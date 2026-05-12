@@ -9,8 +9,6 @@ sealed interface Route {
     @Serializable
     data object Search : Route
     @Serializable
-    data object Profile : Route
-    @Serializable
     data object Settings : Route
     @Serializable
     data object Notifications : Route
