@@ -19,6 +19,7 @@ class TaminHamrahKmpFeaturePlugin : Plugin<Project> {
                         implementation(project(":core:core-domain"))
                         implementation(project(":core:core-network"))
                         implementation(project(":core:core-database"))
+                        implementation(project(":core:core-ui"))
 
                         implementation(libs.findLibrary("koin-core").get())
                         implementation(libs.findLibrary("koin-core-viewmodel").get())
