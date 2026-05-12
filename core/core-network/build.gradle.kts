@@ -23,10 +23,6 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
 
-        jvmMain.dependencies {
-            implementation(libs.ktor.client.cio)
-        }
-
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }

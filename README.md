@@ -1,32 +1,19 @@
 <div align="center">
 
-<img src="docs/app_icon.png" width="128" alt="TaminHamrah Icon" />
-
 # TaminHamrah
 
-**The power user client for CivitAI — browse, compare, and bridge to your generation workflow**
 
-Built with Kotlin Multiplatform (KMP) | Android, iOS & Desktop
+Built with Kotlin Multiplatform (KMP) | Android & iOS
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Desktop-6366F1?style=flat-square)]()
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-6366F1?style=flat-square)]()
 [![CI](https://github.com/rioX432/TaminHamrah/actions/workflows/ci.yml/badge.svg)](https://github.com/rioX432/TaminHamrah/actions/workflows/ci.yml)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/rioX432?style=flat-square&logo=github)](https://github.com/sponsors/rioX432)
-
-[English](README.md) | [日本語](README.ja.md)
 
 </div>
 
 ---
-
-## Screenshots
-
-| Android | iOS |
-|---------|-----|
-| <img src="docs/screenshots/android_search.png" alt="Android Search" width="300"> | <img src="docs/screenshots/ios_search.png" alt="iOS Search" width="300"> |
-| <img src="docs/screenshots/android_detail.png" alt="Android Detail" width="300"> | <img src="docs/screenshots/ios_detail.png" alt="iOS Detail" width="300"> |
-| <img src="docs/screenshots/android_gallery.png" alt="Android Gallery" width="300"> | <img src="docs/screenshots/ios_gallery.png" alt="iOS Gallery" width="300"> |
 
 ## Why TaminHamrah?
 
@@ -72,9 +59,7 @@ TaminHamrah is built for power users and creators who generate, not just browse.
 - **Fresh Find** — discover recently published models before they trend
 - **Quality Filter** — filter models by calculated quality score based on downloads, favorites, and ratings
 - **Integrations Hub** — unified management screen for ComfyUI, SD WebUI, Civitai Link, and external servers
-- **Cross-Platform** — native Android (Jetpack Compose), iOS (SwiftUI) & Desktop (Compose Desktop) with 37 shared ViewModels in KMP commonMain
-
-See the full [Roadmap](docs/ROADMAP.md) for planned features.
+- **Cross-Platform** — native Android (Jetpack Compose) & iOS (SwiftUI) with 37 shared ViewModels in KMP commonMain
 
 ## Who Is This For?
 
@@ -88,14 +73,13 @@ See the full [Roadmap](docs/ROADMAP.md) for planned features.
 |-------|-----------|
 | **Shared (KMP)** | Ktor Client, Kotlinx Serialization, Room KMP, Koin |
 | **Android** | Jetpack Compose, Material Design 3, Navigation 3, Coil |
-| **Desktop** | Compose Desktop (JVM), Material Design 3, Coil |
 | **iOS** | SwiftUI |
 | **Architecture** | Clean Architecture + MVVM (UDF) |
 | **CI/CD** | GitHub Actions |
 
 ## Architecture
 
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed documentation.
+Architecture documentation removed.
 
 ```mermaid
 graph TB
@@ -106,7 +90,6 @@ graph TB
     end
     vm --> compose["Compose (Android)"]
     vm -- "SKIE Observing" --> swiftui["SwiftUI (iOS)"]
-    vm --> cdesktop["Compose Desktop"]
 ```
 
 ## Getting Started
@@ -127,9 +110,6 @@ cd TaminHamrah
 # Android
 ./gradlew :androidApp:installDebug
 
-# Desktop (macOS / Windows / Linux)
-./gradlew :desktopApp:run
-
 # iOS
 open iosApp/iosApp.xcodeproj
 ```
@@ -140,7 +120,7 @@ See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+Contributions are welcome!
 
 For security issues, see [SECURITY.md](SECURITY.md).
 

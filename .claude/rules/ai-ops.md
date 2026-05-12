@@ -10,7 +10,7 @@
 
 ## Research → Implementation Gate
 
-**Research documents (docs/research/, RESEARCH.md, etc.) must NOT be directly implemented.**
+**Research documents (RESEARCH.md, etc.) must NOT be directly implemented.**
 
 Research flow:
 1. Research findings → file as GitHub Issue (with Core Value alignment and complexity cost)
@@ -33,12 +33,12 @@ Research flow:
 6. Implement according to plan
 7. Verify build and lint pass
 8. Run `/ai-dev:review` for self-review
-9. Fix any review findings; extract reusable insights into `docs/claude/review_points.md`
+9. Fix any review findings; extract reusable insights into `CLAUDE.md`
 10. Create PR (`Closes #N` in body)
 
-## review_points.md Workflow
+## CLAUDE.md Workflow
 - Don't copy review comments verbatim — **extract reusable prevention insights**
-- Reference `review_points.md` during design and implementation to avoid repeat mistakes
+- Reference `CLAUDE.md` during design and implementation to avoid repeat mistakes
 
 ## Automated Operations (post-release)
 

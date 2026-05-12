@@ -9,7 +9,7 @@ import UIKit
 /// Loads a SigLIP-2 vision encoder compiled from `SigLIP2.mlpackage` and runs
 /// Core ML inference to produce 768-d L2-normalized image embeddings.
 ///
-/// **Preprocessing** (per `docs/research/siglip2-feasibility.md`):
+/// **Preprocessing**:
 /// - Resize 224x224 BICUBIC
 /// - mean / std = `[0.5, 0.5, 0.5]`
 /// - NCHW float32 input
