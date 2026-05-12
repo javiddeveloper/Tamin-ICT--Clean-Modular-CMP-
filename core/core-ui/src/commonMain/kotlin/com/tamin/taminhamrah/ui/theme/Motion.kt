@@ -1,0 +1,65 @@
+package com.tamin.taminhamrah.ui.theme
+
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring as SpringSpec
+
+// Duration tokens (ms)
+object Duration {
+    const val fast = 150
+    const val normal = 300
+    const val slow = 500
+}
+
+// Easing tokens
+object Easing {
+    val standard = FastOutSlowInEasing // Material standard
+    val decelerate = LinearOutSlowInEasing // entering elements
+    val accelerate = FastOutLinearInEasing // exiting elements
+}
+
+// Spring tokens
+object Spring {
+    val default = spring<Float>(
+        dampingRatio = SpringSpec.DampingRatioNoBouncy,
+        stiffness = SpringSpec.StiffnessMedium,
+    )
+    val bouncy = spring<Float>(
+        dampingRatio = SpringSpec.DampingRatioMediumBouncy,
+        stiffness = SpringSpec.StiffnessMedium,
+    )
+    val stiff = spring<Float>(
+        dampingRatio = SpringSpec.DampingRatioNoBouncy,
+        stiffness = SpringSpec.StiffnessHigh,
+    )
+    val gentle = spring<Float>(
+        dampingRatio = SpringSpec.DampingRatioLowBouncy,
+        stiffness = SpringSpec.StiffnessLow,
+    )
+}
+
+// Stagger animation tokens
+object Stagger {
+    const val delayPerItemMs = 50
+    const val maxDelayMs = 300
+    const val initialOffsetY = 24f
+}
+
+// Parallax animation tokens
+object Parallax {
+    const val factor = 0.15f
+    const val maxOffsetDp = 20f
+}
+
+// Tween helper
+object Tween {
+    fun fast(easing: androidx.compose.animation.core.Easing = Easing.standard) =
+        tween<Float>(Duration.fast, easing = easing)
+    fun normal(easing: androidx.compose.animation.core.Easing = Easing.standard) =
+        tween<Float>(Duration.normal, easing = easing)
+    fun slow(easing: androidx.compose.animation.core.Easing = Easing.standard) =
+        tween<Float>(Duration.slow, easing = easing)
+}

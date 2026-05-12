@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(xcodebuild *)",
+      "Bash(cd iosApp && swiftlint *)",
+      "Bash(swiftlint *)",
+      "Bash(gh *)"
+    ]
+  }
+}
