@@ -310,3 +310,9 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 ktrofit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
+
+# Tamin Custom Convention Plugins
+tamin-kmp-library = { id = "TaminHamrah.kmp.library", version = "unspecified" }
+tamin-kmp-compose = { id = "TaminHamrah.kmp.compose", version = "unspecified" }
+tamin-kmp-feature = { id = "TaminHamrah.kmp.feature", version = "unspecified" }
+tamin-android-application = { id = "TaminHamrah.android.application", version = "unspecified" }

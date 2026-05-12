@@ -2,8 +2,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 }
 plugins {
-    id("TaminHamrah.kmp.library")
-    id("TaminHamrah.kmp.compose")
+    alias(libs.plugins.tamin.kmp.library)
+    alias(libs.plugins.tamin.kmp.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.skie)
 }
@@ -28,19 +28,13 @@ kotlin {
             api(project(":core:core-database"))
             api(project(":core:core-plugin"))
             api(project(":core:core-ui"))
+            api(project(":feature:profile"))
 //            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.core)
             implementation(libs.koin.core.viewmodel)
-
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
-            implementation(libs.compose.material.icons.extended)
-            implementation(libs.compose.ui)
-            implementation(libs.compose.components.resources)
 
             implementation(libs.jetbrains.lifecycle.viewmodel.compose)
             implementation(libs.jetbrains.lifecycle.runtime.compose)

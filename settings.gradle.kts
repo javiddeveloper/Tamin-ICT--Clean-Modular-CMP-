@@ -1,18 +1,18 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        maven { url = uri("https://maven.myket.ir/") }
-        google()
         mavenCentral()
+        google()
+        maven { url = uri("https://maven.myket.ir/") }
         gradlePluginPortal()
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        maven { url = uri("https://maven.myket.ir/") }
-        google()
         mavenCentral()
+        google()
+        maven { url = uri("https://maven.myket.ir/") }
     }
 }
 
@@ -24,3 +24,4 @@ include(":core:core-network")
 include(":core:core-database")
 include(":core:core-ui")
 include(":core:core-plugin")
+include(":feature:profile")
