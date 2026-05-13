@@ -10,6 +10,14 @@ val TaminHamrahShapes = Shapes(
     large = RoundedCornerShape(12.dp),
 )
 
+object ListShapes {
+    val cornerSize = 12.dp
+    val top = RoundedCornerShape(topStart = cornerSize, topEnd = cornerSize)
+    val middle = RoundedCornerShape(0.dp)
+    val bottom = RoundedCornerShape(bottomStart = cornerSize, bottomEnd = cornerSize)
+    val single = RoundedCornerShape(cornerSize)
+}
+
 object Spacing {
     val xxs = 2.dp
     val xs = 4.dp
