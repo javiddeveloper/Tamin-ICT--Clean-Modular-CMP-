@@ -27,6 +27,7 @@ fun TaminHamrahTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = taminHamrahTypography(),
         content = content
     )
 }
