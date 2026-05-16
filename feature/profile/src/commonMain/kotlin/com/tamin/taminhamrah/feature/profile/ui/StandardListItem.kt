@@ -26,14 +26,14 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 
 @Composable
-fun ProfileMenuItem(
+fun StandardListItem(
     modifier: Modifier = Modifier,
     title: String,
     subtitle: String? = null,
     icon: Painter? = null,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
     showMoreIcon: Painter,
     showMoreTint: Color = MaterialTheme.colorScheme.primary,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
     subtitleStyle: TextStyle = MaterialTheme.typography.bodyMedium,

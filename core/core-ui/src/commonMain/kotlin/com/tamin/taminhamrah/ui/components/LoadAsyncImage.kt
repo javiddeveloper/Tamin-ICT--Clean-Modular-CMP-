@@ -10,17 +10,16 @@ import coil3.compose.SubcomposeAsyncImage
 import com.tamin.taminhamrah.ui.theme.shimmer
 
 @Composable
-fun LoadAvatarImage(
-    encodedImage: String?,
+fun LoadAsyncImage(
+    model: String?,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
-    val processedModel = remember(encodedImage) {
-        if (encodedImage is String && encodedImage.isBase64Raw()) {
-            "data:image/png;base64,$encodedImage"
-        } else {
-            encodedImage
+    val processedModel = remember(model) {
+        when {
+            model is String && model.isBase64Raw() -> "data:image/png;base64,$model"
+            else -> model
         }
     }
 

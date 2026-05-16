@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun UserAvatar(
-    encodedImage: String?,
+    model: String?,
     modifier: Modifier = Modifier,
     size: Dp = 100.dp,
     borderWidth: Dp = 1.dp,
@@ -32,8 +32,8 @@ fun UserAvatar(
             .border(borderWidth, borderColor, CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        LoadAvatarImage(
-            encodedImage = encodedImage,
+        LoadAsyncImage(
+            model = model,
             modifier = Modifier.fillMaxSize()
         )
     }
