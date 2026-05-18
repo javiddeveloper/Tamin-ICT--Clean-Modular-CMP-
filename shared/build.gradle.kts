@@ -26,6 +26,7 @@ kotlin {
             api(project(":core:core-domain"))
             api(project(":core:core-network"))
             api(project(":core:core-database"))
+            api(project(":core:core-datastore"))
             api(project(":core:core-plugin"))
             api(project(":core:core-ui"))
             api(project(":feature:profile"))
