@@ -1,10 +1,11 @@
 package com.tamin.taminhamrah.di
 
-import org.koin.core.module.dsl.bind
-import org.koin.core.module.dsl.singleOf
+import com.tamin.taminhamrah.ui.MainViewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val dataModule = module {
+    viewModelOf(::MainViewModel)
     // Repositories
 //    single<AuthRepository> { AuthRepositoryImpl(get()) }
 

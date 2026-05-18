@@ -45,7 +45,7 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     UserAvatar(
-                        model = url,
+                        model = userProfileBase64,
                     )
                     Spacer(modifier = Modifier.height(Spacing.md))
 
