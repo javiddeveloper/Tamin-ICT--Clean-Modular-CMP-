@@ -30,3 +30,8 @@ kotlin {
 android {
     namespace = "com.tamin.taminhamrah.core.ui"
 }
+
+compose.resources {
+    packageOfResClass = "taminx.core.core_ui"
+    publicResClass = true
+}

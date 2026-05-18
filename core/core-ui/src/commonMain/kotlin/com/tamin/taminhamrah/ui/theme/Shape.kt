@@ -5,10 +5,18 @@ import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 val TaminHamrahShapes = Shapes(
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(8.dp),
-    large = RoundedCornerShape(12.dp),
+    small = RoundedCornerShape(CornerRadius.sm),
+    medium = RoundedCornerShape(CornerRadius.md),
+    large = RoundedCornerShape(CornerRadius.lg),
 )
+
+object ListShapes {
+    val cornerSize = CornerRadius.md
+    val top = RoundedCornerShape(topStart = cornerSize, topEnd = cornerSize)
+    val middle = RoundedCornerShape(0.dp)
+    val bottom = RoundedCornerShape(bottomStart = cornerSize, bottomEnd = cornerSize)
+    val single = RoundedCornerShape(cornerSize)
+}
 
 object Spacing {
     val xxs = 2.dp
@@ -21,11 +29,13 @@ object Spacing {
 }
 
 object CornerRadius {
+    val xxs = 2.dp
     val xs = 4.dp
-    val card = 12.dp
-    const val chip = 50
-    val image = 8.dp
-    val searchBar = 8.dp
+    val sm = 8.dp
+    val md = 12.dp
+    val lg = 16.dp
+    val xl = 24.dp
+    val xxl = 32.dp
 }
 
 object Elevation {
