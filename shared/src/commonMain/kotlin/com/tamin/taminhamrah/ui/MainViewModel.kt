@@ -7,23 +7,40 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.core.datastore.UserPreferencesRepository
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val userPreferencesRepository: UserPreferencesRepository) : ViewModel() {
+class MainViewModel(
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val tokenStoreManager: TokenStoreManager,
+    private val authAuthorizeUrlUseCase: AuthAuthorizeUrlUseCase
+) : ViewModel() {
 
-    val uiState: StateFlow<AppUiState> = userPreferencesRepository.userData
-        .map { userData ->
-            AppUiState(darkThemeConfig = userData.darkThemeConfig)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = AppUiState()
+    val uiState: StateFlow<AppUiState> = combine(
+        userPreferencesRepository.userData,
+        tokenStoreManager.tokenValidFlow()
+    ) { userData, isTokenValid ->
+        AppUiState(
+            darkThemeConfig = userData.darkThemeConfig,
+            isLoggedIn = isTokenValid,
+            isLoading = false
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = AppUiState(isLoading = false)
+    )
+
+    fun login() {
+        val url = authAuthorizeUrlUseCase()
+        openUrl(url)
+    }
 
     fun updateDarkThemeConfig(darkThemeConfig: DarkThemeConfig) {
         viewModelScope.launch {
@@ -33,5 +50,7 @@ class MainViewModel(private val userPreferencesRepository: UserPreferencesReposi
 }
 
 data class AppUiState(
-    val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM
+    val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
+    val isLoggedIn: Boolean = false,
+    val isLoading: Boolean = false
 )
