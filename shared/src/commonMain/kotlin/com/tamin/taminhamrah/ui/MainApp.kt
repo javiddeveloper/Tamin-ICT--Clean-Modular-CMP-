@@ -8,10 +8,9 @@ import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.ui.navigation.TaminHamrahNavGraph
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import org.koin.compose.viewmodel.koinViewModel
-
-// ... بقیه ایمپورت‌ها
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -36,7 +35,7 @@ fun MainApp(
         darkTheme = darkTheme,
         language = currentLanguage
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Button(onClick = { viewModel.updateDarkThemeConfig(DarkThemeConfig.LIGHT) }) {
@@ -48,7 +47,11 @@ fun MainApp(
             Button(onClick = { viewModel.updateDarkThemeConfig(DarkThemeConfig.FOLLOW_SYSTEM) }) {
                 Text("System Default")
             }
-            TaminHamrahNavGraph()
+            TaminHamrahNavGraph(
+                isLoggedIn = uiState.isLoggedIn,
+                isLoading = uiState.isLoading,
+                onLoginClick = { viewModel.login() }
+            )
         }
     }
 }
