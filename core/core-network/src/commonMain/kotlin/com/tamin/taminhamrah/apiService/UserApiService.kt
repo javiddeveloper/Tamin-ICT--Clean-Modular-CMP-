@@ -8,8 +8,8 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.core.network.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
-import com.tamin.core.network.tools.BaseResponse
-import com.tamin.core.network.utils.NetworkConstants
+import com.tamin.taminhamrah.tools.BaseResponse
+import com.tamin.taminhamrah.utils.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET

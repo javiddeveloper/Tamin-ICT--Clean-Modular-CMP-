@@ -9,7 +9,7 @@ package com.tamin.taminhamrah.apiService
 import com.tamin.core.network.model.common.CityNameDto
 import com.tamin.core.network.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
-import com.tamin.core.network.tools.BaseResponse
+import com.tamin.taminhamrah.tools.BaseResponse
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url

@@ -2,11 +2,11 @@ package com.tamin.taminhamrah.authSource
 
 import com.tamin.core.network.datasource.authSource.AuthRemoteDataSource
 import com.tamin.core.network.model.auth.TokenResponseDto
-import com.tamin.core.network.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.core.network.tools.errorHandling.ErrorUri
 import com.tamin.core.network.tools.errorHandling.TaminErrorUriException
-import com.tamin.core.network.tools.extractData
-import com.tamin.core.network.utils.NetworkConstants
+import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.utils.NetworkConstants
 import com.tamin.taminhamrah.apiService.UserApiService
 
 internal class AuthRemoteDataSourceImpl(
