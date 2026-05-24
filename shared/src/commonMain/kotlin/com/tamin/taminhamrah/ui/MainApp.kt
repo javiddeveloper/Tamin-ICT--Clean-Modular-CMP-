@@ -4,7 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.domain.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.ui.navigation.TaminHamrahNavGraph
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import org.koin.compose.viewmodel.koinViewModel

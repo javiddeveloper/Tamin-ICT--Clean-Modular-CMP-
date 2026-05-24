@@ -6,7 +6,7 @@ package com.tamin.taminhamrah.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.core.datastore.UserPreferencesRepository
-import com.tamin.taminhamrah.domain.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.DarkThemeConfig
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
