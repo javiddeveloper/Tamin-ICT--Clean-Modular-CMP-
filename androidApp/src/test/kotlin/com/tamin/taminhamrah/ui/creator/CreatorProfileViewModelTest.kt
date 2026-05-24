@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.ui.creator
 
 import com.tamin.taminhamrah.domain.model.BaseModel
 import com.tamin.taminhamrah.domain.model.Creator
-import com.tamin.taminhamrah.domain.model.Model
+import com.tamin.taminhamrah.model.Model
 import com.tamin.taminhamrah.domain.model.ModelStats
 import com.tamin.taminhamrah.domain.model.ModelType
 import com.tamin.taminhamrah.domain.model.PageMetadata

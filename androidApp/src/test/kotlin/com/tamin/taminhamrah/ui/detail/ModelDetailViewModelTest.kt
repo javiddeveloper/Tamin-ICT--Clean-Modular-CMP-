@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.ui.detail
 
 import com.tamin.taminhamrah.domain.model.BaseModel
 import com.tamin.taminhamrah.domain.model.Creator
-import com.tamin.taminhamrah.domain.model.Model
+import com.tamin.taminhamrah.model.Model
 import com.tamin.taminhamrah.domain.model.ModelCollection
 import com.tamin.taminhamrah.domain.model.ModelImage
 import com.tamin.taminhamrah.domain.model.ModelNote

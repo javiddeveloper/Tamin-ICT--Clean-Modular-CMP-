@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.domain.repository.DisplayPreferencesRepository
 import com.tamin.taminhamrah.domain.repository.FavoriteRepository
 import com.tamin.taminhamrah.domain.usecase.ObserveFavoritesUseCase
 import com.tamin.taminhamrah.domain.usecase.ObserveGridColumnsUseCase
+import com.tamin.taminhamrah.model.Model
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -50,9 +51,9 @@ class FavoritesViewModelTest {
         val favRepo = object : FavoriteRepository {
             override fun observeFavorites() = flowOf(favorites)
             override fun observeIsFavorite(modelId: Long) = flowOf(false)
-            override suspend fun toggleFavorite(model: com.tamin.taminhamrah.domain.model.Model) =
+            override suspend fun toggleFavorite(model: Model) =
                 error("not used")
-            override suspend fun addFavorite(model: com.tamin.taminhamrah.domain.model.Model) =
+            override suspend fun addFavorite(model: Model) =
                 error("not used")
             override suspend fun removeFavorite(modelId: Long) = error("not used")
             override suspend fun getAllFavoriteIds() = error("not used")
