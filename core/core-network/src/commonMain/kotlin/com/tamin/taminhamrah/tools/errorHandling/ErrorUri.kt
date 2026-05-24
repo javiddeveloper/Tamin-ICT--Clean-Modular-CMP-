@@ -1,11 +1,11 @@
 /*
 *
-* @author: Javid Sattar 
+* @author: Javid Sattar
 * @email: javiddeveloper@gmail.com
 *
 */
 
-package com.tamin.core.network.tools.errorHandling
+package com.tamin.taminhamrah.tools.errorHandling
 
 enum class ErrorUri {
     ERROR_DOMAIN,

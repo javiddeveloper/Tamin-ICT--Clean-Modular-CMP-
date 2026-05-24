@@ -1,11 +1,11 @@
 /*
 *
-* @author: Javid Sattar 
+* @author: Javid Sattar
 * @email: javiddeveloper@gmail.com
 *
 */
 
-package com.tamin.core.network.tools.errorHandling
+package com.tamin.taminhamrah.tools.errorHandling
 
 data class TaminApiException(
     val title: String,
@@ -27,7 +27,8 @@ fun Throwable.toSingleLineMessage() = this.asTaminApiException().toSingleLineMes
 fun Throwable.asTaminApiException() = try {
     this as TaminApiException
 } catch (t: Throwable) {
-    TaminApiException(title = "مشکلی پیش آمده، لطفا بعدا سعی کنید", cause = TaminErrorUriException(ErrorUri.UNKNOWN))
+    TaminApiException(title = "مشکلی پیش آمده، لطفا بعدا سعی کنید", cause = TaminErrorUriException(
+        ErrorUri.UNKNOWN))
 }
 
 fun Throwable.getTaminApiExceptionTitle() = this.asTaminApiException().title

@@ -4,9 +4,7 @@
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.core.network.tools.errorHandling
-
-import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+package com.tamin.taminhamrah.tools.errorHandling
 
 internal class ErrorParserImpl : ErrorParser {
     override fun parseGeneralError(exception: TaminErrorUriException): TaminApiException {
