@@ -24,6 +24,7 @@ skie = "0.10.11"
 aboutlibraries = "12.1.2"
 onnxruntime-android = "1.20.0"
 core-ktx = "1.18.0"
+androidx-browser = "1.8.0"
 
 # Added from tamin catalog
 kotlinxCoroutines = "1.10.2"
@@ -156,6 +157,7 @@ androidx-navigation-runtime = { module = "org.jetbrains.androidx.navigation:navi
 androidx-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "androidx-lifecycle-viewmodel-navigation3" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
 
 # Jetbrains Lifecycle
 jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "composeLifecycle" }
