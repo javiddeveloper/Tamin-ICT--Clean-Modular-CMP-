@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.ui.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -18,11 +17,18 @@ import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TaminHamrahNavGraph() {
+internal fun TaminHamrahNavGraph(
+    isLoggedIn: Boolean,
+    isLoading: Boolean,
+    onLoginClick: () -> Unit
+) {
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry.value?.destination
+
+    val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     Scaffold(
         bottomBar = {
@@ -58,26 +64,61 @@ internal fun TaminHamrahNavGraph() {
             }
         }
     ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = Route.Home,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable<Route.Home> {
-                SampleScreen("Home Screen")
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            NavHost(
+                navController = navController,
+                startDestination = Route.Home
+            ) {
+                composable<Route.Home> {
+                    SampleScreen("Home Screen")
+                }
+
+                profileGraph(
+                    onBack = { navController.popBackStack() }
+                )
             }
 
-            profileGraph(
-                onBack = { navController.popBackStack() }
-            )
-
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
+    }
+
+    if (showLoginBottomSheet) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {
+                Button(
+                    onClick = onLoginClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("ورود به سامانه تأمین من")
+                }
+            },
+            title = {
+                Text(
+                    "لطفاً وارد حساب کاربری خود شوید",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = {
+                Text(
+                    "برای دسترسی به تمام امکانات اپلیکیشن، ابتدا باید وارد حساب کاربری خود شوید.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        )
     }
 }
 
 @Composable
 fun SampleScreen(title: String) {
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
