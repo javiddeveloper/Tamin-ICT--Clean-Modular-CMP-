@@ -1,6 +1,6 @@
-package com.tamin.core.network.datasource.authSource
+package com.tamin.taminhamrah.dataSource.authSource
 
-import com.tamin.core.network.model.auth.TokenResponseDto
+import com.tamin.taminhamrah.model.auth.TokenResponseDto
 
 interface AuthRemoteDataSource {
     suspend fun exchangeCodeForTokens(

@@ -1,12 +1,11 @@
-package com.tamin.taminhamrah.authSource
+package com.tamin.taminhamrah.dataSource.authSource
 
-import com.tamin.core.network.datasource.authSource.AuthRemoteDataSource
-import com.tamin.core.network.model.auth.TokenResponseDto
+import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.core.network.tools.errorHandling.ErrorUri
-import com.tamin.core.network.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.utils.NetworkConstants
+import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.apiService.UserApiService
 
 internal class AuthRemoteDataSourceImpl(
@@ -22,7 +21,7 @@ internal class AuthRemoteDataSourceImpl(
     ): TokenResponseDto {
         return try {
             val url = "${NetworkConstants.BASE_URL_ACCOUNT}server/v2/token"
-            val response = userApiService.signIn(
+            userApiService.signIn(
                 url = url,
                 redirectUrl = redirectUri,
                 clientId = clientId,
@@ -31,7 +30,6 @@ internal class AuthRemoteDataSourceImpl(
                 codeVerifier = codeVerifier,
                 audience = audience,
             )
-            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -47,13 +45,12 @@ internal class AuthRemoteDataSourceImpl(
     ): TokenResponseDto {
         return try {
             val url = "${NetworkConstants.BASE_URL_ACCOUNT}server/v2/token"
-            val response = userApiService.refreshToken(
+            userApiService.refreshToken(
                 url = url,
                 grantType = "refresh_token",
                 refreshToken = refreshToken,
                 clientId = clientId,
             )
-            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
