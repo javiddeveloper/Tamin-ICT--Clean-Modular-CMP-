@@ -1,0 +1,11 @@
+package com.tamin.core.network.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ErrorDTO(
+    @SerialName("uri") val uri: String? = null,
+    @SerialName("code") val code: Int? = null,
+    @SerialName("description") val description: String? = null
+)
