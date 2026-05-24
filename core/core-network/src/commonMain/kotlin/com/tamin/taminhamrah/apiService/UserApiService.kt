@@ -6,10 +6,10 @@
 */
 package com.tamin.taminhamrah.apiService
 
-import com.tamin.core.network.model.auth.TokenResponseDto
+import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.tools.BaseResponse
-import com.tamin.taminhamrah.utils.NetworkConstants
+import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
@@ -33,7 +33,7 @@ internal interface UserApiService {
         @Field("code") codeFromServer: String = "",
         @Field("code_verifier") codeVerifier: String = "",
         @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir",
-    ): BaseResponse<TokenResponseDto>
+    ): TokenResponseDto
 
     @FormUrlEncoded
     @POST
@@ -42,6 +42,6 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "refresh_token",
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
-    ): BaseResponse<TokenResponseDto>
+    ): TokenResponseDto
 
 }
