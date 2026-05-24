@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.domain.model
+package com.tamin.taminhamrah.model
 
 import kotlinx.serialization.Serializable
 

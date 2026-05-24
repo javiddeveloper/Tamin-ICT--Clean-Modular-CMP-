@@ -1,4 +1,7 @@
-package com.tamin.taminhamrah.domain.model
+/*
+ * author Javid Sattar *(javiddeveloper@gmail.com)
+ */
+package com.tamin.taminhamrah.model
 
 enum class DarkThemeConfig(val configName: String, val osValue: Int) {
     FOLLOW_SYSTEM("Follow System", -1),
@@ -12,3 +15,4 @@ enum class DarkThemeConfig(val configName: String, val osValue: Int) {
         }
     }
 }
+

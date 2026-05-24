@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.domain.model
+package com.tamin.taminhamrah.model
 
 data class Model(
     val id: Long,
