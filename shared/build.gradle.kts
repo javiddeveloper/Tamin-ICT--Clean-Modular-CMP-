@@ -58,6 +58,7 @@ kotlin {
         }
 
         androidMain.dependencies {
+            implementation(libs.androidx.browser)
             implementation(libs.koin.android)
             implementation(libs.androidx.navigation3.ui)
             implementation(libs.androidx.lifecycle.viewmodel.navigation3)
