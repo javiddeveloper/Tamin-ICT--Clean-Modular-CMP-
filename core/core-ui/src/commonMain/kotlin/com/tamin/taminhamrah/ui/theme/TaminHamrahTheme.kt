@@ -42,20 +42,6 @@ private val LightColorScheme = lightColorScheme(
     outline = Color(0xFF79747E)
 )
 
-@Composable
-fun TaminHamrahTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = taminHamrahTypography(),
-        content = content
-    )
-}
-
 val LocalAppLanguage = staticCompositionLocalOf { "fa" }
 val LocalLayoutDirection = staticCompositionLocalOf { LayoutDirection.Rtl }
 
@@ -75,14 +61,12 @@ fun TaminHamrahTheme(
 
     CompositionLocalProvider(
         LocalAppLanguage provides language,
-        LocalLayoutDirection provides layoutDirection
+        androidx.compose.ui.platform.LocalLayoutDirection provides layoutDirection
     ) {
-        CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides layoutDirection) {
             MaterialTheme(
                 colorScheme = colorScheme,
                 typography = taminHamrahTypography(),
                 content = content
             )
-        }
     }
 }
