@@ -1,10 +1,10 @@
 /*
 *
-* @author: Javid Sattar 
+* @author: Javid Sattar
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.taminhamrah.core.datastore.token
+package com.tamin.taminhamrah.repository
 
 import kotlinx.coroutines.flow.Flow
 

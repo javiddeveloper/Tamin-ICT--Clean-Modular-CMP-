@@ -1,9 +1,20 @@
 package com.tamin.taminhamrah.di
 
+import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
+import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCaseImpl
+import com.tamin.taminhamrah.useCases.auth.DeepLinkManager
+import com.tamin.taminhamrah.useCases.auth.DeepLinkManagerImpl
+import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
+import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
+import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
+import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
+import org.koin.core.module.dsl.factoryOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val domainModule = module {
-//    includes(
-//        detailDomainModule,
-//        )
+    factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
+    factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
+    factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
+    factoryOf(::HandleAuthDeepLinkUseCaseImpl) bind HandleAuthDeepLinkUseCase::class
 }
