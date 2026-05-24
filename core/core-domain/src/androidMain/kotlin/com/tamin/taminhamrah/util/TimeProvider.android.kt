@@ -1,3 +1,3 @@
-package com.tamin.taminhamrah.domain.util
+package com.tamin.taminhamrah.util
 
 actual fun currentTimeMillis(): Long = System.currentTimeMillis()
