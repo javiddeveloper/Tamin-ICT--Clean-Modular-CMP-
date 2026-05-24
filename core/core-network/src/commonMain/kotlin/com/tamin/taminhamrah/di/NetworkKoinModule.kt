@@ -1,8 +1,12 @@
 package com.tamin.taminhamrah.di
 
-import com.tamin.core.network.datasource.authSource.AuthRemoteDataSource
-import com.tamin.taminhamrah.utils.NetworkConstants
-import com.tamin.taminhamrah.core.datastore.token.TokenStoreManager
+import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
+import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.repository.AuthRepository
+import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.util.NetworkConstants
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
@@ -19,10 +23,26 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.json.Json
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val networkModule = module {
+
+    // Error Parser
+    singleOf(::ErrorParserImpl) bind ErrorParser::class
+
+    // Data Sources
+    single<AuthRemoteDataSource> {
+        AuthRemoteDataSourceImpl(
+            userApiService = get(named("authUserApiService")),
+            errorParser = get()
+        )
+    }
+
+    // Repositories
+    singleOf(::AuthRepositoryImpl) bind AuthRepository::class
 
     // JSON Serializer
     single {
@@ -45,8 +65,7 @@ val networkModule = module {
     // Main HTTP Client (60 seconds timeout)
     single(named("mainHttpClient")) {
         createHttpClient(
-            tokenStoreManager = get<TokenStoreManager>(),
-            authRemoteDataSource = get<AuthRemoteDataSource>(),
+            authRepository = get<AuthRepository>(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
         )
@@ -55,8 +74,7 @@ val networkModule = module {
     // Upload HTTP Client (5 minutes timeout)
     single(named("uploadHttpClient")) {
         createHttpClient(
-            tokenStoreManager = get<TokenStoreManager>(),
-            authRemoteDataSource = get<AuthRemoteDataSource>(),
+            authRepository = get<AuthRepository>(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
         )
@@ -64,8 +82,7 @@ val networkModule = module {
 }
 
 private fun createHttpClient(
-    tokenStoreManager: TokenStoreManager,
-    authRemoteDataSource: AuthRemoteDataSource,
+    authRepository: AuthRepository,
     json: Json,
     timeoutMillis: Long
 ): HttpClient {
@@ -84,31 +101,29 @@ private fun createHttpClient(
 
         install(Auth) {
             bearer {
+                sendWithoutRequest { true }
                 loadTokens {
-                    val token = tokenStoreManager.getToken()
-                    val refresh = tokenStoreManager.getRefreshToken().orEmpty()
-                    token?.let { BearerTokens(accessToken = it, refreshToken = refresh) }
+                    val token = authRepository.getAccessToken()
+                    // Since AuthRepository handles persistence, we don't need to manually read from DataStore here
+                    // However, BearerTokens needs a non-null refreshToken (even if it's empty) for Ktor to trigger refreshTokens block
+                    token?.let {
+                        BearerTokens(
+                            accessToken = it,
+                            refreshToken = "" // We'll handle the actual refresh token inside AuthRepository
+                        )
+                    }
                 }
                 refreshTokens {
-                    try {
-                        val currentRefresh = tokenStoreManager.getRefreshToken()
-                        if (currentRefresh.isNullOrBlank()) {
-                            tokenStoreManager.setTokenValid(false)
-                            null
-                        } else {
-                            val result = authRemoteDataSource.refreshTokens(
-                                refreshToken = currentRefresh,
-                                clientId = NetworkConstants.CLIENT_ID,
+                    val success = authRepository.refreshToken()
+                    if (success) {
+                        val newAccessToken = authRepository.getAccessToken()
+                        if (newAccessToken != null) {
+                            BearerTokens(
+                                accessToken = newAccessToken,
+                                refreshToken = ""
                             )
-                            tokenStoreManager.saveToken(result.accessToken)
-                            tokenStoreManager.saveRefreshToken(result.refreshToken)
-                            tokenStoreManager.setTokenValid(true)
-                            val access = tokenStoreManager.getToken() ?: return@refreshTokens null
-                            val refresh = tokenStoreManager.getRefreshToken().orEmpty()
-                            BearerTokens(accessToken = access, refreshToken = refresh)
-                        }
-                    } catch (_: Exception) {
-                        tokenStoreManager.setTokenValid(false)
+                        } else null
+                    } else {
                         null
                     }
                 }

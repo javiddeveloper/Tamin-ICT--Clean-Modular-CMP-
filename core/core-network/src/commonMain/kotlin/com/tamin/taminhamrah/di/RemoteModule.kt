@@ -6,14 +6,14 @@
 */
 package com.tamin.taminhamrah.di
 
-import com.tamin.core.network.datasource.authSource.AuthRemoteDataSource
+import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
-import com.tamin.taminhamrah.commonSource.CommonRemoteDataSourceImpl
-import com.tamin.taminhamrah.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.core.network.tools.errorHandling.ErrorParserImpl
-import com.tamin.taminhamrah.userSource.UserRemoteDataSource
-import com.tamin.taminhamrah.userSource.UserRemoteDataSourceImpl
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
+import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
