@@ -7,8 +7,8 @@
 
 package com.tamin.taminhamrah.tools
 
-import com.tamin.core.network.tools.errorHandling.ErrorUri
-import com.tamin.core.network.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
