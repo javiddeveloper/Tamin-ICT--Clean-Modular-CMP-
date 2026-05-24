@@ -4,7 +4,7 @@
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.taminhamrah.commonSource
+package com.tamin.taminhamrah.dataSource.commonSource
 
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.core.network.model.common.CityNameDto
@@ -12,8 +12,8 @@ import com.tamin.core.network.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.core.network.tools.errorHandling.ErrorUri
-import com.tamin.core.network.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN

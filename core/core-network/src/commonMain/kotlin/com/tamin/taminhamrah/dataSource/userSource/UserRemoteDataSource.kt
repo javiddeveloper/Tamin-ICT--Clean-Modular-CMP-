@@ -4,7 +4,7 @@
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.taminhamrah.userSource
+package com.tamin.taminhamrah.dataSource.userSource
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 

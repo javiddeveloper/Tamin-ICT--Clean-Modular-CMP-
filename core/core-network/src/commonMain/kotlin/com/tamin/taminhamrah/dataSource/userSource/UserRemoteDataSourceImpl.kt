@@ -4,12 +4,12 @@
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.taminhamrah.userSource
+package com.tamin.taminhamrah.dataSource.userSource
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.core.network.tools.errorHandling.ErrorUri
-import com.tamin.core.network.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
 
