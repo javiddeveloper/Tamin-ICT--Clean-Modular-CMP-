@@ -1,7 +1,4 @@
-/*
- * author Javid Sattar *(javiddeveloper@gmail.com)
- */
-package com.tamin.taminhamrah.utils
+package com.tamin.taminhamrah.util
 
 object NetworkConstants {
     const val BASE_URL = "https://eservices.tamin.ir/api/"
