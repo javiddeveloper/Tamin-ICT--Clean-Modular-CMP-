@@ -5,12 +5,11 @@
 *
 */
 
-package com.tamin.core.network.tools.apiQueryBuilder
+package com.tamin.taminhamrah.tools.apiQueryBuilder
 
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.core.model.request.ApiSortDN
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 
 internal class ApiQueryBuilderImpl : ApiQueryBuilder {
     override fun buildQuery(query: ApiQueryParamDN): Map<String, String> {
