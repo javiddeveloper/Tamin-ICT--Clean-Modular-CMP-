@@ -3,9 +3,11 @@
  */
 package com.tamin.taminhamrah.core.datastore
 
+import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.UserData
 import kotlinx.coroutines.flow.Flow
-import com.tamin.taminhamrah.domain.model.DarkThemeConfig
-import com.tamin.taminhamrah.domain.model.UserData
+//import com.tamin.taminhamrah.domain.model.DarkThemeConfig
+//import com.tamin.taminhamrah.domain.model.UserData
 import kotlinx.coroutines.flow.StateFlow
 
 /**

@@ -1,0 +1,22 @@
+/*
+*
+* @author: Javid Sattar 
+* @email: javiddeveloper@gmail.com
+*
+*/
+package com.tamin.taminhamrah.core.datastore.token
+
+import kotlinx.coroutines.flow.Flow
+
+interface TokenStoreManager {
+    fun saveToken(token: String?)
+    fun getToken(): String?
+    fun saveRefreshToken(refreshToken: String?)
+    fun getRefreshToken(): String?
+    fun saveUserId(userId: String?)
+    fun getUserId(): String?
+    fun saveCodeVerifier(codeVerifier: String?)
+    fun getCodeVerifier(): String?
+    fun tokenValidFlow(): Flow<Boolean>
+    suspend fun setTokenValid(isValid: Boolean)
+}

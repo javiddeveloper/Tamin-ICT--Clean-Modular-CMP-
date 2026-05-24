@@ -10,8 +10,8 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.serialization.decodeValue
 import com.russhwolf.settings.serialization.decodeValueOrNull
 import com.russhwolf.settings.serialization.encodeValue
-import com.tamin.taminhamrah.domain.model.DarkThemeConfig
-import com.tamin.taminhamrah.domain.model.UserData
+import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.UserData
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
