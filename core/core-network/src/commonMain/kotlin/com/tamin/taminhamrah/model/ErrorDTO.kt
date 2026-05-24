@@ -1,4 +1,4 @@
-package com.tamin.core.network.model
+package com.tamin.taminhamrah.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

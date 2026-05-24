@@ -1,4 +1,4 @@
-package com.tamin.core.network.model.auth
+package com.tamin.taminhamrah.model.auth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
