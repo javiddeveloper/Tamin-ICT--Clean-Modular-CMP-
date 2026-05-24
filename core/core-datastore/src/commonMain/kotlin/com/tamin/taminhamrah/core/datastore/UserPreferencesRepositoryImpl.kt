@@ -12,12 +12,15 @@ import com.russhwolf.settings.serialization.decodeValueOrNull
 import com.russhwolf.settings.serialization.encodeValue
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.model.UserData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 
@@ -25,16 +28,21 @@ private const val USER_DATA_KEY = "user_data_key"
 
 class UserPreferencesRepositoryImpl(private val settings: Settings, ) : UserPreferencesRepository {
 
-    private val _userData = MutableStateFlow(
-        settings.decodeValue(
-            key = USER_DATA_KEY,
-            serializer = UserData.serializer(),
-            defaultValue = settings.decodeValueOrNull(
+    private val _userData = MutableStateFlow(UserData.DEFAULT)
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            val data = settings.decodeValue(
                 key = USER_DATA_KEY,
                 serializer = UserData.serializer(),
-            ) ?: UserData.DEFAULT,
-        ),
-    )
+                defaultValue = settings.decodeValueOrNull(
+                    key = USER_DATA_KEY,
+                    serializer = UserData.serializer(),
+                ) ?: UserData.DEFAULT,
+            )
+            _userData.value = data
+        }
+    }
 
     override val userData: StateFlow<UserData>
         get() = _userData.asStateFlow()
@@ -43,7 +51,7 @@ class UserPreferencesRepositoryImpl(private val settings: Settings, ) : UserPref
         get() = _userData.map { it.darkThemeConfig }
 
     override suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig) =
-        withContext(kotlinx.coroutines.Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             val currentPreference = settings.getUserPreference()
             val newPreference = currentPreference.copy(darkThemeConfig = darkThemeConfig)
             settings.putUserPreference(newPreference)
@@ -66,4 +74,3 @@ private fun Settings.putUserPreference(preference: UserData) {
         value = preference,
     )
 }
-
