@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.domain.util
+package com.tamin.taminhamrah.util
 
 import platform.Foundation.NSDate
 import platform.Foundation.timeIntervalSince1970
