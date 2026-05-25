@@ -2,8 +2,12 @@ package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
+import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AuthRepository
+import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
+import com.tamin.taminhamrah.repository.userRepository.UserRepositoryImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -41,8 +45,17 @@ val networkModule = module {
         )
     }
 
+    single<UserRemoteDataSource> {
+        UserRemoteDataSourceImpl(
+            userApiService = get(),
+//            httpClient = get(named("mainHttpClient")),
+            errorParser = get()
+        )
+    }
+
     // Repositories
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
+    singleOf(::UserRepositoryImpl) bind UserRepository::class
 
     // JSON Serializer
     single {
