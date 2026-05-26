@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import kotlinx.serialization.Serializable
 
@@ -15,13 +16,11 @@ fun NavGraphBuilder.profileGraph(
     onBack: () -> Unit
 ) {
     composable<ProfileRoute.Main> { backStackEntry ->
-        val route: ProfileRoute.Main = backStackEntry.arguments?.let {
-            ProfileRoute.Main(it.getString("userId"))
-        } ?: ProfileRoute.Main()
+        val route = backStackEntry.toRoute<ProfileRoute.Main>()
 
         ProfileScreen(
             userId = route.userId,
-            onBack = onBack
+            onBackClicked = onBack
         )
     }
 }
