@@ -3,54 +3,86 @@
  */
 package com.tamin.taminhamrah.ui
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.core.datastore.UserPreferencesRepository
-import com.tamin.taminhamrah.model.DarkThemeConfig
-import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.ui.contract.MainUiState
+import com.tamin.taminhamrah.ui.contract.MainUiState.PartialState
+import com.tamin.taminhamrah.ui.contract.MainIntent
+import com.tamin.taminhamrah.ui.contract.MainEvent
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val tokenStoreManager: TokenStoreManager,
     private val authAuthorizeUrlUseCase: AuthAuthorizeUrlUseCase
-) : ViewModel() {
+) : BaseViewModel<MainUiState, PartialState, MainEvent, MainIntent>(
+    initialState = MainUiState(isLoading = true)
+) {
 
-    val uiState: StateFlow<AppUiState> = combine(
-        userPreferencesRepository.userData,
-        tokenStoreManager.tokenValidFlow()
-    ) { userData, isTokenValid ->
-        AppUiState(
-            darkThemeConfig = userData.darkThemeConfig,
-            isLoggedIn = isTokenValid,
-            isLoading = false
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = AppUiState(isLoading = false)
-    )
-
-    fun login() {
-        val url = authAuthorizeUrlUseCase()
-        openUrl(url)
+    init {
+        observeData()
+        sendIntent(MainIntent.CheckAuthStatus)
     }
 
-    fun updateDarkThemeConfig(darkThemeConfig: DarkThemeConfig) {
+    private fun observeData() {
         viewModelScope.launch {
-            userPreferencesRepository.setDarkThemeConfig(darkThemeConfig)
+            userPreferencesRepository.userData.collect { userData ->
+                sendIntent(MainIntent.UpdateDarkThemeConfig(userData.darkThemeConfig))
+            }
+        }
+        viewModelScope.launch {
+            tokenStoreManager.tokenValidFlow().collect {
+                sendIntent(MainIntent.CheckAuthStatus)
+            }
         }
     }
-}
 
-data class AppUiState(
-    val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
-    val isLoggedIn: Boolean = false,
-    val isLoading: Boolean = false
-)
+    override fun handleIntent(intent: MainIntent): Flow<PartialState> = flow {
+        when (intent) {
+            is MainIntent.UpdateDarkThemeConfig -> {
+                emit(PartialState.SetDarkThemeConfig(intent.config))
+            }
+            MainIntent.Login -> {
+                val url = authAuthorizeUrlUseCase()
+                sendEvent(MainEvent.OpenUrl(url))
+            }
+            MainIntent.CheckAuthStatus -> {
+                val hasToken = !tokenStoreManager.getToken().isNullOrEmpty()
+                emit(PartialState.SetLoginStatus(hasToken))
+            }
+        }
+    }
+
+    override fun reduceState(currentState: MainUiState, partialState: PartialState): MainUiState {
+        return when (partialState) {
+            is PartialState.SetDarkThemeConfig -> currentState.copy(
+                darkThemeConfig = partialState.config,
+                isLoading = false
+            )
+            is PartialState.SetLoginStatus -> currentState.copy(
+                isLoggedIn = partialState.isLoggedIn,
+                isLoading = false
+            )
+            PartialState.Loading -> currentState.copy(isLoading = true)
+        }
+    }
+
+    override fun createErrorState(message: String): PartialState {
+        return PartialState.Loading
+    }
+
+    fun updateDarkThemeConfig(config: com.tamin.taminhamrah.model.DarkThemeConfig) {
+        viewModelScope.launch {
+            userPreferencesRepository.setDarkThemeConfig(config)
+        }
+    }
+
+    fun login() {
+        sendIntent(MainIntent.Login)
+    }
+}
