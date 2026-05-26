@@ -8,9 +8,12 @@ package com.tamin.taminhamrah.core.datastore.token
 
 import com.russhwolf.settings.Settings
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
 
 
 class TokenStoreManagerImpl(
@@ -24,7 +27,9 @@ class TokenStoreManagerImpl(
     private val tokenValidation = "TOKEN_VALID"
 
     private val _tokenValidFlow = MutableStateFlow(
-        settings.getBoolean(tokenValidation, false)
+        runBlocking(Dispatchers.IO) {
+            settings.getBoolean(tokenValidation, false)
+        }
     )
 
     override fun saveToken(token: String?) {
