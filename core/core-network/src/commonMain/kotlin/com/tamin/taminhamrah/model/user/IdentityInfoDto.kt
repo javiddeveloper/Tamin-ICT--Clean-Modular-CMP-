@@ -12,7 +12,7 @@ data class IdentityInfoDto(
     @SerialName("fatherName") val fatherName: String?,
     @SerialName("firstName") val firstName: String?,
     @SerialName("gender") val gender: String?,
-    @SerialName("id") val id: Int,
+    @SerialName("id") val id: Int? = null,
     @SerialName("idCardNumber") val idCardNumber: String?,
     @SerialName("idCardSerial1") val idCardSerial1: String?,
     @SerialName("idCardSerial2") val idCardSerial2: String?,

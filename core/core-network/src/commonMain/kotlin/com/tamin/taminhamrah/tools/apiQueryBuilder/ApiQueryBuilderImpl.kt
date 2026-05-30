@@ -14,13 +14,17 @@ import com.tamin.taminhamrah.core.model.request.ApiSortDN
 internal class ApiQueryBuilderImpl : ApiQueryBuilder {
     override fun buildQuery(query: ApiQueryParamDN): Map<String, String> {
         return buildMap {
-            query.filters?.forEach { (key, value) ->
-                put(key, value)
+            put("page", query.page.toString())
+            put("start", query.start.toString())
+            put("limit", query.limit.toString())
+
+            if (query.filters.isNotEmpty()) {
+                put("filter", buildFilterJson(query.filters))
             }
-            query.page?.let { put("page", it.toString()) }
-            query.pageSize?.let { put("pageSize", it.toString()) }
-            query.sortBy?.let { put("sortBy", it) }
-            query.sortOrder?.let { put("sortOrder", it) }
+
+            if (query.sorts.isNotEmpty()) {
+                put("sort", buildSortJson(query.sorts))
+            }
         }
     }
 

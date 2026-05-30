@@ -5,13 +5,12 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AuthRepository
-import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
-import com.tamin.taminhamrah.repository.userRepository.UserRepositoryImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.util.NetworkConstants
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -55,7 +54,6 @@ val networkModule = module {
 
     // Repositories
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
-    singleOf(::UserRepositoryImpl) bind UserRepository::class
 
     // JSON Serializer
     single {
@@ -70,6 +68,7 @@ val networkModule = module {
     // Auth HTTP Client (no Auth plugin, used for token endpoints)
     single(named("authHttpClient")) {
         createAuthHttpClient(
+            engine = get(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
         )
@@ -78,6 +77,7 @@ val networkModule = module {
     // Main HTTP Client (60 seconds timeout)
     single(named("mainHttpClient")) {
         createHttpClient(
+            engine = get(),
             authRepository = get<AuthRepository>(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
@@ -87,6 +87,7 @@ val networkModule = module {
     // Upload HTTP Client (5 minutes timeout)
     single(named("uploadHttpClient")) {
         createHttpClient(
+            engine = get(),
             authRepository = get<AuthRepository>(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
@@ -95,11 +96,12 @@ val networkModule = module {
 }
 
 private fun createHttpClient(
+    engine: HttpClientEngine,
     authRepository: AuthRepository,
     json: Json,
     timeoutMillis: Long
 ): HttpClient {
-    return HttpClient {
+    return HttpClient(engine) {
         expectSuccess = false
 
         install(ContentNegotiation) {
@@ -111,6 +113,8 @@ private fun createHttpClient(
             connectTimeoutMillis = timeoutMillis
             socketTimeoutMillis = timeoutMillis
         }
+
+
 
         install(Auth) {
             bearer {
@@ -160,10 +164,11 @@ private fun createHttpClient(
 }
 
 private fun createAuthHttpClient(
+    engine: HttpClientEngine,
     json: Json,
     timeoutMillis: Long
 ): HttpClient {
-    return HttpClient {
+    return HttpClient(engine) {
         expectSuccess = false
 
         install(ContentNegotiation) {

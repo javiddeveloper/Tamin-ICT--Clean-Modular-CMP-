@@ -30,6 +30,7 @@ kotlin {
             api(project(":core:core-plugin"))
             api(project(":core:core-ui"))
             api(project(":feature:profile"))
+            api(project(":feature:city-province"))
 //            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
@@ -75,6 +76,8 @@ kotlin {
             implementation(libs.media3.exoplayer)
             implementation(libs.media3.ui)
             implementation(libs.okhttp)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.chucker.debug)
         }
 
         commonTest.dependencies {
