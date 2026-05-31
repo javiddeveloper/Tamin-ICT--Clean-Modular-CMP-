@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.feature.profile.data.mapper.toEntity
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -35,4 +36,13 @@ internal class UserRepositoryImpl(
 
     override suspend fun getUserProfileImage(): String =
         userRemoteDataSource.getUserProfileImage()
+
+    override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow {
+        try {
+            val remoteData = userRemoteDataSource.fetchTaminRelation()
+            emit(remoteData.toDomain())
+        } catch (e: Throwable) {
+            throw e
+        }
+    }
 }

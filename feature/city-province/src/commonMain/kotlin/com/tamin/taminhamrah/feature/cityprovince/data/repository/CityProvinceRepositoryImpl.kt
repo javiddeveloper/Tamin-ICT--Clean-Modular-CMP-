@@ -20,10 +20,9 @@ internal class CityProvinceRepositoryImpl(
     override fun getCity(query: ApiQueryParamDN): Flow<CityDN> = flow {
         val cityId = query.filters.firstOrNull()?.value ?: return@flow
 
-        try {
-            cityProvinceDao.getCity(cityId).firstOrNull()?.toDomain()?.let { emit(it) }
-        } catch (_: Exception) {
-            // Ignore cache read errors.
+        val localCity = cityProvinceDao.getCity(cityId).firstOrNull()
+        if (localCity != null) {
+            emit(localCity.toDomain())
         }
 
         try {

@@ -8,6 +8,10 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
+import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
+import com.tamin.taminhamrah.useCases.user.TaminRelationUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCaseImpl
 import org.koin.core.module.dsl.factoryOf
@@ -20,4 +24,6 @@ val domainModule = module {
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
     factoryOf(::HandleAuthDeepLinkUseCaseImpl) bind HandleAuthDeepLinkUseCase::class
     factoryOf(::UserProfileImageUseCaseImpl) bind UserProfileImageUseCase::class
+    factoryOf(::TaminRelationUseCaseImpl) bind TaminRelationUseCase::class
+    factoryOf(::IdentityInfoUseCaseImpl) bind IdentityInfoUseCase::class
 }

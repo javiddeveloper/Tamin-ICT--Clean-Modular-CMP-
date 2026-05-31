@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.domain
+package com.tamin.taminhamrah.useCases.identity
 
 import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
@@ -6,7 +6,6 @@ import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.core.model.request.FilterOperator
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
-import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -26,8 +25,8 @@ internal class IdentityInfoUseCaseImpl(
         val cityId = identity.cityOfBirthId ?: identity.cityOfIssueId ?: ""
         if (cityId.isEmpty()) {
             return identity.apply {
-                cityOfBirthName = UNKNOWN_CITY
-                cityOfIssueName = UNKNOWN_CITY
+                cityOfBirthName = cityOfBirthName ?: UNKNOWN_CITY
+                cityOfIssueName = cityOfIssueName ?: UNKNOWN_CITY
             }
         }
 
@@ -45,13 +44,14 @@ internal class IdentityInfoUseCaseImpl(
             ).firstOrNull()
 
             identity.apply {
-                cityOfBirthName = city?.cityName ?: UNKNOWN_CITY
-                cityOfIssueName = city?.cityName ?: UNKNOWN_CITY
+                cityOfBirthName = city?.cityName ?: cityOfBirthName ?: UNKNOWN_CITY
+                cityOfIssueName = city?.cityName ?: cityOfIssueName ?: UNKNOWN_CITY
             }
+
         } catch (_: Exception) {
             identity.apply {
-                cityOfBirthName = UNKNOWN_CITY
-                cityOfIssueName = UNKNOWN_CITY
+                cityOfBirthName = cityOfBirthName ?: UNKNOWN_CITY
+                cityOfIssueName = cityOfIssueName ?: UNKNOWN_CITY
             }
         }
     }

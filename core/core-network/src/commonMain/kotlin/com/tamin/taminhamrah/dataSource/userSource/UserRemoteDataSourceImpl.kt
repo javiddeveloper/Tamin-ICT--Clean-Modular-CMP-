@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.model.user.TaminRelationResponse
 
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
@@ -34,6 +35,19 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun getUserProfileImage(): String {
         return try {
             val response = userApiService.getUserProfileImage()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun fetchTaminRelation(): TaminRelationResponse {
+        return try {
+            val response = userApiService.fetchTaminRelation()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

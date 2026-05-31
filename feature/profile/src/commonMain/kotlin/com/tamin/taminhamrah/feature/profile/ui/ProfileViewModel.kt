@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -18,6 +19,7 @@ class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
+    private val taminRelationUseCase: TaminRelationUseCase
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -52,8 +54,16 @@ class ProfileViewModel(
                 ))
             }
         }
+        val taminRelationFlow = flow {
+            emit(PartialState.TaminRelationChanged(AsyncState.Loading))
+            taminRelationUseCase().collect { taminRelation ->
+                emit(PartialState.TaminRelationChanged(
+                    AsyncState.Success(taminRelation)
+                ))
+            }
+        }
 
-        return merge(userIdFlow, imageFlow, identityFlow)
+        return merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow)
     }
 
     private fun handleLogout(): Flow<PartialState> = flow {
@@ -88,6 +98,9 @@ class ProfileViewModel(
         )
         is PartialState.IdentityInfoChanged -> currentState.copy(
             identityInfoState = partialState.state
+        )
+        is PartialState.TaminRelationChanged -> currentState.copy(
+            taminRelationState = partialState.state
         )
     }
 

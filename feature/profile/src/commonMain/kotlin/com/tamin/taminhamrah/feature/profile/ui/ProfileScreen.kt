@@ -117,7 +117,7 @@ fun ProfileContent(
 
                     if (!state.userId.isNullOrEmpty()) {
                         Text(
-                            text = "${(state.identityInfoState as? AsyncState.Success)?.data?.firstName} ${(state.identityInfoState as? AsyncState.Success)?.data?.lastName} - ${(state.identityInfoState as? AsyncState.Success)?.data?.cityOfBirthName} ",
+                            text = "${(state.identityInfoState as? AsyncState.Success)?.data?.firstName} ${(state.identityInfoState as? AsyncState.Success)?.data?.lastName} - ${(state.identityInfoState as? AsyncState.Success)?.data?.cityOfBirthName} - ${(state.taminRelationState as? AsyncState.Success)?.data?.brhAdress}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

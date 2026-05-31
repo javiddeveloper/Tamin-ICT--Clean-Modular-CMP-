@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 
 @Immutable
 data class ProfileUiState(
@@ -9,12 +10,14 @@ data class ProfileUiState(
     val userId: String? = null,
     val profileImageState: AsyncState<String> = AsyncState.Uninitialized,
     val identityInfoState: AsyncState<IdentityInfoDN> = AsyncState.Uninitialized,
+    val taminRelationState: AsyncState<TaminRelationDN> = AsyncState.Uninitialized,
 ) {
     sealed class PartialState {
         data class ScreenStateChanged(val state: AsyncState<Unit>) : PartialState()
         data class SetUserId(val userId: String?) : PartialState()
         data class ProfileImageChanged(val state: AsyncState<String>) : PartialState()
         data class IdentityInfoChanged(val state: AsyncState<IdentityInfoDN>) : PartialState()
+        data class TaminRelationChanged(val state: AsyncState<TaminRelationDN>) : PartialState()
     }
 }
 
