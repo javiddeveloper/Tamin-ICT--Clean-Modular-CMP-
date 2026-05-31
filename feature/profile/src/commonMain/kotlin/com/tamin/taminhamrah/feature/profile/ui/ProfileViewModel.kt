@@ -1,85 +1,55 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
+import com.tamin.taminhamrah.repository.TokenStoreManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class ProfileViewModel(
-    private val identityInfoUseCase: IdentityInfoUseCase,
-    private val getUserProfileImageUseCase: UserProfileImageUseCase,
-) : ViewModel() {
+    private val tokenStoreManager: TokenStoreManager
+) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
+    initialState = ProfileUiState()
+) {
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
-
-    init {
-        loadUserData()
-        loadUserImage()
-    }
-
-    private fun loadUserData() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingIdentity = true, identityError = null) }
-            identityInfoUseCase()
-                .catch { e ->
-                    if (e is CancellationException) throw e
-                    e.printStackTrace()
-                    println("REAL_ERROR_IS: ${e.message}")
-                    _uiState.update {
-                        it.copy(
-                            isLoadingIdentity = false,
-                            identityInfo = null,
-                            identityError = e.toSingleLineMessage().ifBlank {
-                                "خطا در دریافت اطلاعات هویتی"
-                            },
-                        )
-                    }
-                }
-                .collect { identity ->
-                    _uiState.update {
-                        it.copy(
-                            isLoadingIdentity = false,
-                            identityInfo = identity,
-                            identityError = null,
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun loadUserImage() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingImage = true, imageError = null) }
-            try {
-                val imageBase64 = getUserProfileImageUseCase()
-                _uiState.update {
-                    it.copy(
-                        profileImageBase64 = imageBase64,
-                        isLoadingImage = false,
-                        imageError = null,
-                    )
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoadingImage = false,
-                        imageError = e.toSingleLineMessage().ifBlank {
-                            "خطا در دریافت تصویر پروفایل"
-                        },
-                    )
+    override fun handleIntent(intent: ProfileIntent): Flow<PartialState> = flow {
+        when (intent) {
+            is ProfileIntent.LoadProfile -> {
+                emit(PartialState.Loading)
+                val userId = intent.userId ?: tokenStoreManager.getUserId()
+                emit(PartialState.SetUserId(userId))
+            }
+            ProfileIntent.Logout -> {
+                tokenStoreManager.saveToken(null)
+                tokenStoreManager.saveRefreshToken(null)
+                tokenStoreManager.setTokenValid(isValid = false)
+                sendEvent(ProfileEvent.NavigateBack)
+            }
+            is ProfileIntent.OnItemClick -> {
+                when (intent.title) {
+                    "تنظیمات" -> sendEvent(ProfileEvent.NavigateToSettings)
+                    "خروج از حساب کاربری" -> sendIntent(ProfileIntent.Logout)
+                    else -> sendEvent(ProfileEvent.ShowToast("کلیک بر روی: ${intent.title}"))
                 }
             }
         }
+    }
+
+    override fun reduceState(
+        currentState: ProfileUiState,
+        partialState: PartialState
+    ): ProfileUiState {
+        return when (partialState) {
+            is PartialState.Loading -> currentState.copy(isLoading = true, errorMessage = null)
+            is PartialState.SetUserId -> currentState.copy(isLoading = false, userId = partialState.userId)
+            is PartialState.Error -> currentState.copy(isLoading = false, errorMessage = partialState.message)
+        }
+    }
+
+    override fun createErrorState(message: String): PartialState {
+        return PartialState.Error(message)
     }
 }

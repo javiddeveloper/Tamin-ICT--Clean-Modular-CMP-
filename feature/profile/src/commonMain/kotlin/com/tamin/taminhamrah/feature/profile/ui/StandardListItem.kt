@@ -22,7 +22,13 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.painterResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_arrow_show_more
+import taminx.core.core_ui.ic_tamin_logo
 
 
 @Composable
@@ -95,6 +101,37 @@ fun StandardListItem(
                 contentDescription = null,
                 modifier = Modifier.size(Spacing.xl),
                 tint = showMoreTint
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun StandardListItemRtlPreview() {
+    PreviewRtlThemeContent {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            StandardListItem(
+                title = "اطلاعات هویتی",
+                subtitle = "نمایش اطلاعات هویتی و شماره تأمین اجتماعی",
+                icon = painterResource(Res.drawable.ic_tamin_logo),
+                showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun StandardListItemPreview() {
+    MaterialTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            StandardListItem(
+                title = "Account Settings",
+                subtitle = "Manage your profile and security",
+                showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
+                onClick = {}
             )
         }
     }

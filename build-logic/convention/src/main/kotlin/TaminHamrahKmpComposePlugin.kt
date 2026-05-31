@@ -31,7 +31,12 @@ class TaminHamrahKmpComposePlugin : Plugin<Project> {
                         implementation(libs.findLibrary("compose-material3").get())
                         implementation(libs.findLibrary("compose-material-icons-extended").get())
                         implementation(libs.findLibrary("compose-ui").get())
+                        implementation(libs.findLibrary("compose-ui-tooling-preview").get())
                         implementation(libs.findLibrary("compose-components-resources").get())
+                    }
+
+                    maybeCreate("androidMain").dependencies {
+                        implementation(libs.findLibrary("compose-ui-tooling").get())
                     }
                 }
             }
