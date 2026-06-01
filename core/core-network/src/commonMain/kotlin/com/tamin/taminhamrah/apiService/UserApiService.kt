@@ -8,6 +8,7 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
+import com.tamin.taminhamrah.model.dependent.SubdominantResponse
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.tools.BaseResponse
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -57,5 +58,15 @@ internal interface UserApiService {
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
     ): TokenResponseDto
+
+
+    @GET("personals/subdominant")
+    suspend fun getSubDominantsInfo(
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ) : BaseResponse<SubdominantResponse>
 
 }

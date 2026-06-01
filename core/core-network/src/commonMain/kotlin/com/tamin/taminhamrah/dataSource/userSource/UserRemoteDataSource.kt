@@ -8,6 +8,7 @@ package com.tamin.taminhamrah.dataSource.userSource
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.dependent.SubdominantResponse
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 
 interface UserRemoteDataSource {
@@ -15,4 +16,12 @@ interface UserRemoteDataSource {
     suspend fun getUserProfileImage(): String
     suspend fun fetchTaminRelation(): TaminRelationResponse
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
+
+    suspend fun getSubDominantsInfo(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): SubdominantResponse
 }

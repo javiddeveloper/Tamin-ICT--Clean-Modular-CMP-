@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.dependent.SubdominantResponse
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 
@@ -66,7 +67,29 @@ internal class UserRemoteDataSourceImpl(
         filter: List<ApiFilterDN>
     ): String {
         return try {
-            val response = userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
+            val response =
+                userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+
+
+    override suspend fun getSubDominantsInfo(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): SubdominantResponse {
+        return try {
+            val response = userApiService.getSubDominantsInfo(page, start, limit, filter, sort)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
