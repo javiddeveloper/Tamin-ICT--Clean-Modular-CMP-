@@ -5,8 +5,8 @@ import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 
 
-class SubdominantUseCaseImpl(private val userRepository: UserRepository) {
-    suspend operator fun invoke(
+class SubdominantUseCaseImpl(private val userRepository: UserRepository) : SubdominantUseCase {
+    override suspend operator fun invoke(
         page: String,
         start: String,
         limit: String,

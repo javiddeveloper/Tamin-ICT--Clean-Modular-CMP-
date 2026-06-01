@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCaseImpl
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCaseImpl
@@ -30,5 +31,5 @@ val domainModule = module {
     factoryOf(::TaminRelationUseCaseImpl) bind TaminRelationUseCase::class
     factoryOf(::IdentityInfoUseCaseImpl) bind IdentityInfoUseCase::class
     factoryOf(::SendImageRequestUseCaseImpl) bind SendImageRequestUseCase::class
-    factoryOf(::SubdominantUseCaseImpl) bind SubdominantUseCaseImpl::class
+    factoryOf(::SubdominantUseCaseImpl) bind SubdominantUseCase::class
 }
