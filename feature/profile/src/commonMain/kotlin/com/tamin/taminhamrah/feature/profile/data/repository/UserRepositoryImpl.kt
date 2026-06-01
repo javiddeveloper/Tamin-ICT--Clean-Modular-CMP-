@@ -25,8 +25,10 @@ internal class UserRepositoryImpl(
         emit(remoteData.toDomain())
     }
 
-    override suspend fun getUserProfileImage(): String =
-        userRemoteDataSource.getUserProfileImage()
+    override suspend fun getUserProfileImage(): Flow<String> = flow {
+        val imageData = userRemoteDataSource.getUserProfileImage()
+        emit(imageData)
+    }
 
     override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow {
         val remoteData = userRemoteDataSource.fetchTaminRelation()
@@ -36,10 +38,8 @@ internal class UserRepositoryImpl(
     override suspend fun sendImageRequest(
         branchCode: String,
         filter: List<ApiFilterDN>
-    ): Flow<String> {
-        return flow {
+    ) = flow {
             val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
             emit(remoteData)
         }
-    }
 }

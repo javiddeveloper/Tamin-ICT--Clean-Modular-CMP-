@@ -48,10 +48,11 @@ class ProfileViewModel(
         }
         val imageFlow = flow {
             emit(PartialState.ProfileImageChanged(AsyncState.Loading))
-            val imageBase64 = getUserProfileImageUseCase()
-            emit(PartialState.ProfileImageChanged(
-                imageBase64.let { AsyncState.Success(it) }
-            ))
+            getUserProfileImageUseCase().collect { imageBase64 ->
+                emit(PartialState.ProfileImageChanged(
+                    imageBase64.let { AsyncState.Success(it) }
+                ))
+            }
         }
         val identityFlow = flow {
             emit(PartialState.IdentityInfoChanged(AsyncState.Loading))
