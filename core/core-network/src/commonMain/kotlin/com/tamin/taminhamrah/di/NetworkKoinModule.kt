@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.util.NetworkConstants
+import com.tamin.taminhamrah.util.AppConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
@@ -17,6 +18,7 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -30,6 +32,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import co.touchlab.kermit.Logger as KermitLogger
 
 val networkModule = module {
 
@@ -149,12 +152,14 @@ private fun createHttpClient(
         }
 
         install(Logging) {
+            logger = Logger.DEFAULT
+            level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
             logger = object : Logger {
                 override fun log(message: String) {
-                    KtorSimpleLogger(message)
+                    KermitLogger.d(tag = "KtorClient", messageString = message)
                 }
             }
-            level = LogLevel.ALL
         }
 
         defaultRequest {
@@ -183,12 +188,14 @@ private fun createAuthHttpClient(
         }
 
         install(Logging) {
+            logger = Logger.DEFAULT
+            level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
             logger = object : Logger {
                 override fun log(message: String) {
-                    KtorSimpleLogger(message)
+                    KermitLogger.d(tag = "KtorClient", messageString = message)
                 }
             }
-            level = LogLevel.ALL
         }
 
         defaultRequest {

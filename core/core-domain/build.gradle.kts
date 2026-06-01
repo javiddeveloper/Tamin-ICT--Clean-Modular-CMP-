@@ -27,4 +27,7 @@ kotlin {
 
 android {
     namespace = "com.tamin.taminhamrah.core.domain"
+    buildFeatures {
+        buildConfig = true
+    }
 }

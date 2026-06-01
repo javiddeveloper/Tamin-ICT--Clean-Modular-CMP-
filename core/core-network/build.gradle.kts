@@ -23,6 +23,8 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.core)
             implementation(libs.ktorfit.lib)
+            implementation(libs.kermit.koin)
+            implementation(libs.kermit.logging)
         }
 
         androidMain.dependencies {
