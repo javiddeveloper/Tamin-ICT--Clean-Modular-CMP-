@@ -11,6 +11,7 @@ data class ProfileUiState(
     val profileImageState: AsyncState<String> = AsyncState.Uninitialized,
     val identityInfoState: AsyncState<IdentityInfoDN> = AsyncState.Uninitialized,
     val taminRelationState: AsyncState<TaminRelationDN> = AsyncState.Uninitialized,
+    val imageRequestState: AsyncState<String> = AsyncState.Uninitialized,
 ) {
     sealed class PartialState {
         data class ScreenStateChanged(val state: AsyncState<Unit>) : PartialState()
@@ -18,6 +19,7 @@ data class ProfileUiState(
         data class ProfileImageChanged(val state: AsyncState<String>) : PartialState()
         data class IdentityInfoChanged(val state: AsyncState<IdentityInfoDN>) : PartialState()
         data class TaminRelationChanged(val state: AsyncState<TaminRelationDN>) : PartialState()
+        data class ImageRequestChanged(val state: AsyncState<String>) : PartialState()
     }
 }
 
@@ -25,6 +27,7 @@ sealed class ProfileIntent {
     data class LoadProfile(val userId: String? = null) : ProfileIntent()
     data object Logout : ProfileIntent()
     data class OnItemClick(val title: String) : ProfileIntent()
+    data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 }
 
 sealed class ProfileEvent {

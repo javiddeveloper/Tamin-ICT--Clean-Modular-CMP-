@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.core.model.request.FilterOperator
 import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
@@ -8,18 +10,22 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 
 class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
-    private val taminRelationUseCase: TaminRelationUseCase
+    private val taminRelationUseCase: TaminRelationUseCase,
+    private val sendImageRequestUseCase: SendImageRequestUseCase,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -29,6 +35,7 @@ class ProfileViewModel(
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
             is ProfileIntent.OnItemClick -> handleItemClick(intent.title)
+            is ProfileIntent.SendImageRequest -> handleSendImageRequest(intent.branchCode, intent.filter)
         }
     }
 
@@ -82,6 +89,21 @@ class ProfileViewModel(
         return emptyFlow()
     }
 
+    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
+        val domainFilters = listOf(
+            ApiFilterDN(
+                property = "serialId",
+                operator = FilterOperator.EQ,
+                value = filter
+            )
+        )
+        emit(PartialState.ImageRequestChanged(AsyncState.Loading))
+        sendImageRequestUseCase(branchCode, domainFilters)
+            .collect { result ->
+                emit(PartialState.ImageRequestChanged(AsyncState.Success(result)))
+            }
+    }
+
     override fun reduceState(
         currentState: ProfileUiState,
         partialState: PartialState
@@ -101,6 +123,9 @@ class ProfileViewModel(
         )
         is PartialState.TaminRelationChanged -> currentState.copy(
             taminRelationState = partialState.state
+        )
+        is PartialState.ImageRequestChanged -> currentState.copy(
+            imageRequestState = partialState.state
         )
     }
 

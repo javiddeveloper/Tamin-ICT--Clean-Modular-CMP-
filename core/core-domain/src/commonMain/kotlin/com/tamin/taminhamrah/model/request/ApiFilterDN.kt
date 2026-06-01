@@ -7,6 +7,9 @@
 
 package com.tamin.taminhamrah.core.model.request
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ApiQueryParamDN(
     val page: Int = 0,
     val start: Int = 0,
@@ -15,16 +18,19 @@ data class ApiQueryParamDN(
     val sorts: List<ApiSortDN> = emptyList(),
 )
 
+@Serializable
 enum class SortDirection(val value: String) {
     ASC("ASC"),
     DESC("DESC"),
 }
 
+@Serializable
 data class ApiSortDN(
     val property: String,
     val direction: SortDirection,
 )
 
+@Serializable
 enum class FilterOperator(val value: String) {
     EQUAL("EQUAL"),
     CONTAINS("CONTAINS"),
@@ -32,6 +38,7 @@ enum class FilterOperator(val value: String) {
     EQ("EQ")
 }
 
+@Serializable
 data class ApiFilterDN(
     val property: String,
     val operator: FilterOperator,

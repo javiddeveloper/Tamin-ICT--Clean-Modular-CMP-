@@ -31,7 +31,8 @@ val remoteModule = module {
         UserRemoteDataSourceImpl(
             userApiService = get(),
 //            httpClient = get(named("mainHttpClient")),
-            errorParser = get()
+            errorParser = get(),
+            queryBuilder = get()
         )
     }
 

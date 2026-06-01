@@ -141,6 +141,25 @@ fun ProfileContent(
             item {
                 HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
             }
+
+            item {
+                StandardListItem(
+                    title = "تست درخواست تصویر (SendImageRequest)",
+                    subtitle = when (val s = state.imageRequestState) {
+                        is AsyncState.Loading -> "در حال ارسال..."
+                        is AsyncState.Success -> "موفق: ${s.data.take(20)}..."
+                        is AsyncState.Error -> "خطا: ${s.message}"
+                        AsyncState.Uninitialized -> "برای تست ارسال کلیک کنید"
+                    },
+                    icon = painterResource(Res.drawable.ic_aparat),
+                    showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
+                    onClick = { onIntent(ProfileIntent.SendImageRequest(branchCode = (state.taminRelationState as AsyncState.Success).data.brhCode!!, filter = "edit-text")) }
+                )
+            }
+
+            item {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
+            }
             item {
                 StandardListItem(
                     title = "ارتباط فعال با تأمین",
