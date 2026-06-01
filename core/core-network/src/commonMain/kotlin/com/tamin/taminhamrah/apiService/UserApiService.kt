@@ -16,6 +16,8 @@ import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.Url
 import io.ktor.http.cio.Response
 
@@ -28,6 +30,12 @@ internal interface UserApiService {
 
     @GET("personals/relation")
     suspend fun fetchTaminRelation(): BaseResponse<TaminRelationResponse>
+
+    @GET("personals/image-v2/{branchCode}")
+    suspend fun sendImageRequest(
+        @Path("branchCode") branchCode: String,
+        @Query("filter") filter: String
+    ): BaseResponse<String>
 
     @FormUrlEncoded
     @POST

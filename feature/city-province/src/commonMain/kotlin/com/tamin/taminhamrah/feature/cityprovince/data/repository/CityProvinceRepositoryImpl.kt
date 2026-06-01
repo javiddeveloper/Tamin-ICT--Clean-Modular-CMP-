@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.feature.cityprovince.data.mapper.toDomain
 import com.tamin.taminhamrah.feature.cityprovince.data.mapper.toEntity
 import com.tamin.taminhamrah.repository.CityProvinceRepository
+import com.tamin.taminhamrah.util.Logger.e
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -31,8 +32,8 @@ internal class CityProvinceRepositoryImpl(
                 cityProvinceDao.upsertCity(city.toEntity())
             }
             cityProvinceDao.getCity(cityId).firstOrNull()?.toDomain()?.let { emit(it) }
-        } catch (_: Exception) {
-            // Keep previously emitted cache when refresh fails.
+        } catch (e: Exception) {
+            throw e
         }
     }
 
@@ -41,8 +42,8 @@ internal class CityProvinceRepositoryImpl(
 
         try {
             cityProvinceDao.getProvince(provinceId).firstOrNull()?.toDomain()?.let { emit(it) }
-        } catch (_: Exception) {
-            // Ignore cache read errors.
+        } catch (e: Exception) {
+            throw e
         }
 
         try {
@@ -51,8 +52,8 @@ internal class CityProvinceRepositoryImpl(
                 cityProvinceDao.upsertProvince(province.toEntity())
             }
             cityProvinceDao.getProvince(provinceId).firstOrNull()?.toDomain()?.let { emit(it) }
-        } catch (_: Exception) {
-            // Keep previously emitted cache when refresh fails.
+        } catch (e: Exception) {
+            throw e
         }
     }
 }

@@ -29,6 +29,7 @@ enum class FilterOperator(val value: String) {
     EQUAL("EQUAL"),
     CONTAINS("CONTAINS"),
     LIKE("LIKE"),
+    EQ("EQ")
 }
 
 data class ApiFilterDN(

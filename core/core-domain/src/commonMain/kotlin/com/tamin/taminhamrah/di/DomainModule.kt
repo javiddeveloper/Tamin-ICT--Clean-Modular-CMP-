@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
+import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
@@ -26,4 +28,5 @@ val domainModule = module {
     factoryOf(::UserProfileImageUseCaseImpl) bind UserProfileImageUseCase::class
     factoryOf(::TaminRelationUseCaseImpl) bind TaminRelationUseCase::class
     factoryOf(::IdentityInfoUseCaseImpl) bind IdentityInfoUseCase::class
+    factoryOf(::SendImageRequestUseCaseImpl) bind SendImageRequestUseCase::class
 }

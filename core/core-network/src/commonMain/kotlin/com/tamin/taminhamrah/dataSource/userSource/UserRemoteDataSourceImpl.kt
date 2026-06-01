@@ -12,10 +12,13 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
+    private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser
 ) : UserRemoteDataSource {
 
@@ -48,6 +51,22 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun fetchTaminRelation(): TaminRelationResponse {
         return try {
             val response = userApiService.fetchTaminRelation()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun sendImageRequest(
+        branchCode: String,
+        filter: List<ApiFilterDN>
+    ): String {
+        return try {
+            val response = userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
