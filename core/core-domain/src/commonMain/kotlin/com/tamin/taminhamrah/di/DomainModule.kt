@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
+import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
+import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCaseImpl
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
@@ -32,4 +34,5 @@ val domainModule = module {
     factoryOf(::IdentityInfoUseCaseImpl) bind IdentityInfoUseCase::class
     factoryOf(::SendImageRequestUseCaseImpl) bind SendImageRequestUseCase::class
     factoryOf(::SubdominantUseCaseImpl) bind SubdominantUseCase::class
+    factoryOf(::GetBankAccountListUseCaseImpl) bind GetBankAccountListUseCase::class
 }

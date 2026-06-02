@@ -9,18 +9,16 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialS
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 
 class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -28,7 +26,8 @@ class ProfileViewModel(
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
-    private val subdominantUseCase: SubdominantUseCase
+    private val subdominantUseCase: SubdominantUseCase,
+    private val getBankAccountListUseCase: GetBankAccountListUseCase,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -42,8 +41,8 @@ class ProfileViewModel(
                 intent.branchCode,
                 intent.filter
             )
-
             is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
+            is ProfileIntent.LoadBankAccountList -> handleLoadBankAccountList()
         }
     }
 
@@ -59,8 +58,8 @@ class ProfileViewModel(
             getUserProfileImageUseCase().collect { imageBase64 ->
                 emit(
                     PartialState.ProfileImageChanged(
-                    imageBase64.let { AsyncState.Success(it) }
-                ))
+                        imageBase64.let { AsyncState.Success(it) }
+                    ))
             }
         }
         val identityFlow = flow {
@@ -68,8 +67,8 @@ class ProfileViewModel(
             identityInfoUseCase().collect { identityInfo ->
                 emit(
                     PartialState.IdentityInfoChanged(
-                    identityInfo.let { AsyncState.Success(it) }
-                ))
+                        identityInfo.let { AsyncState.Success(it) }
+                    ))
             }
         }
         val taminRelationFlow = flow {
@@ -130,6 +129,19 @@ class ProfileViewModel(
                 sort = "[]"
             ).collect {
                 emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
+            }
+        }
+    }
+
+    private fun handleLoadBankAccountList(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            getBankAccountListUseCase.invoke(page = "1",
+                start = "0",
+                limit = "10",
+                filter = "[]",
+                sort = "[]").collect {
+                    emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
             }
         }
     }

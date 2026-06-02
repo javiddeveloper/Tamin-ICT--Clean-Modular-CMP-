@@ -57,5 +57,18 @@ internal class UserRepositoryImpl(
         emit(remoteData.toDomain())
     }
 
+    override suspend fun getBankAccountList(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ) = flow {
+        val remoteData = userRemoteDataSource.getBankAccountList(page, start, limit, filter, sort)
+        Logger.d("getBankAccountList", remoteData?.list.toString())
+        val accountList = remoteData?.list?.map { it.toDomain() }
+        emit(accountList ?: emptyList())
+    }
+
 
 }

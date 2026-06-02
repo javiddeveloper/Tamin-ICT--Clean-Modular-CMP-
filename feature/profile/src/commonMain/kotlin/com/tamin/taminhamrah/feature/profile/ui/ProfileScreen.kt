@@ -213,7 +213,7 @@ fun ProfileContent(
                     subtitle = "استعلام و ثبت شماره حساب های بانکی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("شماره حساب بانکی")) }
+                    onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
                 )
             }
             item {
