@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.dependent
+package com.tamin.taminhamrah.model.subDominant
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

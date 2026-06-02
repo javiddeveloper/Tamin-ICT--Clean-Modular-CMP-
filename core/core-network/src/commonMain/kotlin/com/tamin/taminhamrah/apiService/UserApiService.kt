@@ -8,7 +8,7 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
-import com.tamin.taminhamrah.model.dependent.SubDominantResponseData
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.tools.BaseResponse
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -60,6 +60,15 @@ internal interface UserApiService {
 
     @GET("personals/subdominant")
     suspend fun getSubDominantsInfo(
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ) : BaseResponse<SubDominantResponseData>
+
+    @GET("personals/subdominant")
+    suspend fun getBankAccountList(
         @Query("page") page: String = "1",
         @Query("start") start: String = "0",
         @Query("limit") limit: String = "10",
