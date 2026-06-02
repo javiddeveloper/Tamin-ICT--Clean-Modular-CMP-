@@ -13,7 +13,7 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.dependent.SubdominantResponse
+import com.tamin.taminhamrah.model.dependent.SubDominantResponseData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 
@@ -87,7 +87,7 @@ internal class UserRemoteDataSourceImpl(
         limit: String,
         filter: String,
         sort: String
-    ): SubdominantResponse {
+    ): SubDominantResponseData {
         return try {
             val response = userApiService.getSubDominantsInfo(page, start, limit, filter, sort)
             response.extractData()

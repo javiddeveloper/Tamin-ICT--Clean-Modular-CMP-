@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.profile.data.mapper.toEntity
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
+import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -52,6 +53,7 @@ internal class UserRepositoryImpl(
         sort: String
     ) = flow {
         val remoteData = userRemoteDataSource.getSubDominantsInfo(page, start, limit, filter, sort)
+        Logger.d("getSubDominantsInfo", remoteData.toString())
         emit(remoteData.toDomain())
     }
 

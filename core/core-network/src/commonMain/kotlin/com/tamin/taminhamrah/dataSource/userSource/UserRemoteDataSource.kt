@@ -8,7 +8,7 @@ package com.tamin.taminhamrah.dataSource.userSource
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.dependent.SubdominantResponse
+import com.tamin.taminhamrah.model.dependent.SubDominantResponseData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 
 interface UserRemoteDataSource {
@@ -23,5 +23,5 @@ interface UserRemoteDataSource {
         limit: String,
         filter: String,
         sort: String
-    ): SubdominantResponse
+    ): SubDominantResponseData
 }

@@ -4,6 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SubDominant(
-    @SerialName("dateOfExpire") val dateOfExpire: String? = null
+data class SubRelationWithTamin(
+    @SerialName("baseTendency")  val baseTendency: BaseTendency? = null
 )

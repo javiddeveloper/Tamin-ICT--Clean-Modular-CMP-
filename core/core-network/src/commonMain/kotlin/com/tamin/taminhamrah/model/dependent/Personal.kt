@@ -1,43 +1,17 @@
 package com.tamin.taminhamrah.model.dependent
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Personal(
-    @SerialName("id") val id: Int? = null,
-    @SerialName("accounts") val accounts: List<Account>? = null,
-    @SerialName("baseBloadGroup") val baseBloadGroup: Any? = null,
-    @SerialName("cityOfBirth") val cityOfBirth: Any? = null,
-    @SerialName("cityOfIssue") val cityOfIssue: Any? = null,
-    @SerialName("confirmed") val confirmed: Boolean? = null,
-    @SerialName("contacts") val contacts: List<Any>? = null,
-    @SerialName("country") val country: Any? = null,
-    @SerialName("createdBy") val createdBy: String? = null,
-    @SerialName("creationTime") val creationTime: Long? = null,
-    @SerialName("dateOfBirth") val dateOfBirth: Long? = null,
-    @SerialName("dateOfDead") val dateOfDead: Any? = null,
-    @SerialName("educations") val educations: List<Any>? = null,
-    @SerialName("fatherName") val fatherName: String? = null,
-    @SerialName("fidaCode") val fidaCode: Any? = null,
+    @SerialName("dateOfBirth") val dateOfBirth: String? = null,
     @SerialName("firstName") val firstName: String? = null,
-    @SerialName("foreignId") val foreignId: Any? = null,
-    @SerialName("forienRisuid") val forienRisuid: Any? = null,
     @SerialName("gender") val gender: Gender? = null,
     @SerialName("idCardNumber") val idCardNumber: String? = null,
     @SerialName("idCardSerial1") val idCardSerial1: String? = null,
     @SerialName("idCardSerial2") val idCardSerial2: String? = null,
-    @SerialName("isForien") val isForien: Any? = null,
-    @SerialName("languages") val languages: List<Any>? = null,
-    @SerialName("lastModificationTime") val lastModificationTime: Long? = null,
-    @SerialName("lastModifiedBy") val lastModifiedBy: String? = null,
     @SerialName("lastName") val lastName: String? = null,
-    @SerialName("marriage") val marriage: Any? = null,
-    @SerialName("medicalExamination") val medicalExamination: List<Any>? = null,
-    @SerialName("militaryService") val militaryService: Any? = null,
-    @SerialName("nation") val nation: Nation? = null,
     @SerialName("nationalId") val nationalId: String? = null,
-    @SerialName("personalLogs") val personalLogs: List<Any>? = null,
-    @SerialName("relationWithTamins") val relationWithTamins: List<Any>? = null,
-    @SerialName("relatives") val relatives: List<Any>? = null,
-    @SerialName("saveMethod") val saveMethod: Int? = null,
-    @SerialName("ssn") val ssn: String? = null,
+    @SerialName("subDominant") val subDominant: SubDominant? = null,
 )

@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -83,6 +84,7 @@ fun HandleProfileEvents(
                     // onNavigateToRouteById(100)
                 }
             }
+
             is ProfileEvent.ShowToast -> {
                 // Handle toast
             }
@@ -153,7 +155,14 @@ fun ProfileContent(
                     },
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.SendImageRequest(branchCode = (state.taminRelationState as AsyncState.Success).data.brhCode!!, filter = "edit-text")) }
+                    onClick = {
+                        onIntent(
+                            ProfileIntent.SendImageRequest(
+                                branchCode = (state.taminRelationState as AsyncState.Success).data.brhCode!!,
+                                filter = "edit-text"
+                            )
+                        )
+                    }
                 )
             }
 
@@ -178,7 +187,9 @@ fun ProfileContent(
                     subtitle = "مشاهده و ثبت افراد تبعی توسط بیمه شده اصلی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("مشاهده و ثبت افراد تبعی")) }
+                    onClick = {
+                        onIntent(ProfileIntent.LoadSubDominants)
+                    }
                 )
             }
             item {

@@ -11,8 +11,10 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
+import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
@@ -26,6 +28,7 @@ class ProfileViewModel(
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
+    private val subdominantUseCase: SubdominantUseCase
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -35,7 +38,12 @@ class ProfileViewModel(
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
             is ProfileIntent.OnItemClick -> handleItemClick(intent.title)
-            is ProfileIntent.SendImageRequest -> handleSendImageRequest(intent.branchCode, intent.filter)
+            is ProfileIntent.SendImageRequest -> handleSendImageRequest(
+                intent.branchCode,
+                intent.filter
+            )
+
+            is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
         }
     }
 
@@ -49,7 +57,8 @@ class ProfileViewModel(
         val imageFlow = flow {
             emit(PartialState.ProfileImageChanged(AsyncState.Loading))
             getUserProfileImageUseCase().collect { imageBase64 ->
-                emit(PartialState.ProfileImageChanged(
+                emit(
+                    PartialState.ProfileImageChanged(
                     imageBase64.let { AsyncState.Success(it) }
                 ))
             }
@@ -57,7 +66,8 @@ class ProfileViewModel(
         val identityFlow = flow {
             emit(PartialState.IdentityInfoChanged(AsyncState.Loading))
             identityInfoUseCase().collect { identityInfo ->
-                emit(PartialState.IdentityInfoChanged(
+                emit(
+                    PartialState.IdentityInfoChanged(
                     identityInfo.let { AsyncState.Success(it) }
                 ))
             }
@@ -65,9 +75,11 @@ class ProfileViewModel(
         val taminRelationFlow = flow {
             emit(PartialState.TaminRelationChanged(AsyncState.Loading))
             taminRelationUseCase().collect { taminRelation ->
-                emit(PartialState.TaminRelationChanged(
-                    AsyncState.Success(taminRelation)
-                ))
+                emit(
+                    PartialState.TaminRelationChanged(
+                        AsyncState.Success(taminRelation)
+                    )
+                )
             }
         }
 
@@ -90,19 +102,36 @@ class ProfileViewModel(
         return emptyFlow()
     }
 
-    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
-        val domainFilters = listOf(
-            ApiFilterDN(
-                property = "serialId",
-                operator = FilterOperator.EQ,
-                value = filter
+    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> =
+        flow {
+            val domainFilters = listOf(
+                ApiFilterDN(
+                    property = "serialId",
+                    operator = FilterOperator.EQ,
+                    value = filter
+                )
             )
-        )
-        emit(PartialState.ImageRequestChanged(AsyncState.Loading))
-        sendImageRequestUseCase(branchCode, domainFilters)
-            .collect { result ->
-                emit(PartialState.ImageRequestChanged(AsyncState.Success(result)))
+            emit(PartialState.ImageRequestChanged(AsyncState.Loading))
+            sendImageRequestUseCase(branchCode, domainFilters)
+                .collect { result ->
+                    emit(PartialState.ImageRequestChanged(AsyncState.Success(result)))
+                }
+        }
+
+    //todo it should removed from here this is only test
+    private fun handleLoadSubDominants(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            subdominantUseCase.invoke(
+                page = "1",
+                start = "0",
+                limit = "10",
+                filter = "[]",
+                sort = "[]"
+            ).collect {
+                emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
             }
+        }
     }
 
     override fun reduceState(
@@ -112,19 +141,24 @@ class ProfileViewModel(
         is PartialState.ScreenStateChanged -> currentState.copy(
             screenState = partialState.state
         )
+
         is PartialState.SetUserId -> currentState.copy(
             screenState = AsyncState.Success(Unit),
             userId = partialState.userId
         )
+
         is PartialState.ProfileImageChanged -> currentState.copy(
             profileImageState = partialState.state
         )
+
         is PartialState.IdentityInfoChanged -> currentState.copy(
             identityInfoState = partialState.state
         )
+
         is PartialState.TaminRelationChanged -> currentState.copy(
             taminRelationState = partialState.state
         )
+
         is PartialState.ImageRequestChanged -> currentState.copy(
             imageRequestState = partialState.state
         )
@@ -132,4 +166,6 @@ class ProfileViewModel(
 
     override fun createErrorState(message: String): PartialState =
         PartialState.ScreenStateChanged(AsyncState.Error(message))
+
+
 }

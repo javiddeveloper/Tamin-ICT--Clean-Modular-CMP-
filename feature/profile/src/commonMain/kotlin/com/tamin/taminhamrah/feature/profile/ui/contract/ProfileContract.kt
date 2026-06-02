@@ -28,6 +28,8 @@ sealed class ProfileIntent {
     data object Logout : ProfileIntent()
     data class OnItemClick(val title: String) : ProfileIntent()
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
+
+    data object LoadSubDominants : ProfileIntent()
 }
 
 sealed class ProfileEvent {
