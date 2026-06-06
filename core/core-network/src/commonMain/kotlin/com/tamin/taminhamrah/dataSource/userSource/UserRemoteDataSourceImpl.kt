@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
+import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -109,6 +110,19 @@ internal class UserRemoteDataSourceImpl(
     ): ListData<BankAccountResponse>? {
         return try {
             val response = userApiService.getBankAccountList(page, start, limit, filter, sort)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getInsuredActiveBranch(): List<InsuredActiveBranchData>? {
+        return try {
+            val response = userApiService.getInsuredActiveBranch()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

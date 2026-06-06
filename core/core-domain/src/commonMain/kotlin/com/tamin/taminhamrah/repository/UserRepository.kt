@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
+import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import kotlinx.coroutines.flow.Flow
 
@@ -28,4 +29,7 @@ interface UserRepository {
         filter: String,
         sort: String
     ): Flow<List<BankAccountDN>>
+
+    suspend fun getInsuredActiveBranch() : Flow<List<InsuredActiveBranchDN>>
+
 }

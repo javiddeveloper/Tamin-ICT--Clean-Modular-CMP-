@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCaseImpl
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
+import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
+import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
@@ -35,4 +37,5 @@ val domainModule = module {
     factoryOf(::SendImageRequestUseCaseImpl) bind SendImageRequestUseCase::class
     factoryOf(::SubdominantUseCaseImpl) bind SubdominantUseCase::class
     factoryOf(::GetBankAccountListUseCaseImpl) bind GetBankAccountListUseCase::class
+    factoryOf(::GetInsuredActiveBranchUseCaseImpl) bind GetInsuredActiveBranchUseCase::class
 }

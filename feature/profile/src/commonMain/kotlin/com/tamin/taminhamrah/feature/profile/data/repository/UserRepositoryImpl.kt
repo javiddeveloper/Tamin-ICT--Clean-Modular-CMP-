@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.feature.profile.data.mapper.toEntity
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
+import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.util.Logger
@@ -71,4 +72,10 @@ internal class UserRepositoryImpl(
     }
 
 
+    override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> = flow {
+        val remoteData = userRemoteDataSource.getInsuredActiveBranch()
+        Logger.d("getInsuredActiveBranch", remoteData.toString())
+        val insuredActiveBranchList = remoteData?.map { it.toDomain() }
+        emit(insuredActiveBranchList ?: emptyList())
+    }
 }
