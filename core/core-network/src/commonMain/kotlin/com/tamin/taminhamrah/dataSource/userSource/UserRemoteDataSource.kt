@@ -8,6 +8,7 @@ package com.tamin.taminhamrah.dataSource.userSource
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
 import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
@@ -37,4 +38,12 @@ interface UserRemoteDataSource {
     ): ListData<BankAccountResponse>?
 
     suspend fun getInsuredActiveBranch() : List<InsuredActiveBranchData>?
+
+    suspend fun getRelationTaminAll(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): ListData<ActiveRelationResponse>?
 }
