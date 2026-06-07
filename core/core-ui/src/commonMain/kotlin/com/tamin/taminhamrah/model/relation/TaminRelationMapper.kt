@@ -1,8 +1,7 @@
-package com.tamin.taminhamrah.feature.profile.ui.mapper
+package com.tamin.taminhamrah.model.relation
 
-import com.tamin.taminhamrah.feature.profile.ui.model.TaminRelationPR
 import com.tamin.taminhamrah.model.user.TaminRelationDN
-import kotlin.text.ifEmpty
+
 
 fun TaminRelationDN.toPresentation(): TaminRelationPR {
     return TaminRelationPR(

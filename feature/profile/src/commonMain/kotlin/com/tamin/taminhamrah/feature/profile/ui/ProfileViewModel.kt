@@ -4,16 +4,20 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.core.model.request.FilterOperator
 import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState
+import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState.Success
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
-import com.tamin.taminhamrah.feature.profile.ui.mapper.toPresentation
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState.IdentityInfoChanged
+import com.tamin.taminhamrah.model.identity.toPresentation
+import com.tamin.taminhamrah.model.relation.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -49,23 +53,25 @@ class ProfileViewModel(
             emit(PartialState.ProfileImageChanged(AsyncState.Loading))
             getUserProfileImageUseCase().collect { imageBase64 ->
                 emit(PartialState.ProfileImageChanged(
-                    imageBase64.let { AsyncState.Success(it) }
+                    Success(imageBase64)
                 ))
             }
         }
         val identityFlow = flow {
-            emit(PartialState.IdentityInfoChanged(AsyncState.Loading))
+            emit(IdentityInfoChanged(AsyncState.Loading))
             identityInfoUseCase().collect { identityInfo ->
-                emit(PartialState.IdentityInfoChanged(
-                    AsyncState.Success(identityInfo.toPresentation())
-                ))
+                emit(
+                    IdentityInfoChanged(
+                        Success(identityInfo.toPresentation())
+                    )
+                )
             }
         }
         val taminRelationFlow = flow {
             emit(PartialState.TaminRelationChanged(AsyncState.Loading))
             taminRelationUseCase().collect { taminRelation ->
                 emit(PartialState.TaminRelationChanged(
-                    AsyncState.Success(taminRelation.toPresentation())
+                    Success(taminRelation.toPresentation())
                 ))
             }
         }
@@ -100,7 +106,7 @@ class ProfileViewModel(
         emit(PartialState.ImageRequestChanged(AsyncState.Loading))
         sendImageRequestUseCase(branchCode, domainFilters)
             .collect { result ->
-                emit(PartialState.ImageRequestChanged(AsyncState.Success(result)))
+                emit(PartialState.ImageRequestChanged(Success(result)))
             }
     }
 
@@ -112,13 +118,13 @@ class ProfileViewModel(
             screenState = partialState.state
         )
         is PartialState.SetUserId -> currentState.copy(
-            screenState = AsyncState.Success(Unit),
+            screenState = Success(Unit),
             userId = partialState.userId
         )
         is PartialState.ProfileImageChanged -> currentState.copy(
             profileImageState = partialState.state
         )
-        is PartialState.IdentityInfoChanged -> currentState.copy(
+        is IdentityInfoChanged -> currentState.copy(
             identityInfoState = partialState.state
         )
         is PartialState.TaminRelationChanged -> currentState.copy(

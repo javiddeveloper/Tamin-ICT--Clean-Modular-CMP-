@@ -22,8 +22,6 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
-import com.tamin.taminhamrah.feature.profile.ui.model.IdentityInfoPR
-import com.tamin.taminhamrah.feature.profile.ui.model.TaminRelationPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware

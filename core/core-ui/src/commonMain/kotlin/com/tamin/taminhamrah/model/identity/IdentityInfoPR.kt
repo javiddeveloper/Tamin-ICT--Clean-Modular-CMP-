@@ -1,8 +1,8 @@
-package com.tamin.taminhamrah.feature.profile.ui.model
+package com.tamin.taminhamrah.model.identity
 
-import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
-@Immutable
+@Serializable
 data class IdentityInfoPR(
     val cityOfBirthId: String,
     val cityOfIssueId: String,

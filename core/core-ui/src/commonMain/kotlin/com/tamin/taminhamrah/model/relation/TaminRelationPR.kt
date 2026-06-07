@@ -1,8 +1,8 @@
-package com.tamin.taminhamrah.feature.profile.ui.model
+package com.tamin.taminhamrah.model.relation
 
-import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
-@Immutable
+@Serializable
 data class TaminRelationPR(
     val id: Int,
     val nationalId: String,
