@@ -8,7 +8,6 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
-import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
 import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
@@ -85,13 +84,5 @@ internal interface UserApiService {
     @GET("subdominants/getInsuredActiveBranch")
     suspend fun getInsuredActiveBranch(): BaseResponse<List<InsuredActiveBranchData>>
 
-    @GET("relation-tamins/all")
-    suspend fun getRelationTaminAll(
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
-    ) : BaseResponse<ListData<ActiveRelationResponse>>
 
 }

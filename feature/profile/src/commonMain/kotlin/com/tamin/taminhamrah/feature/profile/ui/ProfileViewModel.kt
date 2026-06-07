@@ -12,7 +12,6 @@ import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
-import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
@@ -31,7 +30,6 @@ class ProfileViewModel(
     private val subdominantUseCase: SubdominantUseCase,
     private val getBankAccountListUseCase: GetBankAccountListUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
-    private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -46,8 +44,7 @@ class ProfileViewModel(
                 intent.filter
             )
             is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
-            is ProfileIntent.LoadBankAccountList -> handleGetRelationTaminAll()
-                //handleGetInsuranceActiveBranch()
+            is ProfileIntent.LoadBankAccountList -> handleGetInsuranceActiveBranch()
                 //handleLoadBankAccountList()
         }
     }
@@ -156,15 +153,6 @@ class ProfileViewModel(
         return flow {
             emit(PartialState.ScreenStateChanged(AsyncState.Loading))
             getInsuredActiveBranchUseCase.invoke().collect {
-                emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
-            }
-        }
-    }
-
-    private fun handleGetRelationTaminAll(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
-            getRelationTaminAllUseCase.invoke().collect {
                 emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
             }
         }
