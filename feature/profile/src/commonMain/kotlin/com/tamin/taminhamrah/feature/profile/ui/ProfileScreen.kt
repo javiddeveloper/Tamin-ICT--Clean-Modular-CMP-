@@ -22,6 +22,8 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
+import com.tamin.taminhamrah.feature.profile.ui.model.IdentityInfoPR
+import com.tamin.taminhamrah.feature.profile.ui.model.TaminRelationPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -116,11 +118,15 @@ fun ProfileContent(
                     Spacer(modifier = Modifier.height(Spacing.md))
 
                     if (!state.userId.isNullOrEmpty()) {
-                        Text(
-                            text = "${(state.identityInfoState as? AsyncState.Success)?.data?.firstName} ${(state.identityInfoState as? AsyncState.Success)?.data?.lastName} - ${(state.identityInfoState as? AsyncState.Success)?.data?.cityOfBirthName} - ${(state.taminRelationState as? AsyncState.Success)?.data?.brhAdress}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        val identity = (state.identityInfoState as? AsyncState.Success)?.data
+                        val relation = (state.taminRelationState as? AsyncState.Success)?.data
+                        if (identity != null && relation != null) {
+                            Text(
+                                text = "${identity.fullName} - ${identity.cityOfBirthName} - ${relation.brhAdress}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -153,7 +159,12 @@ fun ProfileContent(
                     },
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.SendImageRequest(branchCode = (state.taminRelationState as AsyncState.Success).data.brhCode!!, filter = "edit-text")) }
+                    onClick = {
+                        val relation = (state.taminRelationState as? AsyncState.Success)?.data
+                        if (relation != null) {
+                            onIntent(ProfileIntent.SendImageRequest(branchCode = relation.brhCode, filter = "edit-text"))
+                        }
+                    }
                 )
             }
 

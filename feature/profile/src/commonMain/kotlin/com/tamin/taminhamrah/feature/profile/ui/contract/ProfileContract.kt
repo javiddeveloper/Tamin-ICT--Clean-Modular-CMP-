@@ -1,24 +1,24 @@
 package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
-import com.tamin.taminhamrah.model.user.TaminRelationDN
+import com.tamin.taminhamrah.feature.profile.ui.model.IdentityInfoPR
+import com.tamin.taminhamrah.feature.profile.ui.model.TaminRelationPR
 
 @Immutable
 data class ProfileUiState(
     val screenState: AsyncState<Unit> = AsyncState.Uninitialized,
     val userId: String? = null,
     val profileImageState: AsyncState<String> = AsyncState.Uninitialized,
-    val identityInfoState: AsyncState<IdentityInfoDN> = AsyncState.Uninitialized,
-    val taminRelationState: AsyncState<TaminRelationDN> = AsyncState.Uninitialized,
+    val identityInfoState: AsyncState<IdentityInfoPR> = AsyncState.Uninitialized,
+    val taminRelationState: AsyncState<TaminRelationPR> = AsyncState.Uninitialized,
     val imageRequestState: AsyncState<String> = AsyncState.Uninitialized,
 ) {
     sealed class PartialState {
         data class ScreenStateChanged(val state: AsyncState<Unit>) : PartialState()
         data class SetUserId(val userId: String?) : PartialState()
         data class ProfileImageChanged(val state: AsyncState<String>) : PartialState()
-        data class IdentityInfoChanged(val state: AsyncState<IdentityInfoDN>) : PartialState()
-        data class TaminRelationChanged(val state: AsyncState<TaminRelationDN>) : PartialState()
+        data class IdentityInfoChanged(val state: AsyncState<IdentityInfoPR>) : PartialState()
+        data class TaminRelationChanged(val state: AsyncState<TaminRelationPR>) : PartialState()
         data class ImageRequestChanged(val state: AsyncState<String>) : PartialState()
     }
 }

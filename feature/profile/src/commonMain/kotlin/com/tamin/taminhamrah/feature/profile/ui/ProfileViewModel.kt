@@ -8,17 +8,16 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
+import com.tamin.taminhamrah.feature.profile.ui.mapper.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 
 class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -58,7 +57,7 @@ class ProfileViewModel(
             emit(PartialState.IdentityInfoChanged(AsyncState.Loading))
             identityInfoUseCase().collect { identityInfo ->
                 emit(PartialState.IdentityInfoChanged(
-                    identityInfo.let { AsyncState.Success(it) }
+                    AsyncState.Success(identityInfo.toPresentation())
                 ))
             }
         }
@@ -66,7 +65,7 @@ class ProfileViewModel(
             emit(PartialState.TaminRelationChanged(AsyncState.Loading))
             taminRelationUseCase().collect { taminRelation ->
                 emit(PartialState.TaminRelationChanged(
-                    AsyncState.Success(taminRelation)
+                    AsyncState.Success(taminRelation.toPresentation())
                 ))
             }
         }

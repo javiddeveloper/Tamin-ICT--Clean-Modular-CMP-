@@ -1,11 +1,11 @@
-package com.tamin.taminhamrah.feature.profile.data.repository
+package com.tamin.taminhamrah.data.repository
 
 import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
-import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
-import com.tamin.taminhamrah.feature.profile.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toDomain
+import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +39,7 @@ internal class UserRepositoryImpl(
         branchCode: String,
         filter: List<ApiFilterDN>
     ) = flow {
-            val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
-            emit(remoteData)
-        }
+        val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
+        emit(remoteData)
+    }
 }

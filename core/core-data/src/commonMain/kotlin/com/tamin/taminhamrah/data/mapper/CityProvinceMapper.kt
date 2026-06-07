@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.cityprovince.data.mapper
+package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.core.network.model.common.CityDto
 import com.tamin.core.network.model.common.ProvinceDto

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.data.mapper
+package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
