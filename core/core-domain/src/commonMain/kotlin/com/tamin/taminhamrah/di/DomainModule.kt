@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCaseImpl
+import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
+import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCaseImpl
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
@@ -41,4 +43,5 @@ val domainModule = module {
     factoryOf(::GetBankAccountListUseCaseImpl) bind GetBankAccountListUseCase::class
     factoryOf(::GetInsuredActiveBranchUseCaseImpl) bind GetInsuredActiveBranchUseCase::class
     factoryOf(::GetRelationTaminAllUseCaseImpl) bind GetRelationTaminAllUseCase::class
+    factoryOf(::GetElectronicFileUseCaseImpl) bind GetElectronicFileUseCase::class
 }

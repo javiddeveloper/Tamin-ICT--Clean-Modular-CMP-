@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
@@ -32,6 +33,7 @@ class ProfileViewModel(
     private val getBankAccountListUseCase: GetBankAccountListUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
+    private val getElectronicFileUseCase: GetElectronicFileUseCase,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -46,9 +48,7 @@ class ProfileViewModel(
                 intent.filter
             )
             is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
-            is ProfileIntent.LoadBankAccountList -> handleGetRelationTaminAll()
-                //handleGetInsuranceActiveBranch()
-                //handleLoadBankAccountList()
+            is ProfileIntent.LoadBankAccountList -> handleLoadElectronicFile()
         }
     }
 
@@ -170,6 +170,15 @@ class ProfileViewModel(
         }
     }
 
+    private fun handleLoadElectronicFile(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            getElectronicFileUseCase.invoke().collect {
+                emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
+            }
+        }
+    }
+
 
     override fun reduceState(
         currentState: ProfileUiState,
@@ -195,6 +204,8 @@ class ProfileViewModel(
         is PartialState.TaminRelationChanged -> currentState.copy(
             taminRelationState = partialState.state
         )
+
+
 
         is PartialState.ImageRequestChanged -> currentState.copy(
             imageRequestState = partialState.state

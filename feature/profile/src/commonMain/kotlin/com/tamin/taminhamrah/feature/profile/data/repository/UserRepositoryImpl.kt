@@ -92,4 +92,17 @@ internal class UserRepositoryImpl(
         val relationList = remoteData?.list?.map { it.toDomain() }
         emit(relationList ?: emptyList())
     }
+
+    override suspend fun getElectronicFile(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<List<com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN>> = flow {
+        val remoteData = userRemoteDataSource.getElectronicFile(page, start, limit, filter, sort)
+        Logger.d("getElectronicFile", remoteData?.list.toString())
+        val electronicFileList = remoteData?.list?.map { it.toDomain() }
+        emit(electronicFileList ?: emptyList())
+    }
 }

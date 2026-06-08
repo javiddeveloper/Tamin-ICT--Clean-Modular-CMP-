@@ -152,4 +152,23 @@ internal class UserRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun getElectronicFile(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): ListData<com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse>? {
+        return try {
+            val response = userApiService.getElectronicFile(page, start, limit, filter, sort)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }

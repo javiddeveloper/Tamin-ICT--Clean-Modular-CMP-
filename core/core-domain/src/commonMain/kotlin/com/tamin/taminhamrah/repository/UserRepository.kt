@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
@@ -40,5 +41,13 @@ interface UserRepository {
         filter: String,
         sort: String
     ): Flow<List<ActiveRelationDN>>
+
+    suspend fun getElectronicFile(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<List<ElectronicFileDN>>
 
 }

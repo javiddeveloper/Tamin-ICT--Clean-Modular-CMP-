@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
 import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
@@ -70,7 +71,7 @@ internal interface UserApiService {
         @Query("limit") limit: String = "10",
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
-    ) : BaseResponse<SubDominantResponseData>
+    ): BaseResponse<SubDominantResponseData>
 
     @GET("personals/accounts")
     suspend fun getBankAccountList(
@@ -79,7 +80,7 @@ internal interface UserApiService {
         @Query("limit") limit: String = "10",
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
-    ) : BaseResponse<ListData<BankAccountResponse>>
+    ): BaseResponse<ListData<BankAccountResponse>>
 
 
     @GET("subdominants/getInsuredActiveBranch")
@@ -92,6 +93,15 @@ internal interface UserApiService {
         @Query("limit") limit: String = "10",
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
-    ) : BaseResponse<ListData<ActiveRelationResponse>>
+    ): BaseResponse<ListData<ActiveRelationResponse>>
+
+    @GET("erecords/images")
+    suspend fun getElectronicFile(
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ): BaseResponse<ListData<ElectronicFileResponse>>
 
 }

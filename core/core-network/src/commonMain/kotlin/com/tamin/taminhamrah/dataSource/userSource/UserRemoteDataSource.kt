@@ -10,6 +10,7 @@ import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
 import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
@@ -46,4 +47,12 @@ interface UserRemoteDataSource {
         filter: String,
         sort: String
     ): ListData<ActiveRelationResponse>?
+
+    suspend fun getElectronicFile(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): ListData<ElectronicFileResponse>?
 }
