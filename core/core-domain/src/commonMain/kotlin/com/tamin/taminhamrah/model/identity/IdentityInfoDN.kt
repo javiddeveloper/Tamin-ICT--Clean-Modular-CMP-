@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.core.model.common
+package com.tamin.taminhamrah.model.identity
 
 data class IdentityInfoDN(
     val cityOfBirthId: String?,
@@ -14,10 +14,7 @@ data class IdentityInfoDN(
     val idCardSerial2: String?,
     val lastName: String?,
     val nationalId: String?,
-    val ssn: String?
-) {
-    var cityOfBirthName: String? = null
+    val ssn: String?,
+    var cityOfBirthName: String? = null,
     var cityOfIssueName: String? = null
-}
-
-
+)
