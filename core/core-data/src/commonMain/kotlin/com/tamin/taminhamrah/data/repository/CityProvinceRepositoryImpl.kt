@@ -1,12 +1,12 @@
 package com.tamin.taminhamrah.data.repository
 
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
-import com.tamin.taminhamrah.core.model.common.CityDN
-import com.tamin.taminhamrah.core.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
