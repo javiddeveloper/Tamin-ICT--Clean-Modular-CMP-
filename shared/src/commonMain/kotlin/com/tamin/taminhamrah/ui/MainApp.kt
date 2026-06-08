@@ -48,17 +48,6 @@ fun MainApp(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                Spacer(modifier = Modifier.height(Spacing.xxl))
-
-                Button(onClick = { viewModel.updateDarkThemeConfig(DarkThemeConfig.LIGHT) }) {
-                    Text("Light Mode")
-                }
-                Button(onClick = { viewModel.updateDarkThemeConfig(DarkThemeConfig.DARK) }) {
-                    Text("Dark Mode")
-                }
-                Button(onClick = { viewModel.updateDarkThemeConfig(DarkThemeConfig.FOLLOW_SYSTEM) }) {
-                    Text("System Default")
-                }
                 TaminHamrahNavGraph(
                     isLoggedIn = uiState.isLoggedIn,
                     isLoading = uiState.isLoading,

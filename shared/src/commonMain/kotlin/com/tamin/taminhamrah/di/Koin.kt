@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.core.datastore.di.datastoreModule
+import com.tamin.taminhamrah.data.di.dataKoinModule
 import com.tamin.taminhamrah.feature.profile.di.profileModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -16,9 +17,10 @@ val sharedModules: List<Module>
         ApiClientsModule,
         remoteModule,
         domainModule,
+        dataKoinModule,
         dataModule,
         pluginModule,
-        profileModule
+        profileModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {

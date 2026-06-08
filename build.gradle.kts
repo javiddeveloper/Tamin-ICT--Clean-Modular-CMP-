@@ -41,3 +41,49 @@ allprojects {
         }
     }
 }
+
+tasks.register("checkDnNaming") {
+    group = "verification"
+    description = "Checks if all Domain models follow naming conventions (DN, PR, Dto, or Mapper)"
+    doLast {
+        var errorCount = 0
+        fileTree(rootDir).matching {
+            include("**/model/**/*.kt")
+            exclude("**/mapper/**")
+            exclude("**/core-network/**")
+            exclude("**/build/**")
+        }.forEach { file ->
+            val fileName = file.name
+            val content = file.readText()
+            val isClass = content.contains("data class") || content.contains("class ") || content.contains("enum class")
+
+            // Check for Mappers (even if they only contain extension functions)
+            if (fileName.contains("Maper", ignoreCase = true) ||
+                (fileName.contains("Mapper", ignoreCase = true) && !fileName.endsWith("Mapper.kt"))) {
+                println("ERROR: Mapper file ${file.absolutePath} must end exactly with 'Mapper.kt' (check for typos like 'Maper').")
+                errorCount++
+            } else if (isClass) {
+                // Check for Models
+                if (!fileName.endsWith("DN.kt") &&
+                    !fileName.endsWith("PR.kt") &&
+                    !fileName.endsWith("Dto.kt") &&
+                    !fileName.endsWith("Mapper.kt") &&
+                    !fileName.endsWith("Entity.kt")
+                ) {
+                    println("ERROR: Model file ${file.absolutePath} does not follow naming convention (DN, PR, Dto, Entity, or Mapper suffix required).")
+                    errorCount++
+                }
+            }
+        }
+        if (errorCount > 0) {
+            throw GradleException("Found $errorCount files that do not follow the naming convention. Run with --info for details.")
+        }
+    }
+}
+
+// Link it to check task if it exists (usually in subprojects or root with specific plugins)
+allprojects {
+    tasks.matching { it.name == "check" }.all {
+        dependsOn(":checkDnNaming")
+    }
+}

@@ -26,6 +26,7 @@ kotlin {
             api(project(":core:core-domain"))
             api(project(":core:core-network"))
             api(project(":core:core-database"))
+            api(project(":core:core-data"))
             api(project(":core:core-datastore"))
             api(project(":core:core-plugin"))
             api(project(":core:core-ui"))
@@ -75,6 +76,8 @@ kotlin {
             implementation(libs.media3.exoplayer)
             implementation(libs.media3.ui)
             implementation(libs.okhttp)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.chucker.debug)
         }
 
         commonTest.dependencies {

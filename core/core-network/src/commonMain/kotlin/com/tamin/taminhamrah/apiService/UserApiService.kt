@@ -8,13 +8,18 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
+import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.tools.BaseResponse
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.Url
+import io.ktor.http.cio.Response
 
 internal interface UserApiService {
     @GET("central-reg/personal")
@@ -22,6 +27,15 @@ internal interface UserApiService {
 
     @GET("booklet-req/profile-image")
     suspend fun getUserProfileImage(): BaseResponse<String>
+
+    @GET("personals/relation")
+    suspend fun fetchTaminRelation(): BaseResponse<TaminRelationResponse>
+
+    @GET("personals/image-v2/{branchCode}")
+    suspend fun sendImageRequest(
+        @Path("branchCode") branchCode: String,
+        @Query("filter") filter: String
+    ): BaseResponse<String>
 
     @FormUrlEncoded
     @POST

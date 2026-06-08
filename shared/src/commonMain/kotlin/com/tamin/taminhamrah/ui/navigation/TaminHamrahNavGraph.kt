@@ -74,6 +74,10 @@ internal fun TaminHamrahNavGraph(
                 }
 
                 profileGraph(
+                    navController = navController,
+                    onNavigateToIdentity = { userId ->
+                        navController.navigate(ProfileRoute.Identity(userId))
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }

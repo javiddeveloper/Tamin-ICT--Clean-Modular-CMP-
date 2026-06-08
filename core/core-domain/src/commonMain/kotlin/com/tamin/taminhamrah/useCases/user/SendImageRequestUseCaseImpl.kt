@@ -1,0 +1,14 @@
+package com.tamin.taminhamrah.useCases.user
+
+import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.repository.UserRepository
+import kotlinx.coroutines.flow.Flow
+
+class SendImageRequestUseCaseImpl(
+    private val userRepository: UserRepository,
+) : SendImageRequestUseCase {
+
+    override suspend fun invoke(branchCode: String, filter: List<ApiFilterDN>): Flow<String> {
+        return userRepository.sendImageRequest(branchCode, filter)
+    }
+}

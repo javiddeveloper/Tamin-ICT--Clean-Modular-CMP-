@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.invoke
 dependencies {
     implementation(libs.androidx.core.ktx)
 }
@@ -22,10 +23,13 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.core)
             implementation(libs.ktorfit.lib)
+            implementation(libs.kermit.koin)
+            implementation(libs.kermit.logging)
         }
 
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.chucker.debug)
         }
 
         iosMain.dependencies {

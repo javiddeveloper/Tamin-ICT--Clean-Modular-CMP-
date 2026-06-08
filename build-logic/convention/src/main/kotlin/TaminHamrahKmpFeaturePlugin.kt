@@ -19,12 +19,15 @@ class TaminHamrahKmpFeaturePlugin : Plugin<Project> {
                         implementation(project(":core:core-domain"))
                         implementation(project(":core:core-network"))
                         implementation(project(":core:core-database"))
+                        implementation(project(":core:core-data"))
                         implementation(project(":core:core-ui"))
 
                         implementation(libs.findLibrary("koin-core").get())
                         implementation(libs.findLibrary("koin-compose").get())
                         implementation(libs.findLibrary("koin-compose-viewmodel").get())
                         implementation(libs.findLibrary("koin-core-viewmodel").get())
+                        implementation(libs.findLibrary("koin-compose").get())
+                        implementation(libs.findLibrary("koin-compose-viewmodel").get())
                         implementation(libs.findLibrary("androidx-lifecycle-viewmodel").get())
                         implementation(libs.findLibrary("kotlinx-coroutines-core").get())
                     }

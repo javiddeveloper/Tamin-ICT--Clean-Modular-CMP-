@@ -10,8 +10,11 @@ package com.tamin.taminhamrah.tools.errorHandling
 data class TaminApiException(
     val title: String,
     val subtitle: String? = null,
-    override val cause: Throwable? = null
-) : Exception()
+    override val cause: Throwable? = null,
+) : Exception(title) {
+    override val message: String?
+        get() = toSingleLineMessage()
+}
 
 data class TaminErrorUriException(
     val uri: ErrorUri,

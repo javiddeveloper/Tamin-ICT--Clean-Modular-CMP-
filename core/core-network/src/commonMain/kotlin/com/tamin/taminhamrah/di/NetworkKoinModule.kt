@@ -2,18 +2,23 @@ package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
+import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AuthRepository
 import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.util.NetworkConstants
+import com.tamin.taminhamrah.util.AppConfig
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -27,6 +32,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import co.touchlab.kermit.Logger as KermitLogger
 
 val networkModule = module {
 
@@ -38,6 +44,15 @@ val networkModule = module {
         AuthRemoteDataSourceImpl(
             userApiService = get(named("authUserApiService")),
             errorParser = get()
+        )
+    }
+
+    single<UserRemoteDataSource> {
+        UserRemoteDataSourceImpl(
+            userApiService = get(),
+//            httpClient = get(named("mainHttpClient")),
+            errorParser = get(),
+            queryBuilder = get()
         )
     }
 
@@ -57,6 +72,7 @@ val networkModule = module {
     // Auth HTTP Client (no Auth plugin, used for token endpoints)
     single(named("authHttpClient")) {
         createAuthHttpClient(
+            engine = get(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
         )
@@ -65,6 +81,7 @@ val networkModule = module {
     // Main HTTP Client (60 seconds timeout)
     single(named("mainHttpClient")) {
         createHttpClient(
+            engine = get(),
             authRepository = get<AuthRepository>(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
@@ -74,6 +91,7 @@ val networkModule = module {
     // Upload HTTP Client (5 minutes timeout)
     single(named("uploadHttpClient")) {
         createHttpClient(
+            engine = get(),
             authRepository = get<AuthRepository>(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
@@ -82,11 +100,12 @@ val networkModule = module {
 }
 
 private fun createHttpClient(
+    engine: HttpClientEngine,
     authRepository: AuthRepository,
     json: Json,
     timeoutMillis: Long
 ): HttpClient {
-    return HttpClient {
+    return HttpClient(engine) {
         expectSuccess = false
 
         install(ContentNegotiation) {
@@ -98,6 +117,8 @@ private fun createHttpClient(
             connectTimeoutMillis = timeoutMillis
             socketTimeoutMillis = timeoutMillis
         }
+
+
 
         install(Auth) {
             bearer {
@@ -131,12 +152,14 @@ private fun createHttpClient(
         }
 
         install(Logging) {
+            logger = Logger.DEFAULT
+            level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
             logger = object : Logger {
                 override fun log(message: String) {
-                    KtorSimpleLogger(message)
+                    KermitLogger.d(tag = "KtorClient", messageString = message)
                 }
             }
-            level = LogLevel.ALL
         }
 
         defaultRequest {
@@ -147,10 +170,11 @@ private fun createHttpClient(
 }
 
 private fun createAuthHttpClient(
+    engine: HttpClientEngine,
     json: Json,
     timeoutMillis: Long
 ): HttpClient {
-    return HttpClient {
+    return HttpClient(engine) {
         expectSuccess = false
 
         install(ContentNegotiation) {
@@ -164,12 +188,14 @@ private fun createAuthHttpClient(
         }
 
         install(Logging) {
+            logger = Logger.DEFAULT
+            level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
             logger = object : Logger {
                 override fun log(message: String) {
-                    KtorSimpleLogger(message)
+                    KermitLogger.d(tag = "KtorClient", messageString = message)
                 }
             }
-            level = LogLevel.ALL
         }
 
         defaultRequest {
