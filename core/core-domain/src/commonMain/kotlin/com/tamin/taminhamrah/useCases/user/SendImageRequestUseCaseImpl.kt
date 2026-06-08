@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.useCases.user
 
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 
