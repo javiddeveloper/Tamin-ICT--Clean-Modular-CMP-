@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.useCases.identity
 
-import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
+import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import kotlinx.coroutines.flow.Flow
 
 interface IdentityInfoUseCase {

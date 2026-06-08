@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.useCases.identity
 
-import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
+import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.core.model.request.FilterOperator
