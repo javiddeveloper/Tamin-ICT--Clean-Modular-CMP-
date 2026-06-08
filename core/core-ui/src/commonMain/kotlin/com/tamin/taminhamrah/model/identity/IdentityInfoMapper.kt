@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.model.identity
 
-import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
 
 fun IdentityInfoDN.toPresentation(): IdentityInfoPR {
     val fName = this.firstName ?: ""
