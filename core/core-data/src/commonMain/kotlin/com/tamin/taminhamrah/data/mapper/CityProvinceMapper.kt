@@ -2,8 +2,8 @@ package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.core.network.model.common.CityDto
 import com.tamin.core.network.model.common.ProvinceDto
-import com.tamin.taminhamrah.core.model.common.CityDN
-import com.tamin.taminhamrah.core.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 

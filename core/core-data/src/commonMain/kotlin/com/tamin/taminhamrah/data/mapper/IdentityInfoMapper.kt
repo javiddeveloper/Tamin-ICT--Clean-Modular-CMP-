@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.core.network.model.user.IdentityInfoDto
-import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
+import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 
 internal fun IdentityInfoDto.toEntity(): IdentityInfoEntity = IdentityInfoEntity(
     id = id,
