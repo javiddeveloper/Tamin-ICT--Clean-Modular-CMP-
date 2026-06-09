@@ -8,9 +8,12 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.tools.BaseResponse
 import com.tamin.taminhamrah.util.NetworkConstants
+import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
@@ -57,5 +60,17 @@ internal interface UserApiService {
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
     ): TokenResponseDto
+
+    @GET
+    suspend fun changeMobile(
+        @Url url: String,
+        @Query("filter") filter: String
+    ): BaseResponse<EditMobileResponseDto>
+
+    @POST
+    suspend fun verifyChangeMobileCode(
+        @Url url: String,
+        @Body loginRequest: VerifyMobileReq,
+    ): BaseResponse<String>
 
 }

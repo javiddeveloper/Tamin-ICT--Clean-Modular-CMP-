@@ -35,7 +35,8 @@ enum class FilterOperator(val value: String) {
     EQUAL("EQUAL"),
     CONTAINS("CONTAINS"),
     LIKE("LIKE"),
-    EQ("EQ")
+    EQ("EQ"),
+    EQUAL_LOWER("equal")
 }
 
 @Serializable

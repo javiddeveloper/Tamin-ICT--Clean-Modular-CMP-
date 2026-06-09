@@ -13,8 +13,11 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
+import com.tamin.taminhamrah.util.NetworkConstants
 
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
@@ -67,6 +70,34 @@ internal class UserRemoteDataSourceImpl(
     ): String {
         return try {
             val response = userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun changeMobile(
+        filter: List<ApiFilterDN>
+    ): EditMobileResponseDto {
+        return try {
+            val response = userApiService.changeMobile(NetworkConstants.EDIT_MOBILE_URL, queryBuilder.buildFilterJson(filter))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String {
+        return try {
+            val response = userApiService.verifyChangeMobileCode(NetworkConstants.VERIFY_EDIT_MOBILE_URL, request)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

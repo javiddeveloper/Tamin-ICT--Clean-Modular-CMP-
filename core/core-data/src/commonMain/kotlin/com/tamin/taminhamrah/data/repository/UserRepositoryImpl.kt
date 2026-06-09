@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.relation.TaminRelationDN
+import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -42,4 +44,16 @@ internal class UserRepositoryImpl(
         val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
         emit(remoteData)
     }
+
+    override suspend fun changeMobile(filter: List<ApiFilterDN>): Flow<EditMobileResponseDN> = flow {
+        val remoteData = userRemoteDataSource.changeMobile(filter)
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
+        val request = VerifyMobileReq(mobile, otp, otpHashCode)
+        val remoteData = userRemoteDataSource.verifyChangeMobileCode(request)
+        emit(remoteData)
+    }
+
 }
