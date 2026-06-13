@@ -7,7 +7,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
-import com.tamin.taminhamrah.model.identity.toPresentation
+import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.model.relation.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
