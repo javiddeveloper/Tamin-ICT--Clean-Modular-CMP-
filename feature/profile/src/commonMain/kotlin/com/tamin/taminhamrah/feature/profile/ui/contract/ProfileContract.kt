@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.model.identity.IdentityInfoPR
+import com.tamin.taminhamrah.model.identity.IdentityInfoPRT
 import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
 @Immutable
@@ -10,7 +10,7 @@ data class ProfileUiState(
     val error: String? = null,
     val userId: String? = null,
     val profileImage: String? = null,
-    val identityInfo: IdentityInfoPR? = null,
+    val identityInfo: IdentityInfoPRT? = null,
     val taminRelation: TaminRelationPR? = null,
     val imageRequestResult: String? = null,
     val isImageRequestLoading: Boolean = false,
@@ -21,7 +21,7 @@ data class ProfileUiState(
         data class Error(val message: String?) : PartialState()
         data class SetUserId(val userId: String?) : PartialState()
         data class ProfileImageLoaded(val image: String?) : PartialState()
-        data class IdentityInfoLoaded(val info: IdentityInfoPR?) : PartialState()
+        data class IdentityInfoLoaded(val info: IdentityInfoPRT?) : PartialState()
         data class TaminRelationLoaded(val relation: TaminRelationPR?) : PartialState()
         data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
         data class ImageRequestResult(val result: String) : PartialState()

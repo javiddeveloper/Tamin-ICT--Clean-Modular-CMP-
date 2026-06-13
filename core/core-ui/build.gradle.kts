@@ -4,6 +4,7 @@ dependencies {
 plugins {
     id("TaminHamrah.kmp.library")
     id("TaminHamrah.kmp.compose")
+    id("TaminHamrah.naming.convention")
 }
 
 kotlin {

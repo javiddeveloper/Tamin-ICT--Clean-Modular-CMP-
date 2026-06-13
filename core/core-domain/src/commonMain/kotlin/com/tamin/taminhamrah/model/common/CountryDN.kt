@@ -1,9 +1,6 @@
-/*
- * author Javid Sattar *(javiddeveloper@gmail.com)
- */
-package com.tamin.taminhamrah.core.model
+package com.tamin.taminhamrah.model.common
 
-data class Country(
+data class CountryDN(
     val code: String,
     val name: String,
     val phoneCode: String,
@@ -14,4 +11,3 @@ data class Country(
     val flagEmoji: String,
     val flagResourceName: String,
 )
-
