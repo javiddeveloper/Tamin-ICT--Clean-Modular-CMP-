@@ -119,7 +119,7 @@ class ProfileViewModel(
     //todo it should removed from here this is only test
     private fun handleLoadSubDominants(): Flow<PartialState> {
         return flow {
-            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            emit(PartialState.ScreenStateChanged.Loading)
             subdominantUseCase.invoke(
                 page = "1",
                 start = "0",
@@ -127,20 +127,20 @@ class ProfileViewModel(
                 filter = "[]",
                 sort = "[]"
             ).collect {
-                emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
+                emit(PartialState.ScreenStateChanged.Success)
             }
         }
     }
 
     private fun handleLoadBankAccountList(): Flow<PartialState> {
         return flow {
-            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            emit(PartialState.ScreenStateChanged.Loading)
             getBankAccountListUseCase.invoke(page = "1",
                 start = "0",
                 limit = "10",
                 filter = "[]",
                 sort = "[]").collect {
-                    emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
+                    emit(PartialState.ScreenStateChanged.Success)
             }
         }
     }
@@ -186,6 +186,8 @@ class ProfileViewModel(
             isImageRequestLoading = false,
             imageRequestError = partialState.message
         )
+
+        is PartialState.ScreenStateChanged -> currentState
     }
 
     override fun createErrorState(message: String): PartialState =
