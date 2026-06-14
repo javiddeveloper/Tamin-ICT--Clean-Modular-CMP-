@@ -10,7 +10,7 @@ stages:
 # Android Jobs
 # -----------------------------------------------------------------------------
 .android-base:
-  image: openjdk:17-jdk
+  image: pull-devops.tamin.ir/openjdk:17-jdk
   tags:
     - devops
   before_script:
