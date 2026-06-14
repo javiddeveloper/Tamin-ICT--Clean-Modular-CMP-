@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.mapper.relation
 
-import com.tamin.taminhamrah.model.relation.TaminRelationDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
 

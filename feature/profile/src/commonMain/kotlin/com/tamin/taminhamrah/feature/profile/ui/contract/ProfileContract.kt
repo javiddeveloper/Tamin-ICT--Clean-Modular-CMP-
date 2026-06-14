@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.model.identity.IdentityInfoPR
 import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
@@ -50,16 +51,4 @@ sealed class ProfileEvent {
     data object NavigateToSettings : ProfileEvent()
     data object NavigateToIdentity : ProfileEvent()
     data class ShowToast(val message: String) : ProfileEvent()
-}
-
-
-enum class ProfileMenuItem {
-    IDENTITY_INFO,
-    ACTIVE_RELATION,
-    DEPENDENTS,
-    ELECTRONIC_FILE,
-    BANK_ACCOUNTS,
-    CHANGE_MOBILE,
-    SETTINGS,
-    LOGOUT
 }

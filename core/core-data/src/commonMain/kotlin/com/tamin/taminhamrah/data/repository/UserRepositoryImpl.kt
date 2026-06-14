@@ -11,7 +11,7 @@ import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
-import com.tamin.taminhamrah.model.relation.TaminRelationDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN

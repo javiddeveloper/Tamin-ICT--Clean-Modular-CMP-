@@ -23,7 +23,7 @@ abstract class BaseApiTest {
     ): Ktorfit {
         val mockEngine = MockEngine { _ ->
             respond(
-                content = ByteReadChannel(content),
+                content = content,
                 status = status,
                 headers = headersOf(HttpHeaders.ContentType, contentType.toString())
             )

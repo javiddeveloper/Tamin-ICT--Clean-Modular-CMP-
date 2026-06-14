@@ -6,7 +6,7 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
-import com.tamin.taminhamrah.model.relation.TaminRelationDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import kotlinx.coroutines.flow.Flow
@@ -88,12 +88,5 @@ class FakeUserRepository : UserRepository {
 
     override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
         emit(verifyChangeMobileResult)
-    }
-
-    override suspend fun sendImageRequest(
-        branchCode: String,
-        filter: List<ApiFilterDN>
-    ): Flow<String> {
-        TODO("Not yet implemented")
     }
 }

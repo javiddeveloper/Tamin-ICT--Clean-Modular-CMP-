@@ -4,8 +4,8 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
-import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileMenuItem
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
+import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager

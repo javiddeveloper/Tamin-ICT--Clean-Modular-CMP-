@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.relation
+package com.tamin.taminhamrah.model.user
 
 import kotlinx.serialization.Serializable
 

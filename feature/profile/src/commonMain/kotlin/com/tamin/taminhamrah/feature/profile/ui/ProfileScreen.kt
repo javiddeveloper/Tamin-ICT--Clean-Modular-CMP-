@@ -20,8 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
-import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileMenuItem
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
+import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
