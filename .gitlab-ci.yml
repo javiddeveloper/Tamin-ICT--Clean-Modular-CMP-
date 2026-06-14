@@ -7,7 +7,7 @@ stages:
   - release
 
 # -----------------------------------------------------------------------------
-# Android Jobs
+# Android Configuration
 # -----------------------------------------------------------------------------
 .android-base:
   image: pull-devops.tamin.ir/openjdk:17-jdk
@@ -15,14 +15,19 @@ stages:
     - devops
   before_script:
     - export GRADLE_USER_HOME=$(pwd)/.gradle
-    # Decode Keystore from Base64 variable
-    - echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.jks
-    - export RELEASE_KEYSTORE=$(pwd)/release.jks
-    # Create key.properties from environment variables if it doesn't exist
+    - chmod +x gradlew
+    # Create key.properties if it doesn't exist
     - |
       if [ ! -f "key.properties" ]; then
         echo "OPERATIONAL_API_KEY=$OPERATIONAL_API_KEY" >> key.properties
         echo "TEST_API_KEY=$TEST_API_KEY" >> key.properties
+      fi
+    # Only decode keystore if the variable is present (avoids failure in non-release jobs)
+    - |
+      if [ ! -z "$RELEASE_KEYSTORE_BASE64" ]; then
+        echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.jks
+        export RELEASE_KEYSTORE=$(pwd)/release.jks
+        echo "Keystore decoded successfully."
       fi
 
 android-test:
@@ -38,8 +43,8 @@ android-test:
     - merge_requests
     - master
     - main
+    - develop
 
-# Build all flavors for debug
 android-build-debug:
   extends: .android-base
   stage: build
@@ -53,6 +58,7 @@ android-build-debug:
     - merge_requests
     - master
     - main
+    - develop
 
 # Release specific flavors
 android-release-direct:
@@ -78,7 +84,7 @@ android-release-reporter:
     - tags
 
 # -----------------------------------------------------------------------------
-# iOS Jobs
+# iOS Jobs (Requires macOS runner)
 # -----------------------------------------------------------------------------
 ios-build:
   stage: build
@@ -95,3 +101,4 @@ ios-build:
     - merge_requests
     - master
     - main
+    - develop
