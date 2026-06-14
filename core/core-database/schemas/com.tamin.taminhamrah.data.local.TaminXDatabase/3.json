@@ -1,0 +1,191 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "e70f28f9d5b7028ffce484ecb1ba4572",
+    "entities": [
+      {
+        "tableName": "test_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "provinces",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`provinceCode` TEXT NOT NULL, `provinceName` TEXT, `status` TEXT, `statusStartDate` TEXT, PRIMARY KEY(`provinceCode`))",
+        "fields": [
+          {
+            "fieldPath": "provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "statusStartDate",
+            "columnName": "statusStartDate",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "provinceCode"
+          ]
+        }
+      },
+      {
+        "tableName": "cities",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cityCode` TEXT NOT NULL, `provinceCode` TEXT, `cityName` TEXT, PRIMARY KEY(`cityCode`))",
+        "fields": [
+          {
+            "fieldPath": "cityCode",
+            "columnName": "cityCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cityName",
+            "columnName": "cityName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cityCode"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cities_provinceCode",
+            "unique": false,
+            "columnNames": [
+              "provinceCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cities_provinceCode` ON `${TABLE_NAME}` (`provinceCode`)"
+          }
+        ]
+      },
+      {
+        "tableName": "identity_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER, `cityOfBirthId` TEXT, `cityOfIssueId` TEXT, `countryId` TEXT, `dateOfBirth` INTEGER, `fatherName` TEXT, `firstName` TEXT, `gender` TEXT, `idCardNumber` TEXT, `idCardSerial1` TEXT, `idCardSerial2` TEXT, `lastName` TEXT, `nationalId` TEXT, `ssn` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cityOfBirthId",
+            "columnName": "cityOfBirthId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cityOfIssueId",
+            "columnName": "cityOfIssueId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "countryId",
+            "columnName": "countryId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dateOfBirth",
+            "columnName": "dateOfBirth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fatherName",
+            "columnName": "fatherName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gender",
+            "columnName": "gender",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idCardNumber",
+            "columnName": "idCardNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idCardSerial1",
+            "columnName": "idCardSerial1",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idCardSerial2",
+            "columnName": "idCardSerial2",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ssn",
+            "columnName": "ssn",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e70f28f9d5b7028ffce484ecb1ba4572')"
+    ]
+  }
+}
