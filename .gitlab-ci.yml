@@ -7,13 +7,25 @@ stages:
   - release
 
 # -----------------------------------------------------------------------------
-# Android Jobs (Linux Runner)
+# Android Jobs
 # -----------------------------------------------------------------------------
-android-test:
-  stage: test
+.android-base:
   image: openjdk:17-jdk
   before_script:
     - export GRADLE_USER_HOME=$(pwd)/.gradle
+    # Decode Keystore from Base64 variable
+    - echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.jks
+    - export RELEASE_KEYSTORE=$(pwd)/release.jks
+    # Create key.properties from environment variables if it doesn't exist
+    - |
+      if [ ! -f "key.properties" ]; then
+        echo "OPERATIONAL_API_KEY=$OPERATIONAL_API_KEY" >> key.properties
+        echo "TEST_API_KEY=$TEST_API_KEY" >> key.properties
+      fi
+
+android-test:
+  extends: .android-base
+  stage: test
   script:
     - ./gradlew :androidApp:lintDebug test
   artifacts:
@@ -25,42 +37,46 @@ android-test:
     - master
     - main
 
+# Build all flavors for debug
 android-build-debug:
+  extends: .android-base
   stage: build
-  image: openjdk:17-jdk
   script:
-    - ./gradlew :androidApp:assembleDebug
+    - ./gradlew :androidApp:assembleDirectDebug :androidApp:assembleFlavorTestDebug
   artifacts:
     paths:
-      - androidApp/build/outputs/apk/debug/*.apk
+      - androidApp/build/outputs/apk/*/debug/*.apk
     expire_in: 1 week
   only:
     - merge_requests
     - master
     - main
 
-android-release:
+# Release specific flavors
+android-release-direct:
+  extends: .android-base
   stage: release
-  image: openjdk:17-jdk
   script:
-    - ./gradlew :androidApp:assembleRelease
-    - VERSION=${CI_COMMIT_TAG#v}
-    - if [ -f androidApp/build/outputs/apk/release/androidApp-release.apk ]; then
-        cp androidApp/build/outputs/apk/release/androidApp-release.apk "TaminX-${VERSION}-android.apk";
-      else
-        cp androidApp/build/outputs/apk/release/androidApp-release-unsigned.apk "TaminX-${VERSION}-android-unsigned.apk";
-      fi
+    - ./gradlew :androidApp:assembleDirectRelease
   artifacts:
     paths:
-      - "TaminX-*-android*.apk"
+      - androidApp/build/outputs/apk/direct/release/*.apk
   only:
     - tags
-  except:
-    - branches
+
+android-release-reporter:
+  extends: .android-base
+  stage: release
+  script:
+    - ./gradlew :androidApp:assembleReporterRelease
+  artifacts:
+    paths:
+      - androidApp/build/outputs/apk/reporter/release/*.apk
+  only:
+    - tags
 
 # -----------------------------------------------------------------------------
-# iOS Jobs (macOS Runner)
-# Note: Requires a runner with 'macos' or 'xcode' tag
+# iOS Jobs
 # -----------------------------------------------------------------------------
 ios-build:
   stage: build
@@ -77,25 +93,3 @@ ios-build:
     - merge_requests
     - master
     - main
-
-ios-release:
-  stage: release
-  tags:
-    - macos
-  script:
-    - xcodebuild archive
-      -project iosApp/iosApp.xcodeproj
-      -scheme iosApp
-      -configuration Release
-      -archivePath ./TaminX.xcarchive
-      CODE_SIGNING_REQUIRED=NO
-      CODE_SIGNING_ALLOWED=YES
-    - VERSION=${CI_COMMIT_TAG#v}
-    - zip -r "TaminX-${VERSION}-ios.xcarchive.zip" ./TaminX.xcarchive
-  artifacts:
-    paths:
-      - "TaminX-*-ios.xcarchive.zip"
-  only:
-    - tags
-  except:
-    - branches
