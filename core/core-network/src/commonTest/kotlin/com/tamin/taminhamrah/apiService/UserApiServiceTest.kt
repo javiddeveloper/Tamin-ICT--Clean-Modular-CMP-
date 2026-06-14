@@ -36,8 +36,11 @@ class UserApiServiceTest : BaseApiTest() {
         val ktorfit = createMockKtorfit(jsonResponse)
         val apiService = ktorfit.create<UserApiService>()
 
-        val filterParam = "[{\"property\":\"mobile\",\"operator\":\"EQ\",\"value\":\"09123456789\"}]"
-        val response = apiService.changeMobile("https://profile.tamin.ir/api/v2.0/users/data/request-otp", filterParam)
+        val response = apiService.changeMobile(
+            referer = "https://profile.tamin.ir/main/change-phone-number",
+            url = "https://profile.tamin.ir/api/v2.0/users/data/request-otp",
+            mobile = "09123456789"
+        )
 
         assertEquals(200, response.status)
         assertEquals("test-trace-id-123", response.data?.traceId)
