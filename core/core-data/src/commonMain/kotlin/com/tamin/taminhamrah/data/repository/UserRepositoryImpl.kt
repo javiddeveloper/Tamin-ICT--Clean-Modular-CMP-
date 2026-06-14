@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.relation.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.util.Logger
@@ -40,7 +41,7 @@ internal class UserRepositoryImpl(
     override suspend fun sendImageRequest(
         branchCode: String,
         filter: List<ApiFilterDN>
-    ) = flow {
+    ): Flow<String> = flow {
         val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
         emit(remoteData)
     }
@@ -51,7 +52,7 @@ internal class UserRepositoryImpl(
         limit: String,
         filter: String,
         sort: String
-    ) = flow {
+    ): Flow<SubdominantDN> = flow {
         val remoteData = userRemoteDataSource.getSubDominantsInfo(page, start, limit, filter, sort)
         Logger.d("getSubDominantsInfo", remoteData.toString())
         emit(remoteData.toDomain())
@@ -63,7 +64,7 @@ internal class UserRepositoryImpl(
         limit: String,
         filter: String,
         sort: String
-    ) = flow {
+    ): Flow<List<BankAccountDN>> = flow {
         val remoteData = userRemoteDataSource.getBankAccountList(page, start, limit, filter, sort)
         Logger.d("getBankAccountList", remoteData?.list.toString())
         val accountList = remoteData?.list?.map { it.toDomain() }
