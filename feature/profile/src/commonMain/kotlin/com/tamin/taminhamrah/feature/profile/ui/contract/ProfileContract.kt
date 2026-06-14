@@ -1,25 +1,31 @@
 package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.core.model.common.IdentityInfoDN
-import com.tamin.taminhamrah.model.user.TaminRelationDN
+import com.tamin.taminhamrah.model.identity.IdentityInfoPR
+import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
 @Immutable
 data class ProfileUiState(
-    val screenState: AsyncState<Unit> = AsyncState.Uninitialized,
+    val isLoading: Boolean = false,
+    val error: String? = null,
     val userId: String? = null,
-    val profileImageState: AsyncState<String> = AsyncState.Uninitialized,
-    val identityInfoState: AsyncState<IdentityInfoDN> = AsyncState.Uninitialized,
-    val taminRelationState: AsyncState<TaminRelationDN> = AsyncState.Uninitialized,
-    val imageRequestState: AsyncState<String> = AsyncState.Uninitialized,
+    val profileImage: String? = null,
+    val identityInfo: IdentityInfoPR? = null,
+    val taminRelation: TaminRelationPR? = null,
+    val imageRequestResult: String? = null,
+    val isImageRequestLoading: Boolean = false,
+    val imageRequestError: String? = null,
 ) {
     sealed class PartialState {
-        data class ScreenStateChanged(val state: AsyncState<Unit>) : PartialState()
+        data class Loading(val isLoading: Boolean) : PartialState()
+        data class Error(val message: String?) : PartialState()
         data class SetUserId(val userId: String?) : PartialState()
-        data class ProfileImageChanged(val state: AsyncState<String>) : PartialState()
-        data class IdentityInfoChanged(val state: AsyncState<IdentityInfoDN>) : PartialState()
-        data class TaminRelationChanged(val state: AsyncState<TaminRelationDN>) : PartialState()
-        data class ImageRequestChanged(val state: AsyncState<String>) : PartialState()
+        data class ProfileImageLoaded(val image: String?) : PartialState()
+        data class IdentityInfoLoaded(val info: IdentityInfoPR?) : PartialState()
+        data class TaminRelationLoaded(val relation: TaminRelationPR?) : PartialState()
+        data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
+        data class ImageRequestResult(val result: String) : PartialState()
+        data class ImageRequestError(val message: String) : PartialState()
     }
 }
 
@@ -37,12 +43,6 @@ sealed class ProfileIntent {
 sealed class ProfileEvent {
     data object NavigateBack : ProfileEvent()
     data object NavigateToSettings : ProfileEvent()
+    data object NavigateToIdentity : ProfileEvent()
     data class ShowToast(val message: String) : ProfileEvent()
-}
-
-sealed class AsyncState<out T> {
-    data object Uninitialized : AsyncState<Nothing>()
-    data object Loading : AsyncState<Nothing>()
-    data class Success<T>(val data: T) : AsyncState<T>()
-    data class Error(val message: String) : AsyncState<Nothing>()
 }

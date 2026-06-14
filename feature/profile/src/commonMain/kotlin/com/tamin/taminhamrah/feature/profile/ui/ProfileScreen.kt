@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
@@ -27,7 +26,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -41,6 +39,7 @@ import taminx.core.core_ui.ic_tamin_logo
 fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = koinViewModel(),
+    onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
@@ -52,6 +51,7 @@ fun ProfileScreen(
 
     HandleProfileEvents(
         events = viewModel.events,
+        onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToRouteById = onNavigateToRouteById,
         onBackClicked = onBackClicked
     )
@@ -65,6 +65,7 @@ fun ProfileScreen(
 @Composable
 fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
+    onNavigateToIdentity: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -84,7 +85,11 @@ fun HandleProfileEvents(
                     // onNavigateToRouteById(100)
                 }
             }
-
+            ProfileEvent.NavigateToIdentity -> {
+                scope.launch {
+                    onNavigateToIdentity()
+                }
+            }
             is ProfileEvent.ShowToast -> {
                 // Handle toast
             }
@@ -113,16 +118,20 @@ fun ProfileContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     UserAvatar(
-                        model = (state.profileImageState as? AsyncState.Success)?.data,
+                        model = state.profileImage,
                     )
                     Spacer(modifier = Modifier.height(Spacing.md))
 
                     if (!state.userId.isNullOrEmpty()) {
-                        Text(
-                            text = "${(state.identityInfoState as? AsyncState.Success)?.data?.firstName} ${(state.identityInfoState as? AsyncState.Success)?.data?.lastName} - ${(state.identityInfoState as? AsyncState.Success)?.data?.cityOfBirthName} - ${(state.taminRelationState as? AsyncState.Success)?.data?.brhAdress}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        val identity = state.identityInfo
+                        val relation = state.taminRelation
+                        if (identity != null && relation != null) {
+                            Text(
+                                text = "${identity.fullName} - ${identity.cityOfBirthName} - ${relation.brhAdress}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -147,21 +156,19 @@ fun ProfileContent(
             item {
                 StandardListItem(
                     title = "تست درخواست تصویر (SendImageRequest)",
-                    subtitle = when (val s = state.imageRequestState) {
-                        is AsyncState.Loading -> "در حال ارسال..."
-                        is AsyncState.Success -> "موفق: ${s.data.take(20)}..."
-                        is AsyncState.Error -> "خطا: ${s.message}"
-                        AsyncState.Uninitialized -> "برای تست ارسال کلیک کنید"
+                    subtitle = when {
+                        state.isImageRequestLoading -> "در حال ارسال..."
+                        state.imageRequestResult != null -> "موفق: ${state.imageRequestResult.take(20)}..."
+                        state.imageRequestError != null -> "خطا: ${state.imageRequestError}"
+                        else -> "برای تست ارسال کلیک کنید"
                     },
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
                     onClick = {
-                        onIntent(
-                            ProfileIntent.SendImageRequest(
-                                branchCode = (state.taminRelationState as AsyncState.Success).data.brhCode!!,
-                                filter = "edit-text"
-                            )
-                        )
+                        val relation = state.taminRelation
+                        if (relation != null) {
+                            onIntent(ProfileIntent.SendImageRequest(branchCode = relation.brhCode, filter = "edit-text"))
+                        }
                     }
                 )
             }
@@ -187,9 +194,7 @@ fun ProfileContent(
                     subtitle = "مشاهده و ثبت افراد تبعی توسط بیمه شده اصلی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = {
-                        onIntent(ProfileIntent.LoadSubDominants)
-                    }
+                    onClick = { onIntent(ProfileIntent.OnItemClick("مشاهده و ثبت افراد تبعی")) }
                 )
             }
             item {
@@ -262,7 +267,7 @@ private fun ProfileScreenPreview() {
         ProfileContent(
             state = ProfileUiState(
                 userId = "1234567890",
-                screenState = AsyncState.Success(Unit),
+                isLoading = false,
             ),
             onIntent = {}
         )
