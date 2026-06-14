@@ -26,6 +26,11 @@ data class ProfileUiState(
         data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
         data class ImageRequestResult(val result: String) : PartialState()
         data class ImageRequestError(val message: String) : PartialState()
+        sealed class ScreenStateChanged : PartialState() {
+            data object Loading : ScreenStateChanged()
+            data object Success : ScreenStateChanged()
+            data class Error(val message: String?) : ScreenStateChanged()
+        }
     }
 }
 
@@ -34,6 +39,10 @@ sealed class ProfileIntent {
     data object Logout : ProfileIntent()
     data class OnItemClick(val title: String) : ProfileIntent()
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
+
+    data object LoadSubDominants : ProfileIntent()
+    data object LoadBankAccountList : ProfileIntent()
+
 }
 
 sealed class ProfileEvent {

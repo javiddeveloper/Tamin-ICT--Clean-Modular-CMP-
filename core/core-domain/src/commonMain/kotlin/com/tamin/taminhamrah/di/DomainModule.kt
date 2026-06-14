@@ -8,8 +8,13 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
+import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
+import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
+import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import org.koin.core.module.dsl.factoryOf
@@ -25,4 +30,9 @@ val domainModule = module {
     factoryOf(::TaminRelationUseCase)
     factoryOf(::IdentityInfoUseCase)
     factoryOf(::SendImageRequestUseCase)
+    factoryOf(::SubdominantUseCase)
+    factoryOf(::GetBankAccountListUseCase)
+    factoryOf(::GetInsuredActiveBranchUseCase)
+    factoryOf(::GetRelationTaminAllUseCase)
+    factoryOf(::GetElectronicFileUseCase)
 }

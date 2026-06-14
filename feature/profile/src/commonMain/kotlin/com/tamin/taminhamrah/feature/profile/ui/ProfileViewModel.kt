@@ -10,8 +10,13 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.model.relation.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
+import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
+import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 
@@ -26,6 +31,11 @@ class ProfileViewModel(
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
+    private val subdominantUseCase: SubdominantUseCase,
+    private val getBankAccountListUseCase: GetBankAccountListUseCase,
+    private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
+    private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
+    private val getElectronicFileUseCase: GetElectronicFileUseCase,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -35,7 +45,12 @@ class ProfileViewModel(
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
             is ProfileIntent.OnItemClick -> handleItemClick(intent.title)
-            is ProfileIntent.SendImageRequest -> handleSendImageRequest(intent.branchCode, intent.filter)
+            is ProfileIntent.SendImageRequest -> handleSendImageRequest(
+                intent.branchCode,
+                intent.filter
+            )
+            is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
+            is ProfileIntent.LoadBankAccountList -> handleLoadElectronicFile()
         }
     }
 
@@ -48,17 +63,25 @@ class ProfileViewModel(
         }
         val imageFlow = flow {
             getUserProfileImageUseCase().collect { imageBase64 ->
-                emit(PartialState.ProfileImageLoaded(imageBase64))
+                emit(
+                    PartialState.ProfileImageLoaded(
+                        imageBase64
+                    ))
             }
         }
         val identityFlow = flow {
             identityInfoUseCase().collect { identityInfo ->
-                emit(PartialState.IdentityInfoLoaded(identityInfo.toPresentation()))
+                emit(
+                    PartialState.IdentityInfoLoaded(
+                        identityInfo.toPresentation()
+                    ))
             }
         }
         val taminRelationFlow = flow {
             taminRelationUseCase().collect { taminRelation ->
-                emit(PartialState.TaminRelationLoaded(taminRelation.toPresentation()))
+                emit(
+                    PartialState.TaminRelationLoaded(taminRelation.toPresentation())
+                )
             }
         }
 
@@ -82,20 +105,86 @@ class ProfileViewModel(
         return emptyFlow()
     }
 
-    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
-        val domainFilters = listOf(
-            ApiFilterDN(
-                property = "serialId",
-                operator = FilterOperator.EQ,
-                value = filter
+    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> =
+        flow {
+            val domainFilters = listOf(
+                ApiFilterDN(
+                    property = "serialId",
+                    operator = FilterOperator.EQ,
+                    value = filter
+                )
             )
-        )
-        emit(PartialState.ImageRequestLoading(true))
-        sendImageRequestUseCase(branchCode, domainFilters)
-            .collect { result ->
-                emit(PartialState.ImageRequestResult(result))
+            emit(PartialState.ImageRequestLoading(true))
+            sendImageRequestUseCase(branchCode, domainFilters)
+                .collect { result ->
+                    emit(PartialState.ImageRequestResult(result))
+                }
+        }
+
+    //todo it should removed from here this is only test
+    private fun handleLoadSubDominants(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged.Loading)
+            subdominantUseCase.invoke(
+                page = "1",
+                start = "0",
+                limit = "10",
+                filter = "[]",
+                sort = "[]"
+            ).collect {
+                emit(PartialState.ScreenStateChanged.Success)
             }
+        }
     }
+
+    private fun handleLoadBankAccountList(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged.Loading)
+            getBankAccountListUseCase.invoke(page = "1",
+                start = "0",
+                limit = "10",
+                filter = "[]",
+                sort = "[]").collect {
+                    emit(PartialState.ScreenStateChanged.Success)
+            }
+        }
+    }
+
+    private fun handleGetInsuranceActiveBranch(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged.Loading)
+            getInsuredActiveBranchUseCase.invoke().collect {
+                emit(PartialState.ScreenStateChanged.Success)
+            }
+        }
+    }
+
+    private fun handleGetRelationTaminAll(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged.Loading)
+            getRelationTaminAllUseCase.invoke(page = "1",
+                start = "0",
+                limit = "10",
+                filter = "[]",
+                sort = "[]").collect {
+                emit(PartialState.ScreenStateChanged.Success)
+            }
+        }
+    }
+
+    private fun handleLoadElectronicFile(): Flow<PartialState> {
+        return flow {
+            emit(PartialState.ScreenStateChanged.Loading)
+            getElectronicFileUseCase.invoke(page = "1",
+                start = "0",
+                limit = "10",
+                filter = "[]",
+                sort = "[]").collect {
+                emit(PartialState.ScreenStateChanged.Success)
+            }
+        }
+    }
+
 
     override fun reduceState(
         currentState: ProfileUiState,
@@ -108,23 +197,28 @@ class ProfileViewModel(
             isLoading = false,
             error = partialState.message
         )
+
         is PartialState.SetUserId -> currentState.copy(
             isLoading = false,
             userId = partialState.userId
         )
+
         is PartialState.ProfileImageLoaded -> currentState.copy(
             profileImage = partialState.image
         )
         is PartialState.IdentityInfoLoaded -> currentState.copy(
             identityInfo = partialState.info
         )
+
         is PartialState.TaminRelationLoaded -> currentState.copy(
             taminRelation = partialState.relation
         )
+
         is PartialState.ImageRequestLoading -> currentState.copy(
             isImageRequestLoading = partialState.isLoading,
             imageRequestError = null
         )
+
         is PartialState.ImageRequestResult -> currentState.copy(
             isImageRequestLoading = false,
             imageRequestResult = partialState.result
@@ -133,8 +227,11 @@ class ProfileViewModel(
             isImageRequestLoading = false,
             imageRequestError = partialState.message
         )
+
+        is PartialState.ScreenStateChanged -> currentState
     }
 
     override fun createErrorState(message: String): PartialState =
         PartialState.Error(message)
+
 }
