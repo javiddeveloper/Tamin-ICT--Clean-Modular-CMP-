@@ -1,8 +1,23 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("TaminHamrah.android.application")
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.aboutlibraries)
+}
+
+// Load API keys from key.properties
+val apiKeyPropertiesFile = rootProject.file("key.properties")
+val apiKeyProperties = Properties().apply {
+    if (apiKeyPropertiesFile.exists()) {
+        load(FileInputStream(apiKeyPropertiesFile))
+    }
+}
+
+fun getApiKey(key: String): String {
+    return apiKeyProperties.getProperty(key) ?: System.getenv(key) ?: ""
 }
 
 android {
@@ -15,8 +30,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Gate embedding-based similarity search UI. Default off until SigLIP-2 embeddings
-        // are being produced on-device (parent #602, phases C/D).
+        // Default Build Config Fields
+        buildConfigField("String", "BASE_URL_MEDICAL", "\"https://medical.tamin.ir\"")
+        buildConfigField("String", "BASE_URL", "\"https://eservices.tamin.ir/api/\"")
+        buildConfigField("String", "BASE_URL_ACCOUNT", "\"https://account.tamin.ir/auth/\"")
+        buildConfigField("String", "BASE_URL_OV", "\"https://ov.tamin.ir/api/\"")
+        buildConfigField("String", "AI_BASE_URL", "\"https://sw.tamin.ir/\"")
+        buildConfigField("String", "AI_BASE_IP", "\"http://172.16.15.54:9001/\"")
+        buildConfigField("String", "CLIENT_ID", "\"${getApiKey("OPERATIONAL_API_KEY")}\"")
+
+        // Feature Gate
         buildConfigField("boolean", "FEATURE_SIMILARITY_SEARCH", "false")
     }
 
@@ -41,6 +64,33 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+
+    flavorDimensions.add("taminHamrah")
+    productFlavors {
+        create("direct") {
+            dimension = "taminHamrah"
+        }
+        create("caffeBazaar") {
+            dimension = "taminHamrah"
+        }
+        create("myket") {
+            dimension = "taminHamrah"
+        }
+        create("flavorTest") {
+            dimension = "taminHamrah"
+            buildConfigField("String", "BASE_URL", "\"https://eservices.test.org:9090/api/\"")
+            buildConfigField("String", "BASE_URL_MEDICAL", "\"http://medical.test.org:9087\"")
+            buildConfigField("String", "BASE_URL_ACCOUNT", "\"https://account-test.tamin.ir:9090/auth/\"")
+            buildConfigField("String", "CLIENT_ID", "\"${getApiKey("TEST_API_KEY")}\"")
+        }
+        create("reporter") {
+            dimension = "taminHamrah"
+            applicationId = "com.tamin.taminhamrahreporter"
+            versionCode = 1
+            versionName = "1.0.0"
+            versionNameSuffix = "-گزارش گیری"
         }
     }
 
