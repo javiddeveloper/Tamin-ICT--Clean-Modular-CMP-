@@ -19,7 +19,6 @@ material3-adaptive = "1.2.0"
 material3-adaptive-navigation-suite = "1.4.0"
 media3 = "1.5.1"
 glance = "1.1.1"
-detekt = "1.23.8"
 skie = "0.10.11"
 aboutlibraries = "12.1.2"
 onnxruntime-android = "1.20.0"
@@ -278,9 +277,6 @@ gitlive-firebase-analytics = { module = "dev.gitlive:firebase-analytics", versio
 gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "gitLive" }
 gitlive-firebase-performance = { module = "dev.gitlive:firebase-performance", version.ref = "gitLive" }
 
-# Detekt
-detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-
 # Build Logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -311,7 +307,6 @@ compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-m
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }

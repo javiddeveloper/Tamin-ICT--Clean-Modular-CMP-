@@ -4,6 +4,7 @@ dependencies {
 plugins {
     id("TaminHamrah.kmp.library")
     id("TaminHamrah.kmp.compose")
+    id("TaminHamrah.naming.convention")
 }
 
 kotlin {
@@ -11,6 +12,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:core-domain"))
             implementation(project(":core:core-plugin"))
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

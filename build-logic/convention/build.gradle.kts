@@ -26,5 +26,9 @@ gradlePlugin {
             id = "TaminHamrah.kmp.compose"
             implementationClass = "TaminHamrahKmpComposePlugin"
         }
+        create("namingConvention") {
+            id = "TaminHamrah.naming.convention"
+            implementationClass = "TaminHamrahNamingConventionPlugin"
+        }
     }
 }

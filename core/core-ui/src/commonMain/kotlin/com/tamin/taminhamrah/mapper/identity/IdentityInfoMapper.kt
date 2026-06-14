@@ -1,5 +1,7 @@
-package com.tamin.taminhamrah.model.identity
+package com.tamin.taminhamrah.mapper.identity
 
+import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.identity.IdentityInfoPR
 
 fun IdentityInfoDN.toPresentation(): IdentityInfoPR {
     val fName = this.firstName ?: ""

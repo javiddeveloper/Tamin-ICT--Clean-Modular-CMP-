@@ -1,5 +1,6 @@
 plugins {
     id("TaminHamrah.kmp.library")
+    id("TaminHamrah.naming.convention")
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
 }
