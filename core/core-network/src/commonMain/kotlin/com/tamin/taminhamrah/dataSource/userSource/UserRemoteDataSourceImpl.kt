@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
@@ -123,6 +124,44 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun getInsuredActiveBranch(): List<InsuredActiveBranchData>? {
         return try {
             val response = userApiService.getInsuredActiveBranch()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getRelationTaminAll(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): ListData<ActiveRelationResponse>? {
+        return try {
+            val response = userApiService.getRelationTaminAll(page, start, limit, filter, sort)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getElectronicFile(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): ListData<com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse>? {
+        return try {
+            val response = userApiService.getElectronicFile(page, start, limit, filter, sort)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

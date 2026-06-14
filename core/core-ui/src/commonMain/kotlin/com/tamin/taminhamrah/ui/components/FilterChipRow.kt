@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * A horizontal row of [FilterChip]s for selecting a single value from [options].
@@ -19,7 +20,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
  */
 @Composable
 fun <T> FilterChipRow(
-    options: List<T>,
+    options: ImmutableList<T>,
     selected: T,
     onSelect: (T) -> Unit,
     label: (T) -> String,

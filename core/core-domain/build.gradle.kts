@@ -3,6 +3,7 @@ dependencies {
 }
 plugins {
     id("TaminHamrah.kmp.library")
+    id("TaminHamrah.naming.convention")
     alias(libs.plugins.kotlin.serialization)
 }
 
