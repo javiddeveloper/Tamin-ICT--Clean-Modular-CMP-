@@ -26,6 +26,11 @@ data class ProfileUiState(
         data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
         data class ImageRequestResult(val result: String) : PartialState()
         data class ImageRequestError(val message: String) : PartialState()
+        sealed class ScreenStateChanged : PartialState() {
+            data object Loading : ScreenStateChanged()
+            data object Success : ScreenStateChanged()
+            data class Error(val message: String?) : ScreenStateChanged()
+        }
     }
 }
 
