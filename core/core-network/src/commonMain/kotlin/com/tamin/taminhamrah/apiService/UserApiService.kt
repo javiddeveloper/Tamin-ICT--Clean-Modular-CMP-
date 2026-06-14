@@ -59,6 +59,7 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "refresh_token",
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
+        @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir"
     ): TokenResponseDto
 
     @GET

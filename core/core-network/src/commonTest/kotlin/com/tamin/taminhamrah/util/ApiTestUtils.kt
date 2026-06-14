@@ -35,4 +35,15 @@ object UserTestData {
             "ssn": "2194813688"
         }
     """.trimIndent()
+
+    val changeMobileSuccess = """
+        {
+            "traceId": "test-trace-id-123",
+            "data": {
+                "hash": "test-hash-456"
+            }
+        }
+    """.trimIndent()
+
+    val verifyMobileSuccess = "\"OTP_VERIFIED_SUCCESSFULLY\""
 }

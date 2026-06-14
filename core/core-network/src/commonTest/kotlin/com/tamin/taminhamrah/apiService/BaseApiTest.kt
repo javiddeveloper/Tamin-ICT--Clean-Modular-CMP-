@@ -10,7 +10,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.serialization.json.Json
+import io.ktor.utils.io.ByteReadChannel
 
 abstract class BaseApiTest {
 
@@ -21,7 +23,7 @@ abstract class BaseApiTest {
     ): Ktorfit {
         val mockEngine = MockEngine { _ ->
             respond(
-                content = content,
+                content = ByteReadChannel(content),
                 status = status,
                 headers = headersOf(HttpHeaders.ContentType, contentType.toString())
             )
