@@ -3,14 +3,14 @@
  */
 package com.tamin.taminhamrah.model.util
 
-import com.tamin.taminhamrah.core.model.Country
+import com.tamin.taminhamrah.model.common.CountryDN
 
 object CountryFlagUtils {
 
     /**
      * Get country by phone number (auto-detect)
      */
-    fun detectCountryFromPhoneNumber(phoneNumber: String): Country? {
+    fun detectCountryFromPhoneNumber(phoneNumber: String): CountryDN? {
         val cleanedNumber = phoneNumber.filter { it.isDigit() || it == '+' }
 
         // Sort by phone code length (longest first) for better matching
@@ -32,14 +32,14 @@ object CountryFlagUtils {
     /**
      * Get all countries for dropdown/picker
      */
-    fun getAllCountriesForSelection(): List<Country> {
+    fun getAllCountriesForSelection(): List<CountryDN> {
         return worldCountries.sortedBy { it.name }
     }
 
     /**
      * Get popular countries first, then alphabetical
      */
-    fun getCountriesWithPopularFirst(): List<Country> {
+    fun getCountriesWithPopularFirst(): List<CountryDN> {
         val popularCodes = listOf("US", "GB", "ES", "FR", "DE", "IT", "CA", "AU")
         val popular = worldCountries.filter { it.code in popularCodes }
             .sortedBy { popularCodes.indexOf(it.code) }
@@ -52,7 +52,7 @@ object CountryFlagUtils {
     /**
      * Search countries by name or code
      */
-    fun searchCountries(query: String): List<Country> {
+    fun searchCountries(query: String): List<CountryDN> {
         val lowercaseQuery = query.lowercase()
         return worldCountries.filter { country ->
             country.name.lowercase().contains(lowercaseQuery) ||
@@ -80,8 +80,8 @@ object CountryFlagUtils {
     }
 }
 
-val worldCountries: List<Country> = listOf(
-    Country(
+val worldCountries: List<CountryDN> = listOf(
+    CountryDN(
         code = "ES",
         name = "Spain",
         phoneCode = "+34",
@@ -92,7 +92,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇪🇸",
         flagResourceName = "flag_es",
     ),
-    Country(
+    CountryDN(
         code = "US",
         name = "United States",
         phoneCode = "+1",
@@ -103,7 +103,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇺🇸",
         flagResourceName = "flag_us",
     ),
-    Country(
+    CountryDN(
         code = "GB",
         name = "United Kingdom",
         phoneCode = "+44",
@@ -116,7 +116,7 @@ val worldCountries: List<Country> = listOf(
     ),
 
     // Additional European countries
-    Country(
+    CountryDN(
         code = "NL",
         name = "Netherlands",
         phoneCode = "+31",
@@ -127,7 +127,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇳🇱",
         flagResourceName = "flag_nl",
     ),
-    Country(
+    CountryDN(
         code = "BE",
         name = "Belgium",
         phoneCode = "+32",
@@ -138,7 +138,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇧🇪",
         flagResourceName = "flag_be",
     ),
-    Country(
+    CountryDN(
         code = "AT",
         name = "Austria",
         phoneCode = "+43",
@@ -149,7 +149,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇦🇹",
         flagResourceName = "flag_at",
     ),
-    Country(
+    CountryDN(
         code = "CH",
         name = "Switzerland",
         phoneCode = "+41",
@@ -160,7 +160,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇨🇭",
         flagResourceName = "flag_ch",
     ),
-    Country(
+    CountryDN(
         code = "SE",
         name = "Sweden",
         phoneCode = "+46",
@@ -171,7 +171,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇸🇪",
         flagResourceName = "flag_se",
     ),
-    Country(
+    CountryDN(
         code = "NO",
         name = "Norway",
         phoneCode = "+47",
@@ -182,7 +182,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇳🇴",
         flagResourceName = "flag_no",
     ),
-    Country(
+    CountryDN(
         code = "DK",
         name = "Denmark",
         phoneCode = "+45",
@@ -193,7 +193,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇩🇰",
         flagResourceName = "flag_dk",
     ),
-    Country(
+    CountryDN(
         code = "FI",
         name = "Finland",
         phoneCode = "+358",
@@ -204,7 +204,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇫🇮",
         flagResourceName = "flag_fi",
     ),
-    Country(
+    CountryDN(
         code = "PL",
         name = "Poland",
         phoneCode = "+48",
@@ -215,7 +215,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇵🇱",
         flagResourceName = "flag_pl",
     ),
-    Country(
+    CountryDN(
         code = "CZ",
         name = "Czech Republic",
         phoneCode = "+420",
@@ -226,7 +226,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇨🇿",
         flagResourceName = "flag_cz",
     ),
-    Country(
+    CountryDN(
         code = "HU",
         name = "Hungary",
         phoneCode = "+36",
@@ -237,7 +237,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇭🇺",
         flagResourceName = "flag_hu",
     ),
-    Country(
+    CountryDN(
         code = "GR",
         name = "Greece",
         phoneCode = "+30",
@@ -248,7 +248,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇬🇷",
         flagResourceName = "flag_gr",
     ),
-    Country(
+    CountryDN(
         code = "PT",
         name = "Portugal",
         phoneCode = "+351",
@@ -261,7 +261,7 @@ val worldCountries: List<Country> = listOf(
     ),
 
     // Asian countries
-    Country(
+    CountryDN(
         code = "TH",
         name = "Thailand",
         phoneCode = "+66",
@@ -272,7 +272,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇹🇭",
         flagResourceName = "flag_th",
     ),
-    Country(
+    CountryDN(
         code = "VN",
         name = "Vietnam",
         phoneCode = "+84",
@@ -283,7 +283,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇻🇳",
         flagResourceName = "flag_vn",
     ),
-    Country(
+    CountryDN(
         code = "MY",
         name = "Malaysia",
         phoneCode = "+60",
@@ -294,7 +294,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇲🇾",
         flagResourceName = "flag_my",
     ),
-    Country(
+    CountryDN(
         code = "SG",
         name = "Singapore",
         phoneCode = "+65",
@@ -305,7 +305,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇸🇬",
         flagResourceName = "flag_sg",
     ),
-    Country(
+    CountryDN(
         code = "ID",
         name = "Indonesia",
         phoneCode = "+62",
@@ -316,7 +316,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇮🇩",
         flagResourceName = "flag_id",
     ),
-    Country(
+    CountryDN(
         code = "PH",
         name = "Philippines",
         phoneCode = "+63",
@@ -327,7 +327,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇵🇭",
         flagResourceName = "flag_ph",
     ),
-    Country(
+    CountryDN(
         code = "HK",
         name = "Hong Kong",
         phoneCode = "+852",
@@ -338,7 +338,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇭🇰",
         flagResourceName = "flag_hk",
     ),
-    Country(
+    CountryDN(
         code = "TW",
         name = "Taiwan",
         phoneCode = "+886",
@@ -351,7 +351,7 @@ val worldCountries: List<Country> = listOf(
     ),
 
     // Middle Eastern countries
-    Country(
+    CountryDN(
         code = "AE",
         name = "UAE",
         phoneCode = "+971",
@@ -362,7 +362,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇦🇪",
         flagResourceName = "flag_ae",
     ),
-    Country(
+    CountryDN(
         code = "SA",
         name = "Saudi Arabia",
         phoneCode = "+966",
@@ -373,7 +373,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇸🇦",
         flagResourceName = "flag_sa",
     ),
-    Country(
+    CountryDN(
         code = "IL",
         name = "Israel",
         phoneCode = "+972",
@@ -384,7 +384,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇮🇱",
         flagResourceName = "flag_il",
     ),
-    Country(
+    CountryDN(
         code = "TR",
         name = "Turkey",
         phoneCode = "+90",
@@ -397,7 +397,7 @@ val worldCountries: List<Country> = listOf(
     ),
 
     // African countries
-    Country(
+    CountryDN(
         code = "ZA",
         name = "South Africa",
         phoneCode = "+27",
@@ -408,7 +408,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇿🇦",
         flagResourceName = "flag_za",
     ),
-    Country(
+    CountryDN(
         code = "EG",
         name = "Egypt",
         phoneCode = "+20",
@@ -419,7 +419,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇪🇬",
         flagResourceName = "flag_eg",
     ),
-    Country(
+    CountryDN(
         code = "NG",
         name = "Nigeria",
         phoneCode = "+234",
@@ -432,7 +432,7 @@ val worldCountries: List<Country> = listOf(
     ),
 
     // South American countries
-    Country(
+    CountryDN(
         code = "AR",
         name = "Argentina",
         phoneCode = "+54",
@@ -443,7 +443,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇦🇷",
         flagResourceName = "flag_ar",
     ),
-    Country(
+    CountryDN(
         code = "CL",
         name = "Chile",
         phoneCode = "+56",
@@ -454,7 +454,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇨🇱",
         flagResourceName = "flag_cl",
     ),
-    Country(
+    CountryDN(
         code = "CO",
         name = "Colombia",
         phoneCode = "+57",
@@ -465,7 +465,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇨🇴",
         flagResourceName = "flag_co",
     ),
-    Country(
+    CountryDN(
         code = "PE",
         name = "Peru",
         phoneCode = "+51",
@@ -478,7 +478,7 @@ val worldCountries: List<Country> = listOf(
     ),
 
     // Other notable countries
-    Country(
+    CountryDN(
         code = "NZ",
         name = "New Zealand",
         phoneCode = "+64",
@@ -489,7 +489,7 @@ val worldCountries: List<Country> = listOf(
         flagEmoji = "🇳🇿",
         flagResourceName = "flag_nz",
     ),
-    Country(
+    CountryDN(
         code = "IE",
         name = "Ireland",
         phoneCode = "+353",

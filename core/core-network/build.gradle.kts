@@ -4,6 +4,7 @@ dependencies {
 }
 plugins {
     id("TaminHamrah.kmp.library")
+    id("TaminHamrah.naming.convention")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktrofit)
@@ -39,6 +40,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
     }
 }

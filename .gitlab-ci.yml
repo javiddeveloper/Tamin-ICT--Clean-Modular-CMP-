@@ -1,0 +1,101 @@
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+stages:
+  - test
+  - build
+  - release
+
+# -----------------------------------------------------------------------------
+# Android Jobs (Linux Runner)
+# -----------------------------------------------------------------------------
+android-test:
+  stage: test
+  image: openjdk:17-jdk
+  before_script:
+    - export GRADLE_USER_HOME=$(pwd)/.gradle
+  script:
+    - ./gradlew :androidApp:lintDebug test
+  artifacts:
+    paths:
+      - "**/build/reports/"
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - master
+    - main
+
+android-build-debug:
+  stage: build
+  image: openjdk:17-jdk
+  script:
+    - ./gradlew :androidApp:assembleDebug
+  artifacts:
+    paths:
+      - androidApp/build/outputs/apk/debug/*.apk
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - master
+    - main
+
+android-release:
+  stage: release
+  image: openjdk:17-jdk
+  script:
+    - ./gradlew :androidApp:assembleRelease
+    - VERSION=${CI_COMMIT_TAG#v}
+    - if [ -f androidApp/build/outputs/apk/release/androidApp-release.apk ]; then
+        cp androidApp/build/outputs/apk/release/androidApp-release.apk "TaminX-${VERSION}-android.apk";
+      else
+        cp androidApp/build/outputs/apk/release/androidApp-release-unsigned.apk "TaminX-${VERSION}-android-unsigned.apk";
+      fi
+  artifacts:
+    paths:
+      - "TaminX-*-android*.apk"
+  only:
+    - tags
+  except:
+    - branches
+
+# -----------------------------------------------------------------------------
+# iOS Jobs (macOS Runner)
+# Note: Requires a runner with 'macos' or 'xcode' tag
+# -----------------------------------------------------------------------------
+ios-build:
+  stage: build
+  tags:
+    - macos
+  script:
+    - xcodebuild build
+      -project iosApp/iosApp.xcodeproj
+      -scheme iosApp
+      -destination 'generic/platform=iOS Simulator'
+      CODE_SIGNING_REQUIRED=NO
+      CODE_SIGNING_ALLOWED=YES
+  only:
+    - merge_requests
+    - master
+    - main
+
+ios-release:
+  stage: release
+  tags:
+    - macos
+  script:
+    - xcodebuild archive
+      -project iosApp/iosApp.xcodeproj
+      -scheme iosApp
+      -configuration Release
+      -archivePath ./TaminX.xcarchive
+      CODE_SIGNING_REQUIRED=NO
+      CODE_SIGNING_ALLOWED=YES
+    - VERSION=${CI_COMMIT_TAG#v}
+    - zip -r "TaminX-${VERSION}-ios.xcarchive.zip" ./TaminX.xcarchive
+  artifacts:
+    paths:
+      - "TaminX-*-ios.xcarchive.zip"
+  only:
+    - tags
+  except:
+    - branches

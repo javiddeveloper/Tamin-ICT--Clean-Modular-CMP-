@@ -3,21 +3,20 @@ package com.tamin.taminhamrah.feature.profile.ui
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
 import com.tamin.taminhamrah.core.model.request.FilterOperator
-import com.tamin.taminhamrah.feature.profile.ui.contract.AsyncState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
+import com.tamin.taminhamrah.mapper.identity.toPresentation
+import com.tamin.taminhamrah.model.relation.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
-import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
-import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -55,34 +54,30 @@ class ProfileViewModel(
     private fun handleLoadProfile(providedUserId: String?): Flow<PartialState> {
 
         val userIdFlow = flow {
-            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            emit(PartialState.Loading(true))
             val userId = providedUserId ?: tokenStoreManager.getUserId()
             emit(PartialState.SetUserId(userId))
         }
         val imageFlow = flow {
-            emit(PartialState.ProfileImageChanged(AsyncState.Loading))
             getUserProfileImageUseCase().collect { imageBase64 ->
                 emit(
-                    PartialState.ProfileImageChanged(
-                        imageBase64.let { AsyncState.Success(it) }
+                    PartialState.ProfileImageLoaded(
+                        imageBase64
                     ))
             }
         }
         val identityFlow = flow {
-            emit(PartialState.IdentityInfoChanged(AsyncState.Loading))
             identityInfoUseCase().collect { identityInfo ->
                 emit(
-                    PartialState.IdentityInfoChanged(
-                        identityInfo.let { AsyncState.Success(it) }
+                    PartialState.IdentityInfoLoaded(
+                        identityInfo.toPresentation()
                     ))
             }
         }
         val taminRelationFlow = flow {
-            emit(PartialState.TaminRelationChanged(AsyncState.Loading))
             taminRelationUseCase().collect { taminRelation ->
                 emit(
-                    PartialState.TaminRelationChanged(
-                        AsyncState.Success(taminRelation)
+                    PartialState.TaminRelationLoaded(taminRelation.toPresentation()
                     )
                 )
             }
@@ -102,6 +97,7 @@ class ProfileViewModel(
         when (title) {
             "تنظیمات" -> sendEvent(ProfileEvent.NavigateToSettings)
             "خروج از حساب کاربری" -> sendIntent(ProfileIntent.Logout)
+            "اطلاعات هویتی" -> sendEvent(ProfileEvent.NavigateToIdentity)
             else -> sendEvent(ProfileEvent.ShowToast("کلیک بر روی: $title"))
         }
         return emptyFlow()
@@ -116,17 +112,17 @@ class ProfileViewModel(
                     value = filter
                 )
             )
-            emit(PartialState.ImageRequestChanged(AsyncState.Loading))
+            emit(PartialState.ImageRequestLoading(true))
             sendImageRequestUseCase(branchCode, domainFilters)
                 .collect { result ->
-                    emit(PartialState.ImageRequestChanged(AsyncState.Success(result)))
+                    emit(PartialState.ImageRequestResult(result))
                 }
         }
 
     //todo it should removed from here this is only test
     private fun handleLoadSubDominants(): Flow<PartialState> {
         return flow {
-            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            emit(PartialState.ScreenStateChanged.Loading)
             subdominantUseCase.invoke(
                 page = "1",
                 start = "0",
@@ -134,20 +130,20 @@ class ProfileViewModel(
                 filter = "[]",
                 sort = "[]"
             ).collect {
-                emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
+                emit(PartialState.ScreenStateChanged.Success)
             }
         }
     }
 
     private fun handleLoadBankAccountList(): Flow<PartialState> {
         return flow {
-            emit(PartialState.ScreenStateChanged(AsyncState.Loading))
+            emit(PartialState.ScreenStateChanged.Loading)
             getBankAccountListUseCase.invoke(page = "1",
                 start = "0",
                 limit = "10",
                 filter = "[]",
                 sort = "[]").collect {
-                    emit(PartialState.ScreenStateChanged(AsyncState.Success(Unit)))
+                    emit(PartialState.ScreenStateChanged.Success)
             }
         }
     }
@@ -184,36 +180,48 @@ class ProfileViewModel(
         currentState: ProfileUiState,
         partialState: PartialState
     ): ProfileUiState = when (partialState) {
-        is PartialState.ScreenStateChanged -> currentState.copy(
-            screenState = partialState.state
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading
+        )
+        is PartialState.Error -> currentState.copy(
+            isLoading = false,
+            error = partialState.message
         )
 
         is PartialState.SetUserId -> currentState.copy(
-            screenState = AsyncState.Success(Unit),
+            isLoading = false,
             userId = partialState.userId
         )
 
-        is PartialState.ProfileImageChanged -> currentState.copy(
-            profileImageState = partialState.state
+        is PartialState.ProfileImageLoaded -> currentState.copy(
+            profileImage = partialState.image
+        )
+        is PartialState.IdentityInfoLoaded -> currentState.copy(
+            identityInfo = partialState.info
         )
 
-        is PartialState.IdentityInfoChanged -> currentState.copy(
-            identityInfoState = partialState.state
+        is PartialState.TaminRelationLoaded -> currentState.copy(
+            taminRelation = partialState.relation
         )
 
-        is PartialState.TaminRelationChanged -> currentState.copy(
-            taminRelationState = partialState.state
+        is PartialState.ImageRequestLoading -> currentState.copy(
+            isImageRequestLoading = partialState.isLoading,
+            imageRequestError = null
         )
 
-
-
-        is PartialState.ImageRequestChanged -> currentState.copy(
-            imageRequestState = partialState.state
+        is PartialState.ImageRequestResult -> currentState.copy(
+            isImageRequestLoading = false,
+            imageRequestResult = partialState.result
         )
+        is PartialState.ImageRequestError -> currentState.copy(
+            isImageRequestLoading = false,
+            imageRequestError = partialState.message
+        )
+
+        is PartialState.ScreenStateChanged -> currentState
     }
 
     override fun createErrorState(message: String): PartialState =
-        PartialState.ScreenStateChanged(AsyncState.Error(message))
-
+        PartialState.Error(message)
 
 }

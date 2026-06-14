@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.core.model.common
+package com.tamin.taminhamrah.model.common
 
 data class CityDN(
     val cityCode: String,
