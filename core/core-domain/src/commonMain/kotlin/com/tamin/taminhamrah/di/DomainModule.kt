@@ -13,9 +13,7 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
-import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
-import com.tamin.taminhamrah.useCases.user.TaminRelationUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
@@ -29,6 +27,10 @@ val domainModule = module {
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
     factoryOf(::HandleAuthDeepLinkUseCaseImpl) bind HandleAuthDeepLinkUseCase::class
+    factoryOf(::UserProfileImageUseCase)
+    factoryOf(::TaminRelationUseCase)
+    factoryOf(::IdentityInfoUseCase)
+    factoryOf(::SendImageRequestUseCase)
     factoryOf(::UserProfileImageUseCaseImpl) bind UserProfileImageUseCase::class
     factoryOf(::TaminRelationUseCaseImpl) bind TaminRelationUseCase::class
     factoryOf(::IdentityInfoUseCaseImpl) bind IdentityInfoUseCase::class
