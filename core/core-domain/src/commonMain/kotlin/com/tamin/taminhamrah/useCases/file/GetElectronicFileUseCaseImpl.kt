@@ -4,10 +4,10 @@ import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 
-class GetElectronicFileUseCaseImpl(
+class GetElectronicFileUseCase(
     private val userRepository: UserRepository
-) : GetElectronicFileUseCase {
-    override suspend operator fun invoke(
+)  {
+     suspend operator fun invoke(
         page: String ,
         start: String,
         limit: String,

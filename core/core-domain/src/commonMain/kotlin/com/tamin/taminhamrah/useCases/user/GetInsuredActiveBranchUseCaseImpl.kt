@@ -4,8 +4,8 @@ import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActive
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 
-class GetInsuredActiveBranchUseCaseImpl(private val userRepository: UserRepository,) : GetInsuredActiveBranchUseCase  {
-    override suspend fun invoke(): Flow<List<InsuredActiveBranchDN>> {
+class GetInsuredActiveBranchUseCase(private val userRepository: UserRepository,)   {
+     suspend fun invoke(): Flow<List<InsuredActiveBranchDN>> {
         return userRepository.getInsuredActiveBranch()
     }
 }

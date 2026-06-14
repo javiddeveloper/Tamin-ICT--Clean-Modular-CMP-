@@ -9,7 +9,10 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
+import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
+import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
@@ -29,7 +32,7 @@ val domainModule = module {
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
     factoryOf(::GetBankAccountListUseCase)
-    factoryOf(::GetInsuredActiveBranchUseCaseImpl)
-    factoryOf(::GetRelationTaminAllUseCaseImpl)
-    factoryOf(::GetElectronicFileUseCaseImpl)
+    factoryOf(::GetInsuredActiveBranchUseCase)
+    factoryOf(::GetRelationTaminAllUseCase)
+    factoryOf(::GetElectronicFileUseCase)
 }

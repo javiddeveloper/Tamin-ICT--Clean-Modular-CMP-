@@ -4,10 +4,10 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 
-class GetRelationTaminAllUseCaseImpl(
+class GetRelationTaminAllUseCase(
     private val userRepository: UserRepository
-) : GetRelationTaminAllUseCase {
-    override suspend fun invoke(
+)  {
+     suspend fun invoke(
         page: String,
         start: String,
         limit: String,
