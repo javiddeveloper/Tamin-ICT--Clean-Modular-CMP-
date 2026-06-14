@@ -3,8 +3,6 @@ package com.tamin.taminhamrah.mapper.relation
 import com.tamin.taminhamrah.model.relation.TaminRelationDN
 import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
-import com.tamin.taminhamrah.model.user.TaminRelationDN
-
 
 fun TaminRelationDN.toPresentation(): TaminRelationPR {
     return TaminRelationPR(

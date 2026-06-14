@@ -43,7 +43,7 @@ class ProfileViewModel(
         return when (intent) {
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
-            is ProfileIntent.OnItemClick -> handleItemClick(intent.title)
+            is ProfileIntent.OnItemClick -> handleItemClick(intent.item)
             is ProfileIntent.SendImageRequest -> handleSendImageRequest(
                 intent.branchCode,
                 intent.filter
