@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.model.relation
 
+import com.tamin.taminhamrah.model.user.TaminRelationDN
+
 
 fun TaminRelationDN.toPresentation(): TaminRelationPR {
     return TaminRelationPR(

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
-import com.tamin.taminhamrah.model.relation.TaminRelationDN
+
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 
 internal fun TaminRelationResponse.toDomain(): TaminRelationDN = TaminRelationDN(
