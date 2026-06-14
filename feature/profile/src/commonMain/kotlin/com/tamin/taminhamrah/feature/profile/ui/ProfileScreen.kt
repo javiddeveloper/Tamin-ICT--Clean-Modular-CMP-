@@ -194,7 +194,7 @@ fun ProfileContent(
                     subtitle = "مشاهده و ثبت افراد تبعی توسط بیمه شده اصلی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("مشاهده و ثبت افراد تبعی")) }
+                    onClick = { onIntent(ProfileIntent.LoadSubDominants) }
                 )
             }
             item {
