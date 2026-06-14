@@ -13,7 +13,10 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 
 internal class UserRemoteDataSourceImpl(
@@ -66,7 +69,46 @@ internal class UserRemoteDataSourceImpl(
         filter: List<ApiFilterDN>
     ): String {
         return try {
-            val response = userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
+            val response =
+                userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getSubDominantsInfo(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): SubDominantResponseData {
+        return try {
+            val response = userApiService.getSubDominantsInfo(page, start, limit, filter, sort)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getBankAccountList(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): ListData<BankAccountResponse>? {
+        return try {
+            val response = userApiService.getBankAccountList(page, start, limit, filter, sort)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

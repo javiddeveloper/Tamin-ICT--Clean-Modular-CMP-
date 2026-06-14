@@ -8,13 +8,15 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
+import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseResponse
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
@@ -57,5 +59,24 @@ internal interface UserApiService {
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
     ): TokenResponseDto
+
+
+    @GET("personals/subdominant")
+    suspend fun getSubDominantsInfo(
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ) : BaseResponse<SubDominantResponseData>
+
+    @GET("personals/accounts")
+    suspend fun getBankAccountList(
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ) : BaseResponse<ListData<BankAccountResponse>>
 
 }
