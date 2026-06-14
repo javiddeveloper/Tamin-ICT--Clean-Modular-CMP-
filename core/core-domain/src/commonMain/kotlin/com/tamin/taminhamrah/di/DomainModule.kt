@@ -9,15 +9,11 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCaseImpl
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -31,10 +27,6 @@ val domainModule = module {
     factoryOf(::TaminRelationUseCase)
     factoryOf(::IdentityInfoUseCase)
     factoryOf(::SendImageRequestUseCase)
-    factoryOf(::UserProfileImageUseCaseImpl) bind UserProfileImageUseCase::class
-    factoryOf(::TaminRelationUseCaseImpl) bind TaminRelationUseCase::class
-    factoryOf(::IdentityInfoUseCaseImpl) bind IdentityInfoUseCase::class
-    factoryOf(::SendImageRequestUseCaseImpl) bind SendImageRequestUseCase::class
-    factoryOf(::ChangeMobileUseCaseImpl) bind ChangeMobileUseCase::class
-    factoryOf(::VerifyChangeMobileUseCaseImpl) bind VerifyChangeMobileUseCase::class
+    factoryOf(::ChangeMobileUseCase)
+    factoryOf(::VerifyChangeMobileUseCase)
 }
