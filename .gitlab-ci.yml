@@ -11,6 +11,8 @@ stages:
 # -----------------------------------------------------------------------------
 .android-base:
   image: openjdk:17-jdk
+  tags:
+    - devops
   before_script:
     - export GRADLE_USER_HOME=$(pwd)/.gradle
     # Decode Keystore from Base64 variable
