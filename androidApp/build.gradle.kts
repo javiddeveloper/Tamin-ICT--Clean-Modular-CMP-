@@ -45,6 +45,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = false
             val releaseKeystore = System.getenv("RELEASE_KEYSTORE")
