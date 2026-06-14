@@ -8,6 +8,8 @@ object NetworkConstants {
     const val REQUEST_TIMEOUT_5_MIN = 300_000L
     const val REDIRECT_URI = "mytamin://login"
     const val DEFAULT_AUDIENCE = "https://es.tamin.ir,https://eservices.tamin.ir"
+    const val EDIT_MOBILE_URL = ""
+    const val VERIFY_EDIT_MOBILE_URL = ""
 }
 
 object HeaderConstant {

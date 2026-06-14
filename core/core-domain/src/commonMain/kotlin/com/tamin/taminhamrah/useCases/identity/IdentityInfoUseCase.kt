@@ -1,9 +1,6 @@
 package com.tamin.taminhamrah.useCases.identity
 
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
-import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.core.model.request.FilterOperator
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
@@ -31,17 +28,7 @@ class IdentityInfoUseCase(
         }
 
         return try {
-            val city = cityProvinceRepository.getCity(
-                ApiQueryParamDN(
-                    filters = listOf(
-                        ApiFilterDN(
-                            property = "cityCode",
-                            operator = FilterOperator.EQUAL,
-                            value = cityId,
-                        ),
-                    ),
-                ),
-            ).firstOrNull()
+            val city = cityProvinceRepository.getCity(cityId).firstOrNull()
 
             identity.apply {
                 cityOfBirthName = city?.cityName ?: cityOfBirthName ?: UNKNOWN_CITY

@@ -7,6 +7,7 @@
 
 package com.tamin.taminhamrah.core.model.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -35,12 +36,21 @@ enum class FilterOperator(val value: String) {
     EQUAL("EQUAL"),
     CONTAINS("CONTAINS"),
     LIKE("LIKE"),
-    EQ("EQ")
+    EQ("EQ"),
+    EQUAL_LOWER("equal")
+}
+
+@Serializable
+enum class FilterProperty(val key: String) {
+    SERIAL_ID("serialId"),
+    MOBILE("mobile"),
+    CITY_CODE("cityCode"),
+    PROVINCE_CODE("provinceCode")
 }
 
 @Serializable
 data class ApiFilterDN(
-    val property: String,
+    val property: FilterProperty,
     val operator: FilterOperator,
     val value: String,
 )

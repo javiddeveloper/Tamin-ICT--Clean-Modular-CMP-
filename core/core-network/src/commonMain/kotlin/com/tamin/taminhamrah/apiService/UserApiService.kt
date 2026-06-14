@@ -13,10 +13,13 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.tools.BaseResponse
 import com.tamin.taminhamrah.util.NetworkConstants
+import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
@@ -61,7 +64,20 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "refresh_token",
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
+        @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir"
     ): TokenResponseDto
+
+    @GET
+    suspend fun changeMobile(
+        @Url url: String,
+        @Query("filter") filter: String
+    ): BaseResponse<EditMobileResponseDto>
+
+    @POST
+    suspend fun verifyChangeMobileCode(
+        @Url url: String,
+        @Body loginRequest: VerifyMobileReq,
+    ): BaseResponse<String>
 
 
     @GET("personals/subdominant")

@@ -3,6 +3,9 @@ package com.tamin.taminhamrah.data.repository
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.core.model.request.FilterOperator
+import com.tamin.taminhamrah.core.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
@@ -17,8 +20,7 @@ internal class CityProvinceRepositoryImpl(
     private val cityProvinceDao: CityProvinceDao,
 ) : CityProvinceRepository {
 
-    override fun getCity(query: ApiQueryParamDN): Flow<CityDN> = flow {
-        val cityId = query.filters.firstOrNull()?.value ?: return@flow
+    override fun getCity(cityId: String): Flow<CityDN> = flow {
 
         val localCity = cityProvinceDao.getCity(cityId).firstOrNull()
         if (localCity != null) {
@@ -26,6 +28,11 @@ internal class CityProvinceRepositoryImpl(
         }
 
         try {
+            val query = ApiQueryParamDN(
+                filters = listOf(
+                    ApiFilterDN(property = FilterProperty.CITY_CODE, operator = FilterOperator.EQUAL, value = cityId)
+                )
+            )
             val response = commonRemoteDataSource.getCityName(query)
             response.list.forEach { city ->
                 cityProvinceDao.upsertCity(city.toEntity())
@@ -36,8 +43,7 @@ internal class CityProvinceRepositoryImpl(
         }
     }
 
-    override fun getProvince(query: ApiQueryParamDN): Flow<ProvinceDN> = flow {
-        val provinceId = query.filters.firstOrNull()?.value ?: return@flow
+    override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {
 
         try {
             cityProvinceDao.getProvince(provinceId).firstOrNull()?.toDomain()?.let { emit(it) }
@@ -46,6 +52,11 @@ internal class CityProvinceRepositoryImpl(
         }
 
         try {
+            val query = ApiQueryParamDN(
+                filters = listOf(
+                    ApiFilterDN(property = FilterProperty.PROVINCE_CODE, operator = FilterOperator.EQUAL, value = provinceId)
+                )
+            )
             val response = commonRemoteDataSource.getProvinceName(query)
             response.list.forEach { province ->
                 cityProvinceDao.upsertProvince(province.toEntity())

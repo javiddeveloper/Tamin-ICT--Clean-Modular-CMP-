@@ -13,7 +13,9 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface UserRemoteDataSource {
@@ -21,6 +23,8 @@ interface UserRemoteDataSource {
     suspend fun getUserProfileImage(): String
     suspend fun fetchTaminRelation(): TaminRelationResponse
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
+    suspend fun changeMobile(filter: List<ApiFilterDN>): EditMobileResponseDto
+    suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String
 
     suspend fun getSubDominantsInfo(
         page: String,
