@@ -18,16 +18,17 @@ import com.tamin.taminhamrah.model.user.TaminRelationResponse
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.tools.BaseResponse
+import com.tamin.taminhamrah.util.HeaderConstant
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.Url
-import io.ktor.http.cio.Response
 
 internal interface UserApiService {
     @GET("central-reg/personal")
@@ -45,6 +46,8 @@ internal interface UserApiService {
         @Query("filter") filter: String
     ): BaseResponse<String>
 
+
+
     @FormUrlEncoded
     @POST
     suspend fun signIn(
@@ -56,6 +59,24 @@ internal interface UserApiService {
         @Field("code_verifier") codeVerifier: String = "",
         @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir",
     ): TokenResponseDto
+
+
+    @GET
+    suspend fun signOut(
+        @Header(HeaderConstant.AUTHORIZATION) token: String,
+        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}signout",
+        @Query("redirect_uri") redirectUrl: String = "https://eservices.tamin.ir/view/index.html?redirect_uri=https://eservices.tamin.ir/auth/access",
+        @Query("response_type") responseType: String = "assertion",
+        @Query("client_id") clientId: String = NetworkConstants.CLIENT_ID
+    )
+
+    @FormUrlEncoded
+    @POST
+    suspend fun revokeToken(
+        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}revoke",
+        @Header(HeaderConstant.AUTHORIZATION) accessToken: String?,
+        @Field("refresh_token") refreshToken: String?
+    )
 
     @FormUrlEncoded
     @POST

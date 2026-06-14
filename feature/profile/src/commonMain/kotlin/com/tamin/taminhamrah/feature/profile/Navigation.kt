@@ -28,6 +28,7 @@ sealed interface ProfileRoute {
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
+    onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
     navigation<ProfileRoute.Graph>(startDestination = ProfileRoute.Main()) {
@@ -39,6 +40,7 @@ fun NavGraphBuilder.profileGraph(
                 userId = route.userId,
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
+                onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
         }

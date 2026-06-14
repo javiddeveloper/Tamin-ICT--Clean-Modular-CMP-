@@ -42,6 +42,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
+    onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -54,6 +55,7 @@ fun ProfileScreen(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToRouteById = onNavigateToRouteById,
+        onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
 
@@ -68,6 +70,7 @@ fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
+    onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -89,6 +92,11 @@ fun HandleProfileEvents(
             ProfileEvent.NavigateToIdentity -> {
                 scope.launch {
                     onNavigateToIdentity()
+                }
+            }
+            is ProfileEvent.OpenUrl -> {
+                scope.launch {
+                    onOpenUrl(it.url)
                 }
             }
             is ProfileEvent.ShowToast -> {

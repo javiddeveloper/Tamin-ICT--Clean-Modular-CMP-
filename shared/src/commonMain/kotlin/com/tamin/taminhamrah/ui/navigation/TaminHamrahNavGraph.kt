@@ -16,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.openUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +79,7 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
                     },
+                    onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
                 )
             }
