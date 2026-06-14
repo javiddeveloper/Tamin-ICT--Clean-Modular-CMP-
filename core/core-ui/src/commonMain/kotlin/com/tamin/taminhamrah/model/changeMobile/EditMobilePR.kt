@@ -1,15 +1,24 @@
 package com.tamin.taminhamrah.model.changeMobile
 
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
+
+@Immutable
+@Serializable
 data class EditMobileResponsePR(
     val traceId: String = "",
     val data: EditMobilePR? = null
 )
 
+@Immutable
+@Serializable
 data class EditMobilePR(
     val hash: String = "",
     val expirationTime: ExpirationTimePR? = null
 )
 
+@Immutable
+@Serializable
 data class ExpirationTimePR(
     val year: Int = 0,
     val month: String = "",
@@ -24,6 +33,8 @@ data class ExpirationTimePR(
     val chronology: ChronologyPR? = null
 )
 
+@Immutable
+@Serializable
 data class ChronologyPR(
     val calendarType: String = "",
     val id: String = ""

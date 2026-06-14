@@ -1,5 +1,9 @@
-package com.tamin.taminhamrah.model.changeMobile
+package com.tamin.taminhamrah.mapper.changeMobile
 
+import com.tamin.taminhamrah.model.changeMobile.ChronologyPR
+import com.tamin.taminhamrah.model.changeMobile.EditMobilePR
+import com.tamin.taminhamrah.model.changeMobile.EditMobileResponsePR
+import com.tamin.taminhamrah.model.changeMobile.ExpirationTimePR
 import com.tamin.taminhamrah.model.user.ChronologyDN
 import com.tamin.taminhamrah.model.user.EditMobileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN

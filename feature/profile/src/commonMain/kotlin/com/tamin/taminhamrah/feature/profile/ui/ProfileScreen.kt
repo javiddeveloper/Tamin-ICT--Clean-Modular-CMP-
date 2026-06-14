@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileMenuItem
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -146,7 +147,7 @@ fun ProfileContent(
                     subtitle = "نمایش اطلاعات هویتی و شماره تأمین اجتماعی",
                     icon = painterResource(Res.drawable.ic_tamin_logo),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("اطلاعات هویتی")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.IDENTITY_INFO)) }
                 )
             }
             item {
@@ -182,7 +183,7 @@ fun ProfileContent(
                     subtitle = "وضعیت ارتباط فعال با تأمین اجتماعی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("ارتباط فعال با تأمین")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ACTIVE_RELATION)) }
                 )
             }
             item {
@@ -194,7 +195,7 @@ fun ProfileContent(
                     subtitle = "مشاهده و ثبت افراد تبعی توسط بیمه شده اصلی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("مشاهده و ثبت افراد تبعی")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.DEPENDENTS)) }
                 )
             }
             item {
@@ -206,7 +207,7 @@ fun ProfileContent(
                     subtitle = "مشاهده مدارک ثبت شده در سیستم",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("پرونده الکترونیک من")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ELECTRONIC_FILE)) }
                 )
             }
             item {
@@ -218,7 +219,7 @@ fun ProfileContent(
                     subtitle = "استعلام و ثبت شماره حساب های بانکی",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("شماره حساب بانکی")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.BANK_ACCOUNTS)) }
                 )
             }
             item {
@@ -230,7 +231,7 @@ fun ProfileContent(
                     subtitle = "جهت شناسایی شما در اپلیکیشن تأمین من",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("تغییر شماره موبایل")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
                 )
             }
             item {
@@ -242,7 +243,7 @@ fun ProfileContent(
                     subtitle = "مدیریت ظاهر و امنیت برنامه",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("تنظیمات")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SETTINGS)) }
                 )
             }
             item {
@@ -253,7 +254,7 @@ fun ProfileContent(
                     title = "خروج از حساب کاربری",
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
-                    onClick = { onIntent(ProfileIntent.OnItemClick("خروج از حساب کاربری")) }
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT)) }
                 )
             }
         }

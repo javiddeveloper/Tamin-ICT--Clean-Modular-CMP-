@@ -1,4 +1,7 @@
-package com.tamin.taminhamrah.model.relation
+package com.tamin.taminhamrah.mapper.relation
+
+import com.tamin.taminhamrah.model.relation.TaminRelationDN
+import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
 
 fun TaminRelationDN.toPresentation(): TaminRelationPR {

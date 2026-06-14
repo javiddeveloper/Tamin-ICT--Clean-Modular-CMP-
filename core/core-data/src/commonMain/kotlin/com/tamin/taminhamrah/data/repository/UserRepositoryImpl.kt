@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.data.repository
 
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.core.model.request.FilterOperator
+import com.tamin.taminhamrah.core.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
@@ -39,14 +41,28 @@ internal class UserRepositoryImpl(
 
     override suspend fun sendImageRequest(
         branchCode: String,
-        filter: List<ApiFilterDN>
+        serialId: String
     ) = flow {
-        val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
+        val domainFilters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.SERIAL_ID,
+                operator = FilterOperator.EQ,
+                value = serialId
+            )
+        )
+        val remoteData = userRemoteDataSource.sendImageRequest(branchCode, domainFilters)
         emit(remoteData)
     }
 
-    override suspend fun changeMobile(filter: List<ApiFilterDN>): Flow<EditMobileResponseDN> = flow {
-        val remoteData = userRemoteDataSource.changeMobile(filter)
+    override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {
+        val domainFilters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.MOBILE,
+                operator = FilterOperator.EQ,
+                value = mobileNumber
+            )
+        )
+        val remoteData = userRemoteDataSource.changeMobile(domainFilters)
         emit(remoteData.toDomain())
     }
 

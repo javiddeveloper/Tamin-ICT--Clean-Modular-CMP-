@@ -32,7 +32,7 @@ data class ProfileUiState(
 sealed class ProfileIntent {
     data class LoadProfile(val userId: String? = null) : ProfileIntent()
     data object Logout : ProfileIntent()
-    data class OnItemClick(val title: String) : ProfileIntent()
+    data class OnItemClick(val item: ProfileMenuItem) : ProfileIntent()
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 }
 
@@ -41,4 +41,16 @@ sealed class ProfileEvent {
     data object NavigateToSettings : ProfileEvent()
     data object NavigateToIdentity : ProfileEvent()
     data class ShowToast(val message: String) : ProfileEvent()
+}
+
+
+enum class ProfileMenuItem {
+    IDENTITY_INFO,
+    ACTIVE_RELATION,
+    DEPENDENTS,
+    ELECTRONIC_FILE,
+    BANK_ACCOUNTS,
+    CHANGE_MOBILE,
+    SETTINGS,
+    LOGOUT
 }
