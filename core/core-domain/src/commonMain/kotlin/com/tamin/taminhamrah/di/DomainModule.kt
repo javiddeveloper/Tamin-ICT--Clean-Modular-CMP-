@@ -9,12 +9,9 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
-import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCaseImpl
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
-import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
-import com.tamin.taminhamrah.useCases.user.SubdominantUseCaseImpl
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import org.koin.core.module.dsl.factoryOf
@@ -30,6 +27,6 @@ val domainModule = module {
     factoryOf(::TaminRelationUseCase)
     factoryOf(::IdentityInfoUseCase)
     factoryOf(::SendImageRequestUseCase)
-    factoryOf(::SubdominantUseCaseImpl) bind SubdominantUseCase::class
-    factoryOf(::GetBankAccountListUseCaseImpl) bind GetBankAccountListUseCase::class
+    factoryOf(::SubdominantUseCase)
+    factoryOf(::GetBankAccountListUseCase)
 }
