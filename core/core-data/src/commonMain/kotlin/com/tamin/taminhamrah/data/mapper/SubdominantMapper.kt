@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.data.mapper
+package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN

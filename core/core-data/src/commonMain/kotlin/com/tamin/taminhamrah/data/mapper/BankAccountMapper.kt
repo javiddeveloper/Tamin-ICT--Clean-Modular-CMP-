@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.data.mapper
+package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.bankAccount.AccountTypeDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
