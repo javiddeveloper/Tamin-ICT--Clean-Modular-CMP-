@@ -1,18 +1,21 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        mavenCentral()
-        google()
+        maven { url = uri("https://nexus.tamin.ir/content/groups/public") }
         maven { url = uri("https://maven.myket.ir/") }
+        google()
+        mavenCentral()
         gradlePluginPortal()
     }
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenCentral()
-        google()
+        maven { url = uri("https://nexus.tamin.ir/content/groups/public") }
         maven { url = uri("https://maven.myket.ir/") }
+        google()
+        mavenCentral()
     }
 }
 

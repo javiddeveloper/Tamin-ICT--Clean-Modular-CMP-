@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.repository
 
+import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.relation.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
@@ -11,6 +14,8 @@ class FakeUserRepository : UserRepository {
     var userProfileImageResult: String = ""
     var taminRelationResult: TaminRelationDN? = null
     var sendImageResult: String = ""
+    var subDominantsResult: SubdominantDN? = null
+    var bankAccountListResult: List<BankAccountDN> = emptyList()
     var changeMobileResult: EditMobileResponseDN? = null
     var verifyChangeMobileResult: String = ""
 
@@ -28,6 +33,26 @@ class FakeUserRepository : UserRepository {
 
     override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> = flow {
         emit(sendImageResult)
+    }
+
+    override suspend fun getSubDominantsInfo(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<SubdominantDN> = flow {
+        subDominantsResult?.let { emit(it) }
+    }
+
+    override suspend fun getBankAccountList(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<List<BankAccountDN>> = flow {
+        emit(bankAccountListResult)
     }
 
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {

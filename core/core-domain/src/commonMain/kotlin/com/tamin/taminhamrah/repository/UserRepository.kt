@@ -1,6 +1,13 @@
 package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
+import com.tamin.taminhamrah.model.subdominant.SubdominantDN
+import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 
 import com.tamin.taminhamrah.model.relation.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
@@ -13,4 +20,40 @@ interface UserRepository {
     suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String>
     suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN>
     suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String>
+    suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): Flow<String>
+
+    suspend fun getSubDominantsInfo(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<SubdominantDN>
+
+    suspend fun getBankAccountList(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<List<BankAccountDN>>
+
+    suspend fun getInsuredActiveBranch() : Flow<List<InsuredActiveBranchDN>>
+
+    suspend fun getRelationTaminAll(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<List<ActiveRelationDN>>
+
+    suspend fun getElectronicFile(
+        page: String,
+        start: String,
+        limit: String,
+        filter: String,
+        sort: String
+    ): Flow<List<ElectronicFileDN>>
+
 }
