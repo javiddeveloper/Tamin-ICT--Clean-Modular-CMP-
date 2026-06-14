@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.model.user
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TaminRelationDN(
     val id: Int? = null,
     val nationalId: String? = null,

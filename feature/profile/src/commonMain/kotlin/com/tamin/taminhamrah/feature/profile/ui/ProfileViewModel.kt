@@ -1,14 +1,13 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.core.model.request.FilterOperator
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
+import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.mapper.identity.toPresentation
-import com.tamin.taminhamrah.model.relation.toPresentation
+import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
@@ -44,7 +43,7 @@ class ProfileViewModel(
         return when (intent) {
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
-            is ProfileIntent.OnItemClick -> handleItemClick(intent.title)
+            is ProfileIntent.OnItemClick -> handleItemClick(intent.item)
             is ProfileIntent.SendImageRequest -> handleSendImageRequest(
                 intent.branchCode,
                 intent.filter
@@ -95,31 +94,23 @@ class ProfileViewModel(
         sendEvent(ProfileEvent.NavigateBack)
     }
 
-    private fun handleItemClick(title: String): Flow<PartialState> {
-        when (title) {
-            "تنظیمات" -> sendEvent(ProfileEvent.NavigateToSettings)
-            "خروج از حساب کاربری" -> sendIntent(ProfileIntent.Logout)
-            "اطلاعات هویتی" -> sendEvent(ProfileEvent.NavigateToIdentity)
-            else -> sendEvent(ProfileEvent.ShowToast("کلیک بر روی: $title"))
+    private fun handleItemClick(item: ProfileMenuItem): Flow<PartialState> {
+        when (item) {
+            ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
+            ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
+            ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
+            else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()
     }
 
-    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> =
-        flow {
-            val domainFilters = listOf(
-                ApiFilterDN(
-                    property = "serialId",
-                    operator = FilterOperator.EQ,
-                    value = filter
-                )
-            )
-            emit(PartialState.ImageRequestLoading(true))
-            sendImageRequestUseCase(branchCode, domainFilters)
-                .collect { result ->
-                    emit(PartialState.ImageRequestResult(result))
-                }
-        }
+    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
+        emit(PartialState.ImageRequestLoading(true))
+        sendImageRequestUseCase(branchCode, filter)
+            .collect { result ->
+                emit(PartialState.ImageRequestResult(result))
+            }
+    }
 
     //todo it should removed from here this is only test
     private fun handleLoadSubDominants(): Flow<PartialState> {

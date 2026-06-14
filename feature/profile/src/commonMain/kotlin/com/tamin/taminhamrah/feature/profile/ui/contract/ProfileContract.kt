@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.model.identity.IdentityInfoPR
 import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
@@ -37,7 +38,7 @@ data class ProfileUiState(
 sealed class ProfileIntent {
     data class LoadProfile(val userId: String? = null) : ProfileIntent()
     data object Logout : ProfileIntent()
-    data class OnItemClick(val title: String) : ProfileIntent()
+    data class OnItemClick(val item: ProfileMenuItem) : ProfileIntent()
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 
     data object LoadSubDominants : ProfileIntent()

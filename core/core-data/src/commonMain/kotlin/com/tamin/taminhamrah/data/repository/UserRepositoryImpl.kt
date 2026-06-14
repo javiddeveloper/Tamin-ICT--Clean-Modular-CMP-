@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.data.repository
 
 import com.tamin.taminhamrah.core.model.request.ApiFilterDN
+import com.tamin.taminhamrah.core.model.request.FilterOperator
+import com.tamin.taminhamrah.core.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
@@ -9,9 +11,11 @@ import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
+import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
-import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
@@ -43,9 +47,34 @@ internal class UserRepositoryImpl(
 
     override suspend fun sendImageRequest(
         branchCode: String,
-        filter: List<ApiFilterDN>
-    ): Flow<String> = flow {
-        val remoteData = userRemoteDataSource.sendImageRequest(branchCode, filter)
+        serialId: String
+    ) = flow {
+        val domainFilters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.SERIAL_ID,
+                operator = FilterOperator.EQ,
+                value = serialId
+            )
+        )
+        val remoteData = userRemoteDataSource.sendImageRequest(branchCode, domainFilters)
+        emit(remoteData)
+    }
+
+    override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {
+        val domainFilters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.MOBILE,
+                operator = FilterOperator.EQ,
+                value = mobileNumber
+            )
+        )
+        val remoteData = userRemoteDataSource.changeMobile(domainFilters)
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
+        val request = VerifyMobileReq(mobile, otp, otpHashCode)
+        val remoteData = userRemoteDataSource.verifyChangeMobileCode(request)
         emit(remoteData)
     }
 
@@ -107,4 +136,5 @@ internal class UserRepositoryImpl(
         val electronicFileList = remoteData?.list?.map { it.toDomain() }
         emit(electronicFileList ?: emptyList())
     }
+
 }
