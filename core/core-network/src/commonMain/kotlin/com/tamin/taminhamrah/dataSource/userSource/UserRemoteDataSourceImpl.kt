@@ -176,10 +176,14 @@ internal class UserRemoteDataSourceImpl(
     }
 
     override suspend fun changeMobile(
-        filter: List<ApiFilterDN>
+        mobile: String
     ): EditMobileResponseDto {
         return try {
-            val response = userApiService.changeMobile(NetworkConstants.EDIT_MOBILE_URL, queryBuilder.buildFilterJson(filter))
+            val response = userApiService.changeMobile(
+                referer = NetworkConstants.REFERER_MOBILE,
+                url = NetworkConstants.EDIT_MOBILE_URL,
+                mobile = mobile
+            )
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -192,7 +196,11 @@ internal class UserRemoteDataSourceImpl(
 
     override suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String {
         return try {
-            val response = userApiService.verifyChangeMobileCode(NetworkConstants.VERIFY_EDIT_MOBILE_URL, request)
+            val response = userApiService.verifyChangeMobileCode(
+                referer = NetworkConstants.REFERER_MOBILE,
+                url = NetworkConstants.VERIFY_EDIT_MOBILE_URL,
+                loginRequest = request
+            )
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

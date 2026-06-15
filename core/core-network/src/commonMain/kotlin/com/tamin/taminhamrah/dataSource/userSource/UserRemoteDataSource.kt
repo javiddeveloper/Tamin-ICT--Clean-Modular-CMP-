@@ -23,7 +23,7 @@ interface UserRemoteDataSource {
     suspend fun getUserProfileImage(): String
     suspend fun fetchTaminRelation(): TaminRelationResponse
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
-    suspend fun changeMobile(filter: List<ApiFilterDN>): EditMobileResponseDto
+    suspend fun changeMobile(mobile: String): EditMobileResponseDto
     suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String
 
     suspend fun getSubDominantsInfo(

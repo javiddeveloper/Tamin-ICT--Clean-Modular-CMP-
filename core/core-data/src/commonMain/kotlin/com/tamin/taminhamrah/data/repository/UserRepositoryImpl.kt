@@ -61,14 +61,7 @@ internal class UserRepositoryImpl(
     }
 
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {
-        val domainFilters = listOf(
-            ApiFilterDN(
-                property = FilterProperty.MOBILE,
-                operator = FilterOperator.EQ,
-                value = mobileNumber
-            )
-        )
-        val remoteData = userRemoteDataSource.changeMobile(domainFilters)
+        val remoteData = userRemoteDataSource.changeMobile(mobileNumber)
         emit(remoteData.toDomain())
     }
 

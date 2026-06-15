@@ -23,6 +23,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
+import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
+import com.tamin.taminhamrah.util.Logger
 
 class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -35,6 +38,8 @@ class ProfileViewModel(
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
     private val getElectronicFileUseCase: GetElectronicFileUseCase,
+    private val changeMobileUseCase: ChangeMobileUseCase,
+    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {

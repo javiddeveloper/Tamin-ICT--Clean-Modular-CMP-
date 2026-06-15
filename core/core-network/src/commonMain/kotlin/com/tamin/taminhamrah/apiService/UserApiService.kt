@@ -23,6 +23,7 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
@@ -69,13 +70,15 @@ internal interface UserApiService {
 
     @GET
     suspend fun changeMobile(
+        @Header("Referer") referer: String,
         @Url url: String,
-        @Query("filter") filter: String
+        @Query("mobile") mobile: String
     ): BaseResponse<EditMobileResponseDto>
 
     @POST
     suspend fun verifyChangeMobileCode(
-        @Url url: String,
+        @Header("Referer") referer: String,
+        @Url url:String,
         @Body loginRequest: VerifyMobileReq,
     ): BaseResponse<String>
 
