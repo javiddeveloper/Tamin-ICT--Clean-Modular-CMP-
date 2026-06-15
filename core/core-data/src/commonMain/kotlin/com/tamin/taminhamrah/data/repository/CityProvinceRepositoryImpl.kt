@@ -2,10 +2,10 @@ package com.tamin.taminhamrah.data.repository
 
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.core.model.request.FilterOperator
-import com.tamin.taminhamrah.core.model.request.FilterProperty
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity

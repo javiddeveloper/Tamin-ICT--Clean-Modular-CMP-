@@ -7,9 +7,9 @@
 
 package com.tamin.taminhamrah.tools.apiQueryBuilder
 
-import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.core.model.request.ApiSortDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.ApiSortDN
 import kotlinx.serialization.json.Json
 
 internal class ApiQueryBuilderImpl : ApiQueryBuilder {

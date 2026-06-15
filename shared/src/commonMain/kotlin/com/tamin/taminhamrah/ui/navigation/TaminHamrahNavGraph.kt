@@ -14,6 +14,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
+import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 
@@ -61,6 +64,20 @@ internal fun TaminHamrahNavGraph(
                         }
                     }
                 )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Home, null) }, // Use appropriate icon
+                    label = { Text("Pension") },
+                    selected = currentDestination?.hasRoute<PensionInquiryRoute>() == true,
+                    onClick = {
+                        navController.navigateToPensionInquiry {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     ) { paddingValues ->
@@ -80,6 +97,8 @@ internal fun TaminHamrahNavGraph(
                     },
                     onBack = { navController.popBackStack() }
                 )
+
+                pensionInquiryScreen()
             }
 
             if (isLoading) {

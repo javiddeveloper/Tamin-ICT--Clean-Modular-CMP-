@@ -27,6 +27,10 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.coil.network.okhttp)
         }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
     }
 }
 
