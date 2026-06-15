@@ -15,7 +15,10 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
+import com.tamin.taminhamrah.util.HeaderConstant
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 
@@ -34,6 +37,8 @@ class ProfileViewModel(
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
     private val subdominantUseCase: SubdominantUseCase,
+    private val signOutUseCase: SignOutUseCase,
+    private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
     private val getBankAccountListUseCase: GetBankAccountListUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
@@ -93,9 +98,22 @@ class ProfileViewModel(
     }
 
     private fun handleLogout(): Flow<PartialState> = flow {
-        tokenStoreManager.saveToken(null)
-        tokenStoreManager.saveRefreshToken(null)
-        tokenStoreManager.setTokenValid(isValid = false)
+        val token = tokenStoreManager.getToken()
+        if (token != null) {
+            // Background sign out (invalidates token on server and clears local tokens)
+            signOutUseCase.invoke(HeaderConstant.AUTHORIZATION_TYPE + token).collect {
+                com.tamin.taminhamrah.util.Logger.d("handleLogout", "Sign out response: $it")
+            }
+        } else {
+            // If no token, just perform local logout
+            tokenStoreManager.saveToken(null)
+            tokenStoreManager.saveRefreshToken(null)
+            tokenStoreManager.setTokenValid(isValid = false)
+        }
+
+        // Trigger browser/WebView sign out to clear SSO session cookies
+        val signOutUrl = getSignOutUrlUseCase()
+        sendEvent(ProfileEvent.OpenUrl(signOutUrl))
         sendEvent(ProfileEvent.NavigateBack)
     }
 

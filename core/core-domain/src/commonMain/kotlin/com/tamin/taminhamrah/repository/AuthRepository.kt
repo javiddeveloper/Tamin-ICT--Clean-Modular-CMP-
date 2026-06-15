@@ -18,4 +18,8 @@ interface AuthRepository {
     suspend fun refreshToken(): Boolean
 
     suspend fun logout()
+
+    suspend fun signOut(token: String): Flow<String>
+
+    suspend fun revokeToken(): Boolean
 }

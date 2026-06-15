@@ -44,11 +44,13 @@ sealed class ProfileIntent {
     data object LoadSubDominants : ProfileIntent()
     data object LoadBankAccountList : ProfileIntent()
 
+
 }
 
 sealed class ProfileEvent {
     data object NavigateBack : ProfileEvent()
     data object NavigateToSettings : ProfileEvent()
     data object NavigateToIdentity : ProfileEvent()
+    data class OpenUrl(val url: String) : ProfileEvent()
     data class ShowToast(val message: String) : ProfileEvent()
 }

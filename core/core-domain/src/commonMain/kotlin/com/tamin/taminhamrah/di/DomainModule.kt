@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCaseImpl
+import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.DeepLinkManager
 import com.tamin.taminhamrah.useCases.auth.DeepLinkManagerImpl
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
@@ -16,6 +17,7 @@ import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
@@ -35,6 +37,8 @@ val domainModule = module {
     factoryOf(::GetPensionInquiryUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
+    factoryOf(::SignOutUseCase)
+    factoryOf(::GetSignOutUrlUseCase)
     factoryOf(::GetBankAccountListUseCase)
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
