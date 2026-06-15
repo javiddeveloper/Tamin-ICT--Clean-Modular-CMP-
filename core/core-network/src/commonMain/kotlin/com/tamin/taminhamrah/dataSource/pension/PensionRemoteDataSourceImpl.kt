@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.pension
 
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryResponse
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
@@ -19,6 +20,19 @@ class PensionRemoteDataSourceImpl(
         return try {
             val response =
                 pensionApiService.getPensionInquiry(apiQueryBuilder.buildQuery(pensionInquiryDN))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getPensionerId(): List<PensionIdDTO> {
+        return try {
+            val response = pensionApiService.getPensionerId()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

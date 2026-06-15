@@ -7,11 +7,14 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIn
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryEvent
 import com.tamin.taminhamrah.mapper.pension.toPresentation
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
+import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 
 class PensionInquiryViewModel(
-    private val getPensionInquiryUseCase: GetPensionInquiryUseCase
+    private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
+    private val getPensionerIdUseCase: GetPensionerIdUseCase
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -19,6 +22,7 @@ class PensionInquiryViewModel(
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
         return when (intent) {
             is PensionInquiryIntent.LoadPensionInquiry -> handleLoadPensionInquiry()
+            is PensionInquiryIntent.LoadPensionerIds -> handleLoadPensionerIds()
         }
     }
 
@@ -39,6 +43,17 @@ class PensionInquiryViewModel(
         }
     }
 
+    private fun handleLoadPensionerIds(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getPensionerIdUseCase().collect { list ->
+                emit(PartialState.PensionerIdsLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
     override fun reduceState(
         currentState: PensionInquiryUiState,
         partialState: PartialState
@@ -48,6 +63,11 @@ class PensionInquiryViewModel(
         is PartialState.PensionListLoaded -> currentState.copy(
             isLoading = false,
             pensionList = partialState.list
+        )
+
+        is PartialState.PensionerIdsLoaded -> currentState.copy(
+            isLoading = false,
+            pensionerIds = partialState.list
         )
     }
 

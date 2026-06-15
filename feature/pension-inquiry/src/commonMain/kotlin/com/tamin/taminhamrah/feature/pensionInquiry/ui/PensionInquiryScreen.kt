@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUiState
+import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -21,6 +22,7 @@ fun PensionInquiryScreen(
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionInquiry)
+        viewModel.sendIntent(PensionInquiryIntent.LoadPensionerIds)
     }
 
     PensionInquiryContent(state)
@@ -35,9 +37,9 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading) {
+            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null) {
+            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty()) {
                 Text(
                     text = state.error ?: "خطای ناشناخته",
                     color = MaterialTheme.colorScheme.error,
@@ -49,11 +51,46 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(state.pensionList) { item ->
-                        PensionItem(item)
+                    if (state.pensionerIds.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "شناسه‌های مستمری‌بگیر:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(state.pensionerIds) { idItem ->
+                            PensionIdItem(idItem)
+                        }
+                    }
+
+                    if (state.pensionList.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "لیست استعلام مستمری:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(state.pensionList) { item ->
+                            PensionItem(item)
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PensionIdItem(item: PensionIdPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "شناسه مستمری‌بگیر: ${item.pensionerId}")
         }
     }
 }
