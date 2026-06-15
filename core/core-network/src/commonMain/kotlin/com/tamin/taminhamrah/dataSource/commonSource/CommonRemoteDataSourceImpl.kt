@@ -16,7 +16,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.CommonApiService
-import com.tamin.taminhamrah.core.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 
 internal class CommonRemoteDataSourceImpl(
     private val commonApiService: CommonApiService,

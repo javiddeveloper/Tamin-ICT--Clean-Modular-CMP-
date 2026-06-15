@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.data.repository
 
-import com.tamin.taminhamrah.core.model.request.ApiFilterDN
-import com.tamin.taminhamrah.core.model.request.FilterOperator
-import com.tamin.taminhamrah.core.model.request.FilterProperty
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
