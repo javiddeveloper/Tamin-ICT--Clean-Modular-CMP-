@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ElectronicFileResponse (
+class ElectronicFileDTO (
     @SerialName("categoryName") val categoryName: String? = null,
     @SerialName("contentServer") val contentServer: String? = null,
     @SerialName("countNumger") val countNumger: Int? = null,

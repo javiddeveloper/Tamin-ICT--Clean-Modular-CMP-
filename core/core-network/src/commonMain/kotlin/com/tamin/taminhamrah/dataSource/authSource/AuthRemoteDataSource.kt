@@ -15,4 +15,10 @@ interface AuthRemoteDataSource {
         refreshToken: String,
         clientId: String,
     ): TokenResponseDto
+
+
+    suspend fun signOut(token: String): String
+
+    suspend fun revokeToken(accessToken: String?, refreshToken: String?): Boolean
+
 }

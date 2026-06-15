@@ -12,13 +12,14 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.UserApiService
-import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
-import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
-import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
-import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
-import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
+import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
+import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -56,7 +57,7 @@ internal class UserRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun fetchTaminRelation(): TaminRelationResponse {
+    override suspend fun fetchTaminRelation(): TaminRelationDTO {
         return try {
             val response = userApiService.fetchTaminRelation()
             response.extractData()
@@ -87,14 +88,10 @@ internal class UserRemoteDataSourceImpl(
     }
 
     override suspend fun getSubDominantsInfo(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): SubDominantResponseData {
+        query: ApiQueryParamDN
+    ): SubDominantResponseDTO {
         return try {
-            val response = userApiService.getSubDominantsInfo(page, start, limit, filter, sort)
+            val response = userApiService.getSubDominantsInfo(queryBuilder.buildQuery(query))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -106,14 +103,10 @@ internal class UserRemoteDataSourceImpl(
     }
 
     override suspend fun getBankAccountList(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): ListData<BankAccountResponse>? {
+        query: ApiQueryParamDN
+    ): ListData<BankAccountDTO>? {
         return try {
-            val response = userApiService.getBankAccountList(page, start, limit, filter, sort)
+            val response = userApiService.getBankAccountList(queryBuilder.buildQuery(query))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -124,7 +117,7 @@ internal class UserRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getInsuredActiveBranch(): List<InsuredActiveBranchData>? {
+    override suspend fun getInsuredActiveBranch(): List<InsuredActiveBranchDTO>? {
         return try {
             val response = userApiService.getInsuredActiveBranch()
             response.extractData()
@@ -138,14 +131,10 @@ internal class UserRemoteDataSourceImpl(
     }
 
     override suspend fun getRelationTaminAll(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): ListData<ActiveRelationResponse>? {
+        query: ApiQueryParamDN
+    ): ListData<ActiveRelationDTO>? {
         return try {
-            val response = userApiService.getRelationTaminAll(page, start, limit, filter, sort)
+            val response = userApiService.getRelationTaminAll(queryBuilder.buildQuery(query))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -157,14 +146,10 @@ internal class UserRemoteDataSourceImpl(
     }
 
     override suspend fun getElectronicFile(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): ListData<com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse>? {
+        query: ApiQueryParamDN
+    ): ListData<com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO>? {
         return try {
-            val response = userApiService.getElectronicFile(page, start, limit, filter, sort)
+            val response = userApiService.getElectronicFile(queryBuilder.buildQuery(query))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -176,10 +161,14 @@ internal class UserRemoteDataSourceImpl(
     }
 
     override suspend fun changeMobile(
-        filter: List<ApiFilterDN>
+        mobile: String
     ): EditMobileResponseDto {
         return try {
-            val response = userApiService.changeMobile(NetworkConstants.EDIT_MOBILE_URL, queryBuilder.buildFilterJson(filter))
+            val response = userApiService.changeMobile(
+                referer = NetworkConstants.REFERER_MOBILE,
+                url = NetworkConstants.EDIT_MOBILE_URL,
+                mobile = mobile
+            )
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -192,7 +181,11 @@ internal class UserRemoteDataSourceImpl(
 
     override suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String {
         return try {
-            val response = userApiService.verifyChangeMobileCode(NetworkConstants.VERIFY_EDIT_MOBILE_URL, request)
+            val response = userApiService.verifyChangeMobileCode(
+                referer = NetworkConstants.REFERER_MOBILE,
+                url = NetworkConstants.VERIFY_EDIT_MOBILE_URL,
+                loginRequest = request
+            )
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -202,4 +195,6 @@ internal class UserRemoteDataSourceImpl(
             )
         }
     }
+
+
 }

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ActiveRelationResponse (
+data class ActiveRelationDTO (
     @SerialName("lastName") val lastName: String? = null,
     @SerialName("relationWithTaminId") val relationWithTaminId: Int? = null,
     @SerialName("endDate") val endDate: String? = null,

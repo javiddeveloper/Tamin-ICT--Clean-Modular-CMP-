@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
@@ -19,37 +20,21 @@ interface UserRepository {
     suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String>
 
     suspend fun getSubDominantsInfo(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN> = emptyList()
     ): Flow<SubdominantDN>
 
     suspend fun getBankAccountList(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<BankAccountDN>>
 
     suspend fun getInsuredActiveBranch() : Flow<List<InsuredActiveBranchDN>>
 
     suspend fun getRelationTaminAll(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ActiveRelationDN>>
 
     suspend fun getElectronicFile(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ElectronicFileDN>>
 
 }

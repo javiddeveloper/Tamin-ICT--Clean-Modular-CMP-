@@ -3,9 +3,9 @@ package com.tamin.taminhamrah.data.mapper
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
-import com.tamin.taminhamrah.model.pension.PensionInquiryResponse
+import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 
-fun PensionInquiryResponse.toDomain(): PensionInquiryDN {
+fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
     return PensionInquiryDN(
         branchCode = branchCode,
         insuranceNumber = insuranceNumber,
