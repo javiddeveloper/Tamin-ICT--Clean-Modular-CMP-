@@ -8,55 +8,40 @@ package com.tamin.taminhamrah.dataSource.userSource
 
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
-import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
-import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
-import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
-import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
+import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
-import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface UserRemoteDataSource {
     suspend fun getIdentityInfo(): IdentityInfoDto
     suspend fun getUserProfileImage(): String
-    suspend fun fetchTaminRelation(): TaminRelationResponse
+    suspend fun fetchTaminRelation(): TaminRelationDTO
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
     suspend fun changeMobile(mobile: String): EditMobileResponseDto
     suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String
 
     suspend fun getSubDominantsInfo(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): SubDominantResponseData
+        query: ApiQueryParamDN
+    ): SubDominantResponseDTO
 
     suspend fun getBankAccountList(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): ListData<BankAccountResponse>?
+        query: ApiQueryParamDN
+    ): ListData<BankAccountDTO>?
 
-    suspend fun getInsuredActiveBranch() : List<InsuredActiveBranchData>?
+    suspend fun getInsuredActiveBranch() : List<InsuredActiveBranchDTO>?
 
     suspend fun getRelationTaminAll(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): ListData<ActiveRelationResponse>?
+        query: ApiQueryParamDN
+    ): ListData<ActiveRelationDTO>?
 
     suspend fun getElectronicFile(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): ListData<ElectronicFileResponse>?
+        query: ApiQueryParamDN
+    ): ListData<ElectronicFileDTO>?
 }

@@ -2,9 +2,9 @@ package com.tamin.taminhamrah.data.mapper
 
 
 import com.tamin.taminhamrah.model.user.TaminRelationDN
-import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.user.TaminRelationDTO
 
-internal fun TaminRelationResponse.toDomain(): TaminRelationDN = TaminRelationDN(
+internal fun TaminRelationDTO.toDomain(): TaminRelationDN = TaminRelationDN(
     id = id,
     nationalId = nationalId,
     insuranceId = insuranceId,

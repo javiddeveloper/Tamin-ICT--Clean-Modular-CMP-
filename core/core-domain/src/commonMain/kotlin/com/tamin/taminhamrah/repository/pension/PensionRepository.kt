@@ -1,15 +1,12 @@
 package com.tamin.taminhamrah.repository.pension
 
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 
 interface PensionRepository {
     suspend fun getPensionInquiry(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<PensionInquiryDN>>
 }
 

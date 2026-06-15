@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ErrorDTO(
-    @SerialName("uri") val uri: String? = null,
-    @SerialName("code") val code: Int? = null,
-    @SerialName("description") val description: String? = null
+    @SerialName("status") val status: Int? = null,
+    @SerialName("error") val error: ErrorDataDTO? = null
 )

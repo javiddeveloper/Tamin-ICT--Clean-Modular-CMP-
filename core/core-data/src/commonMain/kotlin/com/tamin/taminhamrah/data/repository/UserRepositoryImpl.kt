@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.repository
 
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.UserDao
@@ -73,25 +74,17 @@ internal class UserRepositoryImpl(
 
 
     override suspend fun getSubDominantsInfo(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<SubdominantDN> = flow {
-        val remoteData = userRemoteDataSource.getSubDominantsInfo(page, start, limit, filter, sort)
+        val remoteData = userRemoteDataSource.getSubDominantsInfo(ApiQueryParamDN(filters = filters))
         Logger.d("getSubDominantsInfo", remoteData.toString())
         emit(remoteData.toDomain())
     }
 
     override suspend fun getBankAccountList(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<List<BankAccountDN>> = flow {
-        val remoteData = userRemoteDataSource.getBankAccountList(page, start, limit, filter, sort)
+        val remoteData = userRemoteDataSource.getBankAccountList(ApiQueryParamDN(filters = filters))
         Logger.d("getBankAccountList", remoteData?.list.toString())
         val accountList = remoteData?.list?.map { it.toDomain() }
         emit(accountList ?: emptyList())
@@ -106,26 +99,18 @@ internal class UserRepositoryImpl(
     }
 
     override suspend fun getRelationTaminAll(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<List<ActiveRelationDN>> = flow {
-        val remoteData = userRemoteDataSource.getRelationTaminAll(page, start, limit, filter, sort)
+        val remoteData = userRemoteDataSource.getRelationTaminAll(ApiQueryParamDN(filters = filters))
         Logger.d("getRelationTaminAll", remoteData?.list.toString())
         val relationList = remoteData?.list?.map { it.toDomain() }
         emit(relationList ?: emptyList())
     }
 
     override suspend fun getElectronicFile(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<List<com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN>> = flow {
-        val remoteData = userRemoteDataSource.getElectronicFile(page, start, limit, filter, sort)
+        val remoteData = userRemoteDataSource.getElectronicFile(ApiQueryParamDN(filters = filters))
         Logger.d("getElectronicFile", remoteData?.list.toString())
         val electronicFileList = remoteData?.list?.map { it.toDomain() }
         emit(electronicFileList ?: emptyList())

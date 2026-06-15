@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.feature.profile.data.mapper
 
-import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 
-fun ActiveRelationResponse.toDomain(): ActiveRelationDN {
+fun ActiveRelationDTO.toDomain(): ActiveRelationDN {
     return ActiveRelationDN(
         firstName = firstName,
         lastName = lastName,

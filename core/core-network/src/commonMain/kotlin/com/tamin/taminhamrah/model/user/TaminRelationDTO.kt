@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TaminRelationResponse(
+data class TaminRelationDTO(
     @SerialName("id") val id: Int? = null,
     @SerialName("nationalId") val nationalId: String? = null,
     @SerialName("insuranceId") val insuranceId: String? = null,

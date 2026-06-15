@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.model.utils
 
-import com.tamin.taminhamrah.tools.BaseResponse
+import com.tamin.taminhamrah.tools.BaseDTO
 import kotlinx.serialization.Serializable
 
 @Serializable

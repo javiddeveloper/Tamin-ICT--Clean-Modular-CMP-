@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InsuredActiveBranchData(
+data class InsuredActiveBranchDTO(
     @SerialName("branchCode") val branchCode: String? = null,
     @SerialName("branchName") val branchName: String? = null,
     @SerialName("workshopCode") val workshopCode: String? = null,

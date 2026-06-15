@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.feature.profile.data.mapper
 
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
-import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
 
-fun ElectronicFileResponse.toDomain(): ElectronicFileDN {
+fun ElectronicFileDTO.toDomain(): ElectronicFileDN {
     return ElectronicFileDN(
         categoryName = categoryName,
         contentServer = contentServer,
