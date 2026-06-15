@@ -8,5 +8,5 @@ import com.tamin.taminhamrah.model.utils.ListData
 
 interface  PensionRemoteDataSource {
     suspend fun getPensionInquiry(query: ApiQueryParamDN) : ListData<PensionInquiryDTO>
-    suspend fun getPensionerId(): List<PensionIdDTO>
+    suspend fun getPensionerId(): ListData<PensionIdDTO>
 }

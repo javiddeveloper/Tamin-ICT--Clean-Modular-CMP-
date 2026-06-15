@@ -30,7 +30,7 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getPensionerId(): List<PensionIdDTO> {
+    override suspend fun getPensionerId(): ListData<PensionIdDTO> {
         return try {
             val response = pensionApiService.getPensionerId()
             response.extractData()

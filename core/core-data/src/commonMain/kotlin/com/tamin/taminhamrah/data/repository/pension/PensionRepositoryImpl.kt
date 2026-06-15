@@ -24,6 +24,6 @@ class PensionRepositoryImpl(
 
     override suspend fun getPensionerId(): Flow<List<PensionIdDN>> = flow {
         val remoteData = pensionRemoteDataSource.getPensionerId()
-        emit(remoteData.map { it.toDomain() })
+        emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
     }
 }

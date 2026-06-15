@@ -30,11 +30,7 @@ class PensionInquiryViewModel(
         emit(PartialState.Loading(true))
         try {
             getPensionInquiryUseCase(
-                page = "1",
-                start = "0",
-                limit = "10",
-                filter = "[]",
-                sort = "[]"
+
             ).collect { list ->
                 emit(PartialState.PensionListLoaded(list.toPresentation()))
             }
@@ -46,7 +42,7 @@ class PensionInquiryViewModel(
     private fun handleLoadPensionerIds(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            getPensionerIdUseCase().collect { list ->
+            getPensionerIdUseCase.invoke().collect { list ->
                 emit(PartialState.PensionerIdsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
