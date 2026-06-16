@@ -1,151 +1,93 @@
-<div align="center">
-
-# TaminHamrah
+# tatmin-kmp
 
 
-Built with Kotlin Multiplatform (KMP) | Android & iOS
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-6366F1?style=flat-square)]()
-[![CI](https://github.com/rioX432/TaminHamrah/actions/workflows/ci.yml/badge.svg)](https://github.com/rioX432/TaminHamrah/actions/workflows/ci.yml)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/rioX432?style=flat-square&logo=github)](https://github.com/sponsors/rioX432)
+## Getting started
 
-</div>
+To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
----
+Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
-## Why TaminHamrah?
+## Add your files
 
-1. **Workflow fragmentation** — you find a model on CivitAI, then manually copy parameters into ComfyUI or A1111. There's no bridge between discovery and generation.
-2. **Metadata is buried** — generation parameters (prompt, sampler, CFG, seed) are hidden behind multiple clicks. Comparing model versions is tedious.
-3. **Mobile web is painful** — CivitAI's desktop site on mobile means pinch-zooming, slow loads, and no offline access.
+- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
+- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
 
-TaminHamrah is built for power users and creators who generate, not just browse.
-
-## Features
-
-- **Model Search & Browse** — filter by type (Checkpoint, LoRA, etc.), sort, period, and tags
-- **Swipe Discovery** — swipe-card stack for fast model browsing with gesture quick-actions
-- **Image Gallery** — staggered grid with full-screen viewer, pinch-to-zoom, and NSFW blur control
-- **Prompt Metadata** — view generation parameters and copy with one tap
-- **Prompt Templates** — built-in and user-created templates with variable support
-- **Favorites & Collections** — organize saved models into named collections
-- **ComfyUI & SD WebUI Integration** — send models to ComfyUI or Automatic1111/Forge, manage the generation queue, browse generation history, import custom workflows, and use LoRA/ControlNet support
-- **Civitai Link** — sync models directly to your ComfyUI instance via Civitai Link key
-- **AI Training Datasets** — collect ComfyUI generation outputs into labeled datasets with auto-tagging (seed, sampler, prompt hash), caption/tag batch editing, duplicate detection, and source tracking for model training
-- **Saved Search Filters** — save and quickly recall named search presets with filters (type, sort, period, tags, NSFW level)
-- **Multi-Source Search** — unified search across CivitAI, HuggingFace, and TensorArt with platform filter and source indicators
-- **Custom External Servers** — connect to any REST API image server, browse its gallery with filters, multi-select bulk delete, and image zoom modal
-- **Model Comparison** — compare two models side-by-side
-- **Model File Browser** — detect local model files with CivitAI hash matching
-- **Creator Follow & Feed** — follow creators and get a personalized feed of their latest models with pull-to-refresh
-- **Analytics** — usage analytics with browsing/search frequency charts and model popularity insights
-- **Social Sharing** — share models with customizable hashtags (#AIart, #ComfyUI, etc.) and copy/share to any app
-- **QR Code Sharing** — share and scan model links via QR code
-- **Model Notes & Tags** — add personal notes and tags to any model for your own organization
-- **Community Reviews** — read and submit reviews on models
-- **Backup & Restore** — export/import app data (collections, prompts, filters, notes, datasets) with granular category selection
-- **Background Downloads** — download model files with pause/resume queue management, hash verification, and notifications
-- **Real-time Generation Preview** — live WebSocket preview of ComfyUI generation progress with interrupt support
-- **ComfyHub** — browse and import community workflows from ComfyHub directly into your workflow library
-- **Image Similarity Search** — find visually similar models using on-device SigLIP-2 embeddings
-- **Text-to-Image Search** — describe what you want in natural language, find matching models via SigLIP-2 text encoder
-- **Model Update Notifications** — get notified when followed models receive updates
-- **Smart Recommendations** — personalized model suggestions with time-decay scoring and engagement tracking
-- **Browsing History** — dedicated history screen with search frequency charts
-- **Plugin System** — extend TaminHamrah with plugins for workflow engines (ComfyUI, External Server), export formats (kohya-ss), and themes
-- **Video Preview** — play video previews directly in gallery and model detail screens
-- **Fresh Find** — discover recently published models before they trend
-- **Quality Filter** — filter models by calculated quality score based on downloads, favorites, and ratings
-- **Integrations Hub** — unified management screen for ComfyUI, SD WebUI, Civitai Link, and external servers
-- **Cross-Platform** — native Android (Jetpack Compose) & iOS (SwiftUI) with 37 shared ViewModels in KMP commonMain
-
-## Who Is This For?
-
-- **Model hunters** — you browse CivitAI daily looking for new checkpoints and LoRAs to try
-- **Prompt engineers** — you study generation parameters from top-rated images to refine your own workflows
-- **ComfyUI/A1111 users** — you want a seamless bridge between discovering models on CivitAI and using them in your local setup
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Shared (KMP)** | Ktor Client, Kotlinx Serialization, Room KMP, Koin |
-| **Android** | Jetpack Compose, Material Design 3, Navigation 3, Coil |
-| **iOS** | SwiftUI |
-| **Architecture** | Clean Architecture + MVVM (UDF) |
-| **CI/CD** | GitHub Actions |
-
-## Architecture
-
-Architecture documentation removed.
-
-```mermaid
-graph TB
-    subgraph shared["Shared (KMP)"]
-        ktor["Ktor Client"] & repo["Repository"] --> usecase["Use Case"]
-        room["Room KMP (Cache)"] --> entity["Entity"]
-        usecase --> vm["Shared ViewModel"]
-    end
-    vm --> compose["Compose (Android)"]
-    vm -- "SKIE Observing" --> swiftui["SwiftUI (iOS)"]
+```
+cd existing_repo
+git remote add origin https://ci.tamin.ir/base/development/finance/tatmin-kmp.git
+git branch -M main
+git push -uf origin main
 ```
 
-## Getting Started
+## Integrate with your tools
 
-### Prerequisites
+- [ ] [Set up project integrations](https://ci.tamin.ir/base/development/finance/tatmin-kmp/-/settings/integrations)
 
-- Android Studio Ladybug or later
-- Xcode 15+ (for iOS)
-- JDK 17+
+## Collaborate with your team
 
-### Build & Run
+- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
+- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
+- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
+- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
+- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
 
-```bash
-# Clone
-git clone https://github.com/rioX432/TaminHamrah.git
-cd TaminHamrah
+## Test and Deploy
 
-# Android
-./gradlew :androidApp:installDebug
+Use the built-in continuous integration in GitLab.
 
-# iOS
-open iosApp/iosApp.xcodeproj
-```
+- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
+- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
+- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
+- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
+- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
 
-## Changelog
+***
 
-See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
+# Editing this README
+
+When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+
+## Suggestions for a good README
+
+Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+
+## Name
+Choose a self-explaining name for your project.
+
+## Description
+Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+
+## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+
+## Visuals
+Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+
+## Installation
+Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+## Usage
+Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+
+## Roadmap
+If you have ideas for releases in the future, it is a good idea to list them in the README.
 
 ## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
 
-Contributions are welcome!
+For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
 
-For security issues, see [SECURITY.md](SECURITY.md).
+You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
 
-We especially welcome contributions related to:
-- **ComfyUI / SD WebUI integration** — API clients, workflow export formats, protocol support
-- **Power user features** — metadata panels, comparison tools, template systems
-
-## Support the Project
-
-If TaminHamrah improves your daily CivitAI workflow, consider supporting development:
-
-- Give it a **star** — it helps others discover the project
-- [**Sponsor**](https://github.com/sponsors/rioX432) — fund ongoing development and new features
-- [**Open an issue**](https://github.com/rioX432/TaminHamrah/issues/new/choose) — report bugs or request features
-
-## Disclaimer
-
-TaminHamrah is an unofficial, community-built client. It is not affiliated with, endorsed by, or associated with Civitai Inc. All CivitAI data is accessed through their public API.
+## Authors and acknowledgment
+Show your appreciation to those who have contributed to the project.
 
 ## License
+For open source projects, say how it is licensed.
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-**RIO** ([@rioX432](https://github.com/rioX432))
-
-Mobile App Developer based in Tokyo — Android | iOS | KMP
+## Project status
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
