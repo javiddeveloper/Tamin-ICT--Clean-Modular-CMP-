@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.model.common.RecipientDN
+import com.tamin.taminhamrah.model.pension.RecipientPR
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
@@ -36,5 +38,17 @@ fun PensionIdDN.toPresentation(): PensionIdPR {
 
 @JvmName("toPresentationPensionIdDN")
 fun List<PensionIdDN>.toPresentation(): List<PensionIdPR> {
+    return this.map { it.toPresentation() }
+}
+
+fun RecipientDN.toPresentation(): RecipientPR {
+    return RecipientPR(
+        recipientCode = recipientCode,
+        recipientName = recipientName
+    )
+}
+
+@JvmName("toPresentationRecipientDN")
+fun List<RecipientDN>.toPresentation(): List<RecipientPR> {
     return this.map { it.toPresentation() }
 }

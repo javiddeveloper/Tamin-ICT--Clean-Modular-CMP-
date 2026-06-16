@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIn
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUiState
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.model.pension.RecipientPR
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -23,6 +24,7 @@ fun PensionInquiryScreen(
     LaunchedEffect(Unit) {
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionInquiry)
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionerIds)
+        viewModel.sendIntent(PensionInquiryIntent.LoadRecipients)
     }
 
     PensionInquiryContent(state)
@@ -37,9 +39,9 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty()) {
+            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty()) {
+            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty()) {
                 Text(
                     text = state.error ?: "خطای ناشناخته",
                     color = MaterialTheme.colorScheme.error,
@@ -51,6 +53,19 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (state.recipients.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "لیست دریافت‌کنندگان:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(state.recipients) { recipient ->
+                            RecipientItem(recipient)
+                        }
+                    }
+
                     if (state.pensionerIds.isNotEmpty()) {
                         item {
                             Text(
@@ -91,6 +106,20 @@ fun PensionIdItem(item: PensionIdPR) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "شناسه مستمری‌بگیر: ${item.pensionerId}")
+        }
+    }
+}
+
+@Composable
+fun RecipientItem(item: RecipientPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "نام دریافت‌کننده: ${item.recipientName}")
+            Text(text = "کد دریافت‌کننده: ${item.recipientCode}")
         }
     }
 }

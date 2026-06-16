@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUi
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryEvent
 import com.tamin.taminhamrah.mapper.pension.toPresentation
+import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.merge
 
 class PensionInquiryViewModel(
     private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
-    private val getPensionerIdUseCase: GetPensionerIdUseCase
+    private val getPensionerIdUseCase: GetPensionerIdUseCase,
+    private val getRecipientListUseCase: GetRecipientListUseCase
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -23,6 +25,18 @@ class PensionInquiryViewModel(
         return when (intent) {
             is PensionInquiryIntent.LoadPensionInquiry -> handleLoadPensionInquiry()
             is PensionInquiryIntent.LoadPensionerIds -> handleLoadPensionerIds()
+            is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
+        }
+    }
+
+    private fun handleLoadRecipients(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getRecipientListUseCase().collect { list ->
+                emit(PartialState.RecipientsLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -64,6 +78,11 @@ class PensionInquiryViewModel(
         is PartialState.PensionerIdsLoaded -> currentState.copy(
             isLoading = false,
             pensionerIds = partialState.list
+        )
+
+        is PartialState.RecipientsLoaded -> currentState.copy(
+            isLoading = false,
+            recipients = partialState.list
         )
     }
 
