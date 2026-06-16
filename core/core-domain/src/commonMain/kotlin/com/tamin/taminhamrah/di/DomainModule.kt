@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
@@ -47,4 +48,5 @@ val domainModule = module {
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
+    factoryOf(::GetTalfighInfosUseCase)
 }

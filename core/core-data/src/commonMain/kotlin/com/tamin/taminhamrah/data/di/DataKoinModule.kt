@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.data.di
 
 import com.tamin.taminhamrah.data.repository.UserRepositoryImpl
 import com.tamin.taminhamrah.data.repository.CityProvinceRepositoryImpl
+import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pension.PensionRepositoryImpl
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.CityProvinceRepository
@@ -14,4 +15,5 @@ val dataKoinModule = module {
     singleOf(::UserRepositoryImpl) { bind<UserRepository>() }
     singleOf(::CityProvinceRepositoryImpl) { bind<CityProvinceRepository>() }
     singleOf(::PensionRepositoryImpl) { bind<PensionRepository>() }
+    singleOf(::HistoryRepositoryImpl) { bind<com.tamin.taminhamrah.repository.HistoryRepository>() }
 }

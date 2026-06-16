@@ -7,6 +7,7 @@
 package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.apiService.CommonApiService
+import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import de.jensklingenberg.ktorfit.Ktorfit
@@ -54,6 +55,11 @@ val ApiClientsModule = module {
     }
 
     single<PensionApiService>(named("pensionApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.create()
+    }
+
+    single<HistoryApiServices> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.create()
     }
