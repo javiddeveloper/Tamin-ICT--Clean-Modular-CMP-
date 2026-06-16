@@ -139,7 +139,8 @@ class ProfileViewModel(
     private fun handleLoadSubDominants(): Flow<PartialState> {
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
-            subdominantUseCase.invoke().collect {
+            subdominantUseCase.invoke(
+            ).collect {
                 emit(PartialState.ScreenStateChanged.Success)
             }
         }

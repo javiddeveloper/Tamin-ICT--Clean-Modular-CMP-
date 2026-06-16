@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.data.repository.pension
 
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
+import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -18,6 +19,11 @@ class PensionRepositoryImpl(
         filters: List<ApiFilterDN>
     ): Flow<List<PensionInquiryDN>> = flow {
         val remoteData = pensionRemoteDataSource.getPensionInquiry(ApiQueryParamDN(filters = filters))
+        emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
+    }
+
+    override suspend fun getPensionerId(): Flow<List<PensionIdDN>> = flow {
+        val remoteData = pensionRemoteDataSource.getPensionerId()
         emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
     }
 }
