@@ -139,13 +139,7 @@ class ProfileViewModel(
     private fun handleLoadSubDominants(): Flow<PartialState> {
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
-            subdominantUseCase.invoke(
-                page = "1",
-                start = "0",
-                limit = "10",
-                filter = "[]",
-                sort = "[]"
-            ).collect {
+            subdominantUseCase.invoke().collect {
                 emit(PartialState.ScreenStateChanged.Success)
             }
         }
@@ -154,11 +148,7 @@ class ProfileViewModel(
     private fun handleLoadBankAccountList(): Flow<PartialState> {
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
-            getBankAccountListUseCase.invoke(page = "1",
-                start = "0",
-                limit = "10",
-                filter = "[]",
-                sort = "[]").collect {
+            getBankAccountListUseCase.invoke().collect {
                     emit(PartialState.ScreenStateChanged.Success)
             }
         }
@@ -176,11 +166,7 @@ class ProfileViewModel(
     private fun handleGetRelationTaminAll(): Flow<PartialState> {
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
-            getRelationTaminAllUseCase.invoke(page = "1",
-                start = "0",
-                limit = "10",
-                filter = "[]",
-                sort = "[]").collect {
+            getRelationTaminAllUseCase.invoke().collect {
                 emit(PartialState.ScreenStateChanged.Success)
             }
         }
@@ -189,11 +175,7 @@ class ProfileViewModel(
     private fun handleLoadElectronicFile(): Flow<PartialState> {
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
-            getElectronicFileUseCase.invoke(page = "1",
-                start = "0",
-                limit = "10",
-                filter = "[]",
-                sort = "[]").collect {
+            getElectronicFileUseCase.invoke().collect {
                 emit(PartialState.ScreenStateChanged.Success)
             }
         }
