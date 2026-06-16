@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
@@ -38,21 +39,14 @@ class FakeUserRepository : UserRepository {
     }
 
     override suspend fun getSubDominantsInfo(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<SubdominantDN> = flow {
         subDominantsResult?.let { emit(it) }
     }
 
     override suspend fun getBankAccountList(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
+
     ): Flow<List<BankAccountDN>> = flow {
         emit(bankAccountListResult)
     }
@@ -62,21 +56,13 @@ class FakeUserRepository : UserRepository {
     }
 
     override suspend fun getRelationTaminAll(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<List<ActiveRelationDN>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun getElectronicFile(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<List<ElectronicFileDN>> {
         TODO("Not yet implemented")
     }
