@@ -8,16 +8,16 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
-import com.tamin.taminhamrah.model.activeRelation.ActiveRelationResponse
-import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
-import com.tamin.taminhamrah.model.erecords.images.ElectronicFileResponse
-import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
-import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchData
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
+import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
-import com.tamin.taminhamrah.model.user.TaminRelationResponse
+import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.user.VerifyMobileReq
-import com.tamin.taminhamrah.tools.BaseResponse
+import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.util.HeaderConstant
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Body
@@ -28,23 +28,24 @@ import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
+import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
 internal interface UserApiService {
     @GET("central-reg/personal")
-    suspend fun getIdentityInfo(): BaseResponse<IdentityInfoDto>
+    suspend fun getIdentityInfo(): BaseDTO<IdentityInfoDto>
 
     @GET("booklet-req/profile-image")
-    suspend fun getUserProfileImage(): BaseResponse<String>
+    suspend fun getUserProfileImage(): BaseDTO<String>
 
     @GET("personals/relation")
-    suspend fun fetchTaminRelation(): BaseResponse<TaminRelationResponse>
+    suspend fun fetchTaminRelation(): BaseDTO<TaminRelationDTO>
 
     @GET("personals/image-v2/{branchCode}")
     suspend fun sendImageRequest(
         @Path("branchCode") branchCode: String,
         @Query("filter") filter: String
-    ): BaseResponse<String>
+    ): BaseDTO<String>
 
 
 
@@ -93,54 +94,38 @@ internal interface UserApiService {
         @Header("Referer") referer: String,
         @Url url: String,
         @Query("mobile") mobile: String
-    ): BaseResponse<EditMobileResponseDto>
+    ): BaseDTO<EditMobileResponseDto>
 
     @POST
     suspend fun verifyChangeMobileCode(
         @Header("Referer") referer: String,
         @Url url:String,
         @Body loginRequest: VerifyMobileReq,
-    ): BaseResponse<String>
+    ): BaseDTO<String>
 
 
     @GET("personals/subdominant")
     suspend fun getSubDominantsInfo(
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
-    ): BaseResponse<SubDominantResponseData>
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<SubDominantResponseDTO>
 
     @GET("personals/accounts")
     suspend fun getBankAccountList(
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
-    ): BaseResponse<ListData<BankAccountResponse>>
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<BankAccountDTO>>
 
 
     @GET("subdominants/getInsuredActiveBranch")
-    suspend fun getInsuredActiveBranch(): BaseResponse<List<InsuredActiveBranchData>>
+    suspend fun getInsuredActiveBranch(): BaseDTO<List<InsuredActiveBranchDTO>>
 
     @GET("relation-tamins/all")
     suspend fun getRelationTaminAll(
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
-    ): BaseResponse<ListData<ActiveRelationResponse>>
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<ActiveRelationDTO>>
 
     @GET("erecords/images")
     suspend fun getElectronicFile(
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
-    ): BaseResponse<ListData<ElectronicFileResponse>>
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<ElectronicFileDTO>>
 
 }

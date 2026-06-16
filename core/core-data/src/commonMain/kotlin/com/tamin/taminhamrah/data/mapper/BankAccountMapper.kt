@@ -2,12 +2,12 @@ package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.bankAccount.AccountTypeDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
-import com.tamin.taminhamrah.model.bankAccount.BankAccountResponse
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountType
 import com.tamin.taminhamrah.model.bankAccount.BankInfo
 import com.tamin.taminhamrah.model.bankAccount.BankInfoDN
 
-fun BankAccountResponse.toDomain(): BankAccountDN {
+fun BankAccountDTO.toDomain(): BankAccountDN {
     return BankAccountDN(
         dateOfFinish = dateOfFinish,
         creationTime = creationTime,

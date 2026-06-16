@@ -1,10 +1,10 @@
 package com.tamin.taminhamrah.data.mapper
 
-import com.tamin.taminhamrah.model.subDominant.SubDominantResponseData
+import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantItemDN
 
-internal fun SubDominantResponseData.toDomain(): SubdominantDN = SubdominantDN(
+internal fun SubDominantResponseDTO.toDomain(): SubdominantDN = SubdominantDN(
     list = list?.map { item ->
         val relation = item.relationWithTamin
         val personal = relation?.personal

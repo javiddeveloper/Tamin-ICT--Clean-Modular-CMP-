@@ -10,22 +10,29 @@ package com.tamin.taminhamrah.tools.apiQueryBuilder
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.ApiSortDN
+import com.tamin.taminhamrah.util.CommonRequestConstants
 import kotlinx.serialization.json.Json
 
 internal class ApiQueryBuilderImpl : ApiQueryBuilder {
     override fun buildQuery(query: ApiQueryParamDN): Map<String, String> {
-        return buildMap {
+        return buildMap<String, String> {
             put("page", query.page.toString())
             put("start", query.start.toString())
             put("limit", query.limit.toString())
 
-            if (query.filters.isNotEmpty()) {
-                put("filter", buildFilterJson(query.filters))
+            val filterVal: String = if (query.filters.isNotEmpty()) {
+                buildFilterJson(query.filters)
+            } else {
+                CommonRequestConstants.FILTER
             }
+            put("filter", filterVal)
 
-            if (query.sorts.isNotEmpty()) {
-                put("sort", buildSortJson(query.sorts))
+            val sortVal: String = if (query.sorts.isNotEmpty()) {
+                buildSortJson(query.sorts)
+            } else {
+                CommonRequestConstants.SORT
             }
+            put("sort", sortVal)
         }
     }
 

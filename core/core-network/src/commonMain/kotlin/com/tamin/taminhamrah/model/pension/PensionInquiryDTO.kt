@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PensionInquiryResponse (
+data class PensionInquiryDTO (
     @SerialName("branchCode") val branchCode: String? = null,
     @SerialName("insuranceNumber") val insuranceNumber: String? = null,
     @SerialName("pensionerRisuid") val pensionerRisUid: String? = null,

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BankAccountResponse(
+data class BankAccountDTO(
     @SerialName("id")  val id: Long? = null,
     @SerialName("dateOfFinish")  val dateOfFinish: Long? = null,
     @SerialName("creationTime")  val creationTime: String? = null,

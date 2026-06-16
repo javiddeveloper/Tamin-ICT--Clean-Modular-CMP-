@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SubDominantResponseData(
+data class SubDominantResponseDTO(
     @SerialName("list") val list: List<SubDominantResponseItem> ? = null,
     @SerialName("pageNumber") val pageNumber: Int ? = null,
     @SerialName("pageSize") val pageSize: Int ? = null,
