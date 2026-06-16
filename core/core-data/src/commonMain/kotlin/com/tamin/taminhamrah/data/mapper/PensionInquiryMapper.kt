@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.model.pension.PensionIdDN
+import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 
@@ -18,5 +20,11 @@ fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
         pensionEndDate = pensionEndDate,
         nationalId = nationalId,
         paymentAmount = paymentAmount
+    )
+}
+
+fun PensionIdDTO.toDomain(): PensionIdDN {
+    return PensionIdDN(
+        pensionerId = pensionerId
     )
 }
