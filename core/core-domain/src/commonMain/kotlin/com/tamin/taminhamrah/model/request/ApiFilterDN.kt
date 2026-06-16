@@ -7,6 +7,7 @@
 
 package com.tamin.taminhamrah.model.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,8 +21,8 @@ data class ApiQueryParamDN(
 
 @Serializable
 enum class SortDirection(val value: String) {
-    ASC("ASC"),
-    DESC("DESC"),
+    @SerialName("ASC") ASC("ASC"),
+    @SerialName("DESC") DESC("DESC"),
 }
 
 @Serializable
@@ -32,24 +33,26 @@ data class ApiSortDN(
 
 @Serializable
 enum class FilterOperator(val value: String) {
-    EQUAL("EQUAL"),
-    CONTAINS("CONTAINS"),
-    LIKE("LIKE"),
-    EQ("EQ"),
-    EQUAL_LOWER("equal")
+    @SerialName("EQUAL") EQUAL("EQUAL"),
+    @SerialName("CONTAINS") CONTAINS("CONTAINS"),
+    @SerialName("LIKE") LIKE("LIKE"),
+    @SerialName("EQ") EQ("EQ"),
+    @SerialName("equal") EQUAL_LOWER("equal")
 }
 
 @Serializable
 enum class FilterProperty(val key: String) {
-    SERIAL_ID("serialId"),
-    MOBILE("mobile"),
-    CITY_CODE("cityCode"),
-    PROVINCE_CODE("provinceCode")
+    @SerialName("serialId") SERIAL_ID("serialId"),
+    @SerialName("mobile") MOBILE("mobile"),
+    @SerialName("cityCode") CITY_CODE("cityCode"),
+    @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
+    @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
+    @SerialName("startDate") START_DATE("startDate")
 }
 
 @Serializable
 data class ApiFilterDN(
     val property: FilterProperty,
-    val operator: FilterOperator,
     val value: String,
+    val operator: FilterOperator,
 )

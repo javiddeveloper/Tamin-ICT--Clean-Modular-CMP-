@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.apiService.pension
 
-import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
 import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
@@ -22,10 +21,9 @@ interface PensionApiService {
     suspend fun getPensionerId(): BaseDTO<ListData<PensionIdDTO>>
 
 
-
     @GET("hokm")
     suspend fun getEdictPensioner(
-        @Query("filter") filter: String
+        @QueryMap parameters: Map<String, String>
     ): BaseDTO<EdictPensionerDTO?>?
 
 }
