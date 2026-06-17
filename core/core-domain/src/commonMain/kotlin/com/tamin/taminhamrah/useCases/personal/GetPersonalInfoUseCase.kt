@@ -1,0 +1,12 @@
+package com.tamin.taminhamrah.useCases.personal
+
+import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import com.tamin.taminhamrah.repository.personal.PersonalRepository
+
+class GetPersonalInfoUseCase(
+    private val personalRepository: PersonalRepository
+) {
+    suspend operator fun invoke(): PersonalInfoDN? {
+        return personalRepository.getPersonalInfo()
+    }
+}

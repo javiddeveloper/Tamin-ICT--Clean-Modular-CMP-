@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
+import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -26,6 +27,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionInquiry)
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionerIds)
         viewModel.sendIntent(PensionInquiryIntent.LoadRecipients)
+        viewModel.sendIntent(PensionInquiryIntent.LoadPersonalInfo)
     }
 
     PensionInquiryContent(state)
@@ -42,9 +44,9 @@ fun PensionInquiryContent(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty()) {
+            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty()) {
+            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null) {
                 Text(
                     text = state.error ?: "خطای ناشناخته",
                     color = MaterialTheme.colorScheme.error,
@@ -56,6 +58,17 @@ fun PensionInquiryContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (state.personalInfo != null) {
+                        item {
+                            Text(
+                                text = "اطلاعات فردی:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            PersonalInfoItem(state.personalInfo)
+                        }
+                    }
+
                     if (state.recipients.isNotEmpty()) {
                         item {
                             Text(
@@ -107,6 +120,29 @@ fun PensionInquiryContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PersonalInfoItem(info: PersonalInfoPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            val personal = info.personal
+            if (personal != null) {
+                Text(text = "نام: ${personal.firstName} ${personal.lastName}", style = MaterialTheme.typography.titleMedium)
+                Text(text = "نام پدر: ${personal.fatherName}")
+                Text(text = "کد ملی: ${personal.nationalId}")
+                Text(text = "شماره شناسنامه: ${personal.ssn}")
+                Text(text = "جنسیت: ${personal.genderDesc}")
+            }
+            Text(text = "شماره بیمه: ${info.insuranceId}")
+            Text(text = "شعبه: ${info.branch}")
+            Text(text = "استان: ${info.provinceName}")
+            Text(text = "شماره موبایل: ${info.mobileNumber}")
         }
     }
 }
