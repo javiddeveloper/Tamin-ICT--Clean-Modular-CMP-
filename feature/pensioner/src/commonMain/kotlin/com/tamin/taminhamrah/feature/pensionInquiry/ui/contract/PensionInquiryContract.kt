@@ -12,7 +12,7 @@ data class PensionInquiryUiState(
     val error: String? = null,
     val pensionList: List<PensionInquiryPR> = emptyList(),
     val pensionerIds: List<PensionIdPR> = emptyList(),
-    val recipients: List<RecipientPR> = emptyList()
+    val recipients: List<RecipientPR> = emptyList(),
     val edictPensioner: EdictPensionerPR? = null
 ) {
     sealed class PartialState {

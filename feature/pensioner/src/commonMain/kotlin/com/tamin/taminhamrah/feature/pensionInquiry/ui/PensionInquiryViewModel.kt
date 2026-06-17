@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.flow
 
 class PensionInquiryViewModel(
     private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
-    private val getRecipientListUseCase: GetRecipientListUseCase
+    private val getRecipientListUseCase: GetRecipientListUseCase,
     private val getPensionerIdUseCase: GetPensionerIdUseCase,
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
