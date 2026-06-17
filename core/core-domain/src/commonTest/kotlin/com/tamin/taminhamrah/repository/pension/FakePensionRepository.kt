@@ -1,7 +1,11 @@
 package com.tamin.taminhamrah.repository.pension
 
 import com.tamin.taminhamrah.model.pension.PensionIdDN
+import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -9,8 +13,10 @@ import kotlinx.coroutines.flow.flow
 class FakePensionRepository : PensionRepository {
     var pensionInquiryResult: List<PensionInquiryDN> = emptyList()
     var pensionIdResult: List<PensionIdDN> = emptyList()
+    var edictPensionerResult: EdictPensionerDN? = null
+    var pensionIdResult: List<PensionIdDN> = emptyList()
     var shouldThrowError: Boolean = false
-    var getPensionInquiryError: Throwable? = null
+    var error: Throwable? = null
 
     override suspend fun getPensionInquiry(
         filters: List<ApiFilterDN>
@@ -19,6 +25,14 @@ class FakePensionRepository : PensionRepository {
             throw getPensionInquiryError ?: RuntimeException("Unknown error")
         }
         emit(pensionInquiryResult)
+    }
+
+
+    override suspend fun getEdictPensioner(query: ApiQueryParamDN): Flow<EdictPensionerDN?> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(edictPensionerResult)
     }
 
     override suspend fun getPensionerId(): Flow<List<PensionIdDN>> = flow {

@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
@@ -38,6 +39,7 @@ val domainModule = module {
     factoryOf(::IdentityInfoUseCase)
     factoryOf(::GetPensionInquiryUseCase)
     factoryOf(::GetPensionerIdUseCase)
+    factoryOf(::GetEdictPensionerUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
     factoryOf(::SignOutUseCase)

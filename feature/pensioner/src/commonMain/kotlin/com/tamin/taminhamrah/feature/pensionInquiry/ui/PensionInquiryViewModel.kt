@@ -6,17 +6,22 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUi
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryEvent
 import com.tamin.taminhamrah.mapper.pension.toPresentation
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.merge
 
 class PensionInquiryViewModel(
     private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
-    private val getPensionerIdUseCase: GetPensionerIdUseCase,
     private val getRecipientListUseCase: GetRecipientListUseCase
+    private val getPensionerIdUseCase: GetPensionerIdUseCase,
+    private val getEdictPensionerUseCase: GetEdictPensionerUseCase
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -25,6 +30,7 @@ class PensionInquiryViewModel(
         return when (intent) {
             is PensionInquiryIntent.LoadPensionInquiry -> handleLoadPensionInquiry()
             is PensionInquiryIntent.LoadPensionerIds -> handleLoadPensionerIds()
+            is PensionInquiryIntent.LoadEdict -> handleLoadEdict(intent.pensionerId)
             is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
         }
     }
@@ -43,9 +49,7 @@ class PensionInquiryViewModel(
     private fun handleLoadPensionInquiry(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            getPensionInquiryUseCase(
-
-            ).collect { list ->
+            getPensionInquiryUseCase().collect { list ->
                 emit(PartialState.PensionListLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
@@ -56,8 +60,29 @@ class PensionInquiryViewModel(
     private fun handleLoadPensionerIds(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            getPensionerIdUseCase.invoke().collect { list ->
-                emit(PartialState.PensionerIdsLoaded(list.toPresentation()))
+            getPensionerIdUseCase().collect { list ->
+                val presentationList = list.toPresentation()
+                emit(PartialState.PensionerIdsLoaded(presentationList))
+                if (presentationList.isNotEmpty()) {
+                    sendIntent(PensionInquiryIntent.LoadEdict(presentationList.first().pensionerId))
+                }
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
+    private fun handleLoadEdict(pensionerId: String): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            val query = ApiQueryParamDN(
+                filters = listOf(
+                    ApiFilterDN(FilterProperty.START_DATE, "14000101", FilterOperator.EQUAL),
+                    ApiFilterDN(FilterProperty.PENSIONER_ID, pensionerId, FilterOperator.EQUAL)
+                )
+            )
+            getEdictPensionerUseCase(query).collect { edict ->
+                emit(PartialState.EdictLoaded(edict?.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -74,7 +99,6 @@ class PensionInquiryViewModel(
             isLoading = false,
             pensionList = partialState.list
         )
-
         is PartialState.PensionerIdsLoaded -> currentState.copy(
             isLoading = false,
             pensionerIds = partialState.list
@@ -83,6 +107,10 @@ class PensionInquiryViewModel(
         is PartialState.RecipientsLoaded -> currentState.copy(
             isLoading = false,
             recipients = partialState.list
+        )
+        is PartialState.EdictLoaded -> currentState.copy(
+            isLoading = false,
+            edictPensioner = partialState.edict
         )
     }
 

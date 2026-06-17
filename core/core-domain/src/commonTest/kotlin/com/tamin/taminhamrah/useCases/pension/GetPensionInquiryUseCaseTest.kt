@@ -41,7 +41,7 @@ class GetPensionInquiryUseCaseTest : BaseUseCaseTest() {
         )
         pensionRepository.pensionInquiryResult = expectedList
 
-        useCase.invoke().test {
+        useCase.invoke(emptyList()).test {
             val result = awaitItem()
             assertEquals(1, result.size)
             assertEquals("Test User", result[0].fullName)
@@ -53,10 +53,10 @@ class GetPensionInquiryUseCaseTest : BaseUseCaseTest() {
 
         val expectedException = RuntimeException("get pension failed")
         pensionRepository.shouldThrowError = true
-        pensionRepository.getPensionInquiryError = expectedException
+        pensionRepository.error = expectedException
 
 
-        useCase.invoke().test {
+        useCase.invoke(emptyList()).test {
             val actualException = awaitError()
             assertEquals(expectedException.message, actualException.message)
         }

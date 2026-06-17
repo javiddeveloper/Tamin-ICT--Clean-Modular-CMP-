@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUiState
+import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
@@ -31,7 +32,9 @@ fun PensionInquiryScreen(
 }
 
 @Composable
-fun PensionInquiryContent(state: PensionInquiryUiState) {
+fun PensionInquiryContent(
+    state: PensionInquiryUiState
+) {
     Scaffold(
         topBar = {
             @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +54,7 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     if (state.recipients.isNotEmpty()) {
                         item {
@@ -66,12 +69,23 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
                         }
                     }
 
+                    if (state.edictPensioner != null) {
+                        item {
+                            Text(
+                                text = "حکم مستمری:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            EdictItem(state.edictPensioner)
+                        }
+                    }
+
                     if (state.pensionerIds.isNotEmpty()) {
                         item {
                             Text(
                                 text = "شناسه‌های مستمری‌بگیر:",
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                             )
                         }
                         items(state.pensionerIds) { idItem ->
@@ -84,7 +98,7 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
                             Text(
                                 text = "لیست استعلام مستمری:",
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                             )
                         }
                         items(state.pensionList) { item ->
@@ -93,6 +107,24 @@ fun PensionInquiryContent(state: PensionInquiryUiState) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun EdictItem(edict: EdictPensionerPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            val fullName = "${edict.edictInfo?.firstName ?: ""} ${edict.edictInfo?.lastName ?: ""}".trim()
+            Text(text = "نام و نام خانوادگی: $fullName", style = MaterialTheme.typography.titleMedium)
+            Text(text = "شعبه: ${edict.branchName}")
+            Text(text = "سال: ${edict.edictYear} ماه: ${edict.edictMonth}")
+            Text(text = "مبلغ کل: ${edict.edictInfo?.totalAmount ?: "0"}")
+            Text(text = "قابل پرداخت: ${edict.edictInfo?.payableMonthly ?: "0"}")
+            Text(text = "به حروف: ${edict.edictInfo?.lettersPayableMonthly ?: ""}")
         }
     }
 }
