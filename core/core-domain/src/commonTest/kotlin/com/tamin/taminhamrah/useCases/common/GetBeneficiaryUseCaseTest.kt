@@ -29,7 +29,7 @@ class GetBeneficiaryUseCaseTest : BaseUseCaseTest() {
         )
         commonRepository.beneficiaryResult = expectedList
 
-        useCase.invoke(ApiQueryParamDN()).test {
+        useCase.invoke().test {
             val result = awaitItem()
             assertEquals(2, result.size)
             assertEquals("Melli", result[0].bankName)
@@ -43,7 +43,7 @@ class GetBeneficiaryUseCaseTest : BaseUseCaseTest() {
         commonRepository.shouldThrowError = true
         commonRepository.getBeneficiaryError = expectedException
 
-        useCase.invoke(ApiQueryParamDN()).test {
+        useCase.invoke().test {
             val actualException = awaitError()
             assertEquals(expectedException.message, actualException.message)
         }
