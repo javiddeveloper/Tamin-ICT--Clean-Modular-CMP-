@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.UserTestData
-import com.tamin.taminhamrah.model.user.VerifyMobileReq
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

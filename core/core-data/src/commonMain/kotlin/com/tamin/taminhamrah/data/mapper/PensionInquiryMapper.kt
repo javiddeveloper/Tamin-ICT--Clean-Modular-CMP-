@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.installment.*
 
 fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
     return PensionInquiryDN(
@@ -103,5 +104,40 @@ fun EdictPensionerDetailDTO.toDomain(): EdictPensionerDetailDN {
         fieldValue = fieldValue,
         index = index,
         packageName = packageName
+    )
+}
+
+fun DeferredInstallmentRequestDN.toDTO(): DeferredInstallmentRequest {
+    return DeferredInstallmentRequest(
+        bankDTO = bank?.toDTO(),
+        bankBranch = bankBranch,
+        garanteeType = garanteeType,
+        guaranteeAmount = guaranteeAmount,
+        installmentAmount = installmentAmount,
+        installmentCount = installmentCount,
+        loanAmount = loanAmount,
+        pensionerId = pensionerId,
+        birthDate = birthDate,
+        firstName = firstName,
+        lastName = lastName,
+        nationalId = nationalId
+    )
+}
+
+fun BankDN.toDTO(): BankDTO {
+    return BankDTO(
+        bankCode = bankCode
+    )
+}
+
+fun DeferredInstallmentCertificateDTO.toDomain(): DeferredInstallmentCertificateDN {
+    return DeferredInstallmentCertificateDN(
+        request = request?.toDomain()
+    )
+}
+
+fun RequestCertificateDTO.toDomain(): RequestCertificateDN {
+    return RequestCertificateDN(
+        refCode = refCode
     )
 }
