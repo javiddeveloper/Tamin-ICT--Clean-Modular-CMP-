@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
+import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.flow
 
 class PensionInquiryViewModel(
     private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
+    private val getRecipientListUseCase: GetRecipientListUseCase
     private val getPensionerIdUseCase: GetPensionerIdUseCase,
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
@@ -29,6 +31,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadPensionInquiry -> handleLoadPensionInquiry()
             is PensionInquiryIntent.LoadPensionerIds -> handleLoadPensionerIds()
             is PensionInquiryIntent.LoadEdict -> handleLoadEdict(intent.pensionerId)
+            is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
+        }
+    }
+
+    private fun handleLoadRecipients(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getRecipientListUseCase().collect { list ->
+                emit(PartialState.RecipientsLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -88,6 +102,11 @@ class PensionInquiryViewModel(
         is PartialState.PensionerIdsLoaded -> currentState.copy(
             isLoading = false,
             pensionerIds = partialState.list
+        )
+
+        is PartialState.RecipientsLoaded -> currentState.copy(
+            isLoading = false,
+            recipients = partialState.list
         )
         is PartialState.EdictLoaded -> currentState.copy(
             isLoading = false,

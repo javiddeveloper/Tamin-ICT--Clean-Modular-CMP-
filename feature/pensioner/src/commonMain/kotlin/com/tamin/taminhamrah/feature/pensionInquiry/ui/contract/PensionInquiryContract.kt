@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.model.pension.RecipientPR
 
 @Immutable
 data class PensionInquiryUiState(
@@ -11,6 +12,7 @@ data class PensionInquiryUiState(
     val error: String? = null,
     val pensionList: List<PensionInquiryPR> = emptyList(),
     val pensionerIds: List<PensionIdPR> = emptyList(),
+    val recipients: List<RecipientPR> = emptyList()
     val edictPensioner: EdictPensionerPR? = null
 ) {
     sealed class PartialState {
@@ -18,6 +20,7 @@ data class PensionInquiryUiState(
         data class Error(val message: String?) : PartialState()
         data class PensionListLoaded(val list: List<PensionInquiryPR>) : PartialState()
         data class PensionerIdsLoaded(val list: List<PensionIdPR>) : PartialState()
+        data class RecipientsLoaded(val list: List<RecipientPR>) : PartialState()
         data class EdictLoaded(val edict: EdictPensionerPR?) : PartialState()
     }
 }
@@ -25,6 +28,7 @@ data class PensionInquiryUiState(
 sealed class PensionInquiryIntent {
     data object LoadPensionInquiry : PensionInquiryIntent()
     data object LoadPensionerIds : PensionInquiryIntent()
+    data object LoadRecipients : PensionInquiryIntent()
     data class LoadEdict(val pensionerId: String) : PensionInquiryIntent()
 }
 

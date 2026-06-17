@@ -7,8 +7,10 @@
 package com.tamin.taminhamrah.apiService
 
 import com.tamin.core.network.model.common.CityNameDto
-import com.tamin.core.network.model.common.MainServiceDto
+import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
+import com.tamin.taminhamrah.model.common.RecipientDTO
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.QueryMap
@@ -27,4 +29,7 @@ internal interface CommonApiService {
 
     @GET
     suspend fun getMainMenu(@Url url: String): BaseDTO<List<MainServiceDto>>
+
+    @GET("recipients")
+    suspend fun getRecipientList(@QueryMap parameters: Map<String, String>): BaseDTO<ListData<RecipientDTO>>
 }
