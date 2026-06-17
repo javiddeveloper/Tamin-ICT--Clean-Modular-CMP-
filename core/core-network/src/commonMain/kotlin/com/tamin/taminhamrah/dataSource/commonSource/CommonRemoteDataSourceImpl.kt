@@ -16,7 +16,9 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.apiService.CommonApiService
+import com.tamin.taminhamrah.model.common.BeneficiaryDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.utils.ListData
 
 internal class CommonRemoteDataSourceImpl(
     private val commonApiService: CommonApiService,
@@ -64,6 +66,17 @@ internal class CommonRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.UNKNOWN)
             )
+        }
+    }
+
+    override suspend fun getBeneficiary(query: ApiQueryParamDN): ListData<BeneficiaryDTO> {
+        return try {
+            val response = commonApiService.getBeneficiary(
+                queryBuilder.buildQuery(query)
+            )
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
         }
     }
 }
