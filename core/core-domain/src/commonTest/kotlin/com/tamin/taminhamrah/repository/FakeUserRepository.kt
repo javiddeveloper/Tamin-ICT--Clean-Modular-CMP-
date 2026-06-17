@@ -5,9 +5,11 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -20,72 +22,73 @@ class FakeUserRepository : UserRepository {
     var bankAccountListResult: List<BankAccountDN> = emptyList()
     var changeMobileResult: EditMobileResponseDN? = null
     var verifyChangeMobileResult: String = ""
+    var insuredActiveBranchResult: List<InsuredActiveBranchDN> = emptyList()
+    var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
+    var electronicFileResult: List<ElectronicFileDN> = emptyList()
+
+    var shouldThrowError = false
+    var error: Throwable = RuntimeException("User Repository Error")
 
     override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow {
+        if (shouldThrowError) throw error
         identityInfoResult?.let { emit(it) }
     }
 
     override suspend fun getUserProfileImage(): Flow<String> = flow {
+        if (shouldThrowError) throw error
         emit(userProfileImageResult)
     }
 
     override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow {
+        if (shouldThrowError) throw error
         taminRelationResult?.let { emit(it) }
     }
 
     override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> = flow {
+        if (shouldThrowError) throw error
         emit(sendImageResult)
     }
 
     override suspend fun getSubDominantsInfo(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<SubdominantDN> = flow {
+        if (shouldThrowError) throw error
         subDominantsResult?.let { emit(it) }
     }
 
     override suspend fun getBankAccountList(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
+        filters: List<ApiFilterDN>
     ): Flow<List<BankAccountDN>> = flow {
+        if (shouldThrowError) throw error
         emit(bankAccountListResult)
     }
 
-    override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> {
-        TODO("Not yet implemented")
+    override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(insuredActiveBranchResult)
     }
 
     override suspend fun getRelationTaminAll(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): Flow<List<ActiveRelationDN>> {
-        TODO("Not yet implemented")
+        filters: List<ApiFilterDN>
+    ): Flow<List<ActiveRelationDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(relationTaminAllResult)
     }
 
     override suspend fun getElectronicFile(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String,
-        sort: String
-    ): Flow<List<ElectronicFileDN>> {
-        TODO("Not yet implemented")
+        filters: List<ApiFilterDN>
+    ): Flow<List<ElectronicFileDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(electronicFileResult)
     }
 
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {
+        if (shouldThrowError) throw error
         changeMobileResult?.let { emit(it) }
     }
 
     override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
+        if (shouldThrowError) throw error
         emit(verifyChangeMobileResult)
     }
 }

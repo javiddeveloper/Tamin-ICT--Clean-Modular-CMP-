@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.flow
 class FakeCityProvinceRepository : CityProvinceRepository {
     var cityResult: CityDN? = null
     var provinceResult: ProvinceDN? = null
+    var shouldThrowError = false
+    var error: Throwable = RuntimeException("Error")
 
     override fun getCity(cityId: String): Flow<CityDN> = flow {
         cityResult?.let { emit(it) }
@@ -16,4 +18,6 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {
         provinceResult?.let { emit(it) }
     }
+
+
 }
