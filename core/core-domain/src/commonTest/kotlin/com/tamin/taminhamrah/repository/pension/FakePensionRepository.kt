@@ -18,6 +18,7 @@ class FakePensionRepository : PensionRepository {
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
+
     override suspend fun getPensionInquiry(
         filters: List<ApiFilterDN>
     ): Flow<List<PensionInquiryDN>> = flow {
