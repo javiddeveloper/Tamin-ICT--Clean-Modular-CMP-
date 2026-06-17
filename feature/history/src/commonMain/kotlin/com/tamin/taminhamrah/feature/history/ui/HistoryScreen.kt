@@ -17,46 +17,81 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("سوابق تلفیقی", "سوابق دستمزد")
 
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(HistoryIntent.LoadData)
+    LaunchedEffect(selectedTabIndex) {
+        if (selectedTabIndex == 0 && uiState.talfighInfos.isEmpty()) {
+            viewModel.sendIntent(HistoryIntent.LoadTalfighiData)
+        } else if (selectedTabIndex == 1 && uiState.dastmozdInfos.isEmpty()) {
+            viewModel.sendIntent(HistoryIntent.LoadDastmozdData)
+        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("سوابق تلفیقی") }
+                title = { Text("سوابق بیمه") }
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (!uiState.error.isNullOrEmpty()) {
-                Text(
-                    text = "خطا: ${uiState.error}",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.talfighInfos) { info ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth()
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = { Text(title) }
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (!uiState.error.isNullOrEmpty()) {
+                    Text(
+                        text = "خطا: ${uiState.error}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    if (selectedTabIndex == 0) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("سال: ${info.hisYear}", style = MaterialTheme.typography.titleMedium)
-                                Text("مجموع روزهای سابقه: ${info.historyDays}", style = MaterialTheme.typography.bodyMedium)
-                                Text("مجموع سال‌های سابقه: ${info.sumHistoryYears}", style = MaterialTheme.typography.bodyMedium)
-                                Text("کد ملی مرتبط (risuid): ${info.risuid}", style = MaterialTheme.typography.bodySmall)
+                            items(uiState.talfighInfos) { info ->
+                                Card(modifier = Modifier.fillMaxWidth()) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text("سال: ${info.hisYear}", style = MaterialTheme.typography.titleMedium)
+                                        Text("مجموع روزهای سابقه: ${info.historyDays}", style = MaterialTheme.typography.bodyMedium)
+                                        Text("مجموع سال‌های سابقه: ${info.sumHistoryYears}", style = MaterialTheme.typography.bodyMedium)
+                                        Text("کد ملی مرتبط (risuid): ${info.risuid}", style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.dastmozdInfos) { info ->
+                                Card(modifier = Modifier.fillMaxWidth()) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text("سال: ${info.hisyear}", style = MaterialTheme.typography.titleMedium)
+                                        Text("شعبه: ${info.brhname}", style = MaterialTheme.typography.bodyMedium)
+                                        Text("توضیحات: ${info.historytypedesc}", style = MaterialTheme.typography.bodyMedium)
+                                        Text("مجموع دستمزد ماه اول: ${info.hiswage1}", style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
                             }
                         }
                     }
