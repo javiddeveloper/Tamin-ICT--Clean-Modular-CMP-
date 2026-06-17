@@ -1,11 +1,20 @@
 package com.tamin.taminhamrah.model.history
 
-data class TalfighInfoDN(
-    val list: List<TalfighInfoItemDN>,
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
+
+
+@Immutable
+@Serializable
+data class TalfighInfoPR(
+    val list: List<TalfighInfoItemPR>,
     val total: Int
 )
 
-data class TalfighInfoItemDN(
+
+@Immutable
+@Serializable
+data class TalfighInfoItemPR(
     val hisMonth8: String,
     val hisMonth9: String,
     val hisMonth6: String,

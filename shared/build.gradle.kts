@@ -32,6 +32,7 @@ kotlin {
             api(project(":core:core-ui"))
             api(project(":feature:profile"))
             api(project(":feature:pension-inquiry"))
+            api(project(":feature:history"))
 //            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)

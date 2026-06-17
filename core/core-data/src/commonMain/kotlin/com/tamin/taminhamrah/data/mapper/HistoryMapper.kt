@@ -2,11 +2,11 @@ package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
-import com.tamin.taminhamrah.model.history.TalfighInfoItem
+import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 
-fun TalfighInfoItemDTO.toDomain(): TalfighInfoItem {
-    return TalfighInfoItem(
+fun TalfighInfoItemDTO.toDomain(): TalfighInfoItemDN {
+    return TalfighInfoItemDN(
         hisMonth8 = hisMonth8 ?: "",
         hisMonth9 = hisMonth9 ?: "",
         hisMonth6 = hisMonth6 ?: "",
