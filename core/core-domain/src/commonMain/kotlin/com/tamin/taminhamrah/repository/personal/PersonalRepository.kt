@@ -1,7 +1,8 @@
 package com.tamin.taminhamrah.repository.personal
 
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import kotlinx.coroutines.flow.Flow
 
 interface PersonalRepository {
-    suspend fun getPersonalInfo(): PersonalInfoDN?
+    fun getPersonalInfo(): Flow<PersonalInfoDN?>
 }

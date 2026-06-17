@@ -46,8 +46,9 @@ class PensionInquiryViewModel(
     private fun handleLoadPersonalInfo(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            val personalInfo = getPersonalInfoUseCase()
-            emit(PartialState.PersonalInfoLoaded(personalInfo?.toPresentation()))
+            getPersonalInfoUseCase().collect { personalInfo ->
+                emit(PartialState.PersonalInfoLoaded(personalInfo?.toPresentation()))
+            }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
         }
