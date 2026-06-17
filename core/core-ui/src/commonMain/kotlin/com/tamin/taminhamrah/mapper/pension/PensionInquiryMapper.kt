@@ -1,6 +1,12 @@
 package com.tamin.taminhamrah.mapper.pension
 
 import kotlin.jvm.JvmName
+import com.tamin.taminhamrah.model.pension.PensionIdDN
+import com.tamin.taminhamrah.model.pension.PensionIdPR
+import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.model.common.RecipientDN
+import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
 import com.tamin.taminhamrah.model.pension.installment.*
 
@@ -34,6 +40,18 @@ fun PensionIdDN.toPresentation(): PensionIdPR {
 
 @JvmName("toPresentationPensionIdDN")
 fun List<PensionIdDN>.toPresentation(): List<PensionIdPR> {
+    return this.map { it.toPresentation() }
+}
+
+fun RecipientDN.toPresentation(): RecipientPR {
+    return RecipientPR(
+        recipientCode = recipientCode,
+        recipientName = recipientName
+    )
+}
+
+@JvmName("toPresentationRecipientDN")
+fun List<RecipientDN>.toPresentation(): List<RecipientPR> {
     return this.map { it.toPresentation() }
 }
 

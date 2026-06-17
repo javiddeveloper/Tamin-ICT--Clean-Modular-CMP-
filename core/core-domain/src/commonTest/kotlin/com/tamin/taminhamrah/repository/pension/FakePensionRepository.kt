@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.repository.pension
 
-import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
+import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
@@ -47,4 +47,5 @@ class FakePensionRepository : PensionRepository {
         }
         emit(deferredInstallmentCertificateResult!!)
     }
+
 }

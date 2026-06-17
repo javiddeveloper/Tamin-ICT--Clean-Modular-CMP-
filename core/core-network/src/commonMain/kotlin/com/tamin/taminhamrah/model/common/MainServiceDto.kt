@@ -1,10 +1,10 @@
 /*
 *
-* @author: Javid Sattar 
+* @author: Javid Sattar
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.core.network.model.common
+package com.tamin.taminhamrah.model.common
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
