@@ -14,7 +14,7 @@ import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
-import com.tamin.taminhamrah.model.user.VerifyMobileReq
+import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.repository.UserRepository
@@ -67,7 +67,7 @@ internal class UserRepositoryImpl(
     }
 
     override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
-        val request = VerifyMobileReq(mobile, otp, otpHashCode)
+        val request = VerifyMobileRequest(mobile, otp, otpHashCode)
         val remoteData = userRemoteDataSource.verifyChangeMobileCode(request)
         emit(remoteData)
     }

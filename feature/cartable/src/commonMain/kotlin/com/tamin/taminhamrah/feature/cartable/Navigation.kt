@@ -7,7 +7,7 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.tamin.taminhamrah.feature.cartable.ui.CartableScreen
-import com.tamin.taminhamrah.feature.cartable.ui.MyRequestsScreen
+import com.tamin.taminhamrah.feature.cartable.ui.UserRequestsScreen
 import com.tamin.taminhamrah.feature.cartable.ui.PersonalInboxScreen
 import kotlinx.serialization.Serializable
 
@@ -49,7 +49,7 @@ fun NavGraphBuilder.cartableGraph(
         }
 
         composable<CartableRoute.MyRequests> {
-            MyRequestsScreen(onBackClicked = onBack)
+            UserRequestsScreen(onBackClicked = onBack)
         }
 
         composable<CartableRoute.PersonalInbox> {

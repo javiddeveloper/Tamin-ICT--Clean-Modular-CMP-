@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.pension
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
+import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -12,20 +14,26 @@ class FakePensionRepository : PensionRepository {
     var pensionInquiryResult: List<PensionInquiryDN> = emptyList()
     var pensionIdResult: List<PensionIdDN> = emptyList()
     var edictPensionerResult: EdictPensionerDN? = null
+    var deferredInstallmentCertificateResult: DeferredInstallmentCertificateDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
-    var getPensionInquiryError: Throwable? = null
 
 
     override suspend fun getPensionInquiry(
         filters: List<ApiFilterDN>
     ): Flow<List<PensionInquiryDN>> = flow {
         if (shouldThrowError) {
-            throw getPensionInquiryError ?: RuntimeException("Unknown error")
+            throw error!!
         }
         emit(pensionInquiryResult)
     }
 
+    override suspend fun getPensionerId(): Flow<List<PensionIdDN>> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(pensionIdResult)
+    }
 
     override suspend fun getEdictPensioner(query: ApiQueryParamDN): Flow<EdictPensionerDN?> = flow {
         if (shouldThrowError) {
@@ -34,10 +42,11 @@ class FakePensionRepository : PensionRepository {
         emit(edictPensionerResult)
     }
 
-    override suspend fun getPensionerId(): Flow<List<PensionIdDN>> = flow {
+    override suspend fun sendRequestDeferredInstallmentCertificate(request: DeferredInstallmentRequestDN): Flow<DeferredInstallmentCertificateDN> = flow {
         if (shouldThrowError) {
-            throw getPensionInquiryError ?: RuntimeException("Unknown error")
+            throw error!!
         }
-        emit(pensionIdResult)
+        emit(deferredInstallmentCertificateResult!!)
     }
+
 }

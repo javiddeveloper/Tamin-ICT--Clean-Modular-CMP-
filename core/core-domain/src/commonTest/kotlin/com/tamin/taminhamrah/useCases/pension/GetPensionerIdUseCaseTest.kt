@@ -38,7 +38,7 @@ class GetPensionerIdUseCaseTest : BaseUseCaseTest() {
     fun `invoke should return error when repository fails`() = runTest {
         val expectedException = RuntimeException("Failed")
         pensionRepository.shouldThrowError = true
-        pensionRepository.getPensionInquiryError = expectedException
+        pensionRepository.error = expectedException
 
         useCase().test {
             val actualException = awaitError()

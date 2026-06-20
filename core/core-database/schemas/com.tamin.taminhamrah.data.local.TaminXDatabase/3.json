@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "e70f28f9d5b7028ffce484ecb1ba4572",
+    "identityHash": "da064f61c88a27f3cd8c7272af4f4d28",
     "entities": [
       {
         "tableName": "test_table",
@@ -181,11 +181,102 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "recipients",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`recipientCode` TEXT NOT NULL, `recipientName` TEXT, PRIMARY KEY(`recipientCode`))",
+        "fields": [
+          {
+            "fieldPath": "recipientCode",
+            "columnName": "recipientCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recipientName",
+            "columnName": "recipientName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "recipientCode"
+          ]
+        }
+      },
+      {
+        "tableName": "personal_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`insuranceId` TEXT NOT NULL, `branch` TEXT, `mobileNumber` TEXT, `provinceName` TEXT, `firstName` TEXT, `lastName` TEXT, `fatherName` TEXT, `nationalId` TEXT, `ssn` TEXT, `genderDesc` TEXT, `dateOfBirth` INTEGER, PRIMARY KEY(`insuranceId`))",
+        "fields": [
+          {
+            "fieldPath": "insuranceId",
+            "columnName": "insuranceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branch",
+            "columnName": "branch",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mobileNumber",
+            "columnName": "mobileNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fatherName",
+            "columnName": "fatherName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ssn",
+            "columnName": "ssn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "genderDesc",
+            "columnName": "genderDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dateOfBirth",
+            "columnName": "dateOfBirth",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "insuranceId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e70f28f9d5b7028ffce484ecb1ba4572')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'da064f61c88a27f3cd8c7272af4f4d28')"
     ]
   }
 }
