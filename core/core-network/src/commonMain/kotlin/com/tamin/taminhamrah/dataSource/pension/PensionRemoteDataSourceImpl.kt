@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.pension
 
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -34,6 +35,21 @@ class PensionRemoteDataSourceImpl(
         return try {
             val response = pensionApiService.getPensionerId()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getEdictPensioner(query: ApiQueryParamDN): EdictPensionerDTO? {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(query.filters)
+            val response =
+                pensionApiService.getEdictPensioner(mapOf("filter" to filterJson))
+            response?.data
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
