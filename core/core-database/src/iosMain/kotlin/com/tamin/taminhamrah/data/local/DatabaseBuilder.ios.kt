@@ -5,12 +5,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
+import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
 import com.tamin.taminhamrah.data.local.dao.RequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
+import com.tamin.taminhamrah.data.local.entity.PersonalInboxItemEntity
+import com.tamin.taminhamrah.data.local.entity.PersonalInboxSizeEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.data.local.entity.RecipientEntity
 import com.tamin.taminhamrah.data.local.entity.RequestEntity
@@ -25,8 +28,10 @@ import platform.Foundation.NSHomeDirectory
         IdentityInfoEntity::class,
         RecipientEntity::class,
         RequestEntity::class,
+        PersonalInboxItemEntity::class,
+        PersonalInboxSizeEntity::class,
     ],
-    version = 4,
+    version = 5,
 )
 @Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 actual abstract class TaminXDatabase : RoomDatabase() {
@@ -35,6 +40,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun userDao(): UserDao
     actual abstract fun recipientDao(): RecipientDao
     actual abstract fun requestDao(): RequestDao
+    actual abstract fun personalInboxDao(): PersonalInboxDao
 
 }
 

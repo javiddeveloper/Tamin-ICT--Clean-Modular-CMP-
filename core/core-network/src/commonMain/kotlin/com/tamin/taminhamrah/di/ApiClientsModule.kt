@@ -9,6 +9,7 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.request.RequestApiService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -60,6 +61,11 @@ val ApiClientsModule = module {
     }
 
     single<RequestApiService>(named("requestApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.create()
+    }
+
+    single<PersonalInboxApiService>(named("personalInboxApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.create()
     }

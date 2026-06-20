@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
+import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.request.RequestRemoteDataSource
 import com.tamin.taminhamrah.dataSource.request.RequestRemoteDataSourceImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
@@ -67,6 +69,14 @@ val remoteModule = module {
     single<RequestRemoteDataSource> {
         RequestRemoteDataSourceImpl(
             requestApiService = get(named("requestApiService")),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<PersonalInboxRemoteDataSource> {
+        PersonalInboxRemoteDataSourceImpl(
+            personalInboxApiService = get(named("personalInboxApiService")),
             apiQueryBuilder = get(),
             errorParser = get()
         )
