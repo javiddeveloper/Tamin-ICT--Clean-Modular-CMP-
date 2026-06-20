@@ -14,8 +14,6 @@ data class PensionInquiryUiState(
     val pensionList: List<PensionInquiryPR> = emptyList(),
     val pensionerIds: List<PensionIdPR> = emptyList(),
     val recipients: List<RecipientPR> = emptyList(),
-    val edictPensioner: EdictPensionerPR? = null
-    val recipients: List<RecipientPR> = emptyList(),
     val edictPensioner: EdictPensionerPR? = null,
     val beneficiaryList: List<BeneficiaryPR> = emptyList(),
 ) {
