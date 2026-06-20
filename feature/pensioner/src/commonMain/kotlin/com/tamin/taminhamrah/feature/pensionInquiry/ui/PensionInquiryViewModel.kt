@@ -18,7 +18,9 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -30,12 +32,15 @@ class PensionInquiryViewModel(
     private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
     private val getBeneficiaryUseCase: GetBeneficiaryUseCase,
     private val getDeceasedInfoUseCase: GetDeceasedInfoUseCase,
+    private val getAgeUseCase: GetAgeUseCase,
+    private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
 
     init {
         sendIntent(PensionInquiryIntent.LoadPersonalInfo)
+        sendIntent(PensionInquiryIntent.LoadAge(1379L))
     }
 
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
@@ -47,6 +52,19 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadBeneficiaryList -> handleLoadBeneficiaryList()
             is PensionInquiryIntent.LoadPersonalInfo -> handleLoadPersonalInfo()
             is PensionInquiryIntent.LoadDeceasedInfo -> handleLoadDeceasedInfo(intent.nationalId)
+            is PensionInquiryIntent.LoadAge -> handleLoadAge(intent.birthDate)
+            is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
+        }
+    }
+
+    private fun handleLoadDisabilityDependentInfo(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getDisabilityDependentInfoUseCase(emptyList()).collect { list ->
+                emit(PartialState.DisabilityDependentInfoLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -55,6 +73,17 @@ class PensionInquiryViewModel(
         try {
             getPersonalInfoUseCase().collect { personalInfo ->
                 emit(PartialState.PersonalInfoLoaded(personalInfo?.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
+    private fun handleLoadAge(birthDate: Long): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getAgeUseCase(birthDate).collect { age ->
+                emit(PartialState.AgeLoaded(age.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -181,6 +210,14 @@ class PensionInquiryViewModel(
         is PartialState.DeceasedInfoLoaded -> currentState.copy(
             isLoading = false,
             deceasedInfo = partialState.deceasedInfo
+        )
+        is PartialState.DisabilityDependentInfoLoaded -> currentState.copy(
+            isLoading = false,
+            disabilityDependentInfo = partialState.list
+        )
+        is PartialState.AgeLoaded -> currentState.copy(
+            isLoading = false,
+            age = partialState.age
         )
     }
 
