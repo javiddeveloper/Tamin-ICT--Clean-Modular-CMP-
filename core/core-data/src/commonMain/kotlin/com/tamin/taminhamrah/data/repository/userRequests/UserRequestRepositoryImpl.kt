@@ -6,10 +6,6 @@ import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.request.ApiSortDN
-import com.tamin.taminhamrah.model.request.FilterOperator
-import com.tamin.taminhamrah.model.request.FilterProperty
-import com.tamin.taminhamrah.model.request.SortDirection
 import com.tamin.taminhamrah.model.request.UserRequestDN
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import kotlinx.coroutines.flow.Flow
@@ -46,24 +42,7 @@ internal class UserRequestRepositoryImpl(
     }.distinctUntilChanged()
 
     private fun buildQuery(filters: List<ApiFilterDN>): ApiQueryParamDN = ApiQueryParamDN(
-        filters = filters.ifEmpty { defaultFilters() },
-        sorts = defaultSorts(),
+        filters = filters.ifEmpty { UserRequestFilter.defaultFilters() },
+        sorts = UserRequestSort.defaultSorts(),
     )
-
-    private companion object {
-        fun defaultFilters(): List<ApiFilterDN> = listOf(
-            ApiFilterDN(
-                property = FilterProperty.OPERATION,
-                value = "03",
-                operator = FilterOperator.EQUAL,
-            )
-        )
-
-        fun defaultSorts(): List<ApiSortDN> = listOf(
-            ApiSortDN(
-                property = "refCode",
-                direction = SortDirection.DESC,
-            )
-        )
-    }
 }
