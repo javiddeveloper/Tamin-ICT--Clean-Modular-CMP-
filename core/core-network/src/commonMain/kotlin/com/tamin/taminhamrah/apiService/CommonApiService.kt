@@ -40,4 +40,6 @@ internal interface CommonApiService {
 
     @GET("recipients")
     suspend fun getRecipientList(@QueryMap parameters: Map<String, String>): BaseDTO<ListData<RecipientDTO>>
+
+
 }

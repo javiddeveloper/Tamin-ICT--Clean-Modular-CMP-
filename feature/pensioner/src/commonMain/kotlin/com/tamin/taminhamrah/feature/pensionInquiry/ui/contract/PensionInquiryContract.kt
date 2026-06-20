@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
+import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 
 @Immutable
 data class PensionInquiryUiState(
@@ -15,6 +16,7 @@ data class PensionInquiryUiState(
     val pensionerIds: List<PensionIdPR> = emptyList(),
     val recipients: List<RecipientPR> = emptyList(),
     val edictPensioner: EdictPensionerPR? = null,
+    val personalInfo: PersonalInfoPR? = null,
     val beneficiaryList: List<BeneficiaryPR> = emptyList(),
 ) {
     sealed class PartialState {
@@ -25,6 +27,7 @@ data class PensionInquiryUiState(
         data class BeneficiaryListLoaded(val list : List<BeneficiaryPR>) : PartialState()
         data class RecipientsLoaded(val list: List<RecipientPR>) : PartialState()
         data class EdictLoaded(val edict: EdictPensionerPR?) : PartialState()
+        data class PersonalInfoLoaded(val personalInfo: PersonalInfoPR?) : PartialState()
     }
 }
 
@@ -33,6 +36,7 @@ sealed class PensionInquiryIntent {
     data object LoadBeneficiaryList : PensionInquiryIntent()
     data object LoadPensionerIds : PensionInquiryIntent()
     data object LoadRecipients : PensionInquiryIntent()
+    data object LoadPersonalInfo : PensionInquiryIntent()
     data class LoadEdict(val pensionerId: String) : PensionInquiryIntent()
 }
 
