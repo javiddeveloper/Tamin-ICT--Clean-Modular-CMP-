@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -28,6 +29,7 @@ class PensionInquiryViewModel(
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase,
     private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
     private val getBeneficiaryUseCase: GetBeneficiaryUseCase,
+    private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -44,6 +46,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
             is PensionInquiryIntent.LoadBeneficiaryList -> handleLoadBeneficiaryList()
             is PensionInquiryIntent.LoadPersonalInfo -> handleLoadPersonalInfo()
+            is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
+        }
+    }
+
+    private fun handleLoadDisabilityDependentInfo(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getDisabilityDependentInfoUseCase(emptyList()).collect { list ->
+                emit(PartialState.DisabilityDependentInfoLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -159,6 +173,10 @@ class PensionInquiryViewModel(
         is PartialState.BeneficiaryListLoaded -> currentState.copy(
             isLoading = false,
             beneficiaryList = partialState.list
+        )
+        is PartialState.DisabilityDependentInfoLoaded -> currentState.copy(
+            isLoading = false,
+            disabilityDependentInfo = partialState.list
         )
     }
 
