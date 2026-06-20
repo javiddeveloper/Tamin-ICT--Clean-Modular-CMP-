@@ -1,15 +1,15 @@
 package com.tamin.taminhamrah.data.mapper
 
-import com.tamin.taminhamrah.data.local.entity.RequestEntity
-import com.tamin.taminhamrah.model.request.RequestDN
-import com.tamin.taminhamrah.model.request.RequestDTO
-import com.tamin.taminhamrah.model.request.RequestStatusDN
-import com.tamin.taminhamrah.model.request.RequestStatusDTO
-import com.tamin.taminhamrah.model.request.RequestTypeDN
-import com.tamin.taminhamrah.model.request.RequestTypeDTO
+import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
+import com.tamin.taminhamrah.model.request.UserRequestDN
+import com.tamin.taminhamrah.model.request.UserRequestDTO
+import com.tamin.taminhamrah.model.request.UserRequestStatusDN
+import com.tamin.taminhamrah.model.request.UserRequestStatusDTO
+import com.tamin.taminhamrah.model.request.UserRequestTypeDN
+import com.tamin.taminhamrah.model.request.UserRequestTypeDTO
 
-fun RequestDTO.toDomain(): RequestDN {
-    return RequestDN(
+fun UserRequestDTO.toDomain(): UserRequestDN {
+    return UserRequestDN(
         id = id ?: 0L,
         refCode = refCode,
         title = title,
@@ -22,8 +22,8 @@ fun RequestDTO.toDomain(): RequestDN {
     )
 }
 
-internal fun RequestDTO.toEntity(): RequestEntity {
-    return RequestEntity(
+internal fun UserRequestDTO.toEntity(): UserRequestEntity {
+    return UserRequestEntity(
         id = id ?: 0L,
         refCode = refCode,
         title = title,
@@ -39,19 +39,19 @@ internal fun RequestDTO.toEntity(): RequestEntity {
     )
 }
 
-internal fun RequestEntity.toDomain(): RequestDN {
-    return RequestDN(
+internal fun UserRequestEntity.toDomain(): UserRequestDN {
+    return UserRequestDN(
         id = id,
         refCode = refCode,
         title = title,
         comment = comment,
         creationTime = creationTime,
         createByName = createByName,
-        status = RequestStatusDN(
+        status = UserRequestStatusDN(
             requestCode = statusCode,
             requestDesc = statusDesc,
         ),
-        requestType = RequestTypeDN(
+        requestType = UserRequestTypeDN(
             id = requestTypeId,
             title = requestTypeTitle,
             description = requestTypeDescription,
@@ -60,8 +60,8 @@ internal fun RequestEntity.toDomain(): RequestDN {
     )
 }
 
-internal fun RequestDN.toEntity(): RequestEntity {
-    return RequestEntity(
+internal fun UserRequestDN.toEntity(): UserRequestEntity {
+    return UserRequestEntity(
         id = id,
         refCode = refCode,
         title = title,
@@ -77,15 +77,15 @@ internal fun RequestDN.toEntity(): RequestEntity {
     )
 }
 
-fun RequestStatusDTO.toDomain(): RequestStatusDN {
-    return RequestStatusDN(
+fun UserRequestStatusDTO.toDomain(): UserRequestStatusDN {
+    return UserRequestStatusDN(
         requestCode = requestCode,
         requestDesc = requestDesc,
     )
 }
 
-fun RequestTypeDTO.toDomain(): RequestTypeDN {
-    return RequestTypeDN(
+fun UserRequestTypeDTO.toDomain(): UserRequestTypeDN {
+    return UserRequestTypeDN(
         id = id,
         title = title,
         description = description,

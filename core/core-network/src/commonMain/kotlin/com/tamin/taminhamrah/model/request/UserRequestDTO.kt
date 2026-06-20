@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RequestDTO(
+data class UserRequestDTO(
     @SerialName("id") val id: Long? = null,
     @SerialName("operation") val operation: String? = null,
     @SerialName("createdBy") val createdBy: String? = null,
@@ -13,11 +13,11 @@ data class RequestDTO(
     @SerialName("lastModificationTime") val lastModificationTime: Long? = null,
     @SerialName("refCode") val refCode: String? = null,
     @SerialName("userName") val userName: String? = null,
-    @SerialName("status") val status: RequestStatusDTO? = null,
+    @SerialName("status") val status: UserRequestStatusDTO? = null,
     @SerialName("title") val title: String? = null,
     @SerialName("comment") val comment: String? = null,
     @SerialName("template") val template: String? = null,
-    @SerialName("requestType") val requestType: RequestTypeDTO? = null,
+    @SerialName("requestType") val requestType: UserRequestTypeDTO? = null,
     @SerialName("deliverCode") val deliverCode: String? = null,
     @SerialName("refrenceid") val referenceId: String? = null,
     @SerialName("requestDetails") val requestDetails: String? = null,
@@ -27,14 +27,14 @@ data class RequestDTO(
 )
 
 @Serializable
-data class RequestStatusDTO(
+data class UserRequestStatusDTO(
     @SerialName("operation") val operation: String? = null,
     @SerialName("requestCode") val requestCode: String? = null,
     @SerialName("requestDesc") val requestDesc: String? = null,
 )
 
 @Serializable
-data class RequestTypeDTO(
+data class UserRequestTypeDTO(
     @SerialName("operation") val operation: String? = null,
     @SerialName("createdBy") val createdBy: String? = null,
     @SerialName("creationTime") val creationTime: Long? = null,

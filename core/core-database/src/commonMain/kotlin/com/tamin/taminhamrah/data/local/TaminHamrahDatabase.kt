@@ -7,14 +7,14 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
-import com.tamin.taminhamrah.data.local.dao.RequestDao
+import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.data.local.entity.RecipientEntity
-import com.tamin.taminhamrah.data.local.entity.RequestEntity
+import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -26,9 +26,9 @@ import kotlinx.coroutines.IO
         CityEntity::class,
         IdentityInfoEntity::class,
         RecipientEntity::class,
-        RequestEntity::class,
+        UserRequestEntity::class,
     ],
-    version = 4,
+    version = 1,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 expect abstract class TaminXDatabase : RoomDatabase {
@@ -36,7 +36,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun cityProvinceDao(): CityProvinceDao
     abstract fun userDao(): UserDao
     abstract fun recipientDao(): RecipientDao
-    abstract fun requestDao(): RequestDao
+    abstract fun userRequestDao(): UserRequestDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

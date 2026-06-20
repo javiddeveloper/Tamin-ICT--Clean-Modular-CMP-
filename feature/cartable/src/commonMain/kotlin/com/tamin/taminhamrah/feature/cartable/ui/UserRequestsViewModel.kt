@@ -5,13 +5,13 @@ import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsEvent
 import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsIntent
 import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsUiState
 import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsUiState.PartialState
-import com.tamin.taminhamrah.mapper.request.toPresentation
-import com.tamin.taminhamrah.useCases.request.GetMyRequestsUseCase
+import com.tamin.taminhamrah.mapper.userRequest.toPresentation
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class MyRequestsViewModel(
-    private val getMyRequestsUseCase: GetMyRequestsUseCase
+class UserRequestsViewModel(
+    private val getUserRequestsUseCase: GetUserRequestsUseCase
 ) : BaseViewModel<MyRequestsUiState, PartialState, MyRequestsEvent, MyRequestsIntent>(
     initialState = MyRequestsUiState()
 ) {
@@ -25,7 +25,7 @@ class MyRequestsViewModel(
     private fun handleLoadRequests(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            getMyRequestsUseCase().collect { requests ->
+            getUserRequestsUseCase().collect { requests ->
                 emit(PartialState.RequestsLoaded(requests.toPresentation()))
             }
         } catch (e: Exception) {

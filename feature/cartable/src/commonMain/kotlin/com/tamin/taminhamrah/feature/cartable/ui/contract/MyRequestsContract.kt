@@ -1,18 +1,18 @@
 package com.tamin.taminhamrah.feature.cartable.ui.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.model.request.RequestPR
+import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 
 @Immutable
 data class MyRequestsUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val requests: List<RequestPR> = emptyList(),
+    val requests: List<UserRequestPR> = emptyList(),
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
         data class Error(val message: String?) : PartialState()
-        data class RequestsLoaded(val requests: List<RequestPR>) : PartialState()
+        data class RequestsLoaded(val requests: List<UserRequestPR>) : PartialState()
     }
 }
 

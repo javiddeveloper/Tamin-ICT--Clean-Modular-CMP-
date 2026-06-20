@@ -9,7 +9,7 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
-import com.tamin.taminhamrah.apiService.request.RequestApiService
+import com.tamin.taminhamrah.apiService.request.UserRequestApiService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -59,7 +59,7 @@ val ApiClientsModule = module {
         ktorfit.create()
     }
 
-    single<RequestApiService>(named("requestApiService")) {
+    single<UserRequestApiService>(named("requestApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.create()
     }

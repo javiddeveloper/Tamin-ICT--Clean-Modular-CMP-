@@ -3,8 +3,8 @@ package com.tamin.taminhamrah.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "requests")
-data class RequestEntity(
+@Entity(tableName = "user_requests")
+data class UserRequestEntity(
     @PrimaryKey
     val id: Long,
     val refCode: String?,

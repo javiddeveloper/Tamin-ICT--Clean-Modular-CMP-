@@ -32,12 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsIntent
 import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsUiState
-import com.tamin.taminhamrah.model.request.RequestPR
+import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun MyRequestsScreen(
-    viewModel: MyRequestsViewModel = koinViewModel(),
+fun UserRequestsScreen(
+    viewModel: UserRequestsViewModel = koinViewModel(),
     onBackClicked: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -105,7 +105,7 @@ fun MyRequestsContent(
 }
 
 @Composable
-private fun RequestItem(request: RequestPR) {
+private fun RequestItem(request: UserRequestPR) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

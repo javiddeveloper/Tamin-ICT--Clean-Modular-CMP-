@@ -1,10 +1,10 @@
-package com.tamin.taminhamrah.mapper.request
+package com.tamin.taminhamrah.mapper.userRequest
 
-import com.tamin.taminhamrah.model.request.RequestDN
-import com.tamin.taminhamrah.model.request.RequestPR
+import com.tamin.taminhamrah.model.request.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 
-fun RequestDN.toPresentation(): RequestPR {
-    return RequestPR(
+fun UserRequestDN.toPresentation(): UserRequestPR {
+    return UserRequestPR(
         id = id,
         refCode = refCode.orEmpty(),
         title = title.orEmpty(),
@@ -16,7 +16,7 @@ fun RequestDN.toPresentation(): RequestPR {
     )
 }
 
-fun List<RequestDN>.toPresentation(): List<RequestPR> = map { it.toPresentation() }
+fun List<UserRequestDN>.toPresentation(): List<UserRequestPR> = map { it.toPresentation() }
 
 private fun formatCreationTime(creationTime: Long?): String {
     if (creationTime == null) return ""

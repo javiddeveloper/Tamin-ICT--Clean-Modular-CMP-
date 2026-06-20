@@ -1,9 +1,9 @@
-package com.tamin.taminhamrah.model.request
+package com.tamin.taminhamrah.model.userRequest
 
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class RequestPR(
+data class UserRequestPR(
     val id: Long,
     val refCode: String,
     val title: String,

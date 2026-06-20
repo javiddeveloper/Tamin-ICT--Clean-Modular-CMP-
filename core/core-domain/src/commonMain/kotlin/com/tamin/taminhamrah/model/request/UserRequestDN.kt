@@ -1,23 +1,23 @@
 package com.tamin.taminhamrah.model.request
 
-data class RequestDN(
+data class UserRequestDN(
     val id: Long,
     val refCode: String?,
     val title: String?,
     val comment: String?,
     val creationTime: Long?,
     val createByName: String?,
-    val status: RequestStatusDN?,
-    val requestType: RequestTypeDN?,
+    val status: UserRequestStatusDN?,
+    val requestType: UserRequestTypeDN?,
     val referenceId: String?,
 )
 
-data class RequestStatusDN(
+data class UserRequestStatusDN(
     val requestCode: String?,
     val requestDesc: String?,
 )
 
-data class RequestTypeDN(
+data class UserRequestTypeDN(
     val id: Long?,
     val title: String?,
     val description: String?,
