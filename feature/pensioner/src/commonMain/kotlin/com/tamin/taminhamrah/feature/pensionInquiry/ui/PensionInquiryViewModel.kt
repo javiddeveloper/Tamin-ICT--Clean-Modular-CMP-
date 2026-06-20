@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,12 +29,14 @@ class PensionInquiryViewModel(
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase,
     private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
     private val getBeneficiaryUseCase: GetBeneficiaryUseCase,
+    private val getAgeUseCase: GetAgeUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
 
     init {
         sendIntent(PensionInquiryIntent.LoadPersonalInfo)
+        sendIntent(PensionInquiryIntent.LoadAge(1379L))
     }
 
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
@@ -44,6 +47,7 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
             is PensionInquiryIntent.LoadBeneficiaryList -> handleLoadBeneficiaryList()
             is PensionInquiryIntent.LoadPersonalInfo -> handleLoadPersonalInfo()
+            is PensionInquiryIntent.LoadAge -> handleLoadAge(intent.birthDate)
         }
     }
 
@@ -52,6 +56,17 @@ class PensionInquiryViewModel(
         try {
             getPersonalInfoUseCase().collect { personalInfo ->
                 emit(PartialState.PersonalInfoLoaded(personalInfo?.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
+    private fun handleLoadAge(birthDate: Long): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getAgeUseCase(birthDate).collect { age ->
+                emit(PartialState.AgeLoaded(age.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -159,6 +174,10 @@ class PensionInquiryViewModel(
         is PartialState.BeneficiaryListLoaded -> currentState.copy(
             isLoading = false,
             beneficiaryList = partialState.list
+        )
+        is PartialState.AgeLoaded -> currentState.copy(
+            isLoading = false,
+            age = partialState.age
         )
     }
 

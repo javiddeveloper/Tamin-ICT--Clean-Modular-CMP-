@@ -4,6 +4,8 @@ import com.tamin.taminhamrah.model.personal.PersonalDN
 import com.tamin.taminhamrah.model.personal.PersonalPR
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
+import com.tamin.taminhamrah.model.personal.AgeDN
+import com.tamin.taminhamrah.model.personal.AgePR
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
     return PersonalInfoPR(
@@ -24,5 +26,12 @@ fun PersonalDN.toPresentation(): PersonalPR {
         ssn = ssn ?: "",
         genderDesc = genderDesc ?: "",
         dateOfBirth = dateOfBirth?.toString() ?: ""
+    )
+}
+
+fun AgeDN.toPresentation(): AgePR {
+    return AgePR(
+        age = age ?: "",
+        birthDate = birthDate ?: ""
     )
 }

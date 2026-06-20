@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.model.personal.PersonalDTO
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.PersonalDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import com.tamin.taminhamrah.model.personal.AgeDN
+import com.tamin.taminhamrah.model.personal.age.AgeDTO
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
     return PersonalInfoDN(
@@ -25,6 +27,13 @@ fun PersonalDTO.toDomain(): PersonalDN {
         ssn = ssn,
         genderDesc = gender?.genderDesc,
         dateOfBirth = dateOfBirth
+    )
+}
+
+fun AgeDTO.toDomain(): AgeDN {
+    return AgeDN(
+        age = age,
+        birthDate = birthDate
     )
 }
 

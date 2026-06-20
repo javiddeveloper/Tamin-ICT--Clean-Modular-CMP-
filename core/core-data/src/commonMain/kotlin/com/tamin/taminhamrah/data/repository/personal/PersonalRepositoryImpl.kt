@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
+import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import kotlinx.coroutines.flow.Flow
@@ -36,4 +37,8 @@ class PersonalRepositoryImpl(
 
         emitAll(personalDao.getPersonalInfo().map { it?.toDomain() })
     }.distinctUntilChanged()
+
+    override fun getAge(birthDate: Long): Flow<AgeDN> = flow {
+        emit(personalRemoteDataSource.getAge(birthDate).toDomain())
+    }
 }

@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.dataSource.personal
 
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -18,6 +19,19 @@ class PersonalRemoteDataSourceImpl(
         return try {
             val response = personalApiService.getPersonalInfo()
             response?.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getAge(birthDate: Long): AgeDTO {
+        return try {
+            val response = personalApiService.getAge(birthDate)
+            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
