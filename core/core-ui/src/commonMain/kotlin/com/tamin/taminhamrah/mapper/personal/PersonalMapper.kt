@@ -6,6 +6,8 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.AgePR
+import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
     return PersonalInfoPR(
@@ -34,4 +36,21 @@ fun AgeDN.toPresentation(): AgePR {
         age = age ?: "",
         birthDate = birthDate ?: ""
     )
+}
+
+fun DisabilityDependentDN.toPresentation(): DisabilityDependentPR {
+    return DisabilityDependentPR(
+        firstName = firstName ?: "",
+        lastName = lastName ?: "",
+        nationalId = nationalId ?: "",
+        dateOfBirth = dateOfBirth?.toString() ?: "",
+        fatherName = fatherName ?: "",
+        genderDesc = genderDesc ?: "",
+        relation = relation ?: "",
+        tendencyDescription = tendencyDescription ?: ""
+    )
+}
+
+fun List<DisabilityDependentDN>.toPresentation(): List<DisabilityDependentPR> {
+    return map { it.toPresentation() }
 }
