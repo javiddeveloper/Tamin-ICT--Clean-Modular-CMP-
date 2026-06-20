@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.data.di.dataKoinModule
 import com.tamin.taminhamrah.feature.history.di.historyModule
 import com.tamin.taminhamrah.feature.pensionInquiry.di.pensionInquiryModule
 import com.tamin.taminhamrah.feature.profile.di.profileModule
+import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -25,6 +26,7 @@ val sharedModules: List<Module>
         profileModule,
         pensionInquiryModule,
         historyModule,
+        workshopsModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {

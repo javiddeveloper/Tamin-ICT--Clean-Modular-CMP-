@@ -22,6 +22,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.openUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,6 +97,9 @@ internal fun TaminHamrahNavGraph(
                     HomeScreen(
                         onNavigateToHistory = {
                             navController.navigate(HistoryRoute)
+                        },
+                        onNavigateToWorkshops = {
+                            navController.navigateToWorkshops()
                         }
                     )
                 }
@@ -110,6 +116,8 @@ internal fun TaminHamrahNavGraph(
                 pensionInquiryScreen()
 
                 historyScreen()
+
+                workshopsScreen()
             }
 
             if (isLoading) {
@@ -161,7 +169,10 @@ fun SampleScreen(title: String) {
 }
 
 @Composable
-fun HomeScreen(onNavigateToHistory: () -> Unit) {
+fun HomeScreen(
+    onNavigateToHistory: () -> Unit,
+    onNavigateToWorkshops: () -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.TopCenter
@@ -181,6 +192,18 @@ fun HomeScreen(onNavigateToHistory: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text("کلیه سوابق", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToWorkshops,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("کارگاه ها", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
