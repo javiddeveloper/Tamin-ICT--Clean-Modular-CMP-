@@ -66,7 +66,6 @@ val ApiClientsModule = module {
     single<PersonalApiService>(named("personalApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.create()
-        ktorfit.createPensionApiService()
     }
 
     single<HistoryApiServices> {
