@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Gender2DTO(
+data class GenderDTO(
     @SerialName("genderCode") val genderCode: String?,
     @SerialName("genderDesc") val genderDesc: String?,
 )

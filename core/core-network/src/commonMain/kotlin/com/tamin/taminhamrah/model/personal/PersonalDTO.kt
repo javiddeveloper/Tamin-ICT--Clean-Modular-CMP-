@@ -9,7 +9,7 @@ data class PersonalDTO(
     @SerialName("fatherName") val fatherName: String?,
     @SerialName("cityOfIssue") val cityOfIssue: CityDTO?,
     @SerialName("idCardSerial1") val idCardSerial1: String?,
-    @SerialName("gender") val gender: Gender2DTO?,
+    @SerialName("gender") val gender: GenderDTO?,
     @SerialName("creationTime") val creationTime: Long?,
     @SerialName("idCardSerial2") val idCardSerial2: String?,
     @SerialName("nation") val nation: NationDTO?,

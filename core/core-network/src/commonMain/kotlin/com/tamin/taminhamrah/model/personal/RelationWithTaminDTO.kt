@@ -12,7 +12,7 @@ data class RelationWithTaminDTO(
     @SerialName("confirmed") val confirmed: Boolean?,
     @SerialName("organizationId") val organizationId: String?,
     @SerialName("insuranceId") val insuranceId: String?,
-    @SerialName("id2") val id2: Int?,
+    @SerialName("id2") val idSecondary: Int?,
     @SerialName("id") val id: Long?,
     @SerialName("lastModifiedBy") val lastModifiedBy: String?,
     @SerialName("personal") val personal: Int?,
