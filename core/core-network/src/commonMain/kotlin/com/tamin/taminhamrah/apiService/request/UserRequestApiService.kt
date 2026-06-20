@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.apiService.request
 
-import com.tamin.taminhamrah.model.request.UserRequestDTO
-import com.tamin.taminhamrah.model.request.UserRequestTypeDTO
+import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET

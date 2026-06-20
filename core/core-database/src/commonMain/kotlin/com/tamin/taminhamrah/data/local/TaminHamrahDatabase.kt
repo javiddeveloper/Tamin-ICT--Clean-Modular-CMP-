@@ -33,7 +33,6 @@ import kotlinx.coroutines.IO
         RecipientEntity::class,
         UserRequestEntity::class,
         PersonalInfoEntity::class,
-        RequestEntity::class,
         PersonalInboxItemEntity::class,
         PersonalInboxSizeEntity::class,
     ],
@@ -45,7 +44,6 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun cityProvinceDao(): CityProvinceDao
     abstract fun userDao(): UserDao
     abstract fun recipientDao(): RecipientDao
-    abstract fun requestDao(): RequestDao
     abstract fun personalInboxDao(): PersonalInboxDao
     abstract fun personalDao(): PersonalDao
     abstract fun userRequestDao(): UserRequestDao

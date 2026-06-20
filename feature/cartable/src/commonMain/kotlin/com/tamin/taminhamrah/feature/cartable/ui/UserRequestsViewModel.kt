@@ -1,10 +1,10 @@
 package com.tamin.taminhamrah.feature.cartable.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsEvent
-import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsIntent
-import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsUiState
-import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsUiState.PartialState
+import com.tamin.taminhamrah.feature.cartable.ui.contract.UserRequestsEvent
+import com.tamin.taminhamrah.feature.cartable.ui.contract.UserRequestsIntent
+import com.tamin.taminhamrah.feature.cartable.ui.contract.UserRequestsUiState
+import com.tamin.taminhamrah.feature.cartable.ui.contract.UserRequestsUiState.PartialState
 import com.tamin.taminhamrah.mapper.userRequest.toPresentation
 import com.tamin.taminhamrah.mapper.userRequest.toTypePresentation
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
@@ -16,19 +16,19 @@ import kotlinx.coroutines.flow.flow
 class UserRequestsViewModel(
     private val getUserRequestsUseCase: GetUserRequestsUseCase,
     private val getUserRequestTypesUseCase: GetUserRequestTypesUseCase,
-) : BaseViewModel<MyRequestsUiState, PartialState, MyRequestsEvent, MyRequestsIntent>(
-    initialState = MyRequestsUiState()
+) : BaseViewModel<UserRequestsUiState, PartialState, UserRequestsEvent, UserRequestsIntent>(
+    initialState = UserRequestsUiState()
 ) {
 
-    override fun handleIntent(intent: MyRequestsIntent): Flow<PartialState> {
+    override fun handleIntent(intent: UserRequestsIntent): Flow<PartialState> {
         return when (intent) {
-            is MyRequestsIntent.LoadRequests -> handleLoadRequests(UserRequestSearchParams())
-            is MyRequestsIntent.LoadRequestTypes -> handleLoadRequestTypes()
-            is MyRequestsIntent.UpdateRefCode -> flow { emit(PartialState.RefCodeChanged(intent.refCode)) }
-            is MyRequestsIntent.UpdateRequestType -> flow {
+            is UserRequestsIntent.LoadRequests -> handleLoadRequests(UserRequestSearchParams())
+            is UserRequestsIntent.LoadRequestTypes -> handleLoadRequestTypes()
+            is UserRequestsIntent.UpdateRefCode -> flow { emit(PartialState.RefCodeChanged(intent.refCode)) }
+            is UserRequestsIntent.UpdateRequestType -> flow {
                 emit(PartialState.RequestTypeChanged(intent.requestTypeId))
             }
-            is MyRequestsIntent.SearchRequests -> handleLoadRequests(currentSearchParams())
+            is UserRequestsIntent.SearchRequests -> handleLoadRequests(currentSearchParams())
         }
     }
 
@@ -62,9 +62,9 @@ class UserRequestsViewModel(
     }
 
     override fun reduceState(
-        currentState: MyRequestsUiState,
+        currentState: UserRequestsUiState,
         partialState: PartialState
-    ): MyRequestsUiState = when (partialState) {
+    ): UserRequestsUiState = when (partialState) {
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.LoadingTypes -> currentState.copy(isLoadingTypes = partialState.isLoadingTypes)
         is PartialState.Error -> currentState.copy(

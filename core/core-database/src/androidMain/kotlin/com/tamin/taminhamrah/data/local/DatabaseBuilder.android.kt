@@ -30,7 +30,6 @@ import com.tamin.taminhamrah.data.local.entity.TestEntity
         RecipientEntity::class,
         UserRequestEntity::class,
         PersonalInfoEntity::class,
-        RequestEntity::class,
         PersonalInboxItemEntity::class,
         PersonalInboxSizeEntity::class,
     ],
@@ -42,7 +41,6 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun cityProvinceDao(): CityProvinceDao
     actual abstract fun userDao(): UserDao
     actual abstract fun recipientDao(): RecipientDao
-    actual abstract fun requestDao(): RequestDao
     actual abstract fun personalInboxDao(): PersonalInboxDao
     actual abstract fun userRequestDao(): UserRequestDao
     actual abstract fun personalDao(): PersonalDao

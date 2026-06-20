@@ -29,7 +29,6 @@ val dataKoinModule = module {
     singleOf(::PensionRepositoryImpl) { bind<PensionRepository>() }
     singleOf(::HistoryRepositoryImpl) { bind<HistoryRepository>() }
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
-    singleOf(::RequestRepositoryImpl) { bind<RequestRepository>() }
     singleOf(::PersonalInboxRepositoryImpl) { bind<PersonalInboxRepository>() }
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
