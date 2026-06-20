@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
+import com.tamin.taminhamrah.apiService.createWorkShopsApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
@@ -76,6 +77,6 @@ val ApiClientsModule = module {
 
     single<WorkShopsApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createWorkShopsApiService()
     }
 }

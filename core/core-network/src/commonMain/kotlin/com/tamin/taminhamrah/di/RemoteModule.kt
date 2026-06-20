@@ -70,7 +70,9 @@ val remoteModule = module {
 
     single<WorkShopsRemoteDataSource> {
         WorkShopsRemoteDataSourceImpl(
-            apiService = get()
+            apiService = get(),
+            queryBuilder = get(),
+            errorParser = get()
         )
     }
 

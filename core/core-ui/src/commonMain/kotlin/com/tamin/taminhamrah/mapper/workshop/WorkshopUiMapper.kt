@@ -1,0 +1,63 @@
+package com.tamin.taminhamrah.mapper.workshop
+
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementListPR
+import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
+import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
+
+fun EmployerWorkshopDN.toPresentation(): EmployerWorkshopPR {
+    return EmployerWorkshopPR(
+        sswn = sswn,
+        branchTitle = branchTitle,
+        workshopApproveDate = workshopApproveDate,
+        inclusionDate = inclusionDate,
+        brhCode = brhCode,
+        activityName = activityName,
+        workshopRegisterDate = workshopRegisterDate,
+        branchCode = branchCode,
+        workshopName = workshopName,
+        employerName = employerName,
+        actitvityCode = actitvityCode,
+        userId = userId,
+        workshopId = workshopId,
+        workshopUnemployedStat = workshopUnemployedStat
+    )
+}
+
+fun EmployerAgreementDN.toPresentation(): EmployerAgreementPR {
+    return EmployerAgreementPR(
+        pymseq = pymseq,
+        regno = regno,
+        firstname = firstname,
+        emailaddr = emailaddr,
+        workshop = workshop?.toPresentation(),
+        nationalno = nationalno,
+        mobileno = mobileno,
+        startdate = startdate,
+        mastcusttype = mastcusttype,
+        createdt = createdt,
+        masttyp = masttyp,
+        logicalDeleted = logicalDeleted,
+        regemailseq = regemailseq,
+        lastname = lastname,
+        special = special,
+        risuid = risuid,
+        nationalcode = nationalcode,
+        enddate = enddate,
+        letDate = letDate,
+        regdate = regdate,
+        roletype = roletype,
+        dname = dname,
+        letNo = letNo,
+        createuid = createuid
+    )
+}
+
+fun EmployerAgreementListDN.toPresentation(): EmployerAgreementListPR {
+    return EmployerAgreementListPR(
+        list = list?.map { it.toPresentation() },
+        total = total
+    )
+}

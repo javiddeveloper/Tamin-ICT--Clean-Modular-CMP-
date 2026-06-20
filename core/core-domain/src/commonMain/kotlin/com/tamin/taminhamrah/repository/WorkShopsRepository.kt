@@ -1,14 +1,10 @@
 package com.tamin.taminhamrah.repository
 
-import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 
 interface WorkShopsRepository {
     suspend fun getAllEmployerAgreementByNationalId(
-        page: String,
-        start: String,
-        limit: String,
-        filter: String = "[]",
-        sort: String = "[]"
-    ): ListData<EmployerAgreementDTO>?
+        query: ApiQueryParamDN
+    ): EmployerAgreementListDN?
 }

@@ -47,7 +47,10 @@ enum class FilterProperty(val key: String) {
     @SerialName("cityCode") CITY_CODE("cityCode"),
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
-    @SerialName("startDate") START_DATE("startDate")
+    @SerialName("startDate") START_DATE("startDate"),
+    @SerialName("workshop.workshopId") WORKSHOP_ID("workshop.workshopId"),
+    @SerialName("workshop.branchCode") WORKSHOP_BRANCH_CODE("workshop.branchCode"),
+    @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode")
 }
 
 @Serializable
