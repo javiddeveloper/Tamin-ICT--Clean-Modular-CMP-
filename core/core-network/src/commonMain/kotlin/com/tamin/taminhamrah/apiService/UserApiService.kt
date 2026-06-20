@@ -16,7 +16,7 @@ import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActive
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.model.user.VerifyMobileReq
+import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.util.HeaderConstant
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -100,7 +100,7 @@ internal interface UserApiService {
     suspend fun verifyChangeMobileCode(
         @Header("Referer") referer: String,
         @Url url:String,
-        @Body loginRequest: VerifyMobileReq,
+        @Body loginRequest: VerifyMobileRequest,
     ): BaseDTO<String>
 
 

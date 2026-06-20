@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUiState
+import com.tamin.taminhamrah.model.common.BeneficiaryPR
 import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
@@ -28,6 +29,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionerIds)
         viewModel.sendIntent(PensionInquiryIntent.LoadRecipients)
         viewModel.sendIntent(PensionInquiryIntent.LoadPersonalInfo)
+        viewModel.sendIntent(PensionInquiryIntent.LoadBeneficiaryList)
     }
 
     PensionInquiryContent(state)
@@ -118,6 +120,18 @@ fun PensionInquiryContent(
                             PensionItem(item)
                         }
                     }
+                    if (state.beneficiaryList.isNotEmpty()){
+                        item {
+                            Text(
+                                text = "لیست بانک ها:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                        }
+                        items(state.beneficiaryList) { item ->
+                            BeneficiaryItem(item)
+                        }
+                    }
                 }
             }
         }
@@ -204,6 +218,19 @@ fun PensionItem(item: PensionInquiryPR) {
             Text(text = "شماره بیمه: ${item.insuranceNumber}")
             Text(text = "مبلغ پرداختی: ${item.paymentAmount}")
             Text(text = "وضعیت: ${item.statusDesc}")
+        }
+    }
+}
+
+@Composable
+fun BeneficiaryItem(item: BeneficiaryPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "نام بانک: ${item.bankName}", style = MaterialTheme.typography.titleMedium)
+            Text(text = "کد بانک: ${item.bankCode}")
         }
     }
 }

@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
+import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
@@ -53,4 +54,5 @@ val domainModule = module {
     factoryOf(::GetPersonalInfoUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
+    factoryOf(::GetBeneficiaryUseCase)
 }
