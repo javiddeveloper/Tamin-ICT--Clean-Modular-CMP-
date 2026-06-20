@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ParentDTO(
-    @SerialName("parent") val parent: ParentDTO? = null,
-    @SerialName("code") val code: String? = null,
-    @SerialName("description") val description: String? = null,
-    @SerialName("id") val id: Int? = null,
-    @SerialName("title") val title: String? = null,
-    @SerialName("type") val type: TypeDTO? = null
+    @SerialName("parent") val parent: ParentDTO?,
+    @SerialName("code") val code: String?,
+    @SerialName("description") val description: String?,
+    @SerialName("id") val id: Int?,
+    @SerialName("title") val title: String?,
+    @SerialName("type") val type: TypeDTO?,
 )
