@@ -26,7 +26,7 @@ class PensionInquiryViewModel(
     private val getRecipientListUseCase: GetRecipientListUseCase,
     private val getPensionerIdUseCase: GetPensionerIdUseCase,
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase,
-    private val getPersonalInfoUseCase: GetPersonalInfoUseCase
+    private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
     private val getBeneficiaryUseCase: GetBeneficiaryUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
