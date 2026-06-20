@@ -16,7 +16,7 @@ data class PensionInquiryUiState(
     val pensionerIds: List<PensionIdPR> = emptyList(),
     val recipients: List<RecipientPR> = emptyList(),
     val edictPensioner: EdictPensionerPR? = null,
-    val personalInfo: PersonalInfoPR? = null
+    val personalInfo: PersonalInfoPR? = null,
     val beneficiaryList: List<BeneficiaryPR> = emptyList(),
 ) {
     sealed class PartialState {
