@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.common.RecipientDN
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.installment.*
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
@@ -131,5 +132,40 @@ fun EdictPensionerDetailDN.toPresentation(): EdictPensionerDetailPR {
         fieldValue = fieldValue ?: "0",
         index = index ?: "",
         packageName = packageName ?: ""
+    )
+}
+
+fun DeferredInstallmentRequestPR.toDomain(): DeferredInstallmentRequestDN {
+    return DeferredInstallmentRequestDN(
+        bank = bank?.toDomain(),
+        bankBranch = bankBranch,
+        garanteeType = garanteeType,
+        guaranteeAmount = guaranteeAmount,
+        installmentAmount = installmentAmount,
+        installmentCount = installmentCount,
+        loanAmount = loanAmount,
+        pensionerId = pensionerId,
+        birthDate = birthDate,
+        firstName = firstName,
+        lastName = lastName,
+        nationalId = nationalId
+    )
+}
+
+fun BankPR.toDomain(): BankDN {
+    return BankDN(
+        bankCode = bankCode
+    )
+}
+
+fun DeferredInstallmentCertificateDN.toPresentation(): DeferredInstallmentCertificatePR {
+    return DeferredInstallmentCertificatePR(
+        request = request?.toPresentation()
+    )
+}
+
+fun RequestCertificateDN.toPresentation(): RequestCertificatePR {
+    return RequestCertificatePR(
+        refCode = refCode
     )
 }

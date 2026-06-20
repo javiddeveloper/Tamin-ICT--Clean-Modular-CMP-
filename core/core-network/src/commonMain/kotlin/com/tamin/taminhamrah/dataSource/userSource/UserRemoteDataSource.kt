@@ -16,7 +16,7 @@ import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
-import com.tamin.taminhamrah.model.user.VerifyMobileReq
+import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface UserRemoteDataSource {
@@ -25,7 +25,7 @@ interface UserRemoteDataSource {
     suspend fun fetchTaminRelation(): TaminRelationDTO
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
     suspend fun changeMobile(mobile: String): EditMobileResponseDto
-    suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String
+    suspend fun verifyChangeMobileCode(request: VerifyMobileRequest): String
 
     suspend fun getSubDominantsInfo(
         query: ApiQueryParamDN

@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.pension
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
+import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -17,5 +19,9 @@ interface PensionRepository {
     suspend fun getEdictPensioner(
         query: ApiQueryParamDN
     ): Flow<EdictPensionerDN?>
+
+    suspend fun sendRequestDeferredInstallmentCertificate(
+        request: DeferredInstallmentRequestDN
+    ): Flow<DeferredInstallmentCertificateDN>
 }
 
