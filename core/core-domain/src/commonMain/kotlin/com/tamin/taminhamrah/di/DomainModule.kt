@@ -26,6 +26,7 @@ import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -53,4 +54,5 @@ val domainModule = module {
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
+    factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
 }

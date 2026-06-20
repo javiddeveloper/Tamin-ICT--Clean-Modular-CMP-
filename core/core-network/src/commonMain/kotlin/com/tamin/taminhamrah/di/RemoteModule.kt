@@ -16,6 +16,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
+import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -59,6 +61,12 @@ val remoteModule = module {
             pensionApiService = get(named("pensionApiService")),
             apiQueryBuilder = get(),
             errorParser = get()
+        )
+    }
+
+    single<WorkShopsRemoteDataSource> {
+        WorkShopsRemoteDataSourceImpl(
+            apiService = get()
         )
     }
 }
