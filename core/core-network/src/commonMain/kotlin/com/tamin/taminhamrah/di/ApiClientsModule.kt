@@ -7,9 +7,15 @@
 package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.apiService.CommonApiService
+import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.apiService.createCommonApiService
+import com.tamin.taminhamrah.apiService.createHistoryApiServices
+import com.tamin.taminhamrah.apiService.createUserApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.apiService.pension.createPensionApiService
+import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -41,22 +47,31 @@ val ApiClientsModule = module {
     // API Services
     single<UserApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createUserApiService()
     }
 
     single<UserApiService>(named("authUserApiService")) {
         val ktorfit: Ktorfit = get(named("authKtorfit"))
-        ktorfit.create()
+        ktorfit.createUserApiService()
     }
 
     single<CommonApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createCommonApiService()
     }
 
     single<PensionApiService>(named("pensionApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.create()
+    }
+    single<PersonalApiService>(named("personalApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.create()
+    }
+
+    single<HistoryApiServices> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createHistoryApiServices()
     }
 
     single<WorkShopsApiService> {

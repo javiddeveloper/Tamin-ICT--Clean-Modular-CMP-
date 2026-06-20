@@ -14,6 +14,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.history.HistoryRoute
+import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
@@ -88,7 +91,11 @@ internal fun TaminHamrahNavGraph(
                 startDestination = Route.Home
             ) {
                 composable<Route.Home> {
-                    SampleScreen("Home Screen")
+                    HomeScreen(
+                        onNavigateToHistory = {
+                            navController.navigate(HistoryRoute)
+                        }
+                    )
                 }
 
                 profileGraph(
@@ -101,6 +108,8 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 pensionInquiryScreen()
+
+                historyScreen()
             }
 
             if (isLoading) {
@@ -148,5 +157,32 @@ fun SampleScreen(title: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(text = title)
+    }
+}
+
+@Composable
+fun HomeScreen(onNavigateToHistory: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("خانه", style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToHistory,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("کلیه سوابق", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
     }
 }

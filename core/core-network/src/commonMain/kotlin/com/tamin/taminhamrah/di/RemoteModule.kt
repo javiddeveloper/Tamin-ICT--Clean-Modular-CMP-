@@ -10,8 +10,12 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
+import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
+import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSourceImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
@@ -67,6 +71,22 @@ val remoteModule = module {
     single<WorkShopsRemoteDataSource> {
         WorkShopsRemoteDataSourceImpl(
             apiService = get()
+        )
+    }
+
+    single<PersonalRemoteDataSource> {
+        PersonalRemoteDataSourceImpl(
+            personalApiService = get(named("personalApiService")),
+            queryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<HistoryRemoteDataSource> {
+        HistoryRemoteDataSourceImpl(
+            apiServices = get(),
+            queryBuilder = get(),
+            errorParser = get()
         )
     }
 }

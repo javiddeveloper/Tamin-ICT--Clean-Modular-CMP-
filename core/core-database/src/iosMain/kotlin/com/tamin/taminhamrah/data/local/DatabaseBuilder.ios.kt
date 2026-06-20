@@ -5,11 +5,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
+import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
+import com.tamin.taminhamrah.data.local.entity.PersonalInfoEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.data.local.entity.RecipientEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
@@ -22,6 +24,7 @@ import platform.Foundation.NSHomeDirectory
         CityEntity::class,
         IdentityInfoEntity::class,
         RecipientEntity::class,
+        PersonalInfoEntity::class
     ],
     version = 3,
 )
@@ -31,6 +34,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun cityProvinceDao(): CityProvinceDao
     actual abstract fun userDao(): UserDao
     actual abstract fun recipientDao(): RecipientDao
+    actual abstract fun personalDao(): PersonalDao
 
 }
 
