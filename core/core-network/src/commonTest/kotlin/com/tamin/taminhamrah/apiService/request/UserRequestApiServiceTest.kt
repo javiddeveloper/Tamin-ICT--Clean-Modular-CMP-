@@ -41,4 +41,26 @@ class UserRequestApiServiceTest : BaseApiTest() {
         assertEquals(35L, firstRequest.requestType?.id)
         assertEquals("478176974", firstRequest.referenceId)
     }
+
+    @Test
+    fun `getRequestTypes should return request type list`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserRequestTestData.requestTypesSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<UserRequestApiService>()
+
+        val response = apiService.getRequestTypes(emptyMap())
+
+        assertEquals(200, response.status)
+        val listData = response.data
+        assertNotNull(listData)
+        assertEquals(64, listData.total)
+
+        val types = listData.list.orEmpty()
+        assertEquals(1, types.size)
+        assertEquals(67L, types.first().id)
+        assertEquals("خاتمه کفالت", types.first().description)
+    }
 }

@@ -90,4 +90,22 @@ object UserRequestTestData {
             ]
         }
     """.trimIndent()
+
+    val requestTypesSuccess = """
+        {
+            "total": 64,
+            "list": [
+                {
+                    "operation": null,
+                    "createdBy": "PNJ_14040622",
+                    "creationTime": 1760260280000,
+                    "lastModifiedBy": null,
+                    "lastModificationTime": null,
+                    "id": 67,
+                    "title": "END_KAFALAT",
+                    "description": "خاتمه کفالت"
+                }
+            ]
+        }
+    """.trimIndent()
 }

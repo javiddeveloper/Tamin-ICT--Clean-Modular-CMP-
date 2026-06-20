@@ -49,6 +49,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),
     @SerialName("operation") OPERATION("operation"),
+    @SerialName("refCode") REF_CODE("refCode"),
+    @SerialName("requestType.id") REQUEST_TYPE_ID("requestType.id"),
 }
 
 @Serializable

@@ -1,13 +1,11 @@
 package com.tamin.taminhamrah.useCases.userRequest
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.FilterOperator
-import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.request.UserRequestDN
 import com.tamin.taminhamrah.model.request.UserRequestStatusDN
 import com.tamin.taminhamrah.model.request.UserRequestTypeDN
 import com.tamin.taminhamrah.repository.userRequest.FakeUserRequestRepository
+import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -38,22 +36,16 @@ class GetUserRequestsUseCaseTest : BaseUseCaseTest() {
     }
 
     @Test
-    fun `invoke should pass filters to repository`() = runTest {
-        val filters = listOf(
-            ApiFilterDN(
-                property = FilterProperty.OPERATION,
-                value = "03",
-                operator = FilterOperator.EQUAL,
-            )
-        )
+    fun `invoke should pass search params to repository`() = runTest {
+        val search = UserRequestSearchParams(refCode = "3333", requestTypeId = "67")
         repository.userRequestsResult = emptyList()
 
-        useCase(filters).test {
+        useCase(search).test {
             awaitItem()
             awaitComplete()
         }
 
-        assertEquals(filters, repository.lastFilters)
+        assertEquals(search, repository.lastSearch)
     }
 
     @Test

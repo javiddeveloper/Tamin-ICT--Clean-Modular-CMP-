@@ -3,7 +3,9 @@ package com.tamin.taminhamrah.dataSource.request
 import com.tamin.taminhamrah.apiService.request.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.UserRequestDTO
+import com.tamin.taminhamrah.model.request.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -17,9 +19,18 @@ class UserRequestRemoteDataSourceImpl(
 ) : UserRequestRemoteDataSource {
 
     override suspend fun getUserRequests(query: ApiQueryParamDN): ListData<UserRequestDTO> {
+        return fetchListData { requestApiService.getUserRequests(apiQueryBuilder.buildQuery(query)) }
+    }
+
+    override suspend fun getRequestTypes(query: ApiQueryParamDN): ListData<UserRequestTypeDTO> {
+        return fetchListData { requestApiService.getRequestTypes(apiQueryBuilder.buildQuery(query)) }
+    }
+
+    private suspend fun <T> fetchListData(
+        call: suspend () -> BaseDTO<ListData<T>>
+    ): ListData<T> {
         return try {
-            val response = requestApiService.getUserRequests(apiQueryBuilder.buildQuery(query))
-            response.extractData()
+            call().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
