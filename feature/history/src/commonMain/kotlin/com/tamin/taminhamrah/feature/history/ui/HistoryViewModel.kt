@@ -29,7 +29,7 @@ class HistoryViewModel(
         emit(PartialState.Loading(true))
         try {
             val response = getTalfighInfosUseCase()
-            emit(PartialState.TalfighiDataLoaded(response.list.toPresentation()))
+            emit(PartialState.TalfighiDataLoaded(response.list?.toPresentation() ?: emptyList()))
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
         }
@@ -39,7 +39,7 @@ class HistoryViewModel(
         emit(PartialState.Loading(true))
         try {
             val response = getDastmozdInfosUseCase()
-            emit(PartialState.DastmozdDataLoaded(response.list.toPresentation()))
+            emit(PartialState.DastmozdDataLoaded(response.list?.toPresentation() ?: emptyList()))
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
         }
