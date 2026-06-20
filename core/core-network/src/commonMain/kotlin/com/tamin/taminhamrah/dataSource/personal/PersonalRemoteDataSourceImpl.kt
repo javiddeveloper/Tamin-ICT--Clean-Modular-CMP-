@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.dataSource.personal
 
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -18,6 +19,23 @@ class PersonalRemoteDataSourceImpl(
         return try {
             val response = personalApiService.getPersonalInfo()
             response?.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getDeceasedInfo(nationalId: String): DeceasedInfoDTO {
+        return try {
+            val response = personalApiService.getDeceasedInfo(nationalId)
+            val data = response.extractData()
+            if (data.related == "0") {
+                throw TaminErrorUriException(ErrorUri.RESOURCE_NOT_FOUND)
+            }
+            data
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
