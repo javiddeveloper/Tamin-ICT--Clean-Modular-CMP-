@@ -9,16 +9,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
+import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
+import com.tamin.taminhamrah.model.history.WageDetailPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("سوابق تلفیقی", "سوابق دستمزد")
 
     LaunchedEffect(selectedTabIndex) {
         if (selectedTabIndex == 0 && uiState.talfighInfos.isEmpty()) {
@@ -27,6 +31,22 @@ fun HistoryScreen(
             viewModel.sendIntent(HistoryIntent.LoadDastmozdData)
         }
     }
+
+    HistoryContent(
+        uiState = uiState,
+        selectedTabIndex = selectedTabIndex,
+        onTabSelected = { selectedTabIndex = it }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HistoryContent(
+    uiState: com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    val tabs = listOf("سوابق تلفیقی", "سوابق دستمزد")
 
     Scaffold(
         topBar = {
@@ -44,7 +64,7 @@ fun HistoryScreen(
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
+                        onClick = { onTabSelected(index) },
                         text = { Text(title) }
                     )
                 }
@@ -89,7 +109,7 @@ fun HistoryScreen(
                                         Text("سال: ${info.hisyear}", style = MaterialTheme.typography.titleMedium)
                                         Text("شعبه: ${info.brhname}", style = MaterialTheme.typography.bodyMedium)
                                         Text("توضیحات: ${info.historytypedesc}", style = MaterialTheme.typography.bodyMedium)
-                                        Text("مجموع دستمزد ماه اول: ${info.hiswage1}", style = MaterialTheme.typography.bodySmall)
+                                        Text("مجموع دستمزد ماه اول: ${info.wageDetails.firstOrNull()?.wage ?: ""}", style = MaterialTheme.typography.bodySmall)
                                     }
                                 }
                             }
@@ -100,3 +120,58 @@ fun HistoryScreen(
         }
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun HistoryScreenPreview() {
+    PreviewRtlThemeContent {
+        HistoryContent(
+            uiState = HistoryUiState(
+                talfighInfos = listOf(
+                    TalfighInfoItemPR(
+                        months = listOf("30", "31", "30"),
+                        risuid = "1234567890",
+                        historyYears = 1,
+                        historyMonths = 0,
+                        sumYear = 1400,
+                        historyDays = 365,
+                        sumHistoryYears = 10,
+                        id = 1,
+                        hisYear = "1402"
+                    )
+                ),
+                dastmozdInfos = listOf(
+                    DastmozdInfoItemPR(
+                        wageDetails = listOf(
+                            WageDetailPR(month = "01", wage = "12000000"),
+                            WageDetailPR(month = "02", wage = "12000000")
+                        ),
+                        hisyear = "1402",
+                        id = 1,
+                        risufname = "علی",
+                        risubirthdate = "1360/01/01",
+                        risuidserial2 = "12",
+                        risuidserial1 = "34",
+                        rwshname = "شعبه یک",
+                        expcitycode = "021",
+                        brhcode = "123",
+                        risuidno = "123456",
+                        risudname = "محمد",
+                        risuid = "1234567890",
+                        risulname = "رضایی",
+                        risunatcode = "0012345678",
+                        brhname = "شعبه مرکزی",
+                        historytypedesc = "عادی",
+                        rwshid = "1"
+                    )
+                )
+            ),
+            selectedTabIndex = 0,
+            onTabSelected = {}
+        )
+    }
+}
+
+
+
+
