@@ -20,7 +20,7 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
-import com.tamin.taminhamrah.model.user.VerifyMobileReq
+import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -179,7 +179,7 @@ internal class UserRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun verifyChangeMobileCode(request: VerifyMobileReq): String {
+    override suspend fun verifyChangeMobileCode(request: VerifyMobileRequest): String {
         return try {
             val response = userApiService.verifyChangeMobileCode(
                 referer = NetworkConstants.REFERER_MOBILE,

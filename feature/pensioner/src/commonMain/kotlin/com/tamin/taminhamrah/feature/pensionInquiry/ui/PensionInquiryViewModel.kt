@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIn
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryEvent
 import com.tamin.taminhamrah.mapper.common.toPresentation
 import com.tamin.taminhamrah.mapper.pension.toPresentation
+import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -16,6 +17,7 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -24,10 +26,15 @@ class PensionInquiryViewModel(
     private val getRecipientListUseCase: GetRecipientListUseCase,
     private val getPensionerIdUseCase: GetPensionerIdUseCase,
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase,
+    private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
     private val getBeneficiaryUseCase: GetBeneficiaryUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
+
+    init {
+        sendIntent(PensionInquiryIntent.LoadPersonalInfo)
+    }
 
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
         return when (intent) {
@@ -36,6 +43,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadEdict -> handleLoadEdict(intent.pensionerId)
             is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
             is PensionInquiryIntent.LoadBeneficiaryList -> handleLoadBeneficiaryList()
+            is PensionInquiryIntent.LoadPersonalInfo -> handleLoadPersonalInfo()
+        }
+    }
+
+    private fun handleLoadPersonalInfo(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getPersonalInfoUseCase().collect { personalInfo ->
+                emit(PartialState.PersonalInfoLoaded(personalInfo?.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -132,6 +151,10 @@ class PensionInquiryViewModel(
         is PartialState.EdictLoaded -> currentState.copy(
             isLoading = false,
             edictPensioner = partialState.edict
+        )
+        is PartialState.PersonalInfoLoaded -> currentState.copy(
+            isLoading = false,
+            personalInfo = partialState.personalInfo
         )
         is PartialState.BeneficiaryListLoaded -> currentState.copy(
             isLoading = false,
