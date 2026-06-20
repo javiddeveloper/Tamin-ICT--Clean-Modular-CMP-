@@ -7,7 +7,6 @@ import androidx.room.RoomDatabase
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
-import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
@@ -17,8 +16,6 @@ import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxItemEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxSizeEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInfoEntity
-import com.tamin.taminhamrah.data.local.entity.PersonalInboxItemEntity
-import com.tamin.taminhamrah.data.local.entity.PersonalInboxSizeEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.data.local.entity.RecipientEntity
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
