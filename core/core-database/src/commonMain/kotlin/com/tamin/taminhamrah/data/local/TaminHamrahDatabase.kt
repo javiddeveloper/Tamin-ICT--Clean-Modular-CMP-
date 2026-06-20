@@ -8,6 +8,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
+import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.data.local.entity.CityEntity
@@ -15,6 +16,7 @@ import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInfoEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.data.local.entity.RecipientEntity
+import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -26,9 +28,10 @@ import kotlinx.coroutines.IO
         CityEntity::class,
         IdentityInfoEntity::class,
         RecipientEntity::class,
+        UserRequestEntity::class,
         PersonalInfoEntity::class,
     ],
-    version = 3,
+    version = 1,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 expect abstract class TaminXDatabase : RoomDatabase {
@@ -37,6 +40,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun userDao(): UserDao
     abstract fun recipientDao(): RecipientDao
     abstract fun personalDao(): PersonalDao
+    abstract fun userRequestDao(): UserRequestDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

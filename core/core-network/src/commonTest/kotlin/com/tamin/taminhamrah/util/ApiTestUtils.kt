@@ -47,3 +47,65 @@ object UserTestData {
 
     val verifyMobileSuccess = "\"OTP_VERIFIED_SUCCESSFULLY\""
 }
+
+object UserRequestTestData {
+    val userRequestsSuccess = """
+        {
+            "total": 1,
+            "list": [
+                {
+                    "id": 478176975,
+                    "operation": null,
+                    "createdBy": "0946168113",
+                    "creationTime": 1780398668987,
+                    "lastModifiedBy": null,
+                    "lastModificationTime": 1780398668983,
+                    "refCode": "1073555545",
+                    "userName": "0946168113",
+                    "status": {
+                        "operation": null,
+                        "requestCode": "2903",
+                        "requestDesc": "انعقاد قرارداد"
+                    },
+                    "title": "انعقاد قرارداد بيمه اختياري",
+                    "comment": "قرارداد ايجاد شد",
+                    "template": null,
+                    "requestType": {
+                        "operation": null,
+                        "createdBy": null,
+                        "creationTime": null,
+                        "lastModifiedBy": null,
+                        "lastModificationTime": null,
+                        "id": 35,
+                        "title": "قرارداد بيمه اختياري",
+                        "description": "قرارداد بيمه اختياري"
+                    },
+                    "deliverCode": null,
+                    "refrenceid": "478176974",
+                    "requestDetails": null,
+                    "requestChid": null,
+                    "fullName": null,
+                    "createByName": "حميد چيداز"
+                }
+            ]
+        }
+    """.trimIndent()
+
+    val requestTypesSuccess = """
+        {
+            "total": 64,
+            "list": [
+                {
+                    "operation": null,
+                    "createdBy": "PNJ_14040622",
+                    "creationTime": 1760260280000,
+                    "lastModifiedBy": null,
+                    "lastModificationTime": null,
+                    "id": 67,
+                    "title": "END_KAFALAT",
+                    "description": "خاتمه کفالت"
+                }
+            ]
+        }
+    """.trimIndent()
+}
