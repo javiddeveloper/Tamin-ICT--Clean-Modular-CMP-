@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.ui.navigation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +15,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.tamin.taminhamrah.feature.cartable.CartableRoute
+import com.tamin.taminhamrah.feature.cartable.cartableGraph
+import com.tamin.taminhamrah.feature.cartable.navigateToCartable
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
@@ -69,6 +73,20 @@ internal fun TaminHamrahNavGraph(
                     }
                 )
                 NavigationBarItem(
+                    icon = { Icon(Icons.Default.Inbox, null) },
+                    label = { Text("Cartable") },
+                    selected = currentDestination?.hasRoute<CartableRoute.Main>() == true,
+                    onClick = {
+                        navController.navigateToCartable {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                NavigationBarItem(
                     icon = { Icon(Icons.Default.Home, null) }, // Use appropriate icon
                     label = { Text("Pension") },
                     selected = currentDestination?.hasRoute<PensionInquiryRoute>() == true,
@@ -104,6 +122,16 @@ internal fun TaminHamrahNavGraph(
                         navController.navigate(ProfileRoute.Identity(userId))
                     },
                     onOpenUrl = { url -> openUrl(url) },
+                    onBack = { navController.popBackStack() }
+                )
+
+                cartableGraph(
+                    onNavigateToMyRequests = {
+                        navController.navigate(CartableRoute.MyRequests)
+                    },
+                    onNavigateToPersonalInbox = {
+                        navController.navigate(CartableRoute.PersonalInbox)
+                    },
                     onBack = { navController.popBackStack() }
                 )
 

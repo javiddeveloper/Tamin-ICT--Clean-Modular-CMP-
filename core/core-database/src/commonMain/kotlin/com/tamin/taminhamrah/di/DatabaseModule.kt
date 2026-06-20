@@ -10,5 +10,6 @@ val databaseModule = module {
     single { get<TaminXDatabase>().cityProvinceDao() }
     single { get<TaminXDatabase>().userDao() }
     single { get<TaminXDatabase>().recipientDao() }
+    single { get<TaminXDatabase>().userRequestDao() }
     single { get<TaminXDatabase>().personalDao() }
 }
