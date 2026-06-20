@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
+import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -30,6 +31,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadRecipients)
         viewModel.sendIntent(PensionInquiryIntent.LoadPersonalInfo)
         viewModel.sendIntent(PensionInquiryIntent.LoadBeneficiaryList)
+        viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityDependentInfo)
     }
 
     PensionInquiryContent(state)
@@ -60,6 +62,20 @@ fun PensionInquiryContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+
+                    if (state.disabilityDependentInfo.isNotEmpty()){
+                        item {
+                            Text(
+                                text = "مستمری از کار افتادگی / تبعی ها:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                        }
+                        items(state.disabilityDependentInfo){
+                            DependentDisabilityInfo(it)
+                        }
+                    }
+
                     if (state.personalInfo != null) {
                         item {
                             Text(
@@ -188,6 +204,19 @@ fun PensionIdItem(item: PensionIdPR) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "شناسه مستمری‌بگیر: ${item.pensionerId}")
+        }
+    }
+}
+@Composable
+fun DependentDisabilityInfo(item: DisabilityDependentPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "نام: ${item.firstName}")
+            Text(text = "نسبت: ${item.relation}")
         }
     }
 }

@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
@@ -52,6 +53,7 @@ val domainModule = module {
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)
+    factoryOf(::GetDisabilityDependentInfoUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)

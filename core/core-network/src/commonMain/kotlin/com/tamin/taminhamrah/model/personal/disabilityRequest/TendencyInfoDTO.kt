@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.subDominant.disabilityRequest
+package com.tamin.taminhamrah.model.personal.disabilityRequest
 
 import com.tamin.taminhamrah.model.subDominant.BaseTendency
 import kotlinx.serialization.SerialName

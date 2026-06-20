@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.model.personal.PersonalDTO
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.PersonalDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
     return PersonalInfoDN(
@@ -25,6 +27,21 @@ fun PersonalDTO.toDomain(): PersonalDN {
         ssn = ssn,
         genderDesc = gender?.genderDesc,
         dateOfBirth = dateOfBirth
+    )
+}
+
+fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
+    val personal = relationWithTamin?.personal
+    val tendency = relationWithTamin?.tendencyInfo?.baseTendency
+    return DisabilityDependentDN(
+        firstName = personal?.firstName,
+        lastName = personal?.lastName,
+        nationalId = personal?.nationalId,
+        dateOfBirth = personal?.dateOfBirth,
+        fatherName = personal?.fatherName,
+        genderDesc = personal?.gender?.genderDesc,
+        relation = personal?.relation,
+        tendencyDescription = tendency?.tendencyDescription
     )
 }
 
