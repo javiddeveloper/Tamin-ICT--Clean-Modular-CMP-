@@ -51,6 +51,17 @@ enum class FilterProperty(val key: String) {
     @SerialName("operation") OPERATION("operation"),
     @SerialName("refCode") REF_CODE("refCode"),
     @SerialName("requestType.id") REQUEST_TYPE_ID("requestType.id"),
+    @SerialName("workshop.workshopId") WORKSHOP_ID("workshop.workshopId"),
+    @SerialName("workshop.branchCode") WORKSHOP_BRANCH_CODE("workshop.branchCode"),
+    @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode"),
+    @SerialName("workshopId") PAYMENT_WORKSHOP_ID("workshopId"),
+    @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
+    @SerialName("payIdFrom") PAY_ID_FROM("payIdFrom"),
+    @SerialName("payIdTo") PAY_ID_TO("payIdTo"),
+    @SerialName("docDateFrom") DOC_DATE_FROM("docDateFrom"),
+    @SerialName("docDateTo") DOC_DATE_TO("docDateTo"),
+    @SerialName("debitReason") DEBIT_REASON("debitReason"),
+    @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus")
 }
 
 @Serializable
