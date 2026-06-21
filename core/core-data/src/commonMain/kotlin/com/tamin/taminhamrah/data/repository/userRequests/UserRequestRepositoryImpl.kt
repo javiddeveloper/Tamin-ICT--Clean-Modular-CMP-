@@ -5,10 +5,11 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.request.UserRequestDN
-import com.tamin.taminhamrah.model.request.UserRequestTypeDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.map
 internal class UserRequestRepositoryImpl(
     private val requestRemoteDataSource: UserRequestRemoteDataSource,
     private val requestDao: UserRequestDao,
+    private val apiQueryBuilder: ApiQueryBuilder,
 ) : UserRequestRepository {
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = flow {
@@ -42,14 +44,9 @@ internal class UserRequestRepositoryImpl(
         )
     }.distinctUntilChanged()
 
-    override suspend fun getRequestTypes(
-        page: Int,
-        start: Int,
-        limit: Int,
-    ): List<UserRequestTypeDN> {
-        val response = requestRemoteDataSource.getRequestTypes(
-            ApiQueryParamDN(page = page, start = start, limit = limit)
-        )
+    override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> {
+        val effectiveQuery = query ?: apiQueryBuilder.defaultQuery()
+        val response = requestRemoteDataSource.getRequestTypes(effectiveQuery)
         return response.list.orEmpty().map { it.toDomain() }
     }
 

@@ -159,3 +159,92 @@ object PersonalInboxTestData {
         }
     """.trimIndent()
 }
+
+object ContractsTestData {
+    val contractsListSuccess = """
+        {
+            "total": 1,
+            "list": [
+                {
+                    "adultLetterDate": null,
+                    "adultLetterNumber": null,
+                    "age": null,
+                    "branchCode": null,
+                    "brchCodeNew": null,
+                    "cancelDate": null,
+                    "cancelUID": null,
+                    "canceldesc": null,
+                    "cityCode": null,
+                    "cntDrmn": "1",
+                    "cntFreeJobCode": null,
+                    "cntIncPayDate3t4": null,
+                    "cntMedicalFlag": null,
+                    "comment": null,
+                    "commissionStatus": null,
+                    "confirmDate": null,
+                    "confirmUID": null,
+                    "contractDate": 1780398668987,
+                    "contractNumber": 478176974,
+                    "contractStatus": null,
+                    "contractStatusObject": {
+                        "selfIsuContStatDesc": "فعال بعلت تنظیم قرارداد",
+                        "selfIsuContStatDode": 1
+                    },
+                    "creatDate": null,
+                    "createDate": null,
+                    "createUID": null,
+                    "eligibilityStatus": null,
+                    "freeJob": {
+                        "discrioption": "تاسیساتی",
+                        "endDate": null,
+                        "fixRank": null,
+                        "id": null,
+                        "iscoCode": null,
+                        "jobCode": null,
+                        "startDate": null,
+                        "status": null
+                    },
+                    "guid": null,
+                    "guidName": null,
+                    "history": null,
+                    "insuranceId": null,
+                    "isStudent": null,
+                    "medicalExemptionStatus": null,
+                    "militaryServiceLicense": null,
+                    "mobileNumber": null,
+                    "natinoalCode": null,
+                    "physicalStatus": null,
+                    "premiumRate": {
+                        "govermentPercent": null,
+                        "insurDpercent": "27",
+                        "payrespitelOne": null,
+                        "payrespitelTwo": null,
+                        "selfIsuTypeCode": null,
+                        "spcLowDayWage": null,
+                        "spcrateCode": null,
+                        "spcrateDescription": "بیمه اختیاری ۲۷ درصد",
+                        "status": null,
+                        "statusStDate": null,
+                        "treatmentPercap": null
+                    },
+                    "premiumRateCode": null,
+                    "premiumType": {
+                        "insuranceDescription": "اختیاری",
+                        "insuranceKind": "اختیاری",
+                        "insuranceTypeCode": "02",
+                        "status": "1",
+                        "statusDate": 1780398668987
+                    },
+                    "premiumTypeCode": null,
+                    "provinceCode": null,
+                    "provinceName": null,
+                    "refCode": null,
+                    "salary": 362592593,
+                    "startDate": null,
+                    "statusDate": null,
+                    "wage": null
+                }
+            ]
+        }
+    """.trimIndent()
+}

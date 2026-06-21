@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.useCases.userRequest
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.model.request.UserRequestDN
-import com.tamin.taminhamrah.model.request.UserRequestStatusDN
-import com.tamin.taminhamrah.model.request.UserRequestTypeDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestStatusDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.repository.userRequest.FakeUserRequestRepository
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest

@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.mapper.userRequest
 
-import com.tamin.taminhamrah.model.request.UserRequestDN
-import com.tamin.taminhamrah.model.request.UserRequestTypeDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 

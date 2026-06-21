@@ -21,6 +21,8 @@ import com.tamin.taminhamrah.feature.cartable.navigateToCartable
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
+import com.tamin.taminhamrah.feature.contracts.contractsScreen
+import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
@@ -111,6 +113,9 @@ internal fun TaminHamrahNavGraph(
                     HomeScreen(
                         onNavigateToHistory = {
                             navController.navigate(HistoryRoute)
+                        },
+                        onNavigateToContracts = {
+                            navController.navigateToContracts()
                         }
                     )
                 }
@@ -137,6 +142,8 @@ internal fun TaminHamrahNavGraph(
                 pensionInquiryScreen()
 
                 historyScreen()
+
+                contractsScreen(onBack = { navController.popBackStack() })
             }
 
             if (isLoading) {
@@ -188,7 +195,7 @@ fun SampleScreen(title: String) {
 }
 
 @Composable
-fun HomeScreen(onNavigateToHistory: () -> Unit) {
+fun HomeScreen(onNavigateToHistory: () -> Unit, onNavigateToContracts: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.TopCenter
@@ -208,6 +215,18 @@ fun HomeScreen(onNavigateToHistory: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text("کلیه سوابق", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Card(
+                onClick = onNavigateToContracts,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("امور قراردادها و پرداخت", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
