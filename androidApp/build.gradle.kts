@@ -116,7 +116,7 @@ android {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
             if (variant.buildType.name == "release") {
                 output.outputFileName =
-                    "Tamin_ICT_${variant.versionCode}_${variant.versionName}(${variant.flavorName}).apk"
+                    "Tamin_ICT_${variant.versionCode}_${variant.versionName}-(${variant.flavorName}).apk"
             }
         }
     }
