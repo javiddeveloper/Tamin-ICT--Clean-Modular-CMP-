@@ -127,7 +127,7 @@ internal fun TaminHamrahNavGraph(
 
                 cartableGraph(
                     onNavigateToMyRequests = {
-                        navController.navigate(CartableRoute.MyRequests)
+                        navController.navigate(CartableRoute.UserRequests)
                     },
                     onNavigateToPersonalInbox = {
                         navController.navigate(CartableRoute.PersonalInbox)

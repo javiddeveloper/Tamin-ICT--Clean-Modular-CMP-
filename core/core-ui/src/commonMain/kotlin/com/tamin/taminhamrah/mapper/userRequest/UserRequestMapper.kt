@@ -8,13 +8,13 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 fun UserRequestDN.toPresentation(): UserRequestPR {
     return UserRequestPR(
         id = id,
-        refCode = refCode.orEmpty(),
-        title = title.orEmpty(),
-        comment = comment.orEmpty(),
-        creationTime = formatCreationTime(creationTime),
-        createByName = createByName.orEmpty(),
-        statusDesc = status?.requestDesc.orEmpty(),
-        requestTypeTitle = requestType?.title.orEmpty(),
+        refCode = refCode ?: "",
+        title = title ?: "",
+        comment = comment ?: "",
+        creationTime = creationTime?.toString() ?: "0",
+        createByName = createByName ?: "",
+        statusDesc = status?.requestDesc ?: "",
+        requestTypeTitle = requestType?.title ?: "",
     )
 }
 
@@ -28,9 +28,5 @@ fun UserRequestTypeDN.toTypePresentation(): UserRequestTypePR {
     )
 }
 
-fun List<UserRequestTypeDN>.toTypePresentation(): List<UserRequestTypePR> = map { it.toTypePresentation() }
-
-private fun formatCreationTime(creationTime: Long?): String {
-    if (creationTime == null) return ""
-    return creationTime.toString()
-}
+fun List<UserRequestTypeDN>.toTypePresentation(): List<UserRequestTypePR> =
+    map { it.toTypePresentation() }

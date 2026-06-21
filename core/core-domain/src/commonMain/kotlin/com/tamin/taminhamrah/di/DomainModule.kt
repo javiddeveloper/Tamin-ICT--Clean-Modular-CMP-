@@ -17,6 +17,8 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
@@ -67,4 +69,6 @@ val domainModule = module {
     factoryOf(::GetUserRequestTypesUseCase)
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
+    factoryOf(::GetPersonalInboxItemsUseCase)
+    factoryOf(::GetPersonalInboxSizeUseCase)
 }
