@@ -8,7 +8,9 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
     return PersonalInfoDN(
@@ -51,6 +53,12 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         genderDesc = personal?.gender?.genderDesc,
         relation = personal?.relation,
         tendencyDescription = tendency?.tendencyDescription
+    )
+}
+
+fun SubmitFinalSurvivorPensionDN.toDTO(): SubmitFinalSurvivorPensionRequest {
+    return SubmitFinalSurvivorPensionRequest(
+        id = id
     )
 }
 
