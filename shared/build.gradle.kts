@@ -32,6 +32,7 @@ kotlin {
             api(project(":core:core-ui"))
             api(project(":feature:profile"))
             api(project(":feature:pensioner"))
+            api(project(":feature:cartable"))
             api(project(":feature:history"))
             api(project(":feature:workshops"))
 //            api(project(":feature:feature-settings"))

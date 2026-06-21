@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BaseTendency(
-    @SerialName("tendencyCode") val tendencyCode: String? = null
+    @SerialName("tendencyCode") val tendencyCode: String?,
+    @SerialName("tendencyDescription") val tendencyDescription: String?,
 )

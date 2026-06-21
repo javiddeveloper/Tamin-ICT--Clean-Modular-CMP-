@@ -40,7 +40,9 @@ android-test:
   extends: .android-base
   stage: test
   script:
-    - ./gradlew :androidApp:lintDebug test
+    # Run unit tests for all modules (Feature, Domain, Data/Core)
+    # Libraries use testDebugUnitTest. The app uses testDirectDebugUnitTest.
+    - ./gradlew testDebugUnitTest testDirectDebugUnitTest
   artifacts:
     paths:
       - "**/build/reports/"
