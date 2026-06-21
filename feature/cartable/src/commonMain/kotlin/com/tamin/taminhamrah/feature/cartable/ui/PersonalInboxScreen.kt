@@ -58,7 +58,6 @@ fun PersonalInboxContent(
 ) {
     Scaffold(
         topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(
                 title = { Text("صندوق شخصی من") },
                 navigationIcon = {
