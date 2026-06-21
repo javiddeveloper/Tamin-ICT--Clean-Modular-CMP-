@@ -4,6 +4,8 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
+import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
+import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 
 fun EmployerWorkshopDTO.toDomain(): EmployerWorkshopDN {
     return EmployerWorkshopDN(
@@ -50,5 +52,28 @@ fun EmployerAgreementDTO.toDomain(): EmployerAgreementDN {
         dname = dname,
         letNo = letNo,
         createuid = createuid
+    )
+}
+
+fun PaymentSheetDTO.toDomain(): PaymentSheetDN {
+    return PaymentSheetDN(
+        orderNo = orderNo,
+        orderRow = orderRow,
+        payId = payId,
+        mastCustomerCode = mastCustomerCode,
+        rcntrow = rcntrow,
+        mastCustomerName = mastCustomerName,
+        debitCreateReasonCode = debitCreateReasonCode,
+        debitCreateReasonDesc = debitCreateReasonDesc,
+        debitNo = debitNo,
+        docDate = docDate,
+        paySeqAmount = paySeqAmount,
+        orpStatusCode = orpStatusCode,
+        orpStatusDesc = orpStatusDesc,
+        cardDate = cardDate,
+        payKindCode = payKindCode,
+        payKindDesc = payKindDesc,
+        ouragGno = ouragGno,
+        ouragSDate = ouragSDate
     )
 }

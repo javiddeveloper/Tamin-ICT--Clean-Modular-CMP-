@@ -43,14 +43,21 @@ enum class FilterOperator(val value: String) {
 @Serializable
 enum class FilterProperty(val key: String) {
     @SerialName("serialId") SERIAL_ID("serialId"),
-    @SerialName("mobile") MOBILE("mobile"),
     @SerialName("cityCode") CITY_CODE("cityCode"),
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),
     @SerialName("workshop.workshopId") WORKSHOP_ID("workshop.workshopId"),
     @SerialName("workshop.branchCode") WORKSHOP_BRANCH_CODE("workshop.branchCode"),
-    @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode")
+    @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode"),
+    @SerialName("workshopId") PAYMENT_WORKSHOP_ID("workshopId"),
+    @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
+    @SerialName("payIdFrom") PAY_ID_FROM("payIdFrom"),
+    @SerialName("payIdTo") PAY_ID_TO("payIdTo"),
+    @SerialName("docDateFrom") DOC_DATE_FROM("docDateFrom"),
+    @SerialName("docDateTo") DOC_DATE_TO("docDateTo"),
+    @SerialName("debitReason") DEBIT_REASON("debitReason"),
+    @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus")
 }
 
 @Serializable
