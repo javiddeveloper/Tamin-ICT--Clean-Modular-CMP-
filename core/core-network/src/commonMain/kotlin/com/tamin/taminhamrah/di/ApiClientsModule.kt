@@ -9,6 +9,8 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.apiService.contract.ContractsApiService
+import com.tamin.taminhamrah.apiService.contract.createContractsApiService
 import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
@@ -92,6 +94,11 @@ val ApiClientsModule = module {
     single<PersonalInboxApiService>(named("personalInboxApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createPersonalInboxApiService()
+    }
+
+    single<ContractsApiService>(named("contractsApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createContractsApiService()
     }
 
 }

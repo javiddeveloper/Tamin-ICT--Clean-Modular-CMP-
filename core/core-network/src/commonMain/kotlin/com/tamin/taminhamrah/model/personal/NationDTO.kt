@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NationDTO(
-    @SerialName("statusDate") val statusDate: String?,
-    @SerialName("nationDesc") val nationDesc: String?,
-    @SerialName("nationCode") val nationCode: String?,
-    @SerialName("status") val status: String?,
+    @SerialName("statusDate") val statusDate: String? = null,
+    @SerialName("nationDesc") val nationDesc: String? = null,
+    @SerialName("nationCode") val nationCode: String? = null,
+    @SerialName("status") val status: String? = null,
 )

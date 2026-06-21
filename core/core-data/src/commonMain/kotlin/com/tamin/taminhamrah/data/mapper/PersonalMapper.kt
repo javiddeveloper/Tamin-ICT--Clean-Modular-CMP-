@@ -9,7 +9,13 @@ import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
+import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
+import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDTO
+import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
     return PersonalInfoDN(
@@ -58,6 +64,24 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         genderDesc = personal?.gender?.genderDesc,
         relation = personal?.relation,
         tendencyDescription = tendency?.tendencyDescription
+    )
+}
+
+fun ConfirmSurvivorDTO.toDomain(): ConfirmSurvivorDN {
+    return ConfirmSurvivorDN(
+        request = request?.toDomain()
+    )
+}
+
+fun RequestModelDTO.toDomain(): RequestModelDN {
+    return RequestModelDN(
+        id = id
+    )
+}
+
+fun SubmitFinalSurvivorPensionDN.toDTO(): SubmitFinalSurvivorPensionRequest {
+    return SubmitFinalSurvivorPensionRequest(
+        id = id
     )
 }
 
