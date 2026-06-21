@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
@@ -47,6 +48,15 @@ class PersonalRepositoryImpl(
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> = flow {
         try {
             val response = personalRemoteDataSource.getDisabilityDependentInfo(ApiQueryParamDN(filters = filters))
+            emit(response.map { it.toDomain() })
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = flow {
+        try {
+            val response = personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
             emit(response.map { it.toDomain() })
         } catch (e: Exception) {
             throw e

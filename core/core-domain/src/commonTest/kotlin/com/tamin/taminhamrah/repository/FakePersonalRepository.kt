@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.repository
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,7 @@ class FakePersonalRepository : PersonalRepository {
 
     var shouldThrowError = false
     var disabilityDependentInfoResult: List<DisabilityDependentDN> = emptyList()
+    var confirmSurvivorsListResult: List<ConfirmSurvivorDN> = emptyList()
     var error: Throwable = RuntimeException("Personal Repository Error")
 
     override fun getPersonalInfo(): Flow<PersonalInfoDN?> = flow {
@@ -28,5 +30,10 @@ class FakePersonalRepository : PersonalRepository {
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> = flow {
         if (shouldThrowError) throw error
         emit(disabilityDependentInfoResult)
+    }
+
+    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(confirmSurvivorsListResult)
     }
 }
