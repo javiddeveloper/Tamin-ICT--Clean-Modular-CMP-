@@ -63,7 +63,6 @@ android-build-debug:
       - androidApp/build/outputs/apk/*/debug/*.apk
     expire_in: 1 week
   only:
-    - merge_requests
     - main
     - develop
 
