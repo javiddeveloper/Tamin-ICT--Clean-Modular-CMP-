@@ -9,4 +9,5 @@ interface PersonalRemoteDataSource {
     suspend fun getPersonalInfo(): PersonalInfoDTO?
     suspend fun getAge(birthDate: Long): AgeDTO
     suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO>
+    suspend fun checkGirlSurvivorConditions(nationalCode: String, pensionerId: String): String?
 }

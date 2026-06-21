@@ -57,4 +57,23 @@ class PersonalRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String
+    ): String? {
+        return try {
+            val response = personalApiService.checkGirlSurvivorConditions(
+                nationalCode = nationalCode,
+                pensionerId = pensionerId
+            )
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }

@@ -3,9 +3,11 @@ package com.tamin.taminhamrah.data.repository.personal
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toGirlSurvivorConditionDomain
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -44,13 +46,25 @@ class PersonalRepositoryImpl(
     override fun getAge(birthDate: Long): Flow<AgeDN> = flow {
         emit(personalRemoteDataSource.getAge(birthDate).toDomain())
     }
-    override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> = flow {
-        try {
-            val response = personalRemoteDataSource.getDisabilityDependentInfo(ApiQueryParamDN(filters = filters))
-            emit(response.map { it.toDomain() })
-        } catch (e: Exception) {
-            throw e
+
+    override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
+        flow {
+                val response =
+                    personalRemoteDataSource.getDisabilityDependentInfo(ApiQueryParamDN(filters = filters))
+                emit(response.map { it.toDomain() })
+
         }
+
+    override fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String
+    ): Flow<GirlSurvivorConditionDN> = flow {
+        emit(
+            personalRemoteDataSource.checkGirlSurvivorConditions(
+                nationalCode,
+                pensionerId
+            ).toGirlSurvivorConditionDomain()
+        )
     }
 }
 
