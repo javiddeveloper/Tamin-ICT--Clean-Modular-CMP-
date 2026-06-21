@@ -50,14 +50,12 @@ class PersonalRepositoryImpl(
 
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
         flow {
-            try {
+
                 val response = personalRemoteDataSource.getDisabilityDependentInfo(
                     ApiQueryParamDN(filters = filters)
                 )
                 emit(response.map { it.toDomain() })
-            } catch (e: Exception) {
-                throw e
-            }
+
         }
 
     override fun submitFinalSurvivorPension(
@@ -68,12 +66,10 @@ class PersonalRepositoryImpl(
     }
 
     override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = flow {
-        try {
+
             val response = personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
             emit(response.map { it.toDomain() })
-        } catch (e: Exception) {
-            throw e
-        }
+
     }
 }
 
