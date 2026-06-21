@@ -23,6 +23,9 @@ class TaminHamrahKmpComposePlugin : Plugin<Project> {
             }
 
             extensions.configure<KotlinMultiplatformExtension> {
+                sourceSets.all {
+                    languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
+                }
                 sourceSets.apply {
                     val commonMain = getByName("commonMain")
                     commonMain.dependencies {

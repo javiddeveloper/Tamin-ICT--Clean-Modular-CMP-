@@ -45,7 +45,6 @@ fun PensionInquiryContent(
 ) {
     Scaffold(
         topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(title = { Text("استعلام مستمری") })
         }
     ) { padding ->
