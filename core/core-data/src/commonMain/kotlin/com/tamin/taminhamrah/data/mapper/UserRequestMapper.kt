@@ -1,11 +1,11 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
-import com.tamin.taminhamrah.model.request.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
-import com.tamin.taminhamrah.model.request.UserRequestStatusDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestStatusDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestStatusDTO
-import com.tamin.taminhamrah.model.request.UserRequestTypeDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 
 fun UserRequestDTO.toDomain(): UserRequestDN {

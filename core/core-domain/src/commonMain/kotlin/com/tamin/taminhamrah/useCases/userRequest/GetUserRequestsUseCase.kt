@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.useCases.userRequest
 
-import com.tamin.taminhamrah.model.request.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import kotlinx.coroutines.flow.Flow

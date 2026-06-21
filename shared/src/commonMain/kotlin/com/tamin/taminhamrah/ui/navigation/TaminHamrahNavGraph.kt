@@ -21,6 +21,8 @@ import com.tamin.taminhamrah.feature.cartable.navigateToCartable
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
+import com.tamin.taminhamrah.feature.contracts.contractsScreen
+import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
@@ -115,6 +117,9 @@ internal fun TaminHamrahNavGraph(
                         onNavigateToHistory = {
                             navController.navigate(HistoryRoute)
                         },
+                        onNavigateToContracts = {
+                            navController.navigateToContracts()
+                        },
                         onNavigateToWorkshops = {
                             navController.navigateToWorkshops()
                         }
@@ -143,6 +148,8 @@ internal fun TaminHamrahNavGraph(
                 pensionInquiryScreen()
 
                 historyScreen()
+
+                contractsScreen(onBack = { navController.popBackStack() })
 
                 workshopsScreen(navController)
             }
@@ -186,9 +193,20 @@ internal fun TaminHamrahNavGraph(
 }
 
 @Composable
+fun SampleScreen(title: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = title)
+    }
+}
+
+@Composable
 fun HomeScreen(
     onNavigateToHistory: () -> Unit,
-    onNavigateToWorkshops: () -> Unit
+    onNavigateToWorkshops: () -> Unit,
+    onNavigateToContracts: () -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -211,6 +229,18 @@ fun HomeScreen(
                     Text("کلیه سوابق", style = MaterialTheme.typography.titleMedium)
                 }
             }
+            Spacer(Modifier.height(8.dp))
+            Card(
+                onClick = onNavigateToContracts,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("امور قراردادها و پرداخت", style = MaterialTheme.typography.titleMedium)
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
             Card(
                 onClick = onNavigateToWorkshops,
@@ -226,3 +256,4 @@ fun HomeScreen(
         }
     }
 }
+

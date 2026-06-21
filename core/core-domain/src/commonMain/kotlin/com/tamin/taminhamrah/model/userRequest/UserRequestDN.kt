@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.request
+package com.tamin.taminhamrah.model.userRequest
 
 data class UserRequestDN(
     val id: Long,
