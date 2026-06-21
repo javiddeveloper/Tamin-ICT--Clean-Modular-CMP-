@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -47,6 +48,21 @@ class PersonalRemoteDataSourceImpl(
     override suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO> {
         return try {
             val response = personalApiService.getDisabilityDependentInfo(
+                queryBuilder.buildQuery(query)
+            )
+            response.extractData().list ?: emptyList()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
+    override suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO> {
+        return try {
+            val response = personalApiService.confirmSurvivorsList(
                 queryBuilder.buildQuery(query)
             )
             response.extractData().list ?: emptyList()

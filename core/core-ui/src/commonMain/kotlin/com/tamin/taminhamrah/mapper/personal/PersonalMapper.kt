@@ -8,8 +8,13 @@ import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
+import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
+import com.tamin.taminhamrah.model.personal.survivorList.RequestModelPR
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionPR
+import kotlin.jvm.JvmName
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
     return PersonalInfoPR(
@@ -53,7 +58,25 @@ fun DisabilityDependentDN.toPresentation(): DisabilityDependentPR {
     )
 }
 
+@JvmName("disabilityDependentToPresentation")
 fun List<DisabilityDependentDN>.toPresentation(): List<DisabilityDependentPR> {
+    return map { it.toPresentation() }
+}
+
+fun ConfirmSurvivorDN.toPresentation(): ConfirmSurvivorPR {
+    return ConfirmSurvivorPR(
+        request = request?.toPresentation()
+    )
+}
+
+fun RequestModelDN.toPresentation(): RequestModelPR {
+    return RequestModelPR(
+        id = id
+    )
+}
+
+@JvmName("confirmSurvivorToPresentation")
+fun List<ConfirmSurvivorDN>.toPresentation(): List<ConfirmSurvivorPR> {
     return map { it.toPresentation() }
 }
 
