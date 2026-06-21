@@ -1,8 +1,12 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,10 +33,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 
 @Composable
 fun WorkshopsScreen(
-    viewModel: WorkshopsViewModel = koinViewModel()
+    viewModel: WorkshopsViewModel = koinViewModel(),
+    navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -40,19 +46,52 @@ fun WorkshopsScreen(
     var branchCode by remember { mutableStateOf("") }
     var workshopStatus by remember { mutableStateOf("") }
 
+    WorkshopsContent(
+        uiState = uiState,
+        workshopId = workshopId,
+        onWorkshopIdChange = { workshopId = it },
+        branchCode = branchCode,
+        onBranchCodeChange = { branchCode = it },
+        workshopStatus = workshopStatus,
+        onWorkshopStatusChange = { workshopStatus = it },
+        onLoadClick = {
+            viewModel.sendIntent(
+                WorkshopsIntent.LoadWorkshops(
+                    workshopId = workshopId.takeIf { it.isNotBlank() },
+                    branchCode = branchCode.takeIf { it.isNotBlank() },
+                    workshopStatus = workshopStatus.takeIf { it.isNotBlank() }
+                )
+            )
+        },
+        navigateToPaymentSheets = navigateToPaymentSheets
+    )
+}
+
+@Composable
+fun WorkshopsContent(
+    uiState: com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState,
+    workshopId: String,
+    onWorkshopIdChange: (String) -> Unit,
+    branchCode: String,
+    onBranchCodeChange: (String) -> Unit,
+    workshopStatus: String,
+    onWorkshopStatusChange: (String) -> Unit,
+    onLoadClick: () -> Unit,
+    navigateToPaymentSheets: (String, String) -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         OutlinedTextField(
             value = workshopId,
-            onValueChange = { workshopId = it },
+            onValueChange = onWorkshopIdChange,
             label = { Text("کد کارگاه (workshopId)") },
             modifier = Modifier.fillMaxWidth()
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = branchCode,
-            onValueChange = { branchCode = it },
+            onValueChange = onBranchCodeChange,
             label = { Text("کد شعبه (branchCode)") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -61,7 +100,7 @@ fun WorkshopsScreen(
 
         OutlinedTextField(
             value = workshopStatus,
-            onValueChange = { workshopStatus = it },
+            onValueChange = onWorkshopStatusChange,
             label = { Text("وضعیت کارگاه (workshopStatus)") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -69,15 +108,7 @@ fun WorkshopsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {
-                viewModel.sendIntent(
-                    WorkshopsIntent.LoadWorkshops(
-                        workshopId = workshopId.takeIf { it.isNotBlank() },
-                        branchCode = branchCode.takeIf { it.isNotBlank() },
-                        workshopStatus = workshopStatus.takeIf { it.isNotBlank() }
-                    )
-                )
-            },
+            onClick = onLoadClick,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("ارسال و دریافت اطلاعات")
@@ -105,7 +136,12 @@ fun WorkshopsScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(uiState.agreements) { agreement ->
-                            WorkshopItem(agreement)
+                            WorkshopItem(
+                                agreement = agreement,
+                                onClick = { wId, bCode ->
+                                    navigateToPaymentSheets(wId, bCode)
+                                }
+                            )
                         }
                     }
                 }
@@ -115,11 +151,21 @@ fun WorkshopsScreen(
 }
 
 @Composable
-fun WorkshopItem(agreement: EmployerAgreementPR) {
+fun WorkshopItem(
+    agreement: EmployerAgreementPR,
+    onClick: (String, String) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clickable {
+                val wId = agreement.workshop?.workshopId ?: ""
+                val bCode = agreement.workshop?.branchCode ?: ""
+                if (wId.isNotBlank() && bCode.isNotBlank()) {
+                    onClick(wId, bCode)
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -135,5 +181,69 @@ fun WorkshopItem(agreement: EmployerAgreementPR) {
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun WorkshopsContentPreview() {
+    PreviewRtlThemeContent {
+        WorkshopsContent(
+            uiState = WorkshopsUiState(
+                isLoading = false,
+                agreements = listOf(
+                    EmployerAgreementPR(
+                        pymseq = null,
+                        regno = null,
+                        firstname = null,
+                        emailaddr = null,
+                        nationalno = null,
+                        mobileno = null,
+                        startdate = null,
+                        mastcusttype = null,
+                        createdt = null,
+                        masttyp = null,
+                        logicalDeleted = null,
+                        regemailseq = null,
+                        lastname = null,
+                        special = null,
+                        risuid = null,
+                        nationalcode = null,
+                        enddate = null,
+                        letDate = null,
+                        regdate = null,
+                        roletype = null,
+                        dname = null,
+                        letNo = null,
+                        createuid = null,
+                        workshop = EmployerWorkshopPR(
+                            sswn = null,
+                            branchTitle = "شعبه نمونه",
+                            workshopApproveDate = null,
+                            inclusionDate = null,
+                            brhCode = null,
+                            activityName = null,
+                            workshopRegisterDate = null,
+                            branchCode = "123",
+                            workshopName = "کارگاه کامپیوتر توکلی",
+                            employerName = "علی توکلی",
+                            actitvityCode = null,
+                            userId = null,
+                            workshopId = "9900020917749",
+                            workshopUnemployedStat = null
+                        )
+                    )
+                ),
+                error = null
+            ),
+            workshopId = "9900020917749",
+            onWorkshopIdChange = {},
+            branchCode = "123",
+            onBranchCodeChange = {},
+            workshopStatus = "",
+            onWorkshopStatusChange = {},
+            onLoadClick = {},
+            navigateToPaymentSheets = { _, _ -> }
+        )
     }
 }

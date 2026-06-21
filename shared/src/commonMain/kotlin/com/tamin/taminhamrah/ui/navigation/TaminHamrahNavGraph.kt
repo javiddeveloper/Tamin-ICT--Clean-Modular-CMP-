@@ -117,7 +117,7 @@ internal fun TaminHamrahNavGraph(
 
                 historyScreen()
 
-                workshopsScreen()
+                workshopsScreen(navController)
             }
 
             if (isLoading) {
@@ -155,16 +155,6 @@ internal fun TaminHamrahNavGraph(
                 )
             }
         )
-    }
-}
-
-@Composable
-fun SampleScreen(title: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = title)
     }
 }
 
