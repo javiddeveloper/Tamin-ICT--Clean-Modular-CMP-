@@ -21,34 +21,92 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import org.koin.compose.viewmodel.koinViewModel
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
+
 @Composable
 fun WorkshopsScreen(
     viewModel: WorkshopsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (uiState.error != null) {
-            Text(
-                text = "خطا: ${uiState.error}",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else {
-            if (uiState.agreements.isEmpty()) {
+    var workshopId by remember { mutableStateOf("") }
+    var branchCode by remember { mutableStateOf("") }
+    var workshopStatus by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        OutlinedTextField(
+            value = workshopId,
+            onValueChange = { workshopId = it },
+            label = { Text("کد کارگاه (workshopId)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = branchCode,
+            onValueChange = { branchCode = it },
+            label = { Text("کد شعبه (branchCode)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = workshopStatus,
+            onValueChange = { workshopStatus = it },
+            label = { Text("وضعیت کارگاه (workshopStatus)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                viewModel.sendIntent(
+                    WorkshopsIntent.LoadWorkshops(
+                        workshopId = workshopId.takeIf { it.isNotBlank() },
+                        branchCode = branchCode.takeIf { it.isNotBlank() },
+                        workshopStatus = workshopStatus.takeIf { it.isNotBlank() }
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("ارسال و دریافت اطلاعات")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (uiState.error != null) {
                 Text(
-                    text = "هیچ کارگاهی یافت نشد",
+                    text = "خطا: ${uiState.error}",
+                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(uiState.agreements) { agreement ->
-                        WorkshopItem(agreement)
+                if (uiState.agreements.isEmpty()) {
+                    Text(
+                        text = "هیچ کارگاهی یافت نشد",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(uiState.agreements) { agreement ->
+                            WorkshopItem(agreement)
+                        }
                     }
                 }
             }
