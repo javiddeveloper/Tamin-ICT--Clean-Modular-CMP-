@@ -28,6 +28,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.openUrl
 
 @Composable
@@ -116,6 +119,9 @@ internal fun TaminHamrahNavGraph(
                         },
                         onNavigateToContracts = {
                             navController.navigateToContracts()
+                        },
+                        onNavigateToWorkshops = {
+                            navController.navigateToWorkshops()
                         }
                     )
                 }
@@ -144,6 +150,8 @@ internal fun TaminHamrahNavGraph(
                 historyScreen()
 
                 contractsScreen(onBack = { navController.popBackStack() })
+
+                workshopsScreen(navController)
             }
 
             if (isLoading) {
@@ -196,6 +204,10 @@ fun SampleScreen(title: String) {
 
 @Composable
 fun HomeScreen(onNavigateToHistory: () -> Unit, onNavigateToContracts: () -> Unit) {
+fun HomeScreen(
+    onNavigateToHistory: () -> Unit,
+    onNavigateToWorkshops: () -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.TopCenter
@@ -227,6 +239,18 @@ fun HomeScreen(onNavigateToHistory: () -> Unit, onNavigateToContracts: () -> Uni
                     contentAlignment = Alignment.Center
                 ) {
                     Text("امور قراردادها و پرداخت", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToWorkshops,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("کارگاه ها", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

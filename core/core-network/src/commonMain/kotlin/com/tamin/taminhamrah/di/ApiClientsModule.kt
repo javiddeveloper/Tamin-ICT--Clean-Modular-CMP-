@@ -14,6 +14,8 @@ import com.tamin.taminhamrah.apiService.contract.createContractsApiService
 import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
+import com.tamin.taminhamrah.apiService.WorkShopsApiService
+import com.tamin.taminhamrah.apiService.createWorkShopsApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
@@ -77,6 +79,11 @@ val ApiClientsModule = module {
     single<HistoryApiServices> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createHistoryApiServices()
+    }
+
+    single<WorkShopsApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createWorkShopsApiService()
     }
 
     single<UserRequestApiService>(named("requestApiService")) {

@@ -35,6 +35,7 @@ kotlin {
             api(project(":feature:cartable"))
             api(project(":feature:history"))
             api(project(":feature:contracts"))
+            api(project(":feature:workshops"))
 //            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
