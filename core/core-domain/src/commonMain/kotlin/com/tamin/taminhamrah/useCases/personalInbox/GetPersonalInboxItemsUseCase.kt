@@ -1,24 +1,16 @@
-package com.tamin.taminhamrah.useCases.inbox
+package com.tamin.taminhamrah.useCases.personalInbox
 
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.repository.inbox.PersonalInboxRepository
+import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetPersonalInboxItemsUseCase(
     private val personalInboxRepository: PersonalInboxRepository,
 ) {
     operator fun invoke(
-        query: ApiQueryParamDN = defaultQuery(),
+        query: ApiQueryParamDN? = null,
     ): Flow<List<PersonalInboxItemDN>> {
         return personalInboxRepository.getInboxItems(query)
-    }
-
-    companion object {
-        fun defaultQuery(): ApiQueryParamDN = ApiQueryParamDN(
-            page = 0,
-            start = 0,
-            limit = 10,
-        )
     }
 }

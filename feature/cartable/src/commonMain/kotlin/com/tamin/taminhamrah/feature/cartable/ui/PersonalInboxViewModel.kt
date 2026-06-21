@@ -6,8 +6,8 @@ import com.tamin.taminhamrah.feature.cartable.ui.contract.PersonalInboxIntent
 import com.tamin.taminhamrah.feature.cartable.ui.contract.PersonalInboxUiState
 import com.tamin.taminhamrah.feature.cartable.ui.contract.PersonalInboxUiState.PartialState
 import com.tamin.taminhamrah.mapper.inbox.toPresentation
-import com.tamin.taminhamrah.useCases.inbox.GetPersonalInboxItemsUseCase
-import com.tamin.taminhamrah.useCases.inbox.GetPersonalInboxSizeUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge

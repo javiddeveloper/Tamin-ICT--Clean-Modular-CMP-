@@ -14,9 +14,11 @@ import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
+import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
 import com.tamin.taminhamrah.apiService.request.UserRequestApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
+import com.tamin.taminhamrah.apiService.request.createUserRequestApiService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -77,16 +79,12 @@ val ApiClientsModule = module {
 
     single<UserRequestApiService>(named("requestApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createUserRequestApiService()
     }
 
     single<PersonalInboxApiService>(named("personalInboxApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createPersonalInboxApiService()
     }
 
-    single<PersonalInboxApiService>(named("personalInboxApiService")) {
-        val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
-    }
 }

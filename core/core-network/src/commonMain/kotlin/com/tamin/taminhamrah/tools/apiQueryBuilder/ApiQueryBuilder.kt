@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 
 interface ApiQueryBuilder {
+    fun defaultQuery(): ApiQueryParamDN
     fun buildQuery(query: ApiQueryParamDN): Map<String, String>
     fun buildFilterJson(filters: List<ApiFilterDN>): String
 }

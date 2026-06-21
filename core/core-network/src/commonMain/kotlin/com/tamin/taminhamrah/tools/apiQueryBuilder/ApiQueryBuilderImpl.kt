@@ -14,6 +14,8 @@ import com.tamin.taminhamrah.util.CommonRequestConstants
 import kotlinx.serialization.json.Json
 
 internal class ApiQueryBuilderImpl : ApiQueryBuilder {
+    override fun defaultQuery(): ApiQueryParamDN = ApiQueryParamDN()
+
     override fun buildQuery(query: ApiQueryParamDN): Map<String, String> {
         return buildMap<String, String> {
             put("page", query.page.toString())

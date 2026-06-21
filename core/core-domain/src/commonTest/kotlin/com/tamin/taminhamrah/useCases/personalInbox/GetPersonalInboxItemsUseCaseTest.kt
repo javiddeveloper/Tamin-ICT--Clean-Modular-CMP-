@@ -1,11 +1,11 @@
-package com.tamin.taminhamrah.useCases.inbox
+package com.tamin.taminhamrah.useCases.personalInbox
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.model.inbox.InboxPermissionDN
 import com.tamin.taminhamrah.model.inbox.InboxTypeDN
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.repository.inbox.FakePersonalInboxRepository
+import com.tamin.taminhamrah.repository.personalInbox.FakePersonalInboxRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -34,7 +34,7 @@ class GetPersonalInboxItemsUseCaseTest : BaseUseCaseTest() {
             awaitComplete()
         }
 
-        assertEquals(GetPersonalInboxItemsUseCase.defaultQuery(), repository.lastQuery)
+        assertEquals(null, repository.lastQuery)
     }
 
     @Test

@@ -1,7 +1,7 @@
-package com.tamin.taminhamrah.useCases.inbox
+package com.tamin.taminhamrah.useCases.personalInbox
 
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDN
-import com.tamin.taminhamrah.repository.inbox.PersonalInboxRepository
+import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetPersonalInboxSizeUseCase(

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.data.repository.inbox
+package com.tamin.taminhamrah.data.repository.personalInbox
 
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.mapper.toDomain
@@ -7,7 +7,8 @@ import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.repository.inbox.PersonalInboxRepository
+import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -19,14 +20,16 @@ import kotlinx.coroutines.flow.map
 internal class PersonalInboxRepositoryImpl(
     private val personalInboxRemoteDataSource: PersonalInboxRemoteDataSource,
     private val personalInboxDao: PersonalInboxDao,
+    private val apiQueryBuilder: ApiQueryBuilder,
 ) : PersonalInboxRepository {
 
-    override fun getInboxItems(query: ApiQueryParamDN): Flow<List<PersonalInboxItemDN>> = flow {
+    override fun getInboxItems(query: ApiQueryParamDN?): Flow<List<PersonalInboxItemDN>> = flow {
+        val effectiveQuery = query ?: apiQueryBuilder.defaultQuery()
         val localItems = personalInboxDao.getInboxItems().first()
         emit(localItems.map { it.toDomain() })
 
         try {
-            val response = personalInboxRemoteDataSource.getInboxItems(query)
+            val response = personalInboxRemoteDataSource.getInboxItems(effectiveQuery)
             val remoteItems = response.list.orEmpty()
             personalInboxDao.replaceAllInboxItems(remoteItems.map { it.toEntity() })
         } catch (e: Exception) {

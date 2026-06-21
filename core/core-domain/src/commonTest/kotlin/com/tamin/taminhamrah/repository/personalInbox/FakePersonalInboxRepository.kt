@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.repository.inbox
+package com.tamin.taminhamrah.repository.personalInbox
 
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDN
@@ -13,7 +13,7 @@ class FakePersonalInboxRepository : PersonalInboxRepository {
     var inboxSizeResult: PersonalInboxSizeDN = PersonalInboxSizeDN(usage = "0", total = "10")
     var lastQuery: ApiQueryParamDN? = null
 
-    override fun getInboxItems(query: ApiQueryParamDN): Flow<List<PersonalInboxItemDN>> = flow {
+    override fun getInboxItems(query: ApiQueryParamDN?): Flow<List<PersonalInboxItemDN>> = flow {
         lastQuery = query
         if (shouldThrowError) throw error
         emit(inboxItemsResult)
