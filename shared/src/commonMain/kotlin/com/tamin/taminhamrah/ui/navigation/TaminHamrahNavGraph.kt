@@ -203,10 +203,10 @@ fun SampleScreen(title: String) {
 }
 
 @Composable
-fun HomeScreen(onNavigateToHistory: () -> Unit, onNavigateToContracts: () -> Unit) {
 fun HomeScreen(
     onNavigateToHistory: () -> Unit,
-    onNavigateToWorkshops: () -> Unit
+    onNavigateToWorkshops: () -> Unit,
+    onNavigateToContracts: () -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -256,3 +256,4 @@ fun HomeScreen(
         }
     }
 }
+
