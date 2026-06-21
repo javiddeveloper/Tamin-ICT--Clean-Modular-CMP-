@@ -15,6 +15,8 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
+import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -30,6 +32,8 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadRecipients)
         viewModel.sendIntent(PensionInquiryIntent.LoadPersonalInfo)
         viewModel.sendIntent(PensionInquiryIntent.LoadBeneficiaryList)
+        viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityDependentInfo)
+        viewModel.sendIntent(PensionInquiryIntent.LoadAge(1379L))
     }
 
     PensionInquiryContent(state)
@@ -46,9 +50,9 @@ fun PensionInquiryContent(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null) {
+            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.age == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null) {
+            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.age == null) {
                 Text(
                     text = state.error ?: "خطای ناشناخته",
                     color = MaterialTheme.colorScheme.error,
@@ -60,6 +64,30 @@ fun PensionInquiryContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (state.age != null) {
+                        item {
+                            Text(
+                                text = "سن:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            AgeItem(state.age)
+                        }
+                    }
+
+                    if (state.disabilityDependentInfo.isNotEmpty()){
+                        item {
+                            Text(
+                                text = "مستمری از کار افتادگی / تبعی ها:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                        }
+                        items(state.disabilityDependentInfo){
+                            DependentDisabilityInfo(it)
+                        }
+                    }
+
                     if (state.personalInfo != null) {
                         item {
                             Text(
@@ -139,6 +167,19 @@ fun PensionInquiryContent(
 }
 
 @Composable
+fun AgeItem(age: AgePR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "سن: ${age.age}", style = MaterialTheme.typography.titleMedium)
+            Text(text = "تاریخ تولد: ${age.birthDate}")
+        }
+    }
+}
+
+@Composable
 fun PersonalInfoItem(info: PersonalInfoPR) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -188,6 +229,19 @@ fun PensionIdItem(item: PensionIdPR) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "شناسه مستمری‌بگیر: ${item.pensionerId}")
+        }
+    }
+}
+@Composable
+fun DependentDisabilityInfo(item: DisabilityDependentPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "نام: ${item.firstName}")
+            Text(text = "نسبت: ${item.relation}")
         }
     }
 }

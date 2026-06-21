@@ -6,6 +6,8 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
+import com.tamin.taminhamrah.model.personal.AgePR
+import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 
 @Immutable
@@ -18,6 +20,8 @@ data class PensionInquiryUiState(
     val edictPensioner: EdictPensionerPR? = null,
     val personalInfo: PersonalInfoPR? = null,
     val beneficiaryList: List<BeneficiaryPR> = emptyList(),
+    val age: AgePR? = null,
+    val disabilityDependentInfo: List<DisabilityDependentPR> = emptyList(),
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -28,6 +32,8 @@ data class PensionInquiryUiState(
         data class RecipientsLoaded(val list: List<RecipientPR>) : PartialState()
         data class EdictLoaded(val edict: EdictPensionerPR?) : PartialState()
         data class PersonalInfoLoaded(val personalInfo: PersonalInfoPR?) : PartialState()
+        data class AgeLoaded(val age: AgePR?) : PartialState()
+        data class DisabilityDependentInfoLoaded(val list: List<DisabilityDependentPR>) : PartialState()
     }
 }
 
@@ -37,7 +43,9 @@ sealed class PensionInquiryIntent {
     data object LoadPensionerIds : PensionInquiryIntent()
     data object LoadRecipients : PensionInquiryIntent()
     data object LoadPersonalInfo : PensionInquiryIntent()
+    data object LoadDisabilityDependentInfo : PensionInquiryIntent()
     data class LoadEdict(val pensionerId: String) : PensionInquiryIntent()
+    data class LoadAge(val birthDate: Long) : PensionInquiryIntent()
 }
 
 sealed class PensionInquiryEvent {
