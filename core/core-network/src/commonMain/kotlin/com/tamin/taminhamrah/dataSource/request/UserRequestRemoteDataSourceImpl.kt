@@ -2,8 +2,8 @@ package com.tamin.taminhamrah.dataSource.request
 
 import com.tamin.taminhamrah.apiService.request.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.request.UserRequestDTO
-import com.tamin.taminhamrah.model.request.UserRequestTypeDTO
+import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder

@@ -28,7 +28,6 @@ import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.openUrl
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TaminHamrahNavGraph(
     isLoggedIn: Boolean,
@@ -127,7 +126,7 @@ internal fun TaminHamrahNavGraph(
 
                 cartableGraph(
                     onNavigateToMyRequests = {
-                        navController.navigate(CartableRoute.MyRequests)
+                        navController.navigate(CartableRoute.UserRequests)
                     },
                     onNavigateToPersonalInbox = {
                         navController.navigate(CartableRoute.PersonalInbox)

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +33,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_tamin_logo
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IdentityScreen(
     userId: String? = null,
