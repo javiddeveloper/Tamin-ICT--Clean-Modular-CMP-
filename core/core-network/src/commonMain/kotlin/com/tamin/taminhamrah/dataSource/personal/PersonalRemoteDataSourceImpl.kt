@@ -21,7 +21,7 @@ class PersonalRemoteDataSourceImpl(
     override suspend fun getPersonalInfo(): PersonalInfoDTO? {
         return try {
             val response = personalApiService.getPersonalInfo()
-            response?.extractData()
+            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

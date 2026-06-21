@@ -17,7 +17,7 @@ interface PersonalApiService {
 
     @GET("survivor-request/personal")
     suspend fun getPersonalInfo(
-    ): BaseDTO<PersonalInfoDTO?>?
+    ): BaseDTO<PersonalInfoDTO>
 
 
     @GET("survivor-request/age")

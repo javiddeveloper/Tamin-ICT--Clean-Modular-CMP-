@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TypeDTO(
-    @SerialName("code") val code: String?,
-    @SerialName("id") val id: Int?,
-    @SerialName("title") val title: String?,
+    @SerialName("parent") val parent: TypeDTO? = null,
+    @SerialName("code") val code: String? = null,
+    @SerialName("id") val id: Int? = null,
+    @SerialName("title") val title: String? = null,
 )
