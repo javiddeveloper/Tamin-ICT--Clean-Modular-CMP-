@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionPR
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
     return PersonalInfoPR(
@@ -53,4 +55,16 @@ fun DisabilityDependentDN.toPresentation(): DisabilityDependentPR {
 
 fun List<DisabilityDependentDN>.toPresentation(): List<DisabilityDependentPR> {
     return map { it.toPresentation() }
+}
+
+fun SubmitFinalSurvivorPensionPR.toDomain(): SubmitFinalSurvivorPensionDN {
+    return SubmitFinalSurvivorPensionDN(
+        id = id
+    )
+}
+
+fun SubmitFinalSurvivorPensionDN.toPresentation(): SubmitFinalSurvivorPensionPR {
+    return SubmitFinalSurvivorPensionPR(
+        id = id
+    )
 }

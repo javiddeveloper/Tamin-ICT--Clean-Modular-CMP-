@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
@@ -49,6 +50,22 @@ class PersonalRemoteDataSourceImpl(
                 queryBuilder.buildQuery(query)
             )
             response.extractData().list ?: emptyList()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
+    override suspend fun submitFinalSurvivorPension(
+        requestId: Int,
+        body: SubmitFinalSurvivorPensionRequest
+    ): String? {
+        return try {
+            val response = personalApiService.submitFinalSurvivorPension(requestId, body)
+            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
