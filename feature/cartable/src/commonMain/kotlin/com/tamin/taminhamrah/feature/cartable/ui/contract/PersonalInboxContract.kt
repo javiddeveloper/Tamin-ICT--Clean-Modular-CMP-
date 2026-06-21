@@ -1,10 +1,8 @@
 package com.tamin.taminhamrah.feature.cartable.ui.contract
 
-import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemPR
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizePR
 
-@Immutable
 data class PersonalInboxUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
