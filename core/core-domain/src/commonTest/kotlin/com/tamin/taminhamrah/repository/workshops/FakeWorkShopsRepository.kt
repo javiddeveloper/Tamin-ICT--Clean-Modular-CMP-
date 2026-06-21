@@ -9,10 +9,19 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var shouldThrowError: Boolean = false
     var error: Exception = RuntimeException("Fake Network Error")
 
+    var paymentSheetsResult: com.tamin.taminhamrah.model.workshop.PaymentSheetListDN? = null
+
     override suspend fun getAllEmployerAgreementByNationalId(query: ApiQueryParamDN): EmployerAgreementListDN? {
         if (shouldThrowError) {
             throw error
         }
         return result
+    }
+
+    override suspend fun getPaymentSheets(query: ApiQueryParamDN): com.tamin.taminhamrah.model.workshop.PaymentSheetListDN? {
+        if (shouldThrowError) {
+            throw error
+        }
+        return paymentSheetsResult
     }
 }
