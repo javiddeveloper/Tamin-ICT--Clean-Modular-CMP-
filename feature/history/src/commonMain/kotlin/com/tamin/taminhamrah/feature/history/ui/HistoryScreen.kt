@@ -39,7 +39,6 @@ fun HistoryScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryContent(
     uiState: com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState,

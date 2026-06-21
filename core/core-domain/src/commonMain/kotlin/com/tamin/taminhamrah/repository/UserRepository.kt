@@ -18,7 +18,6 @@ interface UserRepository {
     suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String>
     suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN>
     suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String>
-
     suspend fun getSubDominantsInfo(
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<SubdominantDN>

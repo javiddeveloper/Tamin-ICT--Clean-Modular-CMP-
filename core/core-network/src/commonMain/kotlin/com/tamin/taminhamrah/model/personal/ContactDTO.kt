@@ -5,14 +5,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContactDTO(
-    @SerialName("zipCode") val zipCode: String?,
-    @SerialName("address") val address: String?,
-    @SerialName("creationTime") val creationTime: Long?,
-    @SerialName("lastModificationTime") val lastModificationTime: Long?,
-    @SerialName("lastModifiedBy") val lastModifiedBy: String?,
-    @SerialName("personal") val personal: Int?,
-    @SerialName("confirmed") val confirmed: Boolean?,
-    @SerialName("phoneNumber") val phoneNumber: String?,
-    @SerialName("createdBy") val createdBy: String?,
-    @SerialName("id") val id: Long?,
+    @SerialName("zipCode") val zipCode: String? = null,
+    @SerialName("address") val address: String? = null,
+    @SerialName("creationTime") val creationTime: Long? = null,
+    @SerialName("lastModificationTime") val lastModificationTime: Long? = null,
+    @SerialName("lastModifiedBy") val lastModifiedBy: String? = null,
+    @SerialName("personal") val personal: Int? = null,
+    @SerialName("confirmed") val confirmed: Boolean? = null,
+    @SerialName("phoneNumber") val phoneNumber: String? = null,
+    @SerialName("createdBy") val createdBy: String? = null,
+    @SerialName("id") val id: Long? = null,
 )

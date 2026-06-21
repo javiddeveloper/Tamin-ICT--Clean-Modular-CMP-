@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelPR
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionPR
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
     return PersonalInfoPR(
@@ -73,4 +75,16 @@ fun RequestModelDN.toPresentation(): RequestModelPR {
 
 fun List<ConfirmSurvivorDN>.toPresentation(): List<ConfirmSurvivorPR> {
     return map { it.toPresentation() }
+}
+
+fun SubmitFinalSurvivorPensionPR.toDomain(): SubmitFinalSurvivorPensionDN {
+    return SubmitFinalSurvivorPensionDN(
+        id = id
+    )
+}
+
+fun SubmitFinalSurvivorPensionDN.toPresentation(): SubmitFinalSurvivorPensionPR {
+    return SubmitFinalSurvivorPensionPR(
+        id = id
+    )
 }

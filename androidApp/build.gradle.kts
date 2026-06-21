@@ -110,6 +110,17 @@ android {
             }
         }
     }
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            if (variant.buildType.name == "release") {
+                output.outputFileName =
+                    "Tamin_ICT_${variant.versionCode}_${variant.versionName}-(${variant.flavorName}).apk"
+            }
+        }
+    }
+
 }
 
 dependencies {
