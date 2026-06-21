@@ -9,13 +9,20 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.apiService.contract.ContractsApiService
+import com.tamin.taminhamrah.apiService.contract.createContractsApiService
 import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
+import com.tamin.taminhamrah.apiService.WorkShopsApiService
+import com.tamin.taminhamrah.apiService.createWorkShopsApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
+import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
 import com.tamin.taminhamrah.apiService.request.UserRequestApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
+import com.tamin.taminhamrah.apiService.request.createUserRequestApiService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -74,8 +81,24 @@ val ApiClientsModule = module {
         ktorfit.createHistoryApiServices()
     }
 
+    single<WorkShopsApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createWorkShopsApiService()
+    }
+
     single<UserRequestApiService>(named("requestApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createUserRequestApiService()
     }
+
+    single<PersonalInboxApiService>(named("personalInboxApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createPersonalInboxApiService()
+    }
+
+    single<ContractsApiService>(named("contractsApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createContractsApiService()
+    }
+
 }

@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -34,6 +35,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadPersonalInfo)
         viewModel.sendIntent(PensionInquiryIntent.LoadBeneficiaryList)
         viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityDependentInfo)
+        viewModel.sendIntent(PensionInquiryIntent.LoadConfirmSurvivorsList)
         viewModel.sendIntent(PensionInquiryIntent.LoadAge(1379L))
     }
 
@@ -46,7 +48,6 @@ fun PensionInquiryContent(
 ) {
     Scaffold(
         topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(title = { Text("استعلام مستمری") })
         }
     ) { padding ->
@@ -172,8 +173,33 @@ fun PensionInquiryContent(
                             BeneficiaryItem(item)
                         }
                     }
+
+                    if (state.confirmSurvivorsList.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "تایید لیست بازماندگان:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                        }
+                        items(state.confirmSurvivorsList) { item ->
+                            ConfirmSurvivorItem(item)
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ConfirmSurvivorItem(item: ConfirmSurvivorPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "شناسه درخواست: ${item.request?.id}", style = MaterialTheme.typography.titleMedium)
         }
     }
 }

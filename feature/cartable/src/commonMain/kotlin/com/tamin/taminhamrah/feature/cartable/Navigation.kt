@@ -20,7 +20,7 @@ sealed interface CartableRoute {
     data object Main : CartableRoute
 
     @Serializable
-    data object MyRequests : CartableRoute
+    data object UserRequests : CartableRoute
 
     @Serializable
     data object PersonalInbox : CartableRoute
@@ -48,7 +48,7 @@ fun NavGraphBuilder.cartableGraph(
             )
         }
 
-        composable<CartableRoute.MyRequests> {
+        composable<CartableRoute.UserRequests> {
             UserRequestsScreen(onBackClicked = onBack)
         }
 

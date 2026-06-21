@@ -16,19 +16,16 @@ stages:
   before_script:
     - export GRADLE_USER_HOME=$(pwd)/.gradle
     - chmod +x gradlew
-    # Create a better mock xargs that strips quotes and handles gradle's needs
     - echo '#!/bin/sh' > xargs
     - echo 'while [ "$#" -gt 0 ]; do case "$1" in -n*) shift ;; *) break ;; esac; done' >> xargs
     - echo 'sed "s/\"//g" | tr " " "\n" | grep -v "^$"' >> xargs
     - chmod +x xargs
     - export PATH=$(pwd):$PATH
-    # Create key.properties if it doesn't exist
     - |
       if [ ! -f "key.properties" ]; then
         echo "OPERATIONAL_API_KEY=$OPERATIONAL_API_KEY" >> key.properties
         echo "TEST_API_KEY=$TEST_API_KEY" >> key.properties
       fi
-    # Only decode keystore if the variable is present (avoids failure in non-release jobs)
     - |
       if [ ! -z "$RELEASE_KEYSTORE_BASE64" ]; then
         echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.jks
@@ -36,21 +33,26 @@ stages:
         echo "Keystore decoded successfully."
       fi
 
+# -----------------------------------------------------------------------------
+# Test
+# -----------------------------------------------------------------------------
 android-test:
   extends: .android-base
   stage: test
   script:
-    - ./gradlew :androidApp:lintDebug test
+    - ./gradlew testDebugUnitTest testDirectDebugUnitTest
   artifacts:
     paths:
       - "**/build/reports/"
     expire_in: 1 week
   only:
     - merge_requests
-    - master
     - main
     - develop
 
+# -----------------------------------------------------------------------------
+# Build (Debug)
+# -----------------------------------------------------------------------------
 android-build-debug:
   extends: .android-base
   stage: build
@@ -61,50 +63,80 @@ android-build-debug:
       - androidApp/build/outputs/apk/*/debug/*.apk
     expire_in: 1 week
   only:
-    - merge_requests
-    - master
     - main
     - develop
 
-# Release specific flavors
-android-release-direct:
+# -----------------------------------------------------------------------------
+# Release (فقط روی tag)
+# -----------------------------------------------------------------------------
+android-release:
   extends: .android-base
   stage: release
   script:
     - ./gradlew :androidApp:assembleDirectRelease
+      :androidApp:assembleCaffeBazaarRelease
+      :androidApp:assembleMyketRelease
+      :androidApp:assembleReporterRelease
   artifacts:
+    name: "TaminX-$CI_COMMIT_TAG"
     paths:
       - androidApp/build/outputs/apk/direct/release/*.apk
-  only:
-    - tags
-
-android-release-reporter:
-  extends: .android-base
-  stage: release
-  script:
-    - ./gradlew :androidApp:assembleReporterRelease
-  artifacts:
-    paths:
+      - androidApp/build/outputs/apk/caffeBazaar/release/*.apk
+      - androidApp/build/outputs/apk/myket/release/*.apk
       - androidApp/build/outputs/apk/reporter/release/*.apk
   only:
     - tags
 
 # -----------------------------------------------------------------------------
-# iOS Jobs (Requires macOS runner)
+# GitLab Release (نمایش APKها توی صفحه Tags)
 # -----------------------------------------------------------------------------
-ios-build:
-  stage: build
+create-release:
+  image: pull-devops.tamin.ir/devops/android-sdk-image:1.0
   tags:
-    - macos
+    - devops
+  stage: release
+  needs:
+    - android-release
   script:
-    - xcodebuild build
-      -project iosApp/iosApp.xcodeproj
-      -scheme iosApp
-      -destination 'generic/platform=iOS Simulator'
-      CODE_SIGNING_REQUIRED=NO
-      CODE_SIGNING_ALLOWED=YES
+    - |
+      DIRECT_APK=$(ls androidApp/build/outputs/apk/direct/release/*.apk | head -1)
+      BAZAAR_APK=$(ls androidApp/build/outputs/apk/caffeBazaar/release/*.apk | head -1)
+      MYKET_APK=$(ls androidApp/build/outputs/apk/myket/release/*.apk | head -1)
+      REPORTER_APK=$(ls androidApp/build/outputs/apk/reporter/release/*.apk | head -1)
+
+      # آپلود APKها به GitLab Package Registry
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "$DIRECT_APK" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $DIRECT_APK)"
+
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "$BAZAAR_APK" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $BAZAAR_APK)"
+
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "$MYKET_APK" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $MYKET_APK)"
+
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "$REPORTER_APK" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $REPORTER_APK)"
+
+      # ساختن Release توی GitLab
+      curl --request POST \
+           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --header "Content-Type: application/json" \
+           --data "{
+             \"name\": \"Release $CI_COMMIT_TAG\",
+             \"tag_name\": \"$CI_COMMIT_TAG\",
+             \"assets\": {
+               \"links\": [
+                 {\"name\": \"Direct APK\", \"url\": \"$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $DIRECT_APK)\"},
+                 {\"name\": \"CaffeBazaar APK\", \"url\": \"$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $BAZAAR_APK)\"},
+                 {\"name\": \"Myket APK\", \"url\": \"$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $MYKET_APK)\"},
+                 {\"name\": \"Reporter APK\", \"url\": \"$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/android/$CI_COMMIT_TAG/$(basename $REPORTER_APK)\"}
+               ]
+             }
+           }" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases"
   only:
-    - merge_requests
-    - master
-    - main
-    - develop
+    - tags

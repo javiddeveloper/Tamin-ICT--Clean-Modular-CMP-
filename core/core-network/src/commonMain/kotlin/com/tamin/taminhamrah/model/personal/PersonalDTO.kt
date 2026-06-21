@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 data class PersonalDTO(
     @SerialName("lastName") val lastName: String? = null,
     @SerialName("fatherName") val fatherName: String? = null,
+    @SerialName("country") val country: CityDTO? = null,
     @SerialName("cityOfIssue") val cityOfIssue: CityDTO? = null,
+    @SerialName("cityOfBirth") val cityOfBirth: CityDTO? = null,
     @SerialName("idCardSerial1") val idCardSerial1: String? = null,
     @SerialName("gender") val gender: GenderDTO? = null,
     @SerialName("creationTime") val creationTime: Long? = null,
@@ -24,5 +26,6 @@ data class PersonalDTO(
     @SerialName("nationalId") val nationalId: String? = null,
     @SerialName("createdBy") val createdBy: String? = null,
     @SerialName("idCardNumber") val idCardNumber: String? = null,
+    @SerialName("relationWithTamins") val relationWithTamins: List<Int>? = null,
     @SerialName("contacts") val contacts: List<ContactDTO>? = null,
 )

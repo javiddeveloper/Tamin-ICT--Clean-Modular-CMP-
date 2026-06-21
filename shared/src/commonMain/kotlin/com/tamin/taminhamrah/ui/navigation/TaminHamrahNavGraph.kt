@@ -21,14 +21,18 @@ import com.tamin.taminhamrah.feature.cartable.navigateToCartable
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
+import com.tamin.taminhamrah.feature.contracts.contractsScreen
+import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.openUrl
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TaminHamrahNavGraph(
     isLoggedIn: Boolean,
@@ -112,6 +116,12 @@ internal fun TaminHamrahNavGraph(
                     HomeScreen(
                         onNavigateToHistory = {
                             navController.navigate(HistoryRoute)
+                        },
+                        onNavigateToContracts = {
+                            navController.navigateToContracts()
+                        },
+                        onNavigateToWorkshops = {
+                            navController.navigateToWorkshops()
                         }
                     )
                 }
@@ -127,7 +137,7 @@ internal fun TaminHamrahNavGraph(
 
                 cartableGraph(
                     onNavigateToMyRequests = {
-                        navController.navigate(CartableRoute.MyRequests)
+                        navController.navigate(CartableRoute.UserRequests)
                     },
                     onNavigateToPersonalInbox = {
                         navController.navigate(CartableRoute.PersonalInbox)
@@ -138,6 +148,10 @@ internal fun TaminHamrahNavGraph(
                 pensionInquiryScreen()
 
                 historyScreen()
+
+                contractsScreen(onBack = { navController.popBackStack() })
+
+                workshopsScreen(navController)
             }
 
             if (isLoading) {
@@ -189,7 +203,11 @@ fun SampleScreen(title: String) {
 }
 
 @Composable
-fun HomeScreen(onNavigateToHistory: () -> Unit) {
+fun HomeScreen(
+    onNavigateToHistory: () -> Unit,
+    onNavigateToWorkshops: () -> Unit,
+    onNavigateToContracts: () -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.TopCenter
@@ -211,6 +229,31 @@ fun HomeScreen(onNavigateToHistory: () -> Unit) {
                     Text("کلیه سوابق", style = MaterialTheme.typography.titleMedium)
                 }
             }
+            Spacer(Modifier.height(8.dp))
+            Card(
+                onClick = onNavigateToContracts,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("امور قراردادها و پرداخت", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToWorkshops,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("کارگاه ها", style = MaterialTheme.typography.titleMedium)
+                }
+            }
         }
     }
 }
+

@@ -4,9 +4,14 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
+import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.PUT
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Query
 
@@ -14,7 +19,7 @@ interface PersonalApiService {
 
     @GET("survivor-request/personal")
     suspend fun getPersonalInfo(
-    ): BaseDTO<PersonalInfoDTO?>?
+    ): BaseDTO<PersonalInfoDTO>
 
     @GET("survivor-request/national-id")
     suspend fun getDeceasedInfo(
@@ -31,5 +36,17 @@ interface PersonalApiService {
     suspend fun getDisabilityDependentInfo(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<DisabilityDependentDTO>>
+
+    @GET("survivor-request/list")
+    suspend fun confirmSurvivorsList(
+        @QueryMap parameters: Map<String, String>,
+    ): BaseDTO<ListData<ConfirmSurvivorDTO>>
+
+
+    @PUT("survivor-request/{requestId}")
+    suspend fun submitFinalSurvivorPension(
+        @Path("requestId") requestId: Int,
+        @Body body: SubmitFinalSurvivorPensionRequest
+    ): BaseDTO<String?>
 
 }

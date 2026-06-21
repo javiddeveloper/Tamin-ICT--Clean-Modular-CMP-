@@ -5,7 +5,7 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 
 @Immutable
-data class MyRequestsUiState(
+data class UserRequestsUiState(
     val isLoading: Boolean = false,
     val isLoadingTypes: Boolean = false,
     val error: String? = null,
@@ -25,14 +25,14 @@ data class MyRequestsUiState(
     }
 }
 
-sealed class MyRequestsIntent {
-    data object LoadRequests : MyRequestsIntent()
-    data object LoadRequestTypes : MyRequestsIntent()
-    data class UpdateRefCode(val refCode: String) : MyRequestsIntent()
-    data class UpdateRequestType(val requestTypeId: String?) : MyRequestsIntent()
-    data object SearchRequests : MyRequestsIntent()
+sealed class UserRequestsIntent {
+    data object LoadRequests : UserRequestsIntent()
+    data object LoadRequestTypes : UserRequestsIntent()
+    data class UpdateRefCode(val refCode: String) : UserRequestsIntent()
+    data class UpdateRequestType(val requestTypeId: String?) : UserRequestsIntent()
+    data object SearchRequests : UserRequestsIntent()
 }
 
-sealed class MyRequestsEvent {
-    data class ShowToast(val message: String) : MyRequestsEvent()
+sealed class UserRequestsEvent {
+    data class ShowToast(val message: String) : UserRequestsEvent()
 }

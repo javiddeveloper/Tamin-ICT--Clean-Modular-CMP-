@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -87,7 +86,6 @@ fun CartableContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(title = { Text("کارتابل") })
         }
     ) { padding ->

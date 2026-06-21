@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GenderDTO(
-    @SerialName("genderCode") val genderCode: String?,
-    @SerialName("genderDesc") val genderDesc: String?,
+    @SerialName("genderCode") val genderCode: String? = null,
+    @SerialName("genderDesc") val genderDesc: String? = null,
+    @SerialName("statusDate") val statusDate: String? = null,
+    @SerialName("status") val status: String? = null,
 )

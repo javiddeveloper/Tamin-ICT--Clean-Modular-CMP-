@@ -20,7 +20,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,8 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsIntent
-import com.tamin.taminhamrah.feature.cartable.ui.contract.MyRequestsUiState
+import com.tamin.taminhamrah.feature.cartable.ui.contract.UserRequestsIntent
+import com.tamin.taminhamrah.feature.cartable.ui.contract.UserRequestsUiState
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 import org.koin.compose.viewmodel.koinViewModel
@@ -52,22 +51,22 @@ fun UserRequestsScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.sendIntent(MyRequestsIntent.LoadRequestTypes)
-        viewModel.sendIntent(MyRequestsIntent.LoadRequests)
+        viewModel.sendIntent(UserRequestsIntent.LoadRequestTypes)
+        viewModel.sendIntent(UserRequestsIntent.LoadRequests)
     }
 
-    MyRequestsContent(
+    UserRequestsContent(
         state = uiState,
         onBackClicked = onBackClicked,
-        onRefCodeChange = { viewModel.sendIntent(MyRequestsIntent.UpdateRefCode(it)) },
-        onRequestTypeChange = { viewModel.sendIntent(MyRequestsIntent.UpdateRequestType(it)) },
-        onSearchClick = { viewModel.sendIntent(MyRequestsIntent.SearchRequests) },
+        onRefCodeChange = { viewModel.sendIntent(UserRequestsIntent.UpdateRefCode(it)) },
+        onRequestTypeChange = { viewModel.sendIntent(UserRequestsIntent.UpdateRequestType(it)) },
+        onSearchClick = { viewModel.sendIntent(UserRequestsIntent.SearchRequests) },
     )
 }
 
 @Composable
-fun MyRequestsContent(
-    state: MyRequestsUiState,
+fun UserRequestsContent(
+    state: UserRequestsUiState,
     onBackClicked: () -> Unit,
     onRefCodeChange: (String) -> Unit,
     onRequestTypeChange: (String?) -> Unit,
@@ -75,7 +74,6 @@ fun MyRequestsContent(
 ) {
     Scaffold(
         topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(
                 title = { Text("درخواست های من") },
                 navigationIcon = {

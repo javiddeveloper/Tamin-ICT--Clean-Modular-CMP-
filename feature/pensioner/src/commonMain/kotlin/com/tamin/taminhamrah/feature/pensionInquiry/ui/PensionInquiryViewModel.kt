@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -34,6 +35,7 @@ class PensionInquiryViewModel(
     private val getDeceasedInfoUseCase: GetDeceasedInfoUseCase,
     private val getAgeUseCase: GetAgeUseCase,
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
+    private val getConfirmSurvivorsListUseCase: GetConfirmSurvivorsListUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -54,6 +56,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadDeceasedInfo -> handleLoadDeceasedInfo(intent.nationalId)
             is PensionInquiryIntent.LoadAge -> handleLoadAge(intent.birthDate)
             is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
+            is PensionInquiryIntent.LoadConfirmSurvivorsList -> handleLoadConfirmSurvivorsList()
+        }
+    }
+
+    private fun handleLoadConfirmSurvivorsList(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getConfirmSurvivorsListUseCase(emptyList()).collect { list ->
+                emit(PartialState.ConfirmSurvivorsListLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -214,6 +228,10 @@ class PensionInquiryViewModel(
         is PartialState.DisabilityDependentInfoLoaded -> currentState.copy(
             isLoading = false,
             disabilityDependentInfo = partialState.list
+        )
+        is PartialState.ConfirmSurvivorsListLoaded -> currentState.copy(
+            isLoading = false,
+            confirmSurvivorsList = partialState.list
         )
         is PartialState.AgeLoaded -> currentState.copy(
             isLoading = false,

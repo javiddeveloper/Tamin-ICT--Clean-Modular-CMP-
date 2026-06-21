@@ -18,94 +18,33 @@ object ApiTestUtils {
 }
 
 object UserTestData {
-    val identityInfoSuccess = """
-        {
-            "nationalId": "0080000800",
-            "firstName": "Javid",
-            "lastName": "Sattar",
-            "idCardNumber": "0080000800",
-            "idCardSerial1": "A91",
-            "idCardSerial2": "314981",
-            "fatherName": "TESTFATHERNAME",
-            "dateOfBirth": 730326600000,
-            "countryId": "0001",
-            "cityOfBirthId": "1105",
-            "cityOfIssueId": "1105",
-            "gender": "01",
-            "ssn": "2194813688"
-        }
-    """.trimIndent()
+    val identityInfoSuccess: String
+        get() = readResourceFile("mocks/identity_info_success.json")
 
-    val changeMobileSuccess = """
-        {
-            "traceId": "test-trace-id-123",
-            "data": {
-                "hash": "test-hash-456"
-            }
-        }
-    """.trimIndent()
+    val changeMobileSuccess: String
+        get() = readResourceFile("mocks/change_mobile_success.json")
 
-    val verifyMobileSuccess = "\"OTP_VERIFIED_SUCCESSFULLY\""
+    val verifyMobileSuccess: String
+        get() = readResourceFile("mocks/verify_mobile_success.json")
 }
 
 object UserRequestTestData {
-    val userRequestsSuccess = """
-        {
-            "total": 1,
-            "list": [
-                {
-                    "id": 478176975,
-                    "operation": null,
-                    "createdBy": "0946168113",
-                    "creationTime": 1780398668987,
-                    "lastModifiedBy": null,
-                    "lastModificationTime": 1780398668983,
-                    "refCode": "1073555545",
-                    "userName": "0946168113",
-                    "status": {
-                        "operation": null,
-                        "requestCode": "2903",
-                        "requestDesc": "انعقاد قرارداد"
-                    },
-                    "title": "انعقاد قرارداد بيمه اختياري",
-                    "comment": "قرارداد ايجاد شد",
-                    "template": null,
-                    "requestType": {
-                        "operation": null,
-                        "createdBy": null,
-                        "creationTime": null,
-                        "lastModifiedBy": null,
-                        "lastModificationTime": null,
-                        "id": 35,
-                        "title": "قرارداد بيمه اختياري",
-                        "description": "قرارداد بيمه اختياري"
-                    },
-                    "deliverCode": null,
-                    "refrenceid": "478176974",
-                    "requestDetails": null,
-                    "requestChid": null,
-                    "fullName": null,
-                    "createByName": "حميد چيداز"
-                }
-            ]
-        }
-    """.trimIndent()
+    val userRequestsSuccess: String
+        get() = readResourceFile("mocks/user_requests_success.json")
 
-    val requestTypesSuccess = """
-        {
-            "total": 64,
-            "list": [
-                {
-                    "operation": null,
-                    "createdBy": "PNJ_14040622",
-                    "creationTime": 1760260280000,
-                    "lastModifiedBy": null,
-                    "lastModificationTime": null,
-                    "id": 67,
-                    "title": "END_KAFALAT",
-                    "description": "خاتمه کفالت"
-                }
-            ]
-        }
-    """.trimIndent()
+    val requestTypesSuccess: String
+        get() = readResourceFile("mocks/request_types_success.json")
+}
+
+object PersonalInboxTestData {
+    val inboxItemsSuccess: String
+        get() = readResourceFile("mocks/inbox_items_success.json")
+
+    val inboxSizeSuccess: String
+        get() = readResourceFile("mocks/inbox_size_success.json")
+}
+
+object ContractsTestData {
+    val contractsListSuccess: String
+        get() = readResourceFile("mocks/contracts_list_success.json")
 }
