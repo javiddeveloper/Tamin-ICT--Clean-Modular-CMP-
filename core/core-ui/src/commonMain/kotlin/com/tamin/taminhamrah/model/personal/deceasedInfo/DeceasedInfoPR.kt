@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.model.personal.deceasedInfo
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
 @Immutable
+@Serializable
 data class DeceasedInfoPR(
     val branchCode: String?,
     val branchName: String?,
@@ -17,6 +19,7 @@ data class DeceasedInfoPR(
 )
 
 @Immutable
+@Serializable
 data class DeceasedPersonalPR(
     val cityOfIssueDesc: String?,
     val dateOfBirth: Long?,
