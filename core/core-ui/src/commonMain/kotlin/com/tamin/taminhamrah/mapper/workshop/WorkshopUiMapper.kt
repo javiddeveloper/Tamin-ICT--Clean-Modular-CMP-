@@ -10,6 +10,10 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListPR
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitPR
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitListPR
 
 fun EmployerWorkshopDN.toPresentation(): EmployerWorkshopPR {
     return EmployerWorkshopPR(
@@ -91,6 +95,43 @@ fun PaymentSheetDN.toPresentation(): PaymentSheetPR {
 
 fun PaymentSheetListDN.toPresentation(): PaymentSheetListPR {
     return PaymentSheetListPR(
+        list = list?.map { it.toPresentation() },
+        total = total
+    )
+}
+
+fun WorkshopDebitDN.toPresentation(): WorkshopDebitPR {
+    return WorkshopDebitPR(
+        debitNumber = debitNumber,
+        debitCreateReasonCode = debitCreateReasonCode,
+        debitCreateReasonDesc = debitCreateReasonDesc,
+        debitStartDate = debitStartDate,
+        debitEndDate = debitEndDate,
+        debitAmount = debitAmount,
+        debitRemain = debitRemain,
+        withoutPentaltyAmount = withoutPentaltyAmount,
+        penaltyList = penaltyList,
+        penaltyPay = penaltyPay,
+        sum = sum,
+        nimOshr = nimOshr,
+        debitStepDesc = debitStepDesc,
+        debitStatDesc = debitStatDesc,
+        debitStepCode = debitStepCode,
+        debitStatCode = debitStatCode,
+        mastCustomerTypeCode = mastCustomerTypeCode,
+        mastCustomerCode = mastCustomerCode,
+        peymanSequence = peymanSequence,
+        debitCreateDate = debitCreateDate,
+        cludatCode = cludatCode,
+        cludatDesc = cludatDesc,
+        nimOshrKol = nimOshrKol,
+        docDate = docDate,
+        stepCat = stepCat,
+    )
+}
+
+fun WorkshopDebitListDN.toPresentation(): WorkshopDebitListPR {
+    return WorkshopDebitListPR(
         list = list?.map { it.toPresentation() },
         total = total
     )

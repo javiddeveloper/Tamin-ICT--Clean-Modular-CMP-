@@ -16,6 +16,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,16 +37,19 @@ import androidx.compose.runtime.setValue
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkshopsScreen(
     viewModel: WorkshopsViewModel = koinViewModel(),
-    navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> }
+    navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var workshopId by remember { mutableStateOf("") }
     var branchCode by remember { mutableStateOf("") }
     var workshopStatus by remember { mutableStateOf("") }
+    var selectedWorkshop by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     WorkshopsContent(
         uiState = uiState,
@@ -63,13 +68,48 @@ fun WorkshopsScreen(
                 )
             )
         },
-        navigateToPaymentSheets = navigateToPaymentSheets
+        onWorkshopClick = { wId, bCode ->
+            selectedWorkshop = wId to bCode
+        }
     )
+
+    if (selectedWorkshop != null) {
+        val (wId, bCode) = selectedWorkshop!!
+        ModalBottomSheet(
+            onDismissRequest = { selectedWorkshop = null }
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "لیست برگ پرداخت",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToPaymentSheets(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "لیست بدهی کارگاه",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToWorkshopDebit(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
 }
 
 @Composable
 fun WorkshopsContent(
-    uiState: com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState,
+    uiState: WorkshopsUiState,
     workshopId: String,
     onWorkshopIdChange: (String) -> Unit,
     branchCode: String,
@@ -77,7 +117,7 @@ fun WorkshopsContent(
     workshopStatus: String,
     onWorkshopStatusChange: (String) -> Unit,
     onLoadClick: () -> Unit,
-    navigateToPaymentSheets: (String, String) -> Unit
+    onWorkshopClick: (String, String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         OutlinedTextField(
@@ -138,9 +178,7 @@ fun WorkshopsContent(
                         items(uiState.agreements) { agreement ->
                             WorkshopItem(
                                 agreement = agreement,
-                                onClick = { wId, bCode ->
-                                    navigateToPaymentSheets(wId, bCode)
-                                }
+                                onClick = onWorkshopClick
                             )
                         }
                     }
@@ -243,7 +281,7 @@ private fun WorkshopsContentPreview() {
             workshopStatus = "",
             onWorkshopStatusChange = {},
             onLoadClick = {},
-            navigateToPaymentSheets = { _, _ -> }
+            onWorkshopClick = { _, _ -> }
         )
     }
 }

@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -35,6 +36,25 @@ internal class WorkShopsRemoteDataSourceImpl(
 
         return try {
             val response = apiService.getWorkshopPaymentSheets(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getWorkshopDebit(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopDebitDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+
+        return try {
+            val response = apiService.getWorkshopDebit(workshopId, branchCode, queries)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
