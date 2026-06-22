@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
@@ -44,6 +45,10 @@ class PersonalRepositoryImpl(
         emitAll(personalDao.getPersonalInfo().map { it?.toDomain() })
     }.distinctUntilChanged()
 
+    override fun getDeceasedInfo(nationalId: String): Flow<DeceasedInfoDN> = flow {
+        emit(personalRemoteDataSource.getDeceasedInfo(nationalId).toDomain())
+    }
+
     override fun getAge(birthDate: Long): Flow<AgeDN> = flow {
         emit(personalRemoteDataSource.getAge(birthDate).toDomain())
     }
@@ -51,10 +56,10 @@ class PersonalRepositoryImpl(
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
         flow {
 
-                val response = personalRemoteDataSource.getDisabilityDependentInfo(
-                    ApiQueryParamDN(filters = filters)
-                )
-                emit(response.map { it.toDomain() })
+            val response = personalRemoteDataSource.getDisabilityDependentInfo(
+                ApiQueryParamDN(filters = filters)
+            )
+            emit(response.map { it.toDomain() })
 
         }
 
@@ -65,11 +70,13 @@ class PersonalRepositoryImpl(
         emit(personalRemoteDataSource.submitFinalSurvivorPension(requestId, body.toDTO()))
     }
 
-    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = flow {
+    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> =
+        flow {
 
-            val response = personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
+            val response =
+                personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
             emit(response.map { it.toDomain() })
 
-    }
+        }
 }
 

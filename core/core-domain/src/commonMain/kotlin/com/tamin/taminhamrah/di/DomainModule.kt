@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
@@ -64,6 +65,7 @@ val domainModule = module {
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)
+    factoryOf(::GetDeceasedInfoUseCase)
     factoryOf(::GetDisabilityDependentInfoUseCase)
     factoryOf(::GetConfirmSurvivorsListUseCase)
     factoryOf(::GetAgeUseCase)

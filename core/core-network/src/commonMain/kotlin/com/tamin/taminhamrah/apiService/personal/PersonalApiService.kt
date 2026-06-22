@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
@@ -19,6 +20,11 @@ interface PersonalApiService {
     @GET("survivor-request/personal")
     suspend fun getPersonalInfo(
     ): BaseDTO<PersonalInfoDTO>
+
+    @GET("survivor-request/national-id")
+    suspend fun getDeceasedInfo(
+        @Query("id") nationalId: String
+    ): BaseDTO<DeceasedInfoDTO>
 
 
     @GET("survivor-request/age")
