@@ -26,6 +26,13 @@ internal fun ProvinceDto.toEntity(): ProvinceEntity = ProvinceEntity(
     statusStartDate = statusStartDate,
 )
 
+internal fun ProvinceDto.toDomain(): ProvinceDN = ProvinceDN(
+    provinceCode = provinceCode,
+    provinceName = provinceName,
+    status = status,
+    statusStartDate = statusStartDate,
+)
+
 internal fun CityEntity.toDomain(): CityDN = CityDN(
     cityCode = cityCode,
     provinceCode = provinceCode,

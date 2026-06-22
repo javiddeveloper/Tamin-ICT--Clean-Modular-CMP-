@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.repository.contracts
 
+import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -11,7 +12,9 @@ class FakeContractsRepository : ContractsRepository {
     var error: Throwable = RuntimeException("Error")
     var contractsResult: List<ContractDN> = emptyList()
     var registrationInfoResult: RegistrationInfoDN? = null
+    var branchesResult: List<BranchDN> = emptyList()
     var lastQuery: ApiQueryParamDN? = null
+    var lastBranchCityCode: String? = null
 
     override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow {
         lastQuery = query
@@ -33,5 +36,11 @@ class FakeContractsRepository : ContractsRepository {
             insuranceId = null,
             lastContact = null,
         ))
+    }
+
+    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
+        lastBranchCityCode = cityCode
+        if (shouldThrowError) throw error
+        emit(branchesResult)
     }
 }

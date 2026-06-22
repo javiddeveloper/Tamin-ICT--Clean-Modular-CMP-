@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 data class CityOptionPR(
     val code: String,
     val name: String,
+    val provinceCode: String? = null,
 )
 
 @Immutable

@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 class GetCitiesUseCase(
     private val cityProvinceRepository: CityProvinceRepository,
 ) {
-    operator fun invoke(cityName: String? = null): Flow<List<CityDN>> =
-        cityProvinceRepository.getCities(cityName)
+    operator fun invoke(
+        cityName: String? = null,
+        provinceCode: String? = null,
+    ): Flow<List<CityDN>> = cityProvinceRepository.getCities(cityName, provinceCode)
 }

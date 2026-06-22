@@ -46,10 +46,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractIntent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractApplicantStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTermsStepContent
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.SelectBranchStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import org.koin.compose.viewmodel.koinViewModel
@@ -89,6 +93,18 @@ fun StudentInsuranceContractScreen(
             onUserInfoChange = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.UpdateUserInfo(it))
             },
+            onContractApplicantTypeChange = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SetContractApplicantType(it))
+            },
+            onBranchProvinceSelected = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SelectBranchProvince(it))
+            },
+            onBranchCitySelected = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SelectBranchCity(it))
+            },
+            onBranchSelected = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SelectBranch(it))
+            },
             onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
         )
@@ -102,6 +118,10 @@ private fun StudentInsuranceContractContent(
     onPreviousStep: () -> Unit,
     onRulesConfirmedChange: (Boolean) -> Unit,
     onUserInfoChange: (UserInfoFormPR) -> Unit,
+    onContractApplicantTypeChange: (ContractApplicantType) -> Unit,
+    onBranchProvinceSelected: (CityOptionPR) -> Unit,
+    onBranchCitySelected: (CityOptionPR) -> Unit,
+    onBranchSelected: (CityOptionPR) -> Unit,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -142,6 +162,10 @@ private fun StudentInsuranceContractContent(
                                 onPreviousStep = onPreviousStep,
                                 onRulesConfirmedChange = onRulesConfirmedChange,
                                 onUserInfoChange = onUserInfoChange,
+                                onContractApplicantTypeChange = onContractApplicantTypeChange,
+                                onBranchProvinceSelected = onBranchProvinceSelected,
+                                onBranchCitySelected = onBranchCitySelected,
+                                onBranchSelected = onBranchSelected,
                                 onShowRules = onShowRules,
                             )
                         }
@@ -174,6 +198,10 @@ private fun ContractStepper(
     onPreviousStep: () -> Unit,
     onRulesConfirmedChange: (Boolean) -> Unit,
     onUserInfoChange: (UserInfoFormPR) -> Unit,
+    onContractApplicantTypeChange: (ContractApplicantType) -> Unit,
+    onBranchProvinceSelected: (CityOptionPR) -> Unit,
+    onBranchCitySelected: (CityOptionPR) -> Unit,
+    onBranchSelected: (CityOptionPR) -> Unit,
     onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -219,6 +247,26 @@ private fun ContractStepper(
                                 onAddressChange = { onUserInfoChange(state.userInfo.copy(address = it)) },
                                 onZipCodeChange = { onUserInfoChange(state.userInfo.copy(zipCode = it)) },
                                 onPhoneNumberChange = { onUserInfoChange(state.userInfo.copy(phoneNumber = it)) },
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_CONTRACT_APPLICANT -> {
+                            ContractApplicantStepContent(
+                                selectedType = state.contractApplicantType,
+                                onTypeSelected = onContractApplicantTypeChange,
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_SELECT_BRANCH -> {
+                            SelectBranchStepContent(
+                                branchSelection = state.branchSelection,
+                                provinces = state.provinces,
+                                cities = state.branchCities,
+                                branches = state.branches,
+                                isProvincesLoading = state.isProvincesLoading,
+                                isCitiesLoading = state.isBranchCitiesLoading,
+                                isBranchesLoading = state.isBranchesLoading,
+                                onProvinceSelected = onBranchProvinceSelected,
+                                onCitySelected = onBranchCitySelected,
+                                onBranchSelected = onBranchSelected,
                             )
                         }
                         else -> Unit

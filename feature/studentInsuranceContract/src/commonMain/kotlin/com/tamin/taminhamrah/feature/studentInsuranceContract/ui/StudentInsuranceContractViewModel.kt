@@ -6,11 +6,18 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState.PartialState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.resolveEligibility
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.filterByProvinceCode
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toBranchOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toCityOptions
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toProvinceOptions
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
 import com.tamin.taminhamrah.mapper.contracts.toPresentation
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +28,8 @@ class StudentInsuranceContractViewModel(
     private val getRegistrationInfoUseCase: GetRegistrationInfoUseCase,
     private val getContractsUseCase: GetContractsUseCase,
     private val getCitiesUseCase: GetCitiesUseCase,
+    private val getProvincesUseCase: GetProvincesUseCase,
+    private val getBranchesUseCase: GetBranchesUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -36,6 +45,10 @@ class StudentInsuranceContractViewModel(
             StudentInsuranceContractIntent.GoToPreviousStep -> handleGoToPreviousStep()
             is StudentInsuranceContractIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
             is StudentInsuranceContractIntent.UpdateUserInfo -> handleUpdateUserInfo(intent.userInfo)
+            is StudentInsuranceContractIntent.SetContractApplicantType -> handleSetContractApplicantType(intent.type)
+            is StudentInsuranceContractIntent.SelectBranchProvince -> handleSelectBranchProvince(intent.province)
+            is StudentInsuranceContractIntent.SelectBranchCity -> handleSelectBranchCity(intent.city)
+            is StudentInsuranceContractIntent.SelectBranch -> handleSelectBranch(intent.branch)
         }
     }
 
@@ -43,6 +56,7 @@ class StudentInsuranceContractViewModel(
         loadRegistrationInfo(),
         loadContracts(),
         loadCities(),
+        loadProvinces(),
     )
 
     private fun loadRegistrationInfo(): Flow<PartialState> = flow {
@@ -82,6 +96,53 @@ class StudentInsuranceContractViewModel(
         }
     }
 
+    private fun loadProvinces(): Flow<PartialState> = flow {
+        emit(PartialState.ProvincesLoading(true))
+        try {
+            getProvincesUseCase().collect { provinces ->
+                emit(PartialState.ProvincesLoaded(provinces.toProvinceOptions()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.ProvincesLoading(false))
+        }
+    }
+
+    private fun handleSelectBranchProvince(province: CityOptionPR): Flow<PartialState> = flow {
+        emit(
+            PartialState.BranchSelectionChanged(
+                uiState.value.branchSelection.copy(
+                    provinceCode = province.code,
+                    provinceName = province.name,
+                    cityCode = "",
+                    cityName = "",
+                    branchCode = "",
+                    branchName = "",
+                ),
+            ),
+        )
+        emit(
+            PartialState.BranchCitiesLoaded(
+                uiState.value.cities.filterByProvinceCode(province.code),
+            ),
+        )
+        emit(PartialState.BranchesLoaded(emptyList()))
+    }
+
+    private fun loadBranches(cityCode: String): Flow<PartialState> = flow {
+        emit(PartialState.BranchesLoading(true))
+        try {
+            getBranchesUseCase(cityCode).collect { branches ->
+                emit(PartialState.BranchesLoaded(branches.toBranchOptions()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.BranchesLoading(false))
+        }
+    }
+
     private fun handleGoToNextStep(): Flow<PartialState> = flow {
         val nextStep = uiState.value.currentStep.stepIndex
             .let { StudentInsuranceContractStep.entries.firstOrNull { step -> step.stepIndex == it + 1 } }
@@ -103,6 +164,38 @@ class StudentInsuranceContractViewModel(
 
     private fun handleUpdateUserInfo(userInfo: UserInfoFormPR): Flow<PartialState> = flow {
         emit(PartialState.UserInfoChanged(userInfo))
+    }
+
+    private fun handleSetContractApplicantType(type: ContractApplicantType): Flow<PartialState> = flow {
+        emit(PartialState.ContractApplicantTypeChanged(type))
+    }
+
+    private fun handleSelectBranchCity(city: CityOptionPR): Flow<PartialState> = merge(
+        flow {
+            emit(
+                PartialState.BranchSelectionChanged(
+                    uiState.value.branchSelection.copy(
+                        cityCode = city.code,
+                        cityName = city.name,
+                        branchCode = "",
+                        branchName = "",
+                    ),
+                ),
+            )
+            emit(PartialState.BranchesLoaded(emptyList()))
+        },
+        loadBranches(city.code),
+    )
+
+    private fun handleSelectBranch(branch: CityOptionPR): Flow<PartialState> = flow {
+        emit(
+            PartialState.BranchSelectionChanged(
+                uiState.value.branchSelection.copy(
+                    branchCode = branch.code,
+                    branchName = branch.name,
+                ),
+            ),
+        )
     }
 
     override fun reduceState(
@@ -131,9 +224,44 @@ class StudentInsuranceContractViewModel(
         is PartialState.CitiesLoading -> currentState.copy(
             isCitiesLoading = partialState.isLoading,
         )
-        is PartialState.CitiesLoaded -> currentState.copy(
-            isCitiesLoading = false,
-            cities = partialState.cities,
+        is PartialState.CitiesLoaded -> {
+            val cities = partialState.cities
+            currentState.copy(
+                isCitiesLoading = false,
+                cities = cities,
+                branchCities = if (currentState.branchSelection.provinceCode.isNotBlank()) {
+                    cities.filterByProvinceCode(currentState.branchSelection.provinceCode)
+                } else {
+                    currentState.branchCities
+                },
+            )
+        }
+        is PartialState.ProvincesLoading -> currentState.copy(
+            isProvincesLoading = partialState.isLoading,
+        )
+        is PartialState.ProvincesLoaded -> currentState.copy(
+            isProvincesLoading = false,
+            provinces = partialState.provinces,
+        )
+        is PartialState.BranchCitiesLoading -> currentState.copy(
+            isBranchCitiesLoading = partialState.isLoading,
+        )
+        is PartialState.BranchCitiesLoaded -> currentState.copy(
+            isBranchCitiesLoading = false,
+            branchCities = partialState.cities,
+        )
+        is PartialState.BranchesLoading -> currentState.copy(
+            isBranchesLoading = partialState.isLoading,
+        )
+        is PartialState.BranchesLoaded -> currentState.copy(
+            isBranchesLoading = false,
+            branches = partialState.branches,
+        )
+        is PartialState.ContractApplicantTypeChanged -> currentState.copy(
+            contractApplicantType = partialState.type,
+        )
+        is PartialState.BranchSelectionChanged -> currentState.copy(
+            branchSelection = partialState.branchSelection,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,

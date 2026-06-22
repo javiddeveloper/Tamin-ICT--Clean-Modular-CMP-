@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
@@ -31,6 +32,7 @@ import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
@@ -65,6 +67,7 @@ val domainModule = module {
     factoryOf(::GetRelationTaminAllUseCase)
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::GetCitiesUseCase)
+    factoryOf(::GetProvincesUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)
     factoryOf(::GetDisabilityDependentInfoUseCase)
@@ -81,6 +84,7 @@ val domainModule = module {
     factoryOf(::GetPersonalInboxSizeUseCase)
     factoryOf(::GetContractsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
+    factoryOf(::GetBranchesUseCase)
     factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
     factoryOf(::GetAllPaymentSheetsUseCase)
 }

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.apiService.contract
 
+import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -16,4 +17,9 @@ interface ContractsApiService {
 
     @GET("special-insured-services/get-registration-info")
     suspend fun getRegistrationInfo(): BaseDTO<RegistrationInfoDTO>
+
+    @GET("special-insured-services/branches")
+    suspend fun getBranches(
+        @QueryMap parameters: Map<String, String>,
+    ): BaseDTO<ListData<BranchDTO>>
 }

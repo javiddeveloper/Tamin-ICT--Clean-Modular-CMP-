@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.contracts
 
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
+import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -33,6 +34,19 @@ class ContractsRemoteDataSourceImpl(
     override suspend fun getRegistrationInfo(): RegistrationInfoDTO {
         return try {
             contractsApiService.getRegistrationInfo().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getBranches(query: ApiQueryParamDN): ListData<BranchDTO> {
+        return try {
+            val response = contractsApiService.getBranches(apiQueryBuilder.buildQuery(query))
+            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

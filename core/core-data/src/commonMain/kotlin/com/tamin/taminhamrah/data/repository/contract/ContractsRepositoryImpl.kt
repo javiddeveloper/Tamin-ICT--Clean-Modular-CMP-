@@ -4,7 +4,9 @@ import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.repository.contract.BranchListQuery
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
+import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -53,6 +55,11 @@ class ContractsRepositoryImpl(
 
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
         getContracts(buildStudentInsuranceContractsQuery())
+
+    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
+        val response = contractsRemoteDataSource.getBranches(BranchListQuery.build(cityCode))
+        emit(response.list.orEmpty().toDomain())
+    }
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         val localInfo = registrationInfoDao.getRegistrationInfo().first()
