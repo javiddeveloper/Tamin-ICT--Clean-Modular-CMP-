@@ -1,25 +1,36 @@
 package com.tamin.taminhamrah.feature.studentInsuranceContract.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -29,10 +40,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractIntent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
-import com.tamin.taminhamrah.model.contracts.ContractPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -62,6 +77,8 @@ fun StudentInsuranceContractScreen(
     ) { padding ->
         StudentInsuranceContractContent(
             state = state,
+            onNextStep = { viewModel.sendIntent(StudentInsuranceContractIntent.GoToNextStep) },
+            onPreviousStep = { viewModel.sendIntent(StudentInsuranceContractIntent.GoToPreviousStep) },
             modifier = Modifier.padding(padding),
         )
     }
@@ -70,6 +87,8 @@ fun StudentInsuranceContractScreen(
 @Composable
 private fun StudentInsuranceContractContent(
     state: StudentInsuranceContractUiState,
+    onNextStep: () -> Unit,
+    onPreviousStep: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -92,26 +111,22 @@ private fun StudentInsuranceContractContent(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     state.registrationInfo?.let { info ->
                         item {
                             RegistrationHeaderCard(info)
                         }
                         item {
-                            RegistrationStepCard(info)
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                    }
-
-                    if (state.existingContracts.isNotEmpty()) {
                         item {
-                            Text(
-                                text = "قراردادهای موجود",
-                                style = MaterialTheme.typography.titleMedium,
+                            ContractStepper(
+                                state = state,
+                                info = info,
+                                onNextStep = onNextStep,
+                                onPreviousStep = onPreviousStep,
                             )
-                        }
-                        items(state.existingContracts) { contract ->
-                            ExistingContractCard(contract)
                         }
                     }
                 }
@@ -135,32 +150,260 @@ private fun RegistrationHeaderCard(info: RegistrationInfoPR) {
 }
 
 @Composable
-private fun RegistrationStepCard(info: RegistrationInfoPR) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(text = "۱. نام‌نویسی", style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = "متقاضی محترم، نام‌نویسی شما با شماره بیمه تأمین اجتماعی ${info.insuranceId} انجام شده است.",
-                style = MaterialTheme.typography.bodyMedium,
+private fun ContractStepper(
+    state: StudentInsuranceContractUiState,
+    info: RegistrationInfoPR,
+    onNextStep: () -> Unit,
+    onPreviousStep: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+        StudentInsuranceContractStep.orderedSteps.forEachIndexed { index, step ->
+            val stepState = resolveStepState(step, state.currentStep)
+            StepperItem(
+                step = step,
+                stepState = stepState,
+                isLast = index == StudentInsuranceContractStep.orderedSteps.lastIndex,
+                content = {
+                    when (step) {
+                        StudentInsuranceContractStep.STEP_REGISTRATION -> {
+                            RegistrationStepContent(info = info)
+                        }
+                        StudentInsuranceContractStep.STEP_AUTHORIZATION -> {
+                            if (state.eligibility != null) {
+                                AuthorizationStepContent(eligibility = state.eligibility)
+                            } else {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            }
+                        }
+                        else -> Unit
+                    }
+                },
+                navigation = {
+                    if (stepState == StepState.ACTIVE) {
+                        StepNavigationButtons(
+                            showPrevious = step != StudentInsuranceContractStep.STEP_REGISTRATION,
+                            showNext = step != StudentInsuranceContractStep.STEP_SELECT_BRANCH,
+                            nextEnabled = state.canGoNext,
+                            onNextStep = onNextStep,
+                            onPreviousStep = onPreviousStep,
+                        )
+                    }
+                },
             )
-            Button(
-                onClick = { /* step 2 — next iteration */ },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("مرحله بعد")
+        }
+    }
+}
+
+private enum class StepState {
+    COMPLETED,
+    ACTIVE,
+    UPCOMING,
+}
+
+private fun resolveStepState(
+    step: StudentInsuranceContractStep,
+    currentStep: StudentInsuranceContractStep,
+): StepState = when {
+    step.stepIndex < currentStep.stepIndex -> StepState.COMPLETED
+    step.stepIndex == currentStep.stepIndex -> StepState.ACTIVE
+    else -> StepState.UPCOMING
+}
+
+@Composable
+private fun StepperItem(
+    step: StudentInsuranceContractStep,
+    stepState: StepState,
+    isLast: Boolean,
+    content: @Composable () -> Unit,
+    navigation: @Composable () -> Unit,
+) {
+    val activeColor = Color(0xFF2E7D32)
+    val upcomingColor = MaterialTheme.colorScheme.outline
+    val indicatorColor = when (stepState) {
+        StepState.COMPLETED -> activeColor
+        StepState.ACTIVE -> activeColor
+        StepState.UPCOMING -> upcomingColor
+    }
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(40.dp),
+        ) {
+            StepIndicator(
+                stepIndex = step.stepIndex,
+                stepState = stepState,
+                indicatorColor = indicatorColor,
+            )
+            if (!isLast) {
+                Box(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .height(if (stepState == StepState.ACTIVE) 120.dp else 32.dp)
+                        .background(
+                            if (stepState == StepState.COMPLETED) activeColor else upcomingColor.copy(alpha = 0.4f),
+                        ),
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = "${step.stepIndex}. ${step.title}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (stepState == StepState.ACTIVE) FontWeight.Bold else FontWeight.Normal,
+                color = when (stepState) {
+                    StepState.UPCOMING -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    else -> MaterialTheme.colorScheme.onSurface
+                },
+            )
+
+            if (stepState == StepState.ACTIVE) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        content()
+                        navigation()
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ExistingContractCard(contract: ContractPR) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(text = "شماره قرارداد: ${contract.contractNumber}")
-            Text(text = "نوع بیمه: ${contract.insuranceType}")
-            Text(text = "وضعیت: ${contract.statusDesc}")
-            Spacer(modifier = Modifier.height(4.dp))
+private fun StepIndicator(
+    stepIndex: Int,
+    stepState: StepState,
+    indicatorColor: Color,
+) {
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(
+                if (stepState == StepState.UPCOMING) Color.Transparent else indicatorColor,
+            )
+            .border(
+                width = 2.dp,
+                color = indicatorColor,
+                shape = CircleShape,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (stepState) {
+            StepState.COMPLETED -> {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+            StepState.ACTIVE -> {
+                Text(
+                    text = stepIndex.toString(),
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            StepState.UPCOMING -> {
+                Text(
+                    text = stepIndex.toString(),
+                    color = indicatorColor,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RegistrationStepContent(info: RegistrationInfoPR) {
+    Text(
+        text = "متقاضی محترم، نام‌نویسی شما با شماره بیمه تأمین اجتماعی ${info.insuranceId} انجام شده است.",
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
+
+@Composable
+private fun AuthorizationStepContent(eligibility: ContractEligibilityPR) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            imageVector = if (eligibility.isEligible) Icons.Default.Check else Icons.Default.Close,
+            contentDescription = null,
+            tint = if (eligibility.isEligible) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(24.dp),
+        )
+        Text(
+            text = eligibility.message(),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
+}
+
+@Composable
+private fun StepNavigationButtons(
+    showPrevious: Boolean,
+    showNext: Boolean,
+    nextEnabled: Boolean,
+    onNextStep: () -> Unit,
+    onPreviousStep: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (showPrevious) {
+            OutlinedButton(
+                onClick = onPreviousStep,
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("مرحله قبل")
+            }
+        }
+        if (showNext) {
+            Button(
+                onClick = onNextStep,
+                enabled = nextEnabled,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ),
+            ) {
+                Text("مرحله بعد")
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
     }
 }

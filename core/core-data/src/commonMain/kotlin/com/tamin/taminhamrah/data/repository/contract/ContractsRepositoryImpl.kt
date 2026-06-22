@@ -80,12 +80,16 @@ class ContractsRepositoryImpl(
             ApiFilterDN(
                 property = FilterProperty.PREMIUM_TYPE_CODE,
                 operator = FilterOperator.EQ,
-                value = STUDENT_PREMIUM_TYPE_CODE,
+                value = FREELANCE_PREMIUM_TYPE_CODE,
             ),
         ),
     )
 
     private companion object {
-        const val STUDENT_PREMIUM_TYPE_CODE = "03"
+        /**
+         * Legacy Tamin Hamrah student insurance flow queries list-contracts-mobile
+         * with premiumTypeCode "01" (حرف و مشاغل آزاد). Step-2 eligibilityStatus comes from this response.
+         */
+        const val FREELANCE_PREMIUM_TYPE_CODE = "01"
     }
 }
