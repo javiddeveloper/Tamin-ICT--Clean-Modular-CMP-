@@ -8,6 +8,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
+import com.tamin.taminhamrah.data.local.dao.FreelancePremiumRangeDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
@@ -19,6 +20,7 @@ import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
+import com.tamin.taminhamrah.data.local.entity.FreelancePremiumRangeEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxItemEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxSizeEntity
@@ -47,6 +49,7 @@ import kotlinx.coroutines.IO
         RegistrationInfoEntity::class,
         BranchEntity::class,
         SpcPremiumRateEntity::class,
+        FreelancePremiumRangeEntity::class,
     ],
     version = 1,
 )
@@ -63,6 +66,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun registrationInfoDao(): RegistrationInfoDao
     abstract fun branchDao(): BranchDao
     abstract fun spcPremiumRateDao(): SpcPremiumRateDao
+    abstract fun freelancePremiumRangeDao(): FreelancePremiumRangeDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.tamin.taminhamrah.data.local.dao.BranchDao
+import com.tamin.taminhamrah.data.local.dao.FreelancePremiumRangeDao
 import com.tamin.taminhamrah.data.local.dao.SpcPremiumRateDao
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
@@ -15,6 +16,7 @@ import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.data.local.entity.BranchEntity
+import com.tamin.taminhamrah.data.local.entity.FreelancePremiumRangeEntity
 import com.tamin.taminhamrah.data.local.entity.SpcPremiumRateEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
@@ -44,6 +46,7 @@ import platform.Foundation.NSHomeDirectory
         RegistrationInfoEntity::class,
         BranchEntity::class,
         SpcPremiumRateEntity::class,
+        FreelancePremiumRangeEntity::class,
     ],
     version = 1,
 )
@@ -60,6 +63,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun registrationInfoDao(): RegistrationInfoDao
     actual abstract fun branchDao(): BranchDao
     actual abstract fun spcPremiumRateDao(): SpcPremiumRateDao
+    actual abstract fun freelancePremiumRangeDao(): FreelancePremiumRangeDao
 }
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<TaminXDatabase> {

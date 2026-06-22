@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractIntent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState.PartialState
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toPresentation as toPremiumRangePresentation
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toSpcPremiumRateOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.resolveEligibility
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.filterByProvinceCode
@@ -22,6 +23,8 @@ import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
+import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -34,6 +37,7 @@ class StudentInsuranceContractViewModel(
     private val getProvincesUseCase: GetProvincesUseCase,
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getSpcPremiumRatesUseCase: GetSpcPremiumRatesUseCase,
+    private val getFreelancePremiumRangeUseCase: GetFreelancePremiumRangeUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -54,6 +58,8 @@ class StudentInsuranceContractViewModel(
             is StudentInsuranceContractIntent.SelectBranchCity -> handleSelectBranchCity(intent.city)
             is StudentInsuranceContractIntent.SelectBranch -> handleSelectBranch(intent.branch)
             is StudentInsuranceContractIntent.SelectPremiumRate -> handleSelectPremiumRate(intent.rate)
+            is StudentInsuranceContractIntent.SelectMonthlyPremium -> handleSelectMonthlyPremium(intent.amount)
+            StudentInsuranceContractIntent.CalculateMonthlyPremium -> handleCalculateMonthlyPremium()
         }
     }
 
@@ -162,12 +168,20 @@ class StudentInsuranceContractViewModel(
         }
     }
 
-    private fun handleGoToNextStep(): Flow<PartialState> = flow {
+    private fun handleGoToNextStep(): Flow<PartialState> {
         val nextStep = uiState.value.currentStep.stepIndex
             .let { StudentInsuranceContractStep.entries.firstOrNull { step -> step.stepIndex == it + 1 } }
-            ?: return@flow
-        if (!uiState.value.canGoNext) return@flow
-        emit(PartialState.StepChanged(nextStep))
+            ?: return flow { }
+        if (!uiState.value.canGoNext) return flow { }
+
+        return merge(
+            flow { emit(PartialState.StepChanged(nextStep)) },
+            if (nextStep == StudentInsuranceContractStep.STEP_SALARY) {
+                loadFreelancePremiumRange()
+            } else {
+                flow { }
+            },
+        )
     }
 
     private fun handleGoToPreviousStep(): Flow<PartialState> = flow {
@@ -219,6 +233,56 @@ class StudentInsuranceContractViewModel(
 
     private fun handleSelectPremiumRate(rate: SpcPremiumRateOptionPR): Flow<PartialState> = flow {
         emit(PartialState.PremiumRateSelected(rate.code))
+    }
+
+    private fun loadFreelancePremiumRange(): Flow<PartialState> = flow {
+        val params = buildPremiumRangeParams() ?: return@flow
+        emit(PartialState.PremiumRangeLoading(true))
+        emit(PartialState.PremiumCalculated(false))
+        try {
+            getFreelancePremiumRangeUseCase(params).collect { range ->
+                val presentation = range.toPremiumRangePresentation()
+                emit(PartialState.PremiumRangeLoaded(presentation))
+                emit(PartialState.SelectedMonthlyPremiumChanged(presentation.lowPremium))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.PremiumRangeLoading(false))
+        }
+    }
+
+    private fun buildPremiumRangeParams(): FreelancePremiumRangeParams? {
+        val insuranceId = uiState.value.registrationInfo?.insuranceId?.takeIf { it.isNotBlank() }
+            ?: return null
+        val spcRateCode = uiState.value.selectedPremiumRateCode ?: return null
+        return FreelancePremiumRangeParams(
+            treatmentSupportCode = DEFAULT_TREATMENT_SUPPORT_CODE,
+            spcRateCode = spcRateCode,
+            insuranceId = insuranceId,
+        )
+    }
+
+    private fun handleSelectMonthlyPremium(amount: Long): Flow<PartialState> = flow {
+        emit(PartialState.SelectedMonthlyPremiumChanged(amount))
+        emit(PartialState.PremiumCalculated(false))
+    }
+
+    private fun handleCalculateMonthlyPremium(): Flow<PartialState> = flow {
+        emit(PartialState.CalculatingPremium(true))
+        try {
+            // TODO: call calculate-monthly-premium API when provided
+            emit(PartialState.PremiumCalculated(true))
+        } finally {
+            emit(PartialState.CalculatingPremium(false))
+        }
+    }
+
+    private companion object {
+        /**
+         * Step 8 (treatment support) is not implemented yet; legacy app uses cntDrmn "1".
+         */
+        const val DEFAULT_TREATMENT_SUPPORT_CODE = "1"
     }
 
     override fun reduceState(
@@ -295,6 +359,22 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.PremiumRateSelected -> currentState.copy(
             selectedPremiumRateCode = partialState.code,
+        )
+        is PartialState.PremiumRangeLoading -> currentState.copy(
+            isPremiumRangeLoading = partialState.isLoading,
+        )
+        is PartialState.PremiumRangeLoaded -> currentState.copy(
+            isPremiumRangeLoading = false,
+            premiumRange = partialState.premiumRange,
+        )
+        is PartialState.SelectedMonthlyPremiumChanged -> currentState.copy(
+            selectedMonthlyPremium = partialState.amount,
+        )
+        is PartialState.CalculatingPremium -> currentState.copy(
+            isCalculatingPremium = partialState.isCalculating,
+        )
+        is PartialState.PremiumCalculated -> currentState.copy(
+            isPremiumCalculated = partialState.calculated,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,

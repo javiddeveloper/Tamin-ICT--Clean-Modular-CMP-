@@ -17,4 +17,5 @@ val databaseModule = module {
     single { get<TaminXDatabase>().registrationInfoDao() }
     single { get<TaminXDatabase>().branchDao() }
     single { get<TaminXDatabase>().spcPremiumRateDao() }
+    single { get<TaminXDatabase>().freelancePremiumRangeDao() }
 }

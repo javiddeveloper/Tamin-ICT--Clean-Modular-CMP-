@@ -50,4 +50,7 @@ object ContractsTestData {
 
     val spcPremiumRateSuccess: String
         get() = readResourceFile("mocks/spc_premium_rate_success.json")
+
+    val freelancePremiumRangeSuccess: String
+        get() = readResourceFile("mocks/freelance_premium_range_success.json")
 }

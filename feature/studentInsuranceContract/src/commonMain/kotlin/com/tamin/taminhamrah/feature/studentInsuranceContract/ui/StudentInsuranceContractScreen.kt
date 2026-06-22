@@ -55,6 +55,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoF
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractApplicantStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTermsStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.InsurancePremiumStepContent
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.PremiumSalaryStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.SelectBranchStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
@@ -110,6 +111,12 @@ fun StudentInsuranceContractScreen(
             onPremiumRateSelected = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.SelectPremiumRate(it))
             },
+            onMonthlyPremiumChange = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SelectMonthlyPremium(it))
+            },
+            onCalculateMonthlyPremium = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.CalculateMonthlyPremium)
+            },
             onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
         )
@@ -128,6 +135,8 @@ private fun StudentInsuranceContractContent(
     onBranchCitySelected: (CityOptionPR) -> Unit,
     onBranchSelected: (CityOptionPR) -> Unit,
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    onMonthlyPremiumChange: (Long) -> Unit,
+    onCalculateMonthlyPremium: () -> Unit,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -173,6 +182,8 @@ private fun StudentInsuranceContractContent(
                                 onBranchCitySelected = onBranchCitySelected,
                                 onBranchSelected = onBranchSelected,
                                 onPremiumRateSelected = onPremiumRateSelected,
+                                onMonthlyPremiumChange = onMonthlyPremiumChange,
+                                onCalculateMonthlyPremium = onCalculateMonthlyPremium,
                                 onShowRules = onShowRules,
                             )
                         }
@@ -210,6 +221,8 @@ private fun ContractStepper(
     onBranchCitySelected: (CityOptionPR) -> Unit,
     onBranchSelected: (CityOptionPR) -> Unit,
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    onMonthlyPremiumChange: (Long) -> Unit,
+    onCalculateMonthlyPremium: () -> Unit,
     onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -291,6 +304,16 @@ private fun ContractStepper(
                                 selectedCode = state.selectedPremiumRateCode,
                                 isLoading = state.isPremiumRatesLoading,
                                 onRateSelected = onPremiumRateSelected,
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_SALARY -> {
+                            PremiumSalaryStepContent(
+                                premiumRange = state.premiumRange,
+                                selectedPremium = state.selectedMonthlyPremium,
+                                isLoading = state.isPremiumRangeLoading,
+                                isCalculating = state.isCalculatingPremium,
+                                onPremiumChange = onMonthlyPremiumChange,
+                                onCalculate = onCalculateMonthlyPremium,
                             )
                         }
                         else -> Unit

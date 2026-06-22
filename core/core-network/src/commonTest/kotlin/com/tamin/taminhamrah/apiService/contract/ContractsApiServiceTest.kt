@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.ContractsTestData
@@ -68,5 +69,30 @@ class ContractsApiServiceTest : BaseApiTest() {
         assertEquals("01", rates.first().spcrateCode)
         assertEquals("صاحبان حرف  ومشاغل ازاد12درصد", rates.first().spcrateDescription)
         assertEquals("12", rates.first().insurDpercent)
+    }
+
+    @Test
+    fun `getFreelancePremiumRange should return low and high premium bounds`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.freelancePremiumRangeSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<ContractsApiService>()
+
+        val response = apiService.getFreelancePremiumRange(
+            treatmentSupportCode = "1",
+            spcRateCode = "01",
+            insuranceId = "099796",
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data: FreelancePremiumRangeDTO = response.data!!
+        assertEquals(0L, data.paymentTabayi)
+        assertEquals(25_989_368L, data.lowPremium)
+        assertEquals(538, data.history)
+        assertEquals(139_654_620L, data.highPremium)
     }
 }
