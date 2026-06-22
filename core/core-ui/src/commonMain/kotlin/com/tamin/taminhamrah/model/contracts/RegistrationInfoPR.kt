@@ -5,4 +5,5 @@ data class RegistrationInfoPR(
     val nationalId: String,
     val birthDateFormatted: String,
     val insuranceId: String,
+    val genderTitle: String,
 )

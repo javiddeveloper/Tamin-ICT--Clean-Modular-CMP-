@@ -10,8 +10,9 @@ fun RegistrationInfoDN.toPresentation(): RegistrationInfoPR {
         fullName = listOfNotNull(personal?.firstName, personal?.lastName)
             .joinToString(" ")
             .ifBlank { "-" },
-        nationalId = personal?.nationalId?:"",
+        nationalId = personal?.nationalId ?: "",
         birthDateFormatted = PersianDateFormatter.formatTimestamp(personal?.dateOfBirth),
-        insuranceId = insuranceId?:"",
+        insuranceId = insuranceId ?: "",
+        genderTitle = if (personal?.genderCode == "02") "خانم" else "آقای",
     )
 }

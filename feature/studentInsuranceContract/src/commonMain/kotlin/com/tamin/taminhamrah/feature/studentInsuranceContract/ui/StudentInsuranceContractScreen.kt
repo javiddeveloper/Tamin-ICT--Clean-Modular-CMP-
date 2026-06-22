@@ -48,6 +48,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTermsStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -55,6 +56,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun StudentInsuranceContractScreen(
     onBack: () -> Unit,
+    onShowRules: () -> Unit = {},
     viewModel: StudentInsuranceContractViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -79,6 +81,10 @@ fun StudentInsuranceContractScreen(
             state = state,
             onNextStep = { viewModel.sendIntent(StudentInsuranceContractIntent.GoToNextStep) },
             onPreviousStep = { viewModel.sendIntent(StudentInsuranceContractIntent.GoToPreviousStep) },
+            onRulesConfirmedChange = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SetRulesConfirmed(it))
+            },
+            onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
         )
     }
@@ -89,6 +95,8 @@ private fun StudentInsuranceContractContent(
     state: StudentInsuranceContractUiState,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
+    onRulesConfirmedChange: (Boolean) -> Unit,
+    onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -126,6 +134,8 @@ private fun StudentInsuranceContractContent(
                                 info = info,
                                 onNextStep = onNextStep,
                                 onPreviousStep = onPreviousStep,
+                                onRulesConfirmedChange = onRulesConfirmedChange,
+                                onShowRules = onShowRules,
                             )
                         }
                     }
@@ -155,6 +165,8 @@ private fun ContractStepper(
     info: RegistrationInfoPR,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
+    onRulesConfirmedChange: (Boolean) -> Unit,
+    onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
         StudentInsuranceContractStep.orderedSteps.forEachIndexed { index, step ->
@@ -175,6 +187,14 @@ private fun ContractStepper(
                                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
                             }
                         }
+                        StudentInsuranceContractStep.STEP_CONTRACT_TERMS -> {
+                            ContractTermsStepContent(
+                                info = info,
+                                isRulesConfirmed = state.isRulesConfirmed,
+                                onRulesConfirmedChange = onRulesConfirmedChange,
+                                onShowRules = onShowRules,
+                            )
+                        }
                         else -> Unit
                     }
                 },
@@ -182,7 +202,7 @@ private fun ContractStepper(
                     if (stepState == StepState.ACTIVE) {
                         StepNavigationButtons(
                             showPrevious = step != StudentInsuranceContractStep.STEP_REGISTRATION,
-                            showNext = step != StudentInsuranceContractStep.STEP_SELECT_BRANCH,
+                            showNext = step != StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT,
                             nextEnabled = state.canGoNext,
                             onNextStep = onNextStep,
                             onPreviousStep = onPreviousStep,

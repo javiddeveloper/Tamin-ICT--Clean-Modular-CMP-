@@ -30,6 +30,7 @@ class StudentInsuranceContractViewModel(
             StudentInsuranceContractIntent.LoadInitialData -> handleLoadInitialData()
             StudentInsuranceContractIntent.GoToNextStep -> handleGoToNextStep()
             StudentInsuranceContractIntent.GoToPreviousStep -> handleGoToPreviousStep()
+            is StudentInsuranceContractIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
         }
     }
 
@@ -75,6 +76,10 @@ class StudentInsuranceContractViewModel(
         emit(PartialState.StepChanged(previousStep))
     }
 
+    private fun handleSetRulesConfirmed(confirmed: Boolean): Flow<PartialState> = flow {
+        emit(PartialState.RulesConfirmedChanged(confirmed))
+    }
+
     override fun reduceState(
         currentState: StudentInsuranceContractUiState,
         partialState: PartialState,
@@ -91,6 +96,9 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.EligibilityLoaded -> currentState.copy(
             eligibility = partialState.eligibility,
+        )
+        is PartialState.RulesConfirmedChanged -> currentState.copy(
+            isRulesConfirmed = partialState.confirmed,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,
