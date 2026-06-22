@@ -13,6 +13,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.ktor.client.core)
         }
 
         androidMain.dependencies {

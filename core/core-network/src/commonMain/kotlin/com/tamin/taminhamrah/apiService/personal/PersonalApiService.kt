@@ -13,6 +13,7 @@ import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Query
+import io.ktor.client.statement.HttpResponse
 
 interface PersonalApiService {
 
@@ -42,5 +43,10 @@ interface PersonalApiService {
         @Path("requestId") requestId: Int,
         @Body body: SubmitFinalSurvivorPensionRequest
     ): BaseDTO<String?>
+
+    @GET("survivor-request/final-report")
+    suspend fun getFinalSurvivorPensionPDF(
+        token: String
+    ): HttpResponse
 
 }

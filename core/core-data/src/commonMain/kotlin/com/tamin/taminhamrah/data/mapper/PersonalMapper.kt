@@ -10,6 +10,10 @@ import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
@@ -69,6 +73,18 @@ fun ConfirmSurvivorDTO.toDomain(): ConfirmSurvivorDN {
 fun RequestModelDTO.toDomain(): RequestModelDN {
     return RequestModelDN(
         id = id
+    )
+}
+
+fun PdfDownloadDTO.toDomain(): PdfDownloadDN {
+    return PdfDownloadDN(
+        pdf = pdf?.toDomain()
+    )
+}
+
+fun InputStreamDTO.toDomain(): InputStreamDN {
+    return InputStreamDN(
+        pdf = pdf
     )
 }
 
