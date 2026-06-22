@@ -8,7 +8,7 @@ fun RegistrationInfoDN.toPresentation(): RegistrationInfoPR {
     val personal = personalInfo
     val contact = lastContact
     val mobile = contact?.mobile?.takeIf { it.isNotBlank() }
-        ?: mobileNumber.orEmpty()
+        ?: (mobileNumber?:"")
     return RegistrationInfoPR(
         fullName = listOfNotNull(personal?.firstName, personal?.lastName)
             .joinToString(" ")
@@ -17,9 +17,9 @@ fun RegistrationInfoDN.toPresentation(): RegistrationInfoPR {
         birthDateFormatted = PersianDateFormatter.formatTimestamp(personal?.dateOfBirth),
         insuranceId = insuranceId ?: "",
         genderTitle = if (personal?.genderCode == "02") "خانم" else "آقای",
-        address = contact?.address.orEmpty(),
-        zipCode = contact?.zipCode.orEmpty(),
-        phoneNumber = contact?.phoneNumber.orEmpty(),
+        address = contact?.address?:"",
+        zipCode = contact?.zipCode?:"",
+        phoneNumber = contact?.phoneNumber?:"",
         mobileNumber = mobile,
         hasMobile = mobile.isNotBlank(),
     )

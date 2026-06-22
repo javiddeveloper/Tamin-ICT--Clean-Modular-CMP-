@@ -57,7 +57,7 @@ data class ContractEligibilityPR(
             val year = age.substring(0, 2)
             val month = age.substring(2, 4)
             val day = age.substring(4, 6)
-            return "داشتن ${history.orEmpty()} روز سابقه و سن $year/$month/$day در زمان تقاضا"
+            return "داشتن ${history?:""} روز سابقه و سن $year/$month/$day در زمان تقاضا"
         }
     }
 }

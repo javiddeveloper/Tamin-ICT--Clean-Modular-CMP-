@@ -6,10 +6,10 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 
 fun ContractDN.toPresentation(): ContractPR {
     val statusDesc = contractStatusObject?.selfIsuContStatDesc
-        ?: contractStatus.orEmpty()
+        ?: (contractStatus?:"")
     val hasTreatmentSupport = resolveTreatmentSupport()
     return ContractPR(
-        contractNumber = contractNumber?.toString().orEmpty(),
+        contractNumber = contractNumber?.toString()?:"",
         statusDesc = statusDesc,
         isActive = !statusDesc.contains("ابطال"),
         requestDate = PersianDateFormatter.formatTimestamp(
@@ -17,12 +17,12 @@ fun ContractDN.toPresentation(): ContractPR {
         ),
         insuranceType = premiumType?.insuranceDescription
             ?: premiumType?.insuranceKind
-            ?: premiumTypeCode.orEmpty(),
-        monthlyPremiumLabel = premiumRate?.spcrateDescription.orEmpty(),
+            ?: (premiumTypeCode?:""),
+        monthlyPremiumLabel = premiumRate?.spcrateDescription?:"",
         monthlyIncome = salary.toString(),
         treatmentSupportText = if (hasTreatmentSupport) "حمایت درمان دارد" else "حمایت درمان ندارد",
         hasTreatmentSupport = hasTreatmentSupport,
-        jobTitle = freeJob?.discrioption.orEmpty(),
+        jobTitle = freeJob?.discrioption?:"",
     )
 }
 

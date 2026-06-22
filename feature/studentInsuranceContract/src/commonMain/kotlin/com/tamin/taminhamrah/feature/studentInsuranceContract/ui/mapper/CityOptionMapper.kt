@@ -5,7 +5,7 @@ import com.tamin.taminhamrah.model.common.CityDN
 
 fun CityDN.toCityOption(): CityOptionPR = CityOptionPR(
     code = cityCode,
-    name = cityName.orEmpty(),
+    name = cityName?:"",
     provinceCode = provinceCode,
 )
 

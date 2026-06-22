@@ -6,9 +6,9 @@ import com.tamin.taminhamrah.model.contracts.BranchDTO
 
 internal fun BranchDTO.toDomain(): BranchDN = BranchDN(
     code = code,
-    name = name.orEmpty().trim(),
-    branchAddress = branchAddress.orEmpty().trim(),
-    cityCode = cityCode.orEmpty(),
+    name = name?:"",
+    branchAddress = branchAddress?:"",
+    cityCode = cityCode?:"",
     minCode = minCode,
     maxCode = maxCode,
 )
@@ -16,10 +16,10 @@ internal fun BranchDTO.toDomain(): BranchDN = BranchDN(
 internal fun List<BranchDTO>.toDomain(): List<BranchDN> = map { it.toDomain() }
 
 internal fun BranchDTO.toEntity(): BranchEntity = BranchEntity(
-    code = code.orEmpty(),
-    name = name.orEmpty().trim(),
-    branchAddress = branchAddress.orEmpty().trim(),
-    cityCode = cityCode.orEmpty(),
+    code = code?:"",
+    name = name?:"",
+    branchAddress = branchAddress?:"",
+    cityCode = cityCode?:"",
     minCode = minCode,
     maxCode = maxCode,
 )
