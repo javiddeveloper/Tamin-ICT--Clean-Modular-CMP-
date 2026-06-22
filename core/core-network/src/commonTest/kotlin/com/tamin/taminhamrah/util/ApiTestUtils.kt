@@ -52,4 +52,7 @@ object ContractsTestData {
 object WorkshopTestData {
     val workshopDebitSuccess: String
         get() = readResourceFile("mocks/workshop_debit_success.json")
+
+    val workshopDebtInquirySuccess: String
+        get() = readResourceFile("mocks/workshop_debt_inquiry_success.json")
 }

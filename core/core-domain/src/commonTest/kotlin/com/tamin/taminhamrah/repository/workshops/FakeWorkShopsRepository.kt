@@ -37,4 +37,16 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         }
         return workshopDebitResult
     }
+
+    var workshopDebtInquiryResult: com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN? = null
+
+    override suspend fun getWorkshopDebtInquiry(
+        workshopId: String,
+        branchCode: String
+    ): com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN? {
+        if (shouldThrowError) {
+            throw error
+        }
+        return workshopDebtInquiryResult
+    }
 }

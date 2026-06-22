@@ -48,4 +48,32 @@ class WorkShopsApiServiceTest : BaseApiTest() {
         assertEquals("سند 4% بدهي حق بيمه سخت و زيان آور - بخشنامه 49/5", secondDebit.debitCreateReasonDesc)
         assertEquals(18546691L, secondDebit.debitAmount)
     }
+
+    @Test
+    fun `getWorkshopDebtInquiry should return workshop debt inquiry`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = WorkshopTestData.workshopDebtInquirySuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<WorkShopsApiService>()
+
+        val response = apiService.getWorkshopDebtInquiry(
+            workshopId = "1071410004",
+            branchCode = "1070"
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data = response.data
+        assertNotNull(data)
+
+        assertEquals("1071410004", data.workshopId)
+        assertEquals("1070", data.branchCode)
+        assertEquals("سنگ بري سعيد", data.workshopName)
+        assertEquals("کارگاه دارای بدهی قطعی", data.result)
+        assertEquals("19895251", data.amount1)
+        assertEquals("1405/04/01", data.sDate)
+    }
 }
