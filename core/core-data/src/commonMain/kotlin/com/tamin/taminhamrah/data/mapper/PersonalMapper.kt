@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.PersonalDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
@@ -21,6 +22,7 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocRequest
+import kotlin.jvm.JvmName
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
     return PersonalInfoDN(
@@ -48,6 +50,13 @@ fun AgeDTO.toDomain(): AgeDN {
     return AgeDN(
         age = age,
         birthDate = birthDate
+    )
+}
+
+@JvmName("toGirlSurvivorConditionDomain")
+fun String?.toDomain(): GirlSurvivorConditionDN {
+    return GirlSurvivorConditionDN(
+        condition = this
     )
 }
 

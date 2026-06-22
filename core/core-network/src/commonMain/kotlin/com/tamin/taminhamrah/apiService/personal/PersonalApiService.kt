@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
@@ -22,6 +23,12 @@ interface PersonalApiService {
     suspend fun getPersonalInfo(
     ): BaseDTO<PersonalInfoDTO>
 
+    @GET("survivor-request/national-id")
+    suspend fun getDeceasedInfo(
+        @Query("id") nationalId: String
+    ): BaseDTO<DeceasedInfoDTO>
+
+
     @GET("survivor-request/age")
     suspend fun getAge(
         @Query("birthDate") birthDate: Long = 0L
@@ -31,6 +38,13 @@ interface PersonalApiService {
     suspend fun getDisabilityDependentInfo(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<DisabilityDependentDTO>>
+
+    @GET("survivor-request/condition")
+    suspend fun checkGirlSurvivorConditions(
+        @Query("code") nationalCode: String,
+        @Query("rel") relation: String = "04",
+        @Query("pensionerId") pensionerId: String,
+    ): BaseDTO<String?>
 
     @GET("survivor-request/list")
     suspend fun confirmSurvivorsList(
