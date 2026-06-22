@@ -15,4 +15,5 @@ interface PersonalRemoteDataSource {
     suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO>
     suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO>
     suspend fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionRequest): String?
+    suspend fun checkGirlSurvivorConditions(nationalCode: String, pensionerId: String): String?
 }

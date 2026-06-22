@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionPR
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
@@ -89,5 +91,11 @@ fun SubmitFinalSurvivorPensionPR.toDomain(): SubmitFinalSurvivorPensionDN {
 fun SubmitFinalSurvivorPensionDN.toPresentation(): SubmitFinalSurvivorPensionPR {
     return SubmitFinalSurvivorPensionPR(
         id = id
+    )
+}
+
+fun GirlSurvivorConditionDN.toPresentation(): GirlSurvivorConditionPR {
+    return GirlSurvivorConditionPR(
+        condition = condition
     )
 }

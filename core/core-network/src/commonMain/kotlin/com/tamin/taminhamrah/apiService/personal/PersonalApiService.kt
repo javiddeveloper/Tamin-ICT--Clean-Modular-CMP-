@@ -37,6 +37,13 @@ interface PersonalApiService {
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<DisabilityDependentDTO>>
 
+    @GET("survivor-request/condition")
+    suspend fun checkGirlSurvivorConditions(
+        @Query("code") nationalCode: String,
+        @Query("rel") relation: String = "04",
+        @Query("pensionerId") pensionerId: String,
+    ): BaseDTO<String?>
+
     @GET("survivor-request/list")
     suspend fun confirmSurvivorsList(
         @QueryMap parameters: Map<String, String>,

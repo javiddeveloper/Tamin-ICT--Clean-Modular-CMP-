@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
@@ -53,6 +54,7 @@ class PersonalRepositoryImpl(
         emit(personalRemoteDataSource.getAge(birthDate).toDomain())
     }
 
+
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
         flow {
 
@@ -62,6 +64,18 @@ class PersonalRepositoryImpl(
             emit(response.map { it.toDomain() })
 
         }
+
+    override fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String
+    ): Flow<GirlSurvivorConditionDN> = flow {
+        emit(
+            personalRemoteDataSource.checkGirlSurvivorConditions(
+                nationalCode,
+                pensionerId
+            ).toDomain()
+        )
+    }
 
     override fun submitFinalSurvivorPension(
         requestId: Int,
