@@ -4,7 +4,6 @@ import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDTO
 import com.tamin.taminhamrah.data.mapper.toEntity
-import com.tamin.taminhamrah.data.mapper.toGirlSurvivorConditionDomain
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
@@ -50,20 +49,14 @@ class PersonalRepositoryImpl(
         emit(personalRemoteDataSource.getAge(birthDate).toDomain())
     }
 
-    override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
-        flow {
-                val response =
-                    personalRemoteDataSource.getDisabilityDependentInfo(ApiQueryParamDN(filters = filters))
-                emit(response.map { it.toDomain() })
-
 
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
         flow {
 
-                val response = personalRemoteDataSource.getDisabilityDependentInfo(
-                    ApiQueryParamDN(filters = filters)
-                )
-                emit(response.map { it.toDomain() })
+            val response = personalRemoteDataSource.getDisabilityDependentInfo(
+                ApiQueryParamDN(filters = filters)
+            )
+            emit(response.map { it.toDomain() })
 
         }
 
@@ -75,8 +68,9 @@ class PersonalRepositoryImpl(
             personalRemoteDataSource.checkGirlSurvivorConditions(
                 nationalCode,
                 pensionerId
-            ).toGirlSurvivorConditionDomain()
+            ).toDomain()
         )
+    }
 
     override fun submitFinalSurvivorPension(
         requestId: Int,
@@ -85,11 +79,13 @@ class PersonalRepositoryImpl(
         emit(personalRemoteDataSource.submitFinalSurvivorPension(requestId, body.toDTO()))
     }
 
-    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = flow {
+    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> =
+        flow {
 
-            val response = personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
+            val response =
+                personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
             emit(response.map { it.toDomain() })
 
-    }
+        }
 }
 
