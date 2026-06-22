@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
+import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
@@ -20,6 +21,7 @@ import com.tamin.taminhamrah.data.local.entity.PersonalInboxSizeEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInfoEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.data.local.entity.RecipientEntity
+import com.tamin.taminhamrah.data.local.entity.RegistrationInfoEntity
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
 
@@ -35,6 +37,7 @@ import com.tamin.taminhamrah.data.local.entity.TestEntity
         PersonalInboxItemEntity::class,
         PersonalInboxSizeEntity::class,
         ContractEntity::class,
+        RegistrationInfoEntity::class,
     ],
     version = 1,
 )
@@ -48,6 +51,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun userRequestDao(): UserRequestDao
     actual abstract fun personalDao(): PersonalDao
     actual abstract fun contractDao(): ContractDao
+    actual abstract fun registrationInfoDao(): RegistrationInfoDao
 }
 
 fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<TaminXDatabase> {

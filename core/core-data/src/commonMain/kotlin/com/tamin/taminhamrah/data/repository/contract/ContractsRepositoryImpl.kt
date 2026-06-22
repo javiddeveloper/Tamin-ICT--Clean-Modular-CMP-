@@ -1,11 +1,16 @@
 package com.tamin.taminhamrah.data.repository.contract
 
 import com.tamin.taminhamrah.data.local.dao.ContractDao
+import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
@@ -14,10 +19,12 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 class ContractsRepositoryImpl(
     private val contractsRemoteDataSource: ContractsRemoteDataSource,
     private val contractDao: ContractDao,
+    private val registrationInfoDao: RegistrationInfoDao,
     private val apiQueryBuilder: ApiQueryBuilder,
 ) :
     ContractsRepository {
@@ -43,4 +50,42 @@ class ContractsRepositoryImpl(
                 }
             )
         }.distinctUntilChanged()
+
+    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
+        getContracts(buildStudentInsuranceContractsQuery())
+
+    override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
+        val localInfo = registrationInfoDao.getRegistrationInfo().first()
+        localInfo?.toDomain()?.let { emit(it) }
+
+        try {
+            val response = contractsRemoteDataSource.getRegistrationInfo()
+            registrationInfoDao.upsertRegistrationInfo(response.toDomain().toEntity())
+        } catch (e: Exception) {
+            if (localInfo == null) {
+                throw e
+            }
+        }
+        emitAll(
+            registrationInfoDao.getRegistrationInfo()
+                .mapNotNull { it?.toDomain() }
+        )
+    }.distinctUntilChanged()
+
+    private fun buildStudentInsuranceContractsQuery(): ApiQueryParamDN = ApiQueryParamDN(
+        page = 1,
+        start = 0,
+        limit = 100,
+        filters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.PREMIUM_TYPE_CODE,
+                operator = FilterOperator.EQ,
+                value = STUDENT_PREMIUM_TYPE_CODE,
+            ),
+        ),
+    )
+
+    private companion object {
+        const val STUDENT_PREMIUM_TYPE_CODE = "03"
+    }
 }

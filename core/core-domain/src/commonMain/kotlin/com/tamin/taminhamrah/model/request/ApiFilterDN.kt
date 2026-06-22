@@ -61,7 +61,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("docDateFrom") DOC_DATE_FROM("docDateFrom"),
     @SerialName("docDateTo") DOC_DATE_TO("docDateTo"),
     @SerialName("debitReason") DEBIT_REASON("debitReason"),
-    @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus")
+    @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
+    @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
 }
 
 @Serializable

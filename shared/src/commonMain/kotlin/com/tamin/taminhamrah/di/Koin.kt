@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.cartable.di.cartableModule
 import com.tamin.taminhamrah.feature.pensionInquiry.di.pensionInquiryModule
 import com.tamin.taminhamrah.feature.profile.di.profileModule
 import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
+import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranceContractModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -31,6 +32,7 @@ val sharedModules: List<Module>
         historyModule,
         contractsModule,
         workshopsModule,
+        studentInsuranceContractModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
