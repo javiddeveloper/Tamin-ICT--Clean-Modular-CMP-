@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
@@ -14,6 +15,7 @@ class FakePersonalRepository : PersonalRepository {
     var personalInfoResult: PersonalInfoDN? = null
     var ageResult: AgeDN? = null
     var submitFinalSurvivorPensionResult: String? = null
+    var girlSurvivorConditionResult: GirlSurvivorConditionDN? = null
 
     var shouldThrowError = false
     var disabilityDependentInfoResult: List<DisabilityDependentDN> = emptyList()
@@ -35,6 +37,14 @@ class FakePersonalRepository : PersonalRepository {
             if (shouldThrowError) throw error
             emit(disabilityDependentInfoResult)
         }
+
+    override fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String
+    ): Flow<GirlSurvivorConditionDN> = flow {
+        if (shouldThrowError) throw error
+        girlSurvivorConditionResult?.let { emit(it) }
+    }
 
     override fun submitFinalSurvivorPension(
         requestId: Int,
