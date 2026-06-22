@@ -34,6 +34,7 @@ import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
@@ -89,6 +90,7 @@ val domainModule = module {
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)
     factoryOf(::GetFreelancePremiumRangeUseCase)
+    factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
     factoryOf(::GetAllPaymentSheetsUseCase)
 }

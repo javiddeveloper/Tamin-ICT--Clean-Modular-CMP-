@@ -310,6 +310,7 @@ private fun ContractStepper(
                             PremiumSalaryStepContent(
                                 premiumRange = state.premiumRange,
                                 selectedPremium = state.selectedMonthlyPremium,
+                                calculatedMonthlySalary = state.calculatedMonthlySalary,
                                 isLoading = state.isPremiumRangeLoading,
                                 isCalculating = state.isCalculatingPremium,
                                 onPremiumChange = onMonthlyPremiumChange,

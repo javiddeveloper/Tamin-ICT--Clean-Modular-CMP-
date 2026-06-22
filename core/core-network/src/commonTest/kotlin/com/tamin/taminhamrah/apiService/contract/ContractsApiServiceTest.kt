@@ -95,4 +95,24 @@ class ContractsApiServiceTest : BaseApiTest() {
         assertEquals(538, data.history)
         assertEquals(139_654_620L, data.highPremium)
     }
+
+    @Test
+    fun `calculateFreelanceSalary should return calculated monthly salary`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.freelanceCalculateSalarySuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<ContractsApiService>()
+
+        val response = apiService.calculateFreelanceSalary(
+            monthlyPremium = 60_300_000L,
+            treatmentSupportCode = "1",
+            spcRateCode = "01",
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertEquals(502_500_000L, response.data)
+    }
 }

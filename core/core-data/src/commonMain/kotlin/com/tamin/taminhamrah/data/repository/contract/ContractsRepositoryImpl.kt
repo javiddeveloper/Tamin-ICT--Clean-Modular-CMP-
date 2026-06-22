@@ -2,15 +2,14 @@ package com.tamin.taminhamrah.data.repository.contract
 
 import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
-import com.tamin.taminhamrah.data.local.dao.FreelancePremiumRangeDao
 import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
-import com.tamin.taminhamrah.data.local.dao.SpcPremiumRateDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.data.repository.contract.BranchListQuery
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
@@ -34,8 +33,6 @@ class ContractsRepositoryImpl(
     private val contractDao: ContractDao,
     private val registrationInfoDao: RegistrationInfoDao,
     private val branchDao: BranchDao,
-    private val spcPremiumRateDao: SpcPremiumRateDao,
-    private val freelancePremiumRangeDao: FreelancePremiumRangeDao,
     private val apiQueryBuilder: ApiQueryBuilder,
 ) :
     ContractsRepository {
@@ -87,46 +84,17 @@ class ContractsRepositoryImpl(
     }.distinctUntilChanged()
 
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
-        val localRates = spcPremiumRateDao.getSpcPremiumRates().first()
-        emit(localRates.map { it.toDomain() })
-
-        try {
-            val response = contractsRemoteDataSource.getSpcPremiumRates()
-            val remoteRates = response.list.orEmpty()
-            spcPremiumRateDao.replaceAll(remoteRates.map { it.toEntity() })
-        } catch (e: Exception) {
-            if (localRates.isEmpty()) {
-                throw e
-            }
-        }
-
-        emitAll(
-            spcPremiumRateDao.getSpcPremiumRates().map { entities ->
-                entities.map { it.toDomain() }
-            },
-        )
-    }.distinctUntilChanged()
+        val response = contractsRemoteDataSource.getSpcPremiumRates()
+        emit(response.list.orEmpty().map { it.toDomain() })
+    }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
-        val localRange = freelancePremiumRangeDao.getById(params.id).first()
-        localRange?.toDomain()?.let { emit(it) }
+        emit(contractsRemoteDataSource.getFreelancePremiumRange(params).toDomain())
+    }
 
-        try {
-            val response = contractsRemoteDataSource.getFreelancePremiumRange(params)
-            val domain = response.toDomain()
-            freelancePremiumRangeDao.upsert(domain.toEntity(params))
-            emit(domain)
-        } catch (e: Exception) {
-            if (localRange == null) {
-                throw e
-            }
-        }
-
-        emitAll(
-            freelancePremiumRangeDao.getById(params.id)
-                .mapNotNull { it?.toDomain() },
-        )
-    }.distinctUntilChanged()
+    override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
+        emit(contractsRemoteDataSource.calculateFreelanceSalary(params))
+    }
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         val localInfo = registrationInfoDao.getRegistrationInfo().first()

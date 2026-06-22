@@ -23,7 +23,9 @@ import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
+import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +40,7 @@ class StudentInsuranceContractViewModel(
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getSpcPremiumRatesUseCase: GetSpcPremiumRatesUseCase,
     private val getFreelancePremiumRangeUseCase: GetFreelancePremiumRangeUseCase,
+    private val calculateFreelanceSalaryUseCase: CalculateFreelanceSalaryUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -265,17 +268,31 @@ class StudentInsuranceContractViewModel(
 
     private fun handleSelectMonthlyPremium(amount: Long): Flow<PartialState> = flow {
         emit(PartialState.SelectedMonthlyPremiumChanged(amount))
-        emit(PartialState.PremiumCalculated(false))
     }
 
     private fun handleCalculateMonthlyPremium(): Flow<PartialState> = flow {
+        val params = buildCalculateSalaryParams() ?: return@flow
         emit(PartialState.CalculatingPremium(true))
         try {
-            // TODO: call calculate-monthly-premium API when provided
-            emit(PartialState.PremiumCalculated(true))
+            calculateFreelanceSalaryUseCase(params).collect { salary ->
+                emit(PartialState.CalculatedMonthlySalaryLoaded(salary))
+                emit(PartialState.PremiumCalculated(true))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         } finally {
             emit(PartialState.CalculatingPremium(false))
         }
+    }
+
+    private fun buildCalculateSalaryParams(): FreelanceCalculateSalaryParams? {
+        val monthlyPremium = uiState.value.selectedMonthlyPremium ?: return null
+        val spcRateCode = uiState.value.selectedPremiumRateCode ?: return null
+        return FreelanceCalculateSalaryParams(
+            monthlyPremium = monthlyPremium,
+            treatmentSupportCode = DEFAULT_TREATMENT_SUPPORT_CODE,
+            spcRateCode = spcRateCode,
+        )
     }
 
     private companion object {
@@ -369,12 +386,17 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.SelectedMonthlyPremiumChanged -> currentState.copy(
             selectedMonthlyPremium = partialState.amount,
+            calculatedMonthlySalary = null,
+            isPremiumCalculated = false,
         )
         is PartialState.CalculatingPremium -> currentState.copy(
             isCalculatingPremium = partialState.isCalculating,
         )
         is PartialState.PremiumCalculated -> currentState.copy(
             isPremiumCalculated = partialState.calculated,
+        )
+        is PartialState.CalculatedMonthlySalaryLoaded -> currentState.copy(
+            calculatedMonthlySalary = partialState.salary,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,

@@ -35,4 +35,11 @@ interface ContractsApiService {
         @Path("spcRateCode") spcRateCode: String,
         @Path("insuranceId") insuranceId: String,
     ): BaseDTO<FreelancePremiumRangeDTO>
+
+    @GET("special-insured-services/freelance-check-and-calc-salary/{monthlyPremium}/{treatmentSupportCode}/{spcRateCode}")
+    suspend fun calculateFreelanceSalary(
+        @Path("monthlyPremium") monthlyPremium: Long,
+        @Path("treatmentSupportCode") treatmentSupportCode: String,
+        @Path("spcRateCode") spcRateCode: String,
+    ): BaseDTO<Long>
 }

@@ -11,7 +11,4 @@ data class FreelancePremiumRangeParams(
     val treatmentSupportCode: String,
     val spcRateCode: String,
     val insuranceId: String,
-) {
-    val id: String
-        get() = "$treatmentSupportCode/$spcRateCode/$insuranceId"
-}
+)

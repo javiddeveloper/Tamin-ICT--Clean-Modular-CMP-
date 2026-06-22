@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.dataSource.contracts
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
@@ -77,6 +78,22 @@ class ContractsRemoteDataSourceImpl(
                 treatmentSupportCode = params.treatmentSupportCode,
                 spcRateCode = params.spcRateCode,
                 insuranceId = params.insuranceId,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Long {
+        return try {
+            contractsApiService.calculateFreelanceSalary(
+                monthlyPremium = params.monthlyPremium,
+                treatmentSupportCode = params.treatmentSupportCode,
+                spcRateCode = params.spcRateCode,
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

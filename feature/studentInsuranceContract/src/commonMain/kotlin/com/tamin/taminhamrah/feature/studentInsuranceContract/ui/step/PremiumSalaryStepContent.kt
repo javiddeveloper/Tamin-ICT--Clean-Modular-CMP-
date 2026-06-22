@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.Freelance
 fun PremiumSalaryStepContent(
     premiumRange: FreelancePremiumRangePR?,
     selectedPremium: Long?,
+    calculatedMonthlySalary: Long?,
     isLoading: Boolean,
     isCalculating: Boolean,
     onPremiumChange: (Long) -> Unit,
@@ -67,6 +68,12 @@ fun PremiumSalaryStepContent(
                     } else {
                         Text("محاسبه حق بیمه ماهانه")
                     }
+                }
+                calculatedMonthlySalary?.let { salary ->
+                    Text(
+                        text = "دستمزد ماهانه شما بر اساس حق بیمه انتخابی $salary ریال می‌باشد",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }

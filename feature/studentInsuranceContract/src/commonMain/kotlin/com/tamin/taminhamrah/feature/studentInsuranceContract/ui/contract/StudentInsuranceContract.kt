@@ -38,6 +38,7 @@ data class StudentInsuranceContractUiState(
     val isPremiumRangeLoading: Boolean = false,
     val isCalculatingPremium: Boolean = false,
     val isPremiumCalculated: Boolean = false,
+    val calculatedMonthlySalary: Long? = null,
     val currentStep: StudentInsuranceContractStep = StudentInsuranceContractStep.STEP_REGISTRATION,
 ) {
     val canGoNext: Boolean
@@ -83,6 +84,7 @@ data class StudentInsuranceContractUiState(
         data class SelectedMonthlyPremiumChanged(val amount: Long) : PartialState()
         data class CalculatingPremium(val isCalculating: Boolean) : PartialState()
         data class PremiumCalculated(val calculated: Boolean) : PartialState()
+        data class CalculatedMonthlySalaryLoaded(val salary: Long) : PartialState()
         data class StepChanged(val step: StudentInsuranceContractStep) : PartialState()
     }
 }
