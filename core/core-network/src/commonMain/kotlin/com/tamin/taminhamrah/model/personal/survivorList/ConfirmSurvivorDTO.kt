@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ConfirmSurvivorDTO(
-    @SerialName("request")val request: RequestModelDTO?
+    @SerialName("request") val request: RequestModelDTO? = null
 )

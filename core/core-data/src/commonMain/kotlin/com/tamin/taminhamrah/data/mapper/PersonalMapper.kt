@@ -16,6 +16,12 @@ import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeDN
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocDN
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeRequest
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocRequest
 import kotlin.jvm.JvmName
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
@@ -84,6 +90,45 @@ fun RequestModelDTO.toDomain(): RequestModelDN {
 fun SubmitFinalSurvivorPensionDN.toDTO(): SubmitFinalSurvivorPensionRequest {
     return SubmitFinalSurvivorPensionRequest(
         id = id
+    )
+}
+
+fun SaveSurvivorInfoDN.toDTO(): SaveSurvivorInfoRequest {
+    return SaveSurvivorInfoRequest(
+        address = address,
+        age = age,
+        birthDate = birthDate,
+        branchCode = branchCode,
+        survivorInsuranceId = survivorInsuranceId,
+        survivorNationalId = survivorNationalId,
+        deathType = deathType,
+        dependencyType = dependencyType?.toDTO(),
+        fatherName = fatherName,
+        firstName = firstName,
+        gender = gender,
+        idCardNumber = idCardNumber,
+        insuranceNumber = insuranceNumber,
+        issuePlace = issuePlace,
+        lastName = lastName,
+        mobileNumber = mobileNumber,
+        deceasedNationalId = deceasedNationalId,
+        pensionId = pensionId,
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDTO() },
+        phoneNumber = phoneNumber,
+        status = status
+    )
+}
+
+fun DependencyTypeDN.toDTO(): DependencyTypeRequest {
+    return DependencyTypeRequest(
+        code = code
+    )
+}
+
+fun PensionDocDN.toDTO(): PensionDocRequest {
+    return PensionDocRequest(
+        documentType = documentType,
+        guid = guid
     )
 }
 
