@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.repository.city.CityListQuery
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +43,14 @@ internal class CityProvinceRepositoryImpl(
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    override fun getCities(cityName: String?): Flow<List<CityDN>> = flow {
+        val response = commonRemoteDataSource.getCityName(CityListQuery.build(cityName))
+        response.list.forEach { cityDto ->
+            cityProvinceDao.upsertCity(cityDto.toEntity())
+        }
+        emit(response.list.map { it.toDomain() })
     }
 
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {

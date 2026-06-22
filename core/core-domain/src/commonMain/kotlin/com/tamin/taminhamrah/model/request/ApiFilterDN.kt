@@ -45,6 +45,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("serialId") SERIAL_ID("serialId"),
     @SerialName("mobile") MOBILE("mobile"),
     @SerialName("cityCode") CITY_CODE("cityCode"),
+    @SerialName("cityName") CITY_NAME("cityName"),
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),

@@ -48,7 +48,9 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTermsStepContent
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -84,6 +86,9 @@ fun StudentInsuranceContractScreen(
             onRulesConfirmedChange = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.SetRulesConfirmed(it))
             },
+            onUserInfoChange = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.UpdateUserInfo(it))
+            },
             onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
         )
@@ -96,6 +101,7 @@ private fun StudentInsuranceContractContent(
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
     onRulesConfirmedChange: (Boolean) -> Unit,
+    onUserInfoChange: (UserInfoFormPR) -> Unit,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -135,6 +141,7 @@ private fun StudentInsuranceContractContent(
                                 onNextStep = onNextStep,
                                 onPreviousStep = onPreviousStep,
                                 onRulesConfirmedChange = onRulesConfirmedChange,
+                                onUserInfoChange = onUserInfoChange,
                                 onShowRules = onShowRules,
                             )
                         }
@@ -166,6 +173,7 @@ private fun ContractStepper(
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
     onRulesConfirmedChange: (Boolean) -> Unit,
+    onUserInfoChange: (UserInfoFormPR) -> Unit,
     onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -193,6 +201,24 @@ private fun ContractStepper(
                                 isRulesConfirmed = state.isRulesConfirmed,
                                 onRulesConfirmedChange = onRulesConfirmedChange,
                                 onShowRules = onShowRules,
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_USER_INFO -> {
+                            UserInfoStepContent(
+                                userInfo = state.userInfo,
+                                cities = state.cities,
+                                isCitiesLoading = state.isCitiesLoading,
+                                onCitySelected = { city ->
+                                    onUserInfoChange(
+                                        state.userInfo.copy(
+                                            cityCode = city.code,
+                                            cityName = city.name,
+                                        ),
+                                    )
+                                },
+                                onAddressChange = { onUserInfoChange(state.userInfo.copy(address = it)) },
+                                onZipCodeChange = { onUserInfoChange(state.userInfo.copy(zipCode = it)) },
+                                onPhoneNumberChange = { onUserInfoChange(state.userInfo.copy(phoneNumber = it)) },
                             )
                         }
                         else -> Unit

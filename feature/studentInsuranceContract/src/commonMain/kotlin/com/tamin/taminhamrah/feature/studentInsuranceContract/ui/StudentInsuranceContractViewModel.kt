@@ -6,8 +6,11 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState.PartialState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.resolveEligibility
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toCityOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
 import com.tamin.taminhamrah.mapper.contracts.toPresentation
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +20,7 @@ import kotlinx.coroutines.flow.merge
 class StudentInsuranceContractViewModel(
     private val getRegistrationInfoUseCase: GetRegistrationInfoUseCase,
     private val getContractsUseCase: GetContractsUseCase,
+    private val getCitiesUseCase: GetCitiesUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -31,19 +35,23 @@ class StudentInsuranceContractViewModel(
             StudentInsuranceContractIntent.GoToNextStep -> handleGoToNextStep()
             StudentInsuranceContractIntent.GoToPreviousStep -> handleGoToPreviousStep()
             is StudentInsuranceContractIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
+            is StudentInsuranceContractIntent.UpdateUserInfo -> handleUpdateUserInfo(intent.userInfo)
         }
     }
 
     private fun handleLoadInitialData(): Flow<PartialState> = merge(
         loadRegistrationInfo(),
         loadContracts(),
+        loadCities(),
     )
 
     private fun loadRegistrationInfo(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
             getRegistrationInfoUseCase().collect { info ->
-                emit(PartialState.RegistrationInfoLoaded(info.toPresentation()))
+                val presentation = info.toPresentation()
+                emit(PartialState.RegistrationInfoLoaded(presentation))
+                emit(PartialState.UserInfoChanged(UserInfoFormPR.fromRegistration(presentation)))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -58,6 +66,19 @@ class StudentInsuranceContractViewModel(
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
+        }
+    }
+
+    private fun loadCities(): Flow<PartialState> = flow {
+        emit(PartialState.CitiesLoading(true))
+        try {
+            getCitiesUseCase().collect { cities ->
+                emit(PartialState.CitiesLoaded(cities.toCityOptions()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.CitiesLoading(false))
         }
     }
 
@@ -80,6 +101,10 @@ class StudentInsuranceContractViewModel(
         emit(PartialState.RulesConfirmedChanged(confirmed))
     }
 
+    private fun handleUpdateUserInfo(userInfo: UserInfoFormPR): Flow<PartialState> = flow {
+        emit(PartialState.UserInfoChanged(userInfo))
+    }
+
     override fun reduceState(
         currentState: StudentInsuranceContractUiState,
         partialState: PartialState,
@@ -99,6 +124,16 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.RulesConfirmedChanged -> currentState.copy(
             isRulesConfirmed = partialState.confirmed,
+        )
+        is PartialState.UserInfoChanged -> currentState.copy(
+            userInfo = partialState.userInfo,
+        )
+        is PartialState.CitiesLoading -> currentState.copy(
+            isCitiesLoading = partialState.isLoading,
+        )
+        is PartialState.CitiesLoaded -> currentState.copy(
+            isCitiesLoading = false,
+            cities = partialState.cities,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,

@@ -7,6 +7,12 @@ import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 
+internal fun CityDto.toDomain(): CityDN = CityDN(
+    cityCode = cityCode,
+    provinceCode = provinceCode,
+    cityName = cityName,
+)
+
 internal fun CityDto.toEntity(): CityEntity = CityEntity(
     cityCode = cityCode,
     provinceCode = provinceCode,
