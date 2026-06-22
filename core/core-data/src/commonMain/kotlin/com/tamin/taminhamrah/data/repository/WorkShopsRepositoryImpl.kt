@@ -38,10 +38,10 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun getWorkshopDebit(
         workshopId: String,
-        branchCode: String,
-        query: ApiQueryParamDN
+        branchCode: String
     ): WorkshopDebitListDN? {
-        val response = remoteDataSource.getWorkshopDebit(workshopId, branchCode, query)
+        val queryParam = ApiQueryParamDN()
+        val response = remoteDataSource.getWorkshopDebit(workshopId, branchCode, queryParam)
         return response?.let {
             WorkshopDebitListDN(
                 list = it.list?.map { item -> item.toDomain() },

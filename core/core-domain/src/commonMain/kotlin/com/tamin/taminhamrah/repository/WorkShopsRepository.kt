@@ -16,7 +16,6 @@ interface WorkShopsRepository {
 
     suspend fun getWorkshopDebit(
         workshopId: String,
-        branchCode: String,
-        query: ApiQueryParamDN
+        branchCode: String
     ): WorkshopDebitListDN?
 }
