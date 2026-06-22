@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import kotlin.jvm.JvmName
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
     return PersonalInfoDN(
@@ -46,7 +47,8 @@ fun AgeDTO.toDomain(): AgeDN {
     )
 }
 
-fun String?.toGirlSurvivorConditionDomain(): GirlSurvivorConditionDN {
+@JvmName("toGirlSurvivorConditionDomain")
+fun String?.toDomain(): GirlSurvivorConditionDN {
     return GirlSurvivorConditionDN(
         condition = this
     )
