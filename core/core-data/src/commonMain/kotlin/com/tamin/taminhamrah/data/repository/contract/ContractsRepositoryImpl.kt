@@ -3,12 +3,14 @@ package com.tamin.taminhamrah.data.repository.contract
 import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
+import com.tamin.taminhamrah.data.local.dao.SpcPremiumRateDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.data.repository.contract.BranchListQuery
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -29,6 +31,7 @@ class ContractsRepositoryImpl(
     private val contractDao: ContractDao,
     private val registrationInfoDao: RegistrationInfoDao,
     private val branchDao: BranchDao,
+    private val spcPremiumRateDao: SpcPremiumRateDao,
     private val apiQueryBuilder: ApiQueryBuilder,
 ) :
     ContractsRepository {
@@ -74,6 +77,27 @@ class ContractsRepositoryImpl(
 
         emitAll(
             branchDao.getBranchesByCityCode(cityCode).map { entities ->
+                entities.map { it.toDomain() }
+            },
+        )
+    }.distinctUntilChanged()
+
+    override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
+        val localRates = spcPremiumRateDao.getSpcPremiumRates().first()
+        emit(localRates.map { it.toDomain() })
+
+        try {
+            val response = contractsRemoteDataSource.getSpcPremiumRates()
+            val remoteRates = response.list.orEmpty()
+            spcPremiumRateDao.replaceAll(remoteRates.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localRates.isEmpty()) {
+                throw e
+            }
+        }
+
+        emitAll(
+            spcPremiumRateDao.getSpcPremiumRates().map { entities ->
                 entities.map { it.toDomain() }
             },
         )

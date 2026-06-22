@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractIntent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState.PartialState
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toSpcPremiumRateOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.resolveEligibility
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.filterByProvinceCode
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toBranchOptions
@@ -12,6 +13,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toCityOp
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toProvinceOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
 import com.tamin.taminhamrah.mapper.contracts.toPresentation
@@ -20,6 +22,7 @@ import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -30,6 +33,7 @@ class StudentInsuranceContractViewModel(
     private val getCitiesUseCase: GetCitiesUseCase,
     private val getProvincesUseCase: GetProvincesUseCase,
     private val getBranchesUseCase: GetBranchesUseCase,
+    private val getSpcPremiumRatesUseCase: GetSpcPremiumRatesUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -49,6 +53,7 @@ class StudentInsuranceContractViewModel(
             is StudentInsuranceContractIntent.SelectBranchProvince -> handleSelectBranchProvince(intent.province)
             is StudentInsuranceContractIntent.SelectBranchCity -> handleSelectBranchCity(intent.city)
             is StudentInsuranceContractIntent.SelectBranch -> handleSelectBranch(intent.branch)
+            is StudentInsuranceContractIntent.SelectPremiumRate -> handleSelectPremiumRate(intent.rate)
         }
     }
 
@@ -57,6 +62,7 @@ class StudentInsuranceContractViewModel(
         loadContracts(),
         loadCities(),
         loadProvinces(),
+        loadPremiumRates(),
     )
 
     private fun loadRegistrationInfo(): Flow<PartialState> = flow {
@@ -106,6 +112,19 @@ class StudentInsuranceContractViewModel(
             emit(PartialState.Error(e.message))
         } finally {
             emit(PartialState.ProvincesLoading(false))
+        }
+    }
+
+    private fun loadPremiumRates(): Flow<PartialState> = flow {
+        emit(PartialState.PremiumRatesLoading(true))
+        try {
+            getSpcPremiumRatesUseCase().collect { rates ->
+                emit(PartialState.PremiumRatesLoaded(rates.toSpcPremiumRateOptions()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.PremiumRatesLoading(false))
         }
     }
 
@@ -198,6 +217,10 @@ class StudentInsuranceContractViewModel(
         )
     }
 
+    private fun handleSelectPremiumRate(rate: SpcPremiumRateOptionPR): Flow<PartialState> = flow {
+        emit(PartialState.PremiumRateSelected(rate.code))
+    }
+
     override fun reduceState(
         currentState: StudentInsuranceContractUiState,
         partialState: PartialState,
@@ -262,6 +285,16 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.BranchSelectionChanged -> currentState.copy(
             branchSelection = partialState.branchSelection,
+        )
+        is PartialState.PremiumRatesLoading -> currentState.copy(
+            isPremiumRatesLoading = partialState.isLoading,
+        )
+        is PartialState.PremiumRatesLoaded -> currentState.copy(
+            isPremiumRatesLoading = false,
+            premiumRates = partialState.premiumRates,
+        )
+        is PartialState.PremiumRateSelected -> currentState.copy(
+            selectedPremiumRateCode = partialState.code,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,

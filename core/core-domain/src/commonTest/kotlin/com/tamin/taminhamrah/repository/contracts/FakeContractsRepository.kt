@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ class FakeContractsRepository : ContractsRepository {
     var contractsResult: List<ContractDN> = emptyList()
     var registrationInfoResult: RegistrationInfoDN? = null
     var branchesResult: List<BranchDN> = emptyList()
+    var spcPremiumRatesResult: List<PremiumRateDN> = emptyList()
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
 
@@ -42,5 +44,10 @@ class FakeContractsRepository : ContractsRepository {
         lastBranchCityCode = cityCode
         if (shouldThrowError) throw error
         emit(branchesResult)
+    }
+
+    override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(spcPremiumRatesResult)
     }
 }

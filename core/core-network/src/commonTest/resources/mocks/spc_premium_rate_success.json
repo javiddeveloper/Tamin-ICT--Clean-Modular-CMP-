@@ -1,0 +1,33 @@
+{
+  "list": [
+    {
+      "operation": null,
+      "spcrateCode": "01",
+      "spcrateDescription": "صاحبان حرف  ومشاغل ازاد12درصد",
+      "selfIsuTypeCode": "01",
+      "spcLowDayWage": "0",
+      "insurDpercent": "12",
+      "govermentPercent": "0",
+      "treatmentPercap": "38000",
+      "payrespitelOne": "3",
+      "payrespitelTwo": "3",
+      "status": "1",
+      "statusStDate": "19920321"
+    },
+    {
+      "operation": null,
+      "spcrateCode": "02",
+      "spcrateDescription": "صاحبان حرف و مشاغل آزاد14درصد",
+      "selfIsuTypeCode": "01",
+      "spcLowDayWage": "0",
+      "insurDpercent": "14",
+      "govermentPercent": "0",
+      "treatmentPercap": "38000",
+      "payrespitelOne": "3",
+      "payrespitelTwo": "3",
+      "status": "1",
+      "statusStDate": "19920321"
+    }
+  ],
+  "total": 2
+}

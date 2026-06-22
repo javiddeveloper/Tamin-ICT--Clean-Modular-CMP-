@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.BranchSel
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
 import com.tamin.taminhamrah.model.contracts.ContractPR
@@ -28,6 +29,9 @@ data class StudentInsuranceContractUiState(
     val isProvincesLoading: Boolean = false,
     val isBranchCitiesLoading: Boolean = false,
     val isBranchesLoading: Boolean = false,
+    val premiumRates: List<SpcPremiumRateOptionPR> = emptyList(),
+    val selectedPremiumRateCode: String? = null,
+    val isPremiumRatesLoading: Boolean = false,
     val currentStep: StudentInsuranceContractStep = StudentInsuranceContractStep.STEP_REGISTRATION,
 ) {
     val canGoNext: Boolean
@@ -39,6 +43,10 @@ data class StudentInsuranceContractUiState(
             StudentInsuranceContractStep.STEP_USER_INFO -> userInfo.isValid
             StudentInsuranceContractStep.STEP_CONTRACT_APPLICANT -> true
             StudentInsuranceContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
+            StudentInsuranceContractStep.STEP_UPLOAD_IMAGE,
+            StudentInsuranceContractStep.STEP_TREATMENT_SUPPORT,
+            -> true
+            StudentInsuranceContractStep.STEP_INSURANCE_PREMIUM -> selectedPremiumRateCode != null
             else -> false
         }
 
@@ -60,6 +68,9 @@ data class StudentInsuranceContractUiState(
         data class BranchesLoaded(val branches: List<CityOptionPR>) : PartialState()
         data class ContractApplicantTypeChanged(val type: ContractApplicantType) : PartialState()
         data class BranchSelectionChanged(val branchSelection: BranchSelectionFormPR) : PartialState()
+        data class PremiumRatesLoading(val isLoading: Boolean) : PartialState()
+        data class PremiumRatesLoaded(val premiumRates: List<SpcPremiumRateOptionPR>) : PartialState()
+        data class PremiumRateSelected(val code: String) : PartialState()
         data class StepChanged(val step: StudentInsuranceContractStep) : PartialState()
     }
 }
@@ -74,6 +85,7 @@ sealed class StudentInsuranceContractIntent {
     data class SelectBranchProvince(val province: CityOptionPR) : StudentInsuranceContractIntent()
     data class SelectBranchCity(val city: CityOptionPR) : StudentInsuranceContractIntent()
     data class SelectBranch(val branch: CityOptionPR) : StudentInsuranceContractIntent()
+    data class SelectPremiumRate(val rate: SpcPremiumRateOptionPR) : StudentInsuranceContractIntent()
 }
 
 sealed class StudentInsuranceContractEvent

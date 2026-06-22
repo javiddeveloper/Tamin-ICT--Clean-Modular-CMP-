@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -22,4 +23,7 @@ interface ContractsApiService {
     suspend fun getBranches(
         @QueryMap parameters: Map<String, String>,
     ): BaseDTO<ListData<BranchDTO>>
+
+    @GET("baseinfo/spc-premium-rate")
+    suspend fun getSpcPremiumRates(): BaseDTO<ListData<PremiumRateDTO>>
 }

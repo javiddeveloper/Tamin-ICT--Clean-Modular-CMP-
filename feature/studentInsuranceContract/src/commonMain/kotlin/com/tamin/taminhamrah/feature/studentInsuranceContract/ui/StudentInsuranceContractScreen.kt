@@ -49,10 +49,12 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractApplicantStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTermsStepContent
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.InsurancePremiumStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.SelectBranchStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
@@ -105,6 +107,9 @@ fun StudentInsuranceContractScreen(
             onBranchSelected = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.SelectBranch(it))
             },
+            onPremiumRateSelected = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SelectPremiumRate(it))
+            },
             onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
         )
@@ -122,6 +127,7 @@ private fun StudentInsuranceContractContent(
     onBranchProvinceSelected: (CityOptionPR) -> Unit,
     onBranchCitySelected: (CityOptionPR) -> Unit,
     onBranchSelected: (CityOptionPR) -> Unit,
+    onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -166,6 +172,7 @@ private fun StudentInsuranceContractContent(
                                 onBranchProvinceSelected = onBranchProvinceSelected,
                                 onBranchCitySelected = onBranchCitySelected,
                                 onBranchSelected = onBranchSelected,
+                                onPremiumRateSelected = onPremiumRateSelected,
                                 onShowRules = onShowRules,
                             )
                         }
@@ -202,6 +209,7 @@ private fun ContractStepper(
     onBranchProvinceSelected: (CityOptionPR) -> Unit,
     onBranchCitySelected: (CityOptionPR) -> Unit,
     onBranchSelected: (CityOptionPR) -> Unit,
+    onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
     onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -267,6 +275,22 @@ private fun ContractStepper(
                                 onProvinceSelected = onBranchProvinceSelected,
                                 onCitySelected = onBranchCitySelected,
                                 onBranchSelected = onBranchSelected,
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_UPLOAD_IMAGE,
+                        StudentInsuranceContractStep.STEP_TREATMENT_SUPPORT,
+                        -> {
+                            Text(
+                                text = "این مرحله هنوز پیاده‌سازی نشده است.",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_INSURANCE_PREMIUM -> {
+                            InsurancePremiumStepContent(
+                                premiumRates = state.premiumRates,
+                                selectedCode = state.selectedPremiumRateCode,
+                                isLoading = state.isPremiumRatesLoading,
+                                onRateSelected = onPremiumRateSelected,
                             )
                         }
                         else -> Unit

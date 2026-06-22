@@ -47,4 +47,7 @@ object PersonalInboxTestData {
 object ContractsTestData {
     val contractsListSuccess: String
         get() = readResourceFile("mocks/contracts_list_success.json")
+
+    val spcPremiumRateSuccess: String
+        get() = readResourceFile("mocks/spc_premium_rate_success.json")
 }
