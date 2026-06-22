@@ -23,7 +23,7 @@ class ContractMapperTest {
         assertTrue(pr.isActive)
         assertEquals("اختیاری", pr.insuranceType)
         assertEquals("بیمه اختیاری ۲۷ درصد", pr.monthlyPremiumLabel)
-        assertEquals("۳۶۲,۵۹۲,۵۹۳ ریال", pr.monthlyIncome)
+        assertEquals("362592593", pr.monthlyIncome)
         assertTrue(pr.hasTreatmentSupport)
         assertEquals("حمایت درمان دارد", pr.treatmentSupportText)
         assertEquals("تاسیساتی", pr.jobTitle)
