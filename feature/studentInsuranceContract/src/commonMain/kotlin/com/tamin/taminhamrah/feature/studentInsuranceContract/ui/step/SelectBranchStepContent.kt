@@ -19,20 +19,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.SelectableField
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.BranchSelectionFormPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
 
 @Composable
 fun SelectBranchStepContent(
     branchSelection: BranchSelectionFormPR,
-    provinces: List<CityOptionPR>,
-    cities: List<CityOptionPR>,
-    branches: List<CityOptionPR>,
+    provinces: List<ProvincePR>,
+    cities: List<CityPR>,
+    branches: List<BranchPR>,
     isProvincesLoading: Boolean,
     isCitiesLoading: Boolean,
     isBranchesLoading: Boolean,
-    onProvinceSelected: (CityOptionPR) -> Unit,
-    onCitySelected: (CityOptionPR) -> Unit,
-    onBranchSelected: (CityOptionPR) -> Unit,
+    onProvinceSelected: (ProvincePR) -> Unit,
+    onCitySelected: (CityPR) -> Unit,
+    onBranchSelected: (BranchPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -51,6 +53,8 @@ fun SelectBranchStepContent(
             options = provinces,
             selectedCode = branchSelection.provinceCode,
             selectedName = branchSelection.provinceName,
+            optionCode = { it.provinceCode },
+            optionName = { it.provinceName },
             isLoading = isProvincesLoading,
             onSelected = onProvinceSelected,
         )
@@ -60,6 +64,8 @@ fun SelectBranchStepContent(
             options = cities,
             selectedCode = branchSelection.cityCode,
             selectedName = branchSelection.cityName,
+            optionCode = { it.cityCode },
+            optionName = { it.cityName },
             isLoading = isCitiesLoading,
             enabled = branchSelection.provinceCode.isNotBlank(),
             onSelected = onCitySelected,
@@ -70,6 +76,8 @@ fun SelectBranchStepContent(
             options = branches,
             selectedCode = branchSelection.branchCode,
             selectedName = branchSelection.branchName,
+            optionCode = { it.code },
+            optionName = { it.name },
             isLoading = isBranchesLoading,
             enabled = branchSelection.cityCode.isNotBlank(),
             onSelected = onBranchSelected,

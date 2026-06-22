@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract
 
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.BranchSelectionFormPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.FreelanceContractResultPR
@@ -9,6 +8,9 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.Freelance
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.ContractPR
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 
@@ -23,10 +25,10 @@ data class StudentInsuranceContractUiState(
     val userInfo: UserInfoFormPR = UserInfoFormPR(),
     val contractApplicantType: ContractApplicantType = ContractApplicantType.PERSONAL,
     val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
-    val cities: List<CityOptionPR> = emptyList(),
-    val branchCities: List<CityOptionPR> = emptyList(),
-    val provinces: List<CityOptionPR> = emptyList(),
-    val branches: List<CityOptionPR> = emptyList(),
+    val cities: List<CityPR> = emptyList(),
+    val branchCities: List<CityPR> = emptyList(),
+    val provinces: List<ProvincePR> = emptyList(),
+    val branches: List<BranchPR> = emptyList(),
     val isCitiesLoading: Boolean = false,
     val isProvincesLoading: Boolean = false,
     val isBranchCitiesLoading: Boolean = false,
@@ -72,13 +74,13 @@ data class StudentInsuranceContractUiState(
         data class RulesConfirmedChanged(val confirmed: Boolean) : PartialState()
         data class UserInfoChanged(val userInfo: UserInfoFormPR) : PartialState()
         data class CitiesLoading(val isLoading: Boolean) : PartialState()
-        data class CitiesLoaded(val cities: List<CityOptionPR>) : PartialState()
+        data class CitiesLoaded(val cities: List<CityPR>) : PartialState()
         data class ProvincesLoading(val isLoading: Boolean) : PartialState()
-        data class ProvincesLoaded(val provinces: List<CityOptionPR>) : PartialState()
+        data class ProvincesLoaded(val provinces: List<ProvincePR>) : PartialState()
         data class BranchCitiesLoading(val isLoading: Boolean) : PartialState()
-        data class BranchCitiesLoaded(val cities: List<CityOptionPR>) : PartialState()
+        data class BranchCitiesLoaded(val cities: List<CityPR>) : PartialState()
         data class BranchesLoading(val isLoading: Boolean) : PartialState()
-        data class BranchesLoaded(val branches: List<CityOptionPR>) : PartialState()
+        data class BranchesLoaded(val branches: List<BranchPR>) : PartialState()
         data class ContractApplicantTypeChanged(val type: ContractApplicantType) : PartialState()
         data class BranchSelectionChanged(val branchSelection: BranchSelectionFormPR) : PartialState()
         data class PremiumRatesLoading(val isLoading: Boolean) : PartialState()
@@ -104,9 +106,9 @@ sealed class StudentInsuranceContractIntent {
     data class SetRulesConfirmed(val confirmed: Boolean) : StudentInsuranceContractIntent()
     data class UpdateUserInfo(val userInfo: UserInfoFormPR) : StudentInsuranceContractIntent()
     data class SetContractApplicantType(val type: ContractApplicantType) : StudentInsuranceContractIntent()
-    data class SelectBranchProvince(val province: CityOptionPR) : StudentInsuranceContractIntent()
-    data class SelectBranchCity(val city: CityOptionPR) : StudentInsuranceContractIntent()
-    data class SelectBranch(val branch: CityOptionPR) : StudentInsuranceContractIntent()
+    data class SelectBranchProvince(val province: ProvincePR) : StudentInsuranceContractIntent()
+    data class SelectBranchCity(val city: CityPR) : StudentInsuranceContractIntent()
+    data class SelectBranch(val branch: BranchPR) : StudentInsuranceContractIntent()
     data class SelectPremiumRate(val rate: SpcPremiumRateOptionPR) : StudentInsuranceContractIntent()
     data class SelectMonthlyPremium(val amount: Long) : StudentInsuranceContractIntent()
     data object CalculateMonthlyPremium : StudentInsuranceContractIntent()

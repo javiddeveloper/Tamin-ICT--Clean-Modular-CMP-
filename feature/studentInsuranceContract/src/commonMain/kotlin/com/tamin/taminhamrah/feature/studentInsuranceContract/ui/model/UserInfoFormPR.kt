@@ -4,13 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 
 @Immutable
-data class CityOptionPR(
-    val code: String,
-    val name: String,
-    val provinceCode: String? = null,
-)
-
-@Immutable
 data class UserInfoFormPR(
     val cityCode: String = "",
     val cityName: String = "",

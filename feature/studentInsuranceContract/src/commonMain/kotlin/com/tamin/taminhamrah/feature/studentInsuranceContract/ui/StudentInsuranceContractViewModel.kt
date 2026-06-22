@@ -9,21 +9,22 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toPresen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toPresentation as toPremiumRangePresentation
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toSpcPremiumRateOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.resolveEligibility
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.filterByProvinceCode
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toBranchOptions
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toCityOptions
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toProvinceOptions
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
+import com.tamin.taminhamrah.mapper.common.filterByProvinceCode
+import com.tamin.taminhamrah.mapper.common.toCityPresentation
+import com.tamin.taminhamrah.mapper.common.toProvincePresentation
+import com.tamin.taminhamrah.mapper.contracts.toBranchPresentation
+import com.tamin.taminhamrah.mapper.contracts.toPresentation
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
+import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
-import com.tamin.taminhamrah.mapper.contracts.toPresentation
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
-import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
-import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
-import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
@@ -39,8 +40,7 @@ import kotlinx.coroutines.flow.merge
 class StudentInsuranceContractViewModel(
     private val getRegistrationInfoUseCase: GetRegistrationInfoUseCase,
     private val getContractsUseCase: GetContractsUseCase,
-    private val getCitiesUseCase: GetCitiesUseCase,
-    private val getProvincesUseCase: GetProvincesUseCase,
+    private val identityInfoUseCase: IdentityInfoUseCase,
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getSpcPremiumRatesUseCase: GetSpcPremiumRatesUseCase,
     private val getFreelancePremiumRangeUseCase: GetFreelancePremiumRangeUseCase,
@@ -108,8 +108,8 @@ class StudentInsuranceContractViewModel(
     private fun loadCities(): Flow<PartialState> = flow {
         emit(PartialState.CitiesLoading(true))
         try {
-            getCitiesUseCase().collect { cities ->
-                emit(PartialState.CitiesLoaded(cities.toCityOptions()))
+            identityInfoUseCase.getCities().collect { cities ->
+                emit(PartialState.CitiesLoaded(cities.toCityPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -121,8 +121,8 @@ class StudentInsuranceContractViewModel(
     private fun loadProvinces(): Flow<PartialState> = flow {
         emit(PartialState.ProvincesLoading(true))
         try {
-            getProvincesUseCase().collect { provinces ->
-                emit(PartialState.ProvincesLoaded(provinces.toProvinceOptions()))
+            identityInfoUseCase.getProvinces().collect { provinces ->
+                emit(PartialState.ProvincesLoaded(provinces.toProvincePresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -144,12 +144,12 @@ class StudentInsuranceContractViewModel(
         }
     }
 
-    private fun handleSelectBranchProvince(province: CityOptionPR): Flow<PartialState> = flow {
+    private fun handleSelectBranchProvince(province: ProvincePR): Flow<PartialState> = flow {
         emit(
             PartialState.BranchSelectionChanged(
                 uiState.value.branchSelection.copy(
-                    provinceCode = province.code,
-                    provinceName = province.name,
+                    provinceCode = province.provinceCode,
+                    provinceName = province.provinceName,
                     cityCode = "",
                     cityName = "",
                     branchCode = "",
@@ -159,7 +159,7 @@ class StudentInsuranceContractViewModel(
         )
         emit(
             PartialState.BranchCitiesLoaded(
-                uiState.value.cities.filterByProvinceCode(province.code),
+                uiState.value.cities.filterByProvinceCode(province.provinceCode),
             ),
         )
         emit(PartialState.BranchesLoaded(emptyList()))
@@ -169,7 +169,7 @@ class StudentInsuranceContractViewModel(
         emit(PartialState.BranchesLoading(true))
         try {
             getBranchesUseCase(cityCode).collect { branches ->
-                emit(PartialState.BranchesLoaded(branches.toBranchOptions()))
+                emit(PartialState.BranchesLoaded(branches.toBranchPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -213,13 +213,13 @@ class StudentInsuranceContractViewModel(
         emit(PartialState.ContractApplicantTypeChanged(type))
     }
 
-    private fun handleSelectBranchCity(city: CityOptionPR): Flow<PartialState> = merge(
+    private fun handleSelectBranchCity(city: CityPR): Flow<PartialState> = merge(
         flow {
             emit(
                 PartialState.BranchSelectionChanged(
                     uiState.value.branchSelection.copy(
-                        cityCode = city.code,
-                        cityName = city.name,
+                        cityCode = city.cityCode,
+                        cityName = city.cityName,
                         branchCode = "",
                         branchName = "",
                     ),
@@ -227,10 +227,10 @@ class StudentInsuranceContractViewModel(
             )
             emit(PartialState.BranchesLoaded(emptyList()))
         },
-        loadBranches(city.code),
+        loadBranches(city.cityCode),
     )
 
-    private fun handleSelectBranch(branch: CityOptionPR): Flow<PartialState> = flow {
+    private fun handleSelectBranch(branch: BranchPR): Flow<PartialState> = flow {
         emit(
             PartialState.BranchSelectionChanged(
                 uiState.value.branchSelection.copy(

@@ -14,17 +14,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 
 @Composable
-fun SelectableField(
+fun <T> SelectableField(
     label: String,
-    options: List<CityOptionPR>,
+    options: List<T>,
     selectedCode: String,
     selectedName: String,
+    optionCode: (T) -> String,
+    optionName: (T) -> String,
     isLoading: Boolean,
     enabled: Boolean = true,
-    onSelected: (CityOptionPR) -> Unit,
+    onSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -61,7 +62,7 @@ fun SelectableField(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option.name) },
+                    text = { Text(optionName(option)) },
                     onClick = {
                         onSelected(option)
                         expanded = false

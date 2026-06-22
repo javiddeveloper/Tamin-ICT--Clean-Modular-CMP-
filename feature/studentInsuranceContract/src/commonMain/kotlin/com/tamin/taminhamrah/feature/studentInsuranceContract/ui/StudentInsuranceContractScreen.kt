@@ -46,12 +46,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractIntent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractApplicantStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTermsStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.InsurancePremiumStepContent
@@ -138,9 +140,9 @@ private fun StudentInsuranceContractContent(
     onRulesConfirmedChange: (Boolean) -> Unit,
     onUserInfoChange: (UserInfoFormPR) -> Unit,
     onContractApplicantTypeChange: (ContractApplicantType) -> Unit,
-    onBranchProvinceSelected: (CityOptionPR) -> Unit,
-    onBranchCitySelected: (CityOptionPR) -> Unit,
-    onBranchSelected: (CityOptionPR) -> Unit,
+    onBranchProvinceSelected: (ProvincePR) -> Unit,
+    onBranchCitySelected: (CityPR) -> Unit,
+    onBranchSelected: (BranchPR) -> Unit,
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
     onMonthlyPremiumChange: (Long) -> Unit,
     onCalculateMonthlyPremium: () -> Unit,
@@ -228,9 +230,9 @@ private fun ContractStepper(
     onRulesConfirmedChange: (Boolean) -> Unit,
     onUserInfoChange: (UserInfoFormPR) -> Unit,
     onContractApplicantTypeChange: (ContractApplicantType) -> Unit,
-    onBranchProvinceSelected: (CityOptionPR) -> Unit,
-    onBranchCitySelected: (CityOptionPR) -> Unit,
-    onBranchSelected: (CityOptionPR) -> Unit,
+    onBranchProvinceSelected: (ProvincePR) -> Unit,
+    onBranchCitySelected: (CityPR) -> Unit,
+    onBranchSelected: (BranchPR) -> Unit,
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
     onMonthlyPremiumChange: (Long) -> Unit,
     onCalculateMonthlyPremium: () -> Unit,
@@ -273,8 +275,8 @@ private fun ContractStepper(
                                 onCitySelected = { city ->
                                     onUserInfoChange(
                                         state.userInfo.copy(
-                                            cityCode = city.code,
-                                            cityName = city.name,
+                                            cityCode = city.cityCode,
+                                            cityName = city.cityName,
                                         ),
                                     )
                                 },

@@ -19,16 +19,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.CityDropdown
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.SelectableField
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.model.common.CityPR
 
 @Composable
 fun UserInfoStepContent(
     userInfo: UserInfoFormPR,
-    cities: List<CityOptionPR>,
+    cities: List<CityPR>,
     isCitiesLoading: Boolean,
-    onCitySelected: (CityOptionPR) -> Unit,
+    onCitySelected: (CityPR) -> Unit,
     onAddressChange: (String) -> Unit,
     onZipCodeChange: (String) -> Unit,
     onPhoneNumberChange: (String) -> Unit,
@@ -61,12 +61,15 @@ fun UserInfoStepContent(
             }
         }
 
-        CityDropdown(
-            cities = cities,
-            selectedCityCode = userInfo.cityCode,
-            selectedCityName = userInfo.cityName,
+        SelectableField(
+            label = "شهر",
+            options = cities,
+            selectedCode = userInfo.cityCode,
+            selectedName = userInfo.cityName,
+            optionCode = { it.cityCode },
+            optionName = { it.cityName },
             isLoading = isCitiesLoading,
-            onCitySelected = onCitySelected,
+            onSelected = onCitySelected,
         )
 
         OutlinedTextField(
