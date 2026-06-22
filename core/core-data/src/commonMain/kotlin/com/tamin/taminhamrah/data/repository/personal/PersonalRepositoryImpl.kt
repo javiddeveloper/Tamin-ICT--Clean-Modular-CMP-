@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -70,6 +71,10 @@ class PersonalRepositoryImpl(
             val response = personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
             emit(response.map { it.toDomain() })
 
+    }
+
+    override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {
+        emit(personalRemoteDataSource.saveSurvivorInfo(body.toDTO()))
     }
 }
 
