@@ -42,7 +42,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 fun WorkshopsScreen(
     viewModel: WorkshopsViewModel = koinViewModel(),
     navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> }
+    navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -98,6 +99,17 @@ fun WorkshopsScreen(
                         .clickable {
                             selectedWorkshop = null
                             navigateToWorkshopDebit(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "استعلام بدهی کارگاه",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToWorkshopDebtInquiry(wId, bCode)
                         }
                         .padding(16.dp)
                 )

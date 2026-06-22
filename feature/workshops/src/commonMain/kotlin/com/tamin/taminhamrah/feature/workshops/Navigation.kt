@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsScreen
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -24,6 +25,12 @@ data class WorkshopDebitRoute(
     val branchCode: String
 )
 
+@Serializable
+data class WorkshopDebtInquiryRoute(
+    val workshopId: String,
+    val branchCode: String
+)
+
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsRoute)
 }
@@ -37,6 +44,9 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
             },
             navigateToWorkshopDebit = { workshopId, branchCode ->
                 navController.navigate(WorkshopDebitRoute(workshopId, branchCode))
+            },
+            navigateToWorkshopDebtInquiry = { workshopId, branchCode ->
+                navController.navigate(WorkshopDebtInquiryRoute(workshopId, branchCode))
             }
         )
     }
@@ -52,6 +62,14 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
     composable<WorkshopDebitRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkshopDebitRoute>()
         WorkshopDebitScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode
+        )
+    }
+
+    composable<WorkshopDebtInquiryRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<WorkshopDebtInquiryRoute>()
+        WorkshopDebtInquiryScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode
         )

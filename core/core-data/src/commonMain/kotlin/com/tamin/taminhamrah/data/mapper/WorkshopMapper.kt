@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 
 fun EmployerWorkshopDTO.toDomain(): EmployerWorkshopDN {
     return EmployerWorkshopDN(
@@ -107,5 +109,19 @@ fun WorkshopDebitDTO.toDomain(): WorkshopDebitDN {
         nimOshrKol = nimOshrKol,
         docDate = docDate,
         stepCat = stepCat,
+    )
+}
+
+fun WorkshopDebtInquiryDTO.toDomain(): WorkshopDebtInquiryDN {
+    return WorkshopDebtInquiryDN(
+        status = status,
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName,
+        result = result,
+        amount1 = amount1,
+        sDate = sDate,
+        amount2 = amount2,
+        amount3 = amount3
     )
 }
