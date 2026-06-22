@@ -57,6 +57,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.ContractTe
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.InsurancePremiumStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.PremiumSalaryStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.SelectBranchStepContent
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.SubmitContractStepContent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import org.koin.compose.viewmodel.koinViewModel
@@ -117,6 +118,12 @@ fun StudentInsuranceContractScreen(
             onCalculateMonthlyPremium = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.CalculateMonthlyPremium)
             },
+            onAgreementConfirmedChange = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SetAgreementConfirmed(it))
+            },
+            onSubmitContract = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SubmitContract)
+            },
             onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
         )
@@ -137,6 +144,8 @@ private fun StudentInsuranceContractContent(
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
     onMonthlyPremiumChange: (Long) -> Unit,
     onCalculateMonthlyPremium: () -> Unit,
+    onAgreementConfirmedChange: (Boolean) -> Unit,
+    onSubmitContract: () -> Unit,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -184,6 +193,8 @@ private fun StudentInsuranceContractContent(
                                 onPremiumRateSelected = onPremiumRateSelected,
                                 onMonthlyPremiumChange = onMonthlyPremiumChange,
                                 onCalculateMonthlyPremium = onCalculateMonthlyPremium,
+                                onAgreementConfirmedChange = onAgreementConfirmedChange,
+                                onSubmitContract = onSubmitContract,
                                 onShowRules = onShowRules,
                             )
                         }
@@ -223,6 +234,8 @@ private fun ContractStepper(
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
     onMonthlyPremiumChange: (Long) -> Unit,
     onCalculateMonthlyPremium: () -> Unit,
+    onAgreementConfirmedChange: (Boolean) -> Unit,
+    onSubmitContract: () -> Unit,
     onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -317,18 +330,42 @@ private fun ContractStepper(
                                 onCalculate = onCalculateMonthlyPremium,
                             )
                         }
+                        StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT -> {
+                            SubmitContractStepContent(
+                                registrationInfo = info,
+                                selectedPremiumRateDescription = state.premiumRates
+                                    .firstOrNull { it.code == state.selectedPremiumRateCode }
+                                    ?.description,
+                                calculatedMonthlySalary = state.calculatedMonthlySalary,
+                                isAgreementConfirmed = state.isAgreementConfirmed,
+                                isSubmitting = state.isSubmittingContract,
+                                submittedContract = state.submittedContract,
+                                onAgreementConfirmedChange = onAgreementConfirmedChange,
+                                onSubmit = onSubmitContract,
+                            )
+                        }
                         else -> Unit
                     }
                 },
                 navigation = {
                     if (stepState == StepState.ACTIVE) {
-                        StepNavigationButtons(
-                            showPrevious = step != StudentInsuranceContractStep.STEP_REGISTRATION,
-                            showNext = step != StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT,
-                            nextEnabled = state.canGoNext,
-                            onNextStep = onNextStep,
-                            onPreviousStep = onPreviousStep,
-                        )
+                        if (step == StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT) {
+                            StepNavigationButtons(
+                                showPrevious = true,
+                                showNext = false,
+                                nextEnabled = false,
+                                onNextStep = onNextStep,
+                                onPreviousStep = onPreviousStep,
+                            )
+                        } else {
+                            StepNavigationButtons(
+                                showPrevious = step != StudentInsuranceContractStep.STEP_REGISTRATION,
+                                showNext = step != StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT,
+                                nextEnabled = state.canGoNext,
+                                onNextStep = onNextStep,
+                                onPreviousStep = onPreviousStep,
+                            )
+                        }
                     }
                 },
             )

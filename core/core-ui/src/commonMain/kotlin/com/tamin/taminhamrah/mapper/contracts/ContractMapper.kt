@@ -19,7 +19,7 @@ fun ContractDN.toPresentation(): ContractPR {
             ?: premiumType?.insuranceKind
             ?: (premiumTypeCode?:""),
         monthlyPremiumLabel = premiumRate?.spcrateDescription?:"",
-        monthlyIncome = salary.toString(),
+        monthlyIncome = salary?.toString() ?: "",
         treatmentSupportText = if (hasTreatmentSupport) "حمایت درمان دارد" else "حمایت درمان ندارد",
         hasTreatmentSupport = hasTreatmentSupport,
         jobTitle = freeJob?.discrioption?:"",

@@ -56,4 +56,7 @@ object ContractsTestData {
 
     val freelanceCalculateSalarySuccess: String
         get() = readResourceFile("mocks/freelance_calculate_salary_success.json")
+
+    val freelanceMakeContractSuccess: String
+        get() = readResourceFile("mocks/freelance_make_contract_success.json")
 }

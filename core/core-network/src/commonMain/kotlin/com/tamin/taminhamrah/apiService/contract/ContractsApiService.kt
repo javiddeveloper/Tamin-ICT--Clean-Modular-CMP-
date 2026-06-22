@@ -2,12 +2,16 @@ package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
 
@@ -42,4 +46,10 @@ interface ContractsApiService {
         @Path("treatmentSupportCode") treatmentSupportCode: String,
         @Path("spcRateCode") spcRateCode: String,
     ): BaseDTO<Long>
+
+    @POST("special-insured-services/freelance-make-a-contract/{monthlyPremium}")
+    suspend fun makeFreelanceContract(
+        @Path("monthlyPremium") monthlyPremium: Long,
+        @Body request: FreelanceMakeContractRequestDTO,
+    ): BaseDTO<FreelanceContractResultDTO>
 }

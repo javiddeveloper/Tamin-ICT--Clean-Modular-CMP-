@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.contracts
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
+import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
@@ -18,4 +20,5 @@ interface ContractsRepository {
     fun getSpcPremiumRates(): Flow<List<PremiumRateDN>>
     fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN>
     fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long>
+    fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>
 }

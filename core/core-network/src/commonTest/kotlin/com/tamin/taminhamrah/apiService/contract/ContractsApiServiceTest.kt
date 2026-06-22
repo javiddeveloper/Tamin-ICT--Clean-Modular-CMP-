@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
@@ -114,5 +116,36 @@ class ContractsApiServiceTest : BaseApiTest() {
         assertEquals(200, response.status)
         assertEquals("SUCCESSFUL", response.family)
         assertEquals(502_500_000L, response.data)
+    }
+
+    @Test
+    fun `makeFreelanceContract should return contract number and date`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.freelanceMakeContractSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<ContractsApiService>()
+
+        val response = apiService.makeFreelanceContract(
+            monthlyPremium = 25_989_368L,
+            request = FreelanceMakeContractRequestDTO(
+                brchCodeNew = "0360",
+                cityCode = "2442",
+                cntDrmn = "1",
+                cntFreeJobCode = "099796",
+                guid = "00",
+                guidName = "00",
+                premiumRateCode = "01",
+                provinceCode = "33",
+            ),
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data: FreelanceContractResultDTO = response.data!!
+        assertEquals(478_176_975L, data.contractNumber)
+        assertEquals(1_782_132_474_000L, data.contractDate)
     }
 }

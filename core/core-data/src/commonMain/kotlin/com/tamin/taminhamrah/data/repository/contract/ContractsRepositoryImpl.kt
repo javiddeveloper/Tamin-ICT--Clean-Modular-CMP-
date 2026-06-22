@@ -4,12 +4,15 @@ import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
+import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.data.repository.contract.BranchListQuery
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
+import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
@@ -94,6 +97,15 @@ class ContractsRepositoryImpl(
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
         emit(contractsRemoteDataSource.calculateFreelanceSalary(params))
+    }
+
+    override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
+        emit(
+            contractsRemoteDataSource.makeFreelanceContract(
+                monthlyPremium = params.monthlyPremium,
+                request = params.request.toDto(),
+            ).toDomain(),
+        )
     }
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {

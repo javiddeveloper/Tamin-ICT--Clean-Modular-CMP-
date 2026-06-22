@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.BranchSel
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.CityOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.FreelanceContractResultPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.FreelancePremiumRangePR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
@@ -39,6 +40,9 @@ data class StudentInsuranceContractUiState(
     val isCalculatingPremium: Boolean = false,
     val isPremiumCalculated: Boolean = false,
     val calculatedMonthlySalary: Long? = null,
+    val isAgreementConfirmed: Boolean = false,
+    val isSubmittingContract: Boolean = false,
+    val submittedContract: FreelanceContractResultPR? = null,
     val currentStep: StudentInsuranceContractStep = StudentInsuranceContractStep.STEP_REGISTRATION,
 ) {
     val canGoNext: Boolean
@@ -55,6 +59,7 @@ data class StudentInsuranceContractUiState(
             -> true
             StudentInsuranceContractStep.STEP_INSURANCE_PREMIUM -> selectedPremiumRateCode != null
             StudentInsuranceContractStep.STEP_SALARY -> isPremiumCalculated
+            StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT -> submittedContract != null
             else -> false
         }
 
@@ -85,6 +90,9 @@ data class StudentInsuranceContractUiState(
         data class CalculatingPremium(val isCalculating: Boolean) : PartialState()
         data class PremiumCalculated(val calculated: Boolean) : PartialState()
         data class CalculatedMonthlySalaryLoaded(val salary: Long) : PartialState()
+        data class AgreementConfirmedChanged(val confirmed: Boolean) : PartialState()
+        data class SubmittingContract(val isSubmitting: Boolean) : PartialState()
+        data class ContractSubmitted(val result: FreelanceContractResultPR) : PartialState()
         data class StepChanged(val step: StudentInsuranceContractStep) : PartialState()
     }
 }
@@ -102,6 +110,8 @@ sealed class StudentInsuranceContractIntent {
     data class SelectPremiumRate(val rate: SpcPremiumRateOptionPR) : StudentInsuranceContractIntent()
     data class SelectMonthlyPremium(val amount: Long) : StudentInsuranceContractIntent()
     data object CalculateMonthlyPremium : StudentInsuranceContractIntent()
+    data class SetAgreementConfirmed(val confirmed: Boolean) : StudentInsuranceContractIntent()
+    data object SubmitContract : StudentInsuranceContractIntent()
 }
 
 sealed class StudentInsuranceContractEvent

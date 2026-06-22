@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.Studen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractIntent
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract.StudentInsuranceContractUiState.PartialState
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toPresentation as toContractResultPresentation
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toPresentation as toPremiumRangePresentation
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.toSpcPremiumRateOptions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper.resolveEligibility
@@ -24,10 +25,13 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -41,6 +45,7 @@ class StudentInsuranceContractViewModel(
     private val getSpcPremiumRatesUseCase: GetSpcPremiumRatesUseCase,
     private val getFreelancePremiumRangeUseCase: GetFreelancePremiumRangeUseCase,
     private val calculateFreelanceSalaryUseCase: CalculateFreelanceSalaryUseCase,
+    private val makeFreelanceContractUseCase: MakeFreelanceContractUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -63,6 +68,8 @@ class StudentInsuranceContractViewModel(
             is StudentInsuranceContractIntent.SelectPremiumRate -> handleSelectPremiumRate(intent.rate)
             is StudentInsuranceContractIntent.SelectMonthlyPremium -> handleSelectMonthlyPremium(intent.amount)
             StudentInsuranceContractIntent.CalculateMonthlyPremium -> handleCalculateMonthlyPremium()
+            is StudentInsuranceContractIntent.SetAgreementConfirmed -> handleSetAgreementConfirmed(intent.confirmed)
+            StudentInsuranceContractIntent.SubmitContract -> handleSubmitContract()
         }
     }
 
@@ -295,11 +302,52 @@ class StudentInsuranceContractViewModel(
         )
     }
 
+    private fun handleSetAgreementConfirmed(confirmed: Boolean): Flow<PartialState> = flow {
+        emit(PartialState.AgreementConfirmedChanged(confirmed))
+    }
+
+    private fun handleSubmitContract(): Flow<PartialState> = flow {
+        val params = buildMakeContractParams() ?: return@flow
+        emit(PartialState.SubmittingContract(true))
+        try {
+            makeFreelanceContractUseCase(params).collect { result ->
+                emit(PartialState.ContractSubmitted(result.toContractResultPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.SubmittingContract(false))
+        }
+    }
+
+    private fun buildMakeContractParams(): FreelanceMakeContractParams? {
+        val monthlyPremium = uiState.value.selectedMonthlyPremium ?: return null
+        val premiumRateCode = uiState.value.selectedPremiumRateCode ?: return null
+        val insuranceId = uiState.value.registrationInfo?.insuranceId?.takeIf { it.isNotBlank() } ?: return null
+        val branch = uiState.value.branchSelection
+        if (!branch.isValid) return null
+        return FreelanceMakeContractParams(
+            monthlyPremium = monthlyPremium,
+            request = FreelanceMakeContractRequestDN(
+                brchCodeNew = branch.branchCode,
+                cityCode = branch.cityCode,
+                cntDrmn = DEFAULT_TREATMENT_SUPPORT_CODE,
+                cntFreeJobCode = insuranceId,
+                guid = DEFAULT_APPLICANT_GUID,
+                guidName = DEFAULT_APPLICANT_GUID_NAME,
+                premiumRateCode = premiumRateCode,
+                provinceCode = branch.provinceCode,
+            ),
+        )
+    }
+
     private companion object {
         /**
          * Step 8 (treatment support) is not implemented yet; legacy app uses cntDrmn "1".
          */
         const val DEFAULT_TREATMENT_SUPPORT_CODE = "1"
+        const val DEFAULT_APPLICANT_GUID = "00"
+        const val DEFAULT_APPLICANT_GUID_NAME = "00"
     }
 
     override fun reduceState(
@@ -397,6 +445,15 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.CalculatedMonthlySalaryLoaded -> currentState.copy(
             calculatedMonthlySalary = partialState.salary,
+        )
+        is PartialState.AgreementConfirmedChanged -> currentState.copy(
+            isAgreementConfirmed = partialState.confirmed,
+        )
+        is PartialState.SubmittingContract -> currentState.copy(
+            isSubmittingContract = partialState.isSubmitting,
+        )
+        is PartialState.ContractSubmitted -> currentState.copy(
+            submittedContract = partialState.result,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,
