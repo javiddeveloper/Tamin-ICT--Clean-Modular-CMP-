@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
@@ -14,6 +15,7 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
+import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
@@ -41,6 +43,7 @@ import kotlinx.coroutines.IO
         PersonalInboxSizeEntity::class,
         ContractEntity::class,
         RegistrationInfoEntity::class,
+        BranchEntity::class,
     ],
     version = 1,
 )
@@ -55,6 +58,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun userRequestDao(): UserRequestDao
     abstract fun contractDao(): ContractDao
     abstract fun registrationInfoDao(): RegistrationInfoDao
+    abstract fun branchDao(): BranchDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

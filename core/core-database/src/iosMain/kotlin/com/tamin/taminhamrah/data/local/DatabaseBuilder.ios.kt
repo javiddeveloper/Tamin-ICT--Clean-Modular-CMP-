@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.data.local
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
@@ -12,6 +13,7 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
+import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
@@ -38,6 +40,7 @@ import platform.Foundation.NSHomeDirectory
         PersonalInboxSizeEntity::class,
         ContractEntity::class,
         RegistrationInfoEntity::class,
+        BranchEntity::class,
     ],
     version = 1,
 )
@@ -52,6 +55,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun personalDao(): PersonalDao
     actual abstract fun contractDao(): ContractDao
     actual abstract fun registrationInfoDao(): RegistrationInfoDao
+    actual abstract fun branchDao(): BranchDao
 }
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<TaminXDatabase> {

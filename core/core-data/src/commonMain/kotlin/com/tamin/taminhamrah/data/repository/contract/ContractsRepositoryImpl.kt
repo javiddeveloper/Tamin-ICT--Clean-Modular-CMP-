@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.repository.contract
 
+import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
@@ -27,6 +28,7 @@ class ContractsRepositoryImpl(
     private val contractsRemoteDataSource: ContractsRemoteDataSource,
     private val contractDao: ContractDao,
     private val registrationInfoDao: RegistrationInfoDao,
+    private val branchDao: BranchDao,
     private val apiQueryBuilder: ApiQueryBuilder,
 ) :
     ContractsRepository {
@@ -57,9 +59,25 @@ class ContractsRepositoryImpl(
         getContracts(buildStudentInsuranceContractsQuery())
 
     override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
-        val response = contractsRemoteDataSource.getBranches(BranchListQuery.build(cityCode))
-        emit(response.list.orEmpty().toDomain())
-    }
+        val localBranches = branchDao.getBranchesByCityCode(cityCode).first()
+        emit(localBranches.map { it.toDomain() })
+
+        try {
+            val response = contractsRemoteDataSource.getBranches(BranchListQuery.build(cityCode))
+            val remoteBranches = response.list.orEmpty()
+            branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localBranches.isEmpty()) {
+                throw e
+            }
+        }
+
+        emitAll(
+            branchDao.getBranchesByCityCode(cityCode).map { entities ->
+                entities.map { it.toDomain() }
+            },
+        )
+    }.distinctUntilChanged()
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         val localInfo = registrationInfoDao.getRegistrationInfo().first()
