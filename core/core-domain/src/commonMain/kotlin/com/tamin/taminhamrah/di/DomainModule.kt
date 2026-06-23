@@ -42,6 +42,8 @@ import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -85,4 +87,6 @@ val domainModule = module {
     factoryOf(::GetContractsUseCase)
     factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
     factoryOf(::GetAllPaymentSheetsUseCase)
+    factoryOf(::GetWorkshopDebitUseCase)
+    factoryOf(::GetWorkshopDebtInquiryUseCase)
 }

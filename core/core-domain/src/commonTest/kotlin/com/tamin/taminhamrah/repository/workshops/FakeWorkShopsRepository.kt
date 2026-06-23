@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.repository.workshops
 
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
+import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 
 class FakeWorkShopsRepository : WorkShopsRepository {
@@ -9,7 +11,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var shouldThrowError: Boolean = false
     var error: Exception = RuntimeException("Fake Network Error")
 
-    var paymentSheetsResult: com.tamin.taminhamrah.model.workshop.PaymentSheetListDN? = null
+    var paymentSheetsResult: PaymentSheetListDN? = null
+    var workshopDebitResult: WorkshopDebitListDN? = null
 
     override suspend fun getAllEmployerAgreementByNationalId(query: ApiQueryParamDN): EmployerAgreementListDN? {
         if (shouldThrowError) {
@@ -23,5 +26,27 @@ class FakeWorkShopsRepository : WorkShopsRepository {
             throw error
         }
         return paymentSheetsResult
+    }
+
+    override suspend fun getWorkshopDebit(
+        workshopId: String,
+        branchCode: String
+    ): WorkshopDebitListDN? {
+        if (shouldThrowError) {
+            throw error
+        }
+        return workshopDebitResult
+    }
+
+    var workshopDebtInquiryResult: com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN? = null
+
+    override suspend fun getWorkshopDebtInquiry(
+        workshopId: String,
+        branchCode: String
+    ): com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN? {
+        if (shouldThrowError) {
+            throw error
+        }
+        return workshopDebtInquiryResult
     }
 }
