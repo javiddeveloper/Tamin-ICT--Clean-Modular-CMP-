@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.data.repository.contract.BranchListQuery
+import com.tamin.taminhamrah.data.repository.contract.ContractListQuery
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -17,10 +18,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.request.FilterOperator
-import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
@@ -63,7 +61,7 @@ class ContractsRepositoryImpl(
         }.distinctUntilChanged()
 
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
-        getContracts(buildStudentInsuranceContractsQuery())
+        getContracts(ContractListQuery.build())
 
     override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
         val localBranches = branchDao.getBranchesByCityCode(cityCode).first()
@@ -125,21 +123,4 @@ class ContractsRepositoryImpl(
                 .mapNotNull { it?.toDomain() }
         )
     }.distinctUntilChanged()
-
-    private fun buildStudentInsuranceContractsQuery(): ApiQueryParamDN = ApiQueryParamDN(
-        page = 1,
-        start = 0,
-        limit = 100,
-        filters = listOf(
-            ApiFilterDN(
-                property = FilterProperty.PREMIUM_TYPE_CODE,
-                operator = FilterOperator.EQ,
-                value = FREELANCE_PREMIUM_TYPE_CODE,
-            ),
-        ),
-    )
-
-    private companion object {
-        const val FREELANCE_PREMIUM_TYPE_CODE = "01"
-    }
 }

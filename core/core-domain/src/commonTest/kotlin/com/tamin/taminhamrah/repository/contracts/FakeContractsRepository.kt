@@ -26,6 +26,7 @@ class FakeContractsRepository : ContractsRepository {
     var lastMakeContractParams: FreelanceMakeContractParams? = null
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
+    var studentInsuranceContractsCalled = false
 
     override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow {
         lastQuery = query
@@ -34,6 +35,7 @@ class FakeContractsRepository : ContractsRepository {
     }
 
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flow {
+        studentInsuranceContractsCalled = true
         if (shouldThrowError) throw error
         emit(contractsResult)
     }
