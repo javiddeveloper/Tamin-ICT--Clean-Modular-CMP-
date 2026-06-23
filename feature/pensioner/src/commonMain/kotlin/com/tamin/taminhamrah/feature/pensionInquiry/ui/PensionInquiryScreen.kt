@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -51,9 +52,9 @@ fun PensionInquiryContent(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.age == null) {
+            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.deceasedInfo == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.age == null) {
+            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.deceasedInfo == null) {
                 Text(
                     text = state.error ?: "خطای ناشناخته",
                     color = MaterialTheme.colorScheme.error,
@@ -65,6 +66,17 @@ fun PensionInquiryContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (state.deceasedInfo != null) {
+                        item {
+                            Text(
+                                text = "اطلاعات متوفی:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            DeceasedInfoItem(state.deceasedInfo)
+                        }
+                    }
+
                     if (state.age != null) {
                         item {
                             Text(
@@ -224,6 +236,27 @@ fun PersonalInfoItem(info: PersonalInfoPR) {
             Text(text = "شعبه: ${info.branch}")
             Text(text = "استان: ${info.provinceName}")
             Text(text = "شماره موبایل: ${info.mobileNumber}")
+        }
+    }
+}
+
+@Composable
+fun DeceasedInfoItem(info: DeceasedInfoPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            val personal = info.personal
+            if (personal != null) {
+                Text(text = "نام متوفی: ${personal.firstName} ${personal.lastName}", style = MaterialTheme.typography.titleMedium)
+                Text(text = "نام پدر: ${personal.fatherName}")
+                Text(text = "کد ملی: ${personal.nationalId}")
+                Text(text = "تاریخ فوت: ${info.deadDate}")
+            }
+            Text(text = "شعبه: ${info.branchName} (${info.branchCode})")
+            Text(text = "شماره مستمری: ${info.pensionerId}")
+            Text(text = "سن: ${info.yearsAge} سال و ${info.monthsAge} ماه و ${info.daysAge} روز")
         }
     }
 }

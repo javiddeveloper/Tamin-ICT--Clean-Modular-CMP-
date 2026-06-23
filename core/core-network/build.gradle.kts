@@ -55,4 +55,9 @@ dependencies {
 
 android {
     namespace = "com.tamin.taminhamrah.core.network"
+    sourceSets {
+        getByName("test") {
+            resources.srcDirs("src/commonTest/resources")
+        }
+    }
 }

@@ -1,0 +1,25 @@
+package com.tamin.taminhamrah.model.personal.saveSurvivorInfo
+
+data class SaveSurvivorInfoDN(
+    val address: String? = null,
+    val age: String? = null,
+    val birthDate: Long? = null,
+    val branchCode: String? = null,
+    val survivorInsuranceId: String? = null,
+    val survivorNationalId: String? = null,
+    val deathType: String? = null,
+    val dependencyType: DependencyTypeDN? = null,
+    val fatherName: String? = null,
+    val firstName: String? = null,
+    val gender: String? = null,
+    val idCardNumber: String? = null,
+    val insuranceNumber: String? = null,
+    val issuePlace: String? = null,
+    val lastName: String? = null,
+    val mobileNumber: String? = null,
+    val deceasedNationalId: String? = null,
+    val pensionId: String? = null,
+    val pensionRequestDocList: List<PensionDocDN>? = null,
+    val phoneNumber: String? = null,
+    val status: String? = null,
+)
