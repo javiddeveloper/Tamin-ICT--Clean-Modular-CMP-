@@ -43,3 +43,4 @@ Thumbs.db
 *.tmp
 progress.txt
 /core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/4.json
+/core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/1.json
