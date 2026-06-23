@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -92,8 +93,11 @@ class PersonalRepositoryImpl(
                 personalRemoteDataSource.confirmSurvivorsList(ApiQueryParamDN(filters = filters))
             emit(response.map { it.toDomain() })
 
-        }
+    }
 
+    override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = flow {
+        emit(personalRemoteDataSource.getFinalSurvivorPensionPDF().toDomain())
+    }
 
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {
         emit(personalRemoteDataSource.saveSurvivorInfo(body.toDTO()))
