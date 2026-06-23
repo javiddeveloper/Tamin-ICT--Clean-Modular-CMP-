@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
@@ -41,5 +42,9 @@ interface PensionApiService {
     suspend fun getPensionerPayRoll(
         @Query("filter") filter: String,
     ): BaseDTO<PayRollDTO>
+
+    @GET("disability-request/personal")
+    suspend fun getDisabilityPersonalInfo(
+    ): BaseDTO<DisabilityPersonalInfoDTO>
 
 }

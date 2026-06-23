@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
+import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -38,6 +39,7 @@ class PensionInquiryViewModel(
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val getConfirmSurvivorsListUseCase: GetConfirmSurvivorsListUseCase,
     private val getPensionerPayRollUseCase: GetPensionerPayRollUseCase,
+    private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -45,6 +47,7 @@ class PensionInquiryViewModel(
     init {
         sendIntent(PensionInquiryIntent.LoadPersonalInfo)
         sendIntent(PensionInquiryIntent.LoadAge(1379L))
+        sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
     }
 
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
@@ -60,6 +63,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
             is PensionInquiryIntent.LoadConfirmSurvivorsList -> handleLoadConfirmSurvivorsList()
             is PensionInquiryIntent.LoadPensionerPayRoll -> handleLoadPensionerPayRoll(intent.filters)
+            is PensionInquiryIntent.LoadDisabilityPersonalInfo -> handleLoadDisabilityPersonalInfo()
+        }
+    }
+
+    private fun handleLoadDisabilityPersonalInfo(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getDisabilityPersonalInfoUseCase().collect { personalInfo ->
+                emit(PartialState.DisabilityPersonalInfoLoaded(personalInfo.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -254,6 +269,10 @@ class PensionInquiryViewModel(
         is PartialState.PayRollLoaded -> currentState.copy(
             isLoading = false,
             payRoll = partialState.payRoll
+        )
+        is PartialState.DisabilityPersonalInfoLoaded -> currentState.copy(
+            isLoading = false,
+            disabilityPersonalInfo = partialState.disabilityPersonalInfo
         )
     }
 

@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
@@ -19,4 +20,6 @@ interface PensionRemoteDataSource {
     suspend fun getPensionerPayRoll(
         filter: List<ApiFilterDN>
     ): PayRollDTO
+
+    suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
 }
