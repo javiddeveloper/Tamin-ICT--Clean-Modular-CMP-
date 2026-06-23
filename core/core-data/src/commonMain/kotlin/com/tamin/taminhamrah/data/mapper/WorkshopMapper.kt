@@ -6,6 +6,10 @@ import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 
 fun EmployerWorkshopDTO.toDomain(): EmployerWorkshopDN {
     return EmployerWorkshopDN(
@@ -75,5 +79,49 @@ fun PaymentSheetDTO.toDomain(): PaymentSheetDN {
         payKindDesc = payKindDesc,
         ouragGno = ouragGno,
         ouragSDate = ouragSDate
+    )
+}
+
+fun WorkshopDebitDTO.toDomain(): WorkshopDebitDN {
+    return WorkshopDebitDN(
+        debitNumber = debitNumber,
+        debitCreateReasonCode = debitCreateReasonCode,
+        debitCreateReasonDesc = debitCreateReasonDesc,
+        debitStartDate = debitStartDate,
+        debitEndDate = debitEndDate,
+        debitAmount = debitAmount,
+        debitRemain = debitRemain,
+        withoutPentaltyAmount = withoutPentaltyAmount,
+        penaltyList = penaltyList,
+        penaltyPay = penaltyPay,
+        sum = sum,
+        nimOshr = this.nimOshr,
+        debitStepDesc = debitStepDesc,
+        debitStatDesc = debitStatDesc,
+        debitStepCode = debitStepCode,
+        debitStatCode = debitStatCode,
+        mastCustomerTypeCode = mastCustomerTypeCode,
+        mastCustomerCode = mastCustomerCode,
+        peymanSequence = peymanSequence,
+        debitCreateDate = debitCreateDate,
+        cludatCode = cludatCode,
+        cludatDesc = cludatDesc,
+        nimOshrKol = nimOshrKol,
+        docDate = docDate,
+        stepCat = stepCat,
+    )
+}
+
+fun WorkshopDebtInquiryDTO.toDomain(): WorkshopDebtInquiryDN {
+    return WorkshopDebtInquiryDN(
+        status = status,
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName,
+        result = result,
+        amount1 = amount1,
+        sDate = sDate,
+        amount2 = amount2,
+        amount3 = amount3
     )
 }

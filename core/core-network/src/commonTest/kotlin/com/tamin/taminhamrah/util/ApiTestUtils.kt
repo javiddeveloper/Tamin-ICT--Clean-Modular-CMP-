@@ -60,3 +60,11 @@ object ContractsTestData {
     val freelanceMakeContractSuccess: String
         get() = readResourceFile("mocks/freelance_make_contract_success.json")
 }
+
+object WorkshopTestData {
+    val workshopDebitSuccess: String
+        get() = readResourceFile("mocks/workshop_debit_success.json")
+
+    val workshopDebtInquirySuccess: String
+        get() = readResourceFile("mocks/workshop_debt_inquiry_success.json")
+}

@@ -93,7 +93,6 @@ class PersonalRepositoryImpl(
             emit(response.map { it.toDomain() })
 
         }
-    }
 
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {
         emit(personalRemoteDataSource.saveSurvivorInfo(body.toDTO()))
