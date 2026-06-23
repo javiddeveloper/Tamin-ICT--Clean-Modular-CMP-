@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
 
 fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
@@ -139,5 +140,22 @@ fun DeferredInstallmentCertificateDTO.toDomain(): DeferredInstallmentCertificate
 fun RequestCertificateDTO.toDomain(): RequestCertificateDN {
     return RequestCertificateDN(
         refCode = refCode
+    )
+}
+
+fun PayRollDTO.toDomain(): PayRollDN {
+    return PayRollDN(
+        id = id,
+        clpType = clpType,
+        tprDesc = tprDesc,
+        sumAmount = sumAmount,
+        textNumber = textNumber,
+        sumPay = sumPay,
+        hisYear = hisYear,
+        hisMon = hisMon,
+        hisDay = hisDay,
+        hisYearPlus = hisYearPlus,
+        hisMonPlus = hisMonPlus,
+        hisDayPlus = hisDayPlus
     )
 }

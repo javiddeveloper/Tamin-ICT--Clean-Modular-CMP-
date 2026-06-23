@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.repository.pension
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -15,6 +16,7 @@ class FakePensionRepository : PensionRepository {
     var pensionIdResult: List<PensionIdDN> = emptyList()
     var edictPensionerResult: EdictPensionerDN? = null
     var deferredInstallmentCertificateResult: DeferredInstallmentCertificateDN? = null
+    var payRollResult: PayRollDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -47,6 +49,13 @@ class FakePensionRepository : PensionRepository {
             throw error!!
         }
         emit(deferredInstallmentCertificateResult!!)
+    }
+
+    override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<PayRollDN> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(payRollResult!!)
     }
 
 }

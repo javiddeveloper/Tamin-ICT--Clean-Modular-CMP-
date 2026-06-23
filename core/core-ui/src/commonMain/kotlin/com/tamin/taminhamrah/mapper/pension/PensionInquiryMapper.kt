@@ -169,3 +169,20 @@ fun RequestCertificateDN.toPresentation(): RequestCertificatePR {
         refCode = refCode
     )
 }
+
+fun PayRollDN.toPresentation(): PayRollPR {
+    return PayRollPR(
+        id = id ?: 0,
+        clpType = clpType ?: "",
+        tprDesc = tprDesc ?: "",
+        sumAmount = sumAmount ?: 0,
+        textNumber = textNumber ?: "",
+        sumPay = sumPay ?: 0,
+        hisYear = hisYear ?: "",
+        hisMon = hisMon ?: "",
+        hisDay = hisDay ?: "",
+        hisYearPlus = hisYearPlus ?: "",
+        hisMonPlus = hisMonPlus ?: "",
+        hisDayPlus = hisDayPlus ?: ""
+    )
+}

@@ -63,4 +63,7 @@ interface PersonalApiService {
         @Body body: SaveSurvivorInfoRequest
     ): BaseDTO<String>
 
+
+
+
 }
