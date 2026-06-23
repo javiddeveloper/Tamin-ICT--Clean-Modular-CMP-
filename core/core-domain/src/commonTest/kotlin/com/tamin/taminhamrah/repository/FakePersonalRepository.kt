@@ -70,7 +70,7 @@ class FakePersonalRepository : PersonalRepository {
         emit(confirmSurvivorsListResult)
     }
 
-    override fun getFinalSurvivorPensionPDF(token: String): Flow<PdfDownloadDN> = flow {
+    override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = flow {
         if (shouldThrowError) throw error
         pdfDownloadResult?.let { emit(it) }
     }
