@@ -28,7 +28,7 @@ class GetFinalSurvivorPensionPDFUseCaseTest : BaseUseCaseTest() {
         )
         personalRepository.pdfDownloadResult = expectedPdf
 
-        useCase.invoke("fake_token").test {
+        useCase.invoke().test {
             val result = awaitItem()
             assertEquals(expectedPdf, result)
             awaitComplete()
@@ -41,7 +41,7 @@ class GetFinalSurvivorPensionPDFUseCaseTest : BaseUseCaseTest() {
         personalRepository.shouldThrowError = true
         personalRepository.error = expectedException
 
-        useCase.invoke("fake_token").test {
+        useCase.invoke().test {
             val actualException = awaitError()
             assertEquals(expectedException.message, actualException.message)
         }
