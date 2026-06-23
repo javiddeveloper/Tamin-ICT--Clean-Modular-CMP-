@@ -33,7 +33,13 @@ import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
@@ -85,6 +91,12 @@ val domainModule = module {
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
     factoryOf(::GetContractsUseCase)
+    factoryOf(::GetRegistrationInfoUseCase)
+    factoryOf(::GetBranchesUseCase)
+    factoryOf(::GetSpcPremiumRatesUseCase)
+    factoryOf(::GetFreelancePremiumRangeUseCase)
+    factoryOf(::CalculateFreelanceSalaryUseCase)
+    factoryOf(::MakeFreelanceContractUseCase)
     factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
     factoryOf(::GetAllPaymentSheetsUseCase)
     factoryOf(::GetWorkshopDebitUseCase)

@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.useCases.identity
 
+import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
@@ -17,6 +19,13 @@ class IdentityInfoUseCase(
             emit(resolveCityNames(identity))
         }
     }
+
+    fun getCities(
+        cityName: String? = null,
+        provinceCode: String? = null,
+    ): Flow<List<CityDN>> = cityProvinceRepository.getCities(cityName, provinceCode)
+
+    fun getProvinces(): Flow<List<ProvinceDN>> = cityProvinceRepository.getProvinces()
 
     private suspend fun resolveCityNames(identity: IdentityInfoDN): IdentityInfoDN {
         val cityId = identity.cityOfBirthId ?: identity.cityOfIssueId ?: ""

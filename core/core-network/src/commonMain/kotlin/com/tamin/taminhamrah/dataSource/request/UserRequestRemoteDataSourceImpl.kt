@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.dataSource.request
 
-import com.tamin.taminhamrah.apiService.request.UserRequestApiService
+import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO

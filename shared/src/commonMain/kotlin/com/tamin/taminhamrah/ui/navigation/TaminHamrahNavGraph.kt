@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
+import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.openUrl
 
 @Composable
@@ -122,6 +124,9 @@ internal fun TaminHamrahNavGraph(
                         },
                         onNavigateToWorkshops = {
                             navController.navigateToWorkshops()
+                        },
+                        onNavigateToStudentInsuranceContract = {
+                            navController.navigateToStudentInsuranceContract()
                         }
                     )
                 }
@@ -152,6 +157,8 @@ internal fun TaminHamrahNavGraph(
                 contractsScreen(onBack = { navController.popBackStack() })
 
                 workshopsScreen(navController)
+
+                studentInsuranceContractScreen(onBack = { navController.popBackStack() })
             }
 
             if (isLoading) {
@@ -206,7 +213,8 @@ fun SampleScreen(title: String) {
 fun HomeScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToWorkshops: () -> Unit,
-    onNavigateToContracts: () -> Unit
+    onNavigateToContracts: () -> Unit,
+    onNavigateToStudentInsuranceContract: () -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -251,6 +259,18 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text("کارگاه ها", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToStudentInsuranceContract,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("انعقاد قرارداد بیمه دانشجویی", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

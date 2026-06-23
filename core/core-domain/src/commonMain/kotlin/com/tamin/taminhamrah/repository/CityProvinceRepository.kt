@@ -7,4 +7,6 @@ import kotlinx.coroutines.flow.Flow
 interface CityProvinceRepository {
     fun getCity(cityId: String): Flow<CityDN>
     fun getProvince(provinceId: String): Flow<ProvinceDN>
+    fun getProvinces(): Flow<List<ProvinceDN>>
+    fun getCities(cityName: String? = null, provinceCode: String? = null): Flow<List<CityDN>>
 }

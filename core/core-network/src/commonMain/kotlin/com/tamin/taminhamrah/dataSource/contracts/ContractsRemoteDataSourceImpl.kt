@@ -1,7 +1,15 @@
 package com.tamin.taminhamrah.dataSource.contracts
 
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
+import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
+import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
+import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
+import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
+import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -20,6 +28,93 @@ class ContractsRemoteDataSourceImpl(
             val response =
                 contractsApiService.getContractList(apiQueryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getRegistrationInfo(): RegistrationInfoDTO {
+        return try {
+            contractsApiService.getRegistrationInfo().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getBranches(query: ApiQueryParamDN): ListData<BranchDTO> {
+        return try {
+            val response = contractsApiService.getBranches(apiQueryBuilder.buildQuery(query))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getSpcPremiumRates(): ListData<PremiumRateDTO> {
+        return try {
+            contractsApiService.getSpcPremiumRates().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): FreelancePremiumRangeDTO {
+        return try {
+            contractsApiService.getFreelancePremiumRange(
+                treatmentSupportCode = params.treatmentSupportCode,
+                spcRateCode = params.spcRateCode,
+                insuranceId = params.insuranceId,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Long {
+        return try {
+            contractsApiService.calculateFreelanceSalary(
+                monthlyPremium = params.monthlyPremium,
+                treatmentSupportCode = params.treatmentSupportCode,
+                spcRateCode = params.spcRateCode,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun makeFreelanceContract(
+        monthlyPremium: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ): FreelanceContractResultDTO {
+        return try {
+            contractsApiService.makeFreelanceContract(
+                monthlyPremium = monthlyPremium,
+                request = request,
+            ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

@@ -53,6 +53,20 @@ class GetContractsUseCaseTest : BaseUseCaseTest() {
     }
 
     @Test
+    fun `studentInsuranceContracts should delegate to repository`() = runTest {
+        val expectedList = listOf(sampleContract())
+        repository.contractsResult = expectedList
+
+        useCase.studentInsuranceContracts().test {
+            assertEquals(expectedList, awaitItem())
+            awaitComplete()
+        }
+
+        assertEquals(true, repository.studentInsuranceContractsCalled)
+        assertEquals(null, repository.lastQuery)
+    }
+
+    @Test
     fun `invoke should return error when repository fails`() = runTest {
         val expectedException = RuntimeException("Failed")
         repository.shouldThrowError = true

@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.repository.city.CityListQuery
+import com.tamin.taminhamrah.data.repository.city.ProvinceListQuery
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +44,35 @@ internal class CityProvinceRepositoryImpl(
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow {
+        val response = commonRemoteDataSource.getCityName(CityListQuery.build(cityName))
+        response.list.forEach { cityDto ->
+            cityProvinceDao.upsertCity(cityDto.toEntity())
+        }
+        val cities = response.list.map { it.toDomain() }
+        emit(
+            if (provinceCode.isNullOrBlank()) {
+                cities
+            } else {
+                cities.filter { it.matchesProvinceCode(provinceCode) }
+            },
+        )
+    }
+
+    private fun CityDN.matchesProvinceCode(selectedProvinceCode: String): Boolean {
+        val cityProvinceCode = provinceCode ?: return false
+        if (cityProvinceCode == selectedProvinceCode) return true
+        return cityProvinceCode.trimStart('0') == selectedProvinceCode.trimStart('0')
+    }
+
+    override fun getProvinces(): Flow<List<ProvinceDN>> = flow {
+        val response = commonRemoteDataSource.getProvinceName(ProvinceListQuery.build())
+        response.list.forEach { province ->
+            cityProvinceDao.upsertProvince(province.toEntity())
+        }
+        emit(response.list.map { it.toDomain() })
     }
 
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {
