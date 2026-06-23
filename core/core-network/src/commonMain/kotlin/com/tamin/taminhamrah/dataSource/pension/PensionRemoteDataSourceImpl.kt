@@ -4,8 +4,10 @@ import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -64,6 +66,22 @@ class PensionRemoteDataSourceImpl(
     override suspend fun sendRequestDeferredInstallmentCertificate(request: DeferredInstallmentRequest): DeferredInstallmentCertificateDTO {
         return try {
             val response = pensionApiService.sendRequestDeferredInstallmentCertificate(request)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getPensionerPayRoll(
+        filter: List<ApiFilterDN>
+    ): PayRollDTO {
+        return try {
+            val response =
+                pensionApiService.getPensionerPayRoll( apiQueryBuilder.buildFilterJson(filter))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

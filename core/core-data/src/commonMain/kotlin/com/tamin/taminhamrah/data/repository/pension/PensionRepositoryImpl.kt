@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -37,6 +38,11 @@ class PensionRepositoryImpl(
 
     override suspend fun sendRequestDeferredInstallmentCertificate(request: DeferredInstallmentRequestDN): Flow<DeferredInstallmentCertificateDN> = flow {
         val remoteData = pensionRemoteDataSource.sendRequestDeferredInstallmentCertificate(request.toDTO())
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<PayRollDN> = flow {
+        val remoteData = pensionRemoteDataSource.getPensionerPayRoll(filters)
         emit(remoteData.toDomain())
     }
 }
