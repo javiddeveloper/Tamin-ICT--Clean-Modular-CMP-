@@ -6,6 +6,8 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 
 class WorkShopsRepositoryImpl(
     private val remoteDataSource: WorkShopsRemoteDataSource
@@ -33,5 +35,27 @@ class WorkShopsRepositoryImpl(
                 total = it.total
             )
         }
+    }
+
+    override suspend fun getWorkshopDebit(
+        workshopId: String,
+        branchCode: String
+    ): WorkshopDebitListDN? {
+        val queryParam = ApiQueryParamDN()
+        val response = remoteDataSource.getWorkshopDebit(workshopId, branchCode, queryParam)
+        return response?.let {
+            WorkshopDebitListDN(
+                list = it.list?.map { item -> item.toDomain() },
+                total = it.total
+            )
+        }
+    }
+
+    override suspend fun getWorkshopDebtInquiry(
+        workshopId: String,
+        branchCode: String
+    ): WorkshopDebtInquiryDN? {
+        val response = remoteDataSource.getWorkshopDebtInquiry(workshopId, branchCode)
+        return response?.toDomain()
     }
 }

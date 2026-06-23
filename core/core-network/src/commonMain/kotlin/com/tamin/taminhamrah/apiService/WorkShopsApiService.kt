@@ -9,11 +9,14 @@ package com.tamin.taminhamrah.apiService
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebitDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Path
 import io.ktor.http.cio.Response
 
 internal interface WorkShopsApiService {
@@ -29,5 +32,17 @@ internal interface WorkShopsApiService {
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<PaymentSheetDTO>>
 
+    @GET("debit-online-payment/workshop-debit/{workshopId}/{branchCode}")
+    suspend fun getWorkshopDebit(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<WorkshopDebitDTO>>
+
+    @GET("workshop-services/workshop-debit/{workshopId}/{branchCode}")
+    suspend fun getWorkshopDebtInquiry(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String
+    ): BaseDTO<WorkshopDebtInquiryDTO>
 
 }
