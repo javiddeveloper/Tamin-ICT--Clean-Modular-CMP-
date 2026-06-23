@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components
+package com.tamin.taminhamrah.model.studentContract
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

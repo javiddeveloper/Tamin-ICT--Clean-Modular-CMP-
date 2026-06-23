@@ -1,5 +1,11 @@
 package com.tamin.taminhamrah.model.contracts
 
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+@Immutable
 data class RegistrationInfoPR(
     val fullName: String,
     val nationalId: String,

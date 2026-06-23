@@ -18,7 +18,7 @@ class PersonalInboxApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<PersonalInboxApiService>()
+        val apiService = ktorfit.createPersonalInboxApiService()
 
         val response = apiService.getInboxItems(emptyMap())
 
@@ -45,7 +45,7 @@ class PersonalInboxApiServiceTest : BaseApiTest() {
     @Test
     fun `getInboxSize should return personal inbox size`() = runTest {
         val ktorfit = createMockKtorfit(PersonalInboxTestData.inboxSizeSuccess)
-        val apiService = ktorfit.create<PersonalInboxApiService>()
+        val apiService = ktorfit.createPersonalInboxApiService()
 
         val response = apiService.getInboxSize()
 

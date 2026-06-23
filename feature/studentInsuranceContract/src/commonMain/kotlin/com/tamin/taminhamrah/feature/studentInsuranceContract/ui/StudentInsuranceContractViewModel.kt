@@ -27,6 +27,8 @@ import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase

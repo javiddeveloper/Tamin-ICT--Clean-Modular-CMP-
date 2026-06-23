@@ -52,14 +52,16 @@ import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.ContractApplicantStepContent
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.ContractTermsStepContent
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.InsurancePremiumStepContent
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.PremiumSalaryStepContent
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.SelectBranchStepContent
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.SubmitContractStepContent
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.UserInfoStepContent
+import com.tamin.taminhamrah.model.studentContract.ContractApplicantStepContent
+import com.tamin.taminhamrah.model.studentContract.ContractTermsStepContent
+import com.tamin.taminhamrah.model.studentContract.InsurancePremiumStepContent
+import com.tamin.taminhamrah.model.studentContract.PremiumSalaryStepContent
+import com.tamin.taminhamrah.model.studentContract.SelectBranchStepContent
+import com.tamin.taminhamrah.model.studentContract.SubmitContractStepContent
+import com.tamin.taminhamrah.model.studentContract.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
 import org.koin.compose.viewmodel.koinViewModel
 
 

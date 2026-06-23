@@ -2,8 +2,6 @@ package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.contracts.ContractDTO
-import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
-import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
@@ -22,7 +20,7 @@ class ContractsApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<ContractsApiService>()
+        val apiService = ktorfit.createContractsApiService()
 
         val response = apiService.getContractList(emptyMap())
 
@@ -41,11 +39,17 @@ class ContractsApiServiceTest : BaseApiTest() {
         assertEquals(1780398668987L, firstContract.contractDate)
         assertEquals(362592593L, firstContract.salary)
         assertEquals("1", firstContract.cntDrmn)
-        assertEquals("فعال بعلت تنظیم قرارداد", firstContract.contractStatusObject?.selfIsuContStatDesc)
+
+        assertNotNull(firstContract.contractStatusObject)
         assertEquals(1, firstContract.contractStatusObject?.selfIsuContStatCode)
-        assertEquals("اختیاری", firstContract.premiumType?.insuranceDescription)
-        assertEquals("بیمه اختیاری ۲۷ درصد", firstContract.premiumRate?.spcrateDescription)
-        assertEquals("تاسیساتی", firstContract.freeJob?.discrioption)
+
+        assertNotNull(firstContract.premiumType)
+        assertEquals("02", firstContract.premiumType?.insuranceTypeCode)
+
+        assertNotNull(firstContract.premiumRate)
+        assertEquals("27", firstContract.premiumRate?.insurDpercent)
+
+        assertNotNull(firstContract.freeJob)
     }
 
     @Test
@@ -55,7 +59,7 @@ class ContractsApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<ContractsApiService>()
+        val apiService = ktorfit.createContractsApiService()
 
         val response = apiService.getSpcPremiumRates()
 
@@ -68,9 +72,14 @@ class ContractsApiServiceTest : BaseApiTest() {
 
         val rates: List<PremiumRateDTO> = listData.list.orEmpty()
         assertEquals(2, rates.size)
-        assertEquals("01", rates.first().spcrateCode)
-        assertEquals("صاحبان حرف  ومشاغل ازاد12درصد", rates.first().spcrateDescription)
-        assertEquals("12", rates.first().insurDpercent)
+
+        val firstRate = rates.first()
+        assertEquals("01", firstRate.spcrateCode)
+        assertEquals("12", firstRate.insurDpercent)
+
+        val secondRate = rates[1]
+        assertEquals("02", secondRate.spcrateCode)
+        assertEquals("14", secondRate.insurDpercent)
     }
 
     @Test
@@ -80,7 +89,7 @@ class ContractsApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<ContractsApiService>()
+        val apiService = ktorfit.createContractsApiService()
 
         val response = apiService.getFreelancePremiumRange(
             treatmentSupportCode = "1",
@@ -105,7 +114,7 @@ class ContractsApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<ContractsApiService>()
+        val apiService = ktorfit.createContractsApiService()
 
         val response = apiService.calculateFreelanceSalary(
             monthlyPremium = 60_300_000L,

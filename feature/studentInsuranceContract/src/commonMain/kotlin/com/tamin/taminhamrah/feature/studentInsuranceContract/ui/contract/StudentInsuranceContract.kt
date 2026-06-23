@@ -1,12 +1,12 @@
 package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract
 
 import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
 import com.tamin.taminhamrah.model.studentContract.ContractEligibilityPR
 import com.tamin.taminhamrah.model.studentContract.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.studentContract.FreelancePremiumRangePR
 import com.tamin.taminhamrah.model.studentContract.SpcPremiumRateOptionPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.StudentInsuranceContractStep
+import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
 import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
@@ -53,7 +53,7 @@ data class StudentInsuranceContractUiState(
                 registrationInfo != null && eligibility != null
             StudentInsuranceContractStep.STEP_AUTHORIZATION -> eligibility?.isEligible == true
             StudentInsuranceContractStep.STEP_CONTRACT_TERMS -> isRulesConfirmed
-            StudentInsuranceContractStep.STEP_USER_INFO -> userInfo.isValid
+            StudentInsuranceContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
             StudentInsuranceContractStep.STEP_CONTRACT_APPLICANT -> true
             StudentInsuranceContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
             StudentInsuranceContractStep.STEP_UPLOAD_IMAGE,
@@ -116,3 +116,10 @@ sealed class StudentInsuranceContractIntent {
 }
 
 sealed class StudentInsuranceContractEvent
+
+internal fun isUserInfoStepComplete(userInfo: UserInfoFormPR): Boolean =
+    userInfo.cityCode.isNotBlank() &&
+        userInfo.cityName.isNotBlank() &&
+        userInfo.address.isNotBlank() &&
+        userInfo.zipCode.length >= 10 &&
+        userInfo.phoneNumber.isNotBlank()

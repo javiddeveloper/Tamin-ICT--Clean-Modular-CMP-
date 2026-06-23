@@ -15,13 +15,6 @@ data class UserInfoFormPR(
     val mobileNumber: String = "",
     val showMobile: Boolean = false,
 ) {
-    val isValid: Boolean
-        get() = cityCode.isNotBlank() &&
-            cityName.isNotBlank() &&
-            address.isNotBlank() &&
-            zipCode.length >= 10 &&
-            phoneNumber.isNotBlank()
-
     companion object {
         fun fromRegistration(info: RegistrationInfoPR): UserInfoFormPR = UserInfoFormPR(
             address = info.address,

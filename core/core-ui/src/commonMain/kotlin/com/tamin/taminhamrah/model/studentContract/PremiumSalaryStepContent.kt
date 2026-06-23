@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components
+package com.tamin.taminhamrah.model.studentContract
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.model.studentContract.FreelancePremiumRangePR
 
 @Composable
 fun PremiumSalaryStepContent(
