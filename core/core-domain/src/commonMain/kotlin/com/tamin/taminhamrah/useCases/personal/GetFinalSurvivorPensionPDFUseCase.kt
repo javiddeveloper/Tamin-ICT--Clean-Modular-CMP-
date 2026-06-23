@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class GetFinalSurvivorPensionPDFUseCase(
     private val personalRepository: PersonalRepository
 ) {
-    operator fun invoke(token: String): Flow<PdfDownloadDN> {
-        return personalRepository.getFinalSurvivorPensionPDF(token)
+    operator fun invoke(): Flow<PdfDownloadDN> {
+        return personalRepository.getFinalSurvivorPensionPDF()
     }
 }

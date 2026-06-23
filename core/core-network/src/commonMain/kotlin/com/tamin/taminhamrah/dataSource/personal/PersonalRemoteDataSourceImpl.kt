@@ -132,9 +132,9 @@ class PersonalRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getFinalSurvivorPensionPDF(token: String): PdfDownloadDTO {
+    override suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO {
         return try {
-            val response = personalApiService.getFinalSurvivorPensionPDF(token)
+            val response = personalApiService.getFinalSurvivorPensionPDF()
             PdfDownloadDTO(
                 pdf = InputStreamDTO(
                     pdf = response.bodyAsChannel()

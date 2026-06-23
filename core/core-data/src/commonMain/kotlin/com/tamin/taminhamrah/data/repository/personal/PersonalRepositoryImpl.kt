@@ -95,8 +95,8 @@ class PersonalRepositoryImpl(
 
     }
 
-    override fun getFinalSurvivorPensionPDF(token: String): Flow<PdfDownloadDN> = flow {
-        emit(personalRemoteDataSource.getFinalSurvivorPensionPDF(token).toDomain())
+    override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = flow {
+        emit(personalRemoteDataSource.getFinalSurvivorPensionPDF().toDomain())
     }
 
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {

@@ -21,5 +21,5 @@ interface PersonalRepository {
     fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>>
     fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionDN): Flow<String?>
     fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?>
-    fun getFinalSurvivorPensionPDF(token: String): Flow<PdfDownloadDN>
+    fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN>
 }

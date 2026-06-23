@@ -66,7 +66,6 @@ interface PersonalApiService {
 
     @GET("survivor-request/final-report")
     suspend fun getFinalSurvivorPensionPDF(
-        token: String
     ): HttpResponse
 
 }
