@@ -1,9 +1,11 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model
+package com.tamin.taminhamrah.model.studentContract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import kotlinx.serialization.Serializable
 
 @Immutable
+@Serializable
 data class UserInfoFormPR(
     val cityCode: String = "",
     val cityName: String = "",

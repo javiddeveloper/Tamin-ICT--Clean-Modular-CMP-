@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step
+package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.ContractApplicantType
 
 @Composable
 fun ContractApplicantStepContent(

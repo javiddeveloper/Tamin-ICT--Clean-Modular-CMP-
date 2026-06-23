@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.apiService.request
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
+import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.UserRequestTestData

@@ -21,10 +21,8 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.model.studentContract.SpcPremiumRateOptionPR
+import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN

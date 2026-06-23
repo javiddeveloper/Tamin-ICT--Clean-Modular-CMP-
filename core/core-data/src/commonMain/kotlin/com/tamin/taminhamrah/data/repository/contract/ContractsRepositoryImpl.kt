@@ -140,10 +140,6 @@ class ContractsRepositoryImpl(
     )
 
     private companion object {
-        /**
-         * Legacy Tamin Hamrah student insurance flow queries list-contracts-mobile
-         * with premiumTypeCode "01" (حرف و مشاغل آزاد). Step-2 eligibilityStatus comes from this response.
-         */
         const val FREELANCE_PREMIUM_TYPE_CODE = "01"
     }
 }

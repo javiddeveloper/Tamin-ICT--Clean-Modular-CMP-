@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.step
+package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,8 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.components.SelectableField
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
 import com.tamin.taminhamrah.model.common.CityPR
 
 @Composable

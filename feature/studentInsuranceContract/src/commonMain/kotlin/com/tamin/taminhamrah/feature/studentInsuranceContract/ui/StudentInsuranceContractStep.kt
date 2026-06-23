@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model
+package com.tamin.taminhamrah.feature.studentInsuranceContract.ui
 
 enum class StudentInsuranceContractStep(
     val title: String,

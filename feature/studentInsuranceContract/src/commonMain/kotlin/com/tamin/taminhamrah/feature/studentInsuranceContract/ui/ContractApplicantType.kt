@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model
+package com.tamin.taminhamrah.feature.studentInsuranceContract.ui
 
 enum class ContractApplicantType(val label: String) {
     PERSONAL("متقاضی شخصا قرارداد منعقد می نماید"),

@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.mapper
 
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,8 +1,10 @@
-package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model
+package com.tamin.taminhamrah.model.studentContract
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
 @Immutable
+@Serializable
 data class ContractEligibilityPR(
     val statusCode: Int,
     val isEligible: Boolean,

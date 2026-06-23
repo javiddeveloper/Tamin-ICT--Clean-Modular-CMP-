@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.apiService.request
+package com.tamin.taminhamrah.apiService.userRequest
 
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO

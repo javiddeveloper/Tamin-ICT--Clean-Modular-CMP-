@@ -1,13 +1,13 @@
 package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract
 
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.BranchSelectionFormPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractApplicantType
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.ContractEligibilityPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.FreelanceContractResultPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.FreelancePremiumRangePR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.SpcPremiumRateOptionPR
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.StudentInsuranceContractStep
-import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.model.UserInfoFormPR
+import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.ContractEligibilityPR
+import com.tamin.taminhamrah.model.studentContract.FreelanceContractResultPR
+import com.tamin.taminhamrah.model.studentContract.FreelancePremiumRangePR
+import com.tamin.taminhamrah.model.studentContract.SpcPremiumRateOptionPR
+import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.StudentInsuranceContractStep
+import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
@@ -62,7 +62,6 @@ data class StudentInsuranceContractUiState(
             StudentInsuranceContractStep.STEP_INSURANCE_PREMIUM -> selectedPremiumRateCode != null
             StudentInsuranceContractStep.STEP_SALARY -> isPremiumCalculated
             StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT -> submittedContract != null
-            else -> false
         }
 
     sealed class PartialState {
