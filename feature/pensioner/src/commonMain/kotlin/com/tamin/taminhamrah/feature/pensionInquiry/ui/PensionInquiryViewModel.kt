@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -36,6 +37,7 @@ class PensionInquiryViewModel(
     private val getAgeUseCase: GetAgeUseCase,
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val getConfirmSurvivorsListUseCase: GetConfirmSurvivorsListUseCase,
+    private val getPensionerPayRollUseCase: GetPensionerPayRollUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -57,6 +59,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadAge -> handleLoadAge(intent.birthDate)
             is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
             is PensionInquiryIntent.LoadConfirmSurvivorsList -> handleLoadConfirmSurvivorsList()
+            is PensionInquiryIntent.LoadPensionerPayRoll -> handleLoadPensionerPayRoll(intent.filters)
+        }
+    }
+
+    private fun handleLoadPensionerPayRoll(filters: List<ApiFilterDN>): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getPensionerPayRollUseCase(filters).collect { payRoll ->
+                emit(PartialState.PayRollLoaded(payRoll.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -236,6 +250,10 @@ class PensionInquiryViewModel(
         is PartialState.AgeLoaded -> currentState.copy(
             isLoading = false,
             age = partialState.age
+        )
+        is PartialState.PayRollLoaded -> currentState.copy(
+            isLoading = false,
+            payRoll = partialState.payRoll
         )
     }
 

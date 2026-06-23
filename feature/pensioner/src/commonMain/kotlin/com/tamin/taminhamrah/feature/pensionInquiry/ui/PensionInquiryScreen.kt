@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.model.common.BeneficiaryPR
 import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.model.pension.PayRollPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.AgePR
@@ -37,6 +38,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityDependentInfo)
         viewModel.sendIntent(PensionInquiryIntent.LoadConfirmSurvivorsList)
         viewModel.sendIntent(PensionInquiryIntent.LoadAge(1379L))
+        viewModel.sendIntent(PensionInquiryIntent.LoadPensionerPayRoll(emptyList()))
     }
 
     PensionInquiryContent(state)
@@ -184,6 +186,17 @@ fun PensionInquiryContent(
                         }
                         items(state.confirmSurvivorsList) { item ->
                             ConfirmSurvivorItem(item)
+                        }
+                    }
+
+                    if (state.payRoll != null) {
+                        item {
+                            Text(
+                                text = "فیش حقوقی:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                            PayRollItem(state.payRoll)
                         }
                     }
                 }
@@ -344,6 +357,23 @@ fun BeneficiaryItem(item: BeneficiaryPR) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "نام بانک: ${item.bankName}", style = MaterialTheme.typography.titleMedium)
             Text(text = "کد بانک: ${item.bankCode}")
+        }
+    }
+}
+
+@Composable
+fun PayRollItem(item: PayRollPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "توضیحات: ${item.tprDesc}", style = MaterialTheme.typography.titleMedium)
+            Text(text = "مبلغ کل: ${item.sumAmount}")
+            Text(text = "مبلغ قابل پرداخت: ${item.sumPay}")
+            Text(text = "سال: ${item.hisYear} ماه: ${item.hisMon}")
+            Text(text = "نوع: ${item.clpType}")
         }
     }
 }
