@@ -52,6 +52,9 @@ object ContractsTestData {
 object PensionTestData {
     val payrollSuccess: String
         get() = readResourceFile("mocks/pension_payroll_success.json")
+
+    val userAgeSuccess: String
+        get() = """{"age": "30", "birthDate": "1370/01/01"}"""
 }
 
 object WorkshopTestData {

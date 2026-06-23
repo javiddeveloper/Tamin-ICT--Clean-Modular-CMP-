@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,7 @@ class FakePensionRepository : PensionRepository {
     var edictPensionerResult: EdictPensionerDN? = null
     var deferredInstallmentCertificateResult: DeferredInstallmentCertificateDN? = null
     var payRollResult: PayRollDN? = null
+    var userAgeResult: AgeDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -58,4 +60,10 @@ class FakePensionRepository : PensionRepository {
         emit(payRollResult!!)
     }
 
+    override suspend fun getUserAge(filters: List<ApiFilterDN>): Flow<AgeDN> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(userAgeResult!!)
+    }
 }
