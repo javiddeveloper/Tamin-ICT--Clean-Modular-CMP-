@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
@@ -31,6 +32,7 @@ class PensionInquiryViewModel(
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase,
     private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
     private val getBeneficiaryUseCase: GetBeneficiaryUseCase,
+    private val getDeceasedInfoUseCase: GetDeceasedInfoUseCase,
     private val getAgeUseCase: GetAgeUseCase,
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val getConfirmSurvivorsListUseCase: GetConfirmSurvivorsListUseCase,
@@ -51,6 +53,7 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadRecipients -> handleLoadRecipients()
             is PensionInquiryIntent.LoadBeneficiaryList -> handleLoadBeneficiaryList()
             is PensionInquiryIntent.LoadPersonalInfo -> handleLoadPersonalInfo()
+            is PensionInquiryIntent.LoadDeceasedInfo -> handleLoadDeceasedInfo(intent.nationalId)
             is PensionInquiryIntent.LoadAge -> handleLoadAge(intent.birthDate)
             is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
             is PensionInquiryIntent.LoadConfirmSurvivorsList -> handleLoadConfirmSurvivorsList()
@@ -116,7 +119,11 @@ class PensionInquiryViewModel(
         emit(PartialState.Loading(true))
         try {
             getPensionInquiryUseCase().collect { list ->
-                emit(PartialState.PensionListLoaded(list.toPresentation()))
+                val presentationList = list.toPresentation()
+                emit(PartialState.PensionListLoaded(presentationList))
+                if (presentationList.isNotEmpty()) {
+                    sendIntent(PensionInquiryIntent.LoadDeceasedInfo(presentationList.first().nationalId))
+                }
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -170,6 +177,17 @@ class PensionInquiryViewModel(
         }
     }
 
+    private fun handleLoadDeceasedInfo(nationalId: String): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getDeceasedInfoUseCase(nationalId).collect { deceasedInfo ->
+                emit(PartialState.DeceasedInfoLoaded(deceasedInfo.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
     override fun reduceState(
         currentState: PensionInquiryUiState,
         partialState: PartialState
@@ -202,6 +220,10 @@ class PensionInquiryViewModel(
         is PartialState.BeneficiaryListLoaded -> currentState.copy(
             isLoading = false,
             beneficiaryList = partialState.list
+        )
+        is PartialState.DeceasedInfoLoaded -> currentState.copy(
+            isLoading = false,
+            deceasedInfo = partialState.deceasedInfo
         )
         is PartialState.DisabilityDependentInfoLoaded -> currentState.copy(
             isLoading = false,

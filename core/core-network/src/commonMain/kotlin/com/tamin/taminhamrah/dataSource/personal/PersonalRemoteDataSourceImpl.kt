@@ -2,10 +2,12 @@ package com.tamin.taminhamrah.dataSource.personal
 
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
@@ -23,6 +25,23 @@ class PersonalRemoteDataSourceImpl(
         return try {
             val response = personalApiService.getPersonalInfo()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getDeceasedInfo(nationalId: String): DeceasedInfoDTO {
+        return try {
+            val response = personalApiService.getDeceasedInfo(nationalId)
+            val data = response.extractData()
+            if (data.related == "0") {
+                throw TaminErrorUriException(ErrorUri.RESOURCE_NOT_FOUND)
+            }
+            data
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -60,6 +79,25 @@ class PersonalRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String
+    ): String? {
+        return try {
+            val response = personalApiService.checkGirlSurvivorConditions(
+                nationalCode = nationalCode,
+                pensionerId = pensionerId
+            )
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO> {
         return try {
             val response = personalApiService.confirmSurvivorsList(
@@ -81,6 +119,19 @@ class PersonalRemoteDataSourceImpl(
     ): String? {
         return try {
             val response = personalApiService.submitFinalSurvivorPension(requestId, body)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
+    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String? {
+        return try {
+            val response = personalApiService.saveSurvivorInfo(body)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
