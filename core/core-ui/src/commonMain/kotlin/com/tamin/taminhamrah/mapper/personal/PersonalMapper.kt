@@ -28,6 +28,10 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypePR
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
 import kotlin.jvm.JvmName
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
@@ -224,5 +228,17 @@ fun PensionDocDN.toPresentation(): PensionDocPR {
 fun GirlSurvivorConditionDN.toPresentation(): GirlSurvivorConditionPR {
     return GirlSurvivorConditionPR(
         condition = condition
+    )
+}
+
+fun PdfDownloadDN.toPresentation(): PdfDownloadPR {
+    return PdfDownloadPR(
+        pdf = pdf?.toPresentation()
+    )
+}
+
+fun InputStreamDN.toPresentation(): InputStreamPR {
+    return InputStreamPR(
+        pdf = pdf
     )
 }

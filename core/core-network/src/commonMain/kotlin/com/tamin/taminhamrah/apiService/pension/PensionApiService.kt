@@ -15,6 +15,8 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Streaming
+import io.ktor.client.statement.HttpStatement
 
 
 interface PensionApiService {
@@ -50,5 +52,14 @@ interface PensionApiService {
     suspend fun getUserAge(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<AgeDTO>
+
+    @Streaming
+    @GET("fish/report")
+    suspend fun pensionerPayRollPDF(
+        @QueryMap parameters: Map<String, String>
+    ): HttpStatement
+
+
+
 
 }

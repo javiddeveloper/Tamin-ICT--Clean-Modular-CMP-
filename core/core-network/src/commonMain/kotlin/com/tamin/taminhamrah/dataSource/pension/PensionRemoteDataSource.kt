@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertif
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
@@ -29,5 +30,7 @@ interface PensionRemoteDataSource {
     suspend fun getUserAge(
         filter: List<ApiFilterDN>
     ): AgeDTO
+    suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
+
 
 }

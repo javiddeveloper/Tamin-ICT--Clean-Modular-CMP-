@@ -36,5 +36,9 @@ interface PensionRepository {
     suspend fun getUserAge(
         filters: List<ApiFilterDN>
     ): Flow<AgeDN>
+
+    suspend fun pensionerPayRollPDF(
+        filters: List<ApiFilterDN>
+    ): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN>
 }
 
