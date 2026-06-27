@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.common.RecipientDN
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.installment.*
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
@@ -184,5 +185,12 @@ fun PayRollDN.toPresentation(): PayRollPR {
         hisYearPlus = hisYearPlus ?: "",
         hisMonPlus = hisMonPlus ?: "",
         hisDayPlus = hisDayPlus ?: ""
+    )
+}
+
+fun RetirementStatusDN.toPresentation(): RetirementStatusPR {
+    return RetirementStatusPR(
+        requestId = requestId ?: "",
+        requestStatusCode = requestStatusCode ?: ""
     )
 }

@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
@@ -50,5 +51,9 @@ interface PensionApiService {
     @GET("disability-request/personal")
     suspend fun getDisabilityPersonalInfo(
     ): BaseDTO<DisabilityPersonalInfoDTO>
+
+    @GET("pension-request/checkRequests")
+    suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>
+
 
 }
