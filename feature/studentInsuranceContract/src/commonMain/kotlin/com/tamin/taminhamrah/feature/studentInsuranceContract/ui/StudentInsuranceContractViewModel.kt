@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.model.studentContract.UploadImagePR
 import com.tamin.taminhamrah.model.studentContract.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
@@ -28,11 +29,17 @@ import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.InsuranceContractKind
 import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
+import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetFreeJobWagesUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -45,7 +52,10 @@ class StudentInsuranceContractViewModel(
     private val getSpcPremiumRatesUseCase: GetSpcPremiumRatesUseCase,
     private val getFreelancePremiumRangeUseCase: GetFreelancePremiumRangeUseCase,
     private val calculateFreelanceSalaryUseCase: CalculateFreelanceSalaryUseCase,
+    private val calculateOptionalSalaryUseCase: CalculateOptionalSalaryUseCase,
+    private val getFreeJobWagesUseCase: GetFreeJobWagesUseCase,
     private val makeFreelanceContractUseCase: MakeFreelanceContractUseCase,
+    private val uploadImageUseCase: UploadImageUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
     PartialState,
@@ -56,7 +66,7 @@ class StudentInsuranceContractViewModel(
 ) {
     override fun handleIntent(intent: StudentInsuranceContractIntent): Flow<PartialState> {
         return when (intent) {
-            StudentInsuranceContractIntent.LoadInitialData -> handleLoadInitialData()
+            is StudentInsuranceContractIntent.LoadInitialData -> handleLoadInitialData(intent.kind)
             StudentInsuranceContractIntent.GoToNextStep -> handleGoToNextStep()
             StudentInsuranceContractIntent.GoToPreviousStep -> handleGoToPreviousStep()
             is StudentInsuranceContractIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
@@ -65,7 +75,11 @@ class StudentInsuranceContractViewModel(
             is StudentInsuranceContractIntent.SelectBranchProvince -> handleSelectBranchProvince(intent.province)
             is StudentInsuranceContractIntent.SelectBranchCity -> handleSelectBranchCity(intent.city)
             is StudentInsuranceContractIntent.SelectBranch -> handleSelectBranch(intent.branch)
+            is StudentInsuranceContractIntent.UpdateDocumentDescription -> handleUpdateDocumentDescription(intent.description)
+            is StudentInsuranceContractIntent.UploadPickedImage -> handleUploadPickedImage(intent.fileName, intent.bytes)
+            StudentInsuranceContractIntent.ClearUploadedDocument -> handleClearUploadedDocument()
             is StudentInsuranceContractIntent.SelectPremiumRate -> handleSelectPremiumRate(intent.rate)
+            is StudentInsuranceContractIntent.SelectFreeJob -> handleSelectFreeJob(intent.job)
             is StudentInsuranceContractIntent.SelectMonthlyPremium -> handleSelectMonthlyPremium(intent.amount)
             StudentInsuranceContractIntent.CalculateMonthlyPremium -> handleCalculateMonthlyPremium()
             is StudentInsuranceContractIntent.SetAgreementConfirmed -> handleSetAgreementConfirmed(intent.confirmed)
@@ -73,13 +87,29 @@ class StudentInsuranceContractViewModel(
         }
     }
 
-    private fun handleLoadInitialData(): Flow<PartialState> = merge(
+    private fun handleLoadInitialData(kind: InsuranceContractKind): Flow<PartialState> = merge(
+        flow { emit(PartialState.ContractKindChanged(kind)) },
         loadRegistrationInfo(),
-        loadContracts(),
+        loadContracts(kind),
         loadCities(),
         loadProvinces(),
-        loadPremiumRates(),
+        loadPremiumRates(kind),
+        loadFreeJobsIfNeeded(kind),
     )
+
+    private fun loadFreeJobsIfNeeded(kind: InsuranceContractKind): Flow<PartialState> = flow {
+        if (!kind.requiresFreeJob) return@flow
+        emit(PartialState.FreeJobsLoading(true))
+        try {
+            getFreeJobWagesUseCase().collect { jobs ->
+                emit(PartialState.FreeJobsLoaded(jobs))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.FreeJobsLoading(false))
+        }
+    }
 
     private fun loadRegistrationInfo(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
@@ -94,9 +124,9 @@ class StudentInsuranceContractViewModel(
         }
     }
 
-    private fun loadContracts(): Flow<PartialState> = flow {
+    private fun loadContracts(kind: InsuranceContractKind): Flow<PartialState> = flow {
         try {
-            getContractsUseCase.studentInsuranceContracts().collect { contracts ->
+            getContractsUseCase.contractsByPremiumType(kind.premiumTypeCode).collect { contracts ->
                 emit(PartialState.EligibilityLoaded(contracts.resolveEligibility()))
                 emit(PartialState.ContractsLoaded(contracts.toPresentation()))
             }
@@ -131,11 +161,14 @@ class StudentInsuranceContractViewModel(
         }
     }
 
-    private fun loadPremiumRates(): Flow<PartialState> = flow {
+    private fun loadPremiumRates(kind: InsuranceContractKind): Flow<PartialState> = flow {
         emit(PartialState.PremiumRatesLoading(true))
         try {
             getSpcPremiumRatesUseCase().collect { rates ->
-                emit(PartialState.PremiumRatesLoaded(rates.toSpcPremiumRateOptions()))
+                val filteredRates = rates
+                    .filter { it.selfIsuTypeCode == kind.premiumTypeCode }
+                    .ifEmpty { rates }
+                emit(PartialState.PremiumRatesLoaded(filteredRates.toSpcPremiumRateOptions()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -179,24 +212,25 @@ class StudentInsuranceContractViewModel(
     }
 
     private fun handleGoToNextStep(): Flow<PartialState> {
-        val nextStep = uiState.value.currentStep.stepIndex
-            .let { StudentInsuranceContractStep.entries.firstOrNull { step -> step.stepIndex == it + 1 } }
-            ?: return flow { }
+        val kind = uiState.value.contractKind
+        val nextStep = kind.nextStep(uiState.value.currentStep) ?: return flow { }
         if (!uiState.value.canGoNext) return flow { }
 
         return merge(
             flow { emit(PartialState.StepChanged(nextStep)) },
-            if (nextStep == StudentInsuranceContractStep.STEP_SALARY) {
-                loadFreelancePremiumRange()
-            } else {
-                flow { }
+            when {
+                nextStep == StudentInsuranceContractStep.STEP_SALARY &&
+                    kind.usesFreelancePremiumRange -> loadFreelancePremiumRange()
+                nextStep == StudentInsuranceContractStep.STEP_SALARY &&
+                    kind == InsuranceContractKind.OPTIONAL -> loadOptionalSalary()
+                else -> flow { }
             },
         )
     }
 
     private fun handleGoToPreviousStep(): Flow<PartialState> = flow {
-        val previousStep = uiState.value.currentStep.stepIndex
-            .let { StudentInsuranceContractStep.entries.firstOrNull { step -> step.stepIndex == it - 1 } }
+        val previousStep = uiState.value.contractKind
+            .previousStep(uiState.value.currentStep)
             ?: return@flow
         emit(PartialState.StepChanged(previousStep))
     }
@@ -241,8 +275,62 @@ class StudentInsuranceContractViewModel(
         )
     }
 
+    private fun handleUpdateDocumentDescription(description: String): Flow<PartialState> = flow {
+        emit(PartialState.DocumentDescriptionChanged(description))
+    }
+
+    private fun handleUploadPickedImage(fileName: String, bytes: ByteArray): Flow<PartialState> = flow {
+        emit(PartialState.UploadDocumentError(null))
+        if (!isJpegFileName(fileName)) {
+            emit(PartialState.UploadDocumentError("فقط تصاویر با فرمت JPEG مجاز هستند."))
+            return@flow
+        }
+        emit(PartialState.DocumentPreviewSet(bytes))
+        emit(PartialState.UploadingDocument(true))
+        try {
+            val request = UploadImageRequestDN(
+                fileName = fileName,
+                bytes = bytes,
+                description = uiState.value.documentDescription.takeIf { it.isNotBlank() },
+            )
+            uploadImageUseCase(request).collect { imageId ->
+                emit(
+                    PartialState.DocumentUploaded(
+                        UploadImagePR(
+                            imageId = imageId,
+                            fileName = fileName,
+                            description = uiState.value.documentDescription,
+                        ),
+                    ),
+                )
+            }
+        } catch (e: Exception) {
+            emit(PartialState.UploadDocumentError(e.message ?: "خطا در بارگذاری تصویر"))
+        } finally {
+            emit(PartialState.UploadingDocument(false))
+        }
+    }
+
+    private fun handleClearUploadedDocument(): Flow<PartialState> = flow {
+        emit(PartialState.UploadedDocumentCleared)
+    }
+
+    private fun isJpegFileName(fileName: String): Boolean {
+        val lower = fileName.lowercase()
+        return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+    }
+
     private fun handleSelectPremiumRate(rate: SpcPremiumRateOptionPR): Flow<PartialState> = flow {
         emit(PartialState.PremiumRateSelected(rate.code))
+    }
+
+    private fun handleSelectFreeJob(job: FreeJobDN): Flow<PartialState> = flow {
+        emit(
+            PartialState.FreeJobSelected(
+                jobCode = job.jobCode.orEmpty(),
+                jobName = job.discrioption.orEmpty(),
+            ),
+        )
     }
 
     private fun loadFreelancePremiumRange(): Flow<PartialState> = flow {
@@ -263,14 +351,35 @@ class StudentInsuranceContractViewModel(
     }
 
     private fun buildPremiumRangeParams(): FreelancePremiumRangeParams? {
-        val insuranceId = uiState.value.registrationInfo?.insuranceId?.takeIf { it.isNotBlank() }
-            ?: return null
         val spcRateCode = uiState.value.selectedPremiumRateCode ?: return null
+        val lookupCode = when (uiState.value.contractKind) {
+            InsuranceContractKind.FREELANCE ->
+                uiState.value.selectedFreeJobCode?:""
+            InsuranceContractKind.STUDENT ->
+                uiState.value.registrationInfo?.insuranceId?:""
+            InsuranceContractKind.OPTIONAL -> null
+        } ?: return null
         return FreelancePremiumRangeParams(
             treatmentSupportCode = DEFAULT_TREATMENT_SUPPORT_CODE,
             spcRateCode = spcRateCode,
-            insuranceId = insuranceId,
+            freeJobCode = lookupCode,
         )
+    }
+
+    private fun loadOptionalSalary(): Flow<PartialState> = flow {
+        val premiumRateCode = uiState.value.selectedPremiumRateCode ?: return@flow
+        emit(PartialState.CalculatingPremium(true))
+        emit(PartialState.PremiumCalculated(false))
+        try {
+            calculateOptionalSalaryUseCase(premiumRateCode).collect { salary ->
+                emit(PartialState.CalculatedMonthlySalaryLoaded(salary))
+                emit(PartialState.PremiumCalculated(true))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.CalculatingPremium(false))
+        }
     }
 
     private fun handleSelectMonthlyPremium(amount: Long): Flow<PartialState> = flow {
@@ -278,6 +387,7 @@ class StudentInsuranceContractViewModel(
     }
 
     private fun handleCalculateMonthlyPremium(): Flow<PartialState> = flow {
+        if (!uiState.value.contractKind.usesFreelancePremiumRange) return@flow
         val params = buildCalculateSalaryParams() ?: return@flow
         emit(PartialState.CalculatingPremium(true))
         try {
@@ -321,9 +431,10 @@ class StudentInsuranceContractViewModel(
     }
 
     private fun buildMakeContractParams(): FreelanceMakeContractParams? {
+        if (uiState.value.contractKind != InsuranceContractKind.FREELANCE) return null
         val monthlyPremium = uiState.value.selectedMonthlyPremium ?: return null
         val premiumRateCode = uiState.value.selectedPremiumRateCode ?: return null
-        val insuranceId = uiState.value.registrationInfo?.insuranceId?.takeIf { it.isNotBlank() } ?: return null
+        val freeJobCode = uiState.value.selectedFreeJobCode?.takeIf { it.isNotBlank() } ?: return null
         val branch = uiState.value.branchSelection
         if (!branch.isValid) return null
         return FreelanceMakeContractParams(
@@ -332,7 +443,7 @@ class StudentInsuranceContractViewModel(
                 brchCodeNew = branch.branchCode,
                 cityCode = branch.cityCode,
                 cntDrmn = DEFAULT_TREATMENT_SUPPORT_CODE,
-                cntFreeJobCode = insuranceId,
+                cntFreeJobCode = freeJobCode,
                 guid = DEFAULT_APPLICANT_GUID,
                 guidName = DEFAULT_APPLICANT_GUID_NAME,
                 premiumRateCode = premiumRateCode,
@@ -409,6 +520,25 @@ class StudentInsuranceContractViewModel(
             isBranchesLoading = false,
             branches = partialState.branches,
         )
+        is PartialState.ContractKindChanged -> currentState.copy(
+            contractKind = partialState.kind,
+            currentStep = partialState.kind.steps.first(),
+        )
+        is PartialState.FreeJobsLoading -> currentState.copy(
+            isFreeJobsLoading = partialState.isLoading,
+        )
+        is PartialState.FreeJobsLoaded -> currentState.copy(
+            isFreeJobsLoading = false,
+            freeJobs = partialState.freeJobs,
+        )
+        is PartialState.FreeJobSelected -> currentState.copy(
+            selectedFreeJobCode = partialState.jobCode,
+            selectedFreeJobName = partialState.jobName,
+            premiumRange = null,
+            selectedMonthlyPremium = null,
+            calculatedMonthlySalary = null,
+            isPremiumCalculated = false,
+        )
         is PartialState.ContractApplicantTypeChanged -> currentState.copy(
             contractApplicantType = partialState.type,
         )
@@ -454,6 +584,27 @@ class StudentInsuranceContractViewModel(
         )
         is PartialState.ContractSubmitted -> currentState.copy(
             submittedContract = partialState.result,
+        )
+        is PartialState.DocumentDescriptionChanged -> currentState.copy(
+            documentDescription = partialState.description,
+        )
+        is PartialState.DocumentPreviewSet -> currentState.copy(
+            documentPreviewBytes = partialState.bytes,
+        )
+        is PartialState.UploadingDocument -> currentState.copy(
+            isUploadingDocument = partialState.isUploading,
+        )
+        is PartialState.UploadDocumentError -> currentState.copy(
+            uploadDocumentError = partialState.message,
+        )
+        is PartialState.DocumentUploaded -> currentState.copy(
+            uploadedDocuments = listOf(partialState.document),
+            uploadDocumentError = null,
+        )
+        PartialState.UploadedDocumentCleared -> currentState.copy(
+            documentPreviewBytes = null,
+            uploadedDocuments = emptyList(),
+            uploadDocumentError = null,
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,

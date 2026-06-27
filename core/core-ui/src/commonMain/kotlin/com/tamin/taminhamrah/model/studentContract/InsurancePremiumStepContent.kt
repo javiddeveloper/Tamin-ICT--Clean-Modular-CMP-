@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.model.contracts.FreeJobDN
 
 @Composable
 fun InsurancePremiumStepContent(
@@ -20,6 +21,12 @@ fun InsurancePremiumStepContent(
     selectedCode: String?,
     isLoading: Boolean,
     onRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    showFreeJobSelector: Boolean = false,
+    freeJobs: List<FreeJobDN> = emptyList(),
+    selectedFreeJobCode: String? = null,
+    selectedFreeJobName: String? = null,
+    isFreeJobsLoading: Boolean = false,
+    onFreeJobSelected: (FreeJobDN) -> Unit = {},
 ) {
     when {
         isLoading && premiumRates.isEmpty() -> {
@@ -35,6 +42,18 @@ fun InsurancePremiumStepContent(
 
         else -> {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (showFreeJobSelector) {
+                    SelectableField(
+                        label = "شغل",
+                        options = freeJobs,
+                        selectedCode = selectedFreeJobCode.orEmpty(),
+                        selectedName = selectedFreeJobName.orEmpty(),
+                        optionCode = { it.jobCode.orEmpty() },
+                        optionName = { it.discrioption.orEmpty() },
+                        isLoading = isFreeJobsLoading,
+                        onSelected = onFreeJobSelected,
+                    )
+                }
                 premiumRates.forEach { rate ->
                     Row(
                         modifier = Modifier

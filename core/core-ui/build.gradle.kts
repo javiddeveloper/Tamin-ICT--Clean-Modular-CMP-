@@ -21,6 +21,8 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime.compose)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.dialog.compose)
             implementation(libs.kotlinx.datetime)
         }
 

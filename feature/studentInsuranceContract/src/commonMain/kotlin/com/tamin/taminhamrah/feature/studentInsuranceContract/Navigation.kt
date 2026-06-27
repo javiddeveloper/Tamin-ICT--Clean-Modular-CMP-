@@ -3,18 +3,39 @@ package com.tamin.taminhamrah.feature.studentInsuranceContract
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.StudentInsuranceContractScreen
+import com.tamin.taminhamrah.model.studentContract.InsuranceContractKind
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object StudentInsuranceContractRoute
+data class StudentInsuranceContractRoute(
+    val kind: String = InsuranceContractKind.STUDENT.name,
+)
 
-fun NavController.navigateToStudentInsuranceContract() {
-    navigate(StudentInsuranceContractRoute)
+fun NavController.navigateToStudentInsuranceContract(
+    kind: InsuranceContractKind = InsuranceContractKind.STUDENT,
+) {
+    navigate(StudentInsuranceContractRoute(kind = kind.name))
+}
+
+fun NavController.navigateToFreelanceInsuranceContract() {
+    navigateToStudentInsuranceContract(InsuranceContractKind.FREELANCE)
+}
+
+fun NavController.navigateToOptionalInsuranceContract() {
+    navigateToStudentInsuranceContract(InsuranceContractKind.OPTIONAL)
 }
 
 fun NavGraphBuilder.studentInsuranceContractScreen(onBack: () -> Unit) {
-    composable<StudentInsuranceContractRoute> {
-        StudentInsuranceContractScreen(onBack = onBack)
+    composable<StudentInsuranceContractRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<StudentInsuranceContractRoute>()
+        val contractKind = InsuranceContractKind.entries
+            .firstOrNull { it.name == route.kind }
+            ?: InsuranceContractKind.STUDENT
+        StudentInsuranceContractScreen(
+            contractKind = contractKind,
+            onBack = onBack,
+        )
     }
 }

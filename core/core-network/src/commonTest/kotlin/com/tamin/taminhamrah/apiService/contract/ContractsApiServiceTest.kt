@@ -94,7 +94,7 @@ class ContractsApiServiceTest : BaseApiTest() {
         val response = apiService.getFreelancePremiumRange(
             treatmentSupportCode = "1",
             spcRateCode = "01",
-            insuranceId = "099796",
+            freeJobCode = "099796",
         )
 
         assertEquals(200, response.status)

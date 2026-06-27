@@ -7,8 +7,10 @@ import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.FreeJobDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 
@@ -19,8 +21,11 @@ interface ContractsRemoteDataSource {
     suspend fun getSpcPremiumRates(): ListData<PremiumRateDTO>
     suspend fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): FreelancePremiumRangeDTO
     suspend fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Long
+    suspend fun calculateOptionalSalary(premiumRateCode: String): Long
+    suspend fun getFreeJobWages(query: ApiQueryParamDN): ListData<FreeJobDTO>
     suspend fun makeFreelanceContract(
         monthlyPremium: Long,
         request: FreelanceMakeContractRequestDTO,
     ): FreelanceContractResultDTO
+    suspend fun uploadImage(request: UploadImageRequestDN): String?
 }

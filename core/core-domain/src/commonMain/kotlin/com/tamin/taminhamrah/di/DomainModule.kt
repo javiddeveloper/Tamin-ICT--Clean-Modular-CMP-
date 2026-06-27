@@ -37,7 +37,9 @@ import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetFreeJobWagesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
@@ -48,6 +50,7 @@ import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -99,7 +102,10 @@ val domainModule = module {
     factoryOf(::GetSpcPremiumRatesUseCase)
     factoryOf(::GetFreelancePremiumRangeUseCase)
     factoryOf(::CalculateFreelanceSalaryUseCase)
+    factoryOf(::CalculateOptionalSalaryUseCase)
     factoryOf(::MakeFreelanceContractUseCase)
+    factoryOf(::GetFreeJobWagesUseCase)
+    factoryOf(::UploadImageUseCase)
     factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
     factoryOf(::GetAllPaymentSheetsUseCase)
     factoryOf(::GetWorkshopDebitUseCase)
