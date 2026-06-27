@@ -2,9 +2,11 @@ package com.tamin.taminhamrah.feature.studentInsuranceContract.ui.contract
 
 import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
 import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.UploadImagePR
 import com.tamin.taminhamrah.model.studentContract.ContractEligibilityPR
 import com.tamin.taminhamrah.model.studentContract.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.studentContract.FreelancePremiumRangePR
+import com.tamin.taminhamrah.model.studentContract.InsuranceContractKind
 import com.tamin.taminhamrah.model.studentContract.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
 import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
@@ -12,6 +14,7 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.ContractPR
+import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 
 
@@ -23,6 +26,11 @@ data class StudentInsuranceContractUiState(
     val eligibility: ContractEligibilityPR? = null,
     val isRulesConfirmed: Boolean = false,
     val userInfo: UserInfoFormPR = UserInfoFormPR(),
+    val contractKind: InsuranceContractKind = InsuranceContractKind.STUDENT,
+    val freeJobs: List<FreeJobDN> = emptyList(),
+    val selectedFreeJobCode: String? = null,
+    val selectedFreeJobName: String? = null,
+    val isFreeJobsLoading: Boolean = false,
     val contractApplicantType: ContractApplicantType = ContractApplicantType.PERSONAL,
     val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
     val cities: List<CityPR> = emptyList(),
@@ -45,6 +53,11 @@ data class StudentInsuranceContractUiState(
     val isAgreementConfirmed: Boolean = false,
     val isSubmittingContract: Boolean = false,
     val submittedContract: FreelanceContractResultPR? = null,
+    val documentDescription: String = "",
+    val documentPreviewBytes: ByteArray? = null,
+    val uploadedDocuments: List<UploadImagePR> = emptyList(),
+    val isUploadingDocument: Boolean = false,
+    val uploadDocumentError: String? = null,
     val currentStep: StudentInsuranceContractStep = StudentInsuranceContractStep.STEP_REGISTRATION,
 ) {
     val canGoNext: Boolean
@@ -56,10 +69,13 @@ data class StudentInsuranceContractUiState(
             StudentInsuranceContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
             StudentInsuranceContractStep.STEP_CONTRACT_APPLICANT -> true
             StudentInsuranceContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
-            StudentInsuranceContractStep.STEP_UPLOAD_IMAGE,
-            StudentInsuranceContractStep.STEP_TREATMENT_SUPPORT,
-            -> true
-            StudentInsuranceContractStep.STEP_INSURANCE_PREMIUM -> selectedPremiumRateCode != null
+            StudentInsuranceContractStep.STEP_UPLOAD_IMAGE -> true
+            StudentInsuranceContractStep.STEP_TREATMENT_SUPPORT -> true
+            StudentInsuranceContractStep.STEP_INSURANCE_PREMIUM -> {
+                val hasPremiumRate = selectedPremiumRateCode != null
+                val hasFreeJob = !contractKind.requiresFreeJob || selectedFreeJobCode != null
+                hasPremiumRate && hasFreeJob
+            }
             StudentInsuranceContractStep.STEP_SALARY -> isPremiumCalculated
             StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT -> submittedContract != null
         }
@@ -80,6 +96,10 @@ data class StudentInsuranceContractUiState(
         data class BranchCitiesLoaded(val cities: List<CityPR>) : PartialState()
         data class BranchesLoading(val isLoading: Boolean) : PartialState()
         data class BranchesLoaded(val branches: List<BranchPR>) : PartialState()
+        data class ContractKindChanged(val kind: InsuranceContractKind) : PartialState()
+        data class FreeJobsLoading(val isLoading: Boolean) : PartialState()
+        data class FreeJobsLoaded(val freeJobs: List<FreeJobDN>) : PartialState()
+        data class FreeJobSelected(val jobCode: String, val jobName: String) : PartialState()
         data class ContractApplicantTypeChanged(val type: ContractApplicantType) : PartialState()
         data class BranchSelectionChanged(val branchSelection: BranchSelectionFormPR) : PartialState()
         data class PremiumRatesLoading(val isLoading: Boolean) : PartialState()
@@ -94,12 +114,18 @@ data class StudentInsuranceContractUiState(
         data class AgreementConfirmedChanged(val confirmed: Boolean) : PartialState()
         data class SubmittingContract(val isSubmitting: Boolean) : PartialState()
         data class ContractSubmitted(val result: FreelanceContractResultPR) : PartialState()
+        data class DocumentDescriptionChanged(val description: String) : PartialState()
+        data class DocumentPreviewSet(val bytes: ByteArray) : PartialState()
+        data class UploadingDocument(val isUploading: Boolean) : PartialState()
+        data class UploadDocumentError(val message: String?) : PartialState()
+        data class DocumentUploaded(val document: UploadImagePR) : PartialState()
+        data object UploadedDocumentCleared : PartialState()
         data class StepChanged(val step: StudentInsuranceContractStep) : PartialState()
     }
 }
 
 sealed class StudentInsuranceContractIntent {
-    data object LoadInitialData : StudentInsuranceContractIntent()
+    data class LoadInitialData(val kind: InsuranceContractKind) : StudentInsuranceContractIntent()
     data object GoToNextStep : StudentInsuranceContractIntent()
     data object GoToPreviousStep : StudentInsuranceContractIntent()
     data class SetRulesConfirmed(val confirmed: Boolean) : StudentInsuranceContractIntent()
@@ -108,7 +134,11 @@ sealed class StudentInsuranceContractIntent {
     data class SelectBranchProvince(val province: ProvincePR) : StudentInsuranceContractIntent()
     data class SelectBranchCity(val city: CityPR) : StudentInsuranceContractIntent()
     data class SelectBranch(val branch: BranchPR) : StudentInsuranceContractIntent()
+    data class UpdateDocumentDescription(val description: String) : StudentInsuranceContractIntent()
+    data class UploadPickedImage(val fileName: String, val bytes: ByteArray) : StudentInsuranceContractIntent()
+    data object ClearUploadedDocument : StudentInsuranceContractIntent()
     data class SelectPremiumRate(val rate: SpcPremiumRateOptionPR) : StudentInsuranceContractIntent()
+    data class SelectFreeJob(val job: FreeJobDN) : StudentInsuranceContractIntent()
     data class SelectMonthlyPremium(val amount: Long) : StudentInsuranceContractIntent()
     data object CalculateMonthlyPremium : StudentInsuranceContractIntent()
     data class SetAgreementConfirmed(val confirmed: Boolean) : StudentInsuranceContractIntent()

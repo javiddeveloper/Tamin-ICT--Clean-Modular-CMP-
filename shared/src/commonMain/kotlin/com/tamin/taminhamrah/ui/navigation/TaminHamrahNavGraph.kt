@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
+import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.openUrl
@@ -127,7 +129,13 @@ internal fun TaminHamrahNavGraph(
                         },
                         onNavigateToStudentInsuranceContract = {
                             navController.navigateToStudentInsuranceContract()
-                        }
+                        },
+                        onNavigateToFreelanceInsuranceContract = {
+                            navController.navigateToFreelanceInsuranceContract()
+                        },
+                        onNavigateToOptionalInsuranceContract = {
+                            navController.navigateToOptionalInsuranceContract()
+                        },
                     )
                 }
 
@@ -214,7 +222,9 @@ fun HomeScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToWorkshops: () -> Unit,
     onNavigateToContracts: () -> Unit,
-    onNavigateToStudentInsuranceContract: () -> Unit
+    onNavigateToStudentInsuranceContract: () -> Unit,
+    onNavigateToFreelanceInsuranceContract: () -> Unit,
+    onNavigateToOptionalInsuranceContract: () -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -271,6 +281,30 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text("انعقاد قرارداد بیمه دانشجویی", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToFreelanceInsuranceContract,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToOptionalInsuranceContract,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("انعقاد قرارداد بیمه اختیاری", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

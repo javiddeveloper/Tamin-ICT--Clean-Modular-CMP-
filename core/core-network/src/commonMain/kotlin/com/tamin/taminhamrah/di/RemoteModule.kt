@@ -121,4 +121,11 @@ val remoteModule = module {
             errorParser = get()
         )
     }
+
+    single<com.tamin.taminhamrah.dataSource.upload.UploadImageRemoteDataSource> {
+        com.tamin.taminhamrah.dataSource.upload.UploadImageRemoteDataSourceImpl(
+            contractsApiService = get(named("contractsApiService")),
+            errorParser = get(),
+        )
+    }
 }

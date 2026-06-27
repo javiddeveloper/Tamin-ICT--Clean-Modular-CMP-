@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
+import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
@@ -30,6 +31,16 @@ class FakeContractsRepository : ContractsRepository {
 
     override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow {
         lastQuery = query
+        if (shouldThrowError) throw error
+        emit(contractsResult)
+    }
+
+    var lastPremiumTypeCode: String? = null
+    var freeJobWagesResult: List<FreeJobDN> = emptyList()
+    var calculatedOptionalSalaryResult: Long? = null
+
+    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flow {
+        lastPremiumTypeCode = premiumTypeCode
         if (shouldThrowError) throw error
         emit(contractsResult)
     }
@@ -62,6 +73,11 @@ class FakeContractsRepository : ContractsRepository {
         emit(spcPremiumRatesResult)
     }
 
+    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(freeJobWagesResult)
+    }
+
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
         if (shouldThrowError) throw error
         emit(
@@ -77,6 +93,11 @@ class FakeContractsRepository : ContractsRepository {
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
         if (shouldThrowError) throw error
         emit(calculatedSalaryResult ?: 0L)
+    }
+
+    override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow {
+        if (shouldThrowError) throw error
+        emit(calculatedOptionalSalaryResult ?: 0L)
     }
 
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {

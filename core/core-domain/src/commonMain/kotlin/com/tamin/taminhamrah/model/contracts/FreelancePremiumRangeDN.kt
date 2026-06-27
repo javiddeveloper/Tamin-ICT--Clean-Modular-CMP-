@@ -10,5 +10,5 @@ data class FreelancePremiumRangeDN(
 data class FreelancePremiumRangeParams(
     val treatmentSupportCode: String,
     val spcRateCode: String,
-    val insuranceId: String,
+    val freeJobCode: String,
 )
