@@ -1,0 +1,38 @@
+{
+    "total": "1",
+    "list": [
+        {
+            "id": 12345,
+            "nationalCode": "0946168113",
+            "mobileNumber": "09123456789",
+            "email": null,
+            "read": "0",
+            "data": null,
+            "sentDate": 1780398668987,
+            "receiveDate": 1780398668987,
+            "seenDate": null,
+            "seen": false,
+            "hasImage": false,
+            "hasText": true,
+            "hasPDF": false,
+            "updateable": true,
+            "status": "1",
+            "refrenceId": null,
+            "pdf": null,
+            "type": {
+                "typeDesc": "سیستم تامین",
+                "typeCode": "01"
+            },
+            "subType": {
+                "typeDesc": "اعلامیه",
+                "typeCode": "02"
+            },
+            "permission": {
+                "password": 1234,
+                "dateFrom": null,
+                "dateTo": 1780398668987,
+                "id": 1
+            }
+        }
+    ]
+}
