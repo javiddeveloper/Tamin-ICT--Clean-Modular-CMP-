@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 
@@ -26,4 +27,5 @@ interface ContractsRemoteDataSource {
         monthlyPremium: Long,
         request: FreelanceMakeContractRequestDTO,
     ): FreelanceContractResultDTO
+    suspend fun uploadImage(request: UploadImageRequestDN): String?
 }

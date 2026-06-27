@@ -1,10 +1,9 @@
-package com.tamin.taminhamrah.useCases.uploadImage
+package com.tamin.taminhamrah.useCases.contracts
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.model.upload.UploadImageRequestDN
-import com.tamin.taminhamrah.repository.uploadImage.FakeUploadImageRepository
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.repository.contracts.FakeContractsRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
-import com.tamin.taminhamrah.useCases.upload.UploadImageUseCase
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -12,17 +11,17 @@ import kotlin.test.assertEquals
 
 class UploadImageUseCaseTest : BaseUseCaseTest() {
 
-    private lateinit var repository: FakeUploadImageRepository
+    private lateinit var repository: FakeContractsRepository
     private lateinit var useCase: UploadImageUseCase
 
     @BeforeTest
     fun setup() {
-        repository = FakeUploadImageRepository()
+        repository = FakeContractsRepository()
         useCase = UploadImageUseCase(repository)
     }
 
     @Test
-    fun `invoke should upload image and return result`() = runTest {
+    fun `invoke should upload image and return image id`() = runTest {
         val request = UploadImageRequestDN(
             fileName = "Image_Imp_0000.jpg",
             bytes = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte(), 0xD9.toByte()),
@@ -35,6 +34,6 @@ class UploadImageUseCaseTest : BaseUseCaseTest() {
             awaitComplete()
         }
 
-        assertEquals(request, repository.lastRequest)
+        assertEquals(request, repository.lastUploadImageRequest)
     }
 }

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.upload
+package com.tamin.taminhamrah.model.contracts
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

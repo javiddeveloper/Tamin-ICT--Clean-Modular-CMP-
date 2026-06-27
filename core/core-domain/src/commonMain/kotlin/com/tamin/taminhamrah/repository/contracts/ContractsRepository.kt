@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 
@@ -25,4 +26,5 @@ interface ContractsRepository {
     fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long>
     fun calculateOptionalSalary(premiumRateCode: String): Flow<Long>
     fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>
+    fun uploadImage(request: UploadImageRequestDN): Flow<String>
 }
