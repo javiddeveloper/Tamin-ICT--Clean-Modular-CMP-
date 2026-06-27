@@ -27,6 +27,7 @@ interface ContractsRepository {
     fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long>
     fun calculateOptionalSalary(premiumRateCode: String): Flow<Long>
     fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>
+    fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>
     fun uploadImage(request: UploadImageRequestDN): Flow<String>
     fun saveContact(request: SaveContactRequestDN): Flow<Any?>
 }

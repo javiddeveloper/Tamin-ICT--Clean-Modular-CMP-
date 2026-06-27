@@ -156,6 +156,24 @@ class ContractsRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun makeContract(
+        selectedSalary: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ): FreelanceContractResultDTO {
+        return try {
+            contractsApiService.makeContract(
+                selectedSalary = selectedSalary,
+                request = request,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun uploadImage(request: UploadImageRequestDN): String? {
         return try {
             val content = MultiPartFormDataContent(

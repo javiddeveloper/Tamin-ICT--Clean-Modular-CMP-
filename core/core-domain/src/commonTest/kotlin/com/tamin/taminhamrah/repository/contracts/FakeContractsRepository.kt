@@ -27,6 +27,7 @@ class FakeContractsRepository : ContractsRepository {
     var calculatedSalaryResult: Long? = null
     var makeContractResult: FreelanceContractResultDN? = null
     var lastMakeContractParams: FreelanceMakeContractParams? = null
+    var makeContractCalled = false
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
     var studentInsuranceContractsCalled = false
@@ -116,6 +117,19 @@ class FakeContractsRepository : ContractsRepository {
 
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
         lastMakeContractParams = params
+        makeContractCalled = false
+        if (shouldThrowError) throw error
+        emit(
+            makeContractResult ?: FreelanceContractResultDN(
+                contractNumber = null,
+                contractDate = null,
+            ),
+        )
+    }
+
+    override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
+        lastMakeContractParams = params
+        makeContractCalled = true
         if (shouldThrowError) throw error
         emit(
             makeContractResult ?: FreelanceContractResultDN(

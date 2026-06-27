@@ -28,6 +28,10 @@ interface ContractsRemoteDataSource {
         monthlyPremium: Long,
         request: FreelanceMakeContractRequestDTO,
     ): FreelanceContractResultDTO
+    suspend fun makeContract(
+        selectedSalary: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ): FreelanceContractResultDTO
     suspend fun uploadImage(request: UploadImageRequestDN): String?
     suspend fun saveContact(request: SaveContactRequestDTO): Any?
 }

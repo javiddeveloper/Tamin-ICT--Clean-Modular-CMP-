@@ -63,9 +63,17 @@ interface ContractsApiService {
         @QueryMap parameters: Map<String, String>,
     ): BaseDTO<ListData<FreeJobDTO>>
 
+    @Headers("Content-Type: application/json")
     @POST("special-insured-services/freelance-make-a-contract/{monthlyPremium}")
     suspend fun makeFreelanceContract(
         @Path("monthlyPremium") monthlyPremium: Long,
+        @Body request: FreelanceMakeContractRequestDTO,
+    ): BaseDTO<FreelanceContractResultDTO>
+
+    @Headers("Content-Type: application/json")
+    @POST("special-insured-services/make-a-contract/{selectedSalary}")
+    suspend fun makeContract(
+        @Path("selectedSalary") selectedSalary: Long,
         @Body request: FreelanceMakeContractRequestDTO,
     ): BaseDTO<FreelanceContractResultDTO>
 

@@ -395,7 +395,7 @@ private fun ContractStepper(
                                 submittedContract = state.submittedContract,
                                 onAgreementConfirmedChange = onAgreementConfirmedChange,
                                 onSubmit = onSubmitContract,
-                                canSubmit = state.contractKind == InsuranceContractKind.FREELANCE,
+                                canSubmit = true,
                             )
                         }
                     }

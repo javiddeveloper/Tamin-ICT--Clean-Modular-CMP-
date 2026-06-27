@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inbox
@@ -32,6 +34,7 @@ import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
+import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
@@ -136,6 +139,9 @@ internal fun TaminHamrahNavGraph(
                         onNavigateToOptionalInsuranceContract = {
                             navController.navigateToOptionalInsuranceContract()
                         },
+                        onNavigateToHousewifeInsuranceContract = {
+                            navController.navigateToHousewifeInsuranceContract()
+                        },
                     )
                 }
 
@@ -225,13 +231,14 @@ fun HomeScreen(
     onNavigateToStudentInsuranceContract: () -> Unit,
     onNavigateToFreelanceInsuranceContract: () -> Unit,
     onNavigateToOptionalInsuranceContract: () -> Unit,
+    onNavigateToHousewifeInsuranceContract: () -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("خانه", style = MaterialTheme.typography.titleLarge)
@@ -293,6 +300,18 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text("انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                onClick = onNavigateToHousewifeInsuranceContract,
+                modifier = Modifier.fillMaxWidth().height(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("انعقاد قرارداد بیمه زنان خانه‌دار", style = MaterialTheme.typography.titleMedium)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

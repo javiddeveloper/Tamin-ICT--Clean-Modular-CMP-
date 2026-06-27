@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.model.studentContract.UploadImagePR
 import com.tamin.taminhamrah.model.studentContract.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.studentContract.UserInfoFormPR
+import com.tamin.taminhamrah.model.contracts.ContractFreeJobCode
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
@@ -38,7 +39,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetFreeJobWagesUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
-import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
@@ -58,7 +59,7 @@ class StudentInsuranceContractViewModel(
     private val calculateFreelanceSalaryUseCase: CalculateFreelanceSalaryUseCase,
     private val calculateOptionalSalaryUseCase: CalculateOptionalSalaryUseCase,
     private val getFreeJobWagesUseCase: GetFreeJobWagesUseCase,
-    private val makeFreelanceContractUseCase: MakeFreelanceContractUseCase,
+    private val makeContractUseCase: MakeContractUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
 ) : BaseViewModel<
@@ -399,7 +400,8 @@ class StudentInsuranceContractViewModel(
         val lookupCode = when (uiState.value.contractKind) {
             InsuranceContractKind.FREELANCE ->
                 uiState.value.selectedFreeJobCode?:""
-            InsuranceContractKind.STUDENT ->
+            InsuranceContractKind.STUDENT,
+            InsuranceContractKind.HOUSEWIFE ->
                 uiState.value.registrationInfo?.insuranceId?:""
             InsuranceContractKind.OPTIONAL -> null
         } ?: return null
@@ -461,10 +463,12 @@ class StudentInsuranceContractViewModel(
     }
 
     private fun handleSubmitContract(): Flow<PartialState> = flow {
+        val kind = uiState.value.contractKind
         val params = buildMakeContractParams() ?: return@flow
         emit(PartialState.SubmittingContract(true))
         try {
-            makeFreelanceContractUseCase(params).collect { result ->
+            val isOptionalInsurance = kind == InsuranceContractKind.OPTIONAL
+            makeContractUseCase(isOptionalInsurance, params).collect { result ->
                 emit(PartialState.ContractSubmitted(result.toContractResultPresentation()))
             }
         } catch (e: Exception) {
@@ -475,14 +479,17 @@ class StudentInsuranceContractViewModel(
     }
 
     private fun buildMakeContractParams(): FreelanceMakeContractParams? {
-        if (uiState.value.contractKind != InsuranceContractKind.FREELANCE) return null
-        val monthlyPremium = uiState.value.selectedMonthlyPremium ?: return null
+        val kind = uiState.value.contractKind
+        val selectedSalary = when (kind) {
+            InsuranceContractKind.OPTIONAL -> uiState.value.calculatedMonthlySalary
+            else -> uiState.value.selectedMonthlyPremium
+        } ?: return null
         val premiumRateCode = uiState.value.selectedPremiumRateCode ?: return null
-        val freeJobCode = uiState.value.selectedFreeJobCode?.takeIf { it.isNotBlank() } ?: return null
+        val freeJobCode = resolveCntFreeJobCode() ?: return null
         val branch = uiState.value.branchSelection
         if (!branch.isValid) return null
         return FreelanceMakeContractParams(
-            monthlyPremium = monthlyPremium,
+            monthlyPremium = selectedSalary,
             request = FreelanceMakeContractRequestDN(
                 brchCodeNew = branch.branchCode,
                 cityCode = branch.cityCode,
@@ -494,6 +501,17 @@ class StudentInsuranceContractViewModel(
                 provinceCode = branch.provinceCode,
             ),
         )
+    }
+
+    private fun resolveCntFreeJobCode(): String? = when (uiState.value.contractKind) {
+        InsuranceContractKind.FREELANCE ->
+            uiState.value.selectedFreeJobCode?.takeIf { it.isNotBlank() }
+        InsuranceContractKind.STUDENT ->
+            ContractFreeJobCode.STUDENT_CONTRACT_CODE
+        InsuranceContractKind.HOUSEWIFE ->
+            ContractFreeJobCode.WOMEN_CONTRACT_CODE
+        InsuranceContractKind.OPTIONAL ->
+            ""
     }
 
     private companion object {

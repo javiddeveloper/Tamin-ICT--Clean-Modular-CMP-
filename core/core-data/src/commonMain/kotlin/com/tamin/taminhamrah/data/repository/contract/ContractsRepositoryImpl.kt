@@ -122,6 +122,15 @@ class ContractsRepositoryImpl(
         )
     }
 
+    override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
+        emit(
+            contractsRemoteDataSource.makeContract(
+                selectedSalary = params.monthlyPremium,
+                request = params.request.toDto(),
+            ).toDomain(),
+        )
+    }
+
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {
         val imageId = contractsRemoteDataSource.uploadImage(request)
         imageId?.let { emit(it) }
