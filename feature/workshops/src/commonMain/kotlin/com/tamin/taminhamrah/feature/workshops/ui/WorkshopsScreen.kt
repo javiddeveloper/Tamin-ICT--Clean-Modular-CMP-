@@ -74,6 +74,9 @@ fun WorkshopsScreen(
                 )
             )
         },
+        onTestDownloadPdfClick = {
+            viewModel.sendIntent(WorkshopsIntent.TestDownloadPdf)
+        },
         onWorkshopClick = { wId, bCode ->
             selectedWorkshop = wId to bCode
         }
@@ -188,6 +191,7 @@ fun WorkshopsContent(
     workshopStatus: String,
     onWorkshopStatusChange: (String) -> Unit,
     onLoadClick: () -> Unit,
+    onTestDownloadPdfClick: () -> Unit,
     onWorkshopClick: (String, String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -223,6 +227,15 @@ fun WorkshopsContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("ارسال و دریافت اطلاعات")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onTestDownloadPdfClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("تست دریافت PDF")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -352,6 +365,7 @@ private fun WorkshopsContentPreview() {
             workshopStatus = "",
             onWorkshopStatusChange = {},
             onLoadClick = {},
+            onTestDownloadPdfClick = {},
             onWorkshopClick = { _, _ -> }
         )
     }

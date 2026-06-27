@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import io.ktor.client.statement.HttpStatement
 
 class CommonRepositoryImpl(
     private val commonRemoteDataSource: CommonRemoteDataSource
@@ -22,9 +23,8 @@ class CommonRepositoryImpl(
         }
     }
 
-    override suspend fun getRegistrationDeclarationForm(): Any {
-        val response = commonRemoteDataSource.getRegistrationDeclarationForm()
-        return response
+    override suspend fun getRegistrationDeclarationForm(): HttpStatement {
+        return commonRemoteDataSource.getRegistrationDeclarationForm()
     }
 
     override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {

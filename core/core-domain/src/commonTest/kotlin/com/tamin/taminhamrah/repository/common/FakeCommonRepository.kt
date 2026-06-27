@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import io.ktor.client.statement.HttpStatement
 
 class FakeCommonRepository : CommonRepository {
     var beneficiaryResult: List<BeneficiaryDN> = emptyList()
@@ -19,9 +20,9 @@ class FakeCommonRepository : CommonRepository {
         emit(beneficiaryResult)
     }
 
-    override suspend fun getRegistrationDeclarationForm(): Any {
+    override suspend fun getRegistrationDeclarationForm(): HttpStatement {
         if (shouldThrowError) throw getBeneficiaryError
-        return Any()
+        throw NotImplementedError("Fake does not support HttpStatement")
     }
 
     override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {

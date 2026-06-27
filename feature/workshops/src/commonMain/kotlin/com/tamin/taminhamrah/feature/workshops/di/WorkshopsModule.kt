@@ -8,7 +8,6 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.employerAgreement.EmployerAgreementViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersViewModel
@@ -20,7 +19,6 @@ val workshopsModule = module {
     viewModelOf(::WorkshopDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)
     viewModelOf(::ObjectionableDebitViewModel)
-    viewModelOf(::EmployerAgreementViewModel)
     viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopMembersViewModel)
     viewModelOf(::WorkshopStackholdersViewModel)

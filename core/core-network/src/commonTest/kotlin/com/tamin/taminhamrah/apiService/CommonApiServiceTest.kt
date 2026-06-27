@@ -28,8 +28,7 @@ class CommonApiServiceTest : BaseApiTest() {
 
     @Test
     fun `getRegistrationDeclarationForm should return HttpStatement`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse("{}")
-        val ktorfit = createMockKtorfit(jsonResponse)
+        val ktorfit = createMockKtorfit(ApiTestUtils.createJsonResponse(dataJson = ""))
         val apiService = ktorfit.create<CommonApiService>()
 
         val response = apiService.getRegistrationDeclarationForm()
