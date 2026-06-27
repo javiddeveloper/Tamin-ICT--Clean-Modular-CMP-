@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
@@ -82,7 +83,20 @@ class PensionRemoteDataSourceImpl(
     ): PayRollDTO {
         return try {
             val response =
-                pensionApiService.getPensionerPayRoll(apiQueryBuilder.buildFilterJson(filter))
+                pensionApiService.getPensionerPayRoll( apiQueryBuilder.buildFilterJson(filter))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO {
+        return try {
+            val response = pensionApiService.getDisabilityPersonalInfo()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

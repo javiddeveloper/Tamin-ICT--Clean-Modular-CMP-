@@ -8,6 +8,12 @@ import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalPR
+import com.tamin.taminhamrah.model.personal.DisabilityWorkDN
+import com.tamin.taminhamrah.model.personal.DisabilityWorkPR
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionPR
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
@@ -63,6 +69,43 @@ fun DisabilityDependentDN.toPresentation(): DisabilityDependentPR {
         genderDesc = genderDesc ?: "",
         relation = relation ?: "",
         tendencyDescription = tendencyDescription ?: ""
+    )
+}
+
+fun DisabilityPersonalInfoDN.toPresentation(): DisabilityPersonalInfoPR {
+    return DisabilityPersonalInfoPR(
+        branch = branch ?: "",
+        branchName = branchName ?: "",
+        confirmed = confirmed ?: false,
+        insuranceId = insuranceId ?: "",
+        mobileNumber = mobileNumber ?: "",
+        personal = personal?.toPresentation(),
+        provinceName = provinceName ?: "",
+        work = work?.toPresentation(),
+        yearsAge = yearsAge ?: "",
+        monthsAge = monthsAge ?: "",
+        daysAge = daysAge ?: "",
+        strAge = strAge ?: ""
+    )
+}
+
+fun DisabilityPersonalDN.toPresentation(): DisabilityPersonalPR {
+    return DisabilityPersonalPR(
+        firstName = firstName ?: "",
+        lastName = lastName ?: "",
+        nationalId = nationalId ?: "",
+        fatherName = fatherName ?: "",
+        idCardNumber = idCardNumber ?: "",
+        cityOfIssue = cityOfIssue ?: "",
+        dateOfBirth = dateOfBirth?.toString() ?: "",
+        genderDesc = genderDesc ?: ""
+    )
+}
+
+fun DisabilityWorkDN.toPresentation(): DisabilityWorkPR {
+    return DisabilityWorkPR(
+        jobDescription = jobDescription ?: "",
+        workshopId = workshopId ?: ""
     )
 }
 

@@ -6,11 +6,16 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.PersonalDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalDN
+import com.tamin.taminhamrah.model.personal.DisabilityWorkDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.WorkDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -26,6 +31,7 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocRequest
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.PersonalDTO as DisabilityPersonalDTO
 import kotlin.jvm.JvmName
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
@@ -76,6 +82,43 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         genderDesc = personal?.gender?.genderDesc,
         relation = personal?.relation,
         tendencyDescription = tendency?.tendencyDescription
+    )
+}
+
+fun DisabilityPersonalInfoDTO.toDomain(): DisabilityPersonalInfoDN {
+    return DisabilityPersonalInfoDN(
+        branch = branch,
+        branchName = branchName,
+        confirmed = confirmed,
+        insuranceId = insuranceId,
+        mobileNumber = mobileNumber,
+        personal = personal?.toDomain(),
+        provinceName = provinceName,
+        work = work?.toDomain(),
+        yearsAge = yearsAge,
+        monthsAge = monthsAge,
+        daysAge = daysAge,
+        strAge = strAge
+    )
+}
+
+fun DisabilityPersonalDTO.toDomain(): DisabilityPersonalDN {
+    return DisabilityPersonalDN(
+        firstName = firstName,
+        lastName = lastName,
+        nationalId = nationalId,
+        fatherName = fatherName,
+        idCardNumber = idCardNumber,
+        cityOfIssue = cityOfIssue?.description,
+        dateOfBirth = dateOfBirth,
+        genderDesc = gender?.genderDesc
+    )
+}
+
+fun WorkDTO.toDomain(): DisabilityWorkDN {
+    return DisabilityWorkDN(
+        jobDescription = job?.jobDescription,
+        workshopId = workshopId
     )
 }
 

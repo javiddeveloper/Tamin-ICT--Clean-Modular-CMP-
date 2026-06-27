@@ -29,10 +29,11 @@ class PensionApiServiceTest : BaseApiTest() {
 
     @Test
     fun `getPensionerPayRoll should return error status`() = runTest {
+        val family = "SERVER_ERROR"
         val jsonResponse = ApiTestUtils.createJsonResponse(
             dataJson = "{}",
             status = 500,
-            family = "SERVER_ERROR",
+            family = family,
             reason = "Internal Server Error"
         )
 
@@ -42,7 +43,25 @@ class PensionApiServiceTest : BaseApiTest() {
         val response = apiService.getPensionerPayRoll("filter-json")
 
         assertEquals(500, response.status)
-        assertEquals("SERVER_ERROR", response.family)
+        assertEquals(family, response.family)
+    }
+
+    @Test
+    fun `getDisabilityPersonalInfo should return personal info data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.disabilityPersonalInfoSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.getDisabilityPersonalInfo()
+
+        assertEquals(200, response.status)
+        assertEquals("Ali", response.data?.personal?.firstName)
+        assertEquals("Alavi", response.data?.personal?.lastName)
+        assertEquals("0012345678", response.data?.personal?.nationalId)
+        assertEquals("09121234567", response.data?.mobileNumber)
     }
 
     @Test
