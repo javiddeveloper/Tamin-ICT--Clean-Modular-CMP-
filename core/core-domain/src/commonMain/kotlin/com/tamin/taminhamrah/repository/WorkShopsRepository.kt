@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.repository
 
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
@@ -13,11 +14,11 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
 
 interface WorkShopsRepository {
     suspend fun getAllEmployerAgreementByNationalId(
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): EmployerAgreementListDN?
 
     suspend fun getPaymentSheets(
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): PaymentSheetListDN?
 
     suspend fun getWorkshopDebit(
@@ -33,24 +34,24 @@ interface WorkShopsRepository {
     suspend fun getWorkshopObjectionableDebitList(
         workshopNumber: String,
         branchCode: String,
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): WorkShopDebtListDN?
 
     suspend fun getWorkshopRecentlyAddedMembers(
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): WorkshopNewMemberListDN?
 
     suspend fun getWorkshopsDebtsList(
         workshopId: String,
         branchId: String,
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): WorkshopsDebtListDN?
 
     suspend fun getWorkshopMembers(
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): WorkshopMemberListDN?
 
     suspend fun getWorkshopStackHolders(
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): WorkshopStackHolderListDN?
 }

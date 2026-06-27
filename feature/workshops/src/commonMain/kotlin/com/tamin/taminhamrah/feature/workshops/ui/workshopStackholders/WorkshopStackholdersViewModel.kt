@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
@@ -20,11 +19,10 @@ class WorkshopStackholdersViewModel(
             emit(WorkshopStackholdersUiState.PartialState.Loading(true))
             try {
                 val filters = listOf(
-                    ApiFilterDN(FilterProperty.WORKSHOP_ID, intent.workshopId, FilterOperator.EQ),
-                    ApiFilterDN(FilterProperty.WORKSHOP_BRANCH_CODE, intent.branchCode, FilterOperator.EQ)
+                    ApiFilterDN(FilterProperty.WORKSHOPID_ID, intent.workshopId, FilterOperator.EQ),
+                    ApiFilterDN(FilterProperty.WORKSHOPID_BRANCH_CODE, intent.branchCode, FilterOperator.EQ)
                 )
-                val query = ApiQueryParamDN(page = 1, start = 0, limit = 100, filters = filters, sorts = emptyList())
-                val res = useCase(query)
+                val res = useCase(filters)
                 emit(WorkshopStackholdersUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
             } catch (e: Exception) {
                 emit(WorkshopStackholdersUiState.PartialState.Error(e.message))

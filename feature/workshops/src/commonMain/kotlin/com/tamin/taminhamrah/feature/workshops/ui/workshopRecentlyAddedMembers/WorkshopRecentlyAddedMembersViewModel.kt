@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
@@ -23,8 +22,7 @@ class WorkshopRecentlyAddedMembersViewModel(
                     ApiFilterDN(FilterProperty.WORKSHOP_ID, intent.workshopId, FilterOperator.EQ),
                     ApiFilterDN(FilterProperty.WORKSHOP_BRANCH_CODE, intent.branchCode, FilterOperator.EQ)
                 )
-                val query = ApiQueryParamDN(page = 1, start = 0, limit = 100, filters = filters, sorts = emptyList())
-                val res = useCase(query)
+                val res = useCase(filters)
                 emit(WorkshopRecentlyAddedMembersUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
             } catch (e: Exception) {
                 emit(WorkshopRecentlyAddedMembersUiState.PartialState.Error(e.message))

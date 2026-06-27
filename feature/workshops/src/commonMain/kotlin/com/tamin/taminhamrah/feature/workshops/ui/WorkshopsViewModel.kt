@@ -7,7 +7,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
@@ -55,15 +54,7 @@ class WorkshopsViewModel(
                 filters.add(ApiFilterDN(FilterProperty.WORKSHOP_STATUS_CODE, it, FilterOperator.EQ))
             }
 
-            val queryParam = ApiQueryParamDN(
-                page = 1,
-                start = 0,
-                limit = 100,
-                filters = filters,
-                sorts = emptyList()
-            )
-
-            val response = getAllEmployerAgreementUseCase(query = queryParam)
+            val response = getAllEmployerAgreementUseCase(filters = filters)
             val list = response?.list?.map { it.toPresentation() } ?: emptyList()
             emit(PartialState.WorkshopsLoaded(list))
 

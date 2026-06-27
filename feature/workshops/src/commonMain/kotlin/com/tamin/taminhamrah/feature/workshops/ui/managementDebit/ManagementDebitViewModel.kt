@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,8 +15,7 @@ class ManagementDebitViewModel(
         is ManagementDebitIntent.Load -> flow {
             emit(ManagementDebitUiState.PartialState.Loading(true))
             try {
-                val query = ApiQueryParamDN(page = 1, start = 0, limit = 100, filters = emptyList(), sorts = emptyList())
-                val res = useCase(intent.workshopId, intent.branchCode, query)
+                val res = useCase(intent.workshopId, intent.branchCode, emptyList())
                 emit(ManagementDebitUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
             } catch (e: Exception) {
                 emit(ManagementDebitUiState.PartialState.Error(e.message))

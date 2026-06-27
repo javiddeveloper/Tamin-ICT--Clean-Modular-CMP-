@@ -37,7 +37,7 @@ class GetAllEmployerAgreementByNationalIdUseCaseTest : BaseUseCaseTest() {
         )
         repository.result = expectedList
 
-        val result = useCase.invoke(ApiQueryParamDN())
+        val result = useCase.invoke()
 
         assertEquals(1, result?.list?.size)
         assertEquals("Workshop 1", result?.list?.get(0)?.workshop?.workshopName)
@@ -51,7 +51,7 @@ class GetAllEmployerAgreementByNationalIdUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val exception = assertFailsWith<RuntimeException> {
-            useCase.invoke(ApiQueryParamDN())
+            useCase.invoke()
         }
         
         assertEquals(expectedException.message, exception.message)

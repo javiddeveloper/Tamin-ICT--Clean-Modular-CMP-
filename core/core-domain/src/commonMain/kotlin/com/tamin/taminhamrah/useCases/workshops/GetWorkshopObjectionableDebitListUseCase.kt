@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.useCases.workshops
 
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 
@@ -10,8 +10,8 @@ class GetWorkshopObjectionableDebitListUseCase(
     suspend operator fun invoke(
         workshopNumber: String,
         branchCode: String,
-        query: ApiQueryParamDN
+        filters: List<ApiFilterDN> = emptyList()
     ): WorkShopDebtListDN? {
-        return repository.getWorkshopObjectionableDebitList(workshopNumber, branchCode, query)
+        return repository.getWorkshopObjectionableDebitList(workshopNumber, branchCode, filters)
     }
 }
