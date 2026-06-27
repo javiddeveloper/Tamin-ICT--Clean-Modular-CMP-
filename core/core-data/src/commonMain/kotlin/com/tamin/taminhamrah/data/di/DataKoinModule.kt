@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.data.repository.UserRepositoryImpl
 import com.tamin.taminhamrah.data.repository.CityProvinceRepositoryImpl
 import com.tamin.taminhamrah.data.repository.RecipientRepositoryImpl
 import com.tamin.taminhamrah.data.repository.common.CommonRepositoryImpl
+import com.tamin.taminhamrah.data.repository.common.FeatureFlagRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personalInbox.PersonalInboxRepositoryImpl
 import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.contract.ContractsRepositoryImpl
@@ -14,6 +15,7 @@ import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.RecipientRepository
 import com.tamin.taminhamrah.repository.common.CommonRepository
+import com.tamin.taminhamrah.repository.common.FeatureFlagRepository
 import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
@@ -33,6 +35,7 @@ val dataKoinModule = module {
     singleOf(::PensionRepositoryImpl) { bind<PensionRepository>() }
     singleOf(::HistoryRepositoryImpl) { bind<HistoryRepository>() }
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
+    singleOf(::FeatureFlagRepositoryImpl) { bind<FeatureFlagRepository>() }
     singleOf(::WorkShopsRepositoryImpl) { bind<WorkShopsRepository>() }
     singleOf(::PersonalInboxRepositoryImpl) { bind<PersonalInboxRepository>() }
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
