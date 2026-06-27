@@ -415,6 +415,8 @@ private fun ContractStepper(
                                 showPrevious = !state.contractKind.isFirstStep(step),
                                 showNext = !state.contractKind.isLastStep(step),
                                 nextEnabled = state.canGoNext,
+                                nextLoading = state.isSavingContact &&
+                                    step == StudentInsuranceContractStep.STEP_USER_INFO,
                                 onNextStep = onNextStep,
                                 onPreviousStep = onPreviousStep,
                             )
@@ -607,6 +609,7 @@ private fun StepNavigationButtons(
     showPrevious: Boolean,
     showNext: Boolean,
     nextEnabled: Boolean,
+    nextLoading: Boolean = false,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
 ) {
@@ -637,13 +640,21 @@ private fun StepNavigationButtons(
                     containerColor = MaterialTheme.colorScheme.primary,
                 ),
             ) {
-                Text("مرحله بعد")
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
+                if (nextLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    Text("مرحله بعد")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
             }
         }
     }

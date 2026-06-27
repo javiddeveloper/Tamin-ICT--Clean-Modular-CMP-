@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -176,6 +177,28 @@ class ContractsRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun saveContact(request: SaveContactRequestDTO): Any? {
+        return try {
+            println("SaveContact: calling save-contact endpoint with $request")
+            val response = contractsApiService.saveContact(request)
+            println("SaveContact: response status=${response.status}, family=${response.family}")
+            if (response.status !in 200..299) {
+                throw TaminErrorUriException(
+                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
+                )
+            }
+            response.data as Any?
+        } catch (e: TaminErrorUriException) {
+            println("SaveContact: tamin error ${e.message}")
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            println("SaveContact: exception ${e::class.simpleName} ${e.message}")
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
             )

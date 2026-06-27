@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
 import com.tamin.taminhamrah.model.studentContract.InsuranceContractKind
 import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
@@ -38,9 +39,12 @@ import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 
@@ -55,6 +59,7 @@ class StudentInsuranceContractViewModel(
     private val calculateOptionalSalaryUseCase: CalculateOptionalSalaryUseCase,
     private val getFreeJobWagesUseCase: GetFreeJobWagesUseCase,
     private val makeFreelanceContractUseCase: MakeFreelanceContractUseCase,
+    private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
 ) : BaseViewModel<
     StudentInsuranceContractUiState,
@@ -213,8 +218,13 @@ class StudentInsuranceContractViewModel(
 
     private fun handleGoToNextStep(): Flow<PartialState> {
         val kind = uiState.value.contractKind
-        val nextStep = kind.nextStep(uiState.value.currentStep) ?: return flow { }
+        val currentStep = uiState.value.currentStep
+        val nextStep = kind.nextStep(currentStep) ?: return flow { }
         if (!uiState.value.canGoNext) return flow { }
+
+        if (currentStep == StudentInsuranceContractStep.STEP_USER_INFO) {
+            return saveContactThenAdvance(nextStep)
+        }
 
         return merge(
             flow { emit(PartialState.StepChanged(nextStep)) },
@@ -225,6 +235,40 @@ class StudentInsuranceContractViewModel(
                     kind == InsuranceContractKind.OPTIONAL -> loadOptionalSalary()
                 else -> flow { }
             },
+        )
+    }
+
+    private fun saveContactThenAdvance(
+        nextStep: StudentInsuranceContractStep,
+    ): Flow<PartialState> = flow {
+        emit(PartialState.SavingContact(true))
+        try {
+            saveContactUseCase(buildSaveContactParams()).first()
+            emit(PartialState.ContactSaved)
+            emit(PartialState.StepChanged(nextStep))
+            when {
+                nextStep == StudentInsuranceContractStep.STEP_SALARY &&
+                    uiState.value.contractKind.usesFreelancePremiumRange ->
+                    emitAll(loadFreelancePremiumRange())
+                nextStep == StudentInsuranceContractStep.STEP_SALARY &&
+                    uiState.value.contractKind == InsuranceContractKind.OPTIONAL ->
+                    emitAll(loadOptionalSalary())
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        } finally {
+            emit(PartialState.SavingContact(false))
+        }
+    }
+
+    private fun buildSaveContactParams(): SaveContactRequestDN {
+        val userInfo = uiState.value.userInfo
+        return SaveContactRequestDN(
+            address = userInfo.address,
+            mobile = userInfo.mobileNumber,
+            ssn = uiState.value.registrationInfo?.nationalId.orEmpty(),
+            phoneNumber = userInfo.phoneNumber,
+            zipCode = userInfo.zipCode,
         )
     }
 
@@ -579,6 +623,10 @@ class StudentInsuranceContractViewModel(
         is PartialState.AgreementConfirmedChanged -> currentState.copy(
             isAgreementConfirmed = partialState.confirmed,
         )
+        is PartialState.SavingContact -> currentState.copy(
+            isSavingContact = partialState.isSaving,
+        )
+        PartialState.ContactSaved -> currentState
         is PartialState.SubmittingContract -> currentState.copy(
             isSubmittingContract = partialState.isSubmitting,
         )

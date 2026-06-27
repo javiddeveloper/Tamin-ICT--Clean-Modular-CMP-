@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -124,6 +125,10 @@ class ContractsRepositoryImpl(
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {
         val imageId = contractsRemoteDataSource.uploadImage(request)
         imageId?.let { emit(it) }
+    }
+
+    override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flow {
+        emit(contractsRemoteDataSource.saveContact(request.toDto()))
     }
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {

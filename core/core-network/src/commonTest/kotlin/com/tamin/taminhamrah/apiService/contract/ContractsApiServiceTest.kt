@@ -4,6 +4,8 @@ import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
+import com.tamin.taminhamrah.model.contracts.SaveContactPersonalDTO
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.ContractsTestData
 import kotlinx.coroutines.test.runTest
@@ -125,6 +127,27 @@ class ContractsApiServiceTest : BaseApiTest() {
         assertEquals(200, response.status)
         assertEquals("SUCCESSFUL", response.family)
         assertEquals(502_500_000L, response.data)
+    }
+
+    @Test
+    fun `saveContact should return successful response with null data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(dataJson = "null")
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.saveContact(
+            SaveContactRequestDTO(
+                address = "اينجا56564544545",
+                mobile = "",
+                personal = SaveContactPersonalDTO(ssn = "2487741923"),
+                phoneNumber = "02126555891",
+                zipCode = "4915784967",
+            ),
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
     }
 
 }

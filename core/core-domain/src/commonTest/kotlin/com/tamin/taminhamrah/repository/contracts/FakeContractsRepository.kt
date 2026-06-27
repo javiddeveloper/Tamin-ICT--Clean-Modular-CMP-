@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,9 @@ class FakeContractsRepository : ContractsRepository {
 
     var lastUploadImageRequest: UploadImageRequestDN? = null
     var uploadImageResult: String = "a4769aa8-b9af-4183-83b9-367dc9f52511"
+
+    var lastSaveContactRequest: SaveContactRequestDN? = null
+    var saveContactResult: Any? = null
 
     override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow {
         lastQuery = query
@@ -119,5 +123,11 @@ class FakeContractsRepository : ContractsRepository {
         lastUploadImageRequest = request
         if (shouldThrowError) throw error
         emit(uploadImageResult)
+    }
+
+    override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flow {
+        lastSaveContactRequest = request
+        if (shouldThrowError) throw error
+        emit(saveContactResult)
     }
 }

@@ -43,6 +43,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetFreeJobWagesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
@@ -104,6 +105,7 @@ val domainModule = module {
     factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::CalculateOptionalSalaryUseCase)
     factoryOf(::MakeFreelanceContractUseCase)
+    factoryOf(::SaveContactUseCase)
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
     factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
