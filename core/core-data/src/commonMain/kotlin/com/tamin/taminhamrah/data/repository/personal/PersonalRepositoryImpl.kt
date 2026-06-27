@@ -7,7 +7,11 @@ import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.DocumentFileDTO
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
@@ -22,6 +26,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlin.collections.map
 
 class PersonalRepositoryImpl(
     private val personalRemoteDataSource: PersonalRemoteDataSource,
@@ -98,5 +103,33 @@ class PersonalRepositoryImpl(
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {
         emit(personalRemoteDataSource.saveSurvivorInfo(body.toDTO()))
     }
-}
 
+    override suspend fun putInsuredRegistrationDocList(
+        personalId: String,
+        docs: List<InsuredDocDN>
+    ): String? {
+        val dtos = docs.map {
+            InsuredDocDTO(
+                documentType = it.documentType,
+                id = it.id,
+                documentFile = DocumentFileDTO(
+                    createdBy = it.documentFile?.createdBy,
+                    id = it.documentFile?.id,
+                    image = it.documentFile?.image
+                )
+            )
+        }
+        return personalRemoteDataSource.putInsuredRegistrationDocList(personalId, dtos)
+    }
+
+    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDN? {
+        val response = personalRemoteDataSource.getRequestSummary(requestId)
+        return response?.let {
+            NewInsuredSummaryDN(
+                refCode = it.refCode, nationalId = it.nationalId, firstName = it.firstName,
+                lastName = it.lastName, relationDescription = it.relationDescription,
+                jobDescription = it.jobDescription
+            )
+        }
+    }
+}

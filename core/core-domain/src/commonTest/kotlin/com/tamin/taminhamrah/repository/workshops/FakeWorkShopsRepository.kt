@@ -49,4 +49,28 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         }
         return workshopDebtInquiryResult
     }
+
+    override suspend fun getWorkshopObjectionableDebitList(
+        workshopNumber: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN? = null
+
+    override suspend fun getWorkshopRecentlyAddedMembers(
+        query: ApiQueryParamDN
+    ): com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN? = null
+
+    override suspend fun getWorkshopsDebtsList(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN
+    ): com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN? = null
+
+    override suspend fun getWorkshopMembers(
+        query: ApiQueryParamDN
+    ): com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN? = null
+
+    override suspend fun getWorkshopStackHolders(
+        query: ApiQueryParamDN
+    ): com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN? = null
 }

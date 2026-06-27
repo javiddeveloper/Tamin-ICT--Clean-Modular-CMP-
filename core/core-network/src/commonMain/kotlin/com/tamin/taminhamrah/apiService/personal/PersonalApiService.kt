@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.apiService.personal
 
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDTO
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -64,6 +66,15 @@ interface PersonalApiService {
     ): BaseDTO<String>
 
 
+    @PUT("documents/{personalId}")
+    suspend fun putInsuredRegistrationDocList(
+        @Path("personalId") personalId: String,
+        @Body body: List<InsuredDocDTO>
+    ): BaseDTO<String?>
 
+    @GET("personals/summary/{requestId}")
+    suspend fun getRequestSummary(
+        @Path("requestId") requestId: String
+    ): BaseDTO<NewInsuredSummaryDTO>
 
 }

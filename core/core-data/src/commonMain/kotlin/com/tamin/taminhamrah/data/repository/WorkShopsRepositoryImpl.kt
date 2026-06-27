@@ -8,6 +8,11 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
 
 class WorkShopsRepositoryImpl(
     private val remoteDataSource: WorkShopsRemoteDataSource
@@ -57,5 +62,54 @@ class WorkShopsRepositoryImpl(
     ): WorkshopDebtInquiryDN? {
         val response = remoteDataSource.getWorkshopDebtInquiry(workshopId, branchCode)
         return response?.toDomain()
+    }
+
+    override suspend fun getWorkshopObjectionableDebitList(
+        workshopNumber: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): WorkShopDebtListDN? {
+        val response = remoteDataSource.getWorkshopObjectionableDebitList(workshopNumber, branchCode, query)
+        return response?.let {
+            WorkShopDebtListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
+        }
+    }
+
+    override suspend fun getWorkshopRecentlyAddedMembers(
+        query: ApiQueryParamDN
+    ): WorkshopNewMemberListDN? {
+        val response = remoteDataSource.getWorkshopRecentlyAddedMembers(query)
+        return response?.let {
+            WorkshopNewMemberListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
+        }
+    }
+
+    override suspend fun getWorkshopsDebtsList(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN
+    ): WorkshopsDebtListDN? {
+        val response = remoteDataSource.getWorkshopsDebtsList(workshopId, branchId, query)
+        return response?.let {
+            WorkshopsDebtListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
+        }
+    }
+
+    override suspend fun getWorkshopMembers(
+        query: ApiQueryParamDN
+    ): WorkshopMemberListDN? {
+        val response = remoteDataSource.getWorkshopMembers(query)
+        return response?.let {
+            WorkshopMemberListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
+        }
+    }
+
+    override suspend fun getWorkshopStackHolders(
+        query: ApiQueryParamDN
+    ): WorkshopStackHolderListDN? {
+        val response = remoteDataSource.getWorkshopStackHolders(query)
+        return response?.let {
+            WorkshopStackHolderListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
+        }
     }
 }

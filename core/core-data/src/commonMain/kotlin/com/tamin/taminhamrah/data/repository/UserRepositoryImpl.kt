@@ -116,4 +116,7 @@ internal class UserRepositoryImpl(
         emit(electronicFileList ?: emptyList())
     }
 
+    override suspend fun checkUserIsNew(nationalId: String): Boolean {
+        return userRemoteDataSource.checkUserIsNew(nationalId)
+    }
 }

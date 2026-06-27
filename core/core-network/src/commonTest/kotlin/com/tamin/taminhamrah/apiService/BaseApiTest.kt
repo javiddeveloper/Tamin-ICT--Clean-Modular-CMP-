@@ -10,7 +10,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.utils.io.core.toByteArray
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
 import io.ktor.utils.io.ByteReadChannel
 
@@ -35,6 +36,9 @@ abstract class BaseApiTest {
                     ignoreUnknownKeys = true
                     isLenient = true
                 })
+            }
+            install(DefaultRequest) {
+                headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }
         }
 

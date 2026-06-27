@@ -36,4 +36,5 @@ interface UserRepository {
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ElectronicFileDN>>
 
+    suspend fun checkUserIsNew(nationalId: String): Boolean
 }

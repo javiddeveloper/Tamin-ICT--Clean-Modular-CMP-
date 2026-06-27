@@ -7,7 +7,7 @@
 package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource

@@ -33,9 +33,14 @@ import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
+import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
+import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
+import com.tamin.taminhamrah.useCases.user.CheckUserIsNewUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
@@ -44,6 +49,11 @@ import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationa
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -89,4 +99,14 @@ val domainModule = module {
     factoryOf(::GetAllPaymentSheetsUseCase)
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
+    factoryOf(::GetJobTitleUseCase)
+    factoryOf(::GetRegistrationDeclarationFormUseCase)
+    factoryOf(::GetRequestSummaryUseCase)
+    factoryOf(::PutInsuredRegistrationDocListUseCase)
+    factoryOf(::CheckUserIsNewUseCase)
+    factoryOf(::GetWorkshopMembersUseCase)
+    factoryOf(::GetWorkshopObjectionableDebitListUseCase)
+    factoryOf(::GetWorkshopRecentlyAddedMembersUseCase)
+    factoryOf(::GetWorkshopsDebtsListUseCase)
+    factoryOf(::GetWorkshopStackHoldersUseCase)
 }

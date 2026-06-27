@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.personal
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
@@ -20,4 +22,6 @@ interface PersonalRepository {
     fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>>
     fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionDN): Flow<String?>
     fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?>
+    suspend fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): String?
+    suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDN?
 }

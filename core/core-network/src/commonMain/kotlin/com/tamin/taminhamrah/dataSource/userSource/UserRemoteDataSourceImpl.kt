@@ -196,5 +196,14 @@ internal class UserRemoteDataSourceImpl(
         }
     }
 
-
+    override suspend fun checkUserIsNew(nationalId: String): Boolean {
+        return try {
+            val response = userApiService.checkUserIsNew(nationalId)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
 }

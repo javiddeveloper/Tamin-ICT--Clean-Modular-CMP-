@@ -46,4 +46,19 @@ class UserApiServiceTest : BaseApiTest() {
         assertEquals("test-hash-456", response.data?.data?.hash)
     }
 
+    @Test
+    fun `checkUserIsNew should return boolean flag`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserTestData.checkUserIsNewSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<UserApiService>()
+
+        val response = apiService.checkUserIsNew("0000000000")
+
+        assertEquals(200, response.status)
+        assertEquals(true, response.data)
+    }
+
 }

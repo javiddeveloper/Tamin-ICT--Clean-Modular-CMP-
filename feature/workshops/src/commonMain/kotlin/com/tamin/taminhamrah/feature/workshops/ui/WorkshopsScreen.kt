@@ -43,7 +43,13 @@ fun WorkshopsScreen(
     viewModel: WorkshopsViewModel = koinViewModel(),
     navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> },
     navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> }
+    navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> },
+    navigateToEmployerAgreement: (String, String) -> Unit = { _, _ -> },
+    navigateToManagementDebit: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopMembers: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopStackholders: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopRecentlyAddedMembers: (String, String) -> Unit = { _, _ -> },
+    navigateToObjectionableDebit: (String, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

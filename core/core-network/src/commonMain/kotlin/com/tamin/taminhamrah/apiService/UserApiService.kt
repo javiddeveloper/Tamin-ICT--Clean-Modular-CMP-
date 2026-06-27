@@ -128,4 +128,8 @@ internal interface UserApiService {
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<ElectronicFileDTO>>
 
+    @GET("relation-tamins/isnew/{nationalId}")
+    suspend fun checkUserIsNew(
+        @Path("nationalId") nationalId: String
+    ): BaseDTO<Boolean>
 }

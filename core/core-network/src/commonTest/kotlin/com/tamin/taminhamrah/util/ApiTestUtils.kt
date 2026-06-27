@@ -26,6 +26,22 @@ object UserTestData {
 
     val verifyMobileSuccess: String
         get() = readResourceFile("mocks/verify_mobile_success.json")
+
+    val checkUserIsNewSuccess: String
+        get() = readResourceFile("mocks/check_user_is_new_success.json")
+}
+
+object CommonTestData {
+    val jobTitleSuccess: String
+        get() = readResourceFile("mocks/job_title_success.json")
+}
+
+object PersonalTestData {
+    val insuredDocSuccess: String
+        get() = readResourceFile("mocks/insured_doc_success.json")
+
+    val requestSummarySuccess: String
+        get() = readResourceFile("mocks/request_summary_success.json")
 }
 
 object UserRequestTestData {
@@ -60,4 +76,25 @@ object WorkshopTestData {
 
     val workshopDebtInquirySuccess: String
         get() = readResourceFile("mocks/workshop_debt_inquiry_success.json")
+
+    val employerAgreementSuccess: String
+        get() = readResourceFile("mocks/employer_agreement_success.json")
+
+    val paymentSheetsSuccess: String
+        get() = readResourceFile("mocks/payment_sheets_success.json")
+
+    val objectionableDebitSuccess: String
+        get() = readResourceFile("mocks/objectionable_debit_success.json")
+
+    val recentlyAddedMembersSuccess: String
+        get() = readResourceFile("mocks/recently_added_members_success.json")
+
+    val managementDebitSuccess: String
+        get() = readResourceFile("mocks/management_debit_success.json")
+
+    val workshopMembersSuccess: String
+        get() = readResourceFile("mocks/workshop_members_success.json")
+
+    val workshopStackholdersSuccess: String
+        get() = readResourceFile("mocks/workshop_stackholders_success.json")
 }
