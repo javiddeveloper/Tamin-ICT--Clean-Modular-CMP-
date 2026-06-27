@@ -65,44 +65,8 @@ object PensionTestData {
     val payrollSuccess: String
         get() = readResourceFile("mocks/pension_payroll_success.json")
 
-    val disabilityPersonalInfoSuccess: String
-        get() = """
-            {
-                "branch": "123",
-                "branchName": "شعبه یک",
-                "confirmed": true,
-                "insuranceId": "12345678",
-                "mobileNumber": "09121234567",
-                "personal": {
-                    "firstName": "Ali",
-                    "lastName": "Alavi",
-                    "nationalId": "0012345678",
-                    "fatherName": "Reza",
-                    "idCardNumber": "123",
-                    "cityOfIssue": {
-                        "code": "1",
-                        "description": "تهران"
-                    },
-                    "dateOfBirth": 315532800000,
-                    "gender": {
-                        "genderCode": 1,
-                        "genderDesc": "مرد"
-                    }
-                },
-                "provinceName": "تهران",
-                "work": {
-                    "job": {
-                        "jobCode": "101",
-                        "jobDescription": "برنامه نویس"
-                    },
-                    "workshopId": "987654321"
-                },
-                "yearsAge": "40",
-                "monthsAge": "5",
-                "daysAge": "10",
-                "strAge": "40 سال و 5 ماه و 10 روز"
-            }
-        """.trimIndent()
+    val userAgeSuccess: String
+        get() = readResourceFile("mocks/pension/user_age_success.json")
 }
 
 object WorkshopTestData {

@@ -39,6 +39,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityDependentInfo)
         viewModel.sendIntent(PensionInquiryIntent.LoadConfirmSurvivorsList)
         viewModel.sendIntent(PensionInquiryIntent.LoadAge(1379L))
+        viewModel.sendIntent(PensionInquiryIntent.LoadUserAge)
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionerPayRoll(emptyList()))
         viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
     }

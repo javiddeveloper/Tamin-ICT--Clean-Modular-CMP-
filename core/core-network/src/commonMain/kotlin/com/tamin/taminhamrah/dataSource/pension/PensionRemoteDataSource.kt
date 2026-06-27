@@ -6,10 +6,14 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.tools.BaseDTO
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.QueryMap
 
 
 interface PensionRemoteDataSource {
@@ -22,4 +26,8 @@ interface PensionRemoteDataSource {
     ): PayRollDTO
 
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
+    suspend fun getUserAge(
+        filter: List<ApiFilterDN>
+    ): AgeDTO
+
 }
