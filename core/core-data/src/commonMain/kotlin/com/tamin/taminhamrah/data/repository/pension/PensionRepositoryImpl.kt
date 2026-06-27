@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.data.repository.pension
 
-import com.tamin.taminhamrah.data.mapper.toDTO
-import com.tamin.taminhamrah.data.mapper.toDomain
+import com.tamin.taminhamrah.data.mapper.*
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
@@ -9,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.pension.PensionRepository
@@ -43,6 +43,11 @@ class PensionRepositoryImpl(
 
     override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<PayRollDN> = flow {
         val remoteData = pensionRemoteDataSource.getPensionerPayRoll(filters)
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun getUserAge(filters: List<ApiFilterDN>): Flow<AgeDN> = flow {
+        val remoteData = pensionRemoteDataSource.getUserAge(filters)
         emit(remoteData.toDomain())
     }
 }
