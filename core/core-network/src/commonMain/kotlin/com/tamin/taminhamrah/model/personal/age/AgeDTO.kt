@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AgeDTO(
-    @SerialName("age") val age: String?,
-    @SerialName("birthDate") val birthDate: String?,
+    @SerialName("age") val age: String? = null,
+    @SerialName("birthDate") val birthDate: String? = null,
     )

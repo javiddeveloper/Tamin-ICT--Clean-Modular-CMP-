@@ -43,6 +43,7 @@ data class PensionInquiryUiState(
         data class PersonalInfoLoaded(val personalInfo: PersonalInfoPR?) : PartialState()
         data class DeceasedInfoLoaded(val deceasedInfo: DeceasedInfoPR?) : PartialState()
         data class AgeLoaded(val age: AgePR?) : PartialState()
+        data class UserAgeLoaded(val age: AgePR?) : PartialState()
         data class DisabilityDependentInfoLoaded(val list: List<DisabilityDependentPR>) : PartialState()
         data class ConfirmSurvivorsListLoaded(val list: List<ConfirmSurvivorPR>) : PartialState()
         data class PayRollLoaded(val payRoll: PayRollPR) : PartialState()
@@ -62,6 +63,7 @@ sealed class PensionInquiryIntent {
     data class LoadDeceasedInfo(val nationalId: String) : PensionInquiryIntent()
     data class LoadEdict(val pensionerId: String) : PensionInquiryIntent()
     data class LoadAge(val birthDate: Long) : PensionInquiryIntent()
+    data object LoadUserAge : PensionInquiryIntent()
     data class LoadPensionerPayRoll(val filters: List<ApiFilterDN>) : PensionInquiryIntent()
 }
 

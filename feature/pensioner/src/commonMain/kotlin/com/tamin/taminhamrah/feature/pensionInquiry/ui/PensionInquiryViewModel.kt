@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
+import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
@@ -39,6 +40,7 @@ class PensionInquiryViewModel(
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val getConfirmSurvivorsListUseCase: GetConfirmSurvivorsListUseCase,
     private val getPensionerPayRollUseCase: GetPensionerPayRollUseCase,
+    private val getUserAgeUseCase: GetUserAgeUseCase,
     private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
@@ -48,6 +50,7 @@ class PensionInquiryViewModel(
         sendIntent(PensionInquiryIntent.LoadPersonalInfo)
         sendIntent(PensionInquiryIntent.LoadAge(1379L))
         sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
+        sendIntent(PensionInquiryIntent.LoadUserAge)
     }
 
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
@@ -60,6 +63,7 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadPersonalInfo -> handleLoadPersonalInfo()
             is PensionInquiryIntent.LoadDeceasedInfo -> handleLoadDeceasedInfo(intent.nationalId)
             is PensionInquiryIntent.LoadAge -> handleLoadAge(intent.birthDate)
+            is PensionInquiryIntent.LoadUserAge -> handleLoadUserAge()
             is PensionInquiryIntent.LoadDisabilityDependentInfo -> handleLoadDisabilityDependentInfo()
             is PensionInquiryIntent.LoadConfirmSurvivorsList -> handleLoadConfirmSurvivorsList()
             is PensionInquiryIntent.LoadPensionerPayRoll -> handleLoadPensionerPayRoll(intent.filters)
@@ -127,6 +131,17 @@ class PensionInquiryViewModel(
         try {
             getAgeUseCase(birthDate).collect { age ->
                 emit(PartialState.AgeLoaded(age.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
+    private fun handleLoadUserAge(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getUserAgeUseCase(emptyList()).collect { age ->
+                emit(PartialState.UserAgeLoaded(age.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -263,6 +278,10 @@ class PensionInquiryViewModel(
             confirmSurvivorsList = partialState.list
         )
         is PartialState.AgeLoaded -> currentState.copy(
+            isLoading = false,
+            age = partialState.age
+        )
+        is PartialState.UserAgeLoaded -> currentState.copy(
             isLoading = false,
             age = partialState.age
         )
