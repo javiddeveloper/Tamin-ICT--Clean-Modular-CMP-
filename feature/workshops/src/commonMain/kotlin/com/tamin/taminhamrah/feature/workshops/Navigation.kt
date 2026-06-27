@@ -5,7 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsScreen
 import androidx.navigation.toRoute
-import com.tamin.taminhamrah.feature.workshops.ui.employerAgreement.EmployerAgreementScreen
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
@@ -39,12 +38,6 @@ data class WorkshopDebtInquiryRoute(
 
 @Serializable
 data class ObjectionableDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class EmployerAgreementRoute(
     val workshopId: String,
     val branchCode: String
 )
@@ -93,9 +86,6 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
             navigateToObjectionableDebit = { workshopId, branchCode ->
                 navController.navigate(ObjectionableDebitRoute(workshopId, branchCode))
             },
-            navigateToEmployerAgreement = { workshopId, branchCode ->
-                navController.navigate(EmployerAgreementRoute(workshopId, branchCode))
-            },
             navigateToManagementDebit = { workshopId, branchCode ->
                 navController.navigate(ManagementDebitRoute(workshopId, branchCode))
             },
@@ -138,14 +128,6 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
     composable<ObjectionableDebitRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<ObjectionableDebitRoute>()
         ObjectionableDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composable<EmployerAgreementRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<EmployerAgreementRoute>()
-        EmployerAgreementScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode
         )

@@ -44,7 +44,6 @@ fun WorkshopsScreen(
     navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> },
     navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> },
     navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> },
-    navigateToEmployerAgreement: (String, String) -> Unit = { _, _ -> },
     navigateToManagementDebit: (String, String) -> Unit = { _, _ -> },
     navigateToWorkshopMembers: (String, String) -> Unit = { _, _ -> },
     navigateToWorkshopStackholders: (String, String) -> Unit = { _, _ -> },
@@ -137,7 +136,6 @@ fun WorkshopsScreen(
                         .fillMaxWidth()
                         .clickable {
                             selectedWorkshop = null
-                            navigateToEmployerAgreement(wId, bCode)
                         }
                         .padding(16.dp)
                 )
