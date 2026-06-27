@@ -47,7 +47,7 @@ class ContractsRepositoryImpl(
 
             try {
                 val response = contractsRemoteDataSource.getContracts(effectiveQuery)
-                val remoteItems = response.list.orEmpty()
+                val remoteItems = response.list?:emptyList()
                 contractDao.replaceAll(remoteItems.map { it.toEntity() })
             } catch (e: Exception) {
                 if (localItems.isEmpty()) {
@@ -74,7 +74,7 @@ class ContractsRepositoryImpl(
 
         try {
             val response = contractsRemoteDataSource.getBranches(branchListQuery(cityCode))
-            val remoteBranches = response.list.orEmpty()
+            val remoteBranches = response.list?:emptyList()
             branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity() })
         } catch (e: Exception) {
             if (localBranches.isEmpty()) {
@@ -91,7 +91,7 @@ class ContractsRepositoryImpl(
 
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
         val response = contractsRemoteDataSource.getSpcPremiumRates()
-        emit(response.list.orEmpty().map { it.toDomain() })
+        emit((response.list?:emptyList()).map { it.toDomain() })
     }
 
     override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow {
