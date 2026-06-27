@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class GetDisabilityPersonalInfoUseCaseTest {
 
@@ -54,5 +55,16 @@ class GetDisabilityPersonalInfoUseCaseTest {
         val result = getDisabilityPersonalInfoUseCase().first()
 
         assertEquals(expectedInfo, result)
+    }
+    @Test
+    fun `invoke should throw error when repository fails`() = runTest {
+        val expectedError = RuntimeException("Error occurred")
+        fakePensionRepository.shouldThrowError = true
+        fakePensionRepository.error = expectedError
+
+        val exception = assertFailsWith<RuntimeException> {
+            getDisabilityPersonalInfoUseCase().first()
+        }
+        assertEquals(expectedError.message, exception.message)
     }
 }

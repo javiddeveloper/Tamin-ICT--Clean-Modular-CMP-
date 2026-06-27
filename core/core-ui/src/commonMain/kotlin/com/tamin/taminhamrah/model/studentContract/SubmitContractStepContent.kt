@@ -20,11 +20,13 @@ fun SubmitContractStepContent(
     registrationInfo: RegistrationInfoPR,
     selectedPremiumRateDescription: String?,
     calculatedMonthlySalary: Long?,
+    agreementContractLabel: String,
     isAgreementConfirmed: Boolean,
     isSubmitting: Boolean,
     submittedContract: FreelanceContractResultPR?,
     onAgreementConfirmedChange: (Boolean) -> Unit,
     onSubmit: () -> Unit,
+    canSubmit: Boolean = true,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
@@ -40,13 +42,14 @@ fun SubmitContractStepContent(
                     registrationInfo = registrationInfo,
                     premiumRateDescription = selectedPremiumRateDescription,
                     calculatedMonthlySalary = calculatedMonthlySalary,
+                    agreementContractLabel = agreementContractLabel,
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
         Button(
             onClick = onSubmit,
-            enabled = isAgreementConfirmed && !isSubmitting && submittedContract == null,
+            enabled = canSubmit && isAgreementConfirmed && !isSubmitting && submittedContract == null,
             modifier = Modifier.fillMaxWidth(),
         ) {
             if (isSubmitting) {
@@ -69,9 +72,10 @@ private fun buildAgreementText(
     registrationInfo: RegistrationInfoPR,
     premiumRateDescription: String?,
     calculatedMonthlySalary: Long?,
+    agreementContractLabel: String,
 ): String {
     val rate = premiumRateDescription.orEmpty()
     val salary = calculatedMonthlySalary?.toString().orEmpty()
     return "اینجانب ${registrationInfo.fullName} به شماره ملی ${registrationInfo.nationalId} " +
-        "درخواست انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد $rate با دستمزد مبنا $salary ریال را دارم."
+        "درخواست انعقاد قرارداد $agreementContractLabel $rate با دستمزد مبنا $salary ریال را دارم."
 }

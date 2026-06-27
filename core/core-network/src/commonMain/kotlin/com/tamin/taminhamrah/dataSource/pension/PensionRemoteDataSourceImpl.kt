@@ -97,11 +97,9 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getUserAge(filter: List<ApiFilterDN>): AgeDTO {
+    override suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO {
         return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-            val response =
-                pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
+            val response = pensionApiService.getDisabilityPersonalInfo()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -112,9 +110,11 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO {
+    override suspend fun getUserAge(filter: List<ApiFilterDN>): AgeDTO {
         return try {
-            val response = pensionApiService.getDisabilityPersonalInfo()
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response =
+                pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

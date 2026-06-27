@@ -51,6 +51,7 @@ class PensionInquiryViewModel(
     init {
         sendIntent(PensionInquiryIntent.LoadPersonalInfo)
         sendIntent(PensionInquiryIntent.LoadAge(1379L))
+        sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
         sendIntent(PensionInquiryIntent.LoadUserAge)
         sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
         sendIntent(

@@ -21,51 +21,65 @@ fun PremiumSalaryStepContent(
     isCalculating: Boolean,
     onPremiumChange: (Long) -> Unit,
     onCalculate: () -> Unit,
+    showPremiumSlider: Boolean = true,
 ) {
     when {
-        isLoading && premiumRange == null -> {
+        showPremiumSlider && isLoading && premiumRange == null -> {
             CircularProgressIndicator()
         }
 
-        premiumRange == null -> {
+        !showPremiumSlider && calculatedMonthlySalary == null && isCalculating -> {
+            CircularProgressIndicator()
+        }
+
+        showPremiumSlider && premiumRange == null -> {
             Text(
                 text = "محدوده حق بیمه در دسترس نیست.",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
 
-        else -> {
-            val low = premiumRange.lowPremium.toFloat()
-            val high = premiumRange.highPremium.toFloat()
-            val current = (selectedPremium ?: premiumRange.lowPremium).toFloat().coerceIn(low, high)
-            val range = high - low
+        !showPremiumSlider && calculatedMonthlySalary == null && !isCalculating -> {
+            Text(
+                text = "محاسبه حق بیمه در دسترس نیست.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
 
+        else -> {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "حداقل: ${premiumRange.lowPremium} — حداکثر: ${premiumRange.highPremium}",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                Text(
-                    text = "مبلغ انتخابی: ${current.toLong()} ریال",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                if (range > 0f) {
-                    Slider(
-                        value = current,
-                        onValueChange = { onPremiumChange(it.toLong()) },
-                        valueRange = low..high,
-                        modifier = Modifier.fillMaxWidth(),
+                if (showPremiumSlider && premiumRange != null) {
+                    val low = premiumRange.lowPremium.toFloat()
+                    val high = premiumRange.highPremium.toFloat()
+                    val current = (selectedPremium ?: premiumRange.lowPremium).toFloat().coerceIn(low, high)
+                    val range = high - low
+
+                    Text(
+                        text = "حداقل: ${premiumRange.lowPremium} — حداکثر: ${premiumRange.highPremium}",
+                        style = MaterialTheme.typography.bodySmall,
                     )
-                }
-                Button(
-                    onClick = onCalculate,
-                    enabled = !isCalculating,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    if (isCalculating) {
-                        CircularProgressIndicator()
-                    } else {
-                        Text("محاسبه حق بیمه ماهانه")
+                    Text(
+                        text = "مبلغ انتخابی: ${current.toLong()} ریال",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    if (range > 0f) {
+                        Slider(
+                            value = current,
+                            onValueChange = { onPremiumChange(it.toLong()) },
+                            valueRange = low..high,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Button(
+                        onClick = onCalculate,
+                        enabled = !isCalculating,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (isCalculating) {
+                            CircularProgressIndicator()
+                        } else {
+                            Text("محاسبه حق بیمه ماهانه")
+                        }
                     }
                 }
                 calculatedMonthlySalary?.let { salary ->

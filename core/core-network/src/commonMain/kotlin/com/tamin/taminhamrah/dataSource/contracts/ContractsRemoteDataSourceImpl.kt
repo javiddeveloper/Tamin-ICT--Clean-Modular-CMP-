@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.FreeJobDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -17,6 +18,12 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 class ContractsRemoteDataSourceImpl(
     private val contractsApiService: ContractsApiService,
@@ -79,7 +86,7 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.getFreelancePremiumRange(
                 treatmentSupportCode = params.treatmentSupportCode,
                 spcRateCode = params.spcRateCode,
-                insuranceId = params.insuranceId,
+                freeJobCode = params.freeJobCode,
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -106,6 +113,30 @@ class ContractsRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun calculateOptionalSalary(premiumRateCode: String): Long {
+        return try {
+            contractsApiService.calculateOptionalSalary(premiumRateCode).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getFreeJobWages(query: ApiQueryParamDN): ListData<FreeJobDTO> {
+        return try {
+            contractsApiService.getFreeJobWages(apiQueryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun makeFreelanceContract(
         monthlyPremium: Long,
         request: FreelanceMakeContractRequestDTO,
@@ -120,6 +151,33 @@ class ContractsRemoteDataSourceImpl(
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun uploadImage(request: UploadImageRequestDN): String? {
+        return try {
+            val content = MultiPartFormDataContent(
+                formData {
+                    append(
+                        key = "file",
+                        value = request.bytes,
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, ContentType.Image.JPEG.toString())
+                            append(
+                                HttpHeaders.ContentDisposition,
+                                "filename=\"${request.fileName}\"",
+                            )
+                        },
+                    )
+                },
+            )
+            contractsApiService.uploadImage(content).guid
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
             )
         }
     }

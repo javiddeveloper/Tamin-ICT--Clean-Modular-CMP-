@@ -12,9 +12,6 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.tools.BaseDTO
-import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.QueryMap
 
 
 interface PensionRemoteDataSource {
