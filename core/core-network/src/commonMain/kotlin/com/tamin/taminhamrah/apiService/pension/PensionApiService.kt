@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -45,5 +46,9 @@ interface PensionApiService {
     suspend fun getUserAge(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<AgeDTO>
+
+    @GET("disability-request/personal")
+    suspend fun getDisabilityPersonalInfo(
+    ): BaseDTO<DisabilityPersonalInfoDTO>
 
 }

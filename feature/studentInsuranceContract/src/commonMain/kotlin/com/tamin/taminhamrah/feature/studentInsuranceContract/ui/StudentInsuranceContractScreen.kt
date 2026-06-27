@@ -58,29 +58,32 @@ import com.tamin.taminhamrah.model.studentContract.InsurancePremiumStepContent
 import com.tamin.taminhamrah.model.studentContract.PremiumSalaryStepContent
 import com.tamin.taminhamrah.model.studentContract.SelectBranchStepContent
 import com.tamin.taminhamrah.model.studentContract.SubmitContractStepContent
+import com.tamin.taminhamrah.model.studentContract.UploadImageStepContent
 import com.tamin.taminhamrah.model.studentContract.UserInfoStepContent
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import com.tamin.taminhamrah.model.studentContract.ContractApplicantType
+import com.tamin.taminhamrah.model.studentContract.InsuranceContractKind
 import com.tamin.taminhamrah.model.studentContract.StudentInsuranceContractStep
 import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
 fun StudentInsuranceContractScreen(
+    contractKind: InsuranceContractKind = InsuranceContractKind.STUDENT,
     onBack: () -> Unit,
     onShowRules: () -> Unit = {},
     viewModel: StudentInsuranceContractViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(StudentInsuranceContractIntent.LoadInitialData)
+    LaunchedEffect(contractKind) {
+        viewModel.sendIntent(StudentInsuranceContractIntent.LoadInitialData(contractKind))
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("انعقاد قرارداد بیمه دانشجویی") },
+                title = { Text(state.contractKind.screenTitle) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "بازگشت")
@@ -114,6 +117,9 @@ fun StudentInsuranceContractScreen(
             onPremiumRateSelected = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.SelectPremiumRate(it))
             },
+            onFreeJobSelected = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.SelectFreeJob(it))
+            },
             onMonthlyPremiumChange = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.SelectMonthlyPremium(it))
             },
@@ -125,6 +131,15 @@ fun StudentInsuranceContractScreen(
             },
             onSubmitContract = {
                 viewModel.sendIntent(StudentInsuranceContractIntent.SubmitContract)
+            },
+            onDocumentDescriptionChange = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.UpdateDocumentDescription(it))
+            },
+            onImagePicked = { fileName, bytes ->
+                viewModel.sendIntent(StudentInsuranceContractIntent.UploadPickedImage(fileName, bytes))
+            },
+            onClearDocument = {
+                viewModel.sendIntent(StudentInsuranceContractIntent.ClearUploadedDocument)
             },
             onShowRules = onShowRules,
             modifier = Modifier.padding(padding),
@@ -144,10 +159,14 @@ private fun StudentInsuranceContractContent(
     onBranchCitySelected: (CityPR) -> Unit,
     onBranchSelected: (BranchPR) -> Unit,
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    onFreeJobSelected: (com.tamin.taminhamrah.model.contracts.FreeJobDN) -> Unit,
     onMonthlyPremiumChange: (Long) -> Unit,
     onCalculateMonthlyPremium: () -> Unit,
     onAgreementConfirmedChange: (Boolean) -> Unit,
     onSubmitContract: () -> Unit,
+    onDocumentDescriptionChange: (String) -> Unit,
+    onImagePicked: (fileName: String, bytes: ByteArray) -> Unit,
+    onClearDocument: () -> Unit,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -193,10 +212,14 @@ private fun StudentInsuranceContractContent(
                                 onBranchCitySelected = onBranchCitySelected,
                                 onBranchSelected = onBranchSelected,
                                 onPremiumRateSelected = onPremiumRateSelected,
+                                onFreeJobSelected = onFreeJobSelected,
                                 onMonthlyPremiumChange = onMonthlyPremiumChange,
                                 onCalculateMonthlyPremium = onCalculateMonthlyPremium,
                                 onAgreementConfirmedChange = onAgreementConfirmedChange,
                                 onSubmitContract = onSubmitContract,
+                                onDocumentDescriptionChange = onDocumentDescriptionChange,
+                                onImagePicked = onImagePicked,
+                                onClearDocument = onClearDocument,
                                 onShowRules = onShowRules,
                             )
                         }
@@ -234,19 +257,26 @@ private fun ContractStepper(
     onBranchCitySelected: (CityPR) -> Unit,
     onBranchSelected: (BranchPR) -> Unit,
     onPremiumRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    onFreeJobSelected: (com.tamin.taminhamrah.model.contracts.FreeJobDN) -> Unit,
     onMonthlyPremiumChange: (Long) -> Unit,
     onCalculateMonthlyPremium: () -> Unit,
     onAgreementConfirmedChange: (Boolean) -> Unit,
     onSubmitContract: () -> Unit,
+    onDocumentDescriptionChange: (String) -> Unit,
+    onImagePicked: (fileName: String, bytes: ByteArray) -> Unit,
+    onClearDocument: () -> Unit,
     onShowRules: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-        StudentInsuranceContractStep.orderedSteps.forEachIndexed { index, step ->
-            val stepState = resolveStepState(step, state.currentStep)
+        val steps = state.contractKind.steps
+        steps.forEachIndexed { index, step ->
+            val stepState = resolveStepState(step, state.currentStep, state.contractKind)
+            val displayNumber = state.contractKind.displayNumber(step)
             StepperItem(
                 step = step,
+                displayNumber = displayNumber,
                 stepState = stepState,
-                isLast = index == StudentInsuranceContractStep.orderedSteps.lastIndex,
+                isLast = index == steps.lastIndex,
                 content = {
                     when (step) {
                         StudentInsuranceContractStep.STEP_REGISTRATION -> {
@@ -254,7 +284,10 @@ private fun ContractStepper(
                         }
                         StudentInsuranceContractStep.STEP_AUTHORIZATION -> {
                             if (state.eligibility != null) {
-                                AuthorizationStepContent(eligibility = state.eligibility)
+                                AuthorizationStepContent(
+                                    eligibility = state.eligibility,
+                                    insuranceTypeLabel = state.contractKind.insuranceTypeLabel,
+                                )
                             } else {
                                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
                             }
@@ -305,9 +338,19 @@ private fun ContractStepper(
                                 onBranchSelected = onBranchSelected,
                             )
                         }
-                        StudentInsuranceContractStep.STEP_UPLOAD_IMAGE,
-                        StudentInsuranceContractStep.STEP_TREATMENT_SUPPORT,
-                        -> {
+                        StudentInsuranceContractStep.STEP_UPLOAD_IMAGE -> {
+                            UploadImageStepContent(
+                                description = state.documentDescription,
+                                previewBytes = state.documentPreviewBytes,
+                                uploadedDocuments = state.uploadedDocuments,
+                                isUploading = state.isUploadingDocument,
+                                uploadError = state.uploadDocumentError,
+                                onDescriptionChange = onDocumentDescriptionChange,
+                                onImagePicked = onImagePicked,
+                                onClearDocument = onClearDocument,
+                            )
+                        }
+                        StudentInsuranceContractStep.STEP_TREATMENT_SUPPORT -> {
                             Text(
                                 text = "این مرحله هنوز پیاده‌سازی نشده است.",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -319,6 +362,12 @@ private fun ContractStepper(
                                 selectedCode = state.selectedPremiumRateCode,
                                 isLoading = state.isPremiumRatesLoading,
                                 onRateSelected = onPremiumRateSelected,
+                                showFreeJobSelector = state.contractKind.requiresFreeJob,
+                                freeJobs = state.freeJobs,
+                                selectedFreeJobCode = state.selectedFreeJobCode,
+                                selectedFreeJobName = state.selectedFreeJobName,
+                                isFreeJobsLoading = state.isFreeJobsLoading,
+                                onFreeJobSelected = onFreeJobSelected,
                             )
                         }
                         StudentInsuranceContractStep.STEP_SALARY -> {
@@ -330,6 +379,7 @@ private fun ContractStepper(
                                 isCalculating = state.isCalculatingPremium,
                                 onPremiumChange = onMonthlyPremiumChange,
                                 onCalculate = onCalculateMonthlyPremium,
+                                showPremiumSlider = state.contractKind.usesFreelancePremiumRange,
                             )
                         }
                         StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT -> {
@@ -339,14 +389,15 @@ private fun ContractStepper(
                                     .firstOrNull { it.code == state.selectedPremiumRateCode }
                                     ?.description,
                                 calculatedMonthlySalary = state.calculatedMonthlySalary,
+                                agreementContractLabel = state.contractKind.agreementContractLabel,
                                 isAgreementConfirmed = state.isAgreementConfirmed,
                                 isSubmitting = state.isSubmittingContract,
                                 submittedContract = state.submittedContract,
                                 onAgreementConfirmedChange = onAgreementConfirmedChange,
                                 onSubmit = onSubmitContract,
+                                canSubmit = state.contractKind == InsuranceContractKind.FREELANCE,
                             )
                         }
-                        else -> Unit
                     }
                 },
                 navigation = {
@@ -361,8 +412,8 @@ private fun ContractStepper(
                             )
                         } else {
                             StepNavigationButtons(
-                                showPrevious = step != StudentInsuranceContractStep.STEP_REGISTRATION,
-                                showNext = step != StudentInsuranceContractStep.STEP_SUBMIT_CONTRACT,
+                                showPrevious = !state.contractKind.isFirstStep(step),
+                                showNext = !state.contractKind.isLastStep(step),
                                 nextEnabled = state.canGoNext,
                                 onNextStep = onNextStep,
                                 onPreviousStep = onPreviousStep,
@@ -384,15 +435,21 @@ private enum class StepState {
 private fun resolveStepState(
     step: StudentInsuranceContractStep,
     currentStep: StudentInsuranceContractStep,
-): StepState = when {
-    step.stepIndex < currentStep.stepIndex -> StepState.COMPLETED
-    step.stepIndex == currentStep.stepIndex -> StepState.ACTIVE
-    else -> StepState.UPCOMING
+    kind: InsuranceContractKind,
+): StepState {
+    val stepPosition = kind.steps.indexOf(step)
+    val currentPosition = kind.steps.indexOf(currentStep)
+    return when {
+        stepPosition < currentPosition -> StepState.COMPLETED
+        stepPosition == currentPosition -> StepState.ACTIVE
+        else -> StepState.UPCOMING
+    }
 }
 
 @Composable
 private fun StepperItem(
     step: StudentInsuranceContractStep,
+    displayNumber: Int,
     stepState: StepState,
     isLast: Boolean,
     content: @Composable () -> Unit,
@@ -412,7 +469,7 @@ private fun StepperItem(
             modifier = Modifier.width(40.dp),
         ) {
             StepIndicator(
-                stepIndex = step.stepIndex,
+                stepIndex = displayNumber,
                 stepState = stepState,
                 indicatorColor = indicatorColor,
             )
@@ -437,7 +494,7 @@ private fun StepperItem(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "${step.stepIndex}. ${step.title}",
+                text = "$displayNumber. ${step.title}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = if (stepState == StepState.ACTIVE) FontWeight.Bold else FontWeight.Normal,
                 color = when (stepState) {
@@ -524,7 +581,10 @@ private fun RegistrationStepContent(info: RegistrationInfoPR) {
 }
 
 @Composable
-private fun AuthorizationStepContent(eligibility: ContractEligibilityPR) {
+private fun AuthorizationStepContent(
+    eligibility: ContractEligibilityPR,
+    insuranceTypeLabel: String,
+) {
     Row(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -536,7 +596,7 @@ private fun AuthorizationStepContent(eligibility: ContractEligibilityPR) {
             modifier = Modifier.size(24.dp),
         )
         Text(
-            text = eligibility.message(),
+            text = eligibility.message(insuranceTypeLabel),
             style = MaterialTheme.typography.bodyMedium,
         )
     }

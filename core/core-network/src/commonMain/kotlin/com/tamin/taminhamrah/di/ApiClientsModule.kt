@@ -43,13 +43,6 @@ val ApiClientsModule = module {
             .build()
     }
 
-    // Upload Ktorfit instance
-    single(named("uploadKtorfit")) {
-        Ktorfit.Builder()
-            .httpClient(get<HttpClient>(named("uploadHttpClient")))
-            .build()
-    }
-
     // API Services
     single<UserApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))

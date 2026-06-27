@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.PayRollPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
 import com.tamin.taminhamrah.model.personal.AgePR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
@@ -40,6 +41,7 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadAge(1379L))
         viewModel.sendIntent(PensionInquiryIntent.LoadUserAge)
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionerPayRoll(emptyList()))
+        viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
     }
 
     PensionInquiryContent(state)
@@ -55,9 +57,9 @@ fun PensionInquiryContent(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.deceasedInfo == null) {
+            if (state.isLoading && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.deceasedInfo == null && state.disabilityPersonalInfo == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.deceasedInfo == null) {
+            } else if (state.error != null && state.pensionList.isEmpty() && state.pensionerIds.isEmpty() && state.recipients.isEmpty() && state.personalInfo == null && state.deceasedInfo == null && state.disabilityPersonalInfo == null) {
                 Text(
                     text = state.error ?: "خطای ناشناخته",
                     color = MaterialTheme.colorScheme.error,
@@ -69,6 +71,17 @@ fun PensionInquiryContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (state.disabilityPersonalInfo != null) {
+                        item {
+                            Text(
+                                text = "اطلاعات فردی (از کار افتادگی):",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            DisabilityPersonalInfoItem(state.disabilityPersonalInfo)
+                        }
+                    }
+
                     if (state.deceasedInfo != null) {
                         item {
                             Text(
@@ -227,6 +240,36 @@ fun AgeItem(age: AgePR) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "سن: ${age.age}", style = MaterialTheme.typography.titleMedium)
             Text(text = "تاریخ تولد: ${age.birthDate}")
+        }
+    }
+}
+
+@Composable
+fun DisabilityPersonalInfoItem(info: DisabilityPersonalInfoPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            val personal = info.personal
+            if (personal != null) {
+                Text(text = "نام: ${personal.firstName} ${personal.lastName}", style = MaterialTheme.typography.titleMedium)
+                Text(text = "نام پدر: ${personal.fatherName}")
+                Text(text = "کد ملی: ${personal.nationalId}")
+                Text(text = "تاریخ تولد: ${personal.dateOfBirth}")
+                Text(text = "جنسیت: ${personal.genderDesc}")
+            }
+            Text(text = "شماره بیمه: ${info.insuranceId}")
+            Text(text = "شعبه: ${info.branchName} (${info.branch})")
+            Text(text = "استان: ${info.provinceName}")
+            Text(text = "شماره موبایل: ${info.mobileNumber}")
+            val work = info.work
+            if (work != null) {
+                Text(text = "شغل: ${work.jobDescription}")
+                Text(text = "کد کارگاه: ${work.workshopId}")
+            }
+            Text(text = "سن: ${info.strAge} (${info.yearsAge} سال، ${info.monthsAge} ماه، ${info.daysAge} روز)")
+            Text(text = "وضعیت تایید: ${if (info.confirmed) "تایید شده" else "تایید نشده"}")
         }
     }
 }

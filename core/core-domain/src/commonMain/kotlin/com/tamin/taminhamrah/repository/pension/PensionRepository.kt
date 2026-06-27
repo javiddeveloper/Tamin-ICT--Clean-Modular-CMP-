@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -29,6 +30,8 @@ interface PensionRepository {
     suspend fun getPensionerPayRoll(
         filters: List<ApiFilterDN>
     ): Flow<PayRollDN>
+
+    suspend fun getDisabilityPersonalInfo(): Flow<DisabilityPersonalInfoDN>
 
     suspend fun getUserAge(
         filters: List<ApiFilterDN>

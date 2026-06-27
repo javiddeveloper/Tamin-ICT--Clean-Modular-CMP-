@@ -1,9 +1,10 @@
 package com.tamin.taminhamrah.model.personal.disabilityRequest
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class GenderDTO(
-    val genderCode: String?,
-    val genderDesc: String?,
+    @SerialName("genderCode") val genderCode: String?= null,
+    @SerialName("genderDesc") val genderDesc: String?= null,
 )
