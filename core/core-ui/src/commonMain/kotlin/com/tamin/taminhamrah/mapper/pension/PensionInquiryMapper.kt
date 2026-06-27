@@ -62,8 +62,8 @@ fun EdictPensionerDN.toPresentation(): EdictPensionerPR {
         branchName = branchName ?: "",
         insuranceId = insuranceId ?: "",
         title = title ?: "",
-        edictYear = edictYear,
-        edictMonth = edictMonth,
+        edictYear = edictYear ?:  "0",
+        edictMonth = edictMonth ?:  "0",
         edictInfo = edictInfo?.toPresentation(),
         survivorInfo = survivorInfo?.map { it.toPresentation() } ?: emptyList(),
         detail = detail?.map { it.toPresentation() } ?: emptyList()

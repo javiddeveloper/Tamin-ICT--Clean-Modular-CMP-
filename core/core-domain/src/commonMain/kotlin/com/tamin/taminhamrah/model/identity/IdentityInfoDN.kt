@@ -15,6 +15,6 @@ data class IdentityInfoDN(
     val lastName: String?,
     val nationalId: String?,
     val ssn: String?,
-    val cityOfBirthName: String?,
-    val cityOfIssueName: String?,
+    var cityOfBirthName: String? = null,
+    var cityOfIssueName: String? = null
 )
