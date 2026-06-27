@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -26,12 +27,16 @@ class FakeContractsRepository : ContractsRepository {
     var calculatedSalaryResult: Long? = null
     var makeContractResult: FreelanceContractResultDN? = null
     var lastMakeContractParams: FreelanceMakeContractParams? = null
+    var makeContractCalled = false
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
     var studentInsuranceContractsCalled = false
 
     var lastUploadImageRequest: UploadImageRequestDN? = null
     var uploadImageResult: String = "a4769aa8-b9af-4183-83b9-367dc9f52511"
+
+    var lastSaveContactRequest: SaveContactRequestDN? = null
+    var saveContactResult: Any? = null
 
     override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow {
         lastQuery = query
@@ -42,6 +47,9 @@ class FakeContractsRepository : ContractsRepository {
     var lastPremiumTypeCode: String? = null
     var freeJobWagesResult: List<FreeJobDN> = emptyList()
     var calculatedOptionalSalaryResult: Long? = null
+    var lastPremiumRateCode: String? = null
+    var lastFreelanceCalculateParams: FreelanceCalculateSalaryParams? = null
+    var lastFreelancePremiumRangeParams: FreelancePremiumRangeParams? = null
 
     override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flow {
         lastPremiumTypeCode = premiumTypeCode
@@ -83,6 +91,7 @@ class FakeContractsRepository : ContractsRepository {
     }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
+        lastFreelancePremiumRangeParams = params
         if (shouldThrowError) throw error
         emit(
             freelancePremiumRangeResult ?: FreelancePremiumRangeDN(
@@ -95,17 +104,32 @@ class FakeContractsRepository : ContractsRepository {
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
+        lastFreelanceCalculateParams = params
         if (shouldThrowError) throw error
         emit(calculatedSalaryResult ?: 0L)
     }
 
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow {
+        lastPremiumRateCode = premiumRateCode
         if (shouldThrowError) throw error
         emit(calculatedOptionalSalaryResult ?: 0L)
     }
 
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
         lastMakeContractParams = params
+        makeContractCalled = false
+        if (shouldThrowError) throw error
+        emit(
+            makeContractResult ?: FreelanceContractResultDN(
+                contractNumber = null,
+                contractDate = null,
+            ),
+        )
+    }
+
+    override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
+        lastMakeContractParams = params
+        makeContractCalled = true
         if (shouldThrowError) throw error
         emit(
             makeContractResult ?: FreelanceContractResultDN(
@@ -119,5 +143,11 @@ class FakeContractsRepository : ContractsRepository {
         lastUploadImageRequest = request
         if (shouldThrowError) throw error
         emit(uploadImageResult)
+    }
+
+    override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flow {
+        lastSaveContactRequest = request
+        if (shouldThrowError) throw error
+        emit(saveContactResult)
     }
 }

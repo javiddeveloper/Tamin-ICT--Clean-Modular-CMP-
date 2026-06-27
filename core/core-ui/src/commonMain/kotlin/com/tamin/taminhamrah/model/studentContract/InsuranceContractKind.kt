@@ -20,6 +20,16 @@ enum class InsuranceContractKind(
         hasUploadImageStep = true,
         hasTreatmentSupportStep = true,
     ),
+    HOUSEWIFE(
+        premiumTypeCode = "01",
+        screenTitle = "انعقاد قرارداد بیمه زنان خانه‌دار",
+        insuranceTypeLabel = "بیمه زنان خانه‌دار",
+        agreementContractLabel = "بیمه زنان خانه‌دار",
+        requiresFreeJob = false,
+        usesFreelancePremiumRange = true,
+        hasUploadImageStep = true,
+        hasTreatmentSupportStep = true,
+    ),
     FREELANCE(
         premiumTypeCode = "01",
         screenTitle = "انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد",
