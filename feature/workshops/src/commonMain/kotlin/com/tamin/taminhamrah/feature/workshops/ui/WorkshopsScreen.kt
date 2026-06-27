@@ -119,6 +119,61 @@ fun WorkshopsScreen(
                         }
                         .padding(16.dp)
                 )
+                Text(
+                    text = "اعتراض به بدهی",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToObjectionableDebit(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "نام نویسی غیرحضوری بیمه شده",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToEmployerAgreement(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "رسیدگی به بدهی ماده ۱۶",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToManagementDebit(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "کارکنان",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToWorkshopMembers(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "ذینفعان",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToWorkshopStackholders(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
