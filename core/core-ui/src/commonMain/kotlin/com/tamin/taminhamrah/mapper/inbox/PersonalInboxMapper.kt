@@ -12,8 +12,8 @@ fun PersonalInboxItemDN.toPresentation(): PersonalInboxItemPR {
         id = id,
         refCode = id.toString(),
         requestDate = PersianDateFormatter.formatTimestamp(requestTimestamp),
-        system = type?.typeDesc.orEmpty(),
-        subject = subType?.typeDesc.orEmpty(),
+        system = type?.typeDesc?:"",
+        subject = subType?.typeDesc?:"",
         passwordCode = resolvePasswordCode(),
         seen = seen == true,
     )
@@ -22,8 +22,8 @@ fun PersonalInboxItemDN.toPresentation(): PersonalInboxItemPR {
 fun List<PersonalInboxItemDN>.toPresentation(): List<PersonalInboxItemPR> = map { it.toPresentation() }
 
 fun PersonalInboxSizeDN.toPresentation(): PersonalInboxSizePR {
-    val usage = usage.orEmpty()
-    val total = total.orEmpty()
+    val usage = usage?:""
+    val total = total?:""
     return PersonalInboxSizePR(
         usageMb = usage,
         totalMb = total,

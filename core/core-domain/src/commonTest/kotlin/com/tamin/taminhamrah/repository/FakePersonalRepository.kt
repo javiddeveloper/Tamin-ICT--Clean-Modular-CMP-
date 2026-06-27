@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
@@ -18,6 +19,7 @@ class FakePersonalRepository : PersonalRepository {
     var ageResult: AgeDN? = null
     var deceasedInfoResult: DeceasedInfoDN? = null
     var submitFinalSurvivorPensionResult: String? = null
+    var pdfDownloadResult: PdfDownloadDN? = null
     var girlSurvivorConditionResult: GirlSurvivorConditionDN? = null
     var saveSurvivorInfoResult: String? = null
 
@@ -66,6 +68,11 @@ class FakePersonalRepository : PersonalRepository {
     override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = flow {
         if (shouldThrowError) throw error
         emit(confirmSurvivorsListResult)
+    }
+
+    override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = flow {
+        if (shouldThrowError) throw error
+        pdfDownloadResult?.let { emit(it) }
     }
 
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {

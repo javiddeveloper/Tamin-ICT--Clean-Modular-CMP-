@@ -11,4 +11,7 @@ class GetContractsUseCase(
     operator fun invoke(query: ApiQueryParamDN? = null): Flow<List<ContractDN>> {
         return contractsRepository.getContracts(query)
     }
+
+    fun studentInsuranceContracts(): Flow<List<ContractDN>> =
+        contractsRepository.getStudentInsuranceContracts()
 }

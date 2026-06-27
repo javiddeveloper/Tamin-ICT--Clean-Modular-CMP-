@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
@@ -16,6 +18,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import io.ktor.client.statement.bodyAsChannel
 
 class PersonalRemoteDataSourceImpl(
     private val personalApiService: PersonalApiService,
@@ -122,6 +125,23 @@ class PersonalRemoteDataSourceImpl(
         return try {
             val response = personalApiService.submitFinalSurvivorPension(requestId, body)
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
+    override suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO {
+        return try {
+            val response = personalApiService.getFinalSurvivorPensionPDF()
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = response.bodyAsChannel()
+                )
+            )
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

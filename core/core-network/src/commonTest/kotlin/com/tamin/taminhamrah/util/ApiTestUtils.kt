@@ -63,11 +63,26 @@ object PersonalInboxTestData {
 object ContractsTestData {
     val contractsListSuccess: String
         get() = readResourceFile("mocks/contracts_list_success.json")
+
+    val spcPremiumRateSuccess: String
+        get() = readResourceFile("mocks/spc_premium_rate_success.json")
+
+    val freelancePremiumRangeSuccess: String
+        get() = readResourceFile("mocks/freelance_premium_range_success.json")
+
+    val freelanceCalculateSalarySuccess: String
+        get() = readResourceFile("mocks/freelance_calculate_salary_success.json")
+
+    val freelanceMakeContractSuccess: String
+        get() = readResourceFile("mocks/freelance_make_contract_success.json")
 }
 
 object PensionTestData {
     val payrollSuccess: String
         get() = readResourceFile("mocks/pension_payroll_success.json")
+
+    val userAgeSuccess: String
+        get() = readResourceFile("mocks/pension/user_age_success.json")
 }
 
 object WorkshopTestData {
