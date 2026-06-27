@@ -46,6 +46,9 @@ class FakeContractsRepository : ContractsRepository {
     var lastPremiumTypeCode: String? = null
     var freeJobWagesResult: List<FreeJobDN> = emptyList()
     var calculatedOptionalSalaryResult: Long? = null
+    var lastPremiumRateCode: String? = null
+    var lastFreelanceCalculateParams: FreelanceCalculateSalaryParams? = null
+    var lastFreelancePremiumRangeParams: FreelancePremiumRangeParams? = null
 
     override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flow {
         lastPremiumTypeCode = premiumTypeCode
@@ -87,6 +90,7 @@ class FakeContractsRepository : ContractsRepository {
     }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
+        lastFreelancePremiumRangeParams = params
         if (shouldThrowError) throw error
         emit(
             freelancePremiumRangeResult ?: FreelancePremiumRangeDN(
@@ -99,11 +103,13 @@ class FakeContractsRepository : ContractsRepository {
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
+        lastFreelanceCalculateParams = params
         if (shouldThrowError) throw error
         emit(calculatedSalaryResult ?: 0L)
     }
 
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow {
+        lastPremiumRateCode = premiumRateCode
         if (shouldThrowError) throw error
         emit(calculatedOptionalSalaryResult ?: 0L)
     }

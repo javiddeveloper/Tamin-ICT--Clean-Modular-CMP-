@@ -59,6 +59,21 @@ object ContractsTestData {
 
     val freelanceMakeContractSuccess: String
         get() = readResourceFile("mocks/freelance_make_contract_success.json")
+
+    val optionalCalculateSalarySuccess: String
+        get() = readResourceFile("mocks/optional_calculate_salary_success.json")
+
+    val registrationInfoSuccess: String
+        get() = readResourceFile("mocks/registration_info_success.json")
+
+    val branchesListSuccess: String
+        get() = readResourceFile("mocks/branches_list_success.json")
+
+    val freeJobWagesSuccess: String
+        get() = readResourceFile("mocks/free_job_wages_success.json")
+
+    val uploadImageSuccess: String
+        get() = readResourceFile("mocks/upload_image_success.json")
 }
 
 object PensionTestData {

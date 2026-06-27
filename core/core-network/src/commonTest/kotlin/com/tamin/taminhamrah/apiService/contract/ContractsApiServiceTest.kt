@@ -2,12 +2,21 @@ package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
+import com.tamin.taminhamrah.model.contracts.FreeJobDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
+import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactPersonalDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.ContractsTestData
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -148,6 +157,119 @@ class ContractsApiServiceTest : BaseApiTest() {
 
         assertEquals(200, response.status)
         assertEquals("SUCCESSFUL", response.family)
+    }
+
+    @Test
+    fun `getRegistrationInfo should return registration info`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.registrationInfoSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.getRegistrationInfo()
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data: RegistrationInfoDTO = response.data!!
+        assertEquals(true, data.insuranceIdValidity)
+        assertEquals("12345678901", data.insuranceId)
+        assertEquals("09121234567", data.mobileNumber)
+        assertNotNull(data.personalInfo)
+        assertEquals("علی", data.personalInfo?.firstName)
+        assertEquals("2487741923", data.personalInfo?.ssn)
+        assertNotNull(data.lastContact)
+        assertEquals("تهران", data.lastContact?.address)
+    }
+
+    @Test
+    fun `getBranches should return branch list`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.branchesListSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.getBranches(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val listData = response.data
+        assertNotNull(listData)
+        assertEquals(1, listData.total)
+
+        val branches: List<BranchDTO> = listData.list.orEmpty()
+        assertEquals(1, branches.size)
+        assertEquals("001", branches.first().code)
+        assertEquals("شعبه مرکزی", branches.first().name)
+        assertEquals("0101", branches.first().cityCode)
+    }
+
+    @Test
+    fun `calculateOptionalSalary should return calculated monthly salary`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.optionalCalculateSalarySuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.calculateOptionalSalary(premiumRate = "25989368")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertEquals(362_592_593L, response.data)
+    }
+
+    @Test
+    fun `getFreeJobWages should return free job list`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.freeJobWagesSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.getFreeJobWages(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val listData = response.data
+        assertNotNull(listData)
+        assertEquals(1, listData.total)
+
+        val freeJobs: List<FreeJobDTO> = listData.list.orEmpty()
+        assertEquals(1, freeJobs.size)
+        assertEquals("099796", freeJobs.first().jobCode)
+        assertEquals("تاسیساتی", freeJobs.first().discrioption)
+    }
+
+    @Test
+    fun `uploadImage should return image guid`() = runTest {
+        val ktorfit = createMockKtorfit(ContractsTestData.uploadImageSuccess)
+        val apiService = ktorfit.createContractsApiService()
+
+        val content = MultiPartFormDataContent(
+            formData {
+                append(
+                    key = "file",
+                    value = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte(), 0xD9.toByte()),
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, ContentType.Image.JPEG.toString())
+                        append(HttpHeaders.ContentDisposition, "filename=\"test.jpg\"")
+                    },
+                )
+            },
+        )
+
+        val response = apiService.uploadImage(content)
+
+        assertEquals("a4769aa8-b9af-4183-83b9-367dc9f52511", response.guid)
     }
 
 }
