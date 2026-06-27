@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.WorkDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -30,6 +31,7 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocRequest
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.PersonalDTO as DisabilityPersonalDTO
 import kotlin.jvm.JvmName
 
 fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
@@ -100,7 +102,7 @@ fun DisabilityPersonalInfoDTO.toDomain(): DisabilityPersonalInfoDN {
     )
 }
 
-fun com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.PersonalDTO.toDomain(): DisabilityPersonalDN {
+fun DisabilityPersonalDTO.toDomain(): DisabilityPersonalDN {
     return DisabilityPersonalDN(
         firstName = firstName,
         lastName = lastName,
@@ -113,7 +115,7 @@ fun com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPers
     )
 }
 
-fun com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.WorkDTO.toDomain(): DisabilityWorkDN {
+fun WorkDTO.toDomain(): DisabilityWorkDN {
     return DisabilityWorkDN(
         jobDescription = job?.jobDescription,
         workshopId = workshopId
