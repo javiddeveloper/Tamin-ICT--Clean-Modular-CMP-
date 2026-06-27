@@ -79,4 +79,22 @@ class PensionApiServiceTest : BaseApiTest() {
         assertEquals("30", response.data?.age)
         assertEquals("1370/01/01", response.data?.birthDate)
     }
+
+    @Test
+    fun `getRetirementRequestInfo should return retirement request data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.retirementRequestInfoSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.getRetirementRequestInfo(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals(1, response.data?.list?.size)
+        assertEquals("Ali", response.data?.list?.first()?.firstName)
+        assertEquals("Alavi", response.data?.list?.first()?.lastName)
+        assertEquals("0012345678", response.data?.list?.first()?.nationalCode)
+    }
 }
