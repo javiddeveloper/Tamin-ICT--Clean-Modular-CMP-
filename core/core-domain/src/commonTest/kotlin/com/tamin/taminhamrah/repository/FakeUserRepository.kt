@@ -90,4 +90,9 @@ class FakeUserRepository : UserRepository {
         if (shouldThrowError) throw error
         emit(verifyChangeMobileResult)
     }
+
+    override suspend fun checkUserIsNew(nationalId: String): Boolean {
+        if (shouldThrowError) throw error
+        return false
+    }
 }

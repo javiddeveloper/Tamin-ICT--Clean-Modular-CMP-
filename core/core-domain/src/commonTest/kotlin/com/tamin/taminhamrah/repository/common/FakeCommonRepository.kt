@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.common
 
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -16,5 +17,15 @@ class FakeCommonRepository : CommonRepository {
             throw getBeneficiaryError
         }
         emit(beneficiaryResult)
+    }
+
+    override suspend fun getRegistrationDeclarationForm(): Any {
+        if (shouldThrowError) throw getBeneficiaryError
+        return Any()
+    }
+
+    override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {
+        if (shouldThrowError) throw getBeneficiaryError
+        return null
     }
 }

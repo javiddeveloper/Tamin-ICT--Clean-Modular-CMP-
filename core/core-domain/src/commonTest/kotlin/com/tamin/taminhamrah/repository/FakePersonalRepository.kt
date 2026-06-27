@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import kotlinx.coroutines.flow.Flow
@@ -78,5 +80,15 @@ class FakePersonalRepository : PersonalRepository {
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {
         if (shouldThrowError) throw error
         emit(saveSurvivorInfoResult)
+    }
+
+    override suspend fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): String? {
+        if (shouldThrowError) throw error
+        return null
+    }
+
+    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDN? {
+        if (shouldThrowError) throw error
+        return null
     }
 }
