@@ -3,12 +3,16 @@ package com.tamin.taminhamrah.dataSource.contracts
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDTO
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDTO
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
@@ -20,6 +24,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import kotlinx.serialization.json.JsonElement
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
@@ -165,6 +170,75 @@ class ContractsRemoteDataSourceImpl(
                 selectedSalary = selectedSalary,
                 request = request,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun makeFreelanceContractByGuardian(
+        selectedSalary: Long,
+        request: ContractByGuardianRequestDTO,
+    ): FreelanceContractResultDTO {
+        return try {
+            contractsApiService.makeFreelanceContractByGuardian(
+                selectedSalary = selectedSalary,
+                request = request,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun makeOptionalContractByGuardian(
+        selectedSalary: Long,
+        request: OptionalContractByGuardianRequestDTO,
+    ): FreelanceContractResultDTO {
+        return try {
+            contractsApiService.makeOptionalContractByGuardian(
+                selectedSalary = selectedSalary,
+                request = request,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getInsurancePayment(params: InsurancePaymentParamsDN): InsurancePaymentDTO {
+        return try {
+            contractsApiService.getInsurancePayment(
+                startDate = params.startDate,
+                endDate = params.endDate,
+                amount = params.amount,
+                systemType = params.systemType,
+                redirectUri = params.redirectUri,
+                paramPage = params.paramPage,
+                month = params.month,
+                redirectUrl = params.redirectUrl,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun checkInsurancePaymentStatus(systemType: String): JsonElement? {
+        return try {
+            contractsApiService.checkInsurancePaymentStatus(systemType).data
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
@@ -15,6 +17,8 @@ import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
@@ -129,6 +133,36 @@ class ContractsRepositoryImpl(
                 request = params.request.toDto(),
             ).toDomain(),
         )
+    }
+
+    override fun makeFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<FreelanceContractResultDN> = flow {
+        emit(
+            contractsRemoteDataSource.makeFreelanceContractByGuardian(
+                selectedSalary = params.selectedSalary,
+                request = params.toDto(),
+            ).toDomain(),
+        )
+    }
+
+    override fun makeOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<FreelanceContractResultDN> = flow {
+        emit(
+            contractsRemoteDataSource.makeOptionalContractByGuardian(
+                selectedSalary = params.selectedSalary,
+                request = params.toDto(),
+            ).toDomain(),
+        )
+    }
+
+    override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {
+        emit(contractsRemoteDataSource.getInsurancePayment(params).toDomain())
+    }
+
+    override fun checkInsurancePaymentStatus(systemType: String) = flow {
+        emit(contractsRemoteDataSource.checkInsurancePaymentStatus(systemType))
     }
 
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {

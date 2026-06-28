@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
@@ -8,6 +10,8 @@ import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
@@ -15,6 +19,8 @@ import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 class FakeContractsRepository : ContractsRepository {
     var shouldThrowError = false
@@ -28,6 +34,14 @@ class FakeContractsRepository : ContractsRepository {
     var makeContractResult: FreelanceContractResultDN? = null
     var lastMakeContractParams: FreelanceMakeContractParams? = null
     var makeContractCalled = false
+    var lastMakeFreelanceContractByGuardianParams: FreelanceContractByGuardianParams? = null
+    var makeFreelanceContractByGuardianCalled = false
+    var lastMakeOptionalContractByGuardianParams: OptionalContractByGuardianParams? = null
+    var makeOptionalContractByGuardianCalled = false
+    var lastInsurancePaymentParams: InsurancePaymentParamsDN? = null
+    var insurancePaymentResult: InsurancePaymentDN? = null
+    var lastPaymentStatusSystemType: String? = null
+    var paymentStatusResult: JsonElement? = JsonPrimitive(true)
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
     var studentInsuranceContractsCalled = false
@@ -137,6 +151,53 @@ class FakeContractsRepository : ContractsRepository {
                 contractDate = null,
             ),
         )
+    }
+
+    override fun makeFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<FreelanceContractResultDN> = flow {
+        lastMakeFreelanceContractByGuardianParams = params
+        makeFreelanceContractByGuardianCalled = true
+        if (shouldThrowError) throw error
+        emit(
+            makeContractResult ?: FreelanceContractResultDN(
+                contractNumber = null,
+                contractDate = null,
+            ),
+        )
+    }
+
+    override fun makeOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<FreelanceContractResultDN> = flow {
+        lastMakeOptionalContractByGuardianParams = params
+        makeOptionalContractByGuardianCalled = true
+        if (shouldThrowError) throw error
+        emit(
+            makeContractResult ?: FreelanceContractResultDN(
+                contractNumber = null,
+                contractDate = null,
+            ),
+        )
+    }
+
+    override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {
+        lastInsurancePaymentParams = params
+        if (shouldThrowError) throw error
+        emit(
+            insurancePaymentResult ?: InsurancePaymentDN(
+                paymentTicket = null,
+                paymentUrl = null,
+                responseMessage = null,
+                succeed = null,
+            ),
+        )
+    }
+
+    override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flow {
+        lastPaymentStatusSystemType = systemType
+        if (shouldThrowError) throw error
+        emit(paymentStatusResult)
     }
 
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {
