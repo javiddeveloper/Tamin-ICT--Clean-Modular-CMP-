@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -113,6 +114,22 @@ class PensionRemoteDataSourceImpl(
             val response =
                 pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun sendRetirementDocument(
+        requestId: String,
+        request: RetirementSaveDocumentRequest
+    ): String? {
+        return try {
+            val response = pensionApiService.sendRetirementDocument(requestId, request)
+            response?.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

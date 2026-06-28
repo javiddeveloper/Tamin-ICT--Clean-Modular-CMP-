@@ -6,13 +6,17 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Headers
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.PUT
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 
@@ -30,8 +34,9 @@ interface PensionApiService {
     @GET("hokm")
     suspend fun getEdictPensioner(
         @QueryMap parameters: Map<String, String>
-    ): BaseDTO<EdictPensionerDTO?>?
+    ): BaseDTO<EdictPensionerDTO>
 
+    @Headers("Content-Type: application/json")
     @POST("wage-assignment")
     suspend fun sendRequestDeferredInstallmentCertificate(
         @Body deferredInstallmentRequest: DeferredInstallmentRequest
@@ -50,5 +55,13 @@ interface PensionApiService {
     @GET("disability-request/personal")
     suspend fun getDisabilityPersonalInfo(
     ): BaseDTO<DisabilityPersonalInfoDTO>
+
+
+    @Headers("Content-Type: application/json")
+    @PUT("pension-request/{requestId}")
+    suspend fun sendRetirementDocument(
+        @Path("requestId") requestId: String,
+        @Body body: RetirementSaveDocumentRequest
+    ): BaseDTO<String?>
 
 }

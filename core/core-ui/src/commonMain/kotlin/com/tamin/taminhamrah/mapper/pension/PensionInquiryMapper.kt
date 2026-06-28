@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.common.RecipientDN
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
 import com.tamin.taminhamrah.model.pension.installment.*
+import com.tamin.taminhamrah.model.pension.retirement.*
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
@@ -184,5 +185,19 @@ fun PayRollDN.toPresentation(): PayRollPR {
         hisYearPlus = hisYearPlus ?: "",
         hisMonPlus = hisMonPlus ?: "",
         hisDayPlus = hisDayPlus ?: ""
+    )
+}
+
+fun RetirementSaveDocumentPR.toDomain(): RetirementSaveDocumentDN {
+    return RetirementSaveDocumentDN(
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDomain() },
+        status = status
+    )
+}
+
+fun RetirementDocumentPR.toDomain(): RetirementDocumentDN {
+    return RetirementDocumentDN(
+        documentType = documentType,
+        guid = guid
     )
 }

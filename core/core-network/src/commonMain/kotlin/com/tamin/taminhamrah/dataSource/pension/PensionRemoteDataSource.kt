@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -27,4 +28,9 @@ interface PensionRemoteDataSource {
 
 
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
+
+    suspend fun sendRetirementDocument(
+        requestId: String,
+        request: RetirementSaveDocumentRequest
+    ): String?
 }
