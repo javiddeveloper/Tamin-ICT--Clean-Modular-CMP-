@@ -74,6 +74,12 @@ object ContractsTestData {
 
     val uploadImageSuccess: String
         get() = readResourceFile("mocks/upload_image_success.json")
+
+    val insurancePaymentSuccess: String
+        get() = readResourceFile("mocks/insurance_payment_success.json")
+
+    val insurancePaymentStatusSuccess: String
+        get() = readResourceFile("mocks/insurance_payment_status_success.json")
 }
 
 object PensionTestData {

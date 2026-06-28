@@ -1,11 +1,16 @@
 package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
+import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.FreeJobDTO
+import com.tamin.taminhamrah.model.contracts.GuardianShipDetailDTO
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDTO
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.OptionalMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactPersonalDTO
@@ -22,6 +27,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class ContractsApiServiceTest : BaseApiTest() {
 
@@ -313,6 +319,114 @@ class ContractsApiServiceTest : BaseApiTest() {
     }
 
     @Test
+    fun `makeFreelanceContractByGuardian should return contract number and date`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.freelanceMakeContractSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.makeFreelanceContractByGuardian(
+            selectedSalary = 25_989_368L,
+            request = ContractByGuardianRequestDTO(
+                contract = FreelanceMakeContractRequestDTO(
+                    brchCodeNew = "0360",
+                    cityCode = "2442",
+                    cntDrmn = "1",
+                    cntFreeJobCode = "099796",
+                    guid = "00",
+                    guidName = "00",
+                    premiumRateCode = "01",
+                    provinceCode = "33",
+                ),
+                protector = sampleGuardianDetail(),
+            ),
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data: FreelanceContractResultDTO = response.data!!
+        assertEquals(478_176_975L, data.contractNumber)
+    }
+
+    @Test
+    fun `makeOptionalContractByGuardian should return contract number and date`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.freelanceMakeContractSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.makeOptionalContractByGuardian(
+            selectedSalary = 362_592_593L,
+            request = OptionalContractByGuardianRequestDTO(
+                contract = OptionalMakeContractRequestDTO(
+                    brchCodeNew = "0360",
+                    cityCode = "2442",
+                    cntDrmn = "1",
+                    premiumRateCode = "01",
+                    provinceCode = "33",
+                ),
+                protector = sampleGuardianDetail(),
+            ),
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data: FreelanceContractResultDTO = response.data!!
+        assertEquals(478_176_975L, data.contractNumber)
+    }
+
+    @Test
+    fun `getInsurancePayment should return payment ticket and url`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.insurancePaymentSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.getInsurancePayment(
+            startDate = 0L,
+            endDate = 0L,
+            amount = 0L,
+            systemType = "03",
+            redirectUri = "",
+            paramPage = "",
+            month = 0,
+            redirectUrl = "https://hamrah.tamin.ir/payment/callback",
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+
+        val data: InsurancePaymentDTO = response.data!!
+        assertEquals("ticket-123", data.paymentTicket)
+        assertEquals("https://sep.shaparak.ir/payment/ticket-123", data.paymentUrl)
+        assertEquals(true, data.succeed)
+    }
+
+    @Test
+    fun `checkInsurancePaymentStatus should return payment status payload`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = ContractsTestData.insurancePaymentStatusSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.checkInsurancePaymentStatus(systemType = "01")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertTrue(response.data!!.toString().contains("true"))
+    }
+
+    @Test
     fun `uploadImage should return image guid`() = runTest {
         val ktorfit = createMockKtorfit(ContractsTestData.uploadImageSuccess)
         val apiService = ktorfit.createContractsApiService()
@@ -335,4 +449,13 @@ class ContractsApiServiceTest : BaseApiTest() {
         assertEquals("a4769aa8-b9af-4183-83b9-367dc9f52511", response.guid)
     }
 
+    private fun sampleGuardianDetail() = GuardianShipDetailDTO(
+        proCode = "3860387200",
+        guid = "6f1c66e4-1ecf-441a-8868-96e1b2f29157",
+        guidName = "تصویر قیم نامه",
+        nid = "0083834001",
+        fullName = "رضا نادری",
+        protectorLetterNo = "222222222222",
+        protectorLetterDate = "2022-09-18T19:30:00.000Z",
+    )
 }
