@@ -18,8 +18,9 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
-import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
+import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -40,8 +41,9 @@ class PensionInquiryViewModel(
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val getConfirmSurvivorsListUseCase: GetConfirmSurvivorsListUseCase,
     private val getPensionerPayRollUseCase: GetPensionerPayRollUseCase,
-    private val getUserAgeUseCase: GetUserAgeUseCase,
     private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
+    private val getUserAgeUseCase: GetUserAgeUseCase,
+    private val getPensionerPayRollPDFUseCase: GetPensionerPayRollPDFUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -51,6 +53,16 @@ class PensionInquiryViewModel(
         sendIntent(PensionInquiryIntent.LoadAge(1379L))
         sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
         sendIntent(PensionInquiryIntent.LoadUserAge)
+        sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
+        sendIntent(
+            PensionInquiryIntent.LoadPensionerPayRollPDF(
+                listOf(
+                    ApiFilterDN(FilterProperty.PENSIONER_ID, "1003406938", FilterOperator.EQUAL),
+                    ApiFilterDN(FilterProperty.START_DATE, "140501", FilterOperator.EQUAL),
+                    ApiFilterDN(FilterProperty.PAYMENT_TYPE, "01", FilterOperator.EQUAL)
+                )
+            )
+        )
     }
 
     override fun handleIntent(intent: PensionInquiryIntent): Flow<PartialState> {
@@ -68,6 +80,8 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadConfirmSurvivorsList -> handleLoadConfirmSurvivorsList()
             is PensionInquiryIntent.LoadPensionerPayRoll -> handleLoadPensionerPayRoll(intent.filters)
             is PensionInquiryIntent.LoadDisabilityPersonalInfo -> handleLoadDisabilityPersonalInfo()
+            is PensionInquiryIntent.LoadPensionerPayRollPDF -> handleLoadPensionerPayRollPDF(intent.filters)
+            is PensionInquiryIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
         }
     }
 
@@ -76,6 +90,17 @@ class PensionInquiryViewModel(
         try {
             getDisabilityPersonalInfoUseCase().collect { personalInfo ->
                 emit(PartialState.DisabilityPersonalInfoLoaded(personalInfo.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
+        }
+    }
+
+    private fun handleLoadPensionerPayRollPDF(filters: List<ApiFilterDN>): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getPensionerPayRollPDFUseCase(filters).collect { pdf ->
+                emit(PartialState.PayRollPDFLoaded(pdf.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
@@ -292,6 +317,13 @@ class PensionInquiryViewModel(
         is PartialState.DisabilityPersonalInfoLoaded -> currentState.copy(
             isLoading = false,
             disabilityPersonalInfo = partialState.disabilityPersonalInfo
+        )
+        is PartialState.PayRollPDFLoaded -> currentState.copy(
+            isLoading = false,
+            payRollPDF = partialState.pdf
+        )
+        is PartialState.TogglePdfDialog -> currentState.copy(
+            showPdfDialog = partialState.show
         )
     }
 
