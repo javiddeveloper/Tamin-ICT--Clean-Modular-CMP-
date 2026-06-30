@@ -5,9 +5,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.tamin.taminhamrah.data.local.converter.TaminHamrahConverters
 import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
+import com.tamin.taminhamrah.data.local.dao.MenuDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
@@ -19,6 +21,7 @@ import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
+import com.tamin.taminhamrah.data.local.entity.MenuEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxItemEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxSizeEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInfoEntity
@@ -27,6 +30,7 @@ import com.tamin.taminhamrah.data.local.entity.RecipientEntity
 import com.tamin.taminhamrah.data.local.entity.RegistrationInfoEntity
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
+import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
@@ -44,10 +48,12 @@ import kotlinx.coroutines.IO
         ContractEntity::class,
         RegistrationInfoEntity::class,
         BranchEntity::class,
+        MenuEntity::class,
     ],
     version = 1,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
+@TypeConverters(TaminHamrahConverters::class)
 expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun testDao(): TestDao
     abstract fun cityProvinceDao(): CityProvinceDao
@@ -59,6 +65,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun contractDao(): ContractDao
     abstract fun registrationInfoDao(): RegistrationInfoDao
     abstract fun branchDao(): BranchDao
+    abstract fun menuDao(): MenuDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
