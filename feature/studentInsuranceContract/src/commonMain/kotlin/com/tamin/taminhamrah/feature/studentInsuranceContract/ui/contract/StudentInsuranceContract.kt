@@ -51,6 +51,7 @@ data class StudentInsuranceContractUiState(
     val isPremiumCalculated: Boolean = false,
     val calculatedMonthlySalary: Long? = null,
     val isAgreementConfirmed: Boolean = false,
+    val isSavingContact: Boolean = false,
     val isSubmittingContract: Boolean = false,
     val submittedContract: FreelanceContractResultPR? = null,
     val documentDescription: String = "",
@@ -61,7 +62,7 @@ data class StudentInsuranceContractUiState(
     val currentStep: StudentInsuranceContractStep = StudentInsuranceContractStep.STEP_REGISTRATION,
 ) {
     val canGoNext: Boolean
-        get() = when (currentStep) {
+        get() = !isSavingContact && when (currentStep) {
             StudentInsuranceContractStep.STEP_REGISTRATION ->
                 registrationInfo != null && eligibility != null
             StudentInsuranceContractStep.STEP_AUTHORIZATION -> eligibility?.isEligible == true
@@ -112,6 +113,8 @@ data class StudentInsuranceContractUiState(
         data class PremiumCalculated(val calculated: Boolean) : PartialState()
         data class CalculatedMonthlySalaryLoaded(val salary: Long) : PartialState()
         data class AgreementConfirmedChanged(val confirmed: Boolean) : PartialState()
+        data class SavingContact(val isSaving: Boolean) : PartialState()
+        data object ContactSaved : PartialState()
         data class SubmittingContract(val isSubmitting: Boolean) : PartialState()
         data class ContractSubmitted(val result: FreelanceContractResultPR) : PartialState()
         data class DocumentDescriptionChanged(val description: String) : PartialState()

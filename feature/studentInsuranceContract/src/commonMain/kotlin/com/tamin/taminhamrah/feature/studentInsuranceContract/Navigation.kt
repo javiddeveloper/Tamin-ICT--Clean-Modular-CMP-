@@ -27,6 +27,10 @@ fun NavController.navigateToOptionalInsuranceContract() {
     navigateToStudentInsuranceContract(InsuranceContractKind.OPTIONAL)
 }
 
+fun NavController.navigateToHousewifeInsuranceContract() {
+    navigateToStudentInsuranceContract(InsuranceContractKind.HOUSEWIFE)
+}
+
 fun NavGraphBuilder.studentInsuranceContractScreen(onBack: () -> Unit) {
     composable<StudentInsuranceContractRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<StudentInsuranceContractRoute>()

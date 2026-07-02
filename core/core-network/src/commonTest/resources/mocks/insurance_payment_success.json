@@ -1,0 +1,6 @@
+{
+  "paymentTicket": "ticket-123",
+  "paymentURL": "https://sep.shaparak.ir/payment/ticket-123",
+  "responseMessage": "SUCCESS",
+  "succeed": true
+}

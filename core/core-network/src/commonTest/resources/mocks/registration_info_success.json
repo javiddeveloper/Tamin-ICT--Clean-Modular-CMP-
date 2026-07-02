@@ -1,0 +1,22 @@
+{
+  "personalInfo": {
+    "firstName": "علی",
+    "lastName": "احمدی",
+    "nationalId": "1234567890",
+    "dateOfBirth": 631152000000,
+    "gender": {
+      "genderCode": "01",
+      "genderDesc": "مرد"
+    },
+    "ssn": "2487741923"
+  },
+  "insuranceIdValidity": true,
+  "mobileNumber": "09121234567",
+  "insuranceId": "12345678901",
+  "lastContact": {
+    "address": "تهران",
+    "zipCode": "1234567890",
+    "mobile": "09121234567",
+    "phoneNumber": "02112345678"
+  }
+}

@@ -81,6 +81,16 @@ class PensionApiServiceTest : BaseApiTest() {
     }
 
     @Test
+    fun `pensionerPayRollPDF should return http response`() = runTest {
+        val ktorfit = createMockKtorfit("")
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.pensionerPayRollPDF(emptyMap())
+
+        assertEquals(200, response.execute().status.value)
+    }
+
+    @Test
     fun `checkRetirementStatus should return retirement status data`() = runTest {
         val jsonResponse = ApiTestUtils.createJsonResponse(
             dataJson = PensionTestData.retirementStatusSuccess
