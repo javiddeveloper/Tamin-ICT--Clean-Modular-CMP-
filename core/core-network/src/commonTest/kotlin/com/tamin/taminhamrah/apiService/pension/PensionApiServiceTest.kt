@@ -97,4 +97,14 @@ class PensionApiServiceTest : BaseApiTest() {
         assertEquals("Alavi", response.data?.list?.first()?.lastName)
         assertEquals("0012345678", response.data?.list?.first()?.nationalCode)
     }
+
+    @Test
+    fun `pensionerPayRollPDF should return http response`() = runTest {
+        val ktorfit = createMockKtorfit("")
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.pensionerPayRollPDF(emptyMap())
+
+        assertEquals(200, response.execute().status.value)
+    }
 }

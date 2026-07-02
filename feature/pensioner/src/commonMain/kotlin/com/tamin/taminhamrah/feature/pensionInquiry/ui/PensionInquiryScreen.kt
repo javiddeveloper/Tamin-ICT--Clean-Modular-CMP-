@@ -7,7 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryUiState
 import com.tamin.taminhamrah.model.common.BeneficiaryPR
@@ -25,6 +28,7 @@ import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PensionInquiryScreen(
     viewModel: PensionInquiryViewModel = koinViewModel(),
@@ -46,12 +50,16 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadRetirementRequestInfo)
     }
 
-    PensionInquiryContent(state)
+    PensionInquiryContent(
+        state = state,
+        onIntent = viewModel::sendIntent
+    )
 }
 
 @Composable
 fun PensionInquiryContent(
-    state: PensionInquiryUiState
+    state: PensionInquiryUiState,
+    onIntent: (PensionInquiryIntent) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -73,6 +81,16 @@ fun PensionInquiryContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    item {
+                        Button(
+                            onClick = { onIntent(PensionInquiryIntent.TogglePdfDialog(true)) },
+                            enabled = state.payRollPDF != null,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("نمایش فیش حقوقی (PDF)")
+                        }
+                    }
+
                     if (state.disabilityPersonalInfo != null) {
                         item {
                             Text(
@@ -227,6 +245,59 @@ fun PensionInquiryContent(
                         items(state.retirementRequestInfo) { item ->
                             RetirementRequestItem(item)
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    if (state.showPdfDialog && state.payRollPDF != null) {
+        PdfViewerDialog(
+            pdfData = state.payRollPDF,
+            onDismiss = { onIntent(PensionInquiryIntent.TogglePdfDialog(false)) }
+        )
+    }
+}
+
+@Composable
+fun PdfViewerDialog(
+    pdfData: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text("نمایش PDF") },
+                    actions = {
+                        TextButton(onClick = onDismiss) {
+                            Text("بستن")
+                        }
+                    }
+                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Since a multiplatform PDF renderer is not readily available in the current context,
+                    // we show a placeholder indicating the PDF data is loaded.
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "فایل PDF با موفقیت دریافت شد",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "آماده نمایش (نیاز به پیاده سازی رندرینگ)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
             }

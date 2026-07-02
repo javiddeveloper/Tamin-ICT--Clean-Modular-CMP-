@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentReques
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
@@ -18,6 +20,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import io.ktor.client.statement.bodyAsChannel
 
 class PensionRemoteDataSourceImpl(
     private val pensionApiService: PensionApiService,
@@ -84,7 +87,7 @@ class PensionRemoteDataSourceImpl(
     ): PayRollDTO {
         return try {
             val response =
-                pensionApiService.getPensionerPayRoll( apiQueryBuilder.buildFilterJson(filter))
+                pensionApiService.getPensionerPayRoll(apiQueryBuilder.buildFilterJson(filter))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -122,6 +125,25 @@ class PensionRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response = pensionApiService.pensionerPayRollPDF(mapOf("filter" to filterJson))
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = response.body()
+                )
+            )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
 
     override suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>): ListData<RetirementRequestDTO> {
         return try {

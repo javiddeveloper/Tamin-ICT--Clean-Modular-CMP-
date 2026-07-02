@@ -39,27 +39,125 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import org.koin.compose.viewmodel.koinViewModel
 
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.alpha
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsEvent
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContractsScreen(
     onBackClicked: () -> Unit,
+    onNavigateToService: (FeatureFlag) -> Unit,
+    onOpenUrl: (String) -> Unit,
     viewModel: ContractsViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     LaunchedEffect(Unit) {
         viewModel.sendIntent(ContractsIntent.LoadContracts)
+        viewModel.events.collect { event ->
+            when (event) {
+                is ContractsEvent.NavigateToService -> {
+                    showBottomSheet = false
+                    onNavigateToService(event.flag)
+                }
+                is ContractsEvent.NavigateToWeb -> {
+                    onOpenUrl(event.url)
+                }
+                is ContractsEvent.ShowToast -> {
+                    // In a real app we would show a snackbar here
+                }
+            }
+        }
     }
 
     ContractsContent(
         uiState = uiState,
         onBackClicked = onBackClicked,
+        onNewContractClicked = { showBottomSheet = true }
     )
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "انعقاد قرارداد جدید",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                if (uiState.newContractOptions.isEmpty()) {
+                    CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(uiState.newContractOptions) { service ->
+                            val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
+                                             service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+                                             service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(enabled = !isDisabled) {
+                                        viewModel.sendIntent(ContractsIntent.OnServiceClick(service))
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp)
+                                    .alpha(if (isDisabled) 0.5f else 1.0f),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = service.name ?: "",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    if (isDisabled && !service.message.isNullOrEmpty()) {
+                                        Text(
+                                            text = service.message!!,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    } else if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR && !service.message.isNullOrEmpty()) {
+                                        Text(
+                                            text = service.message!!,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
 }
 
 @Composable
 fun ContractsContent(
     uiState: ContractsUiState,
     onBackClicked: () -> Unit,
+    onNewContractClicked: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -72,6 +170,13 @@ fun ContractsContent(
                 },
             )
         },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onNewContractClicked,
+                text = { Text("انعقاد قرارداد جدید") },
+                icon = { }
+            )
+        }
     ) { padding ->
         Box(
             modifier = Modifier

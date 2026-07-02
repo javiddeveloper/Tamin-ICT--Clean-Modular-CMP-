@@ -1,0 +1,585 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "اطلاعات هویتی",
+            "icon": "user",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 2,
+            "name": "ارتباط فعال",
+            "icon": "relation",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 3,
+            "name": "شماره حساب‌ها",
+            "icon": "credit-card",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 4,
+            "name": "ویرایش تصویر",
+            "icon": "camera",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 5,
+            "name": "افراد تبعی",
+            "icon": "relationship",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 6,
+            "name": "سوابق تلفیقی",
+            "icon": "inbox",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 7,
+            "name": "سوابق و دستمزد",
+            "icon": "bill",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 8,
+            "name": "مجموع سوابق",
+            "icon": "budget",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 9,
+            "name": "اعلام سابقه",
+            "icon": "paper-plane",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 10,
+            "name": "اعتراض به سوابق ناموجود",
+            "icon": "protest",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 11,
+            "name": "عناوین شغلی",
+            "icon": "list",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 13,
+            "name": "درخواست‌های تعهدات کوتاه مدت",
+            "icon": "obligation",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 14,
+            "name": "هدیه ازدواج",
+            "icon": "love",
+            "status": "DISABLED",
+            "message": "شما شرایط دریافت هدیه ازدواج را ندارید",
+            "showRole": [
+                1
+            ],
+            "active": false
+        },
+        {
+            "id": 15,
+            "name": "کمک هزینه اروتز پروتز",
+            "icon": "crutch",
+            "status": "WEB_VIEW",
+            "url": "https://tamin.ir/ortez",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 16,
+            "name": "کمک هزینه ایام بارداری",
+            "icon": "pregnancystp",
+            "status": "COMPLETELY_DISABLED",
+            "message": "این سرویس کلا غیر فعال است",
+            "showRole": [
+                1
+            ],
+            "active": false
+        },
+        {
+            "id": 17,
+            "name": "غرامت دستمزد ایام بیماری",
+            "icon": "medical",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 18,
+            "name": "کمک هزینه مراسم ترحیم",
+            "icon": "death",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 19,
+            "name": "بازرسی‌ها",
+            "icon": "cctv",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 20,
+            "name": "محاسبه هدیه ازدواج",
+            "icon": "wedding-presents",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 21,
+            "name": "محاسبه غرامت ایام بیماری",
+            "icon": "medicine",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 22,
+            "name": "محاسبه غرامت ایام بارداری",
+            "icon": "scan",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 23,
+            "name": "نحوه محاسبه مبلغ مستمری",
+            "icon": "calc",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 25,
+            "name": "وضعیت حمایت درمانی",
+            "icon": "first-aid-kit",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 26,
+            "name": "نسخ الکترونیک",
+            "icon": "folder",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 33,
+            "name": "بیمه صاحبان حرف و مشاغل آزاد",
+            "icon": "agreement-freelance",
+            "status": "TEMPORARY_DISABLED",
+            "message": "سرویس موقتاً در دسترس نیست",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 34,
+            "name": "بیمه دانشجویی",
+            "icon": "student",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 35,
+            "name": "امور قراردادها و پرداخت",
+            "icon": "contract_payment",
+            "status": "ENABLED_WITH_ERROR",
+            "message": "ارتباط با سامانه با کندی مواجه است",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 36,
+            "name": "بیمه زنان خانه‌دار",
+            "icon": "woman_agreement-freelance",
+            "status": "DISABLED",
+            "message": "شما شرایط ثبت‌نام را ندارید",
+            "showRole": [
+                1
+            ],
+            "active": false
+        },
+        {
+            "id": 37,
+            "name": "بیمه اختیاری",
+            "icon": "optional-insurance",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 38,
+            "name": "استعلام گواهی اشتغال به تحصیل",
+            "icon": "student_inquiry",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 39,
+            "name": "تکمیل سوابق کسری از ماه",
+            "icon": "employer_info",
+            "status": "COMPLETELY_DISABLED",
+            "message": "غیرفعال",
+            "showRole": [
+                1
+            ],
+            "active": false
+        },
+        {
+            "id": 40,
+            "name": "درخواست مستمری بازماندگان",
+            "icon": "survivors",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 41,
+            "name": "مستمری بازنشستگی",
+            "icon": "ticket",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 42,
+            "name": "اعتراض به سابقه کسری دار",
+            "icon": "objecting_history_bugs",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 46,
+            "name": "پرونده الکترونیک من",
+            "icon": "student_inquiry",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 47,
+            "name": "اطلاعات پرداختی کارگران",
+            "icon": "student_inquiry",
+            "status": "ACTIVE",
+            "showRole": [
+                1
+            ],
+            "active": true
+        },
+        {
+            "id": 101,
+            "name": "استحقاق درمان",
+            "icon": "first-aid-kit",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 104,
+            "name": "استعلام وضعیت مستمری",
+            "icon": "insurance",
+            "status": "TEMPORARY_DISABLED",
+            "message": "سرویس استعلام وضعیت مستمری در حال بروزرسانی است",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 105,
+            "name": "مشاهده فیش حقوقی",
+            "icon": "ticket",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 106,
+            "name": "مشاهده حکم",
+            "icon": "announcement",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 107,
+            "name": "صدور گواهی حقوق",
+            "icon": "stamp",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 108,
+            "name": "گواهی کسر اقساط معوق",
+            "icon": "document",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 110,
+            "name": "تعهدنامه فرزندان دختر",
+            "icon": "agreement",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 112,
+            "name": "برقراری مستمری توسط بازماندگان",
+            "icon": "survivors",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 113,
+            "name": "مستمری از کارافتادگی",
+            "icon": "disability",
+            "status": "ACTIVE",
+            "showRole": [
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 1001,
+            "name": "کارگاه‌ها",
+            "icon": "workshop",
+            "status": "ENABLED_WITH_ERROR",
+            "message": "دریافت اطلاعات لیست کارگاه‌ها با کندی همراه است",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1002,
+            "name": "اطلاعات پیمان",
+            "icon": "contract",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1003,
+            "name": "واگذارندگان",
+            "icon": "ic_assigner",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1004,
+            "name": "تکمیل اطلاعات کارفرمایی",
+            "icon": "employer_info",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1005,
+            "name": "لیست ذینفعان",
+            "icon": "relationship",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1006,
+            "name": "پیگیری وضعیت اعتراض",
+            "icon": "protest",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1007,
+            "name": "درخواست خدمات غیرحضوری",
+            "icon": "onlineServiceReq",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1008,
+            "name": "بازرسی انجام شده",
+            "icon": "cctv",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1009,
+            "name": "مدیریت بدهی",
+            "icon": "student_inquiry",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1010,
+            "name": "بیمه ساختمانی",
+            "icon": "workshop",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1011,
+            "name": "بروزرسانی",
+            "icon": "update",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 1012,
+            "name": "قوانین",
+            "icon": "document",
+            "status": "ACTIVE",
+            "showRole": [
+                3
+            ],
+            "active": true
+        }
+    ]
+}

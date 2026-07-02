@@ -2,14 +2,19 @@ package com.tamin.taminhamrah.dataSource.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDTO
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDTO
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
@@ -27,5 +32,20 @@ interface ContractsRemoteDataSource {
         monthlyPremium: Long,
         request: FreelanceMakeContractRequestDTO,
     ): FreelanceContractResultDTO
+    suspend fun makeContract(
+        selectedSalary: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ): FreelanceContractResultDTO
+    suspend fun makeFreelanceContractByGuardian(
+        selectedSalary: Long,
+        request: ContractByGuardianRequestDTO,
+    ): FreelanceContractResultDTO
+    suspend fun makeOptionalContractByGuardian(
+        selectedSalary: Long,
+        request: OptionalContractByGuardianRequestDTO,
+    ): FreelanceContractResultDTO
+    suspend fun getInsurancePayment(params: InsurancePaymentParamsDN): InsurancePaymentDTO
+    suspend fun checkInsurancePaymentStatus(systemType: String): Any?
     suspend fun uploadImage(request: UploadImageRequestDN): String?
+    suspend fun saveContact(request: SaveContactRequestDTO): Any?
 }

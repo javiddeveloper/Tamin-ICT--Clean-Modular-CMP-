@@ -58,6 +58,12 @@ class PensionRepositoryImpl(
         emit(remoteData.toDomain())
     }
 
+    override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> =
+        flow {
+            val remoteData = pensionRemoteDataSource.pensionerPayRollPDF(filters)
+            emit(remoteData.toDomain())
+        }
+
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
         val remoteData = pensionRemoteDataSource.getRetirementRequestInfo(filters)
         emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
