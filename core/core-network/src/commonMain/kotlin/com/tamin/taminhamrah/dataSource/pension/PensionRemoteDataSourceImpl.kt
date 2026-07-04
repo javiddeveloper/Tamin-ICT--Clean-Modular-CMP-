@@ -143,4 +143,18 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun sendEdictPensionerToMyInbox(filter: List<ApiFilterDN>): String? {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response =
+                pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }

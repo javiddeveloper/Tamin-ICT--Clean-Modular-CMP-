@@ -29,5 +29,7 @@ interface PensionRemoteDataSource {
     ): AgeDTO
     suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
 
-
+    suspend fun sendEdictPensionerToMyInbox(
+        filter: List<ApiFilterDN>
+    ): String?
 }

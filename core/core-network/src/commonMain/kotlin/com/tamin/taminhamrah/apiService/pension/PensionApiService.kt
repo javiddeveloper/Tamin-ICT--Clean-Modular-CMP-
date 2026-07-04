@@ -60,6 +60,9 @@ interface PensionApiService {
     ): HttpStatement
 
 
-
+    @GET("hokm/announcement")
+    suspend fun sendEdictPensionerToMyInbox(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<String?>
 
 }

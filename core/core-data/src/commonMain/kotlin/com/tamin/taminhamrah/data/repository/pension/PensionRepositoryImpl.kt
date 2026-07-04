@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.data.repository.pension
 import com.tamin.taminhamrah.data.mapper.*
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
@@ -62,5 +63,11 @@ class PensionRepositoryImpl(
         flow {
             val remoteData = pensionRemoteDataSource.pensionerPayRollPDF(filters)
             emit(remoteData.toDomain())
+        }
+
+    override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> =
+        flow {
+            val remoteData = pensionRemoteDataSource.sendEdictPensionerToMyInbox(filters)
+            emit(EdictPensionerInboxDN(message = remoteData))
         }
 }

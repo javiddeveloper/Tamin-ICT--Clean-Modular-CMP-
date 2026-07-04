@@ -89,4 +89,19 @@ class PensionApiServiceTest : BaseApiTest() {
 
         assertEquals(200, response.execute().status.value)
     }
+
+    @Test
+    fun `sendEdictPensionerToMyInbox should return success message`() = runTest {
+        val successMessage = "عملیات با موفقیت انجام شد"
+        val jsonResponse =  PensionTestData.sendEdictToInboxSuccess
+
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendEdictPensionerToMyInbox(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals(successMessage, response.data)
+    }
 }

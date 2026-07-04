@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.pension
 
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
@@ -40,5 +41,9 @@ interface PensionRepository {
     suspend fun pensionerPayRollPDF(
         filters: List<ApiFilterDN>
     ): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN>
+
+    suspend fun sendEdictPensionerToMyInbox(
+        filters: List<ApiFilterDN>
+    ): Flow<EdictPensionerInboxDN>
 }
 
