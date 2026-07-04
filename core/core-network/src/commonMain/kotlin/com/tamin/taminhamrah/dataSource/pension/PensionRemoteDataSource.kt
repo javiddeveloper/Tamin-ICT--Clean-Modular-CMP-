@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
@@ -29,5 +30,7 @@ interface PensionRemoteDataSource {
     ): AgeDTO
     suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
 
-
+    suspend fun authenticationAndGetPersonalInfo(
+        authenticationsCode: Long
+    ): RetirementPersonalDTO
 }

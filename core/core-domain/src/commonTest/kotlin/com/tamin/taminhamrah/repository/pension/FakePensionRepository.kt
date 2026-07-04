@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -22,6 +23,7 @@ class FakePensionRepository : PensionRepository {
     var userAgeResult: AgeDN? = null
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
     var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
+    var authenticationAndGetPersonalInfoResult: RetirementPersonalDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -84,6 +86,14 @@ class FakePensionRepository : PensionRepository {
                 throw error!!
             }
             emit(payRollPDFResult!!)
+        }
+
+    override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): Flow<RetirementPersonalDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(authenticationAndGetPersonalInfoResult!!)
         }
 
 }
