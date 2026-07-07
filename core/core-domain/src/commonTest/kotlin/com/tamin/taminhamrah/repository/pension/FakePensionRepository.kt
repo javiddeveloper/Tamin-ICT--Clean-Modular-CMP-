@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.repository.pension
 
+import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
@@ -22,6 +23,7 @@ class FakePensionRepository : PensionRepository {
     var userAgeResult: AgeDN? = null
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
     var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
+    var inquirePensionCertificateResult: InquirePensionCertificateDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -86,4 +88,11 @@ class FakePensionRepository : PensionRepository {
             emit(payRollPDFResult!!)
         }
 
+    override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(inquirePensionCertificateResult!!)
+        }
 }

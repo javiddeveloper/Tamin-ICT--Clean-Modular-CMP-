@@ -93,6 +93,9 @@ object PensionTestData {
 
     val disabilityPersonalInfoSuccess : String
         get() = readResourceFile("mocks/pension/disability_personal_info_success.json")
+
+    val inquirePensionCertificateSuccess: String
+        get() =  readResourceFile("mocks/pension/inquire_pension_certificate_success.json")
 }
 
 object WorkshopTestData {

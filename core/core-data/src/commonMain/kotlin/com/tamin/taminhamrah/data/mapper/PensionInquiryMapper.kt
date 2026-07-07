@@ -159,3 +159,9 @@ fun PayRollDTO.toDomain(): PayRollDN {
         hisDayPlus = hisDayPlus
     )
 }
+
+fun String?.toInquirePensionCertificateDomain(): InquirePensionCertificateDN {
+    return InquirePensionCertificateDN(
+        message = this
+    )
+}

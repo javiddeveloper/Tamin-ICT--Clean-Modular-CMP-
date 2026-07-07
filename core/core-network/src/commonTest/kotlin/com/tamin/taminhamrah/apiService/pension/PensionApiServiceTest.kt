@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.PensionTestData
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -88,5 +89,38 @@ class PensionApiServiceTest : BaseApiTest() {
         val response = apiService.pensionerPayRollPDF(emptyMap())
 
         assertEquals(200, response.execute().status.value)
+    }
+
+    @Test
+    fun `sendRequestInquirePensionCertificate should return success message`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.inquirePensionCertificateSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendRequestInquirePensionCertificate(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals("درخواست شما با موفقیت ثبت شد", response.data?.jsonPrimitive?.content)
+    }
+
+    @Test
+    fun `sendRequestInquirePensionCertificate should return error on 400`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = "null",
+            status = 400,
+            family = "CLIENT_ERROR",
+            reason = "Bad Request"
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendRequestInquirePensionCertificate(emptyMap())
+
+        assertEquals(400, response.status)
+        assertEquals("CLIENT_ERROR", response.family)
     }
 }

@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 import io.ktor.client.statement.bodyAsChannel
 
 class PensionRemoteDataSourceImpl(
@@ -143,4 +144,20 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) :String? {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+
+            val response = pensionApiService.sendRequestInquirePensionCertificate(
+                mapOf("filter" to filterJson)
+            )
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }

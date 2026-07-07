@@ -186,3 +186,9 @@ fun PayRollDN.toPresentation(): PayRollPR {
         hisDayPlus = hisDayPlus ?: ""
     )
 }
+
+fun InquirePensionCertificateDN.toPresentation(): InquirePensionCertificatePR {
+    return InquirePensionCertificatePR(
+        message = message ?: ""
+    )
+}
