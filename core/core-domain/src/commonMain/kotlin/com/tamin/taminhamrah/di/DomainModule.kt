@@ -59,6 +59,12 @@ import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -127,4 +133,12 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+
+    // Treatment UseCases
+    factoryOf(::GetDeservedTreatmentUseCase)
+    factoryOf(::GetDependantUnderEighteenUseCase)
+    factoryOf(::GetTreatmentCostsUseCase)
+    factoryOf(::GetTreatmentCostsPDFUseCase)
+    factoryOf(::SendToInboxTreatmentCostsUseCase)
+    factoryOf(::GetUserProfileUseCase)
 }

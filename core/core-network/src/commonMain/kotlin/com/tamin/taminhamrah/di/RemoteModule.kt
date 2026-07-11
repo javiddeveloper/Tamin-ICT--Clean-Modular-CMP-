@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
@@ -63,6 +65,14 @@ val remoteModule = module {
         AuthRemoteDataSourceImpl(
             userApiService = get(named("authUserApiService")),
             errorParser = get(),
+        )
+    }
+
+    single<TreatmentRemoteDataSource> {
+        TreatmentRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
+            errorParser = get()
         )
     }
 
