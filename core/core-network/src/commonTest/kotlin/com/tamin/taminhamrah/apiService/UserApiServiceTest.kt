@@ -46,4 +46,17 @@ class UserApiServiceTest : BaseApiTest() {
         assertEquals("test-hash-456", response.data?.data?.hash)
     }
 
+    @Test
+    fun `getUserProfile should return user profile`() = runTest {
+        val jsonResponse = """{"status":200,"family":"SUCCESS","reason":"OK","data":{"entityId":"1","login":"user","firstName":"John","lastName":"Doe","email":"john@example.com","nationalCode":"1234567890","mobile":"09123456789"}}"""
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<UserApiService>()
+
+        val response = apiService.getUserProfile()
+
+        assertEquals(200, response.status)
+        assertEquals("John", response.data?.firstName)
+        assertEquals("Doe", response.data?.lastName)
+        assertEquals("1234567890", response.data?.nationalCode)
+    }
 }

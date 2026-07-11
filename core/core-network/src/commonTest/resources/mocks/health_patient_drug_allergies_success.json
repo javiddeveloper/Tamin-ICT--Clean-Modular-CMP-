@@ -1,0 +1,10 @@
+{
+  "total": 1,
+  "list": [
+    {
+      "allergyComments": "Comments",
+      "drugId": 1,
+      "drugName": "Drug"
+    }
+  ]
+}

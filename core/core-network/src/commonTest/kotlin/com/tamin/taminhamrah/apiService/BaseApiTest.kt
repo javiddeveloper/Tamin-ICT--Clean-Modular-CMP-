@@ -14,6 +14,9 @@ import io.ktor.utils.io.core.toByteArray
 import kotlinx.serialization.json.Json
 import io.ktor.utils.io.ByteReadChannel
 
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.http.contentType
+
 abstract class BaseApiTest {
 
     protected fun createMockKtorfit(
@@ -34,7 +37,11 @@ abstract class BaseApiTest {
                 json(Json {
                     ignoreUnknownKeys = true
                     isLenient = true
+                    explicitNulls = false
                 })
+            }
+            defaultRequest {
+                contentType(ContentType.Application.Json)
             }
         }
 

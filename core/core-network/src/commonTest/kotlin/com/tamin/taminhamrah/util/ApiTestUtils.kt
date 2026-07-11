@@ -15,6 +15,16 @@ object ApiTestUtils {
             "data": $dataJson
         }
     """.trimIndent()
+
+    fun wrapInListData(listJson: String, total: Int = 1, isArray: Boolean = true): String {
+        val listContent = if (isArray) listJson else "[$listJson]"
+        return """
+            {
+                "total": $total,
+                "list": $listContent
+            }
+        """.trimIndent()
+    }
 }
 
 object UserTestData {
@@ -94,6 +104,43 @@ object PensionTestData {
     val disabilityPersonalInfoSuccess : String
         get() = readResourceFile("mocks/pension/disability_personal_info_success.json")
 }
+
+object TreatmentTestData {
+    val emptyListSuccess: String
+        get() = readResourceFile("mocks/treatment_empty_list.json")
+    val sendToInboxSuccess: String
+        get() = readResourceFile("mocks/treatment_send_to_inbox_success.json")
+    val deservedTreatmentSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_deserved_success.json"), 1)
+    val prescriptionsSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_prescriptions_success.json"), 2)
+    val prescriptionDetailsSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_prescription_details_success.json"), 2)
+    val prescriptionPriceSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_prescription_price_success.json"), 1, isArray = false)
+    val dependantsSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_dependants_success.json"), 1)
+    val costsSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_costs_success.json"), 2)
+    val medicalConfirmationsSuccess: String
+        get() = ApiTestUtils.wrapInListData(readResourceFile("mocks/treatment_medical_confirmations_success.json"), 2)
+}
+
+object HealthTestData {
+    val patientGeneralSuccess: String
+        get() = readResourceFile("mocks/health_patient_general_success.json")
+    val patientSelfDeclarativeSuccess: String
+        get() = readResourceFile("mocks/health_patient_self_declarative_success.json")
+    val patientDrugAllergiesSuccess: String
+        get() = readResourceFile("mocks/health_patient_drug_allergies_success.json")
+    val emptyListSuccess: String
+        get() = readResourceFile("mocks/treatment_empty_list.json")
+    val emptyArraySuccess: String
+        get() = "[]"
+    val emptyObjectSuccess: String
+        get() = "{}"
+}
+
 
 object WorkshopTestData {
     val workshopDebitSuccess: String

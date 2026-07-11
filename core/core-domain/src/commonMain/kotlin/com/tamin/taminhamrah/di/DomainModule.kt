@@ -59,6 +59,14 @@ import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
+import com.tamin.taminhamrah.useCases.treatment.DownloadTestResultPdfUseCase
+import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -127,4 +135,14 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+
+    // Treatment UseCases
+    factoryOf(::GetDeservedTreatmentUseCase)
+    factoryOf(::GetElectronicPrescriptionListUseCase)
+    factoryOf(::GetElectronicPrescriptionDetailUseCase)
+    factoryOf(::GetElectronicPrescriptionPriceUseCase)
+    factoryOf(::GetDependantUnderEighteenUseCase)
+    factoryOf(::GetPrescriptionPdfFileUseCase)
+    factoryOf(::DownloadTestResultPdfUseCase)
+    factoryOf(::GetUserProfileUseCase)
 }
