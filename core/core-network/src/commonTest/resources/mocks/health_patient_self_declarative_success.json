@@ -1,0 +1,16 @@
+{
+  "alcoholDesc": "No",
+  "alcoholUsage": 0,
+  "alcoholUsageTitle": "None",
+  "exerciseDesc": "Yes",
+  "exerciseFreq": 3,
+  "exerciseFreqTitle": "Weekly",
+  "lastUpdateDate": "14020101",
+  "objectID": 1,
+  "smokingDesc": "No",
+  "smokingStatus": 0,
+  "smokingStatusTitle": "None",
+  "substanceDesc": "No",
+  "substanceUsage": 0,
+  "substanceUsageTitle": "None"
+}

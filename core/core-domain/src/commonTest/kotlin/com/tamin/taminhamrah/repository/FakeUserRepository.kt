@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,6 +25,7 @@ class FakeUserRepository : UserRepository {
     var insuredActiveBranchResult: List<InsuredActiveBranchDN> = emptyList()
     var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
     var electronicFileResult: List<ElectronicFileDN> = emptyList()
+    var userProfileResult: UserProfileDN? = null
 
     var shouldThrowError = false
     var error: Throwable = RuntimeException("User Repository Error")
@@ -89,5 +91,10 @@ class FakeUserRepository : UserRepository {
     override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
         if (shouldThrowError) throw error
         emit(verifyChangeMobileResult)
+    }
+
+    override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
+        if (shouldThrowError) throw error
+        userProfileResult?.let { emit(it) }
     }
 }

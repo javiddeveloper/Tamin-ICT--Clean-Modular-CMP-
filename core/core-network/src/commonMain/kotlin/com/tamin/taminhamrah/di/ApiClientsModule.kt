@@ -9,19 +9,23 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.apiService.contract.createContractsApiService
 import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
-import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.apiService.createWorkShopsApiService
-import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.apiService.health.HealthApiService
+import com.tamin.taminhamrah.apiService.health.createHealthApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
-import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
+import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
+import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
+import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
+import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -59,6 +63,11 @@ val ApiClientsModule = module {
         ktorfit.createCommonApiService()
     }
 
+    single<TreatmentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createTreatmentApiService()
+    }
+
     single<PensionApiService>(named("pensionApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.create()
@@ -88,6 +97,10 @@ val ApiClientsModule = module {
         ktorfit.createPersonalInboxApiService()
     }
 
+    single<HealthApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createHealthApiService()
+    }
     single<ContractsApiService>(named("contractsApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createContractsApiService()
