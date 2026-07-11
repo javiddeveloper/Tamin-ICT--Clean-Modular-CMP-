@@ -146,3 +146,46 @@ val hashtagRegex = "#[\\p{L}0-9_\\p{M}]+".toRegex()
 val stringListRegex = "(\\S+|\\s)".toRegex()
 val emojiRegex = """[\uD83C\uDF00-\uD83D\uDFFF\uD83E\uDD00-\uD83E\uDFFF]+""".toRegex()
 
+/**
+ * Groups a run of digits into thousands separated by commas, e.g. "1234567" -> "1,234,567".
+ * The input must already be clean (digits only); an empty input yields "0".
+ */
+private fun groupThousands(digits: String): String {
+    if (digits.isEmpty()) return "0"
+    val reversed = digits.reversed()
+    val builder = StringBuilder()
+    for (i in reversed.indices) {
+        if (i > 0 && i % 3 == 0) {
+            builder.append(',')
+        }
+        builder.append(reversed[i])
+    }
+    return builder.reverse().toString()
+}
+
+/**
+ * Formats a numeric [String] as a thousands-grouped price (e.g. "1234567" -> "1,234,567").
+ *
+ * Unlike the previous implementation this does NOT silently strip unexpected characters:
+ * if the input contains any non-digit character it is considered invalid and an
+ * [IllegalArgumentException] is raised so the caller can surface the problem instead of
+ * displaying a corrupted value. An empty string formats to "0".
+ *
+ * @throws IllegalArgumentException if [this] contains a non-digit character.
+ */
+fun String.toPriceFormat(): String {
+    require(all { it.isDigit() }) {
+        "toPriceFormat: input must contain digits only but was \"$this\""
+    }
+    return groupThousands(this)
+}
+
+/** Formats a [Long] amount as a thousands-grouped price. */
+fun Long.toPriceFormat(): String = groupThousands(this.toString())
+
+/**
+ * Formats a [Double] amount as a thousands-grouped price.
+ * Currency amounts in the app are integral (Rial), so the fractional part is dropped.
+ */
+fun Double.toPriceFormat(): String = groupThousands(this.toLong().toString())
+
