@@ -67,7 +67,7 @@ internal class HealthRemoteDataSourceImpl(
         patientID: Int
     ): ListData<PatientHospitalizationsDTO>? {
         return try {
-            val response = apiService.getPatientHospitalize(natCode, patientID)
+            val response = apiService.getPatientHospitalize(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -82,7 +82,7 @@ internal class HealthRemoteDataSourceImpl(
         patientID: Int
     ): ListData<PatientVisitDTO>? {
         return try {
-            val response = apiService.getPatientVisit(natCode, patientID)
+            val response = apiService.getPatientVisit(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -97,7 +97,7 @@ internal class HealthRemoteDataSourceImpl(
         patientID: Int
     ): ListData<PatientLabDTO>? {
         return try {
-            val response = apiService.getPatientLab(natCode, patientID)
+            val response = apiService.getPatientLab(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -112,7 +112,7 @@ internal class HealthRemoteDataSourceImpl(
         patientID: Int
     ): ListData<PatientImagingDTO>? {
         return try {
-            val response = apiService.getPatientImaging(natCode, patientID)
+            val response = apiService.getPatientImaging(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
