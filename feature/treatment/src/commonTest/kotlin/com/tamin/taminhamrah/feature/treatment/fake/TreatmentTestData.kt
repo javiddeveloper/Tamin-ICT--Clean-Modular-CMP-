@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.treatment.fake
 import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
 import com.tamin.taminhamrah.model.health.PatientGeneralDN
 import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
+import com.tamin.taminhamrah.model.health.PatientHospitalizationsDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 
@@ -84,5 +85,14 @@ object TreatmentTestData {
 
     fun drugAllergy() = DrugItemAllergiesDN(
         allergyComments = "Comments", drugId = 1, drugName = "Drug"
+    )
+
+    fun hospitalization() = PatientHospitalizationsDN(
+        admId = 1, admSource = null, admType = null, comments = null, docID = null,
+        docSpeciality = null, doctorName = "Dr", finalDiagCode = null, finalDiagDesc = "Diag",
+        firstDiagCode = null, firstDiagDesc = null, healthcareProvider = "Hospital",
+        hospitalizedDays = 3, hospitalizedEndDate = "14020105", hospitalizedStartDate = "14020102",
+        outcomeDesc = null, referDocId = null, referDocName = null, referDocSpeciality = null,
+        referHealthcareProvider = null
     )
 }

@@ -55,17 +55,20 @@ internal interface HealthApiService {
 
     @GET("patient/PatientHospitalize/v1/GetPatientHospitalizations")
     suspend fun getPatientHospitalize(
-        @QueryMap parameters: Map<String, String>
+        @Query("natCode") natCode: String,
+        @Query("patientID") patientID: Int
     ): BaseDTO<ListData<PatientHospitalizationsDTO>>
 
     @GET("patient/PatientVisit/v1/GetPatientVisit")
     suspend fun getPatientVisit(
-        @QueryMap parameters: Map<String, String>
+        @Query("natCode") natCode: String,
+        @Query("patientID") patientID: Int
     ): BaseDTO<ListData<PatientVisitDTO>>
 
     @GET("patient/PatientLab/v1/GetPatientLab")
     suspend fun getPatientLab(
-        @QueryMap parameters: Map<String, String>
+        @Query("natCode") natCode: String,
+        @Query("patientID") patientID: Int
     ): BaseDTO<ListData<PatientLabDTO>>
 
     @GET("patient/PatientLab/v1/GetLabDelivery")
@@ -75,7 +78,8 @@ internal interface HealthApiService {
 
     @GET("patient/PatientImaging/v1/GetPatientImaging")
     suspend fun getPatientImaging(
-        @QueryMap parameters: Map<String, String>
+        @Query("natCode") natCode: String,
+        @Query("patientID") patientID: Int
     ): BaseDTO<ListData<PatientImagingDTO>>
 
     @GET("patient/PatientImaging/v1/GetImagingDelivery")

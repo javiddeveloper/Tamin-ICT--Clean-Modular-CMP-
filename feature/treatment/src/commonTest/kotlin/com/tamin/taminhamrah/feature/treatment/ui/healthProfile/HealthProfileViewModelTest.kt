@@ -7,6 +7,10 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.useCases.health.GetPatientDrugAllergiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientSelfDeclarativeUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -35,7 +39,11 @@ class HealthProfileViewModelTest {
         viewModel = HealthProfileViewModel(
             getPatientGeneralUseCase = GetPatientGeneralUseCase(repository),
             getPatientSelfDeclarativeUseCase = GetPatientSelfDeclarativeUseCase(repository),
-            getPatientDrugAllergiesUseCase = GetPatientDrugAllergiesUseCase(repository)
+            getPatientDrugAllergiesUseCase = GetPatientDrugAllergiesUseCase(repository),
+            getPatientHospitalizationsUseCase = GetPatientHospitalizationsUseCase(repository),
+            getPatientVisitsUseCase = GetPatientVisitsUseCase(repository),
+            getPatientLabsUseCase = GetPatientLabsUseCase(repository),
+            getPatientImagingUseCase = GetPatientImagingUseCase(repository)
         )
     }
 
@@ -71,6 +79,21 @@ class HealthProfileViewModelTest {
             while (state.patientDrugAllergies.isEmpty()) state = awaitItem()
 
             assertEquals(1, state.patientDrugAllergies.size)
+        }
+    }
+
+    @Test
+    fun testLoadProfile_loadsHospitalizations() = runTest(testDispatcher) {
+        repository.hospitalizationsResult = listOf(TreatmentTestData.hospitalization())
+
+        viewModel.uiState.test {
+            awaitItem() // initial
+            viewModel.sendIntent(HealthProfileIntent.LoadProfile(nationalCode))
+
+            var state = awaitItem()
+            while (state.patientHospitalizations.isEmpty()) state = awaitItem()
+
+            assertEquals(1, state.patientHospitalizations.size)
         }
     }
 

@@ -35,3 +35,79 @@ data class DrugItemAllergiesDN(
     val drugId: Int?,
     val drugName: String?
 )
+
+data class PatientHospitalizationsDN(
+    val admId: Int?,
+    val admSource: String?,
+    val admType: String?,
+    val comments: String?,
+    val docID: String?,
+    val docSpeciality: String?,
+    val doctorName: String?,
+    val finalDiagCode: String?,
+    val finalDiagDesc: String?,
+    val firstDiagCode: String?,
+    val firstDiagDesc: String?,
+    val healthcareProvider: String?,
+    val hospitalizedDays: Int?,
+    val hospitalizedEndDate: String?,
+    val hospitalizedStartDate: String?,
+    val outcomeDesc: String?,
+    val referDocId: String?,
+    val referDocName: String?,
+    val referDocSpeciality: String?,
+    val referHealthcareProvider: String?
+)
+
+data class PatientVisitDN(
+    val comments: String?,
+    val diagCode: String?,
+    val diagDesc: String?,
+    val docID: String?,
+    val docSpeciality: String?,
+    val docSpecialityCode: String?,
+    val doctorName: String?,
+    val healthcareProvider: String?,
+    val serviceName: String?,
+    val serviceProvideType: String?,
+    val serviceResult: String?,
+    val sourceSystem: Int?,
+    val visitDate: String?,
+    val visitType: String?
+)
+
+data class PatientLabDN(
+    val deliveredQty: Int?,
+    val diagCode: String?,
+    val diagDesc: String?,
+    val docSpeciality: String?,
+    val docSpecialityCode: String?,
+    val doctorName: String?,
+    val examName: String?,
+    val healthcareProvider: String?,
+    val itemComments: String?,
+    val objectId: Int?,
+    val prescribedQty: Int?,
+    val resultDesc: String?,
+    val resultValue: String?,
+    val serviceProvideType: Int?,
+    val sourceSystem: Int?,
+    val visitDate: String?,
+    val visitType: String?
+)
+
+data class PatientImagingDN(
+    val deliverStatus: String?,
+    val diagCode: String?,
+    val diagDesc: String?,
+    val docSpeciality: String?,
+    val doctorName: String?,
+    val healthcareProvider: String?,
+    val imagingName: String?,
+    val itemComments: String?,
+    val modality: String?,
+    val objectId: Int?,
+    val resultDesc: String?,
+    val visitDate: String?,
+    val visitType: String?
+)

@@ -254,6 +254,11 @@ fun HealthProfileContent(
                         }
                     }
                 }
+
+                item { PatientHospitalizationsSection(state.patientHospitalizations) }
+                item { PatientVisitsSection(state.patientVisits) }
+                item { PatientLabsSection(state.patientLabs) }
+                item { PatientImagingSection(state.patientImaging) }
             }
         }
     }

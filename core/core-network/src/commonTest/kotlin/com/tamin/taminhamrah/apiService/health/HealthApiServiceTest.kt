@@ -156,7 +156,7 @@ class HealthApiServiceTest : BaseApiTest() {
         val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyListSuccess)
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
-        val response = apiService.getPatientHospitalize(emptyMap())
+        val response = apiService.getPatientHospitalize("6319889391", 1)
         assertNotNull(response.extractData())
     }
 
@@ -165,7 +165,7 @@ class HealthApiServiceTest : BaseApiTest() {
         val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyListSuccess)
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
-        val response = apiService.getPatientVisit(emptyMap())
+        val response = apiService.getPatientVisit("6319889391", 1)
         assertNotNull(response.extractData())
     }
 
@@ -174,7 +174,7 @@ class HealthApiServiceTest : BaseApiTest() {
         val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyListSuccess)
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
-        val response = apiService.getPatientLab(emptyMap())
+        val response = apiService.getPatientLab("6319889391", 1)
         assertNotNull(response.extractData())
     }
 
@@ -192,7 +192,7 @@ class HealthApiServiceTest : BaseApiTest() {
         val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyListSuccess)
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
-        val response = apiService.getPatientImaging(emptyMap())
+        val response = apiService.getPatientImaging("6319889391", 1)
         assertNotNull(response.extractData())
     }
 

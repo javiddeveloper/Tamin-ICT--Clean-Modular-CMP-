@@ -65,6 +65,10 @@ import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientSelfDeclarativeUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientDrugAllergiesUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
+import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -143,4 +147,8 @@ val domainModule = module {
     factoryOf(::GetPatientGeneralUseCase)
     factoryOf(::GetPatientSelfDeclarativeUseCase)
     factoryOf(::GetPatientDrugAllergiesUseCase)
+    factoryOf(::GetPatientHospitalizationsUseCase)
+    factoryOf(::GetPatientVisitsUseCase)
+    factoryOf(::GetPatientLabsUseCase)
+    factoryOf(::GetPatientImagingUseCase)
 }
