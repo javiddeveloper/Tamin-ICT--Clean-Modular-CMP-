@@ -68,6 +68,7 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
+            currentDestination?.hasRoute<TreatmentRoute>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
 
