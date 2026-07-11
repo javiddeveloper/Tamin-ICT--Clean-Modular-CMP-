@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import io.ktor.client.statement.HttpStatement
 
 interface CommonRepository {
