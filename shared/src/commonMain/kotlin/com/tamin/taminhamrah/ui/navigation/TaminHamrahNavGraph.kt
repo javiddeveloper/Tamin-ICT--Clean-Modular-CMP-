@@ -68,6 +68,7 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
+            currentDestination?.hasRoute<TreatmentRoute>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
 
@@ -101,20 +102,20 @@ internal fun TaminHamrahNavGraph(
                     )
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Favorite, null) },
-                    label = { Text("Treatment") },
-                    selected = currentDestination?.hasRoute<TreatmentRoute>() == true,
-                    onClick = {
-                        navController.navigateToTreatment {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                        label = { Text("Treatment") },
+                        selected = currentDestination?.hasRoute<TreatmentRoute>() == true,
+                        onClick = {
+                            navController.navigateToTreatment {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, null) },
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Person, null) },
                         label = { Text("Profile") },
                         selected = currentDestination?.hasRoute<ProfileRoute.Main>() == true,
                         onClick = {
