@@ -31,6 +31,8 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
+import com.tamin.taminhamrah.model.user.UserProfileDto
+
 internal interface UserApiService {
     @GET("central-reg/personal")
     suspend fun getIdentityInfo(): BaseDTO<IdentityInfoDto>
@@ -128,4 +130,6 @@ internal interface UserApiService {
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<ElectronicFileDTO>>
 
+    @GET("users/current-user")
+    suspend fun getUserProfile(): BaseDTO<UserProfileDto>
 }
