@@ -1,0 +1,15 @@
+{
+  "total": 1,
+  "list": [
+    {
+      "code": "001",
+      "name": "شعبه مرکزی",
+      "minCode": null,
+      "maxCode": null,
+      "type": null,
+      "branchAddress": "تهران",
+      "cityCode": "0101",
+      "status": "1"
+    }
+  ]
+}

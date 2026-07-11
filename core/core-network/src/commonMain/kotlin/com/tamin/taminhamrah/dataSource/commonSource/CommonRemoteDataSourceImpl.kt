@@ -8,6 +8,7 @@ package com.tamin.taminhamrah.dataSource.commonSource
 
 import com.tamin.core.network.model.common.CityNameDto
 import com.tamin.taminhamrah.model.common.MainServiceDto
+import com.tamin.taminhamrah.model.common.MenuServiceStatus
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -56,6 +57,9 @@ internal class CommonRemoteDataSourceImpl(
         forceUpdate: Boolean
     ): List<MainServiceDto> {
         return try {
+            // Temporarily returning local data as requested
+            mockMenuData
+            /*
             val serviceUrl = buildString {
                 append("https://ssodcfs.tamin.ir/eservices/menu_data_")
                 append(versionCode)
@@ -63,6 +67,7 @@ internal class CommonRemoteDataSourceImpl(
             }
             val response = commonApiService.getMainMenu(serviceUrl)
             response.extractData()
+            */
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

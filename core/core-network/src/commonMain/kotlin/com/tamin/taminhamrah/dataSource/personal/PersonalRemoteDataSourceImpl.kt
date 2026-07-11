@@ -139,7 +139,7 @@ class PersonalRemoteDataSourceImpl(
             val response = personalApiService.getFinalSurvivorPensionPDF()
             PdfDownloadDTO(
                 pdf = InputStreamDTO(
-                    pdf = response.bodyAsChannel()
+                    pdf = response.body()
                 )
             )
         } catch (e: TaminErrorUriException) {
@@ -188,4 +188,6 @@ class PersonalRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
+
+
 }

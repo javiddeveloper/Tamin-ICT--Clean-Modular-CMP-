@@ -75,17 +75,40 @@ object ContractsTestData {
 
     val freelanceMakeContractSuccess: String
         get() = readResourceFile("mocks/freelance_make_contract_success.json")
+
+    val optionalCalculateSalarySuccess: String
+        get() = readResourceFile("mocks/optional_calculate_salary_success.json")
+
+    val registrationInfoSuccess: String
+        get() = readResourceFile("mocks/registration_info_success.json")
+
+    val branchesListSuccess: String
+        get() = readResourceFile("mocks/branches_list_success.json")
+
+    val freeJobWagesSuccess: String
+        get() = readResourceFile("mocks/free_job_wages_success.json")
+
+    val uploadImageSuccess: String
+        get() = readResourceFile("mocks/upload_image_success.json")
+
+    val insurancePaymentSuccess: String
+        get() = readResourceFile("mocks/insurance_payment_success.json")
+
+    val insurancePaymentStatusSuccess: String
+        get() = readResourceFile("mocks/insurance_payment_status_success.json")
 }
 
 object PensionTestData {
     val payrollSuccess: String
         get() = readResourceFile("mocks/pension_payroll_success.json")
 
-    val disabilityPersonalInfoSuccess: String
-        get() = readResourceFile("mocks/disability_personal_info.json")
 
     val userAgeSuccess: String
         get() = readResourceFile("mocks/pension/user_age_success.json")
+
+
+    val disabilityPersonalInfoSuccess : String
+        get() = readResourceFile("mocks/pension/disability_personal_info_success.json")
 }
 
 object WorkshopTestData {

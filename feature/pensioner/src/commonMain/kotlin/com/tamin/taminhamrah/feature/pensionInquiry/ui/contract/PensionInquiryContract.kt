@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
 import com.tamin.taminhamrah.model.personal.PersonalInfoPR
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 
@@ -31,6 +32,8 @@ data class PensionInquiryUiState(
     val confirmSurvivorsList: List<ConfirmSurvivorPR> = emptyList(),
     val payRoll: PayRollPR? = null,
     val disabilityPersonalInfo: DisabilityPersonalInfoPR? = null,
+    val payRollPDF: PdfDownloadPR? = null,
+    val showPdfDialog: Boolean = false,
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -48,6 +51,8 @@ data class PensionInquiryUiState(
         data class ConfirmSurvivorsListLoaded(val list: List<ConfirmSurvivorPR>) : PartialState()
         data class PayRollLoaded(val payRoll: PayRollPR) : PartialState()
         data class DisabilityPersonalInfoLoaded(val disabilityPersonalInfo: DisabilityPersonalInfoPR?) : PartialState()
+        data class PayRollPDFLoaded(val pdf: PdfDownloadPR) : PartialState()
+        data class TogglePdfDialog(val show: Boolean) : PartialState()
     }
 }
 
@@ -65,6 +70,8 @@ sealed class PensionInquiryIntent {
     data class LoadAge(val birthDate: Long) : PensionInquiryIntent()
     data object LoadUserAge : PensionInquiryIntent()
     data class LoadPensionerPayRoll(val filters: List<ApiFilterDN>) : PensionInquiryIntent()
+    data class LoadPensionerPayRollPDF(val filters: List<ApiFilterDN>) : PensionInquiryIntent()
+    data class TogglePdfDialog(val show: Boolean) : PensionInquiryIntent()
 }
 
 sealed class PensionInquiryEvent {
