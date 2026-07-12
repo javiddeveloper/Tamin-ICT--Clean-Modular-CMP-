@@ -8,8 +8,9 @@ import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatu
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
-import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -144,6 +145,21 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
+
+    override suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>): ListData<RetirementRequestDTO> {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response =
+                pensionApiService.getRetirementRequestInfo(mapOf("filter" to filterJson))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 
     override suspend fun checkRetirementStatus(): RetirementStatusDTO {
         return try {

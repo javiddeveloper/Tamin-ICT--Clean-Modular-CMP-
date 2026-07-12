@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatu
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
@@ -25,10 +26,13 @@ interface PensionRemoteDataSource {
     ): PayRollDTO
 
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
+
     suspend fun getUserAge(
         filter: List<ApiFilterDN>
     ): AgeDTO
+
     suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
 
+    suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>) :ListData<RetirementRequestDTO>
     suspend fun checkRetirementStatus(): RetirementStatusDTO
 }
