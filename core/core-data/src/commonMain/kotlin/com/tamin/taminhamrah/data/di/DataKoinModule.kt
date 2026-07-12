@@ -47,5 +47,5 @@ val dataKoinModule = module {
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
-    single<HealthRepository> { HealthRepositoryImpl(get(), get()) }
+    singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
 }

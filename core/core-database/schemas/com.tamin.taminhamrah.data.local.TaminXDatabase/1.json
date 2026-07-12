@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d4f2071c6fb36ed316c89bb46352f43a",
+    "identityHash": "67856e271b99e0ef1d0cb0dd6474ca64",
     "entities": [
       {
         "tableName": "test_table",
@@ -1074,11 +1074,622 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "patient_general",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`natCode` TEXT NOT NULL, `ptientID` INTEGER, `patientName` TEXT, `patientFamily` TEXT, `patientNatCode` TEXT, `patientAge` TEXT, `patientGender` TEXT, `patientBirthDate` TEXT, `patientMobile` TEXT, `patientAddress` TEXT, `patientFather` TEXT, PRIMARY KEY(`natCode`))",
+        "fields": [
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ptientID",
+            "columnName": "ptientID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientName",
+            "columnName": "patientName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientFamily",
+            "columnName": "patientFamily",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientNatCode",
+            "columnName": "patientNatCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientAge",
+            "columnName": "patientAge",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientGender",
+            "columnName": "patientGender",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientBirthDate",
+            "columnName": "patientBirthDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientMobile",
+            "columnName": "patientMobile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientAddress",
+            "columnName": "patientAddress",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientFather",
+            "columnName": "patientFather",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "natCode"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_self_declarative",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`natCode` TEXT NOT NULL, `alcoholDesc` TEXT, `alcoholUsage` INTEGER, `alcoholUsageTitle` TEXT, `exerciseDesc` TEXT, `exerciseFreq` INTEGER, `exerciseFreqTitle` TEXT, `lastUpdateDate` TEXT, `objectID` INTEGER, `smokingDesc` TEXT, `smokingStatus` INTEGER, `smokingStatusTitle` TEXT, `substanceDesc` TEXT, `substanceUsage` INTEGER, `substanceUsageTitle` TEXT, PRIMARY KEY(`natCode`))",
+        "fields": [
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alcoholDesc",
+            "columnName": "alcoholDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "alcoholUsage",
+            "columnName": "alcoholUsage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "alcoholUsageTitle",
+            "columnName": "alcoholUsageTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "exerciseDesc",
+            "columnName": "exerciseDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "exerciseFreq",
+            "columnName": "exerciseFreq",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "exerciseFreqTitle",
+            "columnName": "exerciseFreqTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastUpdateDate",
+            "columnName": "lastUpdateDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "objectID",
+            "columnName": "objectID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "smokingDesc",
+            "columnName": "smokingDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "smokingStatus",
+            "columnName": "smokingStatus",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "smokingStatusTitle",
+            "columnName": "smokingStatusTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "substanceDesc",
+            "columnName": "substanceDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "substanceUsage",
+            "columnName": "substanceUsage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "substanceUsageTitle",
+            "columnName": "substanceUsageTitle",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "natCode"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_drug_allergies",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `allergyComments` TEXT, `drugId` INTEGER, `drugName` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "allergyComments",
+            "columnName": "allergyComments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "drugId",
+            "columnName": "drugId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "drugName",
+            "columnName": "drugName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_hospitalizations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `admId` INTEGER, `admSource` TEXT, `admType` TEXT, `comments` TEXT, `docID` TEXT, `docSpeciality` TEXT, `doctorName` TEXT, `finalDiagCode` TEXT, `finalDiagDesc` TEXT, `firstDiagCode` TEXT, `firstDiagDesc` TEXT, `healthcareProvider` TEXT, `hospitalizedDays` INTEGER, `hospitalizedEndDate` TEXT, `hospitalizedStartDate` TEXT, `outcomeDesc` TEXT, `referDocId` TEXT, `referDocName` TEXT, `referDocSpeciality` TEXT, `referHealthcareProvider` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "admId",
+            "columnName": "admId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "admSource",
+            "columnName": "admSource",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "admType",
+            "columnName": "admType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "comments",
+            "columnName": "comments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docID",
+            "columnName": "docID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "finalDiagCode",
+            "columnName": "finalDiagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "finalDiagDesc",
+            "columnName": "finalDiagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstDiagCode",
+            "columnName": "firstDiagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstDiagDesc",
+            "columnName": "firstDiagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hospitalizedDays",
+            "columnName": "hospitalizedDays",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hospitalizedEndDate",
+            "columnName": "hospitalizedEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hospitalizedStartDate",
+            "columnName": "hospitalizedStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "outcomeDesc",
+            "columnName": "outcomeDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referDocId",
+            "columnName": "referDocId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referDocName",
+            "columnName": "referDocName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referDocSpeciality",
+            "columnName": "referDocSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referHealthcareProvider",
+            "columnName": "referHealthcareProvider",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_visits",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `comments` TEXT, `diagCode` TEXT, `diagDesc` TEXT, `docID` TEXT, `docSpeciality` TEXT, `docSpecialityCode` TEXT, `doctorName` TEXT, `healthcareProvider` TEXT, `serviceName` TEXT, `serviceProvideType` TEXT, `serviceResult` TEXT, `sourceSystem` INTEGER, `visitDate` TEXT, `visitType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comments",
+            "columnName": "comments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagCode",
+            "columnName": "diagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagDesc",
+            "columnName": "diagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docID",
+            "columnName": "docID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpecialityCode",
+            "columnName": "docSpecialityCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceName",
+            "columnName": "serviceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceProvideType",
+            "columnName": "serviceProvideType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceResult",
+            "columnName": "serviceResult",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sourceSystem",
+            "columnName": "sourceSystem",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "visitDate",
+            "columnName": "visitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_labs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `deliveredQty` INTEGER, `diagCode` TEXT, `diagDesc` TEXT, `docSpeciality` TEXT, `docSpecialityCode` TEXT, `doctorName` TEXT, `examName` TEXT, `healthcareProvider` TEXT, `itemComments` TEXT, `objectId` INTEGER, `prescribedQty` INTEGER, `resultDesc` TEXT, `resultValue` TEXT, `serviceProvideType` INTEGER, `sourceSystem` INTEGER, `visitDate` TEXT, `visitType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deliveredQty",
+            "columnName": "deliveredQty",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "diagCode",
+            "columnName": "diagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagDesc",
+            "columnName": "diagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpecialityCode",
+            "columnName": "docSpecialityCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "examName",
+            "columnName": "examName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "itemComments",
+            "columnName": "itemComments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "objectId",
+            "columnName": "objectId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "prescribedQty",
+            "columnName": "prescribedQty",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultDesc",
+            "columnName": "resultDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "resultValue",
+            "columnName": "resultValue",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceProvideType",
+            "columnName": "serviceProvideType",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sourceSystem",
+            "columnName": "sourceSystem",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "visitDate",
+            "columnName": "visitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_imaging",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `deliverStatus` TEXT, `diagCode` TEXT, `diagDesc` TEXT, `docSpeciality` TEXT, `doctorName` TEXT, `healthcareProvider` TEXT, `imagingName` TEXT, `itemComments` TEXT, `modality` TEXT, `objectId` INTEGER, `resultDesc` TEXT, `visitDate` TEXT, `visitType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deliverStatus",
+            "columnName": "deliverStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagCode",
+            "columnName": "diagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagDesc",
+            "columnName": "diagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imagingName",
+            "columnName": "imagingName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "itemComments",
+            "columnName": "itemComments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "modality",
+            "columnName": "modality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "objectId",
+            "columnName": "objectId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultDesc",
+            "columnName": "resultDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitDate",
+            "columnName": "visitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd4f2071c6fb36ed316c89bb46352f43a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '67856e271b99e0ef1d0cb0dd6474ca64')"
     ]
   }
 }
