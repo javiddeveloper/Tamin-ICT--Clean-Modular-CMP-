@@ -39,7 +39,7 @@ class GetMainMenuUseCaseTest {
     }
 
     @Test
-    fun `test categorization (tafkik) by type (role)`() = runTest {
+    fun `test categorization by role`() = runTest {
         // Arrange
         val mockItems = listOf(
             MainServiceDN(id = 1, name = "Bime Shode", showRole = listOf(1), active = true, status = MenuServiceStatusDN.ACTIVE),

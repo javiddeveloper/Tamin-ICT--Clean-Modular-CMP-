@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.data.mapper
 import com.tamin.taminhamrah.model.pension.*
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 
 fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
     return PensionInquiryDN(
@@ -140,6 +142,30 @@ fun DeferredInstallmentCertificateDTO.toDomain(): DeferredInstallmentCertificate
 fun RequestCertificateDTO.toDomain(): RequestCertificateDN {
     return RequestCertificateDN(
         refCode = refCode
+    )
+}
+
+fun RetirementRequestDTO.toDomain(): RetirementRequestDN {
+    return RetirementRequestDN(
+        activityType = activityType,
+        address = address,
+        age = age,
+        birthDate = birthDate,
+        branchCode = branchCode,
+        fatherName = fatherName,
+        firstName = firstName,
+        gender = gender,
+        insuranceNumber = insuranceNumber,
+        issuePlace = issuePlace,
+        idNumber = idNumber,
+        lastName = lastName,
+        mobileNumber = mobileNumber,
+        nationalCode = nationalCode,
+        phoneNumber = phoneNumber,
+        workshopAddress = workshopAddress,
+        workshopCode = workshopCode,
+        workshopName = workshopName,
+        managerName = managerName
     )
 }
 

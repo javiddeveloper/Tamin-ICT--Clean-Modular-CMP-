@@ -13,7 +13,10 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
-import io.ktor.utils.io.ByteReadChannel
+
+
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 
 abstract class BaseApiTest {
 
@@ -36,6 +39,9 @@ abstract class BaseApiTest {
                     ignoreUnknownKeys = true
                     isLenient = true
                 })
+            }
+            defaultRequest {
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
             }
             install(DefaultRequest) {
                 headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
