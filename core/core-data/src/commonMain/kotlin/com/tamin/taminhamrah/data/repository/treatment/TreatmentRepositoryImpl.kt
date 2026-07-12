@@ -23,9 +23,9 @@ internal class TreatmentRepositoryImpl(
 ) : TreatmentRepository {
 
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> = flow {
-        val local = treatmentDao.getDeservedTreatment(nationalCode).first()
-        if (local.isNotEmpty()) {
-            emit(local.map { it.toDomain() })
+        val localDeservedTreatment = treatmentDao.getDeservedTreatment(nationalCode).first()
+        if (localDeservedTreatment.isNotEmpty()) {
+            emit(localDeservedTreatment.map { it.toDomain() })
         }
         try {
             val result = treatmentRemoteDataSource.getDeservedTreatment(nationalCode)
@@ -33,7 +33,7 @@ internal class TreatmentRepositoryImpl(
             treatmentDao.clearDeservedTreatment(nationalCode)
             treatmentDao.insertDeservedTreatment(remote.map { it.toEntity(nationalCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localDeservedTreatment.isEmpty()) throw e
         }
         emitAll(treatmentDao.getDeservedTreatment(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -42,9 +42,9 @@ internal class TreatmentRepositoryImpl(
         nationalCode: String,
         filters: List<ApiFilterDN>
     ): Flow<List<DependantUserUnderEighteenDN>> = flow {
-        val local = treatmentDao.getDependantsUnderEighteen(nationalCode).first()
-        if (local.isNotEmpty()) {
-            emit(local.map { it.toDomain() })
+        val localDependantUnderEighteen = treatmentDao.getDependantsUnderEighteen(nationalCode).first()
+        if (localDependantUnderEighteen.isNotEmpty()) {
+            emit(localDependantUnderEighteen.map { it.toDomain() })
         }
         try {
             val result = treatmentRemoteDataSource.getDependantUnderEighteen(
@@ -55,7 +55,7 @@ internal class TreatmentRepositoryImpl(
             treatmentDao.clearDependantsUnderEighteen(nationalCode)
             treatmentDao.insertDependantsUnderEighteen(remote.map { it.toEntity(nationalCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localDependantUnderEighteen.isEmpty()) throw e
         }
         emitAll(treatmentDao.getDependantsUnderEighteen(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -63,9 +63,9 @@ internal class TreatmentRepositoryImpl(
     override suspend fun getTreatmentCosts(
         filters: List<ApiFilterDN>
     ): Flow<List<TreatmentCostDN>> = flow {
-        val local = treatmentDao.getTreatmentCosts().first()
-        if (local.isNotEmpty()) {
-            emit(local.map { it.toDomain() })
+        val localTreatmentCosts = treatmentDao.getTreatmentCosts().first()
+        if (localTreatmentCosts.isNotEmpty()) {
+            emit(localTreatmentCosts.map { it.toDomain() })
         }
         try {
             val result = treatmentRemoteDataSource.getTreatmentCosts(
@@ -75,7 +75,7 @@ internal class TreatmentRepositoryImpl(
             treatmentDao.clearTreatmentCosts()
             treatmentDao.insertTreatmentCosts(remote.map { it.toEntity() })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localTreatmentCosts.isEmpty()) throw e
         }
         emitAll(treatmentDao.getTreatmentCosts().map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
