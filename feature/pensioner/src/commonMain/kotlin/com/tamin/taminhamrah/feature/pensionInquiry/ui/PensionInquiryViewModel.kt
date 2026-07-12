@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -44,6 +45,7 @@ class PensionInquiryViewModel(
     private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
     private val getUserAgeUseCase: GetUserAgeUseCase,
     private val getPensionerPayRollPDFUseCase: GetPensionerPayRollPDFUseCase,
+    private val getRetirementRequestInfoUseCase: GetRetirementRequestInfoUseCase,
 ) : BaseViewModel<PensionInquiryUiState, PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {
@@ -53,6 +55,7 @@ class PensionInquiryViewModel(
         sendIntent(PensionInquiryIntent.LoadAge(1379L))
         sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
         sendIntent(PensionInquiryIntent.LoadUserAge)
+        sendIntent(PensionInquiryIntent.LoadRetirementRequestInfo)
         sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
         sendIntent(
             PensionInquiryIntent.LoadPensionerPayRollPDF(
@@ -82,6 +85,18 @@ class PensionInquiryViewModel(
             is PensionInquiryIntent.LoadDisabilityPersonalInfo -> handleLoadDisabilityPersonalInfo()
             is PensionInquiryIntent.LoadPensionerPayRollPDF -> handleLoadPensionerPayRollPDF(intent.filters)
             is PensionInquiryIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
+            is PensionInquiryIntent.LoadRetirementRequestInfo -> handleLoadRetirementRequestInfo()
+        }
+    }
+
+    private fun handleLoadRetirementRequestInfo(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getRetirementRequestInfoUseCase().collect { list ->
+                emit(PartialState.RetirementRequestInfoLoaded(list.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -324,6 +339,10 @@ class PensionInquiryViewModel(
         )
         is PartialState.TogglePdfDialog -> currentState.copy(
             showPdfDialog = partialState.show
+        )
+        is PartialState.RetirementRequestInfoLoaded -> currentState.copy(
+            isLoading = false,
+            retirementRequestInfo = partialState.list
         )
     }
 
