@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.model.common.RecipientDN
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
 import com.tamin.taminhamrah.model.pension.installment.*
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
@@ -28,6 +30,7 @@ fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     )
 }
 
+@JvmName("toPresentationPensionInquiryDN")
 fun List<PensionInquiryDN>.toPresentation(): List<PensionInquiryPR> {
     return this.map { it.toPresentation() }
 }
@@ -168,6 +171,34 @@ fun RequestCertificateDN.toPresentation(): RequestCertificatePR {
     return RequestCertificatePR(
         refCode = refCode
     )
+}
+
+fun RetirementRequestDN.toPresentation(): RetirementRequestPR {
+    return RetirementRequestPR(
+        activityType = activityType ?: "",
+        address = address ?: "",
+        age = age ?: "",
+        birthDate = birthDate ?: 0L,
+        branchCode = branchCode ?: "",
+        fatherName = fatherName ?: "",
+        firstName = firstName ?: "",
+        gender = gender ?: "",
+        insuranceNumber = insuranceNumber ?: "",
+        issuePlace = issuePlace ?: "",
+        idNumber = idNumber ?: "",
+        lastName = lastName ?: "",
+        mobileNumber = mobileNumber ?: "",
+        nationalCode = nationalCode ?: "",
+        phoneNumber = phoneNumber ?: "",
+        workshopAddress = workshopAddress ?: "",
+        workshopCode = workshopCode ?: "",
+        workshopName = workshopName ?: "",
+        managerName = managerName ?: ""
+    )
+}
+
+fun List<RetirementRequestDN>.toPresentation(): List<RetirementRequestPR> {
+    return this.map { it.toPresentation() }
 }
 
 fun PayRollDN.toPresentation(): PayRollPR {

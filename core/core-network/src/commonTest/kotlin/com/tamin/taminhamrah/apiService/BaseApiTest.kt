@@ -12,7 +12,10 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.serialization.json.Json
-import io.ktor.utils.io.ByteReadChannel
+
+
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.contentType
@@ -41,7 +44,7 @@ abstract class BaseApiTest {
                 })
             }
             defaultRequest {
-                contentType(ContentType.Application.Json)
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
             }
         }
 
