@@ -46,6 +46,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.SubFlowHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.SuccessStateCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -187,7 +188,7 @@ fun TreatmentCostsContent(
 
 @Composable
 fun PdfViewerDialog(
-    pdfData: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR,
+    pdfData: PdfDownloadPR,
     onDismiss: () -> Unit
 ) {
     Dialog(
