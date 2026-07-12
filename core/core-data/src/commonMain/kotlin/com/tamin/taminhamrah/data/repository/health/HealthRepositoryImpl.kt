@@ -32,13 +32,13 @@ internal class HealthRepositoryImpl(
 ) : HealthRepository {
 
     override suspend fun getPatientGeneral(natCode: String): Flow<PatientGeneralDN> = flow {
-        val local = healthDao.getGeneral(natCode).first()
-        local?.let { emit(it.toDomain()) }
+        val localPatientGeneral = healthDao.getGeneral(natCode).first()
+        localPatientGeneral?.let { emit(it.toDomain()) }
         try {
             val remote = healthRemoteDataSource.getPatientGeneral(natCode)?.toDomain()
             if (remote != null) healthDao.upsertGeneral(remote.toEntity(natCode))
         } catch (e: Exception) {
-            if (local == null) throw e
+            if (localPatientGeneral == null) throw e
         }
         emitAll(healthDao.getGeneral(natCode).filterNotNull().map { it.toDomain() })
     }.distinctUntilChanged()
@@ -47,13 +47,13 @@ internal class HealthRepositoryImpl(
         natCode: String,
         patientID: Int
     ): Flow<PatientSelfDeclarativeDN> = flow {
-        val local = healthDao.getSelfDeclarative(natCode).first()
-        local?.let { emit(it.toDomain()) }
+        val localPatientSelfDeclarative = healthDao.getSelfDeclarative(natCode).first()
+        localPatientSelfDeclarative?.let { emit(it.toDomain()) }
         try {
             val remote = healthRemoteDataSource.getPatientSelfDeclarative(natCode, patientID)?.toDomain()
             if (remote != null) healthDao.upsertSelfDeclarative(remote.toEntity(natCode))
         } catch (e: Exception) {
-            if (local == null) throw e
+            if (localPatientSelfDeclarative == null) throw e
         }
         emitAll(healthDao.getSelfDeclarative(natCode).filterNotNull().map { it.toDomain() })
     }.distinctUntilChanged()
@@ -62,14 +62,14 @@ internal class HealthRepositoryImpl(
         natCode: String,
         patientID: Int
     ): Flow<List<DrugItemAllergiesDN>> = flow {
-        val local = healthDao.getDrugAllergies(natCode).first()
-        if (local.isNotEmpty()) emit(local.map { it.toDomain() })
+        val localPatientDrugAllergies = healthDao.getDrugAllergies(natCode).first()
+        if (localPatientDrugAllergies.isNotEmpty()) emit(localPatientDrugAllergies.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientDrugAllergies(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
             healthDao.clearDrugAllergies(natCode)
             healthDao.insertDrugAllergies(remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localPatientDrugAllergies.isEmpty()) throw e
         }
         emitAll(healthDao.getDrugAllergies(natCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -78,14 +78,14 @@ internal class HealthRepositoryImpl(
         natCode: String,
         patientID: Int
     ): Flow<List<PatientHospitalizationsDN>> = flow {
-        val local = healthDao.getHospitalizations(natCode).first()
-        if (local.isNotEmpty()) emit(local.map { it.toDomain() })
+        val localPatientHospitalizations = healthDao.getHospitalizations(natCode).first()
+        if (localPatientHospitalizations.isNotEmpty()) emit(localPatientHospitalizations.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientHospitalizations(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
             healthDao.clearHospitalizations(natCode)
             healthDao.insertHospitalizations(remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localPatientHospitalizations.isEmpty()) throw e
         }
         emitAll(healthDao.getHospitalizations(natCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -94,14 +94,14 @@ internal class HealthRepositoryImpl(
         natCode: String,
         patientID: Int
     ): Flow<List<PatientVisitDN>> = flow {
-        val local = healthDao.getVisits(natCode).first()
-        if (local.isNotEmpty()) emit(local.map { it.toDomain() })
+        val localPatientVisits = healthDao.getVisits(natCode).first()
+        if (localPatientVisits.isNotEmpty()) emit(localPatientVisits.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientVisits(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
             healthDao.clearVisits(natCode)
             healthDao.insertVisits(remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localPatientVisits.isEmpty()) throw e
         }
         emitAll(healthDao.getVisits(natCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -110,14 +110,14 @@ internal class HealthRepositoryImpl(
         natCode: String,
         patientID: Int
     ): Flow<List<PatientLabDN>> = flow {
-        val local = healthDao.getLabs(natCode).first()
-        if (local.isNotEmpty()) emit(local.map { it.toDomain() })
+        val localPatientLabs = healthDao.getLabs(natCode).first()
+        if (localPatientLabs.isNotEmpty()) emit(localPatientLabs.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientLabs(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
             healthDao.clearLabs(natCode)
             healthDao.insertLabs(remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localPatientLabs.isEmpty()) throw e
         }
         emitAll(healthDao.getLabs(natCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -126,14 +126,14 @@ internal class HealthRepositoryImpl(
         natCode: String,
         patientID: Int
     ): Flow<List<PatientImagingDN>> = flow {
-        val local = healthDao.getImaging(natCode).first()
-        if (local.isNotEmpty()) emit(local.map { it.toDomain() })
+        val localPatientImaging = healthDao.getImaging(natCode).first()
+        if (localPatientImaging.isNotEmpty()) emit(localPatientImaging.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientImaging(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
             healthDao.clearImaging(natCode)
             healthDao.insertImaging(remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localPatientImaging.isEmpty()) throw e
         }
         emitAll(healthDao.getImaging(natCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()

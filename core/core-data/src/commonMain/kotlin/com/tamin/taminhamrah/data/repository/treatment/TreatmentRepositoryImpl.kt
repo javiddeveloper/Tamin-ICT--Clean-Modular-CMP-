@@ -21,9 +21,9 @@ internal class TreatmentRepositoryImpl(
 ) : TreatmentRepository {
 
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> = flow {
-        val local = treatmentDao.getDeservedTreatment(nationalCode).first()
-        if (local.isNotEmpty()) {
-            emit(local.map { it.toDomain() })
+        val localDeservedTreatment = treatmentDao.getDeservedTreatment(nationalCode).first()
+        if (localDeservedTreatment.isNotEmpty()) {
+            emit(localDeservedTreatment.map { it.toDomain() })
         }
         try {
             val result = treatmentRemoteDataSource.getDeservedTreatment(nationalCode)
@@ -31,7 +31,7 @@ internal class TreatmentRepositoryImpl(
             treatmentDao.clearDeservedTreatment(nationalCode)
             treatmentDao.insertDeservedTreatment(remote.map { it.toEntity(nationalCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localDeservedTreatment.isEmpty()) throw e
         }
         emitAll(treatmentDao.getDeservedTreatment(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
@@ -40,9 +40,9 @@ internal class TreatmentRepositoryImpl(
         nationalCode: String,
         filters: List<ApiFilterDN>
     ): Flow<List<DependantUserUnderEighteenDN>> = flow {
-        val local = treatmentDao.getDependantsUnderEighteen(nationalCode).first()
-        if (local.isNotEmpty()) {
-            emit(local.map { it.toDomain() })
+        val localDependantUnderEighteen = treatmentDao.getDependantsUnderEighteen(nationalCode).first()
+        if (localDependantUnderEighteen.isNotEmpty()) {
+            emit(localDependantUnderEighteen.map { it.toDomain() })
         }
         try {
             val result = treatmentRemoteDataSource.getDependantUnderEighteen(
@@ -53,7 +53,7 @@ internal class TreatmentRepositoryImpl(
             treatmentDao.clearDependantsUnderEighteen(nationalCode)
             treatmentDao.insertDependantsUnderEighteen(remote.map { it.toEntity(nationalCode) })
         } catch (e: Exception) {
-            if (local.isEmpty()) throw e
+            if (localDependantUnderEighteen.isEmpty()) throw e
         }
         emitAll(treatmentDao.getDependantsUnderEighteen(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
