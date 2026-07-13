@@ -10,7 +10,11 @@ import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketPR
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.installment.*
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
+import com.tamin.taminhamrah.model.pension.retirement.*
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
@@ -36,6 +40,7 @@ fun AuthenticationTicketDN.toPresentation(): AuthenticationTicketPR {
     )
 }
 
+@JvmName("toPresentationPensionInquiryDN")
 fun List<PensionInquiryDN>.toPresentation(): List<PensionInquiryPR> {
     return this.map { it.toPresentation() }
 }
@@ -69,8 +74,8 @@ fun EdictPensionerDN.toPresentation(): EdictPensionerPR {
         branchName = branchName ?: "",
         insuranceId = insuranceId ?: "",
         title = title ?: "",
-        edictYear = edictYear,
-        edictMonth = edictMonth,
+        edictYear = edictYear ?:  "0",
+        edictMonth = edictMonth ?:  "0",
         edictInfo = edictInfo?.toPresentation(),
         survivorInfo = survivorInfo?.map { it.toPresentation() } ?: emptyList(),
         detail = detail?.map { it.toPresentation() } ?: emptyList()
@@ -178,6 +183,34 @@ fun RequestCertificateDN.toPresentation(): RequestCertificatePR {
     )
 }
 
+fun RetirementRequestDN.toPresentation(): RetirementRequestPR {
+    return RetirementRequestPR(
+        activityType = activityType ?: "",
+        address = address ?: "",
+        age = age ?: "",
+        birthDate = birthDate ?: 0L,
+        branchCode = branchCode ?: "",
+        fatherName = fatherName ?: "",
+        firstName = firstName ?: "",
+        gender = gender ?: "",
+        insuranceNumber = insuranceNumber ?: "",
+        issuePlace = issuePlace ?: "",
+        idNumber = idNumber ?: "",
+        lastName = lastName ?: "",
+        mobileNumber = mobileNumber ?: "",
+        nationalCode = nationalCode ?: "",
+        phoneNumber = phoneNumber ?: "",
+        workshopAddress = workshopAddress ?: "",
+        workshopCode = workshopCode ?: "",
+        workshopName = workshopName ?: "",
+        managerName = managerName ?: ""
+    )
+}
+
+fun List<RetirementRequestDN>.toPresentation(): List<RetirementRequestPR> {
+    return this.map { it.toPresentation() }
+}
+
 fun PayRollDN.toPresentation(): PayRollPR {
     return PayRollPR(
         id = id ?: 0,
@@ -192,5 +225,26 @@ fun PayRollDN.toPresentation(): PayRollPR {
         hisYearPlus = hisYearPlus ?: "",
         hisMonPlus = hisMonPlus ?: "",
         hisDayPlus = hisDayPlus ?: ""
+    )
+}
+
+fun RetirementStatusDN.toPresentation(): RetirementStatusPR {
+    return RetirementStatusPR(
+        requestId = requestId ?: "",
+        requestStatusCode = requestStatusCode ?: ""
+    )
+}
+
+fun RetirementSaveDocumentPR.toDomain(): RetirementSaveDocumentDN {
+    return RetirementSaveDocumentDN(
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDomain() },
+        status = status
+    )
+}
+
+fun RetirementDocumentPR.toDomain(): RetirementDocumentDN {
+    return RetirementDocumentDN(
+        documentType = documentType,
+        guid = guid
     )
 }
