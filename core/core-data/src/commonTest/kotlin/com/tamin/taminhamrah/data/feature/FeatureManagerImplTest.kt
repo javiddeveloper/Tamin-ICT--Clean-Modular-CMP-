@@ -2,9 +2,12 @@ package com.tamin.taminhamrah.data.feature
 
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
+import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -20,6 +23,14 @@ class FakeRepositoryForFeatureManager : CommonRepository {
 
     override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> = flow {
         emit(mainMenuResult)
+    }
+
+    override suspend fun getRegistrationDeclarationForm(): HttpStatement {
+        throw IllegalStateException("Mock for HttpStatement")
+    }
+
+    override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {
+        return null
     }
 
     override fun getBeneficiary(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>): Flow<List<com.tamin.taminhamrah.model.common.BeneficiaryDN>> = flow {}

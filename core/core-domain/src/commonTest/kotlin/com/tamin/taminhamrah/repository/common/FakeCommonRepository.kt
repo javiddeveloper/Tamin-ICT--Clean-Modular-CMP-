@@ -15,6 +15,7 @@ class FakeCommonRepository : CommonRepository {
     var getBeneficiaryError: Throwable = RuntimeException("Error")
     var mainMenuResult: List<MainServiceDN> = emptyList()
     var getMainMenuError: Throwable = RuntimeException("Menu Error")
+    var jobTitleResult: JobTitleListDN? = null
 
 
     override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = flow {
@@ -34,11 +35,11 @@ class FakeCommonRepository : CommonRepository {
 
     override suspend fun getRegistrationDeclarationForm(): HttpStatement {
         if (shouldThrowError) throw getBeneficiaryError
-        throw NotImplementedError("Fake does not support HttpStatement")
+        throw IllegalStateException("Mock for HttpStatement")
     }
 
     override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {
         if (shouldThrowError) throw getBeneficiaryError
-        return null
+        return jobTitleResult
     }
 }
