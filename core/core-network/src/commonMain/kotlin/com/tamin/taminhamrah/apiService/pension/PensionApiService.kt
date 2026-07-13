@@ -4,8 +4,10 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -19,6 +21,8 @@ import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Streaming
+import io.ktor.client.statement.HttpStatement
 
 
 interface PensionApiService {
@@ -47,14 +51,28 @@ interface PensionApiService {
         @Query("filter") filter: String,
     ): BaseDTO<PayRollDTO>
 
+    @GET("disability-request/personal")
+    suspend fun getDisabilityPersonalInfo(
+    ): BaseDTO<DisabilityPersonalInfoDTO>
+
     @GET("pension-request/age")
     suspend fun getUserAge(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<AgeDTO>
 
-    @GET("disability-request/personal")
-    suspend fun getDisabilityPersonalInfo(
-    ): BaseDTO<DisabilityPersonalInfoDTO>
+    @Streaming
+    @GET("fish/report")
+    suspend fun pensionerPayRollPDF(
+        @QueryMap parameters: Map<String, String>
+    ): HttpStatement
+
+    @GET("pension-request")
+    suspend fun getRetirementRequestInfo(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<RetirementRequestDTO>>
+
+    @GET("pension-request/checkRequests")
+    suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>
 
 
     @Headers("Content-Type: application/json")

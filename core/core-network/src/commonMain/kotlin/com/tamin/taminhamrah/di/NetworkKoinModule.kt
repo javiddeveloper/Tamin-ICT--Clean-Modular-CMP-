@@ -165,6 +165,7 @@ private fun createHttpClient(
         defaultRequest {
             url(NetworkConstants.BASE_URL)
             header(HttpHeaders.Accept, "*/*")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
     }
 }

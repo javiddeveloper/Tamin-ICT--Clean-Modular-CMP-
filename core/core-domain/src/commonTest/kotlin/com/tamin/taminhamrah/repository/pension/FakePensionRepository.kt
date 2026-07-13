@@ -4,6 +4,8 @@ import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
@@ -20,8 +22,11 @@ class FakePensionRepository : PensionRepository {
     var edictPensionerResult: EdictPensionerDN? = null
     var deferredInstallmentCertificateResult: DeferredInstallmentCertificateDN? = null
     var payRollResult: PayRollDN? = null
-    var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
     var userAgeResult: AgeDN? = null
+    var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
+    var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
+    var retirementRequestInfoResult: List<RetirementRequestDN> = emptyList()
+    var retirementStatusResult: RetirementStatusDN? = null
     var sendRetirementDocumentResult: String? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
@@ -76,6 +81,30 @@ class FakePensionRepository : PensionRepository {
             throw error!!
         }
         emit(userAgeResult!!)
+    }
+
+
+    override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(payRollPDFResult!!)
+        }
+
+
+    override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(retirementRequestInfoResult)
+    }
+
+    override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(retirementStatusResult!!)
     }
 
     override suspend fun sendRetirementDocument(

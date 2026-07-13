@@ -74,17 +74,31 @@ object ContractsTestData {
 
     val uploadImageSuccess: String
         get() = readResourceFile("mocks/upload_image_success.json")
+
+    val insurancePaymentSuccess: String
+        get() = readResourceFile("mocks/insurance_payment_success.json")
+
+    val insurancePaymentStatusSuccess: String
+        get() = readResourceFile("mocks/insurance_payment_status_success.json")
 }
 
 object PensionTestData {
     val payrollSuccess: String
         get() = readResourceFile("mocks/pension_payroll_success.json")
 
-    val disabilityPersonalInfoSuccess: String
-        get() = readResourceFile("mocks/disability_personal_info.json")
 
     val userAgeSuccess: String
         get() = readResourceFile("mocks/pension/user_age_success.json")
+
+
+    val disabilityPersonalInfoSuccess : String
+        get() = readResourceFile("mocks/pension/disability_personal_info_success.json")
+
+    val retirementRequestInfoSuccess: String
+        get() = readResourceFile("mocks/pension/retirement_request_info_success.json")
+
+    val retirementStatusSuccess: String
+        get() = readResourceFile("mocks/pension/retirement_status_success.json")
 
     val sendRetirementDocumentSuccess: String
         get() = readResourceFile("mocks/pension/send_retirement_document_success.json")

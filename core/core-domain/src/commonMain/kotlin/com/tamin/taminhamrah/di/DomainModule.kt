@@ -12,13 +12,17 @@ import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
+import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
+import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
@@ -39,10 +43,14 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreeJobWagesUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetInsurancePaymentUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
@@ -73,7 +81,10 @@ val domainModule = module {
     factoryOf(::GetPensionInquiryUseCase)
     factoryOf(::GetPensionerIdUseCase)
     factoryOf(::GetPensionerPayRollUseCase)
+    factoryOf(::GetPensionerPayRollPDFUseCase)
     factoryOf(::GetUserAgeUseCase)
+    factoryOf(::GetRetirementRequestInfoUseCase)
+    factoryOf(::CheckRetirementStatusUseCase)
     factoryOf(::GetEdictPensionerUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
@@ -93,6 +104,7 @@ val domainModule = module {
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
+    factoryOf(::GetMainMenuUseCase)
     factoryOf(::GetUserRequestsUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
     factoryOf(::GetTalfighInfosUseCase)
@@ -108,6 +120,10 @@ val domainModule = module {
     factoryOf(::CalculateOptionalSalaryUseCase)
     factoryOf(::MakeFreelanceContractUseCase)
     factoryOf(::MakeContractUseCase)
+    factoryOf(::MakeFreelanceContractByGuardianUseCase)
+    factoryOf(::MakeOptionalContractByGuardianUseCase)
+    factoryOf(::GetInsurancePaymentUseCase)
+    factoryOf(::CheckInsurancePaymentStatusUseCase)
     factoryOf(::SaveContactUseCase)
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
