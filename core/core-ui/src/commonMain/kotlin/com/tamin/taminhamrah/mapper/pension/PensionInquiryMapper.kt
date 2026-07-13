@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
+import com.tamin.taminhamrah.model.pension.retirement.*
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
@@ -223,5 +224,19 @@ fun RetirementStatusDN.toPresentation(): RetirementStatusPR {
     return RetirementStatusPR(
         requestId = requestId ?: "",
         requestStatusCode = requestStatusCode ?: ""
+    )
+}
+
+fun RetirementSaveDocumentPR.toDomain(): RetirementSaveDocumentDN {
+    return RetirementSaveDocumentDN(
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDomain() },
+        status = status
+    )
+}
+
+fun RetirementDocumentPR.toDomain(): RetirementDocumentDN {
+    return RetirementDocumentDN(
+        documentType = documentType,
+        guid = guid
     )
 }
