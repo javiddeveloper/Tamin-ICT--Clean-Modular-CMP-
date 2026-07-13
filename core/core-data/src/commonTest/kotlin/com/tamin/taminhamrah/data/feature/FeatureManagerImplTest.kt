@@ -36,6 +36,7 @@ class FeatureManagerImplTest {
         featureManager = FeatureManagerImpl(fakeRepository)
     }
 
+
     @Test
     fun `test getFeatureStatus returns Enabled when ACTIVE`() = runTest {
         // Arrange

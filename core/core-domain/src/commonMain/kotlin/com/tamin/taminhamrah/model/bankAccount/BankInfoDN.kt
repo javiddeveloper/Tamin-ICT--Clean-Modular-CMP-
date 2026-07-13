@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.model.bankAccount
 
 data class BankInfoDN(
-    var statusDate: String? = null,
-    var bankCode: String? = null,
-    var bankName: String? = null,
-    var status: String? = null
+    val statusDate: String?,
+    val bankCode: String?,
+    val bankName: String?,
+    val status: String?,
 )
