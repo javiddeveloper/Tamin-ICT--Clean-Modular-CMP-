@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.pension.PayRollPR
 import com.tamin.taminhamrah.model.pension.RecipientPR
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
 import com.tamin.taminhamrah.model.personal.AgePR
@@ -42,10 +43,11 @@ fun PensionInquiryScreen(
         viewModel.sendIntent(PensionInquiryIntent.LoadBeneficiaryList)
         viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityDependentInfo)
         viewModel.sendIntent(PensionInquiryIntent.LoadConfirmSurvivorsList)
-        viewModel.sendIntent(PensionInquiryIntent.LoadAge(1379L))
+        viewModel.sendIntent(PensionInquiryIntent.LoadAge(25L))
         viewModel.sendIntent(PensionInquiryIntent.LoadUserAge)
         viewModel.sendIntent(PensionInquiryIntent.LoadPensionerPayRoll(emptyList()))
         viewModel.sendIntent(PensionInquiryIntent.LoadDisabilityPersonalInfo)
+        viewModel.sendIntent(PensionInquiryIntent.LoadRetirementRequestInfo)
     }
 
     PensionInquiryContent(
@@ -231,6 +233,19 @@ fun PensionInquiryContent(
                             PayRollItem(state.payRoll)
                         }
                     }
+
+                    if (state.retirementRequestInfo.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "درخواست های بازنشستگی:",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                        }
+                        items(state.retirementRequestInfo) { item ->
+                            RetirementRequestItem(item)
+                        }
+                    }
                 }
             }
         }
@@ -286,6 +301,31 @@ fun PdfViewerDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RetirementRequestItem(item: RetirementRequestPR) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "نام: ${item.firstName} ${item.lastName}", style = MaterialTheme.typography.titleMedium)
+            Text(text = "کد ملی: ${item.nationalCode}")
+            Text(text = "شماره بیمه: ${item.insuranceNumber}")
+            Text(text = "نام پدر: ${item.fatherName}")
+            Text(text = "کد شعبه: ${item.branchCode}")
+            Text(text = "نوع فعالیت: ${item.activityType}")
+            Text(text = "نام کارگاه: ${item.workshopName}")
+            Text(text = "کد کارگاه: ${item.workshopCode}")
+            Text(text = "آدرس کارگاه: ${item.workshopAddress}")
+            Text(text = "نام مدیر: ${item.managerName}")
+            Text(text = "آدرس: ${item.address}")
+            Text(text = "تلفن: ${item.phoneNumber}")
+            Text(text = "موبایل: ${item.mobileNumber}")
         }
     }
 }

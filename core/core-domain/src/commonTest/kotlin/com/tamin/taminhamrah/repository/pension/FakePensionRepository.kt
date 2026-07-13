@@ -5,9 +5,14 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -23,6 +28,11 @@ class FakePensionRepository : PensionRepository {
     var userAgeResult: AgeDN? = null
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
     var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
+    var retirementRequestInfoResult: List<RetirementRequestDN> = emptyList()
+    var retirementStatusResult: RetirementStatusDN? = null
+    var authenticationAndGetPersonalInfoResult: RetirementPersonalDN? = null
+    var sendRetirementDocumentResult: String? = null
+    var authenticationTicketResult: AuthenticationTicketDN? = null
     var sendEdictPensionerToMyInboxResult: EdictPensionerInboxDN = EdictPensionerInboxDN(null)
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
@@ -87,6 +97,45 @@ class FakePensionRepository : PensionRepository {
             }
             emit(payRollPDFResult!!)
         }
+
+
+    override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(retirementRequestInfoResult)
+    }
+
+    override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(retirementStatusResult!!)
+    }
+
+    override suspend fun sendRetirementDocument(
+        requestId: String,
+        request: RetirementSaveDocumentDN
+    ): Flow<String?> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(sendRetirementDocumentResult)
+    }
+    override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): Flow<RetirementPersonalDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(authenticationAndGetPersonalInfoResult!!)
+        }
+
+    override suspend fun getAuthenticationCode(): Flow<AuthenticationTicketDN> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(authenticationTicketResult!!)
+    }
 
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> =
         flow {
