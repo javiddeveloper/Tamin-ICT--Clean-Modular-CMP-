@@ -1,10 +1,14 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
+import com.tamin.taminhamrah.model.pension.retirement.*
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementDocumentDTO
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 
 fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
     return PensionInquiryDN(
@@ -183,5 +187,26 @@ fun PayRollDTO.toDomain(): PayRollDN {
         hisYearPlus = hisYearPlus,
         hisMonPlus = hisMonPlus,
         hisDayPlus = hisDayPlus
+    )
+}
+
+fun RetirementStatusDTO.toDomain(): RetirementStatusDN {
+    return RetirementStatusDN(
+        requestId = requestId,
+        requestStatusCode = requestStatusCode
+    )
+}
+
+fun RetirementSaveDocumentDN.toDTO(): RetirementSaveDocumentRequest {
+    return RetirementSaveDocumentRequest(
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDTO() },
+        status = status
+    )
+}
+
+fun RetirementDocumentDN.toDTO(): RetirementDocumentDTO {
+    return RetirementDocumentDTO(
+        documentType = documentType,
+        guid = guid
     )
 }

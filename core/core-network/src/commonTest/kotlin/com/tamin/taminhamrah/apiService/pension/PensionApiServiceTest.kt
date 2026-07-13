@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.apiService.pension
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.PensionTestData
 import kotlinx.coroutines.test.runTest
@@ -106,5 +107,36 @@ class PensionApiServiceTest : BaseApiTest() {
         val response = apiService.pensionerPayRollPDF(emptyMap())
 
         assertEquals(200, response.execute().status.value)
+    }
+
+    @Test
+    fun `checkRetirementStatus should return retirement status data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.retirementStatusSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.checkRetirementStatus()
+
+        assertEquals(200, response.status)
+        assertEquals("123", response.data?.requestId)
+        assertEquals("1", response.data?.requestStatusCode)
+    }
+
+    @Test
+    fun `sendRetirementDocument should return success data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.sendRetirementDocumentSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendRetirementDocument("requestId", RetirementSaveDocumentRequest())
+
+        assertEquals(200, response.status)
+        assertEquals("Success", response.data)
     }
 }
