@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertif
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
@@ -40,4 +41,7 @@ interface PensionRemoteDataSource {
         requestId: String,
         request: RetirementSaveDocumentRequest
     ): String?
+    suspend fun authenticationAndGetPersonalInfo(
+        authenticationsCode: Long
+    ): RetirementPersonalDTO
 }

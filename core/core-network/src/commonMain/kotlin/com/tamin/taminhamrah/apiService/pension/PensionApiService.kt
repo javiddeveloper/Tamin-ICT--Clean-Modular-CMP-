@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
@@ -70,6 +71,10 @@ interface PensionApiService {
     suspend fun getRetirementRequestInfo(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<RetirementRequestDTO>>
+    @GET("pension-request/personal")
+    suspend fun authenticationAndGetPersonalInfo(
+        @Query("ticketCode") authenticationsCode: Long
+    ): BaseDTO<RetirementPersonalDTO>
 
     @GET("pension-request/checkRequests")
     suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>

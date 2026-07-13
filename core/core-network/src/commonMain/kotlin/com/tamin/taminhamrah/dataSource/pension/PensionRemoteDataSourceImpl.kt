@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatu
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -165,6 +166,18 @@ class PensionRemoteDataSourceImpl(
     override suspend fun checkRetirementStatus(): RetirementStatusDTO {
         return try {
             val response = pensionApiService.checkRetirementStatus()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+    override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): RetirementPersonalDTO {
+        return try {
+            val response = pensionApiService.authenticationAndGetPersonalInfo(authenticationsCode)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

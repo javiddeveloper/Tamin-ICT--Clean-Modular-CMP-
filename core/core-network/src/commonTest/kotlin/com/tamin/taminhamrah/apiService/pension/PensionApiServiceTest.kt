@@ -110,6 +110,23 @@ class PensionApiServiceTest : BaseApiTest() {
     }
 
     @Test
+    fun `authenticationAndGetPersonalInfo should return personal info data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.authenticationAndGetPersonalInfoSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.authenticationAndGetPersonalInfo(123456L)
+
+        assertEquals(200, response.status)
+        assertEquals("Ali", response.data?.personal?.firstName)
+        assertEquals("Alavi", response.data?.personal?.lastName)
+        assertEquals("Engineer", response.data?.work?.job?.jobDescription)
+    }
+
+    @Test
     fun `checkRetirementStatus should return retirement status data`() = runTest {
         val jsonResponse = ApiTestUtils.createJsonResponse(
             dataJson = PensionTestData.retirementStatusSuccess
