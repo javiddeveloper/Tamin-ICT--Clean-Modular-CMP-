@@ -33,6 +33,26 @@ import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
@@ -158,6 +178,36 @@ internal fun TaminHamrahNavGraph(
                         onNavigateToPensionInquiry = {
                             navController.navigateToPensionInquiry()
                         },
+                        onNavigateToCalculatePension = {
+                            navController.navigateToCalculatePension()
+                        },
+                        onNavigateToPrescription = {
+                            navController.navigateToPrescription()
+                        },
+                        onNavigateToDeservedTreatment = {
+                            navController.navigateToDeservedTreatment()
+                        },
+                        onNavigateToPayRoll = {
+                            navController.navigateToPayRoll()
+                        },
+                        onNavigateToEdict = {
+                            navController.navigateToEdict()
+                        },
+                        onNavigateToIssuanceCertificate = {
+                            navController.navigateToIssuanceCertificate()
+                        },
+                        onNavigateToDeferredInstallment = {
+                            navController.navigateToDeferredInstallment()
+                        },
+                        onNavigateToGirlSurvivor = {
+                            navController.navigateToGirlSurvivor()
+                        },
+                        onNavigateToPensionSurvivor = {
+                            navController.navigateToPensionSurvivor()
+                        },
+                        onNavigateToDisabilityPension = {
+                            navController.navigateToDisabilityPension()
+                        },
                     )
                 }
 
@@ -181,6 +231,16 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 pensionInquiryScreen()
+                calculatePensionScreen(onBack = { navController.popBackStack() })
+                prescriptionScreen(onBack = { navController.popBackStack() })
+                deservedTreatmentScreen(onBack = { navController.popBackStack() })
+                payrollScreen(onBack = { navController.popBackStack() })
+                edictScreen(onBack = { navController.popBackStack() })
+                issuanceCertificateScreen(onBack = { navController.popBackStack() })
+                deferredInstallmentScreen(onBack = { navController.popBackStack() })
+                girlSurvivorScreen(onBack = { navController.popBackStack() })
+                pensionSurvivorScreen(onBack = { navController.popBackStack() })
+                disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()
 
@@ -261,6 +321,16 @@ fun HomeScreen(
     onNavigateToOptionalInsuranceContract: () -> Unit,
     onNavigateToHousewifeInsuranceContract: () -> Unit,
     onNavigateToPensionInquiry: () -> Unit,
+    onNavigateToCalculatePension: () -> Unit,
+    onNavigateToPrescription: () -> Unit,
+    onNavigateToDeservedTreatment: () -> Unit,
+    onNavigateToPayRoll: () -> Unit,
+    onNavigateToEdict: () -> Unit,
+    onNavigateToIssuanceCertificate: () -> Unit,
+    onNavigateToDeferredInstallment: () -> Unit,
+    onNavigateToGirlSurvivor: () -> Unit,
+    onNavigateToPensionSurvivor: () -> Unit,
+    onNavigateToDisabilityPension: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -274,7 +344,17 @@ fun HomeScreen(
         onNavigateToFreelanceInsuranceContract = onNavigateToFreelanceInsuranceContract,
         onNavigateToOptionalInsuranceContract = onNavigateToOptionalInsuranceContract,
         onNavigateToHousewifeInsuranceContract = onNavigateToHousewifeInsuranceContract,
-        onNavigateToPensionInquiry = onNavigateToPensionInquiry
+        onNavigateToPensionInquiry = onNavigateToPensionInquiry,
+        onNavigateToCalculatePension = onNavigateToCalculatePension,
+        onNavigateToPrescription = onNavigateToPrescription,
+        onNavigateToDeservedTreatment = onNavigateToDeservedTreatment,
+        onNavigateToPayRoll = onNavigateToPayRoll,
+        onNavigateToEdict = onNavigateToEdict,
+        onNavigateToIssuanceCertificate = onNavigateToIssuanceCertificate,
+        onNavigateToDeferredInstallment = onNavigateToDeferredInstallment,
+        onNavigateToGirlSurvivor = onNavigateToGirlSurvivor,
+        onNavigateToPensionSurvivor = onNavigateToPensionSurvivor,
+        onNavigateToDisabilityPension = onNavigateToDisabilityPension
     )
 
     Box(
@@ -451,7 +531,17 @@ private fun Handleevents(
     onNavigateToFreelanceInsuranceContract: () -> Unit,
     onNavigateToOptionalInsuranceContract: () -> Unit,
     onNavigateToHousewifeInsuranceContract: () -> Unit,
-    onNavigateToPensionInquiry: () -> Unit
+    onNavigateToPensionInquiry: () -> Unit,
+    onNavigateToCalculatePension: () -> Unit,
+    onNavigateToPrescription: () -> Unit,
+    onNavigateToDeservedTreatment: () -> Unit,
+    onNavigateToPayRoll: () -> Unit,
+    onNavigateToEdict: () -> Unit,
+    onNavigateToIssuanceCertificate: () -> Unit,
+    onNavigateToDeferredInstallment: () -> Unit,
+    onNavigateToGirlSurvivor: () -> Unit,
+    onNavigateToPensionSurvivor: () -> Unit,
+    onNavigateToDisabilityPension: () -> Unit
 ) {
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -466,6 +556,16 @@ private fun Handleevents(
                         FeatureFlag.OPTIONAL_INSURANCE -> onNavigateToOptionalInsuranceContract()
                         FeatureFlag.HOUSEWIFE_INSURANCE -> onNavigateToHousewifeInsuranceContract()
                         FeatureFlag.PENSION_INQUIRY -> onNavigateToPensionInquiry()
+                        FeatureFlag.CALCULATE_WAGE_PENSION -> onNavigateToCalculatePension()
+                        FeatureFlag.PRESCRIPTION -> onNavigateToPrescription()
+                        FeatureFlag.DESERVED_TREATMENT_101 -> onNavigateToDeservedTreatment()
+                        FeatureFlag.PAY_ROLL -> onNavigateToPayRoll()
+                        FeatureFlag.EDICT_PENSIONER -> onNavigateToEdict()
+                        FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> onNavigateToIssuanceCertificate()
+                        FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> onNavigateToDeferredInstallment()
+                        FeatureFlag.GIRL_SURVIVOR -> onNavigateToGirlSurvivor()
+                        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> onNavigateToPensionSurvivor()
+                        FeatureFlag.DISABILITY_PENSION -> onNavigateToDisabilityPension()
                         else -> { /* Handle other flags if needed */
                         }
                     }
