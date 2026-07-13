@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
@@ -203,4 +204,17 @@ class PensionRemoteDataSourceImpl(
             )
         }
     }
+    override suspend fun getAuthenticationCode(): AuthenticationTicketDTO {
+        return try {
+            val response = pensionApiService.getAuthenticationCode()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
 }

@@ -156,4 +156,19 @@ class PensionApiServiceTest : BaseApiTest() {
         assertEquals(200, response.status)
         assertEquals("Success", response.data)
     }
+
+    @Test
+    fun `getAuthenticationCode should return ticket data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.getAuthenticationCode
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.getAuthenticationCode()
+
+        assertEquals(200, response.status)
+        assertEquals("09123456789", response.data?.mobileNumber)
+    }
 }

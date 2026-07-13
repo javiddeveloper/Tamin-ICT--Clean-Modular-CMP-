@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
@@ -78,6 +79,9 @@ interface PensionApiService {
 
     @GET("pension-request/checkRequests")
     suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>
+    @GET("pension-request/getTicket")
+    suspend fun getAuthenticationCode(
+    ): BaseDTO<AuthenticationTicketDTO>
 
 
     @Headers("Content-Type: application/json")

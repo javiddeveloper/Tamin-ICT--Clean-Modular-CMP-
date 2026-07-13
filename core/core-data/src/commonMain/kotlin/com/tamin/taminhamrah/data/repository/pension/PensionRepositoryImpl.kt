@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.data.repository.pension
 import com.tamin.taminhamrah.data.mapper.*
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
@@ -91,4 +92,9 @@ class PensionRepositoryImpl(
                 pensionRemoteDataSource.authenticationAndGetPersonalInfo(authenticationsCode)
             emit(remoteData.toDomain())
         }
+
+    override suspend fun getAuthenticationCode(): Flow<AuthenticationTicketDN> = flow {
+        val remoteData = pensionRemoteDataSource.getAuthenticationCode()
+        emit(remoteData.toDomain())
+    }
 }

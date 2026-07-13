@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentReques
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -30,6 +31,7 @@ class FakePensionRepository : PensionRepository {
     var retirementStatusResult: RetirementStatusDN? = null
     var authenticationAndGetPersonalInfoResult: RetirementPersonalDN? = null
     var sendRetirementDocumentResult: String? = null
+    var authenticationTicketResult: AuthenticationTicketDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -125,5 +127,12 @@ class FakePensionRepository : PensionRepository {
             }
             emit(authenticationAndGetPersonalInfoResult!!)
         }
+
+    override suspend fun getAuthenticationCode(): Flow<AuthenticationTicketDN> = flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(authenticationTicketResult!!)
+    }
 
 }

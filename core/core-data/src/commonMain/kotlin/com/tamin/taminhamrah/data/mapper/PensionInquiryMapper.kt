@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
@@ -25,6 +27,12 @@ fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
         pensionEndDate = pensionEndDate,
         nationalId = nationalId,
         paymentAmount = paymentAmount
+    )
+}
+
+fun AuthenticationTicketDTO.toDomain(): AuthenticationTicketDN {
+    return AuthenticationTicketDN(
+        mobileNumber = mobileNumber
     )
 }
 
@@ -100,7 +108,7 @@ fun SurvivorInfoDTO.toDomain(): SurvivorInfoDN {
         differenceProportionalityBasedHistory = differenceProportionalityBasedHistory,
         nationalCode = nationalCode,
         pensionerId = pensionerId,
-        quota = quota,
+        quota = quota ?: "",
         totalAmount = totalAmount
     )
 }

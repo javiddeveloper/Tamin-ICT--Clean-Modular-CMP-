@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.pension
 
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
@@ -59,5 +60,7 @@ interface PensionRepository {
     suspend fun authenticationAndGetPersonalInfo(
         authenticationsCode: Long
     ): Flow<RetirementPersonalDN>
+
+    suspend fun getAuthenticationCode(): Flow<AuthenticationTicketDN>
 }
 
