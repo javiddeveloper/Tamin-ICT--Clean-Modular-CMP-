@@ -43,9 +43,9 @@ class PensionRepositoryImpl(
         emit(remoteData.toDomain())
     }
 
-    override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<PayRollDN> = flow {
+    override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<List<PayRollDN>> = flow {
         val remoteData = pensionRemoteDataSource.getPensionerPayRoll(filters)
-        emit(remoteData.toDomain())
+        emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
     }
 
     override suspend fun getDisabilityPersonalInfo(): Flow<DisabilityPersonalInfoDN> = flow {

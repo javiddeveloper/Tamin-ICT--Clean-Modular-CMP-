@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.pensionInquiry.ui.contract
+package com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract.PensionInquiryIntent
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract.PensionInquiryUiState
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import org.koin.compose.viewmodel.koinViewModel
 

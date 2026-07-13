@@ -1,6 +1,9 @@
-package com.tamin.taminhamrah.feature.pensionInquiry.ui.contract
+package com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract.PensionInquiryEvent
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract.PensionInquiryIntent
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract.PensionInquiryUiState
 import com.tamin.taminhamrah.mapper.pension.toPresentation
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import kotlinx.coroutines.flow.Flow
@@ -8,6 +11,7 @@ import kotlinx.coroutines.flow.flow
 
 class PensionInquiryViewModel(
     private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
+    //todo status-certificate/report
 ) : BaseViewModel<PensionInquiryUiState, PensionInquiryUiState.PartialState, PensionInquiryEvent, PensionInquiryIntent>(
     initialState = PensionInquiryUiState()
 ) {

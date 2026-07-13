@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.pensionInquiry.ui.contract
+package com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR

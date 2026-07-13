@@ -30,7 +30,7 @@ interface PensionRepository {
 
     suspend fun getPensionerPayRoll(
         filters: List<ApiFilterDN>
-    ): Flow<PayRollDN>
+    ): Flow<List<PayRollDN>>
 
     suspend fun getDisabilityPersonalInfo(): Flow<DisabilityPersonalInfoDN>
 

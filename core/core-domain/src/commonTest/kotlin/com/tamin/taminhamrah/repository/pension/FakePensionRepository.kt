@@ -19,7 +19,7 @@ class FakePensionRepository : PensionRepository {
     var pensionIdResult: List<PensionIdDN> = emptyList()
     var edictPensionerResult: EdictPensionerDN? = null
     var deferredInstallmentCertificateResult: DeferredInstallmentCertificateDN? = null
-    var payRollResult: PayRollDN? = null
+    var payRollResult: List<PayRollDN> = emptyList()
     var userAgeResult: AgeDN? = null
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
     var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
@@ -58,11 +58,11 @@ class FakePensionRepository : PensionRepository {
         emit(deferredInstallmentCertificateResult!!)
     }
 
-    override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<PayRollDN> = flow {
+    override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<List<PayRollDN>> = flow {
         if (shouldThrowError) {
             throw error!!
         }
-        emit(payRollResult!!)
+        emit(payRollResult)
     }
 
     override suspend fun getDisabilityPersonalInfo(): Flow<DisabilityPersonalInfoDN> = flow {

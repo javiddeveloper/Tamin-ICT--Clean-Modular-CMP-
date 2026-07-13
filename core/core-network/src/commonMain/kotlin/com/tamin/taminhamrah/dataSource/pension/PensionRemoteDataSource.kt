@@ -22,7 +22,7 @@ interface PensionRemoteDataSource {
     suspend fun sendRequestDeferredInstallmentCertificate(request: DeferredInstallmentRequest): DeferredInstallmentCertificateDTO
     suspend fun getPensionerPayRoll(
         filter: List<ApiFilterDN>
-    ): PayRollDTO
+    ): ListData<PayRollDTO>
 
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
 
