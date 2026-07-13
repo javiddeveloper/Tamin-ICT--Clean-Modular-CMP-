@@ -23,4 +23,18 @@
     <string name="btn_load_payroll">استعلام فیش حقوقی</string>
     <string name="error_empty_pensioner_id">شناسه مستمری‌بگیر یافت نشد</string>
     <string name="error_generic">خطا: %1$s</string>
+    <string name="edict_title">مشاهده حکم</string>
+    <string name="btn_load_edict">استعلام حکم</string>
+    <string name="edict_header">اطلاعات حکم مستمری</string>
+    <string name="edict_first_name">نام: %1$s</string>
+    <string name="edict_last_name">نام خانوادگی: %1$s</string>
+    <string name="edict_national_code">کد ملی: %1$s</string>
+    <string name="edict_father_name">نام پدر: %1$s</string>
+    <string name="edict_birth_date">تاریخ تولد: %1$s</string>
+    <string name="edict_branch">شعبه: %1$s</string>
+    <string name="edict_insurance_id">شماره بیمه: %1$s</string>
+    <string name="edict_pension_start_date">تاریخ شروع مستمری: %1$s</string>
+    <string name="edict_payable_monthly">مبلغ مستمری ماهانه: %1$s ریال</string>
+    <string name="edict_title_label">عنوان حکم: %1$s</string>
+    <string name="edict_year_month">سال حکم: %1$s ماه: %2$s</string>
 </resources>
