@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.PensionInquiryScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.calculatePension.CalculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.PrescriptionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.DeservedTreatmentScreen

@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.di
 
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.PensionInquiryViewModel
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.contract.PensionInquiryViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.calculatePension.CalculatePensionViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.PrescriptionViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.DeservedTreatmentViewModel
