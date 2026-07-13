@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.dataSource.pension
 import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
@@ -33,4 +34,5 @@ interface PensionRemoteDataSource {
     suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
 
     suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>) :ListData<RetirementRequestDTO>
+    suspend fun checkRetirementStatus(): RetirementStatusDTO
 }

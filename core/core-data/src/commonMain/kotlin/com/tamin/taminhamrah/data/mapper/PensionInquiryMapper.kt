@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
@@ -183,5 +184,12 @@ fun PayRollDTO.toDomain(): PayRollDN {
         hisYearPlus = hisYearPlus,
         hisMonPlus = hisMonPlus,
         hisDayPlus = hisDayPlus
+    )
+}
+
+fun RetirementStatusDTO.toDomain(): RetirementStatusDN {
+    return RetirementStatusDN(
+        requestId = requestId,
+        requestStatusCode = requestStatusCode
     )
 }

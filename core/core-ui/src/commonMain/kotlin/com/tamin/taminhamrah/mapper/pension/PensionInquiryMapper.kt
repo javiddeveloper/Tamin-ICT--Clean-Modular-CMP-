@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.common.RecipientDN
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
@@ -64,8 +65,8 @@ fun EdictPensionerDN.toPresentation(): EdictPensionerPR {
         branchName = branchName ?: "",
         insuranceId = insuranceId ?: "",
         title = title ?: "",
-        edictYear = edictYear,
-        edictMonth = edictMonth,
+        edictYear = edictYear ?:  "0",
+        edictMonth = edictMonth ?:  "0",
         edictInfo = edictInfo?.toPresentation(),
         survivorInfo = survivorInfo?.map { it.toPresentation() } ?: emptyList(),
         detail = detail?.map { it.toPresentation() } ?: emptyList()
@@ -215,5 +216,12 @@ fun PayRollDN.toPresentation(): PayRollPR {
         hisYearPlus = hisYearPlus ?: "",
         hisMonPlus = hisMonPlus ?: "",
         hisDayPlus = hisDayPlus ?: ""
+    )
+}
+
+fun RetirementStatusDN.toPresentation(): RetirementStatusPR {
+    return RetirementStatusPR(
+        requestId = requestId ?: "",
+        requestStatusCode = requestStatusCode ?: ""
     )
 }

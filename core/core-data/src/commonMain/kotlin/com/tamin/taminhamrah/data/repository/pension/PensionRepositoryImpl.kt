@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
@@ -67,5 +68,10 @@ class PensionRepositoryImpl(
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
         val remoteData = pensionRemoteDataSource.getRetirementRequestInfo(filters)
         emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
+    }
+
+    override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> = flow {
+        val remoteData = pensionRemoteDataSource.checkRetirementStatus()
+        emit(remoteData.toDomain())
     }
 }
