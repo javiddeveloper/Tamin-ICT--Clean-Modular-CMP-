@@ -46,4 +46,7 @@ interface PensionRemoteDataSource {
     suspend fun authenticationAndGetPersonalInfo(
         authenticationsCode: Long
     ): RetirementPersonalDTO
+    suspend fun sendEdictPensionerToMyInbox(
+        filter: List<ApiFilterDN>
+    ): String?
 }

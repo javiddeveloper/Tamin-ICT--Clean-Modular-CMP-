@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository.pension
 
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
@@ -32,6 +33,7 @@ class FakePensionRepository : PensionRepository {
     var authenticationAndGetPersonalInfoResult: RetirementPersonalDN? = null
     var sendRetirementDocumentResult: String? = null
     var authenticationTicketResult: AuthenticationTicketDN? = null
+    var sendEdictPensionerToMyInboxResult: EdictPensionerInboxDN = EdictPensionerInboxDN(null)
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -135,4 +137,11 @@ class FakePensionRepository : PensionRepository {
         emit(authenticationTicketResult!!)
     }
 
+    override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(sendEdictPensionerToMyInboxResult)
+        }
 }

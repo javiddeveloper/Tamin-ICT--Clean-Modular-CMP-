@@ -90,5 +90,9 @@ interface PensionApiService {
         @Path("requestId") requestId: String,
         @Body body: RetirementSaveDocumentRequest
     ): BaseDTO<String?>
+    @GET("hokm/announcement")
+    suspend fun sendEdictPensionerToMyInbox(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<String?>
 
 }

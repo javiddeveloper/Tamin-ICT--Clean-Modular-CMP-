@@ -108,6 +108,9 @@ object PensionTestData {
 
     val authenticationAndGetPersonalInfoSuccess: String
         get() = readResourceFile("mocks/pension/get_personal_info_success.json")
+
+    val sendEdictToInboxSuccess: String
+        get() = readResourceFile("mocks/pension/send_edict_to_inbox_success.json")
 }
 
 object WorkshopTestData {
