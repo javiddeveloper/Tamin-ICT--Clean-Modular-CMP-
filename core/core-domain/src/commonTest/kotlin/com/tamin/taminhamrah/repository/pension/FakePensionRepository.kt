@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.repository.pension
 
+import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
@@ -34,6 +35,7 @@ class FakePensionRepository : PensionRepository {
     var sendRetirementDocumentResult: String? = null
     var authenticationTicketResult: AuthenticationTicketDN? = null
     var sendEdictPensionerToMyInboxResult: EdictPensionerInboxDN = EdictPensionerInboxDN(null)
+    var inquirePensionCertificateResult: InquirePensionCertificateDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
 
@@ -143,5 +145,12 @@ class FakePensionRepository : PensionRepository {
                 throw error!!
             }
             emit(sendEdictPensionerToMyInboxResult)
+        }
+    override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(inquirePensionCertificateResult!!)
         }
 }

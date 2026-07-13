@@ -38,6 +38,7 @@ interface PensionRemoteDataSource {
     suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>) :ListData<RetirementRequestDTO>
     suspend fun checkRetirementStatus(): RetirementStatusDTO
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
+    suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) : String?
 
     suspend fun sendRetirementDocument(
         requestId: String,

@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
+import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
@@ -103,5 +104,11 @@ class PensionRepositoryImpl(
         flow {
             val remoteData = pensionRemoteDataSource.sendEdictPensionerToMyInbox(filters)
             emit(EdictPensionerInboxDN(message = remoteData))
+        }
+
+    override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
+        flow {
+            val remoteData = pensionRemoteDataSource.sendRequestInquirePensionCertificate(filters)
+            emit(remoteData.toInquirePensionCertificateDomain())
         }
 }

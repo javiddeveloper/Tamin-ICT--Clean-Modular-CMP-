@@ -248,3 +248,9 @@ fun RetirementDocumentPR.toDomain(): RetirementDocumentDN {
         guid = guid
     )
 }
+
+fun InquirePensionCertificateDN.toPresentation(): InquirePensionCertificatePR {
+    return InquirePensionCertificatePR(
+        message = message ?: ""
+    )
+}

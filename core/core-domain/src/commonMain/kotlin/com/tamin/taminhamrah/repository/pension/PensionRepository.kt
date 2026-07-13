@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.repository.pension
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
+import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
@@ -67,5 +68,9 @@ interface PensionRepository {
     suspend fun sendEdictPensionerToMyInbox(
         filters: List<ApiFilterDN>
     ): Flow<EdictPensionerInboxDN>
+
+    suspend fun sendRequestInquirePensionCertificate(
+        filters: List<ApiFilterDN>
+    ): Flow<InquirePensionCertificateDN>
 }
 

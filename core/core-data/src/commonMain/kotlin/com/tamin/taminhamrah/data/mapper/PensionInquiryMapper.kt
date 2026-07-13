@@ -218,3 +218,9 @@ fun RetirementDocumentDN.toDTO(): RetirementDocumentDTO {
         guid = guid
     )
 }
+
+fun String?.toInquirePensionCertificateDomain(): InquirePensionCertificateDN {
+    return InquirePensionCertificateDN(
+        message = this
+    )
+}

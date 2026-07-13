@@ -25,6 +25,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Streaming
 import io.ktor.client.statement.HttpStatement
+import kotlinx.serialization.json.JsonElement
 
 
 interface PensionApiService {
@@ -82,6 +83,11 @@ interface PensionApiService {
     @GET("pension-request/getTicket")
     suspend fun getAuthenticationCode(
     ): BaseDTO<AuthenticationTicketDTO>
+
+    @GET("pension-inquiry/announcement/")
+    suspend fun sendRequestInquirePensionCertificate(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<JsonElement?>
 
 
     @Headers("Content-Type: application/json")
