@@ -11,8 +11,13 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.transform
 
 class TreatmentViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -54,29 +59,20 @@ class TreatmentViewModel(
         emit(PartialState.MainUserNationalCodeLoaded(nationalCode))
         emit(PartialState.PatientSelected(nationalCode, "کاربر اصلی"))
 
-        var mainUserFullName = "کاربر اصلی"
-        // Load Deserved Status
-        try {
-            getDeservedTreatmentUseCase(nationalCode).collect { list ->
+        val deservedFlow: Flow<PartialState> = getDeservedTreatmentUseCase(nationalCode)
+            .transform { list ->
                 val presentationList = list.toPresentation()
-                presentationList.firstOrNull()?.let {
-                    mainUserFullName = it.fullName
-                }
+                val fullName = presentationList.firstOrNull()?.fullName ?: "کاربر اصلی"
                 emit(PartialState.DeservedLoaded(presentationList))
-                emit(PartialState.PatientSelected(nationalCode, mainUserFullName))
+                emit(PartialState.PatientSelected(nationalCode, fullName))
             }
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-        }
+            .catch { e -> emit(PartialState.Error(e.message)) }
 
-        // Load Dependants under 18 (supplementary; ignore failures)
-        try {
-            getDependantUnderEighteenUseCase(nationalCode).collect { list ->
-                emit(PartialState.DependantsLoaded(list.toPresentation()))
-            }
-        } catch (e: Exception) {
-            // Ignore dependant load failures; they are non-critical.
-        }
+        val dependantFlow: Flow<PartialState> = getDependantUnderEighteenUseCase(nationalCode)
+            .map { list -> PartialState.DependantsLoaded(list.toPresentation()) }
+            .catch { /* dependant load failures are non-critical */ }
+
+        emitAll(merge(deservedFlow, dependantFlow))
     }
 
     override fun reduceState(
