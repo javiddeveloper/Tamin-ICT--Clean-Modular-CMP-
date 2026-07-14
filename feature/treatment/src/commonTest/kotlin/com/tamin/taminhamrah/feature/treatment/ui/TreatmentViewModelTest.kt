@@ -78,6 +78,7 @@ class TreatmentViewModelTest {
 
             assertEquals(1, state.dependantList.size)
             assertEquals("9876543210", state.dependantList.first().nationalId)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -91,6 +92,7 @@ class TreatmentViewModelTest {
             val state = awaitItem()
             assertEquals("9876543210", state.selectedNationalCode)
             assertEquals("Child Name", state.selectedPatientName)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -107,6 +109,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("1234567890", state.mainUserNationalCode)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -124,6 +127,7 @@ class TreatmentViewModelTest {
             }
             assertNotNull(state.error)
             assertEquals(false, state.isLoading)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -144,6 +148,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("اطلاعات کاربری یافت نشد.", state.error)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }
