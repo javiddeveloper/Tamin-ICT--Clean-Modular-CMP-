@@ -1,9 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,14 +19,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -68,9 +62,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Treatment dashboard shell: patient selection + flow menu. The individual sub-flows
- * (prescriptions, medical commissions, costs, health profile) are implemented on their
- * own branches and plug into the [TreatmentFlow] menu items below.
+ * Treatment dashboard shell showing patient selection and treatment entitlement details.
  */
 @Composable
 fun TreatmentScreen(
@@ -195,18 +187,9 @@ fun TreatmentScreenContent(
                         .fillMaxSize()
                         .weight(1f)
                 ) {
-                    when (state.activeFlow) {
-                        TreatmentFlow.MAIN -> {
-                            DashboardMenuSection(
-                                activePatientName = state.selectedPatientName ?: "بیمه‌شده اصلی",
-                                onFlowSelected = { flow ->
-                                    onIntent(TreatmentIntent.SwitchFlow(flow))
-                                }
-                            )
-                        }
-                        // Sub-flow content is provided by the per-sub-feature branches.
-                        else -> {}
-                    }
+                    DashboardMenuSection(
+                        activePatientName = state.selectedPatientName ?: "بیمه‌شده اصلی"
+                    )
                 }
             }
         }
@@ -486,8 +469,7 @@ fun TreatmentCardItem(
 
 @Composable
 fun DashboardMenuSection(
-    activePatientName: String,
-    onFlowSelected: (TreatmentFlow) -> Unit
+    activePatientName: String
 ) {
     Column(
         modifier = Modifier
@@ -517,100 +499,6 @@ fun DashboardMenuSection(
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(Spacing.xs))
-
-        DashboardMenuItem(
-            title = "نسخه‌های الکترونیک",
-            desc = "لیست، جزئیات و استعلام قیمت نسخ پزشکان",
-            icon = Icons.AutoMirrored.Filled.List,
-            onClick = { onFlowSelected(TreatmentFlow.PRESCRIPTIONS) }
-        )
-
-        DashboardMenuItem(
-            title = "کمیسیون‌های پزشکی",
-            desc = "تاییدات استراحت پزشکی و تصمیمات شوراها",
-            icon = Icons.Default.CheckCircle,
-            onClick = { onFlowSelected(TreatmentFlow.CONFIRMATIONS) }
-        )
-
-        DashboardMenuItem(
-            title = "هزینه‌های درمان",
-            desc = "مشاهده هزینه‌های خسارت متفرقه درمان و بیمه",
-            icon = Icons.Default.ShoppingCart,
-            onClick = { onFlowSelected(TreatmentFlow.COSTS) }
-        )
-
-        DashboardMenuItem(
-            title = "سلامت من",
-            desc = "پرونده سلامت، خوداظهاری و حساسیت‌های دارویی",
-            icon = Icons.Default.Person,
-            onClick = { onFlowSelected(TreatmentFlow.HEALTH_PROFILE) }
-        )
-    }
-}
-
-@Composable
-fun DashboardMenuItem(
-    title: String,
-    desc: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(CornerRadius.sm),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(Spacing.md))
-                Column {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = desc,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline
-            )
         }
     }
 }

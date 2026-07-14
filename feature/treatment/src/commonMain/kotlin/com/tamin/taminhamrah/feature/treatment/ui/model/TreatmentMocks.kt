@@ -53,7 +53,6 @@ object TreatmentMocks {
         ),
         mainUserNationalCode = "1234567890",
         selectedNationalCode = "1234567890",
-        selectedPatientName = "رضا احمدی",
-        activeFlow = TreatmentFlow.MAIN
+        selectedPatientName = "رضا احمدی"
     )
 }

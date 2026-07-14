@@ -5,7 +5,6 @@ import com.tamin.taminhamrah.feature.treatment.fake.FakeCityProvinceRepository
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTokenStoreManager
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
-import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentFlow
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
@@ -63,7 +62,6 @@ class TreatmentViewModelTest {
     fun testInitTreatmentFlow_loadsDeservedAndDependants() = runTest(testDispatcher) {
         viewModel.uiState.test {
             val initialState = awaitItem()
-            assertEquals(TreatmentFlow.MAIN, initialState.activeFlow)
             assertEquals(null, initialState.selectedNationalCode)
 
             viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
@@ -93,18 +91,6 @@ class TreatmentViewModelTest {
             val state = awaitItem()
             assertEquals("9876543210", state.selectedNationalCode)
             assertEquals("Child Name", state.selectedPatientName)
-        }
-    }
-
-    @Test
-    fun testSwitchFlow_updatesActiveFlowState() = runTest(testDispatcher) {
-        viewModel.uiState.test {
-            awaitItem() // initial state
-
-            viewModel.sendIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.HEALTH_PROFILE))
-
-            val state = awaitItem()
-            assertEquals(TreatmentFlow.HEALTH_PROFILE, state.activeFlow)
         }
     }
 

@@ -27,7 +27,6 @@ class TreatmentViewModel(
         return when (intent) {
             is TreatmentIntent.InitTreatmentFlow -> initTreatmentFlow()
             is TreatmentIntent.SelectPatient -> flow { emit(PartialState.PatientSelected(intent.nationalCode, intent.fullName)) }
-            is TreatmentIntent.SwitchFlow -> flow { emit(PartialState.FlowSwitched(intent.flow)) }
         }
     }
 
@@ -90,11 +89,6 @@ class TreatmentViewModel(
         is PartialState.DeservedLoaded -> currentState.copy(isLoading = false, deservedList = partialState.list)
         is PartialState.DependantsLoaded -> currentState.copy(isLoading = false, dependantList = partialState.list)
 
-        // Navigation and sub-flow switches
-        is PartialState.FlowSwitched -> currentState.copy(
-            activeFlow = partialState.flow,
-            error = null
-        )
         is PartialState.PatientSelected -> currentState.copy(
             selectedNationalCode = partialState.nationalCode,
             selectedPatientName = partialState.fullName,
