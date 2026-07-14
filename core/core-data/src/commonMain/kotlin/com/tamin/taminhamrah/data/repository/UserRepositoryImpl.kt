@@ -18,6 +18,8 @@ import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.repository.UserRepository
+import com.tamin.taminhamrah.model.user.UserProfileDN
+import com.tamin.taminhamrah.data.mapper.user.toDomain
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -116,4 +118,9 @@ internal class UserRepositoryImpl(
         emit(electronicFileList ?: emptyList())
     }
 
+    override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
+        val result = userRemoteDataSource.getUserProfile()
+        Logger.d("getUserProfile", result.toString())
+        emit(result!!.toDomain())
+    }
 }
