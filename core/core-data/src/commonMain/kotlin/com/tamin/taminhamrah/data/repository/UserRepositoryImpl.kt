@@ -120,7 +120,6 @@ internal class UserRepositoryImpl(
 
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
         val result = userRemoteDataSource.getUserProfile()
-        Logger.d("getUserProfile", result.toString())
         emit(result!!.toDomain())
     }
 }

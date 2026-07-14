@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.feature.treatment.ui.contract
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 
+@Immutable
 data class TreatmentUiState(
     val isLoading: Boolean = false,
     val error: String? = null,

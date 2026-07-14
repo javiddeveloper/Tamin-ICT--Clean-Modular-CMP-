@@ -57,8 +57,10 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -68,22 +70,36 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel()
 ) {
-    TreatmentScreenContent(
-        state = viewModel.uiState.collectAsState().value,
-        onIntent = { viewModel.sendIntent(it) }
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Auto-fetch data on composition entry
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+    }
+
+    HandleTreatmentEvents(events = viewModel.events)
+
+    TreatmentContent(
+        state = uiState,
+        onIntent = viewModel::sendIntent
     )
 }
 
 @Composable
-fun TreatmentScreenContent(
+fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
+    events.collectWithLifecycleAware {
+        when (it) {
+            is TreatmentEvent.ShowMessage -> Unit // TODO: surface via snackbar/toast
+        }
+    }
+}
+
+@Composable
+fun TreatmentContent(
+    modifier: Modifier = Modifier,
     state: TreatmentUiState,
     onIntent: (TreatmentIntent) -> Unit
 ) {
-    // Auto-fetch data on composition entry
-    LaunchedEffect(Unit) {
-        onIntent(TreatmentIntent.InitTreatmentFlow)
-    }
-
     // Resolve patient list dynamically
     val patients = remember(state.deservedList, state.dependantList, state.mainUserNationalCode) {
         val list = mutableListOf<PatientItem>()
@@ -136,6 +152,7 @@ fun TreatmentScreenContent(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -213,7 +230,7 @@ fun TreatmentScreenContent(
 @Composable
 fun TreatmentScreenPreview() {
     PreviewRtlThemeContent {
-        TreatmentScreenContent(
+        TreatmentContent(
             state = TreatmentMocks.mainUiState,
             onIntent = {}
         )
