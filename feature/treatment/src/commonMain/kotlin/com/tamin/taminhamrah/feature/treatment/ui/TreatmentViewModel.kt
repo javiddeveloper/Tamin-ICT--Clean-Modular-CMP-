@@ -5,8 +5,8 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState.PartialState
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
-import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
 
 class TreatmentViewModel(
-    private val tokenStoreManager: TokenStoreManager,
     private val getDeservedTreatmentUseCase: GetDeservedTreatmentUseCase,
     private val getDependantUnderEighteenUseCase: GetDependantUnderEighteenUseCase,
     private val identityInfoUseCase: IdentityInfoUseCase
@@ -38,17 +37,11 @@ class TreatmentViewModel(
     private fun initTreatmentFlow(): Flow<PartialState> = flow {
         emit(PartialState.Reset)
         emit(PartialState.Loading(true))
-        var nationalCode = tokenStoreManager.getUserId() ?: ""
-        if (nationalCode.isEmpty()) {
-            try {
-                val identity = identityInfoUseCase().first()
-                nationalCode = identity.nationalId ?: ""
-                if (nationalCode.isNotEmpty()) {
-                    tokenStoreManager.saveUserId(nationalCode)
-                }
-            } catch (e: Exception) {
-                // Ignore and proceed
-            }
+
+        val nationalCode = try {
+            identityInfoUseCase().first().nationalId ?: ""
+        } catch (e: Exception) {
+            ""
         }
 
         if (nationalCode.isEmpty()) {
@@ -70,7 +63,15 @@ class TreatmentViewModel(
 
         val dependantFlow: Flow<PartialState> = getDependantUnderEighteenUseCase(nationalCode)
             .map { list -> PartialState.DependantsLoaded(list.toPresentation()) }
-            .catch { /* dependant load failures are non-critical */ }
+            .catch { e ->
+                sendEvent(
+                    TreatmentEvent.ShowMessage(
+                        e.message ?: "خطا در دریافت لیست همراهان زیر ۱۸ سال",
+                        TreatmentMessageType.OPERATION_FAILED
+                    )
+                )
+                emit(PartialState.DependantsLoaded(emptyList()))
+            }
 
         emitAll(merge(deservedFlow, dependantFlow))
     }

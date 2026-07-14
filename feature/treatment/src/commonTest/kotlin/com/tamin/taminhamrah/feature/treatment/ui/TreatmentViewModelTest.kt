@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.treatment.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.treatment.fake.FakeCityProvinceRepository
-import com.tamin.taminhamrah.feature.treatment.fake.FakeTokenStoreManager
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
@@ -32,7 +31,6 @@ class TreatmentViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var tokenStoreManager: FakeTokenStoreManager
     private lateinit var repository: FakeTreatmentRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var viewModel: TreatmentViewModel
@@ -40,7 +38,6 @@ class TreatmentViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        tokenStoreManager = FakeTokenStoreManager()
         repository = FakeTreatmentRepository()
         userRepository = FakeUserRepository()
         viewModel = buildViewModel()
@@ -52,7 +49,6 @@ class TreatmentViewModelTest {
     }
 
     private fun buildViewModel() = TreatmentViewModel(
-        tokenStoreManager = tokenStoreManager,
         getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
         getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
         identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository())
@@ -133,7 +129,6 @@ class TreatmentViewModelTest {
 
     @Test
     fun testInitTreatmentFlow_whenNoUserIdAndNoIdentity_emitsUserNotFoundError() = runTest(testDispatcher) {
-        tokenStoreManager = FakeTokenStoreManager(storedUserId = null)
         userRepository = FakeUserRepository().apply {
             identityResult = identityResult.copy(nationalId = null)
         }
