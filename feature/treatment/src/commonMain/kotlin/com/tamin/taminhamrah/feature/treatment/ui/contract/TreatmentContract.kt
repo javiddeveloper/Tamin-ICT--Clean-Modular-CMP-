@@ -5,7 +5,7 @@ import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 
 enum class TreatmentFlow {
-    MAIN, PRESCRIPTIONS, CONFIRMATIONS, COSTS, HEALTH_PROFILE
+    MAIN, PRESCRIPTIONS, CONFIRMATIONS, COSTS, HEALTH_PROFILE, CENTERS
 }
 
 @Immutable
@@ -19,6 +19,12 @@ data class TreatmentUiState(
     // Navigation and dynamic flows state
     val activeFlow: TreatmentFlow = TreatmentFlow.MAIN,
     val mainUserNationalCode: String? = null,
+
+    /**
+     * Whether the health profile (خوداظهاری) has been filled in: null while unknown, so the hub
+     * shows no completion badge until the health sub-flow reports it.
+     */
+    val isHealthProfileCompleted: Boolean? = null,
     val selectedNationalCode: String? = null,
     val selectedPatientName: String? = null
 ) {
@@ -34,6 +40,7 @@ data class TreatmentUiState(
         data class FlowSwitched(val flow: TreatmentFlow) : PartialState()
         data class MainUserNationalCodeLoaded(val nationalCode: String) : PartialState()
         data class PatientSelected(val nationalCode: String, val fullName: String) : PartialState()
+        data class HealthProfileStatusLoaded(val isCompleted: Boolean) : PartialState()
     }
 }
 
