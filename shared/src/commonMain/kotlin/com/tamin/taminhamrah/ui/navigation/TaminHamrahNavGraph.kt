@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.draw.alpha
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
@@ -46,9 +47,12 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceCo
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -66,7 +70,7 @@ internal fun TaminHamrahNavGraph(
     val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
-
+    val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(
         bottomBar = {
             androidx.compose.animation.AnimatedVisibility(
@@ -80,7 +84,7 @@ internal fun TaminHamrahNavGraph(
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
                 )
             ) {
-                NavigationBar {
+                FloatingGlassNavigationBar(hazeState = hazeState) {
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Home, null) },
                         label = { Text("Home") },
@@ -93,7 +97,14 @@ internal fun TaminHamrahNavGraph(
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF1E3A8A), // Dark blue
+                            selectedTextColor = Color(0xFF1E3A8A),
+                            indicatorColor = Color(0xFFE2E8F0).copy(alpha = 0.7f), // The pill behind the selected icon
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray
+                        )
                     )
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Person, null) },
@@ -107,7 +118,14 @@ internal fun TaminHamrahNavGraph(
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF1E3A8A), // Dark blue
+                            selectedTextColor = Color(0xFF1E3A8A),
+                            indicatorColor = Color(0xFFE2E8F0).copy(alpha = 0.7f), // The pill behind the selected icon
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray
+                        )
                     )
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Inbox, null) },
@@ -121,13 +139,25 @@ internal fun TaminHamrahNavGraph(
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF1E3A8A), // Dark blue
+                            selectedTextColor = Color(0xFF1E3A8A),
+                            indicatorColor = Color(0xFFE2E8F0).copy(alpha = 0.95f), // The pill behind the selected icon
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray
+                        )
                     )
                 }
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+                .hazeSource(state = hazeState)
+        ) {
             NavHost(
                 navController = navController,
                 startDestination = Route.Home
