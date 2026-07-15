@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class GetRegistrationDeclarationFormUseCase(
     private val repository: CommonRepository
 ) {
-    operator fun invoke(): Flow<HttpStatement> {
+    operator fun invoke(): Flow<ByteArray> {
         return repository.getRegistrationDeclarationForm()
     }
 }

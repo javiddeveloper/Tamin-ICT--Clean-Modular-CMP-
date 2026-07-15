@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import io.ktor.client.statement.HttpStatement
+import io.ktor.client.statement.readBytes
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -48,9 +49,11 @@ class CommonRepositoryImpl(
             }
         }
 
-    override fun getRegistrationDeclarationForm(): Flow<HttpStatement> = flow {
+    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
         try {
-            emit(commonRemoteDataSource.getRegistrationDeclarationForm())
+            val statement = commonRemoteDataSource.getRegistrationDeclarationForm()
+            val bytes = statement.execute { response -> response.readBytes() }
+            emit(bytes)
         } catch (e: Exception) {
             throw e
         }

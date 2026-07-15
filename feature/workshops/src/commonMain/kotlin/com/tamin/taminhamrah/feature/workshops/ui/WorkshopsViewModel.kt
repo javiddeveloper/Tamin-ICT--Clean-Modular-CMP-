@@ -40,10 +40,10 @@ class WorkshopsViewModel(
     private fun handleTestDownloadPdf(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            val statement = getRegistrationDeclarationFormUseCase().first()
-            statement.execute { response ->
-                sendEvent(WorkshopsEvent.ShowToast("Statement status: ${response.status}"))
+            getRegistrationDeclarationFormUseCase().collect { response ->
+                sendEvent(WorkshopsEvent.ShowToast(" ${response.size}"))
             }
+
             emit(PartialState.Loading(false))
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
