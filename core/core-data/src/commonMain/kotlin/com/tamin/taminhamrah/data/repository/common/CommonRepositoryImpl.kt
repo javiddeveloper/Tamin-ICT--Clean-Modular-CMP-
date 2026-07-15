@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import io.ktor.client.statement.HttpStatement
 import io.ktor.client.statement.readBytes
+import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -52,7 +53,7 @@ class CommonRepositoryImpl(
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
         try {
             val statement = commonRemoteDataSource.getRegistrationDeclarationForm()
-            val bytes = statement.execute { response -> response.readBytes() }
+            val bytes = statement.execute { response -> response.readRawBytes() }
             emit(bytes)
         } catch (e: Exception) {
             throw e
