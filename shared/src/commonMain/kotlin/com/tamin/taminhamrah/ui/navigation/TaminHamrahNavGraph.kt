@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
+import com.tamin.taminhamrah.feature.contracts.ContractsRoute
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
@@ -39,6 +40,7 @@ import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.studentInsuranceContract.StudentInsuranceContractRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
@@ -51,12 +53,18 @@ import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
 import com.tamin.taminhamrah.feature.treatment.treatmentScreen
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
+import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
+import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import org.jetbrains.compose.resources.FontResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -71,10 +79,73 @@ internal fun TaminHamrahNavGraph(
 
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
-    val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
-            currentDestination?.hasRoute<TreatmentRoute>() == true ||
-            currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
-            currentDestination?.hasRoute<CartableRoute.Main>() == true
+    val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
+    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute>() == true
+    val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
+    val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
+
+    val navItemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = Color.Transparent,
+        selectedTextColor = Color.Transparent,
+        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        unselectedIconColor = Color.Transparent,
+        unselectedTextColor = Color.Transparent
+    )
+
+
+    val navigationItems = listOf(
+        NavigationTab(
+            title = "خانه",
+            isSelected = isHomeSelected,
+            icon = Icons.Default.Home,
+            onClick = {
+                navController.navigate(Route.Home) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+        NavigationTab(
+            title = "خدمات",
+            isSelected = isCartableSelected,
+            icon = Icons.Default.Apps,
+            onClick = {
+                navController.navigate(CartableRoute.Main) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+        NavigationTab(
+            title = "درمان",
+            isSelected = isTreatmentSelected,
+            icon = Icons.Default.Favorite,
+            onClick = {
+                navController.navigate(TreatmentRoute) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+        NavigationTab(
+            title = "پروفایل",
+            isSelected = isProfileSelected,
+            icon = Icons.Default.Person,
+            onClick = {
+                navController.navigate(ProfileRoute.Main()) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+    )
+
+    val isBottomBarVisible =
+        isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(
         bottomBar = {
@@ -90,83 +161,102 @@ internal fun TaminHamrahNavGraph(
                 )
             ) {
                 FloatingGlassNavigationBar(hazeState = hazeState) {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, null) },
-                        label = { Text("Home") },
-                        selected = currentDestination?.hasRoute<Route.Home>() == true,
-                        onClick = {
-                            navController.navigate(Route.Home) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Favorite, null) },
-                        label = { Text("Treatment") },
-                        selected = currentDestination?.hasRoute<TreatmentRoute>() == true,
-                        onClick = {
-                            navController.navigateToTreatment {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF1E3A8A), // Dark blue
-                            selectedTextColor = Color(0xFF1E3A8A),
-                            indicatorColor = Color(0xFFE2E8F0).copy(alpha = 0.7f), // The pill behind the selected icon
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
+
+                    navigationItems.forEach { navigationItem ->
+                        val contentColor =
+                            if (navigationItem.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                        NavigationBarItem(
+                            icon = {
+                                NavigationBarItemContent(
+                                    icon = { Icon(navigationItem.icon, null, tint = contentColor) },
+                                    label = { Text(navigationItem.title, color = contentColor ) },
+                                    modifier = Modifier,
+                                    )
+                            },
+                            selected = navigationItem.isSelected,
+                            onClick = navigationItem.onClick,
+                            colors = navItemColors,
+                            modifier = Modifier,
+
+
                         )
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Person, null) },
-                        label = { Text("Profile") },
-                        selected = currentDestination?.hasRoute<ProfileRoute.Main>() == true,
-                        onClick = {
-                            navController.navigate(ProfileRoute.Main(userId = "TaminUser")) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF1E3A8A), // Dark blue
-                            selectedTextColor = Color(0xFF1E3A8A),
-                            indicatorColor = Color(0xFFE2E8F0).copy(alpha = 0.7f), // The pill behind the selected icon
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
-                        )
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Inbox, null) },
-                        label = { Text("Cartable") },
-                        selected = currentDestination?.hasRoute<CartableRoute.Main>() == true,
-                        onClick = {
-                            navController.navigateToCartable {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF1E3A8A), // Dark blue
-                            selectedTextColor = Color(0xFF1E3A8A),
-                            indicatorColor = Color(0xFFE2E8F0).copy(alpha = 0.95f), // The pill behind the selected icon
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
-                        )
-                    )
+                    }
+
+//                    // Item 1: Home ("خانه") - Far right in RTL
+//                    NavigationBarItem(
+//                        icon = {
+//                            NavigationBarItemContent(
+//                                icon = { Icon(Icons.Default.Home, null) },
+//                                label = { Text("خانه") },
+//                                radius = 24,
+//                                modifier = Modifier,
+//                                container =
+//                            )
+//                        },
+//                        selected = isHomeSelected,
+//                        onClick = {
+//                            navController.navigate(Route.Home) {
+//                                popUpTo(navController.graph.findStartDestination().id) {
+//                                    saveState = true
+//                                }
+//                                launchSingleTop = true
+//                                restoreState = true
+//                            }
+//                        },
+//                        colors = navItemColors
+//                    )
+//
+//                    // Item 2: Services ("خدمات") - Middle-right in RTL
+//                    NavigationBarItem(
+//                        icon = { Icon(Icons.Default.Apps, null) },
+//                        label = { Text("خدمات") },
+//                        selected = isCartableSelected,
+//                        onClick = {
+//                            navController.navigateToCartable {
+//                                popUpTo(navController.graph.findStartDestination().id) {
+//                                    saveState = true
+//                                }
+//                                launchSingleTop = true
+//                                restoreState = true
+//                            }
+//                        },
+//                        colors = navItemColors
+//                    )
+//
+//                    // Item 3: Treatment ("درمان") - Middle-left in RTL
+//                    NavigationBarItem(
+//                        icon = { Icon(Icons.Default.Favorite, null) },
+//                        label = { Text("درمان") },
+//                        selected = isTreatmentSelected,
+//                        onClick = {
+//                            navController.navigateToTreatment {
+//                                popUpTo(navController.graph.findStartDestination().id) {
+//                                    saveState = true
+//                                }
+//                                launchSingleTop = true
+//                                restoreState = true
+//                            }
+//                        },
+//                        colors = navItemColors,
+//
+//                        )
+//
+//                    // Item 4: Profile ("پروفایل") - Far left in RTL
+//                    NavigationBarItem(
+//                        icon = { Icon(Icons.Default.Person, null) },
+//                        label = { Text("پروفایل") },
+//                        selected = isProfileSelected,
+//                        onClick = {
+//                            navController.navigate(ProfileRoute.Main(userId = "TaminUser")) {
+//                                popUpTo(navController.graph.findStartDestination().id) {
+//                                    saveState = true
+//                                }
+//                                launchSingleTop = true
+//                                restoreState = true
+//                            }
+//                        },
+//                        colors = navItemColors
+//                    )
                 }
             }
         }
@@ -243,7 +333,7 @@ internal fun TaminHamrahNavGraph(
                             FeatureFlag.FREELANCE_INSURANCE -> navController.navigateToFreelanceInsuranceContract()
                             FeatureFlag.OPTIONAL_INSURANCE -> navController.navigateToOptionalInsuranceContract()
                             FeatureFlag.HOUSEWIFE_INSURANCE -> navController.navigateToHousewifeInsuranceContract()
-                            else -> { }
+                            else -> {}
                         }
                     },
                     onOpenUrl = { url -> openUrl(url) }
@@ -354,7 +444,8 @@ fun HomeScreen(
                     3 to "کارفرمایان"
                 )
                 val availableTypes = remember(uiState.menuItems) {
-                    val typesInData = uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
+                    val typesInData =
+                        uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
                     userTypes.filter { it.first in typesInData }.ifEmpty { userTypes }
                 }
                 var selectedType by remember(availableTypes) {
@@ -362,18 +453,24 @@ fun HomeScreen(
                 }
                 var expanded by remember { mutableStateOf(false) }
 
-                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)
+                ) {
                     OutlinedButton(
                         onClick = { expanded = true },
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.small
                     ) {
                         Text(
-                            text = availableTypes.find { it.first == selectedType }?.second ?: "انتخاب گروه",
+                            text = availableTypes.find { it.first == selectedType }?.second
+                                ?: "انتخاب گروه",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(Modifier.weight(1f))
-                        Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, contentDescription = null)
+                        Icon(
+                            androidx.compose.material.icons.Icons.Default.ArrowDropDown,
+                            contentDescription = null
+                        )
                     }
 
                     DropdownMenu(
@@ -399,8 +496,8 @@ fun HomeScreen(
 
                 servicesToShow.forEach { service ->
                     val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-                                     service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-                                     service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+                        service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+                        service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
                     val cardAlpha = if (isDisabled) 0.5f else 1.0f
 
@@ -458,16 +555,21 @@ fun HomeScreen(
 
                             // Show message if present and service is not just ACTIVE
                             if (!service.message.isNullOrEmpty() && service.status != com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ACTIVE) {
-                                val msgColor = if (service.status == com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ENABLED_WITH_ERROR)
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                val msgColor =
+                                    if (service.status == com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ENABLED_WITH_ERROR)
+                                        MaterialTheme.colorScheme.error
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
 
                                 Text(
                                     text = service.message!!,
                                     style = MaterialTheme.typography.labelMedium,
                                     color = msgColor,
-                                    modifier = Modifier.padding(start = 72.dp, end = 16.dp, bottom = 12.dp)
+                                    modifier = Modifier.padding(
+                                        start = 72.dp,
+                                        end = 16.dp,
+                                        bottom = 12.dp
+                                    )
                                 )
                             }
                         }

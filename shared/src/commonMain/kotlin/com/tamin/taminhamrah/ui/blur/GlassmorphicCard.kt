@@ -41,8 +41,11 @@ fun FloatingGlassNavigationBar(
             .hazeEffect(
                 state = hazeState,
                 style = HazeStyle(
-                    noiseFactor = 0.1f,
-                    tint = HazeTint(color = Color.Transparent ,  blendMode = BlendMode.Luminosity), // The "frost" color
+                    noiseFactor = 0.02f,
+                    tint = HazeTint(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
+                        blendMode = BlendMode.SrcOver
+                    ),
                     blurRadius = 24.dp // How heavy the blur is
                 )
             )
