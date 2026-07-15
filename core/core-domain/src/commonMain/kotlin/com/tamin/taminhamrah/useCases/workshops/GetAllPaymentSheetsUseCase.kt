@@ -8,7 +8,7 @@ class GetAllPaymentSheetsUseCase(
     private val repository: WorkShopsRepository
 ) {
     suspend operator fun invoke(
-        filters: List<ApiFilterDN> = emptyList()
+        filters: List<ApiFilterDN>
     ): PaymentSheetListDN? {
         return repository.getPaymentSheets(
             filters = filters

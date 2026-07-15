@@ -32,9 +32,9 @@ interface UserRepository {
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ActiveRelationDN>>
 
-    suspend fun getElectronicFile(
+    fun getElectronicFile(
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ElectronicFileDN>>
 
-    suspend fun checkUserIsNew(nationalId: String): Boolean
+    fun checkUserIsNew(nationalId: String): Flow<Boolean>
 }

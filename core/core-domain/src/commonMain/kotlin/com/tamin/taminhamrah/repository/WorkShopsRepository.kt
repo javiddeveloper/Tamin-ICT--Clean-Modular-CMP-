@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
+import kotlinx.coroutines.flow.Flow
 
 interface WorkShopsRepository {
     suspend fun getAllEmployerAgreementByNationalId(
@@ -31,27 +32,27 @@ interface WorkShopsRepository {
         branchCode: String
     ): WorkshopDebtInquiryDN?
 
-    suspend fun getWorkshopObjectionableDebitList(
+    fun getWorkshopObjectionableDebitList(
         workshopNumber: String,
         branchCode: String,
         filters: List<ApiFilterDN> = emptyList()
-    ): WorkShopDebtListDN?
+    ): Flow<WorkShopDebtListDN?>
 
-    suspend fun getWorkshopRecentlyAddedMembers(
+    fun getWorkshopRecentlyAddedMembers(
         filters: List<ApiFilterDN> = emptyList()
-    ): WorkshopNewMemberListDN?
+    ): Flow<WorkshopNewMemberListDN?>
 
-    suspend fun getWorkshopsDebtsList(
+    fun getWorkshopsDebtsList(
         workshopId: String,
         branchId: String,
         filters: List<ApiFilterDN> = emptyList()
-    ): WorkshopsDebtListDN?
+    ): Flow<WorkshopsDebtListDN?>
 
-    suspend fun getWorkshopMembers(
+    fun getWorkshopMembers(
         filters: List<ApiFilterDN> = emptyList()
-    ): WorkshopMemberListDN?
+    ): Flow<WorkshopMemberListDN?>
 
-    suspend fun getWorkshopStackHolders(
+    fun getWorkshopStackHolders(
         filters: List<ApiFilterDN> = emptyList()
-    ): WorkshopStackHolderListDN?
+    ): Flow<WorkshopStackHolderListDN?>
 }

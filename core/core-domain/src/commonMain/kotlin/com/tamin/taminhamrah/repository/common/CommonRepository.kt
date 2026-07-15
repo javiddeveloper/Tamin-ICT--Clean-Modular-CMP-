@@ -12,6 +12,6 @@ import io.ktor.client.statement.HttpStatement
 interface CommonRepository {
     fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>>
     fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>>
-    suspend fun getRegistrationDeclarationForm(): HttpStatement
-    suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN?
+    fun getRegistrationDeclarationForm(): Flow<HttpStatement>
+    fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?>
 }

@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 class ManagementDebitViewModel(
@@ -15,7 +16,7 @@ class ManagementDebitViewModel(
         is ManagementDebitIntent.Load -> flow {
             emit(ManagementDebitUiState.PartialState.Loading(true))
             try {
-                val res = useCase(intent.workshopId, intent.branchCode, emptyList())
+                val res = useCase(intent.workshopId, intent.branchCode, emptyList()).first()
                 emit(ManagementDebitUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
             } catch (e: Exception) {
                 emit(ManagementDebitUiState.PartialState.Error(e.message))

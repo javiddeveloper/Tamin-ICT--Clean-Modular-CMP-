@@ -8,7 +8,7 @@ class GetAllEmployerAgreementByNationalIdUseCase(
     private val repository: WorkShopsRepository
 ) {
     suspend operator fun invoke(
-        filters: List<ApiFilterDN> = emptyList()
+        filters: List<ApiFilterDN>
     ): EmployerAgreementListDN? {
         return repository.getAllEmployerAgreementByNationalId(
             filters = filters

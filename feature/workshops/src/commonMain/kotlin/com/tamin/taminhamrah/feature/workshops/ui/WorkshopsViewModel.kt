@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 class WorkshopsViewModel(
@@ -39,14 +40,12 @@ class WorkshopsViewModel(
     private fun handleTestDownloadPdf(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            val statement = getRegistrationDeclarationFormUseCase()
+            val statement = getRegistrationDeclarationFormUseCase().first()
             statement.execute { response ->
-                println("TEST API RESPONSE: Received HttpStatement with status ${response.status}")
                 sendEvent(WorkshopsEvent.ShowToast("Statement status: ${response.status}"))
             }
             emit(PartialState.Loading(false))
         } catch (e: Exception) {
-            println("TEST API ERROR: ${e.message}")
             emit(PartialState.Error(e.message))
         }
     }

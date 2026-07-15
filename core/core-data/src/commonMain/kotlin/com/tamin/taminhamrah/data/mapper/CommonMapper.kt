@@ -5,7 +5,9 @@ import com.tamin.taminhamrah.model.common.JobTitleDTO
 
 fun JobTitleDTO.toDomain(): JobTitleDN {
     return JobTitleDN(
-        jobCode = jobCode, jobDescription = jobDescription, 
-        status = status, statusDate = statusDate
+        jobCode = jobCode ?: "",
+        jobDescription = jobDescription ?: "",
+        status = status ?: "",
+        statusDate = statusDate ?: ""
     )
 }

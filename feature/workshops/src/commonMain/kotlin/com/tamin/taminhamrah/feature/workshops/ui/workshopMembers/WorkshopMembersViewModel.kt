@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 class WorkshopMembersViewModel(
@@ -22,7 +23,7 @@ class WorkshopMembersViewModel(
                     ApiFilterDN(FilterProperty.WORKSHOP_ID, intent.workshopId, FilterOperator.EQ),
                     ApiFilterDN(FilterProperty.WORKSHOP_BRANCH_CODE, intent.branchCode, FilterOperator.EQ)
                 )
-                val res = useCase(filters)
+                val res = useCase(filters).first()
                 emit(WorkshopMembersUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
             } catch (e: Exception) {
                 emit(WorkshopMembersUiState.PartialState.Error(e.message))

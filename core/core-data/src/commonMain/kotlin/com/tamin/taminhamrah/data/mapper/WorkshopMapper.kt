@@ -138,80 +138,80 @@ fun WorkshopDebtInquiryDTO.toDomain(): WorkshopDebtInquiryDN {
 
 fun WorkShopDebtDTO.toDomain(): WorkShopDebtDN {
     return WorkShopDebtDN(
-        rowNum = rowNum,
-        debitNumber = debitNumber,
-        orderRecipeDate = orderRecipeDate,
-        mastCustomerCode = mastCustomerCode,
-        debitAmount = debitAmount,
-        debitRemain = debitRemain,
-        debitStartDate = debitStartDate,
-        debitEndDate = debitEndDate,
-        mastCustomerTypeCode = mastCustomerTypeCode,
-        peymanSequence = peymanSequence,
-        debitCreateReasonCode = debitCreateReasonCode,
-        debitCreateReasonDesc = debitCreateReasonDesc,
-        debitNumberInstallment = debitNumberInstallment,
-        mande = mande,
-        bimehAmount = bimehAmount,
-        bikariAmount = bikariAmount,
-        sayerAmount = sayerAmount,
-        debitStepCode = debitStepCode,
-        debitStepDesc = debitStepDesc,
-        debitStatDesc = debitStatDesc,
-        debitStatCode = debitStatCode,
-        stepCat = stepCat,
-        docDateEblaghEjra = docDateEblaghEjra,
-        badviNo = badviNo,
-        badviDate = badviDate,
-        calculateDate = calculateDate,
-        seqNo = seqNo
+        rowNum = rowNum ?: 0L,
+        debitNumber = debitNumber ?: "",
+        orderRecipeDate = orderRecipeDate ?: "",
+        mastCustomerCode = mastCustomerCode ?: "",
+        debitAmount = debitAmount ?: 0L,
+        debitRemain = debitRemain ?: 0L,
+        debitStartDate = debitStartDate ?: "",
+        debitEndDate = debitEndDate ?: "",
+        mastCustomerTypeCode = mastCustomerTypeCode ?: "",
+        peymanSequence = peymanSequence ?: "",
+        debitCreateReasonCode = debitCreateReasonCode ?: "",
+        debitCreateReasonDesc = debitCreateReasonDesc ?: "",
+        debitNumberInstallment = debitNumberInstallment ?: "",
+        mande = mande ?: "",
+        bimehAmount = bimehAmount ?: "",
+        bikariAmount = bikariAmount ?: "",
+        sayerAmount = sayerAmount ?: "",
+        debitStepCode = debitStepCode ?: "",
+        debitStepDesc = debitStepDesc ?: "",
+        debitStatDesc = debitStatDesc ?: "",
+        debitStatCode = debitStatCode ?: "",
+        stepCat = stepCat ?: "",
+        docDateEblaghEjra = docDateEblaghEjra ?: "",
+        badviNo = badviNo ?: "",
+        badviDate = badviDate ?: "",
+        calculateDate = calculateDate ?: "",
+        seqNo = seqNo ?: 0L
     )
 }
 
 fun WorkshopNewMemberDTO.toDomain(): WorkshopNewMemberDN {
     return WorkshopNewMemberDN(
-        id = id,
-        dateOfStart = dateOfStart,
-        insuranceId = insuranceId,
-        relationWithTamin = relationWithTamin,
-        organizationId = organizationId,
-        workshopId = workshopId,
-        job = job
+        id = id ?: 0L,
+        dateOfStart = dateOfStart ?: 0L,
+        insuranceId = insuranceId ?: "",
+        relationWithTamin = relationWithTamin ?: 0,
+        organizationId = organizationId ?: "",
+        workshopId = workshopId ?: "",
+        job = job ?: ""
     )
 }
 
 fun WorkshopsDebtListModelDTO.toDomain(): WorkshopsDebtListModelDN {
     return WorkshopsDebtListModelDN(
-        indebtednessAmount = indebtednessAmount,
-        insuranceAmount = insuranceAmount,
-        debitAmount = debitAmount,
-        debitCreateReasonCode = debitCreateReasonCode,
-        debitEndDate = debitEndDate,
-        debitNumber = debitNumber,
-        debitRemain = debitRemain,
-        debitStartDate = debitStartDate,
-        status = status
+        indebtednessAmount = indebtednessAmount ?: 0,
+        insuranceAmount = insuranceAmount ?: 0,
+        debitAmount = debitAmount ?: 0,
+        debitCreateReasonCode = debitCreateReasonCode ?: "",
+        debitEndDate = debitEndDate ?: "",
+        debitNumber = debitNumber ?: "",
+        debitRemain = debitRemain ?: 0,
+        debitStartDate = debitStartDate ?: "",
+        status = status ?: ""
     )
 }
 
 fun WorkshopMemberDTO.toDomain(): WorkshopMemberDN {
     return WorkshopMemberDN(
-        leavingWorkStatus = leavingWorkStatus,
-        leavingWorkDate = leavingWorkDate,
-        specialSubType = specialSubType
+        leavingWorkStatus = leavingWorkStatus ?: "",
+        leavingWorkDate = leavingWorkDate ?: "",
+        specialSubType = specialSubType ?: ""
     )
 }
 
 fun WorkshopStackHolderDTO.toDomain(): WorkshopStackHolderDN {
     return WorkshopStackHolderDN(
-        stackId = stackId,
-        mobile = mobile,
-        birthDate = birthDate,
-        telephon = telephon,
-        userId = userId,
-        nationalId = nationalId,
-        stackType = stackType,
-        startDate = startDate,
-        email = email
+        stackId = stackId ?: 0,
+        mobile = mobile ?: "",
+        birthDate = birthDate ?: 0L,
+        telephon = telephon ?: "",
+        userId = userId ?: "",
+        nationalId = nationalId ?: "",
+        stackType = stackType ?: "",
+        startDate = startDate ?: 0L,
+        email = email ?: ""
     )
 }

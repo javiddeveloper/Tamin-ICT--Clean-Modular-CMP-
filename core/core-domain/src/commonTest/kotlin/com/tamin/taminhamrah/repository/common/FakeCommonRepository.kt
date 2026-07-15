@@ -33,13 +33,13 @@ class FakeCommonRepository : CommonRepository {
         emit(mainMenuResult)
     }
 
-    override suspend fun getRegistrationDeclarationForm(): HttpStatement {
+    override fun getRegistrationDeclarationForm(): Flow<HttpStatement> = flow {
         if (shouldThrowError) throw getBeneficiaryError
         throw IllegalStateException("Mock for HttpStatement")
     }
 
-    override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
         if (shouldThrowError) throw getBeneficiaryError
-        return jobTitleResult
+        emit(jobTitleResult)
     }
 }

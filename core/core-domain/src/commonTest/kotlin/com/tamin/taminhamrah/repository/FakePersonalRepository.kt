@@ -82,13 +82,18 @@ class FakePersonalRepository : PersonalRepository {
         emit(saveSurvivorInfoResult)
     }
 
-    override suspend fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): String? {
+    var putInsuredRegistrationDocListResult: String? = "success"
+    override fun putInsuredRegistrationDocList(
+        personalId: String,
+        docs: List<InsuredDocDN>
+    ): Flow<String?> = flow {
         if (shouldThrowError) throw error
-        return null
-    }
+        emit(putInsuredRegistrationDocListResult)
+}
 
-    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDN? {
+    var requestSummaryResult: NewInsuredSummaryDN? = null
+    override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow {
         if (shouldThrowError) throw error
-        return null
+        emit(requestSummaryResult)
     }
 }

@@ -48,14 +48,27 @@ class CommonRepositoryImpl(
             }
         }
 
-    override suspend fun getRegistrationDeclarationForm(): HttpStatement {
-        return commonRemoteDataSource.getRegistrationDeclarationForm()
+    override fun getRegistrationDeclarationForm(): Flow<HttpStatement> = flow {
+        try {
+            emit(commonRemoteDataSource.getRegistrationDeclarationForm())
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
-    override suspend fun getJobTitle(query: ApiQueryParamDN): JobTitleListDN? {
-        val response = commonRemoteDataSource.getJobTitle(query)
-        return response?.let {
-            JobTitleListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
+        try {
+            val response = commonRemoteDataSource.getJobTitle(query)
+            emit(
+                response?.let {
+                    JobTitleListDN(
+                        list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                        total = it.total
+                    )
+                }
+            )
+        } catch (e: Exception) {
+            throw e
         }
     }
 }

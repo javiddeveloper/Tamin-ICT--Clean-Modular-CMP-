@@ -24,6 +24,6 @@ interface PersonalRepository {
     fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionDN): Flow<String?>
     fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?>
     fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN>
-    suspend fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): String?
-    suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDN?
+    fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): Flow<String?>
+    fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?>
 }

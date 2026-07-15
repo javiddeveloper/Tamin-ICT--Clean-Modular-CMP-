@@ -15,6 +15,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class WorkShopsRepositoryImpl(
     private val remoteDataSource: WorkShopsRemoteDataSource,
@@ -69,57 +71,79 @@ class WorkShopsRepositoryImpl(
         return response?.toDomain()
     }
 
-    override suspend fun getWorkshopObjectionableDebitList(
+    override fun getWorkshopObjectionableDebitList(
         workshopNumber: String,
         branchCode: String,
         filters: List<ApiFilterDN>
-    ): WorkShopDebtListDN? {
-        val query = queryBuilder.defaultQuery().copy(page = 1, limit = 100, filters = filters)
-        val response = remoteDataSource.getWorkshopObjectionableDebitList(workshopNumber, branchCode, query)
-        return response?.let {
-            WorkShopDebtListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
-        }
+    ): Flow<WorkShopDebtListDN?> = flow {
+        val response = remoteDataSource.getWorkshopObjectionableDebitList(
+            workshopNumber, branchCode, ApiQueryParamDN(filters = filters)
+        )
+        emit(
+            response?.let {
+                WorkShopDebtListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
     }
 
-    override suspend fun getWorkshopRecentlyAddedMembers(
+    override fun getWorkshopRecentlyAddedMembers(
         filters: List<ApiFilterDN>
-    ): WorkshopNewMemberListDN? {
-        val query = queryBuilder.defaultQuery().copy(page = 1, limit = 100, filters = filters)
-        val response = remoteDataSource.getWorkshopRecentlyAddedMembers(query)
-        return response?.let {
-            WorkshopNewMemberListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
-        }
+    ): Flow<WorkshopNewMemberListDN?> = flow {
+        val response = remoteDataSource.getWorkshopRecentlyAddedMembers(ApiQueryParamDN(filters = filters))
+        emit(
+            response?.let {
+                WorkshopNewMemberListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
     }
 
-    override suspend fun getWorkshopsDebtsList(
+    override fun getWorkshopsDebtsList(
         workshopId: String,
         branchId: String,
         filters: List<ApiFilterDN>
-    ): WorkshopsDebtListDN? {
-        val query = queryBuilder.defaultQuery().copy(page = 1, limit = 100, filters = filters)
-        val response = remoteDataSource.getWorkshopsDebtsList(workshopId, branchId, query)
-        return response?.let {
-            WorkshopsDebtListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
-        }
+    ): Flow<WorkshopsDebtListDN?> = flow {
+        val response = remoteDataSource.getWorkshopsDebtsList(workshopId, branchId, ApiQueryParamDN(filters = filters))
+        emit(
+            response?.let {
+                WorkshopsDebtListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
     }
 
-    override suspend fun getWorkshopMembers(
+    override fun getWorkshopMembers(
         filters: List<ApiFilterDN>
-    ): WorkshopMemberListDN? {
-        val query = queryBuilder.defaultQuery().copy(page = 1, limit = 100, filters = filters)
-        val response = remoteDataSource.getWorkshopMembers(query)
-        return response?.let {
-            WorkshopMemberListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
-        }
+    ): Flow<WorkshopMemberListDN?> = flow {
+        val response = remoteDataSource.getWorkshopMembers(ApiQueryParamDN(filters = filters))
+        emit(
+            response?.let {
+                WorkshopMemberListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
     }
 
-    override suspend fun getWorkshopStackHolders(
+    override fun getWorkshopStackHolders(
         filters: List<ApiFilterDN>
-    ): WorkshopStackHolderListDN? {
-        val query = queryBuilder.defaultQuery().copy(page = 1, limit = 100, filters = filters)
-        val response = remoteDataSource.getWorkshopStackHolders(query)
-        return response?.let {
-            WorkshopStackHolderListDN(list = it.list?.map { item -> item.toDomain() }, total = it.total)
-        }
+    ): Flow<WorkshopStackHolderListDN?> = flow {
+        val response = remoteDataSource.getWorkshopStackHolders(ApiQueryParamDN(filters = filters))
+        emit(
+            response?.let {
+                WorkshopStackHolderListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
     }
 }

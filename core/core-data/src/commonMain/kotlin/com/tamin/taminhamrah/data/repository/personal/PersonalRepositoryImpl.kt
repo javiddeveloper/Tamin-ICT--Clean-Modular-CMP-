@@ -108,32 +108,16 @@ class PersonalRepositoryImpl(
         emit(personalRemoteDataSource.saveSurvivorInfo(body.toDTO()))
     }
 
-    override suspend fun putInsuredRegistrationDocList(
+    override fun putInsuredRegistrationDocList(
         personalId: String,
         docs: List<InsuredDocDN>
-    ): String? {
-        val dtos = docs.map {
-            InsuredDocDTO(
-                documentType = it.documentType,
-                id = it.id,
-                documentFile = DocumentFileDTO(
-                    createdBy = it.documentFile?.createdBy,
-                    id = it.documentFile?.id,
-                    image = it.documentFile?.image
-                )
-            )
-        }
-        return personalRemoteDataSource.putInsuredRegistrationDocList(personalId, dtos)
+    ): Flow<String?> = flow {
+        val dtos = docs.map { it.toDTO() }
+        emit(personalRemoteDataSource.putInsuredRegistrationDocList(personalId, dtos))
     }
 
-    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDN? {
+    override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow {
         val response = personalRemoteDataSource.getRequestSummary(requestId)
-        return response?.let {
-            NewInsuredSummaryDN(
-                refCode = it.refCode, nationalId = it.nationalId, firstName = it.firstName,
-                lastName = it.lastName, relationDescription = it.relationDescription,
-                jobDescription = it.jobDescription
-            )
-        }
+        emit(response?.toDomain())
     }
 }

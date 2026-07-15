@@ -4,8 +4,15 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class FakeWorkShopsRepository : WorkShopsRepository {
     var result: EmployerAgreementListDN? = null
@@ -51,27 +58,47 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         return workshopDebtInquiryResult
     }
 
-    override suspend fun getWorkshopObjectionableDebitList(
+    var workshopObjectionableDebitListResult: WorkShopDebtListDN? = null
+    override fun getWorkshopObjectionableDebitList(
         workshopNumber: String,
         branchCode: String,
         filters: List<ApiFilterDN>
-    ): com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN? = null
+    ): Flow<WorkShopDebtListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(workshopObjectionableDebitListResult)
+    }
 
-    override suspend fun getWorkshopRecentlyAddedMembers(
+    var workshopRecentlyAddedMembersResult: WorkshopNewMemberListDN? = null
+    override fun getWorkshopRecentlyAddedMembers(
         filters: List<ApiFilterDN>
-    ): com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN? = null
+    ): Flow<WorkshopNewMemberListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(workshopRecentlyAddedMembersResult)
+    }
 
-    override suspend fun getWorkshopsDebtsList(
+    var workshopsDebtsListResult: WorkshopsDebtListDN? = null
+    override fun getWorkshopsDebtsList(
         workshopId: String,
         branchId: String,
         filters: List<ApiFilterDN>
-    ): com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN? = null
+    ): Flow<WorkshopsDebtListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(workshopsDebtsListResult)
+    }
 
-    override suspend fun getWorkshopMembers(
+    var workshopMembersResult: WorkshopMemberListDN? = null
+    override fun getWorkshopMembers(
         filters: List<ApiFilterDN>
-    ): com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN? = null
+    ): Flow<WorkshopMemberListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(workshopMembersResult)
+    }
 
-    override suspend fun getWorkshopStackHolders(
+    var workshopStackHoldersResult: WorkshopStackHolderListDN? = null
+    override fun getWorkshopStackHolders(
         filters: List<ApiFilterDN>
-    ): com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN? = null
+    ): Flow<WorkshopStackHolderListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(workshopStackHoldersResult)
+    }
 }
