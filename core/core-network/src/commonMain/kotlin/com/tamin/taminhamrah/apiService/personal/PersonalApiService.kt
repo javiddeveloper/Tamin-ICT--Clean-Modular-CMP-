@@ -20,6 +20,7 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.Streaming
 import io.ktor.client.statement.HttpStatement
+import kotlinx.serialization.json.JsonElement
 
 interface PersonalApiService {
 
@@ -48,7 +49,7 @@ interface PersonalApiService {
         @Query("code") nationalCode: String,
         @Query("rel") relation: String = "04",
         @Query("pensionerId") pensionerId: String,
-    ): BaseDTO<String?>
+    ): BaseDTO<JsonElement?>
 
     @GET("survivor-request/list")
     suspend fun confirmSurvivorsList(
@@ -59,13 +60,13 @@ interface PersonalApiService {
     suspend fun submitFinalSurvivorPension(
         @Path("requestId") requestId: Int,
         @Body body: SubmitFinalSurvivorPensionRequest
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
 
     @POST("survivor-request")
     suspend fun saveSurvivorInfo(
         @Body body: SaveSurvivorInfoRequest
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
     @Streaming
     @GET("survivor-request/final-report")

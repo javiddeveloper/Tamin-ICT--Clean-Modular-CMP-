@@ -4,9 +4,11 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
@@ -23,6 +25,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Streaming
 import io.ktor.client.statement.HttpStatement
+import kotlinx.serialization.json.JsonElement
 
 
 interface PensionApiService {
@@ -70,9 +73,21 @@ interface PensionApiService {
     suspend fun getRetirementRequestInfo(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<RetirementRequestDTO>>
+    @GET("pension-request/personal")
+    suspend fun authenticationAndGetPersonalInfo(
+        @Query("ticketCode") authenticationsCode: Long
+    ): BaseDTO<RetirementPersonalDTO>
 
     @GET("pension-request/checkRequests")
     suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>
+    @GET("pension-request/getTicket")
+    suspend fun getAuthenticationCode(
+    ): BaseDTO<AuthenticationTicketDTO>
+
+    @GET("pension-inquiry/announcement/")
+    suspend fun sendRequestInquirePensionCertificate(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<JsonElement?>
 
 
     @Headers("Content-Type: application/json")
@@ -80,6 +95,10 @@ interface PensionApiService {
     suspend fun sendRetirementDocument(
         @Path("requestId") requestId: String,
         @Body body: RetirementSaveDocumentRequest
+    ): BaseDTO<String?>
+    @GET("hokm/announcement")
+    suspend fun sendEdictPensionerToMyInbox(
+        @QueryMap parameters: Map<String, String>
     ): BaseDTO<String?>
 
 }

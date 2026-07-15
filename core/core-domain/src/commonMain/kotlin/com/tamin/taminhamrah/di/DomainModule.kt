@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
+import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
@@ -67,6 +68,9 @@ import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
+import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -96,6 +100,7 @@ val domainModule = module {
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
     factoryOf(::GetEdictPensionerUseCase)
+    factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
     factoryOf(::SignOutUseCase)
@@ -143,6 +148,11 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
     factoryOf(::SendRetirementDocumentUseCase)
+
+    // Treatment UseCases
+    factoryOf(::GetDeservedTreatmentUseCase)
+    factoryOf(::GetDependantUnderEighteenUseCase)
+    factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetJobTitleUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
     factoryOf(::GetRequestSummaryUseCase)

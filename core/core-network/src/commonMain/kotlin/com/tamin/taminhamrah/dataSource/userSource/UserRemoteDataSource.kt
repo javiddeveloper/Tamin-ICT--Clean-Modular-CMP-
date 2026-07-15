@@ -19,6 +19,8 @@ import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 
+import com.tamin.taminhamrah.model.user.UserProfileDto
+
 interface UserRemoteDataSource {
     suspend fun getIdentityInfo(): IdentityInfoDto
     suspend fun getUserProfileImage(): String
@@ -45,4 +47,6 @@ interface UserRemoteDataSource {
     suspend fun getElectronicFile(
         query: ApiQueryParamDN
     ): ListData<ElectronicFileDTO>?
+
+    suspend fun getUserProfile(): UserProfileDto?
 }

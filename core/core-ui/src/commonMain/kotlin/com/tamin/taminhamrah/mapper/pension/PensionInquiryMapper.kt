@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.model.common.RecipientDN
 import com.tamin.taminhamrah.model.pension.RecipientPR
 import com.tamin.taminhamrah.model.pension.*
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketPR
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
@@ -29,6 +31,12 @@ fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
         pensionEndDate = pensionEndDate ?: "",
         nationalId = nationalId ?: "",
         paymentAmount = paymentAmount?.toString() ?: "0"
+    )
+}
+
+fun AuthenticationTicketDN.toPresentation(): AuthenticationTicketPR {
+    return AuthenticationTicketPR(
+        mobileNumber = mobileNumber
     )
 }
 
@@ -238,5 +246,11 @@ fun RetirementDocumentPR.toDomain(): RetirementDocumentDN {
     return RetirementDocumentDN(
         documentType = documentType,
         guid = guid
+    )
+}
+
+fun InquirePensionCertificateDN.toPresentation(): InquirePensionCertificatePR {
+    return InquirePensionCertificatePR(
+        message = message ?: ""
     )
 }
