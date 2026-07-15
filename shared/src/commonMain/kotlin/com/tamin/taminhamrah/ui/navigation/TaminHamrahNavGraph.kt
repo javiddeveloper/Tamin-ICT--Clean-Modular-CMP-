@@ -1,17 +1,55 @@
 package com.tamin.taminhamrah.ui.navigation
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,36 +58,27 @@ import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.cartable.navigateToCartable
-import androidx.compose.foundation.background
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.draw.alpha
-import androidx.compose.material.icons.filled.ArrowDropDown
-import com.tamin.taminhamrah.feature.history.HistoryRoute
-import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
-import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
+import com.tamin.taminhamrah.feature.history.HistoryRoute
+import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
+import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
+import com.tamin.taminhamrah.feature.treatment.treatmentGraph
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
-import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
-import com.tamin.taminhamrah.feature.treatment.treatmentScreen
-import androidx.compose.material.icons.filled.Favorite
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -67,8 +96,14 @@ internal fun TaminHamrahNavGraph(
 
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
+    // Any destination inside the treatment graph counts as the Treatment tab, so new sub-flows
+    // keep the tab selected without touching this check.
+    val isTreatmentTab = currentDestination?.hierarchy?.any {
+        it.hasRoute<TreatmentRoute.Graph>()
+    } == true
+
     val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
-            currentDestination?.hasRoute<TreatmentRoute>() == true ||
+            isTreatmentTab ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
 
@@ -103,7 +138,7 @@ internal fun TaminHamrahNavGraph(
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Favorite, null) },
                         label = { Text("Treatment") },
-                        selected = currentDestination?.hasRoute<TreatmentRoute>() == true,
+                        selected = isTreatmentTab,
                         onClick = {
                             navController.navigateToTreatment {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -180,7 +215,10 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                treatmentScreen()
+                treatmentGraph(
+                    navController = navController,
+                    onBack = { navController.popBackStack() }
+                )
 
                 profileGraph(
                     navController = navController,
@@ -343,7 +381,7 @@ fun HomeScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(Modifier.weight(1f))
-                        Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, contentDescription = null)
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                     }
 
                     DropdownMenu(
@@ -427,8 +465,8 @@ fun HomeScreen(
                             }
 
                             // Show message if present and service is not just ACTIVE
-                            if (!service.message.isNullOrEmpty() && service.status != com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ACTIVE) {
-                                val msgColor = if (service.status == com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ENABLED_WITH_ERROR)
+                            if (!service.message.isNullOrEmpty() && service.status != MenuServiceStatusDN.ACTIVE) {
+                                val msgColor = if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR)
                                     MaterialTheme.colorScheme.error
                                 else
                                     MaterialTheme.colorScheme.onSurfaceVariant
