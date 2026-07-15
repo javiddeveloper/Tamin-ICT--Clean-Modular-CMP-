@@ -1,9 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,14 +19,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,53 +54,52 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
-import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsContent
-import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Treatment dashboard hosting the general shell + the electronic-prescriptions sub-flow.
- * Other sub-flows (medical commissions, costs, health profile) live on their own branches.
+ * Treatment dashboard shell showing patient selection and treatment entitlement details.
  */
 @Composable
 fun TreatmentScreen(
-    viewModel: TreatmentViewModel = koinViewModel(),
-    prescriptionsViewModel: PrescriptionsViewModel = koinViewModel()
+    viewModel: TreatmentViewModel = koinViewModel()
 ) {
-    TreatmentScreenContent(
-        state = viewModel.uiState.collectAsState().value,
-        prescriptionsState = prescriptionsViewModel.uiState.collectAsState().value,
-        onIntent = { viewModel.sendIntent(it) },
-        onPrescriptionIntent = { prescriptionsViewModel.sendIntent(it) }
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Auto-fetch data on composition entry
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+    }
+
+    HandleTreatmentEvents(events = viewModel.events)
+
+    TreatmentContent(
+        state = uiState,
+        onIntent = viewModel::sendIntent
     )
 }
 
 @Composable
-fun TreatmentScreenContent(
-    state: TreatmentUiState,
-    prescriptionsState: PrescriptionsUiState,
-    onIntent: (TreatmentIntent) -> Unit,
-    onPrescriptionIntent: (PrescriptionsIntent) -> Unit
-) {
-    // Auto-fetch data on composition entry
-    LaunchedEffect(Unit) {
-        onIntent(TreatmentIntent.InitTreatmentFlow)
-    }
-
-    // Side effect: load prescriptions when flow or patient changes
-    LaunchedEffect(state.activeFlow, state.selectedNationalCode) {
-        val nationalCode = state.selectedNationalCode ?: return@LaunchedEffect
-        when (state.activeFlow) {
-            TreatmentFlow.PRESCRIPTIONS -> onPrescriptionIntent(PrescriptionsIntent.LoadList(nationalCode))
-            else -> {}
+fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
+    events.collectWithLifecycleAware {
+        when (it) {
+            is TreatmentEvent.ShowMessage -> Unit // TODO: surface via snackbar/toast
         }
     }
+}
 
+@Composable
+fun TreatmentContent(
+    modifier: Modifier = Modifier,
+    state: TreatmentUiState,
+    onIntent: (TreatmentIntent) -> Unit
+) {
     // Resolve patient list dynamically
     val patients = remember(state.deservedList, state.dependantList, state.mainUserNationalCode) {
         val list = mutableListOf<PatientItem>()
@@ -159,6 +152,7 @@ fun TreatmentScreenContent(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -189,12 +183,15 @@ fun TreatmentScreenContent(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else {
+                // Top card pager / selection list
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 PatientSelectionSection(
                     patients = patients,
                     pagerState = pagerState,
                     deservedList = state.deservedList,
-                    onShowDetails = { msg -> showDetailDialog = msg }
+                    onShowDetails = { msg ->
+                        showDetailDialog = msg
+                    }
                 )
 
                 HorizontalDivider(
@@ -207,41 +204,9 @@ fun TreatmentScreenContent(
                         .fillMaxSize()
                         .weight(1f)
                 ) {
-                    when (state.activeFlow) {
-                        TreatmentFlow.MAIN -> {
-                            DashboardMenuSection(
-                                activePatientName = state.selectedPatientName ?: "بیمه‌شده اصلی",
-                                onFlowSelected = { flow -> onIntent(TreatmentIntent.SwitchFlow(flow)) }
-                            )
-                        }
-                        TreatmentFlow.PRESCRIPTIONS -> {
-                            PrescriptionsContent(
-                                state = prescriptionsState,
-                                onBack = { onIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.MAIN)) },
-                                onPrescriptionSelected = { noteHeadId ->
-                                    onPrescriptionIntent(
-                                        PrescriptionsIntent.SelectPrescription(noteHeadId, state.selectedNationalCode ?: "")
-                                    )
-                                },
-                                onClearSelected = {
-                                    onPrescriptionIntent(PrescriptionsIntent.ClearSelectedPrescription)
-                                },
-                                onDownloadPdf = { prescId ->
-                                    onPrescriptionIntent(PrescriptionsIntent.DownloadPdf(prescId))
-                                },
-                                onDownloadTestResult = { patientId, noteHeadId ->
-                                    onPrescriptionIntent(
-                                        PrescriptionsIntent.DownloadTestResult(patientId, noteHeadId)
-                                    )
-                                },
-                                onDismissPdf = {
-                                    onPrescriptionIntent(PrescriptionsIntent.TogglePdfDialog(false))
-                                }
-                            )
-                        }
-                        // Other sub-flow content is provided by the per-sub-feature branches.
-                        else -> {}
-                    }
+                    DashboardMenuSection(
+                        activePatientName = state.selectedPatientName ?: "بیمه‌شده اصلی"
+                    )
                 }
             }
         }
@@ -265,11 +230,9 @@ fun TreatmentScreenContent(
 @Composable
 fun TreatmentScreenPreview() {
     PreviewRtlThemeContent {
-        TreatmentScreenContent(
+        TreatmentContent(
             state = TreatmentMocks.mainUiState,
-            prescriptionsState = TreatmentMocks.prescriptionsUiState,
-            onIntent = {},
-            onPrescriptionIntent = {}
+            onIntent = {}
         )
     }
 }
@@ -288,9 +251,11 @@ fun DecorativeQRCode(modifier: Modifier = Modifier) {
                 Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
                     repeat(8) { colIndex ->
                         val isPixel = remember {
+                            // Classic QR finder patterns at corners
                             (rowIndex < 3 && colIndex < 3) ||
                                 (rowIndex < 3 && colIndex >= 5) ||
                                 (rowIndex >= 5 && colIndex < 3) ||
+                                // Random bytes simulation
                                 (rowIndex + colIndex) % 2 == 0 ||
                                 (rowIndex * colIndex) % 3 == 0
                         }
@@ -340,6 +305,7 @@ fun PatientSelectionSection(
 
         Spacer(modifier = Modifier.height(Spacing.xs))
 
+        // Indicator dots
         if (patients.size > 1) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
@@ -377,10 +343,11 @@ fun TreatmentCardItem(
     val isError = !patient.isDependent && mainDeserved != null && !hasDeserved
     val isLoading = !patient.isDependent && mainDeserved == null
 
+    // Curated Harmonious Gradient Palette
     val gradientColors = when {
-        isLoading -> listOf(Color(0xFF78909C), Color(0xFFB0BEC5))
-        isError -> listOf(Color(0xFFC62828), Color(0xFFEF5350))
-        else -> listOf(Color(0xFF2E7D32), Color(0xFF4CAF50))
+        isLoading -> listOf(Color(0xFF78909C), Color(0xFFB0BEC5)) // Gray/Blue-gray loading
+        isError -> listOf(Color(0xFFC62828), Color(0xFFEF5350)) // Premium red
+        else -> listOf(Color(0xFF2E7D32), Color(0xFF4CAF50)) // Premium green
     }
 
     Card(
@@ -400,6 +367,7 @@ fun TreatmentCardItem(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+                // Top row: Brand & Logo
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -420,6 +388,7 @@ fun TreatmentCardItem(
 
                 HorizontalDivider(color = Color.White.copy(alpha = 0.2f))
 
+                // Middle Row: Details & Barcode
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -465,6 +434,7 @@ fun TreatmentCardItem(
 
                 HorizontalDivider(color = Color.White.copy(alpha = 0.2f))
 
+                // Bottom Row: Status text & detail button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -516,8 +486,7 @@ fun TreatmentCardItem(
 
 @Composable
 fun DashboardMenuSection(
-    activePatientName: String,
-    onFlowSelected: (TreatmentFlow) -> Unit
+    activePatientName: String
 ) {
     Column(
         modifier = Modifier
@@ -547,100 +516,6 @@ fun DashboardMenuSection(
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(Spacing.xs))
-
-        DashboardMenuItem(
-            title = "نسخه‌های الکترونیک",
-            desc = "لیست، جزئیات و استعلام قیمت نسخ پزشکان",
-            icon = Icons.AutoMirrored.Filled.List,
-            onClick = { onFlowSelected(TreatmentFlow.PRESCRIPTIONS) }
-        )
-
-        DashboardMenuItem(
-            title = "کمیسیون‌های پزشکی",
-            desc = "تاییدات استراحت پزشکی و تصمیمات شوراها",
-            icon = Icons.Default.CheckCircle,
-            onClick = { onFlowSelected(TreatmentFlow.CONFIRMATIONS) }
-        )
-
-        DashboardMenuItem(
-            title = "هزینه‌های درمان",
-            desc = "مشاهده هزینه‌های خسارت متفرقه درمان و بیمه",
-            icon = Icons.Default.ShoppingCart,
-            onClick = { onFlowSelected(TreatmentFlow.COSTS) }
-        )
-
-        DashboardMenuItem(
-            title = "سلامت من",
-            desc = "پرونده سلامت، خوداظهاری و حساسیت‌های دارویی",
-            icon = Icons.Default.Person,
-            onClick = { onFlowSelected(TreatmentFlow.HEALTH_PROFILE) }
-        )
-    }
-}
-
-@Composable
-fun DashboardMenuItem(
-    title: String,
-    desc: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(CornerRadius.sm),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(Spacing.md))
-                Column {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = desc,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline
-            )
         }
     }
 }

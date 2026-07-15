@@ -33,7 +33,6 @@ class TreatmentViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var tokenStoreManager: FakeTokenStoreManager
     private lateinit var repository: FakeTreatmentRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var viewModel: TreatmentViewModel
@@ -41,7 +40,6 @@ class TreatmentViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        tokenStoreManager = FakeTokenStoreManager()
         repository = FakeTreatmentRepository()
         userRepository = FakeUserRepository()
         viewModel = buildViewModel()
@@ -53,7 +51,6 @@ class TreatmentViewModelTest {
     }
 
     private fun buildViewModel() = TreatmentViewModel(
-        tokenStoreManager = tokenStoreManager,
         getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
         getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
         identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository())
@@ -80,6 +77,7 @@ class TreatmentViewModelTest {
 
             assertEquals(1, state.dependantList.size)
             assertEquals("9876543210", state.dependantList.first().nationalId)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -93,6 +91,7 @@ class TreatmentViewModelTest {
             val state = awaitItem()
             assertEquals("9876543210", state.selectedNationalCode)
             assertEquals("Child Name", state.selectedPatientName)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -121,6 +120,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("1234567890", state.mainUserNationalCode)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -138,12 +138,12 @@ class TreatmentViewModelTest {
             }
             assertNotNull(state.error)
             assertEquals(false, state.isLoading)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun testInitTreatmentFlow_whenNoUserIdAndNoIdentity_emitsUserNotFoundError() = runTest(testDispatcher) {
-        tokenStoreManager = FakeTokenStoreManager(storedUserId = null)
         userRepository = FakeUserRepository().apply {
             identityResult = identityResult.copy(nationalId = null)
         }
@@ -158,6 +158,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("اطلاعات کاربری یافت نشد.", state.error)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

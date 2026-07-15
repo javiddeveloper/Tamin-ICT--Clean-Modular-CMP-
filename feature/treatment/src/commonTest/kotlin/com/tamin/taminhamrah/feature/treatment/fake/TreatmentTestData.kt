@@ -8,8 +8,10 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 
 /**
- * Central factory of sample domain models for the treatment dashboard + prescriptions
- * ViewModel tests.
+ * Central factory of sample domain models for the treatment dashboard ViewModel tests.
+ *
+ * Keeping fixtures in one place (instead of inlined per fake/test) keeps the test
+ * doubles small and lets every dashboard test share consistent, realistic data.
  */
 object TreatmentTestData {
 

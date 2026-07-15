@@ -175,7 +175,7 @@ private fun groupThousands(digits: String): String {
  */
 fun String.toPriceFormat(): String {
     require(all { it.isDigit() }) {
-        "toPriceFormat: input must contain digits only but was \"$this\""
+        this
     }
     return groupThousands(this)
 }
