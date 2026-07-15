@@ -12,8 +12,9 @@ import com.tamin.taminhamrah.data.local.dao.PersonalDao
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
 import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
-import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
+import com.tamin.taminhamrah.data.local.dao.TestDao
+import com.tamin.taminhamrah.data.local.dao.TreatmentDao
 
 @Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 actual abstract class TaminXDatabase : RoomDatabase() {
@@ -28,6 +29,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun registrationInfoDao(): RegistrationInfoDao
     actual abstract fun branchDao(): BranchDao
     actual abstract fun menuDao(): MenuDao
+    actual abstract fun treatmentDao(): TreatmentDao
 }
 
 fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<TaminXDatabase> {
