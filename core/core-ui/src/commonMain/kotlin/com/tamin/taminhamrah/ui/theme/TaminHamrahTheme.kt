@@ -7,66 +7,75 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.LayoutDirection
 
+val LocalTaminColors = staticCompositionLocalOf { LightTaminColors }
+val LocalAppLanguage = staticCompositionLocalOf { "fa" }
+val LocalLayoutDirection = staticCompositionLocalOf { LayoutDirection.Rtl }
+
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    onPrimary = Purple40,
-    secondary = PurpleGrey80,
-    onSecondary = PurpleGrey40,
-    tertiary = Pink80,
-    onTertiary = Pink40,
-    background = Color(0xFF1C1B1F),
-    onBackground = Color(0xFFE6E1E5),
-    surface = Color(0xFF1C1B1F),
-    onSurface = Color(0xFFE6E1E5),
-    error = Color(0xFFF2B8B5),
-    onError = Color(0xFF601410),
-    outline = Color(0xFF938F99)
+    primary = DarkTaminColors.blueText,
+    onPrimary = DarkTaminColors.bgSurface,
+    primaryContainer = DarkTaminColors.blueBg,
+    onPrimaryContainer = DarkTaminColors.blueText,
+    secondary = DarkTaminColors.teal,
+    tertiary = DarkTaminColors.greenText,
+    error = DarkTaminColors.dangerText,
+    errorContainer = DarkTaminColors.dangerBg,
+    background = DarkTaminColors.bgPage,
+    onBackground = DarkTaminColors.textPrimary,
+    surface = DarkTaminColors.bgSurface,
+    onSurface = DarkTaminColors.textPrimary,
+    surfaceVariant = DarkTaminColors.divider,
+    onSurfaceVariant = DarkTaminColors.textTertiary,
+    outline = DarkTaminColors.border,
+    outlineVariant = DarkTaminColors.outerBorder,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    onPrimary = Color.White,
-    secondary = PurpleGrey40,
-    onSecondary = Color.White,
-    tertiary = Pink40,
-    onTertiary = Color.White,
-    background = Color(0xFFFFFBFE),
-    onBackground = Color(0xFF1C1B1F),
-    surface = Color(0xFFFFFBFE),
-    onSurface = Color(0xFF1C1B1F),
-    error = Color(0xFFB3261E),
-    onError = Color.White,
-    outline = Color(0xFF79747E)
+    primary = LightTaminColors.blueText,
+    onPrimary = LightTaminColors.bgSurface,
+    primaryContainer = LightTaminColors.blueBg,
+    onPrimaryContainer = LightTaminColors.blueText,
+    secondary = LightTaminColors.teal,
+    tertiary = LightTaminColors.greenText,
+    error = LightTaminColors.dangerText,
+    errorContainer = LightTaminColors.dangerBg,
+    background = LightTaminColors.bgPage,
+    onBackground = LightTaminColors.textPrimary,
+    surface = LightTaminColors.bgSurface,
+    onSurface = LightTaminColors.textPrimary,
+    surfaceVariant = LightTaminColors.divider,
+    onSurfaceVariant = LightTaminColors.textTertiary,
+    outline = LightTaminColors.border,
+    outlineVariant = LightTaminColors.outerBorder,
 )
-
-val LocalAppLanguage = staticCompositionLocalOf { "fa" }
-val LocalLayoutDirection = staticCompositionLocalOf { LayoutDirection.Rtl }
 
 @Composable
 fun TaminHamrahTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     language: String = "fa",
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val extendedColors = if (darkTheme) DarkTaminColors else LightTaminColors
+    val materialColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    val layoutDirection = if (language == "fa" || language == "ar") {
+    val layoutDirection = if ((language == "fa") || (language == "ar")) {
         LayoutDirection.Rtl
     } else {
         LayoutDirection.Ltr
     }
 
     CompositionLocalProvider(
+        LocalTaminColors provides extendedColors,
         LocalAppLanguage provides language,
-        androidx.compose.ui.platform.LocalLayoutDirection provides layoutDirection
+        LocalLayoutDirection provides layoutDirection,
     ) {
-            MaterialTheme(
-                colorScheme = colorScheme,
-                typography = taminHamrahTypography(),
-                content = content
-            )
+        MaterialTheme(
+            colorScheme = materialColorScheme,
+            typography = taminHamrahTypography(),
+            shapes = TaminHamrahShapes,
+            content = content
+        )
     }
 }
