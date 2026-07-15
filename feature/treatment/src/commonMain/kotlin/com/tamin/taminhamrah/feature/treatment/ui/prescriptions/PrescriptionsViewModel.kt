@@ -14,7 +14,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUse
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.util.getCurrentTimestamp
-import com.tamin.taminhamrah.util.getOneWeekAgoTimestamp
+import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -49,7 +49,8 @@ class PrescriptionsViewModel(
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
         val dependantCode = if (intent.nationalCode == nationalCode) "0" else intent.nationalCode
-        val startD = intent.startDate ?: getOneWeekAgoTimestamp()
+        // Defaults to the «۶ ماه اخیر» period the records filter advertises.
+        val startD = intent.startDate ?: getSixMonthsAgoTimestamp()
         val endD = intent.endDate ?: getCurrentTimestamp()
 
         try {
