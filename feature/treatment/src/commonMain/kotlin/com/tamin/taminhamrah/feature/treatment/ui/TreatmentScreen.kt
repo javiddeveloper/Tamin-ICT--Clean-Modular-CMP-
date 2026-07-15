@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,24 +15,33 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -48,48 +57,76 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.tamin.taminhamrah.feature.treatment.ui.contract.*
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentFlow
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientItems
+import com.tamin.taminhamrah.feature.treatment.ui.records.RecordTab
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.TaminPurple500
+import com.tamin.taminhamrah.ui.theme.TaminPurple700
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toPriceFormat
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Treatment dashboard shell showing patient selection and treatment entitlement details.
+ * Treatment dashboard ("درمان" hub): patient card carousel, quick access and the sub-flow grid.
+ *
+ * Layout structure only — colors, typography and the shared card/header components are owned by
+ * the design pass. Sub-flows are separate destinations (see `treatmentGraph`), so system back
+ * unwinds through the nav back stack.
  */
 @Composable
 fun TreatmentScreen(
+    onNavigateToRecords: (String, RecordTab) -> Unit,
     viewModel: TreatmentViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Auto-fetch data on composition entry
     LaunchedEffect(Unit) {
         viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
     }
 
-    HandleTreatmentEvents(events = viewModel.events)
+    HandleTreatmentEvents(events = viewModel.events, snackbarHostState = snackbarHostState)
 
     TreatmentContent(
         state = uiState,
-        onIntent = viewModel::sendIntent
+        snackbarHostState = snackbarHostState,
+        onIntent = viewModel::sendIntent,
+        onNavigateToRecords = onNavigateToRecords
     )
 }
 
 @Composable
-fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
+fun HandleTreatmentEvents(events: Flow<TreatmentEvent>, snackbarHostState: SnackbarHostState) {
     events.collectWithLifecycleAware {
         when (it) {
-            is TreatmentEvent.ShowMessage -> Unit // TODO: surface via snackbar/toast
+            // Failures stay on screen longer than confirmations; the message is already localized.
+            is TreatmentEvent.ShowMessage -> snackbarHostState.showSnackbar(
+                message = it.message,
+                withDismissAction = it.type == TreatmentMessageType.OPERATION_FAILED,
+                duration = if (it.type == TreatmentMessageType.OPERATION_FAILED) {
+                    SnackbarDuration.Long
+                } else {
+                    SnackbarDuration.Short
+                }
+            )
         }
     }
 }
@@ -98,117 +135,82 @@ fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
 fun TreatmentContent(
     modifier: Modifier = Modifier,
     state: TreatmentUiState,
-    onIntent: (TreatmentIntent) -> Unit
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onIntent: (TreatmentIntent) -> Unit,
+    onNavigateToRecords: (String, RecordTab) -> Unit
 ) {
-    // Resolve patient list dynamically
-    val patients = remember(state.deservedList, state.dependantList, state.mainUserNationalCode) {
-        val list = mutableListOf<PatientItem>()
-        val mainUserCode = state.mainUserNationalCode
-        if (mainUserCode != null) {
-            val mainUser = state.deservedList.firstOrNull()
-            list.add(
-                PatientItem(
-                    nationalId = mainUserCode,
-                    fullName = mainUser?.fullName ?: state.selectedPatientName ?: "بیمه‌شده اصلی",
-                    isDependent = false,
-                    brhName = mainUser?.brhName,
-                    insuranceType = mainUser?.insuranceType
-                )
-            )
-        }
-        // Dependents under 18
-        state.dependantList.forEach { dep ->
-            list.add(
-                PatientItem(
-                    nationalId = dep.nationalId,
-                    fullName = dep.fullName,
-                    isDependent = true,
-                    relation = "تحت تکفل"
-                )
-            )
-        }
-        list
-    }
-
+    val patients = rememberPatients(state)
     var showDetailDialog by remember { mutableStateOf<String?>(null) }
     val pagerState = rememberPagerState(pageCount = { patients.size })
 
-    LaunchedEffect(state.selectedNationalCode, patients) {
-        val index = patients.indexOfFirst { it.nationalId == state.selectedNationalCode }
-        if (index >= 0 && pagerState.currentPage != index) {
-            pagerState.scrollToPage(index)
-        }
-    }
+    SyncSelectedPatient(patients = patients, pagerState = pagerState, state = state, onIntent = onIntent)
 
-    LaunchedEffect(pagerState.currentPage, patients) {
-        if (patients.isNotEmpty() && pagerState.currentPage < patients.size) {
-            val selectedPatient = patients[pagerState.currentPage]
-            if (selectedPatient.nationalId != state.selectedNationalCode) {
-                onIntent(
-                    TreatmentIntent.SelectPatient(selectedPatient.nationalId, selectedPatient.fullName)
-                )
-            }
-        }
-    }
+    val colors = LocalTaminColors.current
 
     Scaffold(
         modifier = modifier,
+        containerColor = colors.bgPage,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        Text(
-                            "درمان و نسخ الکترونیک",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                title = { Text(text = "درمان", fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Default.Search, contentDescription = "جست‌وجو")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = colors.teal,
+                    titleContentColor = colors.bgSurface,
+                    actionIconContentColor = colors.bgSurface
                 )
             )
         }
     ) { padding ->
+        if (state.isLoading && patients.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = Spacing.sm)
         ) {
-            if (state.isLoading && patients.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            } else {
-                // Top card pager / selection list
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                PatientSelectionSection(
-                    patients = patients,
-                    pagerState = pagerState,
-                    deservedList = state.deservedList,
-                    onShowDetails = { msg ->
-                        showDetailDialog = msg
-                    }
-                )
+            PatientSelectionSection(
+                patients = patients,
+                pagerState = pagerState,
+                deservedList = state.deservedList,
+                onShowDetails = { msg -> showDetailDialog = msg }
+            )
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = Spacing.md),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                ) {
-                    DashboardMenuSection(
-                        activePatientName = state.selectedPatientName ?: "بیمه‌شده اصلی"
-                    )
-                }
+            val openRecords = { tab: RecordTab ->
+                state.selectedNationalCode?.let { onNavigateToRecords(it, tab) }
+                Unit
             }
+
+            QuickAccessSection(
+                isHealthProfileCompleted = state.isHealthProfileCompleted,
+                onOpenRecords = { openRecords(RecordTab.ALL) },
+                onOpenHealthProfile = { onIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.HEALTH_PROFILE)) },
+                onOpenCenters = { onIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.CENTERS)) }
+            )
+
+            ServiceGridSection(
+                // «نسخه‌های الکترونیک» is the medicine tab of سوابق درمانی, not a screen of its own.
+                onOpenPrescriptions = { openRecords(RecordTab.MEDICINE) },
+                onOpenConfirmations = { onIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.CONFIRMATIONS)) },
+                onOpenCosts = { onIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.COSTS)) }
+            )
+
+            YearlyCostSection()
         }
     }
 
@@ -226,46 +228,35 @@ fun TreatmentContent(
     }
 }
 
-@PreviewRtlTheme
+/** Carousel entries, shared with the records patient filter. */
 @Composable
-fun TreatmentScreenPreview() {
-    PreviewRtlThemeContent {
-        TreatmentContent(
-            state = TreatmentMocks.mainUiState,
-            onIntent = {}
-        )
+private fun rememberPatients(state: TreatmentUiState): List<PatientItem> =
+    remember(state.deservedList, state.dependantList, state.mainUserNationalCode) {
+        state.toPatientItems()
     }
-}
 
+/** Keeps the pager and the ViewModel's selected patient in step, in both directions. */
 @Composable
-fun DecorativeQRCode(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(Color.White, RoundedCornerShape(CornerRadius.xs))
-            .border(1.dp, Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(CornerRadius.xs))
-            .padding(4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            repeat(8) { rowIndex ->
-                Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
-                    repeat(8) { colIndex ->
-                        val isPixel = remember {
-                            // Classic QR finder patterns at corners
-                            (rowIndex < 3 && colIndex < 3) ||
-                                (rowIndex < 3 && colIndex >= 5) ||
-                                (rowIndex >= 5 && colIndex < 3) ||
-                                // Random bytes simulation
-                                (rowIndex + colIndex) % 2 == 0 ||
-                                (rowIndex * colIndex) % 3 == 0
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(2.dp)
-                                .background(if (isPixel) Color.Black else Color.White)
-                        )
-                    }
-                }
+private fun SyncSelectedPatient(
+    patients: List<PatientItem>,
+    pagerState: PagerState,
+    state: TreatmentUiState,
+    onIntent: (TreatmentIntent) -> Unit
+) {
+    LaunchedEffect(state.selectedNationalCode, patients) {
+        val index = patients.indexOfFirst { it.nationalId == state.selectedNationalCode }
+        if (index >= 0 && pagerState.currentPage != index) {
+            pagerState.scrollToPage(index)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage, patients) {
+        if (patients.isNotEmpty() && pagerState.currentPage < patients.size) {
+            val selectedPatient = patients[pagerState.currentPage]
+            if (selectedPatient.nationalId != state.selectedNationalCode) {
+                onIntent(
+                    TreatmentIntent.SelectPatient(selectedPatient.nationalId, selectedPatient.fullName)
+                )
             }
         }
     }
@@ -274,27 +265,18 @@ fun DecorativeQRCode(modifier: Modifier = Modifier) {
 @Composable
 fun PatientSelectionSection(
     patients: List<PatientItem>,
-    pagerState: androidx.compose.foundation.pager.PagerState,
+    pagerState: PagerState,
     deservedList: List<DeservedTreatmentPR>,
     onShowDetails: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "انتخاب بیمه‌شده",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.xs),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = Spacing.md),
-            pageSpacing = Spacing.sm
+            contentPadding = PaddingValues(horizontal = Spacing.lg),
+            pageSpacing = Spacing.md
         ) { page ->
-            val patient = patients.getOrNull(page)
-            if (patient != null) {
+            patients.getOrNull(page)?.let { patient ->
                 TreatmentCardItem(
                     patient = patient,
                     deservedList = deservedList,
@@ -303,12 +285,9 @@ fun PatientSelectionSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(Spacing.xs))
-
-        // Indicator dots
         if (patients.size > 1) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -319,7 +298,11 @@ fun PatientSelectionSection(
                             .padding(horizontal = 3.dp)
                             .size(if (isSelected) 8.dp else 6.dp)
                             .background(
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.outlineVariant
+                                },
                                 shape = CircleShape
                             )
                     )
@@ -329,6 +312,10 @@ fun PatientSelectionSection(
     }
 }
 
+/**
+ * Insurance card for one patient. Entitlement is only reported for the main insured, so
+ * dependants render as covered.
+ */
 @Composable
 fun TreatmentCardItem(
     patient: PatientItem,
@@ -336,147 +323,98 @@ fun TreatmentCardItem(
     onShowDetails: (String) -> Unit
 ) {
     val mainDeserved = deservedList.firstOrNull()
-    val hasDeserved = if (!patient.isDependent && mainDeserved != null) {
-        !mainDeserved.message.contains("عدم")
-    } else true
-
-    val isError = !patient.isDependent && mainDeserved != null && !hasDeserved
     val isLoading = !patient.isDependent && mainDeserved == null
+    val isError = !patient.isDependent && mainDeserved != null && mainDeserved.message.contains("عدم")
 
-    // Curated Harmonious Gradient Palette
-    val gradientColors = when {
-        isLoading -> listOf(Color(0xFF78909C), Color(0xFFB0BEC5)) // Gray/Blue-gray loading
-        isError -> listOf(Color(0xFFC62828), Color(0xFFEF5350)) // Premium red
-        else -> listOf(Color(0xFF2E7D32), Color(0xFF4CAF50)) // Premium green
-    }
+    val colors = LocalTaminColors.current
+    val gradient = if (patient.isDependent) DependantCardGradient else MainPatientCardGradient
 
+    // Fixed height so dependant cards match the main one: they carry fewer rows, and a
+    // wrap-content card would leave the pager showing ragged neighbours.
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
-        shape = RoundedCornerShape(CornerRadius.md),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            .height(PatientCardHeight)
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.linearGradient(gradientColors))
-                .padding(Spacing.md)
+                .background(gradient)
+                .padding(Spacing.lg)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+            Text(
+                text = if (patient.isDependent) {
+                    "کارت الکترونیک بیمهٔ درمان — تحت تکفل"
+                } else {
+                    "کارت الکترونیک بیمهٔ درمان"
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.bgSurface
+            )
+            Spacer(modifier = Modifier.height(Spacing.md))
+            Text(
+                text = patient.fullName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = colors.bgSurface
+            )
+            Text(
+                text = "کد ملی: ${patient.nationalId}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.bgSurface
+            )
+            patient.brhName?.let {
+                Text(
+                    text = "شعبه: $it",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.bgSurface
+                )
+            }
+            patient.insuranceType?.let {
+                Text(
+                    text = "نوع بیمه: $it",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.bgSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+            HorizontalDivider(color = colors.bgSurface.copy(alpha = 0.2f))
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Top row: Brand & Logo
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (patient.isDependent) "کارت خدمات درمانی تحت تکفل" else "کارت خدمات درمانی اصلی",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.8f)
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Icon(
+                        imageVector = when {
+                            isLoading -> Icons.Default.Refresh
+                            isError -> Icons.Default.Close
+                            else -> Icons.Default.CheckCircle
+                        },
+                        contentDescription = null,
+                        tint = colors.bgSurface,
+                        modifier = Modifier.size(16.dp)
                     )
+                    Spacer(modifier = Modifier.width(Spacing.xs))
                     Text(
-                        text = "تأمین همراه",
+                        text = when {
+                            isLoading -> "در حال استعلام وضعیت استحقاق..."
+                            isError -> "وضعیت حمایت‌های درمانی: فاقد استحقاق"
+                            else -> "وضعیت حمایت‌های درمانی: برخوردار هستید"
+                        },
                         style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = colors.bgSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                HorizontalDivider(color = Color.White.copy(alpha = 0.2f))
-
-                // Middle Row: Details & Barcode
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(vertical = Spacing.xs),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = patient.fullName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "کد ملی: ${patient.nationalId}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                        if (patient.brhName != null) {
-                            Text(
-                                text = "شعبه: ${patient.brhName}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.8f)
-                            )
-                        }
-                        if (patient.insuranceType != null) {
-                            Text(
-                                text = "نوع بیمه: ${patient.insuranceType}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
-
-                    DecorativeQRCode(modifier = Modifier.size(65.dp))
-                }
-
-                HorizontalDivider(color = Color.White.copy(alpha = 0.2f))
-
-                // Bottom Row: Status text & detail button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = when {
-                                isLoading -> Icons.Default.Refresh
-                                isError -> Icons.Default.Close
-                                else -> Icons.Default.CheckCircle
-                            },
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = when {
-                                isLoading -> "در حال استعلام وضعیت استحقاق..."
-                                isError -> "فاقد استحقاق درمان"
-                                else -> "مشمول حمایت درمانی تأمین اجتماعی"
-                            },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White
-                        )
-                    }
-
-                    if (isError && mainDeserved.message.isNotEmpty()) {
-                        Button(
-                            onClick = { onShowDetails(mainDeserved.message) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White.copy(alpha = 0.25f),
-                                contentColor = Color.White
-                            ),
-                            contentPadding = PaddingValues(horizontal = Spacing.sm, vertical = 2.dp),
-                            modifier = Modifier.height(26.dp)
-                        ) {
-                            Text("علت عدم استحقاق", style = MaterialTheme.typography.labelSmall)
-                        }
+                if (isError && mainDeserved.message.isNotEmpty()) {
+                    TextButton(onClick = { onShowDetails(mainDeserved.message) }) {
+                        Text("علت", style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -485,37 +423,283 @@ fun TreatmentCardItem(
 }
 
 @Composable
-fun DashboardMenuSection(
-    activePatientName: String
+private fun QuickAccessSection(
+    isHealthProfileCompleted: Boolean?,
+    onOpenRecords: () -> Unit,
+    onOpenHealthProfile: () -> Unit,
+    onOpenCenters: () -> Unit
 ) {
-    Column(
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md)) {
+        SectionLabel("دسترسی سریع")
+
+        TreatmentRow(
+            title = "سوابق درمانی من",
+            subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
+            icon = Icons.AutoMirrored.Filled.List,
+            emphasised = true,
+            onClick = onOpenRecords
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        TreatmentRow(
+            title = "پروندهٔ سلامت من",
+            subtitle = "خوداظهاری‌های سلامت و اطلاعات پزشکی",
+            icon = Icons.Default.FavoriteBorder,
+            // No badge until the health sub-flow reports the status.
+            badge = when (isHealthProfileCompleted) {
+                true -> "تکمیل شده"
+                false -> "تکمیل نشده"
+                null -> null
+            },
+            onClick = onOpenHealthProfile
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        TreatmentRow(
+            title = "مراکز درمانی طرف قرارداد",
+            subtitle = "جست‌وجوی بیمارستان و داروخانه",
+            icon = Icons.Default.LocationOn,
+            onClick = onOpenCenters
+        )
+    }
+}
+
+/** The three service tiles, laid out as one row of equal columns. */
+@Composable
+private fun ServiceGridSection(
+    onOpenPrescriptions: () -> Unit,
+    onOpenConfirmations: () -> Unit,
+    onOpenCosts: () -> Unit
+) {
+    Row(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = Spacing.md),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.lg),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
+        ServiceTile(
+            title = "خسارت متفرقه",
+            icon = Icons.Default.ShoppingCart,
+            onClick = onOpenCosts,
+            modifier = Modifier.weight(1f)
+        )
+        ServiceTile(
+            title = "تاییدیه‌های پزشکی",
+            icon = Icons.Default.CheckCircle,
+            onClick = onOpenConfirmations,
+            modifier = Modifier.weight(1f)
+        )
+        ServiceTile(
+            title = "نسخه‌های الکترونیک",
+            icon = Icons.AutoMirrored.Filled.List,
+            onClick = onOpenPrescriptions,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ServiceTile(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = Spacing.md, horizontal = Spacing.sm),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/**
+ * Current-year treatment spend.
+ *
+ * The totals endpoint belongs to the costs sub-flow and is not on this branch, so the shares read
+ * as placeholders until it lands.
+ */
+@Composable
+private fun YearlyCostSection(
+    organisationShare: Long? = null,
+    insuredShare: Long? = null
+) {
+    Column(modifier = Modifier.padding(Spacing.lg)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-            )
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Row(
-                modifier = Modifier.padding(Spacing.md),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountBox,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary
-                )
-                Spacer(modifier = Modifier.width(Spacing.sm))
+            Column(modifier = Modifier.padding(Spacing.lg)) {
                 Text(
-                    text = "در حال مشاهده اطلاعات درمان برای: $activePatientName",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    text = "هزینه‌های سال جاری",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(modifier = Modifier.height(Spacing.md))
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    ShareCell(
+                        label = "سهم سازمان",
+                        value = organisationShare,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ShareCell(
+                        label = "سهم بیمه‌شده",
+                        value = insuredShare,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
 }
+
+@Composable
+private fun ShareCell(label: String, value: Long?, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(Spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value?.toPriceFormat() ?: "—",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = LocalTaminColors.current.textSecondary,
+        modifier = Modifier.padding(bottom = Spacing.sm)
+    )
+}
+
+/** One tappable entry in the hub. [badge] renders a trailing status chip when present. */
+@Composable
+private fun TreatmentRow(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    badge: String? = null,
+    emphasised: Boolean = false
+) {
+    val colors = LocalTaminColors.current
+    val container = if (emphasised) colors.teal else colors.bgSurface
+    val onContainer = if (emphasised) colors.bgSurface else colors.textPrimary
+
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = container)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(Spacing.lg),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = onContainer,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = onContainer
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = onContainer.copy(alpha = 0.7f)
+                )
+            }
+            badge?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.orangeText,
+                    modifier = Modifier
+                        .background(colors.orangeBg, MaterialTheme.shapes.small)
+                        .padding(horizontal = Spacing.sm, vertical = 2.dp),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.width(Spacing.sm))
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+fun TreatmentScreenPreview() {
+    PreviewRtlThemeContent {
+        TreatmentContent(
+            state = TreatmentMocks.mainUiState,
+            onIntent = {},
+            onNavigateToRecords = { _, _ -> }
+        )
+    }
+}
+
+/**
+ * Patient card gradients, per the درمان design: teal→blue for the insured, purple for dependants.
+ *
+ * Defined here rather than in [com.tamin.taminhamrah.ui.theme.TaminColors] because the shared
+ * palette has no light-mode equivalent yet (its teal→blue lives only in the dark heroGradient) and
+ * the cards are owned by this screen.
+ */
+private val MainPatientCardGradient = Brush.linearGradient(
+    listOf(Color(0xFF10AEB9), Color(0xFF1E6FD0))
+)
+
+private val DependantCardGradient = Brush.linearGradient(
+    listOf(TaminPurple500, TaminPurple700)
+)
+
+/** Every carousel card is this tall, whoever the patient is. */
+private val PatientCardHeight = 180.dp

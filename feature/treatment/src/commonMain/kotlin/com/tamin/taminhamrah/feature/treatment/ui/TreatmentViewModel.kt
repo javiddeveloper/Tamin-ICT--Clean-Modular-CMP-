@@ -7,7 +7,6 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState.PartialState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
-import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
 
 class TreatmentViewModel(
-    private val tokenStoreManager: TokenStoreManager,
     private val getDeservedTreatmentUseCase: GetDeservedTreatmentUseCase,
     private val getDependantUnderEighteenUseCase: GetDependantUnderEighteenUseCase,
     private val identityInfoUseCase: IdentityInfoUseCase
@@ -90,6 +88,9 @@ class TreatmentViewModel(
         is PartialState.DependantsLoaded -> currentState.copy(isLoading = false, dependantList = partialState.list)
 
         // Navigation and sub-flow switches
+        is PartialState.HealthProfileStatusLoaded -> currentState.copy(
+            isHealthProfileCompleted = partialState.isCompleted
+        )
         is PartialState.FlowSwitched -> currentState.copy(
             activeFlow = partialState.flow,
             error = null
