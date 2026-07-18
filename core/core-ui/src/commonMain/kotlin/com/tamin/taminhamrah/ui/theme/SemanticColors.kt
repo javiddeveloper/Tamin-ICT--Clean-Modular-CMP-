@@ -30,6 +30,7 @@ data class TaminColors(
     val dangerBg: Color,
     val dangerBorder: Color,
     val dangerText: Color,
+    val disabledAlpha: Float,
 
     // Medical / Teal
     val teal: Color,
@@ -85,6 +86,7 @@ val LightTaminColors = TaminColors(
     tabbarBorder = Color(0xD9FFFFFF),
     tabbarShine = Color(0x80FFFFFF),
     tabActiveBg = Color(0x1A1F4FA3),
+    disabledAlpha = 0.38f,
     heroGradient = Brush.linearGradient(listOf(TaminNavy900, TaminNavy700)),
     medicalGradient = Brush.linearGradient(listOf(TaminTeal900, TaminTeal500)),
     aiAssistantGradient = Brush.linearGradient(
@@ -111,6 +113,7 @@ val DarkTaminColors = TaminColors(
     orangeText = TaminDarkOrangeText,
     dangerBg = TaminDarkBgSurface,
     dangerBorder = TaminDarkDangerBorder,
+    disabledAlpha = 0.38f,
     dangerText = TaminDarkDangerText,
     teal = TaminTeal500,
     glassA1 = Color(0x8C1E293B),
