@@ -17,7 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +34,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -80,11 +78,11 @@ private fun PreviewPage(content: @Composable BoxScope.() -> Unit) {
 }
 
 @Composable
-private fun BackIcon() {
-    Icon(
-        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+private fun BackButton() {
+    TreatmentHeaderButton(
+        icon = Icons.AutoMirrored.Filled.ArrowBack,
         contentDescription = "برگشت",
-        tint = Color.White,
+        onClick = {},
     )
 }
 
@@ -99,11 +97,13 @@ private fun TreatmentHubPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TreatmentHeader(
                 title = "درمان",
+                centerTitle = false,
                 action = {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
+                    TreatmentHeaderButton(
+                        icon = Icons.Filled.Search,
                         contentDescription = "جست‌وجو",
-                        tint = Color.White,
+                        onClick = {},
+                        bordered = true,
                     )
                 },
                 // Deep enough that the carousel can ride up into it without covering
@@ -154,7 +154,7 @@ private fun HubQuickAccess() {
             title = "سوابق درمانی من",
             subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
             icon = Icons.AutoMirrored.Filled.List,
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {},
         )
         TreatmentNavigationCard(
@@ -163,7 +163,7 @@ private fun HubQuickAccess() {
             icon = Icons.Filled.Favorite,
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {},
             status = {
                 StatusPill(
@@ -179,7 +179,7 @@ private fun HubQuickAccess() {
             icon = Icons.Filled.LocationOn,
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {},
         )
     }
@@ -323,12 +323,12 @@ private fun MedicalRecordsPagePreview() {
 private fun RecordsHeader() {
     TreatmentHeader(
         title = "سوابق درمانی",
-        navigationIcon = { BackIcon() },
+        navigationIcon = { BackButton() },
         action = {
-            Icon(
-                imageVector = Icons.Filled.Share,
+            TreatmentHeaderButton(
+                icon = Icons.Filled.Share,
                 contentDescription = "اشتراک‌گذاری",
-                tint = Color.White,
+                onClick = {},
             )
         },
     ) {
@@ -355,12 +355,12 @@ private fun RecordDetailPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TreatmentHeader(
                 title = "نسخهٔ الکترونیک",
-                navigationIcon = { BackIcon() },
+                navigationIcon = { BackButton() },
                 action = {
-                    Icon(
-                        imageVector = Icons.Filled.Share,
+                    TreatmentHeaderButton(
+                        icon = Icons.Filled.Share,
                         contentDescription = "اشتراک‌گذاری",
-                        tint = Color.White,
+                        onClick = {},
                     )
                 },
             )
@@ -415,7 +415,7 @@ private fun RecordDetailVisitPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TreatmentHeader(
                 title = "تاییدیهٔ پزشکی",
-                navigationIcon = { BackIcon() },
+                navigationIcon = { BackButton() },
             )
             Column(
                 modifier = Modifier.padding(Spacing.page),
@@ -505,7 +505,7 @@ private fun MedicalCentresPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TreatmentHeader(
                 title = "مراکز طرف قرارداد",
-                navigationIcon = { BackIcon() },
+                navigationIcon = { BackButton() },
             ) {
                 TreatmentSearchField(
                     value = "",
@@ -561,7 +561,7 @@ private fun MedicalCentresEmptyPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TreatmentHeader(
                 title = "مراکز طرف قرارداد",
-                navigationIcon = { BackIcon() },
+                navigationIcon = { BackButton() },
             ) {
                 TreatmentSearchField(
                     value = "بیمارستان نامشخص",

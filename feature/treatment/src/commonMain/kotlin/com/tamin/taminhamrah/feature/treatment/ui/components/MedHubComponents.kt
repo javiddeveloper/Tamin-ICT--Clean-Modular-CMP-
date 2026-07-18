@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.toPersianDigits
 
 /**
  * Components for the treatment hub landing screen: the insured-person card carousel,
@@ -61,6 +62,7 @@ fun InsuranceCard(
     coverageLabel: String,
     modifier: Modifier = Modifier,
     background: Brush = LocalTaminColors.current.medicalGradient,
+    footerAction: @Composable (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -84,12 +86,12 @@ fun InsuranceCard(
                 color = Color.White.copy(alpha = 0.75f),
             )
             NumericText(
-                text = nationalId,
+                text = nationalId.toPersianDigits(),
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.White,
             )
         }
-        InsuranceCardFooter(coverageLabel = coverageLabel)
+        InsuranceCardFooter(coverageLabel = coverageLabel, action = footerAction)
     }
 }
 
@@ -146,18 +148,25 @@ private fun InsuranceCardBrandRow(initial: String) {
 }
 
 @Composable
-private fun InsuranceCardFooter(coverageLabel: String) {
-    Box(
+private fun InsuranceCardFooter(
+    coverageLabel: String,
+    action: @Composable (() -> Unit)?,
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White.copy(alpha = 0.08f))
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Text(
             text = coverageLabel,
             style = MaterialTheme.typography.labelMedium,
             color = Color.White,
+            modifier = Modifier.weight(1f),
         )
+        action?.invoke()
     }
 }
 

@@ -34,6 +34,8 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminTeal500
+import com.tamin.taminhamrah.ui.theme.TaminTeal900
 // The platform local, deliberately: TaminHamrahTheme declares a same-named local of
 // its own that no Compose layout reads, so importing the theme's one would no-op.
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -185,43 +187,108 @@ fun TreatmentHeader(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit)? = null,
     action: @Composable (() -> Unit)? = null,
+    centerTitle: Boolean = true,
+    background: Brush = treatmentHeaderGradient(),
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                brush = LocalTaminColors.current.medicalGradient,
+                brush = background,
                 shape = RoundedCornerShape(
                     bottomStart = CornerRadius.sheet,
                     bottomEnd = CornerRadius.sheet,
                 ),
             )
-            .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+            .padding(
+                start = Spacing.page,
+                end = Spacing.page,
+                top = Spacing.lg,
+                bottom = Spacing.page,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            HeaderSlot { navigationIcon?.invoke() }
+            // A centred title needs an end cap on both sides even when empty, so the
+            // title sits between equal margins. A start-aligned one does not.
+            if (centerTitle || navigationIcon != null) {
+                HeaderSlot { navigationIcon?.invoke() }
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f),
+                textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = Spacing.sm),
             )
-            HeaderSlot { action?.invoke() }
+            if (centerTitle || action != null) {
+                HeaderSlot { action?.invoke() }
+            }
         }
         content()
     }
 }
 
+/**
+ * The header's teal wash. Built vertically on purpose: the shared `medicalGradient`
+ * token runs corner-to-corner, which on a full-width, short banner reads as a sideways
+ * sweep instead of the top-to-bottom fade the design asks for.
+ */
+@Composable
+fun treatmentHeaderGradient(): Brush = Brush.verticalGradient(
+    listOf(TaminTeal900, TaminTeal500),
+)
+
+/**
+ * Translucent chip holding a single header icon — the back chevron, the search and
+ * share actions. The design gives every header button this container, so the header
+ * owns it rather than leaving each caller to rebuild it.
+ */
+@Composable
+fun TreatmentHeaderButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    bordered: Boolean = false,
+) {
+    val shape = RoundedCornerShape(CornerRadius.chip)
+    Box(
+        modifier = modifier
+            .size(HEADER_BUTTON_SIZE)
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.125f))
+            .then(
+                if (bordered) {
+                    Modifier.border(1.dp, Color.White.copy(alpha = 0.2f), shape)
+                } else {
+                    Modifier
+                },
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(IconSize.small),
+        )
+    }
+}
+
+private val HEADER_BUTTON_SIZE = 36.dp
+
 /** Fixed-width end cap so the header title stays optically centred with 0, 1 or 2 actions. */
 @Composable
 private fun HeaderSlot(content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier.size(36.dp),
+        modifier = Modifier.size(HEADER_BUTTON_SIZE),
         contentAlignment = Alignment.Center,
         content = { content() },
     )

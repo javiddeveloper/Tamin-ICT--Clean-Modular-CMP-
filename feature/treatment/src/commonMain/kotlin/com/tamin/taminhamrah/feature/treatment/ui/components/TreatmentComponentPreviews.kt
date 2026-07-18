@@ -9,23 +9,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -102,7 +100,7 @@ private fun HubCardsPreview() {
             title = "سوابق درمانی من",
             subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
             icon = Icons.AutoMirrored.Filled.List,
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {},
         )
         TreatmentNavigationCard(
@@ -111,7 +109,7 @@ private fun HubCardsPreview() {
             icon = Icons.Filled.Favorite,
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {},
             status = {
                 StatusPill(
@@ -127,7 +125,7 @@ private fun HubCardsPreview() {
             icon = Icons.Filled.LocationOn,
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {},
         )
     }
@@ -209,10 +207,10 @@ private fun TimelineChromePreview() {
                 TreatmentHeader(
                     title = "سوابق درمانی",
                     navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        TreatmentHeaderButton(
+                            icon = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "برگشت",
-                            tint = Color.White,
+                            onClick = {},
                         )
                     },
                 ) {
@@ -336,10 +334,10 @@ private fun MedicalCentersPreview() {
                 TreatmentHeader(
                     title = "مراکز طرف قرارداد",
                     navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        TreatmentHeaderButton(
+                            icon = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "برگشت",
-                            tint = Color.White,
+                            onClick = {},
                         )
                     },
                 ) {
