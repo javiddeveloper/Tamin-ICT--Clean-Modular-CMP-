@@ -20,6 +20,25 @@ val TaminPurple700 = Color(0xFF5B2FC4)
 val TaminPurple500 = Color(0xFF6D4BE0)
 val TaminPurple300 = Color(0xFFA78BFA)
 
+// ---- Insurance card identities ----
+// One three-stop gradient per insured person, so adjacent cards in the treatment
+// carousel stay visually distinct. The main insured person always takes the teal set.
+val TaminCardTealStart = Color(0xFF0BA5A0)
+val TaminCardTealMid = Color(0xFF0E7FA6)
+val TaminCardTealEnd = Color(0xFF1655A8)
+
+val TaminCardPurpleStart = Color(0xFFB25CC9)
+val TaminCardPurpleMid = Color(0xFF8B4FC7)
+val TaminCardPurpleEnd = Color(0xFF5A3AA8)
+
+val TaminCardBlueStart = Color(0xFF3E9BE0)
+val TaminCardBlueMid = Color(0xFF3E7BD6)
+val TaminCardBlueEnd = Color(0xFF1F4FA3)
+
+val TaminCardAmberStart = Color(0xFFF4A83D)
+val TaminCardAmberMid = Color(0xFFE08A00)
+val TaminCardAmberEnd = Color(0xFFB96B00)
+
 // ---- Semantic accents ----
 val TaminGreen = Color(0xFF03AD5F)       // success / active dot
 val TaminGreenDark = Color(0xFF03794A)   // success text (on light bg)

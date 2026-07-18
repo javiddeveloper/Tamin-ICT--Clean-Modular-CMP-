@@ -41,6 +41,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminTeal700
 import com.tamin.taminhamrah.ui.toPriceFormat
 
 /**
@@ -86,9 +87,7 @@ private fun BackButton() {
     )
 }
 
-// ---------------------------------------------------------------------------
 // Page 1 · Treatment hub (درمان)
-// ---------------------------------------------------------------------------
 
 @PreviewRtlTheme
 @Composable
@@ -108,7 +107,8 @@ private fun TreatmentHubPagePreview() {
                 },
                 // Deep enough that the carousel can ride up into it without covering
                 // the title, matching the design's tall header plus negative margin.
-                modifier = Modifier.padding(bottom = CARD_OVERLAP + Spacing.xl),
+                background = treatmentHeaderGradient(TaminTeal700),
+                bottomPadding = CARD_OVERLAP + Spacing.xl,
             )
             // Everything below the header shifts up together, so the overlap does not
             // leave a gap the way offsetting the carousel alone would.

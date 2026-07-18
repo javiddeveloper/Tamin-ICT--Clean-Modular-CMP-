@@ -189,6 +189,7 @@ fun TreatmentHeader(
     action: @Composable (() -> Unit)? = null,
     centerTitle: Boolean = true,
     background: Brush = treatmentHeaderGradient(),
+    bottomPadding: Dp = Spacing.page,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     Column(
@@ -201,11 +202,14 @@ fun TreatmentHeader(
                     bottomEnd = CornerRadius.sheet,
                 ),
             )
+            // Deliberately inside the background: callers that want a deeper header for
+            // content to overlap into need the gradient to grow with it. Passing that
+            // depth via `modifier` would inset the gradient instead of extending it.
             .padding(
                 start = Spacing.page,
                 end = Spacing.page,
                 top = Spacing.lg,
-                bottom = Spacing.page,
+                bottom = bottomPadding,
             ),
     ) {
         Row(
@@ -240,8 +244,8 @@ fun TreatmentHeader(
  * sweep instead of the top-to-bottom fade the design asks for.
  */
 @Composable
-fun treatmentHeaderGradient(): Brush = Brush.verticalGradient(
-    listOf(TaminTeal900, TaminTeal500),
+fun treatmentHeaderGradient(endColor: Color = TaminTeal500): Brush = Brush.verticalGradient(
+    listOf(TaminTeal900, endColor),
 )
 
 /**

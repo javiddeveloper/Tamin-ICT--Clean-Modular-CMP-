@@ -37,6 +37,18 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
+import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
+import com.tamin.taminhamrah.ui.theme.TaminCardAmberStart
+import com.tamin.taminhamrah.ui.theme.TaminCardBlueEnd
+import com.tamin.taminhamrah.ui.theme.TaminCardBlueMid
+import com.tamin.taminhamrah.ui.theme.TaminCardBlueStart
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleEnd
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleMid
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
+import com.tamin.taminhamrah.ui.theme.TaminCardTealEnd
+import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
+import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.util.toPersianDigits
 
 /**
@@ -50,6 +62,32 @@ import com.tamin.taminhamrah.util.toPersianDigits
 
 private const val CARD_DECOR_ALPHA = 0.07f
 private const val CARD_PEEK_FRACTION = 0.87f
+
+/** The main insured person's card: teal fading into brand blue. */
+private val MainInsuredCardStops = listOf(TaminCardTealStart, TaminCardTealMid, TaminCardTealEnd)
+
+/**
+ * Dependants cycle through these so neighboring cards in the carousel never share a
+ * color. Ordered as the design lists them: spouse, then children.
+ */
+private val DependantCardStops = listOf(
+    listOf(TaminCardPurpleStart, TaminCardPurpleMid, TaminCardPurpleEnd),
+    listOf(TaminCardBlueStart, TaminCardBlueMid, TaminCardBlueEnd),
+    listOf(TaminCardAmberStart, TaminCardAmberMid, TaminCardAmberEnd),
+)
+
+/**
+ * The card identity for one insured person. [dependantOrdinal] is the person's position
+ * among the dependants only — the main insured person ignores it and always reads teal.
+ */
+fun insuranceCardGradient(isDependent: Boolean, dependantOrdinal: Int = 0): Brush {
+    val stops = if (isDependent) {
+        DependantCardStops[dependantOrdinal.mod(DependantCardStops.size)]
+    } else {
+        MainInsuredCardStops
+    }
+    return Brush.linearGradient(stops)
+}
 
 /**
  * The electronic health-insurance card for one insured person: organization branding,

@@ -49,6 +49,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentEmptyState
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentHeaderButton
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentNavigationCard
+import com.tamin.taminhamrah.feature.treatment.ui.components.treatmentHeaderGradient
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
@@ -61,6 +62,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminRed
 import com.tamin.taminhamrah.ui.theme.TaminRedDark
 import com.tamin.taminhamrah.ui.theme.TaminTeal500
+import com.tamin.taminhamrah.ui.theme.TaminTeal700
 import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
@@ -166,8 +168,10 @@ fun TreatmentContent(
                     )
                 }
             },
-            // Deep enough for the carousel to ride up into without covering the title.
-            modifier = Modifier.padding(bottom = CARD_OVERLAP + Spacing.xl),
+            // The design's hub header fades to a slightly darker teal than the
+            // sub-screens, and runs deep enough for the carousel to ride up into it.
+            background = treatmentHeaderGradient(TaminTeal700),
+            bottomPadding = CARD_OVERLAP + Spacing.xl,
         )
         // The whole body shifts up together, so the overlap does not leave a gap below.
         Column(modifier = Modifier.offset(y = -CARD_OVERLAP)) {
@@ -263,7 +267,10 @@ private fun PatientCarousel(
             pagerState = pagerState,
         ) { page ->
             val patient = patients[page]
-            val coverage = coverageFor(patient, state.deservedList)
+            // Position among dependants only, so each dependant keeps its own color
+            // regardless of whether a main insured person is present.
+            val dependantOrdinal = patients.take(page).count { it.isDependent }
+            val coverage = coverageFor(patient, state.deservedList, dependantOrdinal)
             InsuranceCard(
                 holderName = patient.fullName,
                 nationalId = patient.nationalId,
@@ -292,7 +299,7 @@ private fun EntitlementReasonChip(onClick: () -> Unit) {
     )
 }
 
-/** How the card presents one patient's entitlement: colour, wording and failure reason. */
+/** How the card presents one patient's entitlement: color, wording and failure reason. */
 private data class Coverage(
     val label: String,
     val background: Brush,
@@ -303,6 +310,7 @@ private data class Coverage(
 private fun coverageFor(
     patient: PatientItem,
     deservedList: List<DeservedTreatmentPR>,
+    dependantOrdinal: Int,
 ): Coverage {
     val mainDeserved = deservedList.firstOrNull()
     // Dependants inherit the main insured person's entitlement, so only the main record
@@ -324,7 +332,7 @@ private fun coverageFor(
         isRejected -> Coverage(
             label = "فاقد استحقاق درمان",
             background = Brush.verticalGradient(listOf(TaminRedDark, TaminRed)),
-            reason = mainDeserved?.message?.takeIf { it.isNotEmpty() },
+            reason = mainDeserved.message.takeIf { it.isNotEmpty() },
         )
 
         else -> Coverage(
