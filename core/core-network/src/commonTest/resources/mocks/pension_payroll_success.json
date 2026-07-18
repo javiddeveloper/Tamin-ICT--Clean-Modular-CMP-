@@ -1,14 +1,19 @@
 {
-  "id": 1,
-  "clpType": "Type A",
-  "tprDesc": "Payroll for Month 1",
-  "sumAmount": 5000000,
-  "textNumber": "Five Million",
-  "sumPay": 4500000,
-  "hisYear": "1402",
-  "hisMon": "01",
-  "hisDay": "01",
-  "hisYearPlus": "1402",
-  "hisMonPlus": "02",
-  "hisDayPlus": "01"
+  "list": [
+    {
+      "id": 1,
+      "clpType": "Type A",
+      "tprDesc": "Payroll for Month 1",
+      "sumAmount": 5000000,
+      "textNumber": "Five Million",
+      "sumPay": 4500000,
+      "hisYear": "1402",
+      "hisMon": "01",
+      "hisDay": "01",
+      "hisYearPlus": "1402",
+      "hisMonPlus": "02",
+      "hisDayPlus": "01"
+    }
+  ],
+  "total": 1
 }
