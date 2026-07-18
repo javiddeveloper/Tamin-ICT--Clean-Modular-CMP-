@@ -24,15 +24,17 @@ fun NavigationBarItemContent(
     modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
     label: @Composable (() -> Unit),
+    containerBrush : Brush,
+    radius : Int
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
-//            .background(
-//                brush = containerBrush,
-//                shape = RoundedCornerShape(radius) // Large pill shape
-//            )
+            .background(
+                brush = containerBrush,
+                shape = RoundedCornerShape(radius) // Large pill shape
+            ).padding(vertical = 4.dp)
             // Adjust padding to control the size of the pill wrapper
 
     ) {

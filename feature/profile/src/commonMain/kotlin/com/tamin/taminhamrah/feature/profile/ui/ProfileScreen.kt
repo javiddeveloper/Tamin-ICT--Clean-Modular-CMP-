@@ -1,12 +1,20 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -18,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
@@ -89,16 +98,19 @@ fun HandleProfileEvents(
                     // onNavigateToRouteById(100)
                 }
             }
+
             ProfileEvent.NavigateToIdentity -> {
                 scope.launch {
                     onNavigateToIdentity()
                 }
             }
+
             is ProfileEvent.OpenUrl -> {
                 scope.launch {
                     onOpenUrl(it.url)
                 }
             }
+
             is ProfileEvent.ShowToast -> {
                 // Handle toast
             }
@@ -112,11 +124,16 @@ fun ProfileContent(
     state: ProfileUiState,
     onIntent: (ProfileIntent) -> Unit,
 ) {
-    Scaffold { paddingValues ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+                .fillMaxSize(),
+            contentPadding = PaddingValues(
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 80.dp
+            ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
@@ -167,7 +184,12 @@ fun ProfileContent(
                     title = "تست درخواست تصویر (SendImageRequest)",
                     subtitle = when {
                         state.isImageRequestLoading -> "در حال ارسال..."
-                        state.imageRequestResult != null -> "موفق: ${state.imageRequestResult.take(20)}..."
+                        state.imageRequestResult != null -> "موفق: ${
+                            state.imageRequestResult.take(
+                                20
+                            )
+                        }..."
+
                         state.imageRequestError != null -> "خطا: ${state.imageRequestError}"
                         else -> "برای تست ارسال کلیک کنید"
                     },
@@ -176,7 +198,12 @@ fun ProfileContent(
                     onClick = {
                         val relation = state.taminRelation
                         if (relation != null) {
-                            onIntent(ProfileIntent.SendImageRequest(branchCode = relation.brhCode, filter = "edit-text"))
+                            onIntent(
+                                ProfileIntent.SendImageRequest(
+                                    branchCode = relation.brhCode,
+                                    filter = "edit-text"
+                                )
+                            )
                         }
                     }
                 )

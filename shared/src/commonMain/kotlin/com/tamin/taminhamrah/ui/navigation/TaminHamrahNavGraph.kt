@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.animation.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -54,10 +55,15 @@ import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
 import com.tamin.taminhamrah.feature.treatment.treatmentScreen
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
+import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -65,7 +71,13 @@ import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.FontResource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_home_menu
+import taminx.core.core_ui.ic_profile_menu
+import taminx.core.core_ui.ic_services_menu
+import taminx.core.core_ui.ic_treatment_menu
 
 @Composable
 internal fun TaminHamrahNavGraph(
@@ -87,7 +99,7 @@ internal fun TaminHamrahNavGraph(
     val navItemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = Color.Transparent,
         selectedTextColor = Color.Transparent,
-        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        indicatorColor = Color.Transparent,
         unselectedIconColor = Color.Transparent,
         unselectedTextColor = Color.Transparent
     )
@@ -97,7 +109,7 @@ internal fun TaminHamrahNavGraph(
         NavigationTab(
             title = "خانه",
             isSelected = isHomeSelected,
-            icon = Icons.Default.Home,
+            icon = Res.drawable.ic_home_menu,
             onClick = {
                 navController.navigate(Route.Home) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -109,7 +121,7 @@ internal fun TaminHamrahNavGraph(
         NavigationTab(
             title = "خدمات",
             isSelected = isCartableSelected,
-            icon = Icons.Default.Apps,
+            icon = Res.drawable.ic_services_menu,
             onClick = {
                 navController.navigate(CartableRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -121,7 +133,7 @@ internal fun TaminHamrahNavGraph(
         NavigationTab(
             title = "درمان",
             isSelected = isTreatmentSelected,
-            icon = Icons.Default.Favorite,
+            icon = Res.drawable.ic_treatment_menu,
             onClick = {
                 navController.navigate(TreatmentRoute) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -133,7 +145,7 @@ internal fun TaminHamrahNavGraph(
         NavigationTab(
             title = "پروفایل",
             isSelected = isProfileSelected,
-            icon = Icons.Default.Person,
+            icon = Res.drawable.ic_profile_menu,
             onClick = {
                 navController.navigate(ProfileRoute.Main()) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -148,6 +160,7 @@ internal fun TaminHamrahNavGraph(
         isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             androidx.compose.animation.AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -160,103 +173,64 @@ internal fun TaminHamrahNavGraph(
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
                 )
             ) {
-                FloatingGlassNavigationBar(hazeState = hazeState) {
-
-                    navigationItems.forEach { navigationItem ->
-                        val contentColor =
-                            if (navigationItem.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                        NavigationBarItem(
-                            icon = {
-                                NavigationBarItemContent(
-                                    icon = { Icon(navigationItem.icon, null, tint = contentColor) },
-                                    label = { Text(navigationItem.title, color = contentColor ) },
-                                    modifier = Modifier,
-                                    )
-                            },
-                            selected = navigationItem.isSelected,
-                            onClick = navigationItem.onClick,
-                            colors = navItemColors,
-                            modifier = Modifier,
-
-
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.6f)
+                                )
+                            )
                         )
-                    }
+                ) {
+                    FloatingGlassNavigationBar(hazeState = hazeState) {
 
-//                    // Item 1: Home ("خانه") - Far right in RTL
-//                    NavigationBarItem(
-//                        icon = {
-//                            NavigationBarItemContent(
-//                                icon = { Icon(Icons.Default.Home, null) },
-//                                label = { Text("خانه") },
-//                                radius = 24,
-//                                modifier = Modifier,
-//                                container =
-//                            )
-//                        },
-//                        selected = isHomeSelected,
-//                        onClick = {
-//                            navController.navigate(Route.Home) {
-//                                popUpTo(navController.graph.findStartDestination().id) {
-//                                    saveState = true
-//                                }
-//                                launchSingleTop = true
-//                                restoreState = true
-//                            }
-//                        },
-//                        colors = navItemColors
-//                    )
-//
-//                    // Item 2: Services ("خدمات") - Middle-right in RTL
-//                    NavigationBarItem(
-//                        icon = { Icon(Icons.Default.Apps, null) },
-//                        label = { Text("خدمات") },
-//                        selected = isCartableSelected,
-//                        onClick = {
-//                            navController.navigateToCartable {
-//                                popUpTo(navController.graph.findStartDestination().id) {
-//                                    saveState = true
-//                                }
-//                                launchSingleTop = true
-//                                restoreState = true
-//                            }
-//                        },
-//                        colors = navItemColors
-//                    )
-//
-//                    // Item 3: Treatment ("درمان") - Middle-left in RTL
-//                    NavigationBarItem(
-//                        icon = { Icon(Icons.Default.Favorite, null) },
-//                        label = { Text("درمان") },
-//                        selected = isTreatmentSelected,
-//                        onClick = {
-//                            navController.navigateToTreatment {
-//                                popUpTo(navController.graph.findStartDestination().id) {
-//                                    saveState = true
-//                                }
-//                                launchSingleTop = true
-//                                restoreState = true
-//                            }
-//                        },
-//                        colors = navItemColors,
-//
-//                        )
-//
-//                    // Item 4: Profile ("پروفایل") - Far left in RTL
-//                    NavigationBarItem(
-//                        icon = { Icon(Icons.Default.Person, null) },
-//                        label = { Text("پروفایل") },
-//                        selected = isProfileSelected,
-//                        onClick = {
-//                            navController.navigate(ProfileRoute.Main(userId = "TaminUser")) {
-//                                popUpTo(navController.graph.findStartDestination().id) {
-//                                    saveState = true
-//                                }
-//                                launchSingleTop = true
-//                                restoreState = true
-//                            }
-//                        },
-//                        colors = navItemColors
-//                    )
+                        navigationItems.forEach { navigationItem ->
+
+                            val containerColor: Brush =
+                                if (navigationItem.isSelected) Brush.linearGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                    ), tileMode = TileMode.Clamp
+                                ) else Brush.sweepGradient(
+                                    listOf(
+                                        Color.Transparent,
+                                        Color.Transparent
+                                    )
+                                )
+                            val contentColor =
+                                if (navigationItem.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                            CustomNavigationBarItem(
+                                icon = {
+                                    NavigationBarItemContent(
+                                        icon = {
+                                            Icon(
+                                                painter = painterResource(navigationItem.icon),
+                                                null,
+                                                tint = contentColor
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                navigationItem.title,
+                                                color = contentColor,
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        containerBrush = containerColor,
+                                        radius = 24,
+                                    )
+                                },
+                                selected = navigationItem.isSelected,
+                                onClick = navigationItem.onClick,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -344,6 +318,31 @@ internal fun TaminHamrahNavGraph(
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
             }
 
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isBottomBarVisible,
+                enter = fadeIn(
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                ),
+                exit = fadeOut(
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                ),
+                modifier = Modifier.align(Alignment.TopCenter)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.35f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+            }
+
             if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -419,7 +418,7 @@ fun HomeScreen(
     )
 
     Box(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -428,7 +427,15 @@ fun HomeScreen(
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+                    // Top padding for content breathing room
+                    .padding(top = 16.dp)
+                    // Bottom padding so last item scrolls fully above the floating blur bar
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(bottom = 80.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
