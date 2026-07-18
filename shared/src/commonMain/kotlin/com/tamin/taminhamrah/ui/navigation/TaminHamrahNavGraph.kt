@@ -107,23 +107,11 @@ internal fun TaminHamrahNavGraph(
 
     val navigationItems = listOf(
         NavigationTab(
-            title = "خانه",
-            isSelected = isHomeSelected,
-            icon = Res.drawable.ic_home_menu,
+            title = "پروفایل",
+            isSelected = isProfileSelected,
+            icon = Res.drawable.ic_profile_menu,
             onClick = {
-                navController.navigate(Route.Home) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        ),
-        NavigationTab(
-            title = "خدمات",
-            isSelected = isCartableSelected,
-            icon = Res.drawable.ic_services_menu,
-            onClick = {
-                navController.navigate(CartableRoute.Main) {
+                navController.navigate(ProfileRoute.Main()) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -143,17 +131,30 @@ internal fun TaminHamrahNavGraph(
             }
         ),
         NavigationTab(
-            title = "پروفایل",
-            isSelected = isProfileSelected,
-            icon = Res.drawable.ic_profile_menu,
+            title = "خدمات",
+            isSelected = isCartableSelected,
+            icon = Res.drawable.ic_services_menu,
             onClick = {
-                navController.navigate(ProfileRoute.Main()) {
+                navController.navigate(CartableRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
                 }
             }
-        )
+        ),
+        NavigationTab(
+            title = "خانه",
+            isSelected = isHomeSelected,
+            icon = Res.drawable.ic_home_menu,
+            onClick = {
+                navController.navigate(Route.Home) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+
     )
 
     val isBottomBarVisible =
@@ -192,8 +193,9 @@ internal fun TaminHamrahNavGraph(
                             val containerColor: Brush =
                                 if (navigationItem.isSelected) Brush.linearGradient(
                                     listOf(
-                                        MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
                                     ), tileMode = TileMode.Clamp
                                 ) else Brush.sweepGradient(
                                     listOf(
@@ -202,7 +204,7 @@ internal fun TaminHamrahNavGraph(
                                     )
                                 )
                             val contentColor =
-                                if (navigationItem.isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                if (navigationItem.isSelected) MaterialTheme.colorScheme.primary else Color.Gray
                             CustomNavigationBarItem(
                                 icon = {
                                     NavigationBarItemContent(
