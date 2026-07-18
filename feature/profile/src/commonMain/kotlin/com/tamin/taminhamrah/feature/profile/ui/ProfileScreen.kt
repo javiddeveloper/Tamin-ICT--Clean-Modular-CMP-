@@ -20,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
@@ -44,6 +46,20 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_aparat
 import taminx.core.core_ui.ic_tamin_logo
+import taminx.core.core_ui.ic_identity
+import taminx.core.core_ui.ic_person
+import taminx.core.core_ui.ic_communication
+import taminx.core.core_ui.ic_request
+import taminx.core.core_ui.ic_number
+import taminx.core.core_ui.ic_mobile
+import taminx.core.core_ui.ic_inbox
+import taminx.core.core_ui.ic_privacy
+import taminx.core.core_ui.ic_setting
+import taminx.core.core_ui.ic_support
+import taminx.core.core_ui.ic_send
+import taminx.core.core_ui.ic_share
+import taminx.core.core_ui.ic_history
+import taminx.core.core_ui.ic_exit
 
 @Composable
 fun ProfileScreen(
@@ -165,13 +181,13 @@ fun ProfileContent(
                         items = persistentListOf(
                             ListItemData(
                                 title = "اطلاعات هویتی",
-                                leadingIconPainter = painterResource(Res.drawable.ic_tamin_logo),
+                                leadingIconPainter = painterResource(Res.drawable.ic_identity),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.IDENTITY_INFO)) }
                             ),
                             ListItemData(
                                 title = "مشاهده و ثبت افراد تبعی",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_person),
                                 badge = ListItemBadge(
                                     text = "۳ نفر",
                                     backgroundColor = taminColors.blueBg,
@@ -182,25 +198,25 @@ fun ProfileContent(
                             ),
                             ListItemData(
                                 title = "ارتباط فعال با تأمین",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_communication),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ACTIVE_RELATION)) }
                             ),
                             ListItemData(
                                 title = "پرونده الکترونیک",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_request),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ELECTRONIC_FILE)) }
                             ),
                             ListItemData(
                                 title = "شماره حساب بانکی",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_number),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
                             ),
                             ListItemData(
                                 title = "تغییر شماره موبایل",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_mobile),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
                             )
@@ -218,13 +234,13 @@ fun ProfileContent(
                         items = persistentListOf(
                             ListItemData(
                                 title = "درخواست ها",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_request),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.REQUESTS)) }
                             ),
                             ListItemData(
                                 title = "صندوق شخصی",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_inbox),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
                             )
@@ -242,13 +258,13 @@ fun ProfileContent(
                         items = persistentListOf(
                             ListItemData(
                                 title = "امنیت",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_privacy),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SECURITY)) }
                             ),
                             ListItemData(
                                 title = "تنظیمات",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_setting),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SETTINGS)) }
                             )
@@ -266,25 +282,25 @@ fun ProfileContent(
                         items = persistentListOf(
                             ListItemData(
                                 title = "پشتیبانی",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_support),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SUPPORT)) }
                             ),
                             ListItemData(
                                 title = "تماس با من",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_send),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CONTACT_ME)) }
                             ),
                             ListItemData(
                                 title = "اشتراک‌گذاری",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_share),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SHARE)) }
                             ),
                             ListItemData(
                                 title = "تاریخچهٔ نسخه",
-                                leadingIconPainter = painterResource(Res.drawable.ic_aparat),
+                                leadingIconPainter = painterResource(Res.drawable.ic_history),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.VERSION_HISTORY)) }
                             )
@@ -301,7 +317,7 @@ fun ProfileContent(
                         items = persistentListOf(
                             ListItemData(
                                 title = "خروج از حساب کاربری",
-                                leadingIconPainter = painterResource(Res.drawable.ic_tamin_logo),
+                                leadingIconPainter = painterResource(Res.drawable.ic_exit),
                                 colors = ListItemColors(
                                     titleColor = taminColors.dangerText,
                                     leadingIconBackgroundColor = taminColors.dangerBg,
