@@ -4,6 +4,17 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+private const val PERSIAN_ZERO = '۰'
+
+/**
+ * Converts the ASCII digits in this string to Persian-Indic digits, leaving every
+ * other character untouched. Shared by the date and price formatters so both render
+ * numerals the same way.
+ */
+fun String.toPersianDigits(): String = map { char ->
+    if (char in '0'..'9') PERSIAN_ZERO + (char - '0') else char
+}.joinToString("")
+
 object PersianDateFormatter {
 
     fun formatTimestamp(timestamp: Long?): String {
@@ -20,24 +31,6 @@ object PersianDateFormatter {
 
     private fun Int.toPersianDigits(): String {
         return toString().toPersianDigits()
-    }
-
-    private fun String.toPersianDigits(): String {
-        return map { char ->
-            when (char) {
-                '0' -> '۰'
-                '1' -> '۱'
-                '2' -> '۲'
-                '3' -> '۳'
-                '4' -> '۴'
-                '5' -> '۵'
-                '6' -> '۶'
-                '7' -> '۷'
-                '8' -> '۸'
-                '9' -> '۹'
-                else -> char
-            }
-        }.joinToString("")
     }
 
     private fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {

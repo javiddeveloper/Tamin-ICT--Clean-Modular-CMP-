@@ -26,6 +26,11 @@ object Spacing {
     val lg = 16.dp
     val xl = 24.dp
     val xxl = 32.dp
+
+    // Gaps taken from the Tamin Man App design that fall between the steps above.
+    // Named for what they space so call sites stay free of magic numbers.
+    val page = 18.dp
+    val cardGap = 11.dp
 }
 
 object CornerRadius {
@@ -36,6 +41,16 @@ object CornerRadius {
     val lg = 16.dp
     val xl = 24.dp
     val xxl = 32.dp
+
+    // Radii taken from the Tamin Man App design that fall between the steps above.
+    // Named for the element they belong to rather than an abstract size step.
+    val avatarTile = 10.dp
+    val listRow = 13.dp
+    val chip = 14.dp
+    val iconTile = 18.dp
+    val cardCompact = 20.dp
+    val card = 22.dp
+    val sheet = 28.dp
 }
 
 object Elevation {
