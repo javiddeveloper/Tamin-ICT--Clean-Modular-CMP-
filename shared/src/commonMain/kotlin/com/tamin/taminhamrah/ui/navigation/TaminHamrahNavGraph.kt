@@ -50,9 +50,14 @@ import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
 import com.tamin.taminhamrah.feature.treatment.treatmentScreen
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Menu
+import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
+import com.tamin.taminhamrah.ui.khadamat.KhadamatRoute
+import com.tamin.taminhamrah.ui.khadamat.KhadamatViewModel
+import com.tamin.taminhamrah.ui.khadamat.contract.TaminScreens
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -70,7 +75,8 @@ internal fun TaminHamrahNavGraph(
     val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
             currentDestination?.hasRoute<TreatmentRoute>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
-            currentDestination?.hasRoute<CartableRoute.Main>() == true
+            currentDestination?.hasRoute<CartableRoute.Main>() == true ||
+            currentDestination?.hasRoute<Route.Khadamat>() == true
 
     Scaffold(
         bottomBar = {
@@ -92,6 +98,20 @@ internal fun TaminHamrahNavGraph(
                         selected = currentDestination?.hasRoute<Route.Home>() == true,
                         onClick = {
                             navController.navigate(Route.Home) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Menu, null) },
+                        label = { Text("Services") },
+                        selected = currentDestination?.hasRoute<Route.Khadamat>() == true,
+                        onClick = {
+                            navController.navigate(Route.Khadamat) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -177,6 +197,31 @@ internal fun TaminHamrahNavGraph(
                         onNavigateToPensionInquiry = {
                             navController.navigateToPensionInquiry()
                         },
+                    )
+                }
+
+                composable<Route.Khadamat> {
+                    val khadamatViewModel: KhadamatViewModel = koinViewModel()
+                    KhadamatRoute(
+                        viewModel = khadamatViewModel,
+                        onNavigateToRoute = { screen ->
+                            when (screen) {
+                                is TaminScreens.History -> navController.navigateToHistory()
+                                is TaminScreens.Workshops -> navController.navigateToWorkshops()
+                                is TaminScreens.Contracts -> navController.navigateToContracts()
+                                is TaminScreens.StudentInsurance -> navController.navigateToStudentInsuranceContract()
+                                is TaminScreens.FreelanceInsurance -> navController.navigateToFreelanceInsuranceContract()
+                                is TaminScreens.OptionalInsurance -> navController.navigateToOptionalInsuranceContract()
+                                is TaminScreens.HousewifeInsurance -> navController.navigateToHousewifeInsuranceContract()
+                                is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
+                                is TaminScreens.WebView -> openUrl(screen.url)
+                                is TaminScreens.ShowMessage -> {
+                                }
+                            }
+                        },
+                        onBackClicked = {
+                            navController.popBackStack()
+                        }
                     )
                 }
 

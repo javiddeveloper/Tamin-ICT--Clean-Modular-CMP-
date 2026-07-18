@@ -72,7 +72,7 @@ fun taminHamrahTypography(): Typography {
         titleSmall = TextStyle(
             fontFamily = fontFamily,
             fontWeight = FontWeight(600),
-            fontSize = 14.5.sp,
+            fontSize = 12.5.sp,
             lineHeight = 20.sp
         ),
 

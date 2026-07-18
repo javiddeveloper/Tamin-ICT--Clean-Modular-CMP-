@@ -12,4 +12,6 @@ sealed interface Route {
     data object Settings : Route
     @Serializable
     data object Notifications : Route
+    @Serializable
+    data object Khadamat : Route
 }
