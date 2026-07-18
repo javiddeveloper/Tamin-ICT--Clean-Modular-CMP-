@@ -24,25 +24,35 @@ object Spacing {
     val sm = 8.dp
     val md = 12.dp
     val lg = 16.dp
+    val xlg = 20.dp
     val xl = 24.dp
     val xxl = 32.dp
+    val xxxl = 40.dp
+    val xxxxl = 48.dp
+    val xxxxxl = 64.dp
+    val xxxxxxl = 80.dp
+    val xxxxxxxl = 96.dp
 }
 
 object CornerRadius {
-    val xxs = 2.dp
-    val xs = 4.dp
-    val sm = 8.dp
-    val md = 12.dp
-    val lg = 16.dp
-    val xl = 24.dp
-    val xxl = 32.dp
+    val none = 0.dp
+    val xs = 2.dp
+    val sm = 4.dp
+    val md = 8.dp
+    val lg = 12.dp
+    val xl = 16.dp
+    val x2l = 24.dp
+    val full = 9999.dp
 }
 
 object Elevation {
-    val xs = 1.dp
-    val sm = 2.dp
-    val md = 4.dp
-    val lg = 8.dp
+    val none = 0.dp
+    val xxs = 1.dp
+    val xs = 2.dp
+    val sm = 4.dp
+    val md = 6.dp
+    val lg = 12.dp
+    val xl = 24.dp
 }
 
 object IconSize {
