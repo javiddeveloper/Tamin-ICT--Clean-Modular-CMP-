@@ -42,6 +42,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
+    onNavigateToHealthProfile: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
@@ -55,6 +56,7 @@ fun ProfileScreen(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToRouteById = onNavigateToRouteById,
+        onNavigateToHealthProfile = onNavigateToHealthProfile,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -70,6 +72,7 @@ fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
+    onNavigateToHealthProfile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -92,6 +95,11 @@ fun HandleProfileEvents(
             ProfileEvent.NavigateToIdentity -> {
                 scope.launch {
                     onNavigateToIdentity()
+                }
+            }
+            ProfileEvent.NavigateToHealthProfile -> {
+                scope.launch {
+                    onNavigateToHealthProfile()
                 }
             }
             is ProfileEvent.OpenUrl -> {
@@ -240,6 +248,18 @@ fun ProfileContent(
                     icon = painterResource(Res.drawable.ic_aparat),
                     showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
                     onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
+                )
+            }
+            item {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
+            }
+            item {
+                StandardListItem(
+                    title = "پروفایل سلامت",
+                    subtitle = "نمایش اطلاعات عمومی سلامت، سبک زندگی و حساسیت‌ها",
+                    icon = painterResource(Res.drawable.ic_tamin_logo),
+                    showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.HEALTH_PROFILE)) }
                 )
             }
             item {

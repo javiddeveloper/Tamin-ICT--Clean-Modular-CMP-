@@ -1,25 +1,24 @@
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.android.build.gradle.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
-import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-class TaminHamrahAndroidApplicationPlugin : Plugin<Project> {
+class TaminHamrahKmpLibraryPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.application")
-                apply("org.jetbrains.kotlin.android")
+                apply("org.jetbrains.kotlin.multiplatform")
+                apply("com.android.library")
             }
 
-            extensions.configure<BaseAppModuleExtension> {
+            extensions.configure<LibraryExtension> {
                 compileSdk = 36
                 buildToolsVersion = "36.0.0"
                 defaultConfig {
                     minSdk = 24
-                    targetSdk = 35
                 }
                 compileOptions {
                     sourceCompatibility = JavaVersion.VERSION_17
@@ -27,10 +26,15 @@ class TaminHamrahAndroidApplicationPlugin : Plugin<Project> {
                 }
             }
 
-            extensions.configure<KotlinAndroidProjectExtension> {
-                compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_17)
+            extensions.configure<KotlinMultiplatformExtension> {
+                jvmToolchain(17)
+                androidTarget {
+                    compilerOptions {
+                        jvmTarget.set(JvmTarget.JVM_17)
+                    }
                 }
+                iosArm64()
+                iosSimulatorArm64()
             }
         }
     }

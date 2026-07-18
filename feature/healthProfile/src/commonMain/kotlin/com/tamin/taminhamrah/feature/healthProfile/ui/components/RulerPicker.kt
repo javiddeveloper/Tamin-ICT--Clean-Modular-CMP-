@@ -1,0 +1,328 @@
+package com.tamin.taminhamrah.feature.healthProfile.ui.components
+
+import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+
+/**
+ * A highly interactive, premium Ruler Picker component.
+ * Allows users to choose a value (like height or weight) by dragging the ruler
+ * or using increment/decrement buttons.
+ *
+ * @param value The current value.
+ * @param onValueChange Callback when the value changes.
+ * @param range The valid range of integers.
+ * @param unit The unit label (e.g. "سانتی‌متر" or "کیلوگرم").
+ * @param accentColor The color of the main pointer and active buttons.
+ */
+@Composable
+fun RulerPicker(
+    modifier: Modifier = Modifier,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    range: IntRange,
+    unit: String,
+    accentColor: Color = LocalTaminColors.current.blueText
+) {
+    val taminColors = LocalTaminColors.current
+    val coroutineScope = rememberCoroutineScope()
+    
+    // Ticks configuration
+    val tickSpacingPx = 24f // spacing between ticks in pixels
+    val totalTicks = range.last - range.first
+    
+    // We maintain a float offset representing the scroll position
+    // Center of screen represents the current value
+    val scrollOffset = remember { Animatable((value - range.first) * tickSpacingPx) }
+
+    // Synchronize external value changes (e.g., from buttons)
+    LaunchedEffect(value) {
+        val targetOffset = (value - range.first) * tickSpacingPx
+        if (scrollOffset.value.roundToInt() != targetOffset.roundToInt()) {
+            scrollOffset.animateTo(targetOffset)
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(taminColors.bgSurface)
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Value and Unit display
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(bottom = 12.dp)
+        ) {
+            // Decrement Button
+            IconButton(
+                onClick = {
+                    if (value > range.first) {
+                        onValueChange(value - 1)
+                    }
+                },
+                modifier = Modifier
+                    .size(38.dp)
+                    .background(taminColors.divider, CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = "کاهش",
+                    tint = taminColors.textSecondary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(24.dp))
+
+            // Current Value Display (JetBrains Mono for styling)
+            Text(
+                text = value.toString(),
+                fontSize = 44.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = taminColors.textPrimary,
+                fontFamily = FontFamily.Monospace,
+                lineHeight = 44.sp,
+                modifier = Modifier.alignByBaseline()
+            )
+            
+            Spacer(modifier = Modifier.width(4.dp))
+            
+            Text(
+                text = unit,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = taminColors.textMuted
+                ),
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .alignByBaseline()
+            )
+
+            Spacer(modifier = Modifier.width(24.dp))
+
+            // Increment Button
+            IconButton(
+                onClick = {
+                    if (value < range.last) {
+                        onValueChange(value + 1)
+                    }
+                },
+                modifier = Modifier
+                    .size(38.dp)
+                    .background(accentColor.copy(alpha = 0.15f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "افزایش",
+                    tint = accentColor,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        // Ruler view area
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        coroutineScope.launch {
+                            // Drag moves the ruler. Delta is inverted for natural scroll direction.
+                            val newOffset = (scrollOffset.value - delta)
+                                .coerceIn(0f, totalTicks * tickSpacingPx)
+                            scrollOffset.snapTo(newOffset)
+                            val newValue = range.first + (newOffset / tickSpacingPx).roundToInt()
+                            onValueChange(newValue.coerceIn(range))
+                        }
+                    },
+                    onDragStopped = {
+                        // Snap exactly to the nearest tick mark on release
+                        val nearestTick = (scrollOffset.value / tickSpacingPx).roundToInt()
+                        val targetOffset = nearestTick * tickSpacingPx
+                        scrollOffset.animateTo(targetOffset)
+                        onValueChange((range.first + nearestTick).coerceIn(range))
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val centerVal = scrollOffset.value
+                val viewWidth = size.width
+                val viewHeight = size.height
+                val midX = viewWidth / 2f
+                
+                // Draw Ticks
+                val startTickIndex = ((centerVal - midX) / tickSpacingPx).toInt().coerceAtLeast(0)
+                val endTickIndex = ((centerVal + midX) / tickSpacingPx).toInt().coerceAtMost(totalTicks)
+
+                for (i in startTickIndex..endTickIndex) {
+                    val tickValue = range.first + i
+                    val tickX = midX + (i * tickSpacingPx) - centerVal
+
+                    val isMajor = tickValue % 10 == 0
+                    val isHalf = tickValue % 5 == 0 && !isMajor
+
+                    val tickHeight = when {
+                        isMajor -> 36f
+                        isHalf -> 24f
+                        else -> 14f
+                    }
+                    
+                    val tickThickness = if (isMajor) 2f else 1f
+                    val tickColor = if (isMajor) taminColors.textSecondary.copy(alpha = 0.6f) else taminColors.textMuted.copy(alpha = 0.4f)
+
+                    // Draw tick mark line (hanging down from top)
+                    drawLine(
+                        color = tickColor,
+                        start = Offset(tickX, 0f),
+                        end = Offset(tickX, tickHeight),
+                        strokeWidth = tickThickness
+                    )
+
+                    // Draw labels under major ticks (handled in absolute text layers below)
+                }
+
+                // 2. Draw Side Fade Gradients (for glass/premium look)
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(taminColors.bgSurface, Color.Transparent),
+                        startX = 0f,
+                        endX = 54.dp.toPx()
+                    ),
+                    topLeft = Offset(0f, 0f),
+                    size = Size(54.dp.toPx(), viewHeight)
+                )
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(Color.Transparent, taminColors.bgSurface),
+                        startX = viewWidth - 54.dp.toPx(),
+                        endX = viewWidth
+                    ),
+                    topLeft = Offset(viewWidth - 54.dp.toPx(), 0f),
+                    size = Size(54.dp.toPx(), viewHeight)
+                )
+
+                // 3. Draw Center Active Pointer (Arrow + Vertical line)
+                // Main pointer vertical line
+                drawLine(
+                    color = accentColor,
+                    start = Offset(midX, 0f),
+                    end = Offset(midX, 40f),
+                    strokeWidth = 2.5f,
+                    pathEffect = null
+                )
+                // Arrow pointing up at the bottom of the pointer
+                val path = Path().apply {
+                    moveTo(midX - 6f, 48f)
+                    lineTo(midX + 6f, 48f)
+                    lineTo(midX, 38f)
+                    close()
+                }
+                drawPath(path = path, color = accentColor)
+            }
+
+            // Draw major labels as absolute positioned text layers to align easily
+            val centerVal = scrollOffset.value
+            val tickSpacing = tickSpacingPx
+            val midX = 206.dp // approximate half size of a typical layout
+            
+            Box(modifier = Modifier.fillMaxSize()) {
+                val startTickIndex = ((centerVal - 500f) / tickSpacing).toInt().coerceAtLeast(0)
+                val endTickIndex = ((centerVal + 500f) / tickSpacing).toInt().coerceAtMost(totalTicks)
+
+                for (i in startTickIndex..endTickIndex step 5) {
+                    val tickValue = range.first + i
+                    if (tickValue % 10 == 0) {
+                        // Position text above center offset
+                        val offsetFromCenter = (i * tickSpacing) - centerVal
+                        // We map offset relative to screen width in compose layout
+                        // It is easier to use simple absolute layout modifiers
+                        val isCurrent = tickValue == value
+                        
+                        Text(
+                            text = tickValue.toString(),
+                            fontSize = 10.sp,
+                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                            fontFamily = FontFamily.Monospace,
+                            color = if (isCurrent) accentColor else taminColors.textMuted,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .offset(x = (offsetFromCenter / 2.7f).dp, y = 42.dp), // scale offset to match dp/px scale
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun RulerPickerPreview() {
+    PreviewRtlThemeContent {
+        var height by remember { mutableStateOf(175) }
+        var weight by remember { mutableStateOf(70) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text("Height Picker (Accent Blue)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            RulerPicker(
+                value = height,
+                onValueChange = { height = it },
+                range = 120..220,
+                unit = "سانتی‌متر"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Weight Picker (Accent Teal)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            RulerPicker(
+                value = weight,
+                onValueChange = { weight = it },
+                range = 40..150,
+                unit = "کیلوگرم",
+                accentColor = LocalTaminColors.current.teal
+            )
+        }
+    }
+}

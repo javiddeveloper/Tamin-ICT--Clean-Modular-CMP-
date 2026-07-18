@@ -35,6 +35,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
@@ -187,6 +189,9 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
                     },
+                    onNavigateToHealthProfile = {
+                        navController.navigateToHealthProfile()
+                    },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
                 )
@@ -222,6 +227,8 @@ internal fun TaminHamrahNavGraph(
                 workshopsScreen(navController)
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+
+                healthProfileScreen(onBack = { navController.popBackStack() })
             }
 
             if (isLoading) {
