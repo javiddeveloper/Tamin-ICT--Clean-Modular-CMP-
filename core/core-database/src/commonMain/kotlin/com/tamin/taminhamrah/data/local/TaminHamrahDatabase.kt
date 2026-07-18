@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
+import com.tamin.taminhamrah.data.local.dao.TreatmentDao
 import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
@@ -30,6 +31,13 @@ import com.tamin.taminhamrah.data.local.entity.RecipientEntity
 import com.tamin.taminhamrah.data.local.entity.RegistrationInfoEntity
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
+import com.tamin.taminhamrah.data.local.entity.DeservedTreatmentEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionDetailEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
+import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
+import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.data.local.entity.MedicalAuthoritiesEntity
 import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -49,6 +57,13 @@ import kotlinx.coroutines.IO
         RegistrationInfoEntity::class,
         BranchEntity::class,
         MenuEntity::class,
+        DeservedTreatmentEntity::class,
+        ElectronicPrescriptionEntity::class,
+        ElectronicPrescriptionDetailEntity::class,
+        ElectronicPrescriptionPriceEntity::class,
+        DependantUserUnderEighteenEntity::class,
+        TreatmentCostEntity::class,
+        MedicalAuthoritiesEntity::class,
     ],
     version = 1,
 )
@@ -66,6 +81,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun registrationInfoDao(): RegistrationInfoDao
     abstract fun branchDao(): BranchDao
     abstract fun menuDao(): MenuDao
+    abstract fun treatmentDao(): TreatmentDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

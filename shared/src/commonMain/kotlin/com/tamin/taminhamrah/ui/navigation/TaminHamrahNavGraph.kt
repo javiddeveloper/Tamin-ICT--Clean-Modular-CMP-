@@ -66,6 +66,10 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceCo
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
+import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
+import com.tamin.taminhamrah.feature.treatment.treatmentScreen
+import androidx.compose.material.icons.filled.Favorite
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -84,6 +88,7 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
+            currentDestination?.hasRoute<TreatmentRoute>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
 
@@ -107,6 +112,20 @@ internal fun TaminHamrahNavGraph(
                         selected = currentDestination?.hasRoute<Route.Home>() == true,
                         onClick = {
                             navController.navigate(Route.Home) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Default.Favorite, null) },
+                        label = { Text("Treatment") },
+                        selected = currentDestination?.hasRoute<TreatmentRoute>() == true,
+                        onClick = {
+                            navController.navigateToTreatment {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -210,6 +229,8 @@ internal fun TaminHamrahNavGraph(
                         },
                     )
                 }
+
+                treatmentScreen()
 
                 profileGraph(
                     navController = navController,
