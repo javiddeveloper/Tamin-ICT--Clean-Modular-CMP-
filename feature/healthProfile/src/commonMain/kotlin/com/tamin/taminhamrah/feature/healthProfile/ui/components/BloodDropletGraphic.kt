@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminText
+
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -156,7 +158,7 @@ fun BloodDropletGraphic(
             // 1. Draw Glow Background behind the droplet
             if (hasSelection) {
                 val glowRadius = 40f * scaleX
-                val colorGlow = if (isUnknown) taminColors.teal else Color(0xFFE5534B)
+                val colorGlow = if (isUnknown) taminColors.teal else taminColors.dangerText
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -173,7 +175,7 @@ fun BloodDropletGraphic(
 
             // 2. Draw Soft Dotted Rotating Ring
             rotate(ringRotation) {
-                val ringColor = if (isUnknown) taminColors.teal.copy(alpha = 0.25f) else Color(0xFFFA9B9B).copy(alpha = 0.3f)
+                val ringColor = if (isUnknown) taminColors.teal.copy(alpha = 0.25f) else taminColors.dangerText.copy(alpha = 0.3f)
                 drawCircle(
                     color = ringColor,
                     radius = 47f * scaleX,
@@ -209,8 +211,8 @@ fun BloodDropletGraphic(
                 // 4. Draw liquid fill using clipPath
                 clipPath(dropletPath) {
                     val fillHeight = 94f * scaleY - (88f * scaleY * animatedFillPct)
-                    val colorFillStart = if (isUnknown) taminColors.teal else Color(0xFFA81C17)
-                    val colorFillEnd = if (isUnknown) taminColors.teal.copy(alpha = 0.8f) else Color(0xFFF2716B)
+                    val colorFillStart = if (isUnknown) taminColors.teal else taminColors.dangerText
+                    val colorFillEnd = if (isUnknown) taminColors.teal.copy(alpha = 0.8f) else taminColors.dangerText.copy(alpha = 0.6f)
 
                     if (animatedFillPct > 0f) {
                         drawRect(
@@ -254,7 +256,7 @@ fun BloodDropletGraphic(
                 }
 
                 // 6. Draw droplet outline border
-                val strokeColor = if (isUnknown) taminColors.teal.copy(alpha = 0.6f) else if (hasSelection) Color(0xFFD64550) else taminColors.border
+                val strokeColor = if (isUnknown) taminColors.teal.copy(alpha = 0.6f) else if (hasSelection) taminColors.dangerText else taminColors.border
                 drawPath(
                     path = dropletPath,
                     color = strokeColor,
@@ -279,7 +281,7 @@ fun BloodDropletGraphic(
                     clipPath(dropletPath) {
                         drawPath(
                             path = ekgPath,
-                            color = Color(0xDDFFFFFF),
+                            color = Color.White.copy(alpha = 0.87f),
                             style = Stroke(
                                 width = 2.4f * scaleX,
                                 cap = StrokeCap.Round,
@@ -303,7 +305,7 @@ fun BloodDropletGraphic(
             else -> taminColors.textMuted
         }
         
-        Text(
+        TaminText(
             text = displayText,
             style = MaterialTheme.typography.titleLarge.copy(
                 fontSize = 30.sp,
@@ -326,28 +328,28 @@ private fun BloodDropletGraphicPreview() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("No Selection", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
+                TaminText("No Selection", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = null,
                     selectedRh = null
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Letter Only (A)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
+                TaminText("Letter Only (A)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = "A",
                     selectedRh = null
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Complete (O+)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
+                TaminText("Complete (O+)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = "O",
                     selectedRh = "+"
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Unknown (?)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
+                TaminText("Unknown (?)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = null,
                     selectedRh = null,

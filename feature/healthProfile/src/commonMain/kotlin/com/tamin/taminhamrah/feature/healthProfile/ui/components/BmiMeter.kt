@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminText
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -22,7 +24,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,28 +52,28 @@ fun BmiMeter(
             bgColor = taminColors.blueBg,
             textColor = taminColors.blueText,
             advice = "شما کمبود وزن دارید. تغذیه مناسب و متعادل توصیه می‌شود.",
-            dotColor = Color(0xFF3BA0FF)
+            dotColor = taminColors.blueText
         )
         bmi in 18.5f..24.9f -> BmiInfo(
             category = "وزن طبیعی",
             bgColor = taminColors.greenBg,
             textColor = taminColors.greenText,
             advice = "وزن شما طبیعی است. برای حفظ شیوه زندگی فعال و وزن مناسب تلاش کنید.",
-            dotColor = Color(0xFF1FB36A)
+            dotColor = taminColors.greenText
         )
         bmi in 25.0f..29.9f -> BmiInfo(
             category = "اضافه وزن",
             bgColor = taminColors.orangeBg,
             textColor = taminColors.orangeText,
             advice = "شما دچار اضافه وزن خفیف هستید. افزایش فعالیت بدنی و کنترل کالری توصیه می‌شود.",
-            dotColor = Color(0xFFE8A23D)
+            dotColor = taminColors.orangeText
         )
         else -> BmiInfo(
             category = "چاقی شدید",
             bgColor = taminColors.dangerBorder.copy(alpha = 0.25f),
             textColor = taminColors.dangerText,
             advice = "شاخص توده بدنی نشان‌دهنده چاقی است. مشاوره با متخصص تغذیه پیشنهاد می‌شود.",
-            dotColor = Color(0xFFD32F2F)
+            dotColor = taminColors.dangerText
         )
     }
 
@@ -134,7 +135,7 @@ fun BmiMeter(
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
+                TaminText(
                     text = "شاخص تودهٔ بدنی (BMI)",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
@@ -149,11 +150,10 @@ fun BmiMeter(
                 modifier = Modifier.padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
+                TaminText(
                     text = String.format("%.1f", bmi),
                     fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    fontFamily = FontFamily.Monospace,
                     color = taminColors.textPrimary,
                     lineHeight = 42.sp
                 )
@@ -166,7 +166,7 @@ fun BmiMeter(
                         .border(1.5.dp, categoryTextColor.copy(alpha = 0.3f), RoundedCornerShape(100.dp))
                         .padding(horizontal = 14.dp, vertical = 4.dp)
                 ) {
-                    Text(
+                    TaminText(
                         text = categoryText,
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontSize = 11.5.sp,
@@ -196,10 +196,10 @@ fun BmiMeter(
                     // Color transitions: Blue -> Green -> Orange -> Red
                     val brush = Brush.horizontalGradient(
                         colors = listOf(
-                            Color(0xFF3BA0FF), // Underweight
-                            Color(0xFF1FB36A), // Normal
-                            Color(0xFFE8A23D), // Overweight
-                            Color(0xFFD32F2F)  // Obese
+                            taminColors.blueText, // Underweight
+                            taminColors.greenText, // Normal
+                            taminColors.orangeText, // Overweight
+                            taminColors.dangerText  // Obese
                         ),
                         startX = 0f,
                         endX = w
@@ -238,10 +238,10 @@ fun BmiMeter(
                     .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("کمبود", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                Text("طبیعی", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                Text("اضافه", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                Text("چاقی", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText("کمبود", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText("طبیعی", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText("اضافه", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText("چاقی", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -262,7 +262,7 @@ fun BmiMeter(
                         .background(dotColor, RoundedCornerShape(50))
                 )
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(
+                TaminText(
                     text = adviceMsg,
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontSize = 12.sp,

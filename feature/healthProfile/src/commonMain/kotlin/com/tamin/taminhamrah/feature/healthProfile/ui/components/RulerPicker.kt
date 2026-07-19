@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminText
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -107,19 +108,18 @@ fun RulerPicker(
             Spacer(modifier = Modifier.width(24.dp))
 
             // Current Value Display (JetBrains Mono for styling)
-            Text(
+            TaminText(
                 text = value.toString(),
                 fontSize = 44.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = taminColors.textPrimary,
-                fontFamily = FontFamily.Monospace,
                 lineHeight = 44.sp,
                 modifier = Modifier.alignByBaseline()
             )
             
             Spacer(modifier = Modifier.width(4.dp))
             
-            Text(
+            TaminText(
                 text = unit,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 11.sp,
@@ -274,11 +274,10 @@ fun RulerPicker(
                         // It is easier to use simple absolute layout modifiers
                         val isCurrent = tickValue == value
                         
-                        Text(
+                        TaminText(
                             text = tickValue.toString(),
                             fontSize = 10.sp,
                             fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
-                            fontFamily = FontFamily.Monospace,
                             color = if (isCurrent) accentColor else taminColors.textMuted,
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
@@ -305,7 +304,7 @@ private fun RulerPickerPreview() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Height Picker (Accent Blue)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            TaminText("Height Picker (Accent Blue)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             RulerPicker(
                 value = height,
                 onValueChange = { height = it },
@@ -315,7 +314,7 @@ private fun RulerPickerPreview() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Weight Picker (Accent Teal)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            TaminText("Weight Picker (Accent Teal)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             RulerPicker(
                 value = weight,
                 onValueChange = { weight = it },

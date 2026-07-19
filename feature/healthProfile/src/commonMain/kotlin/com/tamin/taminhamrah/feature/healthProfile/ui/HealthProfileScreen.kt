@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui
 
+import com.tamin.taminhamrah.ui.components.TaminText
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,16 +21,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationEvent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.SectionHeader
+import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthProfileScreen(
     viewModel: HealthProfileViewModel = koinViewModel(),
@@ -42,39 +50,187 @@ fun HealthProfileScreen(
         viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile)
     }
 
-    viewModel.events.collectWithLifecycleAware { event ->
-        // Handle events if any
-    }
+    HandleHealthProfileEvents(
+        events = viewModel.events,
+        selfDecEvents = selfDecViewModel.events,
+        onBackClicked = onBackClicked
+    )
 
+    HealthProfileMainContent(
+        state = uiState,
+        selfDecState = selfDecState,
+        onIntent = viewModel::sendIntent,
+        onSelfDecIntent = selfDecViewModel::sendIntent,
+        onBackClicked = onBackClicked
+    )
+}
+
+@Composable
+fun HandleHealthProfileEvents(
+    events: Flow<HealthProfileEvent>,
+    selfDecEvents: Flow<SelfDeclarationEvent>,
+    onBackClicked: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            HealthProfileEvent.NavigateBack -> {
+                scope.launch { onBackClicked() }
+            }
+        }
+    }
+    selfDecEvents.collectWithLifecycleAware { event ->
+        when (event) {
+            SelfDeclarationEvent.NavigateBack -> {
+                scope.launch { onBackClicked() }
+            }
+        }
+    }
+}
+
+@Composable
+fun HealthProfileMainContent(
+    state: HealthProfileUiState,
+    selfDecState: SelfDeclarationUiState,
+    onIntent: (HealthProfileIntent) -> Unit,
+    onSelfDecIntent: (SelfDeclarationIntent) -> Unit,
+    onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         ProvideTextStyle(value = MaterialTheme.typography.bodyMedium) {
             when (selfDecState.currentStep) {
                 SelfDeclarationStep.GATE -> {
                     SelfDeclarationGateScreen(
-                        onBackClicked = onBackClicked,
-                        onStartClicked = {
-                            selfDecViewModel.sendIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO))
-                        }
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = onBackClicked
                     )
                 }
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
+                        onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            selfDecViewModel.sendIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.GATE))
-                        },
-                        onNextClicked = {
-                            // In the first step, click Next to display the mock profile data screen
-                            selfDecViewModel.sendIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.GATE))
+                        }
+                    )
+                }
+                SelfDeclarationStep.IDENTITY -> {
+                    SelfDeclarationIdentityScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO))
+                        }
+                    )
+                }
+                SelfDeclarationStep.PERSONAL -> {
+                    SelfDeclarationPersonalScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.CONTACT -> {
+                    SelfDeclarationContactScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL))
+                        }
+                    )
+                }
+                SelfDeclarationStep.EMERGENCY -> {
+                    SelfDeclarationEmergencyScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.CONTACT))
+                        }
+                    )
+                }
+                SelfDeclarationStep.PHYSICAL -> {
+                    SelfDeclarationPhysicalScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.DISEASES -> {
+                    SelfDeclarationDiseasesScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
+                        }
+                    )
+                }
+                SelfDeclarationStep.FAMILY -> {
+                    SelfDeclarationFamilyScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.DISEASES))
+                        }
+                    )
+                }
+                SelfDeclarationStep.BLOOD -> {
+                    SelfDeclarationBloodScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.FAMILY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.LIFESTYLE -> {
+                    SelfDeclarationLifestyleScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.BLOOD))
+                        }
+                    )
+                }
+                SelfDeclarationStep.ALLERGY -> {
+                    SelfDeclarationAllergyScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
+                        }
+                    )
+                }
+                SelfDeclarationStep.REVIEW -> {
+                    SelfDeclarationReviewScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.SUCCESS -> {
+                    SelfDeclarationSuccessScreen(
+                        onFinish = { enterProfile ->
+                            if (enterProfile) {
+                                onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.COMPLETED))
+                            } else {
+                                onBackClicked()
+                            }
                         }
                     )
                 }
                 else -> {
                     Scaffold(
                         topBar = {
-                            TopAppBar(
+                            TaminTopAppBar(
                                 title = {
-                                    Text(
-                                        text = "پروفایل سلامت",
+                                    TaminText(
+                                        text = "پروندهٔ سلامت",
                                         style = MaterialTheme.typography.titleLarge.copy(
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 18.sp
@@ -82,20 +238,14 @@ fun HealthProfileScreen(
                                     )
                                 },
                                 navigationIcon = {
-                                    IconButton(onClick = {
-                                        selfDecViewModel.sendIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO))
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = "بازگشت"
-                                        )
-                                    }
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "بازگشت"
+                                    )
                                 },
-                                colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                onNavigationClick = {
+                                    onBackClicked()
+                                }
                             )
                         }
                     ) { paddingValues ->
@@ -105,12 +255,12 @@ fun HealthProfileScreen(
                                 .padding(paddingValues)
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
-                            if (uiState.isLoading) {
+                            if (state.isLoading) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.align(Alignment.Center),
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                            } else if (!uiState.error.isNullOrEmpty()) {
+                            } else if (!state.error.isNullOrEmpty()) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -118,19 +268,19 @@ fun HealthProfileScreen(
                                         .align(Alignment.Center),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text(
-                                        text = uiState.error ?: "",
+                                    TaminText(
+                                        text = state.error ?: "",
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = MaterialTheme.colorScheme.error,
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
-                                    Button(onClick = { viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile) }) {
-                                        Text("تلاش مجدد")
+                                    Button(onClick = { onIntent(HealthProfileIntent.LoadHealthProfile) }) {
+                                        TaminText("تلاش مجدد")
                                     }
                                 }
                             } else {
-                                HealthProfileContent(state = uiState)
+                                HealthProfileContent(state = state)
                             }
                         }
                     }
@@ -247,7 +397,7 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (state.drugAllergies.isEmpty()) {
-                    Text(
+                    TaminText(
                         text = "هیچ حساسیت دارویی ثبت نشده است.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -265,13 +415,13 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
+                                TaminText(
                                     text = allergy.drugName ?: "داروی نامشخص",
                                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.error
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(
+                                TaminText(
                                     text = allergy.allergyComments ?: "فاقد توضیحات",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -314,12 +464,12 @@ private fun ProfileRowItem(label: String, value: String) {
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
+        TaminText(
             text = label,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Text(
+        TaminText(
             text = value,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface,
@@ -334,14 +484,14 @@ private fun MetricItem(label: String, value: String, modifier: Modifier = Modifi
         modifier = modifier.padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
+        TaminText(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(6.dp))
-        Text(
+        TaminText(
             text = value,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold,

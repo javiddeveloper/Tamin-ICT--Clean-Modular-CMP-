@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkshopsScreen(
     viewModel: WorkshopsViewModel = koinViewModel(),

@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminText
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -106,7 +108,7 @@ fun HealthNavigationBar(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
+                    TaminText(
                         text = primaryText,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontSize = 15.5.sp,
@@ -138,7 +140,7 @@ fun HealthNavigationBar(
                         .clickable { onSecondaryClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
+                    TaminText(
                         text = secondaryText,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontSize = 14.5.sp,
@@ -163,16 +165,16 @@ private fun HealthNavigationComponentsPreview() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text("Progress Bar (Step 3 of 9)")
+            TaminText("Progress Bar (Step 3 of 9)")
             HealthProgressBar(currentStep = 3, totalSteps = 9)
 
-            Text("Navigation Bar (Primary Only)")
+            TaminText("Navigation Bar (Primary Only)")
             HealthNavigationBar(
                 primaryText = "تکمیل خوداظهاری سلامت",
                 onPrimaryClick = {}
             )
 
-            Text("Navigation Bar (Primary + Secondary)")
+            TaminText("Navigation Bar (Primary + Secondary)")
             HealthNavigationBar(
                 primaryText = "مرحله بعدی",
                 onPrimaryClick = {},

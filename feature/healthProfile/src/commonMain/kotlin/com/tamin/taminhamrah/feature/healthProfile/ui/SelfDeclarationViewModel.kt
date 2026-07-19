@@ -15,11 +15,16 @@ class SelfDeclarationViewModel : BaseViewModel<SelfDeclarationUiState, PartialSt
     override fun handleIntent(intent: SelfDeclarationIntent): Flow<PartialState> {
         return when (intent) {
             is SelfDeclarationIntent.ChangeStep -> handleChangeStep(intent.step)
+            is SelfDeclarationIntent.UpdateState -> handleUpdateState(intent.transform)
         }
     }
 
     private fun handleChangeStep(step: SelfDeclarationStep): Flow<PartialState> = flow {
         emit(PartialState.StepChanged(step))
+    }
+
+    private fun handleUpdateState(transform: SelfDeclarationUiState.() -> SelfDeclarationUiState): Flow<PartialState> = flow {
+        emit(PartialState.StateUpdated(transform))
     }
 
     override fun reduceState(
@@ -37,6 +42,7 @@ class SelfDeclarationViewModel : BaseViewModel<SelfDeclarationUiState, PartialSt
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step
         )
+        is PartialState.StateUpdated -> partialState.transform(currentState)
     }
 
     override fun createErrorState(message: String): PartialState =

@@ -1,4 +1,6 @@
-package com.tamin.taminhamrah.feature.healthProfile.ui
+package com.tamin.taminhamrah.feature.healthProfile.ui.screens
+
+import com.tamin.taminhamrah.ui.components.TaminText
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,18 +30,34 @@ import androidx.compose.foundation.border
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
 /**
  * Intro screen of the Self-Declaration Flow (instructions page).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelfDeclarationIntroScreen(
+    onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit,
-    onNextClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SelfDeclarationIntroContent(
+        onIntent = onIntent,
+        onBackClicked = onBackClicked,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SelfDeclarationIntroContent(
+    onIntent: (SelfDeclarationIntent) -> Unit,
+    onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -49,9 +67,9 @@ fun SelfDeclarationIntroScreen(
         Scaffold(
             modifier = modifier.fillMaxSize(),
             topBar = {
-                TopAppBar(
+                TaminTopAppBar(
                     title = {
-                        Text(
+                        TaminText(
                             text = stringResource(Res.string.health_intro_title),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
@@ -60,24 +78,18 @@ fun SelfDeclarationIntroScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = onBackClicked) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(Res.string.health_gate_btn_back)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(Res.string.health_gate_btn_back)
+                        )
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = taminColors.bgSurface,
-                        titleContentColor = taminColors.textPrimary,
-                        navigationIconContentColor = taminColors.textPrimary
-                    )
+                    onNavigationClick = onBackClicked
                 )
             },
             bottomBar = {
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_intro_btn_next),
-                    onPrimaryClick = onNextClicked,
+                    onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
                 )
@@ -113,7 +125,7 @@ fun SelfDeclarationIntroScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Heading & Description
-                Text(
+                TaminText(
                     text = stringResource(Res.string.health_intro_heading),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontSize = 19.sp,
@@ -122,7 +134,7 @@ fun SelfDeclarationIntroScreen(
                     )
                 )
 
-                Text(
+                TaminText(
                     text = stringResource(Res.string.health_intro_desc),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
@@ -204,7 +216,7 @@ private fun InstructionFeatureItem(
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
-        Text(
+        TaminText(
             text = message,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 13.5.sp,
@@ -222,12 +234,13 @@ private fun InstructionFeatureItem(
 }
 
 @PreviewRtlTheme
+@Preview
 @Composable
-private fun SelfDeclarationIntroScreenPreview() {
+fun SelfDeclarationIntroScreenPreview() {
     PreviewRtlThemeContent {
-        SelfDeclarationIntroScreen(
-            onBackClicked = {},
-            onNextClicked = {}
+        SelfDeclarationIntroContent(
+            onIntent = {},
+            onBackClicked = {}
         )
     }
 }

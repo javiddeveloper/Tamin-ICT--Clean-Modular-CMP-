@@ -1,4 +1,6 @@
-package com.tamin.taminhamrah.feature.healthProfile.ui
+package com.tamin.taminhamrah.feature.healthProfile.ui.screens
+
+import com.tamin.taminhamrah.ui.components.TaminText
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,32 +14,45 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
 /**
  * Gate screen of the Self-Declaration Flow (locked notice page).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelfDeclarationGateScreen(
+    onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit,
-    onStartClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SelfDeclarationGateContent(
+        onIntent = onIntent,
+        onBackClicked = onBackClicked,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SelfDeclarationGateContent(
+    onIntent: (SelfDeclarationIntent) -> Unit,
+    onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -61,31 +76,29 @@ fun SelfDeclarationGateScreen(
                     .statusBarsPadding()
                     .padding(bottom = 30.dp)
             ) {
-                // Top Bar Row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(horizontal = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackClicked) {
+                // Top Bar using custom TaminTopAppBar
+                TaminTopAppBar(
+                    title = {
+                        TaminText(
+                            text = stringResource(Res.string.health_gate_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = Color.White
+                            )
+                        )
+                    },
+                    navigationIcon = {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(Res.string.health_gate_btn_back),
                             tint = Color.White
                         )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(Res.string.health_gate_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color.White
-                        )
-                    )
-                }
+                    },
+                    onNavigationClick = onBackClicked,
+                    backgroundColor = Color.Transparent,
+                    contentColor = Color.White
+                )
             }
         }
 
@@ -96,7 +109,7 @@ fun SelfDeclarationGateScreen(
             bottomBar = {
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
-                    onPrimaryClick = onStartClicked,
+                    onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
                 )
@@ -160,7 +173,7 @@ fun SelfDeclarationGateScreen(
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                Text(
+                                TaminText(
                                     text = stringResource(Res.string.health_gate_heading),
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontSize = 19.sp,
@@ -171,7 +184,7 @@ fun SelfDeclarationGateScreen(
 
                                 Spacer(modifier = Modifier.height(10.dp))
 
-                                Text(
+                                TaminText(
                                     text = stringResource(Res.string.health_gate_desc),
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontSize = 13.5.sp,
@@ -208,7 +221,7 @@ fun SelfDeclarationGateScreen(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
-                                Text(
+                                TaminText(
                                     text = stringResource(Res.string.health_gate_locked_title),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontSize = 13.5.sp,
@@ -217,7 +230,7 @@ fun SelfDeclarationGateScreen(
                                     )
                                 )
                                 Spacer(modifier = Modifier.height(3.dp))
-                                Text(
+                                TaminText(
                                     text = stringResource(Res.string.health_gate_locked_desc),
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontSize = 12.5.sp,
@@ -286,7 +299,7 @@ private fun StepIndicatorRow(
                 .background(taminColors.blueBg, RoundedCornerShape(9.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
+            TaminText(
                 text = stepNumber,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontSize = 13.sp,
@@ -296,7 +309,7 @@ private fun StepIndicatorRow(
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
-        Text(
+        TaminText(
             text = title,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 13.5.sp,
@@ -313,12 +326,13 @@ private fun StepIndicatorRow(
 }
 
 @PreviewRtlTheme
+@Preview
 @Composable
-private fun SelfDeclarationGateScreenPreview() {
+fun SelfDeclarationGateScreenPreview() {
     PreviewRtlThemeContent {
-        SelfDeclarationGateScreen(
-            onBackClicked = {},
-            onStartClicked = {}
+        SelfDeclarationGateContent(
+            onIntent = {},
+            onBackClicked = {}
         )
     }
 }

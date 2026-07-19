@@ -1,6 +1,8 @@
 
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminText
+
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 
@@ -30,11 +32,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -42,6 +41,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.applicationFont
 
 /**
  * A beautiful segmented control switcher (typically Yes/No toggle).
@@ -100,7 +100,7 @@ fun SegmentedControl(
                         .clickable { onOptionSelected(index) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
+                    TaminText(
                         text = label,
                         fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
@@ -161,7 +161,7 @@ fun InteractiveChoiceChips(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                TaminText(
                     text = label,
                     fontSize = 12.5.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
@@ -200,7 +200,7 @@ fun StyledTextField(
     val leadingIconColor = if (isFocused) taminColors.blueText else taminColors.textMuted
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
+        TaminText(
             text = label,
             fontSize = 12.5.sp,
             fontWeight = FontWeight.Bold,
@@ -237,12 +237,13 @@ fun StyledTextField(
                 keyboardOptions = keyboardOptions,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = taminColors.textPrimary,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = applicationFont()
                 ),
                 modifier = Modifier.weight(1f),
                 decorationBox = { innerTextField ->
                     if (value.isEmpty()) {
-                        Text(
+                        TaminText(
                             text = placeholder,
                             fontSize = 13.5.sp,
                             color = taminColors.textMuted,
@@ -278,7 +279,7 @@ fun StyledTextField(
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(
+                TaminText(
                     text = errorText,
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Bold,
@@ -317,7 +318,7 @@ fun InfoBanner(
                 .align(Alignment.Top)
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(
+        TaminText(
             text = message,
             fontSize = 12.5.sp,
             fontWeight = FontWeight.Medium,
@@ -378,7 +379,7 @@ fun DashedAddButton(
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
-            Text(
+            TaminText(
                 text = label,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -418,7 +419,7 @@ fun DynamicItemCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
+                TaminText(
                     text = title,
                     fontSize = 14.5.sp,
                     fontWeight = FontWeight.Bold,
@@ -428,7 +429,7 @@ fun DynamicItemCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            TaminText(
                 text = description,
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Medium,
@@ -456,7 +457,7 @@ fun DynamicItemCard(
                     modifier = Modifier.size(17.dp)
                 )
                 Spacer(modifier = Modifier.width(7.dp))
-                Text(
+                TaminText(
                     text = "حذف",
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
@@ -470,7 +471,6 @@ fun DynamicItemCard(
 /**
  * A reusable dialog modal for cancel/submit confirmation.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionDialog(
     showDialog: Boolean,
@@ -520,7 +520,7 @@ fun ActionDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
+                    TaminText(
                         text = title,
                         fontSize = 16.5.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -530,7 +530,7 @@ fun ActionDialog(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
+                    TaminText(
                         text = description,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
@@ -555,7 +555,7 @@ fun ActionDialog(
                                 contentColor = Color.White
                             )
                         ) {
-                            Text(
+                            TaminText(
                                 text = confirmLabel,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
@@ -572,7 +572,7 @@ fun ActionDialog(
                                 contentColor = taminColors.textTertiary
                             )
                         ) {
-                            Text(
+                            TaminText(
                                 text = cancelLabel,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
@@ -601,21 +601,21 @@ private fun HealthFormComponentsPreview() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Segmented Switcher", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            TaminText("Segmented Switcher", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             SegmentedControl(
                 options = listOf("بله", "خیر"),
                 selectedIndex = switcherIndex,
                 onOptionSelected = { switcherIndex = it }
             )
 
-            Text("Interactive Choice Chips", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            TaminText("Interactive Choice Chips", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             InteractiveChoiceChips(
                 options = listOf("فشار خون بالا", "دیابت", "چربی خون بالا", "بیماری قلبی"),
                 selectedIndices = chipSelection,
                 onSelectionChanged = { chipSelection = it }
             )
 
-            Text("Styled TextField (Phone)", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            TaminText("Styled TextField (Phone)", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             StyledTextField(
                 value = textValue,
                 onValueChange = { textValue = it },
@@ -626,16 +626,16 @@ private fun HealthFormComponentsPreview() {
                 errorText = if (textValue.length != 11) "شماره همراه معتبر نیست" else null
             )
 
-            Text("Info Banner", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            TaminText("Info Banner", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             InfoBanner(message = "این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح با پشتیبانی تماس بگیرید.")
 
-            Text("Dashed Add Button", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            TaminText("Dashed Add Button", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             DashedAddButton(
                 label = "افزودن حساسیت دارویی",
                 onClick = { dialogOpen = true }
             )
 
-            Text("Dynamic Item Card", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            TaminText("Dynamic Item Card", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             DynamicItemCard(
                 title = "پنی‌سیلین",
                 description = "باعث ایجاد خارش شدید پوستی و تنگی نفس خفیف می‌شود.",

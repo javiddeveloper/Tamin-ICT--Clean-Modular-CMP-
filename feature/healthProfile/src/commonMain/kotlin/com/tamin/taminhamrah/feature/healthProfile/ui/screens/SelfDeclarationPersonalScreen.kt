@@ -1,0 +1,150 @@
+package com.tamin.taminhamrah.feature.healthProfile.ui.screens
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientDrugAllergyMock
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import androidx.compose.ui.tooling.preview.Preview
+
+@Composable
+fun SelfDeclarationPersonalScreen(
+    state: SelfDeclarationUiState,
+    onIntent: (SelfDeclarationIntent) -> Unit,
+    onBackClicked: () -> Unit
+) {
+    val taminColors = LocalTaminColors.current
+    val scrollState = rememberScrollState()
+
+    val isNextEnabled = state.maritalStatus.isNotEmpty() && state.job.isNotEmpty()
+
+    Scaffold(
+        bottomBar = {
+            HealthNavigationBar(
+                primaryText = "مرحلهٔ بعدی",
+                primaryEnabled = isNextEnabled,
+                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.CONTACT)) },
+                secondaryText = "مرحلهٔ قبلی",
+                onSecondaryClick = onBackClicked
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(taminColors.bgPage)
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            HealthProgressBar(currentStep = 2, totalSteps = 10)
+
+            TaminText(
+                text = "اطلاعات تکمیلی فردی",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = taminColors.textPrimary
+                )
+            )
+
+            TaminText(
+                text = "لطفاً اطلاعات تکمیلی فردی خود را جهت تکمیل پروندهٔ سلامت وارد کنید.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = taminColors.textTertiary
+                )
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TaminText(
+                    text = "وضعیت تأهل",
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = taminColors.textTertiary
+                )
+
+                val maritalOptions = listOf("مجرد", "متاهل")
+                val maritalIndex = maritalOptions.indexOf(state.maritalStatus)
+                SegmentedControl(
+                    options = maritalOptions,
+                    selectedIndex = if (maritalIndex >= 0) maritalIndex else 0,
+                    onOptionSelected = { idx ->
+                        onIntent(SelfDeclarationIntent.UpdateState { copy(maritalStatus = maritalOptions[idx]) })
+                    }
+                )
+            }
+            // Initialize if empty
+            LaunchedEffect(state.maritalStatus) {
+                if (state.maritalStatus.isEmpty()) {
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(maritalStatus = "مجرد") })
+                }
+            }
+
+            StyledTextField(
+                value = state.job,
+                onValueChange = { jobStr ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(job = jobStr) })
+                },
+                label = "شغل / نوع فعالیت",
+                placeholder = "مثلاً کارمند، آزاد و..."
+            )
+
+            StyledTextField(
+                value = state.citizenship,
+                onValueChange = { cit ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(citizenship = cit) })
+                },
+                label = "تابعیت",
+                placeholder = "وارد کنید"
+            )
+
+            StyledTextField(
+                value = state.nationality,
+                onValueChange = { nat ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(nationality = nat) })
+                },
+                label = "ملیت",
+                placeholder = "مثلاً ایرانی"
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Preview
+@Composable
+fun SelfDeclarationPersonalScreenPreview() {
+    PreviewRtlThemeContent {
+        SelfDeclarationPersonalScreen(
+            state = SelfDeclarationUiState(maritalStatus = "مجرد", job = "برنامه‌نویس"),
+            onIntent = {},
+            onBackClicked = {}
+        )
+    }
+}
