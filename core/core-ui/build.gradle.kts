@@ -24,6 +24,7 @@ kotlin {
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialog.compose)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.chrisbanes.haze)
         }
 
         androidMain.dependencies {
