@@ -101,11 +101,15 @@ fun KhadamatScreen(
         }
 
 
-        val preferredIds = listOf(7, 10, 34, 35, 36)
-        val featuredServices = remember(state.menuItems) {
-            val featured = state.menuItems.filter { it.id in preferredIds }
+        val featuredServices = remember(state.filteredServices, state.selectedTab) {
+            val preferredIds = when (state.selectedTab) {
+                KhadamatTab.INSURED -> listOf(7, 10, 34, 35, 36)
+                KhadamatTab.PENSIONER -> listOf(105, 106, 107, 108, 112)
+                KhadamatTab.EMPLOYER -> listOf(1001, 1002, 1004, 1006, 1010)
+            }
+            val featured = state.filteredServices.filter { it.id in preferredIds }
             if (featured.size < 5) {
-                val remaining = state.menuItems.filter { it.id !in preferredIds }
+                val remaining = state.filteredServices.filter { it.id !in preferredIds }
                 (featured + remaining).take(5)
             } else {
                 featured.take(5)

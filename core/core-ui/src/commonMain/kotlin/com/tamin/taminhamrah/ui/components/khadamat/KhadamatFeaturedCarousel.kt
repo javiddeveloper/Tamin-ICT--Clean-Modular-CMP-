@@ -44,11 +44,24 @@ fun KhadamatFeaturedCarousel(
     )
 
     val fallbackSubtitles = mapOf(
+        // Insured tab
         7 to "مشاهده ریز سوابق بیمه‌ای",
         10 to "ثبت اعتراض به سوابق جامانده",
         34 to "ثبت‌نام بیمه دانشجویان",
         35 to "امور قراردادها و پرداخت حق بیمه",
-        36 to "ثبت‌نام بیمه زنان خانه‌دار"
+        36 to "ثبت‌نام بیمه زنان خانه‌دار",
+        // Pensioner tab
+        105 to "فیش حقوقی ماهانه",
+        106 to "مشاهده آخرین حکم مستمری",
+        107 to "دریافت گواهی حقوق مستمری",
+        108 to "صدور گواهی کسر اقساط",
+        112 to "ثبت درخواست مستمری بازماندگان",
+        // Employer tab
+        1001 to "مشاهده لیست کارگاه‌های فعال",
+        1002 to "مشاهده و پیگیری قراردادهای پیمان",
+        1004 to "ثبت و ویرایش اطلاعات کارفرما",
+        1006 to "مشاهده نتایج اعتراضات ثبت شده",
+        1010 to "ثبت نام و پرداخت بیمه کارگران"
     )
 
     Column(
@@ -113,7 +126,6 @@ private fun FeaturedServiceCard(
             .alpha(cardAlpha),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -128,7 +140,6 @@ private fun FeaturedServiceCard(
                 modifier = Modifier.fillMaxSize()
             )
         }
-
 
         Column(
             modifier = Modifier.fillMaxWidth()
