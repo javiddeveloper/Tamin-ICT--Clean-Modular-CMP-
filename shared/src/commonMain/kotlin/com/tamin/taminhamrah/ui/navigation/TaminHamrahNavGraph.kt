@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,10 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,11 +28,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,19 +50,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
-import com.tamin.taminhamrah.feature.cartable.navigateToCartable
-import androidx.compose.foundation.background
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.draw.alpha
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
-import com.tamin.taminhamrah.feature.contracts.ContractsRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
@@ -95,48 +79,50 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
-import com.tamin.taminhamrah.feature.studentInsuranceContract.StudentInsuranceContractRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
 import com.tamin.taminhamrah.feature.treatment.treatmentScreen
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.outlined.Apps
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
-import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
-import org.jetbrains.compose.resources.FontResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
 import taminx.core.core_ui.ic_treatment_menu
+import taminx.core.core_ui.login_required_desc
+import taminx.core.core_ui.login_to_tamin_man
+import taminx.core.core_ui.please_login_to_your_account
+import taminx.core.core_ui.retry
+import taminx.core.core_ui.select_group
+import taminx.core.core_ui.tab_home
+import taminx.core.core_ui.tab_profile
+import taminx.core.core_ui.tab_services
+import taminx.core.core_ui.tab_treatment
+import taminx.core.core_ui.tamin_man_services
+import taminx.core.core_ui.user_type_employer
+import taminx.core.core_ui.user_type_insured
+import taminx.core.core_ui.user_type_pensioner
 
 @Composable
 internal fun TaminHamrahNavGraph(
@@ -155,54 +141,10 @@ internal fun TaminHamrahNavGraph(
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
-    val navItemColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = Color.Transparent,
-        selectedTextColor = Color.Transparent,
-        indicatorColor = Color.Transparent,
-        unselectedIconColor = Color.Transparent,
-        unselectedTextColor = Color.Transparent
-    )
-
 
     val navigationItems = listOf(
         NavigationTab(
-            title = "پروفایل",
-            isSelected = isProfileSelected,
-            icon = Res.drawable.ic_profile_menu,
-            onClick = {
-                navController.navigate(ProfileRoute.Main()) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        ),
-        NavigationTab(
-            title = "درمان",
-            isSelected = isTreatmentSelected,
-            icon = Res.drawable.ic_treatment_menu,
-            onClick = {
-                navController.navigate(TreatmentRoute) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        ),
-        NavigationTab(
-            title = "خدمات",
-            isSelected = isCartableSelected,
-            icon = Res.drawable.ic_services_menu,
-            onClick = {
-                navController.navigate(CartableRoute.Main) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        ),
-        NavigationTab(
-            title = "خانه",
+            title = stringResource(Res.string.tab_home),
             isSelected = isHomeSelected,
             icon = Res.drawable.ic_home_menu,
             onClick = {
@@ -214,7 +156,44 @@ internal fun TaminHamrahNavGraph(
             }
         ),
 
-    )
+        NavigationTab(
+            title = stringResource(Res.string.tab_services),
+            isSelected = isCartableSelected,
+            icon = Res.drawable.ic_services_menu,
+            onClick = {
+                navController.navigate(CartableRoute.Main) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+        NavigationTab(
+            title = stringResource(Res.string.tab_treatment),
+            isSelected = isTreatmentSelected,
+            icon = Res.drawable.ic_treatment_menu,
+            onClick = {
+                navController.navigate(TreatmentRoute) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+        NavigationTab(
+            title = stringResource(Res.string.tab_profile),
+            isSelected = isProfileSelected,
+            icon = Res.drawable.ic_profile_menu,
+            onClick = {
+                navController.navigate(ProfileRoute.Main()) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        ),
+
+        )
 
     val isBottomBarVisible =
         isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected
@@ -463,18 +442,18 @@ internal fun TaminHamrahNavGraph(
                     onClick = onLoginClick,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("ورود به سامانه تأمین من")
+                    Text(stringResource(Res.string.login_to_tamin_man))
                 }
             },
             title = {
                 Text(
-                    "لطفاً وارد حساب کاربری خود شوید",
+                    stringResource(Res.string.please_login_to_your_account),
                     style = MaterialTheme.typography.titleLarge
                 )
             },
             text = {
                 Text(
-                    "برای دسترسی به تمام امکانات اپلیکیشن، ابتدا باید وارد حساب کاربری خود شوید.",
+                    stringResource(Res.string.login_required_desc),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -548,31 +527,31 @@ fun HomeScreen(
 
         Column(
             modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    // Top padding for content breathing room
-                    .padding(top = 16.dp)
-                    // Bottom padding so last item scrolls fully above the floating blur bar
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .padding(bottom = 80.dp),
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                // Top padding for content breathing room
+                .padding(top = 16.dp)
+                // Bottom padding so last item scrolls fully above the floating blur bar
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "خدمات تأمین من",
+                stringResource(Res.string.tamin_man_services),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             val userTypes = listOf(
-                1 to "بیمه شدگان",
-                2 to "مستمری بگیران",
-                3 to "کارفرمایان"
+                1 to stringResource(Res.string.user_type_insured),
+                2 to stringResource(Res.string.user_type_pensioner),
+                3 to stringResource(Res.string.user_type_employer)
             )
             val availableTypes = remember(uiState.menuItems) {
                 val typesInData =
-                        uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
+                    uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
                 userTypes.filter { it.first in typesInData }.ifEmpty { userTypes }
             }
             var selectedType by remember(availableTypes) {
@@ -580,25 +559,25 @@ fun HomeScreen(
             }
             var expanded by remember { mutableStateOf(false) }
 
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { expanded = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.small
                 ) {
-                    OutlinedButton(
-                        onClick = { expanded = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Text(
-                            text = availableTypes.find { it.first == selectedType }?.second
-                                ?: "انتخاب گروه",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            contentDescription = null
-                        )
-                    }
+                    Text(
+                        text = availableTypes.find { it.first == selectedType }?.second
+                            ?: stringResource(Res.string.select_group),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Icon(
+                        Icons.Default.ArrowDropDown,
+                        contentDescription = null
+                    )
+                }
 
                 DropdownMenu(
                     expanded = expanded,
@@ -621,10 +600,10 @@ fun HomeScreen(
 
             val servicesToShow = uiState.menuItems.filter { it.showRole.contains(selectedType) }
 
-                servicesToShow.forEach { service ->
-                    val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-                        service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-                        service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+            servicesToShow.forEach { service ->
+                val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
+                    service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+                    service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
                 val cardAlpha = if (isDisabled) 0.5f else 1.0f
 
@@ -682,30 +661,30 @@ fun HomeScreen(
 
                         // Show message if present and service is not just ACTIVE
                         if (!service.message.isNullOrEmpty() && service.status != MenuServiceStatusDN.ACTIVE) {
-                                val msgColor =
-                                    if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR)
-                                        MaterialTheme.colorScheme.error
-                                    else
-                                        MaterialTheme.colorScheme.onSurfaceVariant
+                            val msgColor =
+                                if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR)
+                                    MaterialTheme.colorScheme.error
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
 
-                                Text(
-                                    text = service.message!!,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = msgColor,
-                                    modifier = Modifier.padding(
-                                        start = 72.dp,
-                                        end = 16.dp,
-                                        bottom = 12.dp
-                                    )
+                            Text(
+                                text = service.message!!,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = msgColor,
+                                modifier = Modifier.padding(
+                                    start = 72.dp,
+                                    end = 16.dp,
+                                    bottom = 12.dp
                                 )
-                            }
+                            )
                         }
                     }
                 }
+            }
 
             if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
                 Text(
-                    "خطا در دریافت اطلاعات یا لیست خالی است",
+                    stringResource(Res.string.error_load_menu_failed),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 32.dp)
                 )
@@ -713,7 +692,7 @@ fun HomeScreen(
                     onClick = { viewModel.sendIntent(HomeIntent.LoadMenu) },
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    Text("تلاش مجدد")
+                    Text(stringResource(Res.string.retry))
                 }
             }
         }
