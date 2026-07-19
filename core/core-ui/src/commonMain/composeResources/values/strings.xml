@@ -37,4 +37,24 @@
     <string name="edict_payable_monthly">مبلغ مستمری ماهانه: %1$s ریال</string>
     <string name="edict_title_label">عنوان حکم: %1$s</string>
     <string name="edict_year_month">سال حکم: %1$s ماه: %2$s</string>
+    <string name="profile_personal_info">اطلاعات شخصی</string>
+    <string name="profile_identity_info">اطلاعات هویتی</string>
+    <string name="profile_dependents">مشاهده و ثبت افراد تبعی</string>
+    <string name="profile_dependents_badge_test">۳ نفر تست</string>
+    <string name="profile_active_relation">ارتباط فعال با تأمین</string>
+    <string name="profile_electronic_file">پرونده الکترونیک</string>
+    <string name="profile_bank_account">شماره حساب بانکی</string>
+    <string name="profile_change_mobile">تغییر شماره موبایل</string>
+    <string name="profile_cartable">کارتابل</string>
+    <string name="profile_requests">درخواست ها</string>
+    <string name="profile_personal_inbox">صندوق شخصی</string>
+    <string name="profile_security_settings">امنیت و تنظیمات</string>
+    <string name="profile_security">امنیت</string>
+    <string name="profile_settings">تنظیمات</string>
+    <string name="profile_support_section">پشتیبانی</string>
+    <string name="profile_support">پشتیبانی</string>
+    <string name="profile_contact_me">تماس با من</string>
+    <string name="profile_share">اشتراک‌گذاری</string>
+    <string name="profile_version_history">تاریخچهٔ نسخه</string>
+    <string name="profile_logout">خروج از حساب کاربری</string>
 </resources>
