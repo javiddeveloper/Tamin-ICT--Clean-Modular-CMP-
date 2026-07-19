@@ -1,16 +1,53 @@
 package com.tamin.taminhamrah.ui.navigation
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -20,56 +57,47 @@ import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.cartable.navigateToCartable
-import androidx.compose.foundation.background
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.draw.alpha
-import androidx.compose.material.icons.filled.ArrowDropDown
-import com.tamin.taminhamrah.feature.history.HistoryRoute
-import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
-import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
+import com.tamin.taminhamrah.feature.history.HistoryRoute
+import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
-import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
-import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
 import com.tamin.taminhamrah.feature.treatment.treatmentScreen
-import androidx.compose.material.icons.filled.Favorite
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -92,7 +120,18 @@ internal fun TaminHamrahNavGraph(
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
 
+    // Treatment paints its teal header behind the status bar and takes that inset itself.
+    // Everything else still gets padded clear of the system bars by the Scaffold, so this
+    // stays scoped to the one screen that draws edge-to-edge.
+    val drawsUnderStatusBar = currentDestination?.hasRoute<TreatmentRoute>() == true
+
     Scaffold(
+        contentWindowInsets = if (drawsUnderStatusBar) {
+            ScaffoldDefaults.contentWindowInsets
+                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+        } else {
+            ScaffoldDefaults.contentWindowInsets
+        },
         bottomBar = {
             androidx.compose.animation.AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -382,160 +421,158 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "خدمات تأمین من",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val userTypes = listOf(
+                1 to "بیمه شدگان",
+                2 to "مستمری بگیران",
+                3 to "کارفرمایان"
+            )
+            val availableTypes = remember(uiState.menuItems) {
+                val typesInData = uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
+                userTypes.filter { it.first in typesInData }.ifEmpty { userTypes }
+            }
+            var selectedType by remember(availableTypes) {
+                mutableStateOf(availableTypes.firstOrNull()?.first ?: 1)
+            }
+            var expanded by remember { mutableStateOf(false) }
+
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
+                OutlinedButton(
+                    onClick = { expanded = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = availableTypes.find { it.first == selectedType }?.second ?: "انتخاب گروه",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    availableTypes.forEach { (id, name) ->
+                        DropdownMenuItem(
+                            text = { Text(name) },
+                            onClick = {
+                                selectedType = id
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
 
-            Column(
-                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "خدمات تأمین من",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                val userTypes = listOf(
-                    1 to "بیمه شدگان",
-                    2 to "مستمری بگیران",
-                    3 to "کارفرمایان"
-                )
-                val availableTypes = remember(uiState.menuItems) {
-                    val typesInData = uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
-                    userTypes.filter { it.first in typesInData }.ifEmpty { userTypes }
-                }
-                var selectedType by remember(availableTypes) {
-                    mutableStateOf(availableTypes.firstOrNull()?.first ?: 1)
-                }
-                var expanded by remember { mutableStateOf(false) }
+            val servicesToShow = uiState.menuItems.filter { it.showRole.contains(selectedType) }
 
-                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
-                    OutlinedButton(
-                        onClick = { expanded = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Text(
-                            text = availableTypes.find { it.first == selectedType }?.second ?: "انتخاب گروه",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
+            servicesToShow.forEach { service ->
+                val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
+                                 service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+                                 service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.fillMaxWidth(0.9f)
-                    ) {
-                        availableTypes.forEach { (id, name) ->
-                            DropdownMenuItem(
-                                text = { Text(name) },
-                                onClick = {
-                                    selectedType = id
-                                    expanded = false
+                val cardAlpha = if (isDisabled) 0.5f else 1.0f
+
+                Card(
+                    onClick = {
+                        if (!isDisabled) {
+                            viewModel.sendIntent(HomeIntent.OnServiceClick(service))
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 8.dp)
+                        .alpha(cardAlpha),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            // Icon could be added here based on service.icon
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        MaterialTheme.shapes.small
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Home, // Placeholder
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+
+                            Spacer(Modifier.width(16.dp))
+
+                            Column {
+                                Text(
+                                    service.name ?: "",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                if (!service.subtitle.isNullOrEmpty()) {
+                                    Text(
+                                        service.subtitle!!,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
+                            }
+                        }
+
+                        // Show message if present and service is not just ACTIVE
+                        if (!service.message.isNullOrEmpty() && service.status != MenuServiceStatusDN.ACTIVE) {
+                            val msgColor = if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+
+                            Text(
+                                text = service.message!!,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = msgColor,
+                                modifier = Modifier.padding(start = 72.dp, end = 16.dp, bottom = 12.dp)
                             )
                         }
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val servicesToShow = uiState.menuItems.filter { it.showRole.contains(selectedType) }
-
-                servicesToShow.forEach { service ->
-                    val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-                                     service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-                                     service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
-
-                    val cardAlpha = if (isDisabled) 0.5f else 1.0f
-
-                    Card(
-                        onClick = {
-                            if (!isDisabled) {
-                                viewModel.sendIntent(HomeIntent.OnServiceClick(service))
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp, horizontal = 8.dp)
-                            .alpha(cardAlpha),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                // Icon could be added here based on service.icon
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .background(
-                                            MaterialTheme.colorScheme.primaryContainer,
-                                            MaterialTheme.shapes.small
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Home, // Placeholder
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                }
-
-                                Spacer(Modifier.width(16.dp))
-
-                                Column {
-                                    Text(
-                                        service.name ?: "",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    if (!service.subtitle.isNullOrEmpty()) {
-                                        Text(
-                                            service.subtitle!!,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Show message if present and service is not just ACTIVE
-                            if (!service.message.isNullOrEmpty() && service.status != com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ACTIVE) {
-                                val msgColor = if (service.status == com.tamin.taminhamrah.model.common.MenuServiceStatusDN.ENABLED_WITH_ERROR)
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-
-                                Text(
-                                    text = service.message!!,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = msgColor,
-                                    modifier = Modifier.padding(start = 72.dp, end = 16.dp, bottom = 12.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
-                    Text(
-                        "خطا در دریافت اطلاعات یا لیست خالی است",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 32.dp)
-                    )
-                    Button(
-                        onClick = { viewModel.sendIntent(HomeIntent.LoadMenu) },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text("تلاش مجدد")
-                    }
+            if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
+                Text(
+                    "خطا در دریافت اطلاعات یا لیست خالی است",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 32.dp)
+                )
+                Button(
+                    onClick = { viewModel.sendIntent(HomeIntent.LoadMenu) },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text("تلاش مجدد")
                 }
             }
         }

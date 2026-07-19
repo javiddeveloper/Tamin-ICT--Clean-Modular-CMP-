@@ -33,6 +33,9 @@ object Spacing {
     val xxxxxl = 64.dp
     val xxxxxxl = 80.dp
     val xxxxxxxl = 96.dp
+
+    val page = 18.dp
+    val cardGap = 11.dp
 }
 
 object CornerRadius {
@@ -44,6 +47,14 @@ object CornerRadius {
     val xl = 16.dp
     val x2l = 24.dp
     val full = 9999.dp
+
+    val avatarTile = 10.dp
+    val listRow = 13.dp
+    val chip = 14.dp
+    val iconTile = 18.dp
+    val cardCompact = 20.dp
+    val card = 22.dp
+    val sheet = 28.dp
 }
 
 object Elevation {
