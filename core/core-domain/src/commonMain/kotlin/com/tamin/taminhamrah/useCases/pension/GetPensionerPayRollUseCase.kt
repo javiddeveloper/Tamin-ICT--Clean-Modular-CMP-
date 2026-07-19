@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class GetPensionerPayRollUseCase(
     private val pensionRepository: PensionRepository
 ) {
-    suspend operator fun invoke(filters: List<ApiFilterDN>): Flow<PayRollDN> {
+    suspend operator fun invoke(filters: List<ApiFilterDN>): Flow<List<PayRollDN>> {
         return pensionRepository.getPensionerPayRoll(filters)
     }
 }

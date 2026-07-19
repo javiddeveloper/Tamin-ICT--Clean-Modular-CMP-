@@ -23,10 +23,10 @@ class PensionApiServiceTest : BaseApiTest() {
         val response = apiService.getPensionerPayRoll("filter-json")
 
         assertEquals(200, response.status)
-        assertEquals(1, response.data?.id)
-        assertEquals("Type A", response.data?.clpType)
-        assertEquals(5000000L, response.data?.sumAmount)
-        assertEquals("1402", response.data?.hisYear)
+        assertEquals(1, response.data?.list?.first()?.id)
+        assertEquals("Type A", response.data?.list?.first()?.clpType)
+        assertEquals(5000000L, response.data?.list?.first()?.sumAmount)
+        assertEquals("1402", response.data?.list?.first()?.hisYear)
     }
 
     @Test
