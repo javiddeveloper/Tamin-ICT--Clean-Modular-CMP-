@@ -1,7 +1,5 @@
 package com.tamin.taminhamrah.ui.theme
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
@@ -60,6 +58,10 @@ data class TaminColors(
     // Brand gradients (hero headers, feature cards)
     val heroGradient: Brush,
     val medicalGradient: Brush,
+
+    // Top app bar. Held as stops rather than a Brush so the bar owns its sweep
+    // direction; the strip behind the status bar shares this same wash.
+    val topAppBarStops: List<Color>,
     val aiAssistantGradient: Brush,
 )
 
@@ -105,6 +107,8 @@ val LightTaminColors = TaminColors(
     tabActiveBg = Color(0x1A1F4FA3),
     heroGradient = Brush.linearGradient(listOf(Primary900, Primary700)),
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
+    // Same stops as the quick-access card; the bar just sweeps the other way.
+    topAppBarStops = listOf(TaminTeal900, TaminTeal500),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
@@ -150,8 +154,11 @@ val DarkTaminColors = TaminColors(
     tabbarBorder = Color(0x17FFFFFF),
     tabbarShine = Color(0x0DFFFFFF),
     tabActiveBg = Color(0x295B9CFF),
-    heroGradient = Brush.linearGradient(listOf(Color(0xFF10AEB9), Color(0xFF1E6FD0))),
+    heroGradient = Brush.linearGradient(listOf(TaminDarkHeroStart, TaminDarkHeroEnd)),
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
+    // Dark mode overrides every hero to the same teal-to-blue wash, status bar included,
+    // so the bar and the strip above it join into one continuous band.
+    topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
