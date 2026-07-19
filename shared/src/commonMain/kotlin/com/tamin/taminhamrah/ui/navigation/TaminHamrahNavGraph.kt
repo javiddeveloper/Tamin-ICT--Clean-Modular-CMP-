@@ -55,9 +55,10 @@ import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
-import com.tamin.taminhamrah.ui.khadamat.KhadamatRoute
-import com.tamin.taminhamrah.ui.khadamat.KhadamatViewModel
-import com.tamin.taminhamrah.ui.khadamat.contract.TaminScreens
+import com.tamin.taminhamrah.feature.khadamat.khadamatScreen
+import com.tamin.taminhamrah.feature.khadamat.KhadamatRoute
+import com.tamin.taminhamrah.feature.khadamat.navigateToKhadamat
+import com.tamin.taminhamrah.feature.khadamat.ui.contract.TaminScreens
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -76,7 +77,7 @@ internal fun TaminHamrahNavGraph(
             currentDestination?.hasRoute<TreatmentRoute>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true ||
-            currentDestination?.hasRoute<Route.Khadamat>() == true
+            currentDestination?.hasRoute<KhadamatRoute>() == true
 
     Scaffold(
         bottomBar = {
@@ -109,9 +110,9 @@ internal fun TaminHamrahNavGraph(
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Menu, null) },
                         label = { Text("Services") },
-                        selected = currentDestination?.hasRoute<Route.Khadamat>() == true,
+                        selected = currentDestination?.hasRoute<KhadamatRoute>() == true,
                         onClick = {
-                            navController.navigate(Route.Khadamat) {
+                            navController.navigateToKhadamat {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -200,31 +201,27 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                composable<Route.Khadamat> {
-                    val khadamatViewModel: KhadamatViewModel = koinViewModel()
-                    KhadamatRoute(
-                        viewModel = khadamatViewModel,
-                        onNavigateToRoute = { screen ->
-                            when (screen) {
-                                is TaminScreens.History -> navController.navigateToHistory()
-                                is TaminScreens.Workshops -> navController.navigateToWorkshops()
-                                is TaminScreens.Contracts -> navController.navigateToContracts()
-                                is TaminScreens.StudentInsurance -> navController.navigateToStudentInsuranceContract()
-                                is TaminScreens.FreelanceInsurance -> navController.navigateToFreelanceInsuranceContract()
-                                is TaminScreens.OptionalInsurance -> navController.navigateToOptionalInsuranceContract()
-                                is TaminScreens.HousewifeInsurance -> navController.navigateToHousewifeInsuranceContract()
-                                is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
-                                is TaminScreens.WebView -> openUrl(screen.url)
-                                is TaminScreens.ShowMessage -> {
-//                                    showToast(screen.message)
-                                }
+                khadamatScreen(
+                    onNavigateToRoute = { screen ->
+                        when (screen) {
+                            is TaminScreens.History -> navController.navigateToHistory()
+                            is TaminScreens.Workshops -> navController.navigateToWorkshops()
+                            is TaminScreens.Contracts -> navController.navigateToContracts()
+                            is TaminScreens.StudentInsurance -> navController.navigateToStudentInsuranceContract()
+                            is TaminScreens.FreelanceInsurance -> navController.navigateToFreelanceInsuranceContract()
+                            is TaminScreens.OptionalInsurance -> navController.navigateToOptionalInsuranceContract()
+                            is TaminScreens.HousewifeInsurance -> navController.navigateToHousewifeInsuranceContract()
+                            is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
+                            is TaminScreens.WebView -> openUrl(screen.url)
+                            is TaminScreens.ShowMessage -> {
+//                                showToast(screen.message)
                             }
-                        },
-                        onBackClicked = {
-                            navController.popBackStack()
                         }
-                    )
-                }
+                    },
+                    onBackClicked = {
+                        navController.popBackStack()
+                    }
+                )
 
                 treatmentScreen()
 

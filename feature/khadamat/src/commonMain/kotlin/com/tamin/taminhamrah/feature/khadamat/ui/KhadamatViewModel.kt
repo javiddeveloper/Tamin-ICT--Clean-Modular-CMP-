@@ -1,11 +1,11 @@
-package com.tamin.taminhamrah.ui.khadamat
+package com.tamin.taminhamrah.feature.khadamat.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
-import com.tamin.taminhamrah.ui.khadamat.contract.*
+import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
 import com.tamin.taminhamrah.ui.components.khadamat.KhadamatTab
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import kotlinx.coroutines.flow.Flow

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.khadamat.contract
+package com.tamin.taminhamrah.feature.khadamat.ui.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.common.FeatureFlag

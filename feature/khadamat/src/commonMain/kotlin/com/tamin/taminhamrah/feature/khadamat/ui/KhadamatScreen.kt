@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.khadamat
+package com.tamin.taminhamrah.feature.khadamat.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,16 +19,13 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
-import com.tamin.taminhamrah.ui.khadamat.contract.*
 import com.tamin.taminhamrah.ui.components.khadamat.*
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
 
-/**
- * @author  : Javid
- * @summary : KhadamatRoute
- */
+
 @Composable
 fun KhadamatRoute(
     viewModel: KhadamatViewModel,
@@ -61,7 +58,6 @@ fun HandleKhadamatEvents(
     onNavigateToRoute: (TaminScreens) -> Unit,
     onBackClicked: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     LaunchedEffect(events) {
         events.collect { event ->
             when (event) {
@@ -104,7 +100,7 @@ fun KhadamatScreen(
             KhadamatTab.EMPLOYER -> "خدمات کارفرمایان"
         }
 
-        // Quick Access / Featured Services carousel items
+
         val preferredIds = listOf(7, 10, 34, 35, 36)
         val featuredServices = remember(state.menuItems) {
             val featured = state.menuItems.filter { it.id in preferredIds }
@@ -121,7 +117,7 @@ fun KhadamatScreen(
                 .fillMaxSize()
                 .background(TaminLightBgPage)
         ) {
-            // 1. Top White Header Card (Title & Search Bar) - scrolls with content
+
             item {
                 Column(
                     modifier = Modifier
@@ -158,12 +154,12 @@ fun KhadamatScreen(
                 }
             }
 
-            // Top spacer below the card
+
             item {
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
-            // 2. Tab Segmented Selector - scrolls with content
+
             item {
                 TabSelector(
                     selectedTab = state.selectedTab,
@@ -176,7 +172,7 @@ fun KhadamatScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // 3. Featured Services Carousel - scrolls with content
+
             item {
                 KhadamatFeaturedCarousel(
                     featuredServices = featuredServices,
@@ -188,7 +184,7 @@ fun KhadamatScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // 4. Category Header & count badge - scrolls with content
+
             item {
                 KhadamatHeader(
                     title = headerTitle,
@@ -201,7 +197,7 @@ fun KhadamatScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 5. Scrollable Services Grid Items (2 columns layout)
+
             if (state.isLoading) {
                 item {
                     Box(
@@ -229,7 +225,7 @@ fun KhadamatScreen(
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                        // Draw empty placeholder slots to balance Row weight alignment
+
                         val emptySlots = 2 - rowItems.size
                         repeat(emptySlots) {
                             Box(modifier = Modifier.weight(1f))
@@ -238,7 +234,6 @@ fun KhadamatScreen(
                 }
             }
 
-            // Bottom Spacer padding for aesthetics above the bottom nav bar
             item {
                 Spacer(modifier = Modifier.height(24.dp))
             }
