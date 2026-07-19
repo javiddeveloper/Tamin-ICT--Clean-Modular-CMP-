@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.khadamat.ui
+package com.tamin.taminhamrah.feature.taminServices.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,52 +15,55 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
+import com.tamin.taminhamrah.feature.taminServices.ui.contract.*
+import com.tamin.taminhamrah.feature.taminServices.ui.contract.TaminScreens.*
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.khadamat.*
+import com.tamin.taminhamrah.ui.components.taminServices.ServiceCard
+import com.tamin.taminhamrah.ui.components.taminServices.TabSelector
+import com.tamin.taminhamrah.ui.components.taminServices.TaminServicesHeader
+import com.tamin.taminhamrah.ui.components.taminServices.TaminServicesTab
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun KhadamatRoute(
-    viewModel: KhadamatViewModel,
+fun TaminServicesRoute(
+    viewModel: TamminServicesViewModel,
     onNavigateToRoute: (TaminScreens) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.sendIntent(KhadamatIntent.OnTabSelected(KhadamatTab.INSURED))
-        viewModel.sendIntent(KhadamatIntent.OnSearchQueryChanged(""))
+        viewModel.sendIntent(TaminServicesIntent.OnTabSelected(TaminServicesTab.INSURED))
+        viewModel.sendIntent(TaminServicesIntent.OnSearchQueryChanged(""))
     }
 
-    HandleKhadamatEvents(
+    HandleTaminServicesEvents(
         events = viewModel.events,
         onNavigateToRoute = onNavigateToRoute,
         onBackClicked = onBackClicked
     )
 
-    KhadamatScreen(
+    TaminServicesScreen(
         state = uiState,
         onIntent = viewModel::sendIntent,
-        onNavigateToRoute = onNavigateToRoute,
     )
 }
 
 @Composable
-fun HandleKhadamatEvents(
-    events: Flow<KhadamatEvent>,
+fun HandleTaminServicesEvents(
+    events: Flow<TaminSericesEvent>,
     onNavigateToRoute: (TaminScreens) -> Unit,
     onBackClicked: () -> Unit
 ) {
     LaunchedEffect(events) {
         events.collect { event ->
             when (event) {
-                is KhadamatEvent.NavigateToService -> {
+                is TaminSericesEvent.NavigateToService -> {
                     val screen = when (event.flag) {
                         FeatureFlag.MERGE_HISTORY -> TaminScreens.History
                         FeatureFlag.WORKSHOPS -> TaminScreens.Workshops
@@ -74,11 +77,12 @@ fun HandleKhadamatEvents(
                     }
                     screen?.let { onNavigateToRoute(it) }
                 }
-                is KhadamatEvent.NavigateToWeb -> {
-                    onNavigateToRoute(TaminScreens.WebView(event.url))
+                is TaminSericesEvent.NavigateToWeb -> {
+                    onNavigateToRoute(WebView(event.url))
                 }
-                is KhadamatEvent.ShowMessage -> {
-                    onNavigateToRoute(TaminScreens.ShowMessage(event.message))
+                is TaminSericesEvent.NavigateBack -> { onBackClicked()}
+                is TaminSericesEvent.ShowMessage -> {
+                    //TODO display toast
                 }
             }
         }
@@ -86,34 +90,33 @@ fun HandleKhadamatEvents(
 }
 
 @Composable
-fun KhadamatScreen(
+fun TaminServicesScreen(
     modifier: Modifier = Modifier,
-    state: KhadamatUiState,
-    onIntent: (KhadamatIntent) -> Unit,
-    onNavigateToRoute: (TaminScreens) -> Unit,
+    state: TaminServicesUiState,
+    onIntent: (TaminServicesIntent) -> Unit,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         val headerTitle = when (state.selectedTab) {
-            KhadamatTab.INSURED -> "خدمات بیمه‌شدگان"
-            KhadamatTab.PENSIONER -> "خدمات مستمری‌بگیران"
-            KhadamatTab.EMPLOYER -> "خدمات کارفرمایان"
+            TaminServicesTab.INSURED -> "خدمات بیمه‌شدگان"
+            TaminServicesTab.PENSIONER -> "خدمات مستمری‌بگیران"
+            TaminServicesTab.EMPLOYER -> "خدمات کارفرمایان"
         }
 
         //Quick Access
-   /*     val featuredServices = remember(state.filteredServices, state.selectedTab) {
-            val preferredIds = when (state.selectedTab) {
-                KhadamatTab.INSURED -> listOf(7, 10, 34, 35, 36)
-                KhadamatTab.PENSIONER -> listOf(105, 106, 107, 108, 112)
-                KhadamatTab.EMPLOYER -> listOf(1001, 1002, 1004, 1006, 1010)
-            }
-            val featured = state.filteredServices.filter { it.id in preferredIds }
-            if (featured.size < 5) {
-                val remaining = state.filteredServices.filter { it.id !in preferredIds }
-                (featured + remaining).take(5)
-            } else {
-                featured.take(5)
-            }
-        }*/
+        /*     val featuredServices = remember(state.filteredServices, state.selectedTab) {
+                 val preferredIds = when (state.selectedTab) {
+                     TaminServicesTab.INSURED -> listOf(7, 10, 34, 35, 36)
+                     TaminServicesTab.PENSIONER -> listOf(105, 106, 107, 108, 112)
+                     TaminServicesTab.EMPLOYER -> listOf(1001, 1002, 1004, 1006, 1010)
+                 }
+                 val featured = state.filteredServices.filter { it.id in preferredIds }
+                 if (featured.size < 5) {
+                     val remaining = state.filteredServices.filter { it.id !in preferredIds }
+                     (featured + remaining).take(5)
+                 } else {
+                     featured.take(5)
+                 }
+             }*/
 
         LazyColumn(
             modifier = modifier
@@ -127,14 +130,25 @@ fun KhadamatScreen(
                         .fillMaxWidth()
                         .shadow(
                             elevation = Elevation.xs,
-                            shape = RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l),
+                            shape = RoundedCornerShape(
+                                bottomStart = CornerRadius.x2l,
+                                bottomEnd = CornerRadius.x2l
+                            ),
                             clip = false
                         )
                         .background(
                             color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l)
+                            shape = RoundedCornerShape(
+                                bottomStart = CornerRadius.x2l,
+                                bottomEnd = CornerRadius.x2l
+                            )
                         )
-                        .padding(top = Spacing.xl, start = Spacing.xlg, end = Spacing.xlg, bottom = Spacing.xxl)
+                        .padding(
+                            top = Spacing.xl,
+                            start = Spacing.xlg,
+                            end = Spacing.xlg,
+                            bottom = Spacing.xxl
+                        )
                 ) {
                     Text(
                         text = "خدمات",
@@ -148,7 +162,7 @@ fun KhadamatScreen(
 
                     CustomSearchBar(
                         query = state.searchQuery,
-                        onQueryChange = { onIntent(KhadamatIntent.OnSearchQueryChanged(it)) },
+                        onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
                         placeHolder = "جستجو در میان خدمات ..."
                     )
                 }
@@ -158,11 +172,10 @@ fun KhadamatScreen(
                 Spacer(modifier = Modifier.height(Spacing.xlg))
             }
 
-            // Tab Segmented Selector
             item {
                 TabSelector(
                     selectedTab = state.selectedTab,
-                    onTabSelected = { onIntent(KhadamatIntent.OnTabSelected(it)) },
+                    onTabSelected = { onIntent(TaminServicesIntent.OnTabSelected(it)) },
                     modifier = Modifier.padding(horizontal = Spacing.xlg)
                 )
             }
@@ -172,19 +185,19 @@ fun KhadamatScreen(
             }
 
             // Quick Access Carousel Section
-           /* item {
-                KhadamatFeaturedCarousel(
-                    featuredServices = featuredServices,
-                    onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) }
-                )
-            }*/
+            /* item {
+                 TaminServicesFeaturedCarousel(
+                     featuredServices = featuredServices,
+                     onServiceClick = { onIntent(TaminServicesIntent.OnServiceClick(it)) }
+                 )
+             }*/
 
             item {
                 Spacer(modifier = Modifier.height(Spacing.xl))
             }
 
             item {
-                KhadamatHeader(
+                TaminServicesHeader(
                     title = headerTitle,
                     badgeText = "${state.filteredServices.size} خدمت",
                     modifier = Modifier.padding(horizontal = Spacing.xlg)
@@ -232,7 +245,7 @@ fun KhadamatScreen(
                         rowItems.forEach { service ->
                             ServiceCard(
                                 service = service,
-                                onClick = { onIntent(KhadamatIntent.OnServiceClick(service)) },
+                                onClick = { onIntent(TaminServicesIntent.OnServiceClick(service)) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -254,14 +267,13 @@ fun KhadamatScreen(
 
 @PreviewRtlTheme
 @Composable
-fun PreviewKhadamatScreen() {
+fun PreviewTaminServicesScreen() {
     PreviewRtlThemeContent {
-        KhadamatScreen(
+        TaminServicesScreen(
             onIntent = {},
-            onNavigateToRoute = {},
-            state = KhadamatUiState(
+            state = TaminServicesUiState(
                 isLoading = false,
-                selectedTab = KhadamatTab.INSURED,
+                selectedTab = TaminServicesTab.INSURED,
                 filteredServices = emptyList()
             )
         )
@@ -270,14 +282,13 @@ fun PreviewKhadamatScreen() {
 
 @PreviewRtlTheme
 @Composable
-fun PreviewKhadamatScreenDarkMode() {
+fun PreviewTaminServicesScreenDarkMode() {
     TaminHamrahTheme(darkTheme = true) {
-        KhadamatScreen(
+        TaminServicesScreen(
             onIntent = {},
-            onNavigateToRoute = {},
-            state = KhadamatUiState(
+            state = TaminServicesUiState(
                 isLoading = false,
-                selectedTab = KhadamatTab.INSURED,
+                selectedTab = TaminServicesTab.INSURED,
                 filteredServices = emptyList()
             )
         )

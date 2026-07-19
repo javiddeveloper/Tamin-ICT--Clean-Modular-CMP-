@@ -30,7 +30,6 @@ import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
-import com.tamin.taminhamrah.feature.pensionInquiry.PensionInquiryRoute
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -55,7 +54,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
@@ -75,10 +73,10 @@ import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
-import com.tamin.taminhamrah.feature.khadamat.khadamatScreen
-import com.tamin.taminhamrah.feature.khadamat.KhadamatRoute
-import com.tamin.taminhamrah.feature.khadamat.navigateToKhadamat
-import com.tamin.taminhamrah.feature.khadamat.ui.contract.TaminScreens
+import com.tamin.taminhamrah.feature.taminServices.TaminServicesScreen
+import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.navigateToTaminServices
+import com.tamin.taminhamrah.feature.taminServices.ui.contract.TaminScreens
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -97,7 +95,7 @@ internal fun TaminHamrahNavGraph(
             currentDestination?.hasRoute<TreatmentRoute>() == true ||
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true ||
-            currentDestination?.hasRoute<KhadamatRoute>() == true
+            currentDestination?.hasRoute<TaminServicesRoute>() == true
 
     Scaffold(
         bottomBar = {
@@ -130,9 +128,9 @@ internal fun TaminHamrahNavGraph(
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Menu, null) },
                         label = { Text("Services") },
-                        selected = currentDestination?.hasRoute<KhadamatRoute>() == true,
+                        selected = currentDestination?.hasRoute<TaminServicesRoute>() == true,
                         onClick = {
-                            navController.navigateToKhadamat {
+                            navController.navigateToTaminServices {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -251,7 +249,7 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                khadamatScreen(
+                TaminServicesScreen(
                     onNavigateToRoute = { screen ->
                         when (screen) {
                             is TaminScreens.History -> navController.navigateToHistory()
@@ -263,9 +261,6 @@ internal fun TaminHamrahNavGraph(
                             is TaminScreens.HousewifeInsurance -> navController.navigateToHousewifeInsuranceContract()
                             is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
                             is TaminScreens.WebView -> openUrl(screen.url)
-                            is TaminScreens.ShowMessage -> {
-//                                showToast(screen.message)
-                            }
                         }
                     },
                     onBackClicked = {

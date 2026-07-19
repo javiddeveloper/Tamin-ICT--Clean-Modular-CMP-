@@ -1,10 +1,11 @@
-package com.tamin.taminhamrah.ui.components.khadamat
+package com.tamin.taminhamrah.ui.components.taminServices
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,10 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
@@ -149,7 +148,7 @@ fun ServiceCard(
                     .absoluteOffset(x = (-4).dp, y = (-4).dp)
                     .background(
                         MaterialTheme.colorScheme.error,
-                        androidx.compose.foundation.shape.CircleShape
+                        CircleShape
                     )
             )
         }
@@ -208,7 +207,7 @@ internal fun getIconForName(name: String?): ImageVector {
 
 @PreviewRtlTheme
 @Composable
-private fun KhadamatTagPreview() {
+private fun TaminServicesTagPreview() {
     PreviewRtlThemeContent {
         Box(
             modifier = Modifier

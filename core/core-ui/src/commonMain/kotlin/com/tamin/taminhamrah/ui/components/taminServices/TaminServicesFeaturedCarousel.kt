@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.components.khadamat
+package com.tamin.taminhamrah.ui.components.taminServices
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,9 +26,10 @@ import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.*
+import kotlin.collections.get
 
 @Composable
-fun KhadamatFeaturedCarousel(
+fun TaminServicesFeaturedCarousel(
     featuredServices: List<MainServiceDN>,
     onServiceClick: (MainServiceDN) -> Unit,
     modifier: Modifier = Modifier
@@ -169,9 +170,9 @@ private fun FeaturedServiceCard(
 
 @PreviewRtlTheme
 @Composable
-private fun KhadamatFeaturedCarouselPreview() {
+private fun TaminServicesFeaturedCarouselPreview() {
     PreviewRtlThemeContent {
-        KhadamatFeaturedCarousel(
+        TaminServicesFeaturedCarousel(
             featuredServices = listOf(
                 MainServiceDN(id = 7, name = "کلیه سوابق", icon = "bill"),
                 MainServiceDN(id = 10, name = "اعتراض به سوابق", icon = "protest"),

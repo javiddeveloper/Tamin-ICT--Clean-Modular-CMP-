@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.tamin.taminhamrah.feature.khadamat"
+    namespace = "com.tamin.taminhamrah.feature.taminServices"
 }
 
 kotlin {

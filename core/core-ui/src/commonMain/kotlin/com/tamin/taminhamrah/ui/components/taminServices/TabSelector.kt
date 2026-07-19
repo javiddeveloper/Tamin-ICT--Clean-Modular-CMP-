@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.components.khadamat
+package com.tamin.taminhamrah.ui.components.taminServices
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,8 +21,8 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 fun TabSelector(
-    selectedTab: KhadamatTab,
-    onTabSelected: (KhadamatTab) -> Unit,
+    selectedTab: TaminServicesTab,
+    onTabSelected: (TaminServicesTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,7 +32,7 @@ fun TabSelector(
             .padding(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val tabs = listOf(KhadamatTab.INSURED, KhadamatTab.PENSIONER, KhadamatTab.EMPLOYER)
+        val tabs = listOf(TaminServicesTab.INSURED, TaminServicesTab.PENSIONER, TaminServicesTab.EMPLOYER)
         tabs.forEach { tab ->
             val isSelected = selectedTab == tab
             val itemModifier = if (isSelected) {
@@ -77,7 +77,7 @@ fun TabSelector(
 private fun ProfileScreenPreview() {
     PreviewRtlThemeContent {
         TabSelector(
-            selectedTab = KhadamatTab.INSURED,
+            selectedTab = TaminServicesTab.INSURED,
             onTabSelected = {}
         )
     }

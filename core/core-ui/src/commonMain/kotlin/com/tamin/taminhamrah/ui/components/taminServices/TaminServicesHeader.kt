@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.components.khadamat
+package com.tamin.taminhamrah.ui.components.taminServices
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.CustomChip
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
-fun KhadamatHeader(
+fun TaminServicesHeader(
     title: String,
     badgeText: String?,
     modifier: Modifier = Modifier
@@ -27,7 +29,7 @@ fun KhadamatHeader(
     ) {
         Text(
             text = title,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = LocalTaminColors.current.textSecondary,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -40,9 +42,9 @@ fun KhadamatHeader(
 
 @PreviewRtlTheme
 @Composable
-private fun KhadamatHeaderPreview() {
+private fun TaminServicesHeaderPreview() {
     PreviewRtlThemeContent {
-        KhadamatHeader(
+        TaminServicesHeader(
             title = "خدمات بیمه‌شدگان",
             badgeText = "۲۴ خدمت",
             modifier = Modifier.padding(Spacing.lg)
