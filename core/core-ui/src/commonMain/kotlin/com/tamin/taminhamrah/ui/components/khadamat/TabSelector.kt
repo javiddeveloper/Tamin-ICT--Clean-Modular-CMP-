@@ -14,13 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.theme.TaminLightTextTertiary
-import com.tamin.taminhamrah.ui.theme.TaminNavy700
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 fun TabSelector(
@@ -31,8 +28,8 @@ fun TabSelector(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFFEFF3F8), MaterialTheme.shapes.medium)
-            .padding(4.dp),
+            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium)
+            .padding(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val tabs = listOf(KhadamatTab.INSURED, KhadamatTab.PENSIONER, KhadamatTab.EMPLOYER)
@@ -41,7 +38,7 @@ fun TabSelector(
             val itemModifier = if (isSelected) {
                 Modifier
                     .clip(MaterialTheme.shapes.medium)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
             } else {
                 Modifier
             }
@@ -56,13 +53,18 @@ fun TabSelector(
                     ) {
                         onTabSelected(tab)
                     }
-                    .padding(vertical = 10.dp),
+                    .padding(vertical = Spacing.md),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = tab.title,
-                    color = if (isSelected) TaminNavy700 else TaminLightTextTertiary,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    ),
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 )
             }

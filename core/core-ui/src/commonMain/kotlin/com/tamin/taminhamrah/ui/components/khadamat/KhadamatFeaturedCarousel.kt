@@ -25,7 +25,7 @@ import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-
+import com.tamin.taminhamrah.ui.theme.*
 
 @Composable
 fun KhadamatFeaturedCarousel(
@@ -36,11 +36,11 @@ fun KhadamatFeaturedCarousel(
     if (featuredServices.isEmpty()) return
 
     val cardColors = listOf(
-        Color(0xFF1D4ED8),
-        Color(0xFF0D9488),
-        Color(0xFF7C3AED),
-        Color(0xFFEA580C),
-        Color(0xFFDB2777)
+        TaminNavy700,
+        TaminTeal700,
+        TaminPurple700,
+        TaminOrange,
+        TaminRed
     )
 
     val fallbackSubtitles = mapOf(
@@ -69,18 +69,18 @@ fun KhadamatFeaturedCarousel(
     ) {
         Text(
             text = "دسترسی سریع",
-            color = Color(0xFF64748B),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 12.dp)
+                .padding(horizontal = Spacing.xlg)
+                .padding(bottom = Spacing.md)
         )
 
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = Spacing.xlg),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             itemsIndexed(featuredServices) { index, service ->
                 val cardColor = cardColors[index % cardColors.size]
@@ -115,22 +115,22 @@ private fun FeaturedServiceCard(
         modifier = modifier
             .width(170.dp)
             .height(135.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(CornerRadius.x2l))
             .background(backgroundColor)
             .clickable(
                 enabled = true,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ) { onClick() }
-            .padding(16.dp)
+            .padding(Spacing.lg)
             .alpha(cardAlpha),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
-                .padding(8.dp),
+                .size(IconSize.large)
+                .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(CornerRadius.lg))
+                .padding(Spacing.sm),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -153,7 +153,7 @@ private fun FeaturedServiceCard(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             Text(
                 text = subtitle,

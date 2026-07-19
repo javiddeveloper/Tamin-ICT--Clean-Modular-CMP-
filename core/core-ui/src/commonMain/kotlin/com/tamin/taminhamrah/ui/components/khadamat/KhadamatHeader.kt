@@ -9,13 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.CuustomChip
-import com.tamin.taminhamrah.ui.theme.TaminLightTextTertiary
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 fun KhadamatHeader(
@@ -30,13 +27,13 @@ fun KhadamatHeader(
     ) {
         Text(
             text = title,
-            color = TaminLightTextTertiary,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
 
         if (!badgeText.isNullOrEmpty()) {
-            CuustomChip(text = badgeText, borderWidth = 1.dp, borderColor = Color(0xFFCBD7EC))
+            CustomChip(text = badgeText)
         }
     }
 }
@@ -48,7 +45,7 @@ private fun KhadamatHeaderPreview() {
         KhadamatHeader(
             title = "خدمات بیمه‌شدگان",
             badgeText = "۲۴ خدمت",
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(Spacing.lg)
         )
     }
 }

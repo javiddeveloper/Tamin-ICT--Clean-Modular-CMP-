@@ -4,67 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Accessibility
-import androidx.compose.material.icons.filled.AppRegistration
-import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.AssignmentTurnedIn
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.BorderColor
-import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.CloudQueue
-import androidx.compose.material.icons.filled.ConfirmationNumber
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.FamilyRestroom
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.Handshake
-import androidx.compose.material.icons.filled.Healing
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.LocalFlorist
-import androidx.compose.material.icons.filled.LocalHospital
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.Payment
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Policy
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.ReportProblem
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.TransferWithinAStation
-import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.WheelchairPickup
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -79,16 +22,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.theme.TaminLightBgPage
-import com.tamin.taminhamrah.ui.theme.TaminLightTextPrimary
-import com.tamin.taminhamrah.ui.theme.TaminTeal700
+import com.tamin.taminhamrah.ui.theme.*
 
 @Composable
 fun ServiceCard(
@@ -101,7 +45,7 @@ fun ServiceCard(
             service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
     val cardAlpha = if (isDisabled) 0.5f else 1.0f
-    val shadowElevation = if (isDisabled) 0.dp else 8.dp
+    val shadowElevation = if (isDisabled) Elevation.none else Elevation.md
 
     val showRedDot = service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
             service.status == MenuServiceStatusDN.DISABLED ||
@@ -117,38 +61,38 @@ fun ServiceCard(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = MaterialTheme.shapes.small
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = MaterialTheme.shapes.medium
                 )
-                .clip(MaterialTheme.shapes.small)
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(
                     enabled = true,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) { onClick() }
-                .padding(8.dp)
+                .padding(Spacing.sm)
                 .alpha(cardAlpha),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             Box(
                 modifier = Modifier
-                    .size(55.dp)
+                    .size(IconSize.large)
                     .shadow(
                         elevation = shadowElevation,
-                        shape = RoundedCornerShape(17.dp),
+                        shape = RoundedCornerShape(CornerRadius.xl),
                         clip = false
                     )
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFFFFFFFF),
-                                Color(0xFFE9F1FF)
+                                MaterialTheme.colorScheme.surface,
+                                MaterialTheme.colorScheme.primaryContainer
                             ),
                             start = Offset(0f, 0f),
                             end = Offset(1f, 1f)
                         ),
-                        shape = RoundedCornerShape(17.dp)
+                        shape = RoundedCornerShape(CornerRadius.xl)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -158,45 +102,53 @@ fun ServiceCard(
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.White.copy(alpha = 0.5f),
-                                    Color.White.copy(alpha = 0f)
+                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                    MaterialTheme.colorScheme.surface.copy(alpha = 0f)
                                 )
                             ),
-                            shape = RoundedCornerShape(17.dp)
+                            shape = RoundedCornerShape(CornerRadius.xl)
                         )
                 )
 
                 Icon(
                     imageVector = getIconForName(service.icon),
                     contentDescription = service.name,
-                    tint = Color(0xFF18468C),
-                    modifier = Modifier.size(33.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(IconSize.medium)
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             Text(
                 text = service.name ?: "",
                 style = MaterialTheme.typography.titleSmall.copy(
-                    color = TaminLightTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.End,
                 ),
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 2.dp)
+                    .padding(horizontal = Spacing.xxs)
             )
         }
 
         if (showRedDot) {
+            val layoutDirection = LocalLayoutDirection.current
+            val badgeAlignment =
+                if (layoutDirection == LayoutDirection.Rtl) {
+                    Alignment.TopEnd
+                } else {
+                    Alignment.TopStart
+                }
+
             Box(
                 modifier = Modifier
-                    .size(10.dp)
-                    .align(Alignment.TopEnd)
+                    .size(IconSize.statIcon)
+                    .align(badgeAlignment)
                     .absoluteOffset(x = (-4).dp, y = (-4).dp)
                     .background(
-                        Color(0xFFD32F2F),
+                        MaterialTheme.colorScheme.error,
                         androidx.compose.foundation.shape.CircleShape
                     )
             )
@@ -261,8 +213,8 @@ private fun KhadamatTagPreview() {
         Box(
             modifier = Modifier
                 .wrapContentSize()
-                .background(TaminLightBgPage)
-                .padding(16.dp),
+                .background(MaterialTheme.colorScheme.background)
+                .padding(Spacing.lg),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -282,7 +234,7 @@ private fun KhadamatTagPreview() {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

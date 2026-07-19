@@ -12,22 +12,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
+import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.khadamat.*
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
-
 
 @Composable
 fun KhadamatRoute(
@@ -103,9 +99,8 @@ fun KhadamatScreen(
             KhadamatTab.EMPLOYER -> "خدمات کارفرمایان"
         }
 
-
         //Quick Access
-    /*    val featuredServices = remember(state.filteredServices, state.selectedTab) {
+   /*     val featuredServices = remember(state.filteredServices, state.selectedTab) {
             val preferredIds = when (state.selectedTab) {
                 KhadamatTab.INSURED -> listOf(7, 10, 34, 35, 36)
                 KhadamatTab.PENSIONER -> listOf(105, 106, 107, 108, 112)
@@ -123,7 +118,7 @@ fun KhadamatScreen(
         LazyColumn(
             modifier = modifier
                 .fillMaxSize()
-                .background(TaminLightBgPage)
+                .background(MaterialTheme.colorScheme.background)
         ) {
 
             item {
@@ -131,27 +126,25 @@ fun KhadamatScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .shadow(
-                            elevation = 2.dp,
-                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                            elevation = Elevation.xs,
+                            shape = RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l),
                             clip = false
                         )
                         .background(
-                            color = Color.White,
-                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l)
                         )
-                        .padding(top = 24.dp, start = 20.dp, end = 20.dp, bottom = 28.dp)
+                        .padding(top = Spacing.xl, start = Spacing.xlg, end = Spacing.xlg, bottom = Spacing.xxl)
                 ) {
                     Text(
                         text = "خدمات",
-                        color = TaminNavy900,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp)
+                            .padding(vertical = Spacing.md)
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     CustomSearchBar(
                         query = state.searchQuery,
@@ -161,27 +154,25 @@ fun KhadamatScreen(
                 }
             }
 
-
             item {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(Spacing.xlg))
             }
 
-
+            // Tab Segmented Selector
             item {
                 TabSelector(
                     selectedTab = state.selectedTab,
                     onTabSelected = { onIntent(KhadamatIntent.OnTabSelected(it)) },
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier.padding(horizontal = Spacing.xlg)
                 )
             }
 
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
             }
 
-
-            //Quick Access Section
-        /*    item {
+            // Quick Access Carousel Section
+           /* item {
                 KhadamatFeaturedCarousel(
                     featuredServices = featuredServices,
                     onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) }
@@ -189,22 +180,20 @@ fun KhadamatScreen(
             }*/
 
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
             }
-
 
             item {
                 KhadamatHeader(
                     title = headerTitle,
                     badgeText = "${state.filteredServices.size} خدمت",
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier.padding(horizontal = Spacing.xlg)
                 )
             }
 
             item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
             }
-
 
             if (state.isLoading) {
                 item {
@@ -214,7 +203,7 @@ fun KhadamatScreen(
                             .height(200.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = TaminNavy700)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
             } else if (state.showNoResultsError) {
@@ -225,17 +214,20 @@ fun KhadamatScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
-                            .padding(horizontal = 20.dp)
+                            .padding(horizontal = Spacing.xlg)
                     )
                 }
             } else {
                 val chunkedServices = state.filteredServices.chunked(2)
-                items(chunkedServices, key = { chunk -> chunk.firstOrNull()?.id ?: 0 }) { rowItems ->
+                items(
+                    chunkedServices,
+                    key = { chunk -> chunk.firstOrNull()?.id ?: 0 }
+                ) { rowItems ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            .padding(horizontal = Spacing.xlg, vertical = Spacing.sm),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
                         rowItems.forEach { service ->
                             ServiceCard(
@@ -254,7 +246,7 @@ fun KhadamatScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
             }
         }
     }
@@ -264,6 +256,22 @@ fun KhadamatScreen(
 @Composable
 fun PreviewKhadamatScreen() {
     PreviewRtlThemeContent {
+        KhadamatScreen(
+            onIntent = {},
+            onNavigateToRoute = {},
+            state = KhadamatUiState(
+                isLoading = false,
+                selectedTab = KhadamatTab.INSURED,
+                filteredServices = emptyList()
+            )
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+fun PreviewKhadamatScreenDarkMode() {
+    TaminHamrahTheme(darkTheme = true) {
         KhadamatScreen(
             onIntent = {},
             onNavigateToRoute = {},

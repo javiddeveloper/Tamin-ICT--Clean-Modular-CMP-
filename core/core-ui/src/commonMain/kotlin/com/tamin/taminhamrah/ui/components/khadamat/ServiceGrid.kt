@@ -8,8 +8,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 fun ServiceGrid(
@@ -20,9 +20,9 @@ fun ServiceGrid(
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(top = Spacing.sm, bottom = Spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
         items(services, key = { it.id ?: 0 }) { service ->
             ServiceCard(
