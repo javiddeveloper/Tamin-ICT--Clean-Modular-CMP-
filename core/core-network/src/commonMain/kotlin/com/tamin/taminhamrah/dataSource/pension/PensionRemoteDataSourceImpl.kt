@@ -89,7 +89,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun getPensionerPayRoll(
         filter: List<ApiFilterDN>
-    ): PayRollDTO {
+    ): ListData<PayRollDTO> {
         return try {
             val response =
                 pensionApiService.getPensionerPayRoll(apiQueryBuilder.buildFilterJson(filter))
