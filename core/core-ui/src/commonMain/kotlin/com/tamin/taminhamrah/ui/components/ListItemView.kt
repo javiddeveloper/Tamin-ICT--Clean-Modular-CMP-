@@ -81,9 +81,9 @@ data class ListItemData(
     val leadingIconContainerSize: Dp = IconSize.large,
     val leadingIconPadding: Dp = Spacing.sm,
     val leadingIconBorder: BorderStroke? = null,
-    val leadingIconElevation: Dp = 0.dp,
+    val leadingIconElevation: Dp = Elevation.none,
     val badge: ListItemBadge? = null,
-    val showChevron: Boolean = true,
+    val showArrow: Boolean = true,
     val customTrailingContent: (@Composable () -> Unit)? = null,
     val onClick: (() -> Unit)? = null,
     val enabled: Boolean = true,
@@ -258,7 +258,7 @@ private fun ListItemRow(
             if (item.customTrailingContent != null) {
                 Spacer(modifier = Modifier.width(Spacing.md))
                 item.customTrailingContent.invoke()
-            } else if (item.badge != null || item.showChevron) {
+            } else if (item.badge != null || item.showArrow) {
                 Spacer(modifier = Modifier.width(Spacing.md))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -282,7 +282,7 @@ private fun ListItemRow(
                         }
                     }
 
-                    if (item.showChevron) {
+                    if (item.showArrow) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_arrow_show_more),
                             contentDescription = null,
@@ -367,7 +367,7 @@ private fun SettingsListPreviewContent() {
                         backgroundColor = taminColors.greenBg,
                         textColor = taminColors.greenText
                     ),
-                    showChevron = true
+                    showArrow = true
                 ),
                 ListItemData(
                     title = "تاریخچه نسخه",
@@ -392,7 +392,7 @@ private fun SettingsListPreviewContent() {
                         leadingIconBackgroundColor = taminColors.dangerBg,
                         leadingIconTintColor = taminColors.dangerText
                     ),
-                    showChevron = false
+                    showArrow = false
                 )
             )
         )
