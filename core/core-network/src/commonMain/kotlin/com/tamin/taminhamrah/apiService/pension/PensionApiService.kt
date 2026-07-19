@@ -52,7 +52,7 @@ interface PensionApiService {
     @GET("fish")
     suspend fun getPensionerPayRoll(
         @Query("filter") filter: String,
-    ): BaseDTO<PayRollDTO>
+    ): BaseDTO<ListData<PayRollDTO>>
 
     @GET("disability-request/personal")
     suspend fun getDisabilityPersonalInfo(
