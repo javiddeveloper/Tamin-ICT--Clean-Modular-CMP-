@@ -9,11 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -90,7 +86,6 @@ fun KhadamatScreen(
     onIntent: (KhadamatIntent) -> Unit,
     onNavigateToRoute: (TaminScreens) -> Unit,
 ) {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -132,22 +127,38 @@ fun KhadamatScreen(
             }
 
 
-
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .padding(vertical = 20.dp)
             ) {
 
                 TabSelector(
                     selectedTab = state.selectedTab,
-                    onTabSelected = { onIntent(KhadamatIntent.OnTabSelected(it)) }
+                    onTabSelected = { onIntent(KhadamatIntent.OnTabSelected(it)) },
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+
+                val preferredIds = listOf(7, 10, 34, 35, 36)
+                val featuredServices = remember(state.menuItems) {
+                    val featured = state.menuItems.filter { it.id in preferredIds }
+                    if (featured.size < 5) {
+                        val remaining = state.menuItems.filter { it.id !in preferredIds }
+                        (featured + remaining).take(5)
+                    } else {
+                        featured.take(5)
+                    }
+                }
+                KhadamatFeaturedCarousel(
+                    featuredServices = featuredServices,
+                    onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 val headerTitle = when (state.selectedTab) {
                     KhadamatTab.INSURED -> "خدمات بیمه‌شدگان"
@@ -156,11 +167,11 @@ fun KhadamatScreen(
                 }
                 KhadamatHeader(
                     title = headerTitle,
-                    badgeText = "${state.filteredServices.size} خدمت"
+                    badgeText = "${state.filteredServices.size} خدمت",
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
 
                 if (state.isLoading) {
                     Box(
@@ -175,12 +186,13 @@ fun KhadamatScreen(
                     ServiceGrid(
                         services = state.filteredServices,
                         onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 20.dp)
                     )
                 }
             }
         }
-    }
 }
 
 @PreviewRtlTheme

@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -70,6 +73,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -93,85 +97,114 @@ fun ServiceCard(
     modifier: Modifier = Modifier
 ) {
     val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-        service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-        service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+            service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+            service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
     val cardAlpha = if (isDisabled) 0.5f else 1.0f
+    val shadowElevation = if (isDisabled) 0.dp else 8.dp
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(
-                enabled = !isDisabled,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { onClick() }
-            .alpha(cardAlpha),
-        horizontalAlignment = Alignment.CenterHorizontally
+    val showRedDot = service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+            service.status == MenuServiceStatusDN.DISABLED ||
+            service.status == MenuServiceStatusDN.COMPLETELY_DISABLED ||
+            service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR
+
+    Box(
+        modifier = modifier.wrapContentSize(),
+        contentAlignment = Alignment.TopStart
     ) {
-
-        Box(
+        Row(
             modifier = Modifier
-                .size(55.dp)
-                .shadow(
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(17.dp),
-                    clip = false
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = MaterialTheme.shapes.small
                 )
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFFFFFFFF),
-                            Color(0xFFE9F1FF)
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(1f, 1f)
-                    ),
-                    shape = RoundedCornerShape(17.dp)
-                ),
-            contentAlignment = Alignment.Center
+                .clip(MaterialTheme.shapes.small)
+                .clickable(
+                    enabled = true,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { onClick() }
+                .padding(8.dp)
+                .alpha(cardAlpha),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .size(55.dp)
+                    .shadow(
+                        elevation = shadowElevation,
+                        shape = RoundedCornerShape(17.dp),
+                        clip = false
+                    )
                     .background(
-                        brush = Brush.verticalGradient(
+                        brush = Brush.linearGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.5f),
-                                Color.White.copy(alpha = 0f)
-                            )
+                                Color(0xFFFFFFFF),
+                                Color(0xFFE9F1FF)
+                            ),
+                            start = Offset(0f, 0f),
+                            end = Offset(1f, 1f)
                         ),
                         shape = RoundedCornerShape(17.dp)
-                    )
-            )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.5f),
+                                    Color.White.copy(alpha = 0f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(17.dp)
+                        )
+                )
 
+                Icon(
+                    imageVector = getIconForName(service.icon),
+                    contentDescription = service.name,
+                    tint = Color(0xFF18468C),
+                    modifier = Modifier.size(33.dp)
+                )
+            }
 
-            Icon(
-                imageVector = getIconForName(service.icon),
-                contentDescription = service.name,
-                tint = Color(0xFF18468C),
-                modifier = Modifier.size(33.dp)
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = service.name ?: "",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    color = TaminLightTextPrimary,
+                    textAlign = TextAlign.End,
+                ),
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = service.name ?: "",
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = TaminLightTextPrimary,
-                textAlign = TextAlign.Center,
-            ),
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 2.dp)
-        )
+        if (showRedDot) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.TopEnd)
+                    .absoluteOffset(x = (-4).dp, y = (-4).dp)
+                    .background(
+                        Color(0xFFD32F2F),
+                        androidx.compose.foundation.shape.CircleShape
+                    )
+            )
+        }
     }
 }
 
-private fun getIconForName(name: String?): ImageVector {
+internal fun getIconForName(name: String?): ImageVector {
     return when (name) {
         "user" -> Icons.Default.Person
         "relation" -> Icons.Default.Link

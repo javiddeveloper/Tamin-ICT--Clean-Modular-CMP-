@@ -216,6 +216,7 @@ internal fun TaminHamrahNavGraph(
                                 is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
                                 is TaminScreens.WebView -> openUrl(screen.url)
                                 is TaminScreens.ShowMessage -> {
+//                                    showToast(screen.message)
                                 }
                             }
                         },
