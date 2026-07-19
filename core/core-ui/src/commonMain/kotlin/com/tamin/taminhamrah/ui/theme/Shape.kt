@@ -19,6 +19,7 @@ object ListShapes {
 }
 
 object Spacing {
+    val none = 0.dp
     val xxs = 2.dp
     val xs = 4.dp
     val sm = 8.dp
@@ -59,8 +60,8 @@ object IconSize {
     val statIcon = 10.dp
     val small = 16.dp
     val medium = 24.dp
-    val errorPlaceholder = 36.dp
-    val large = 48.dp
-    val xlarge = 56.dp
+    val large = 38.dp
+    val xlarge = 48.dp
+    val xxlarge = 56.dp
     val navBar = 24.dp
 }

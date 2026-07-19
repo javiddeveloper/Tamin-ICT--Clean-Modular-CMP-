@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
@@ -44,6 +46,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_tamin_logo
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -62,6 +65,7 @@ data class ListItemColors(
     val titleColor: Color = Color.Unspecified,
     val subtitleColor: Color = Color.Unspecified,
     val leadingIconBackgroundColor: Color = Color.Unspecified,
+    val leadingIconBackgroundGradient: Brush? = null,
     val leadingIconTintColor: Color = Color.Unspecified,
     val itemBackgroundColor: Color = Color.Transparent
 )
@@ -73,9 +77,11 @@ data class ListItemData(
     val subtitle: String? = null,
     val leadingIconPainter: Painter? = null,
     val leadingText: String? = null,
-    val leadingIconShape: Shape = RoundedCornerShape(CornerRadius.md),
-    val leadingIconContainerSize: Dp = 40.dp,
+    val leadingIconShape: Shape = RoundedCornerShape(CornerRadius.lg),
+    val leadingIconContainerSize: Dp = IconSize.large,
     val leadingIconPadding: Dp = Spacing.sm,
+    val leadingIconBorder: BorderStroke? = null,
+    val leadingIconElevation: Dp = 0.dp,
     val badge: ListItemBadge? = null,
     val showChevron: Boolean = true,
     val customTrailingContent: (@Composable () -> Unit)? = null,
@@ -96,8 +102,8 @@ fun ListGroupView(
     containerShape: Shape = RoundedCornerShape(CornerRadius.lg),
     containerBackgroundColor: Color? = null,
     containerBorder: BorderStroke? = null,
-    elevation: Dp = 0.dp,
-    internalPadding: PaddingValues = PaddingValues(0.dp),
+    elevation: Dp = Elevation.none,
+    internalPadding: PaddingValues = PaddingValues(Spacing.xxs),
     itemContentPadding: PaddingValues = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
     showDividers: Boolean = true,
     dividerColor: Color? = null,
@@ -171,11 +177,37 @@ private fun ListItemRow(
         ) {
             // Leading Icon or Text
             if (item.leadingIconPainter != null || !item.leadingText.isNullOrBlank()) {
-                Box(
-                    modifier = Modifier
-                        .size(item.leadingIconContainerSize)
+                val baseModifier = Modifier
+                    .size(item.leadingIconContainerSize)
+                    .then(
+                        if (item.leadingIconElevation > 0.dp) {
+                            Modifier.shadow(item.leadingIconElevation, item.leadingIconShape)
+                        } else Modifier
+                    )
+
+                val boxModifier = if (item.colors.leadingIconBackgroundGradient != null) {
+                    baseModifier
+                        .background(item.colors.leadingIconBackgroundGradient, item.leadingIconShape)
+                        .background(
+                            brush = taminColors.iconGlassShine,
+                            shape = item.leadingIconShape
+                        )
+                        .border(
+                            width = 1.dp,
+                            brush = taminColors.iconGlassBorder,
+                            shape = item.leadingIconShape
+                        )
+                } else {
+                    baseModifier
                         .clip(item.leadingIconShape)
-                        .background(resolvedIconBgColor),
+                        .background(resolvedIconBgColor)
+                        .then(
+                            if (item.leadingIconBorder != null) Modifier.border(item.leadingIconBorder, item.leadingIconShape) else Modifier
+                        )
+                }
+
+                Box(
+                    modifier = boxModifier,
                     contentAlignment = Alignment.Center
                 ) {
                     if (item.leadingIconPainter != null) {
@@ -326,9 +358,10 @@ private fun SettingsListPreviewContent() {
                     title = "اشتراک‌گذاری",
                     leadingIconPainter = painterResource(Res.drawable.ic_tamin_logo),
                     colors = ListItemColors(
-                        leadingIconBackgroundColor = taminColors.glassB1,
-                        leadingIconTintColor = taminColors.textPrimary
+                        leadingIconBackgroundGradient = taminColors.iconGradientSecondary,
+                        leadingIconTintColor = taminColors.bgIconProfile
                     ),
+                    leadingIconElevation = Elevation.md,
                     badge = ListItemBadge(
                         text = "جدید",
                         backgroundColor = taminColors.greenBg,

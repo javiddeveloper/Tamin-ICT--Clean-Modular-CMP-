@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -182,14 +183,22 @@ fun ProfileContent(
                             ListItemData(
                                 title = "اطلاعات هویتی",
                                 leadingIconPainter = painterResource(Res.drawable.ic_identity),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.IDENTITY_INFO)) }
                             ),
                             ListItemData(
                                 title = "مشاهده و ثبت افراد تبعی",
                                 leadingIconPainter = painterResource(Res.drawable.ic_person),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
                                 badge = ListItemBadge(
-                                    text = "۳ نفر",
+                                    text = "۳ نفر تست",
                                     backgroundColor = taminColors.blueBg,
                                     textColor = taminColors.blueText
                                 ),
@@ -199,24 +208,40 @@ fun ProfileContent(
                             ListItemData(
                                 title = "ارتباط فعال با تأمین",
                                 leadingIconPainter = painterResource(Res.drawable.ic_communication),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ACTIVE_RELATION)) }
                             ),
                             ListItemData(
                                 title = "پرونده الکترونیک",
                                 leadingIconPainter = painterResource(Res.drawable.ic_request),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ELECTRONIC_FILE)) }
                             ),
                             ListItemData(
                                 title = "شماره حساب بانکی",
                                 leadingIconPainter = painterResource(Res.drawable.ic_number),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
                             ),
                             ListItemData(
                                 title = "تغییر شماره موبایل",
                                 leadingIconPainter = painterResource(Res.drawable.ic_mobile),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
                             )
@@ -235,12 +260,20 @@ fun ProfileContent(
                             ListItemData(
                                 title = "درخواست ها",
                                 leadingIconPainter = painterResource(Res.drawable.ic_request),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.REQUESTS)) }
                             ),
                             ListItemData(
                                 title = "صندوق شخصی",
                                 leadingIconPainter = painterResource(Res.drawable.ic_inbox),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
                             )
@@ -259,12 +292,20 @@ fun ProfileContent(
                             ListItemData(
                                 title = "امنیت",
                                 leadingIconPainter = painterResource(Res.drawable.ic_privacy),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SECURITY)) }
                             ),
                             ListItemData(
                                 title = "تنظیمات",
                                 leadingIconPainter = painterResource(Res.drawable.ic_setting),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SETTINGS)) }
                             )
@@ -283,24 +324,40 @@ fun ProfileContent(
                             ListItemData(
                                 title = "پشتیبانی",
                                 leadingIconPainter = painterResource(Res.drawable.ic_support),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SUPPORT)) }
                             ),
                             ListItemData(
                                 title = "تماس با من",
                                 leadingIconPainter = painterResource(Res.drawable.ic_send),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CONTACT_ME)) }
                             ),
                             ListItemData(
                                 title = "اشتراک‌گذاری",
                                 leadingIconPainter = painterResource(Res.drawable.ic_share),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SHARE)) }
                             ),
                             ListItemData(
                                 title = "تاریخچهٔ نسخه",
                                 leadingIconPainter = painterResource(Res.drawable.ic_history),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
                                 showChevron = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.VERSION_HISTORY)) }
                             )
@@ -321,7 +378,8 @@ fun ProfileContent(
                                 colors = ListItemColors(
                                     titleColor = taminColors.dangerText,
                                     leadingIconBackgroundColor = taminColors.dangerBg,
-                                    leadingIconTintColor = taminColors.dangerText
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientDanger
                                 ),
                                 showChevron = false,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT)) }

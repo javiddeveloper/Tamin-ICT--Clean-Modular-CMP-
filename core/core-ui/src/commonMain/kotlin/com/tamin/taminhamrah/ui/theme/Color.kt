@@ -108,3 +108,16 @@ val CoreSurface = Color(0xFFFFFFFF)
 val CoreBackground = Color(0xFFF8FAFC)
 val CoreBorder = Color(0xFFE5E7EB)
 val CoreDivider = Color(0xFFF2F4F8)
+
+// Profile Icon Gradients
+val IconGradientBlueStart = Color(0xFF3B6FD4)
+val IconGradientBlueEnd = Color(0xFF173D7E)
+
+val IconGradientPurpleStart = Color(0xFF8B7CE8)
+val IconGradientPurpleEnd = Color(0xFF5B4CC4)
+
+val IconGradientGrayStart = Color(0xFF8C97A8)
+val IconGradientGrayEnd = Color(0xFF4A5567)
+
+val IconGradientRedStart = Color(0xFFF0635F)
+val IconGradientRedEnd = Color(0xFFC42121)
