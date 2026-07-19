@@ -25,6 +25,16 @@ object PersianDateFormatter {
         return "${jy.toPersianDigits()}/${jm.toTwoDigitPersian()}/${jd.toTwoDigitPersian()}"
     }
 
+    /**
+     * The current year in the Jalali calendar. Used for labeling current-year totals,
+     * which would otherwise need a hardcoded year that silently goes stale.
+     */
+    fun currentJalaliYear(): Int {
+        val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        return gregorianToJalali(dateTime.year, dateTime.monthNumber, dateTime.dayOfMonth).first
+    }
+
     private fun Int.toTwoDigitPersian(): String {
         return toString().padStart(2, '0').toPersianDigits()
     }
