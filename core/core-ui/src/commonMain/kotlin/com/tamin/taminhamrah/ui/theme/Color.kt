@@ -39,6 +39,10 @@ val TaminCardAmberStart = Color(0xFFF4A83D)
 val TaminCardAmberMid = Color(0xFFE08A00)
 val TaminCardAmberEnd = Color(0xFFB96B00)
 
+// Coverage badge on the insurance card footer.
+val TaminCoverageBadgeBg = Color(0xFF4BE3A0)
+val TaminCoverageBadgeFg = Color(0xFF0B5F4F)
+
 // ---- Semantic accents ----
 val TaminGreen = Color(0xFF03AD5F)       // success / active dot
 val TaminGreenDark = Color(0xFF03794A)   // success text (on light bg)
@@ -63,6 +67,10 @@ val TaminLightGreenBg = Color(0xFFE6F7ED)
 val TaminLightBlueBg = Color(0xFFEFF6FF)
 val TaminLightOrangeBg = Color(0xFFFFF8E1)
 val TaminLightDangerBorder = Color(0xFFFDECEC)
+
+// Dark mode collapses every screen's hero onto one teal-to-blue wash.
+val TaminDarkHeroStart = Color(0xFF10AEB9)
+val TaminDarkHeroEnd = Color(0xFF1E6FD0)
 
 // ---- Neutrals — Dark mode ----
 val TaminDarkBgPage = Color(0xFF0A0F1E)

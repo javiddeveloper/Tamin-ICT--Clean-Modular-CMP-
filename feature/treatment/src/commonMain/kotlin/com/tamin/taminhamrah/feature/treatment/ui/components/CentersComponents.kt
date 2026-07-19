@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -33,61 +35,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
  */
 
 private val CENTER_BADGE_SIZE = 44.dp
-
-/**
- * Search input styled for the treatment header — translucent over the teal gradient
- * rather than a surface-colored field.
- */
-@Composable
-fun TreatmentSearchField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    searchIcon: ImageVector,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                Color.White.copy(alpha = 0.1f),
-                RoundedCornerShape(CornerRadius.lg),
-            )
-            .border(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.18f),
-                shape = RoundedCornerShape(CornerRadius.lg),
-            )
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Icon(
-            imageVector = searchIcon,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(IconSize.small),
-        )
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
-            cursorBrush = SolidColor(Color.White),
-            modifier = Modifier.weight(1f),
-            decorationBox = { innerTextField ->
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.7f),
-                    )
-                }
-                innerTextField()
-            },
-        )
-    }
-}
 
 /**
  * One contracted center: a type-colored icon badge, the center's name and category,
@@ -110,7 +57,7 @@ fun MedicalCenterCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.lg)
+            .taminSurface(CornerRadius.lg)
             .padding(Spacing.lg),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
