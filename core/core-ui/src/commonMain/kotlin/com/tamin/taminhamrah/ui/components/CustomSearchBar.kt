@@ -26,7 +26,6 @@ fun CustomSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     placeHolder: String = "",
-    showNoResults: Boolean,
     modifier: Modifier = Modifier
 ) {
     TextField(
@@ -46,17 +45,6 @@ fun CustomSearchBar(
                 contentDescription = null,
                 tint = TaminNavy700
             )
-        },
-        trailingIcon = {
-            if (showNoResults) {
-                Text(
-                    text = "موردی نیست",
-                    color = TaminRed,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-            }
         },
         singleLine = true,
         colors = TextFieldDefaults.colors(
@@ -80,8 +68,7 @@ private fun ProfileScreenPreview() {
     PreviewRtlThemeContent {
         CustomSearchBar(
             query = "هدیه ازدواج",
-            onQueryChange = {},
-            showNoResults = false
+            onQueryChange = {}
         )
     }
 }

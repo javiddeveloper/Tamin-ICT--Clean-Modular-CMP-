@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
+import com.tamin.taminhamrah.ui.components.EmptyState
 import com.tamin.taminhamrah.ui.components.khadamat.*
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
@@ -101,7 +102,8 @@ fun KhadamatScreen(
         }
 
 
-        val featuredServices = remember(state.filteredServices, state.selectedTab) {
+        //Quick Access
+    /*    val featuredServices = remember(state.filteredServices, state.selectedTab) {
             val preferredIds = when (state.selectedTab) {
                 KhadamatTab.INSURED -> listOf(7, 10, 34, 35, 36)
                 KhadamatTab.PENSIONER -> listOf(105, 106, 107, 108, 112)
@@ -114,7 +116,7 @@ fun KhadamatScreen(
             } else {
                 featured.take(5)
             }
-        }
+        }*/
 
         LazyColumn(
             modifier = modifier
@@ -152,8 +154,7 @@ fun KhadamatScreen(
                     CustomSearchBar(
                         query = state.searchQuery,
                         onQueryChange = { onIntent(KhadamatIntent.OnSearchQueryChanged(it)) },
-                        placeHolder = "جستجو در میان خدمات ...",
-                        showNoResults = state.showNoResultsError
+                        placeHolder = "جستجو در میان خدمات ..."
                     )
                 }
             }
@@ -177,12 +178,13 @@ fun KhadamatScreen(
             }
 
 
-            item {
+            //Quick Access Section
+        /*    item {
                 KhadamatFeaturedCarousel(
                     featuredServices = featuredServices,
                     onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) }
                 )
-            }
+            }*/
 
             item {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -212,6 +214,16 @@ fun KhadamatScreen(
                     ) {
                         CircularProgressIndicator(color = TaminNavy700)
                     }
+                }
+            } else if (state.showNoResultsError) {
+                item {
+                    EmptyState(
+                        message = "نتیجه‌ای یافت نشد",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(horizontal = 20.dp)
+                    )
                 }
             } else {
                 val chunkedServices = state.filteredServices.chunked(2)
