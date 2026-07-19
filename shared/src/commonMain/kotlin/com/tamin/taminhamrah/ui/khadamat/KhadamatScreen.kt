@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.ui.khadamat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -9,7 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -19,6 +25,10 @@ import com.tamin.taminhamrah.ui.components.khadamat.*
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * @author  : Javid
+ * @summary : KhadamatRoute
+ */
 @Composable
 fun KhadamatRoute(
     viewModel: KhadamatViewModel,
@@ -51,6 +61,7 @@ fun HandleKhadamatEvents(
     onNavigateToRoute: (TaminScreens) -> Unit,
     onBackClicked: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     LaunchedEffect(events) {
         events.collect { event ->
             when (event) {
@@ -86,113 +97,153 @@ fun KhadamatScreen(
     onIntent: (KhadamatIntent) -> Unit,
     onNavigateToRoute: (TaminScreens) -> Unit,
 ) {
-        Column(
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        val headerTitle = when (state.selectedTab) {
+            KhadamatTab.INSURED -> "خدمات بیمه‌شدگان"
+            KhadamatTab.PENSIONER -> "خدمات مستمری‌بگیران"
+            KhadamatTab.EMPLOYER -> "خدمات کارفرمایان"
+        }
+
+        // Quick Access / Featured Services carousel items
+        val preferredIds = listOf(7, 10, 34, 35, 36)
+        val featuredServices = remember(state.menuItems) {
+            val featured = state.menuItems.filter { it.id in preferredIds }
+            if (featured.size < 5) {
+                val remaining = state.menuItems.filter { it.id !in preferredIds }
+                (featured + remaining).take(5)
+            } else {
+                featured.take(5)
+            }
+        }
+
+        LazyColumn(
             modifier = modifier
                 .fillMaxSize()
                 .background(TaminLightBgPage)
         ) {
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
-                        clip = false
-                    )
-                    .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
-                    )
-                    .padding(top = 24.dp, start = 20.dp, end = 20.dp, bottom = 28.dp)
-            ) {
-
-                Text(
-                    text = "خدمات",
-                    color = TaminNavy900,
-                    style = MaterialTheme.typography.headlineMedium,
+            // 1. Top White Header Card (Title & Search Bar) - scrolls with content
+            item {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
+                        .shadow(
+                            elevation = 2.dp,
+                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                            clip = false
+                        )
+                        .background(
+                            color = Color.White,
+                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+                        )
+                        .padding(top = 24.dp, start = 20.dp, end = 20.dp, bottom = 28.dp)
+                ) {
+                    Text(
+                        text = "خدمات",
+                        color = TaminNavy900,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
+                    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                CustomSearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = { onIntent(KhadamatIntent.OnSearchQueryChanged(it)) },
-                    placeHolder = "جستجو در میان خدمات ...",
-                    showNoResults = state.showNoResultsError
-                )
+                    CustomSearchBar(
+                        query = state.searchQuery,
+                        onQueryChange = { onIntent(KhadamatIntent.OnSearchQueryChanged(it)) },
+                        placeHolder = "جستجو در میان خدمات ...",
+                        showNoResults = state.showNoResultsError
+                    )
+                }
             }
 
+            // Top spacer below the card
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(vertical = 20.dp)
-            ) {
-
+            // 2. Tab Segmented Selector - scrolls with content
+            item {
                 TabSelector(
                     selectedTab = state.selectedTab,
                     onTabSelected = { onIntent(KhadamatIntent.OnTabSelected(it)) },
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
+            }
 
+            item {
                 Spacer(modifier = Modifier.height(24.dp))
+            }
 
-
-                val preferredIds = listOf(7, 10, 34, 35, 36)
-                val featuredServices = remember(state.menuItems) {
-                    val featured = state.menuItems.filter { it.id in preferredIds }
-                    if (featured.size < 5) {
-                        val remaining = state.menuItems.filter { it.id !in preferredIds }
-                        (featured + remaining).take(5)
-                    } else {
-                        featured.take(5)
-                    }
-                }
+            // 3. Featured Services Carousel - scrolls with content
+            item {
                 KhadamatFeaturedCarousel(
                     featuredServices = featuredServices,
                     onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) }
                 )
+            }
 
+            item {
                 Spacer(modifier = Modifier.height(24.dp))
+            }
 
-                val headerTitle = when (state.selectedTab) {
-                    KhadamatTab.INSURED -> "خدمات بیمه‌شدگان"
-                    KhadamatTab.PENSIONER -> "خدمات مستمری‌بگیران"
-                    KhadamatTab.EMPLOYER -> "خدمات کارفرمایان"
-                }
+            // 4. Category Header & count badge - scrolls with content
+            item {
                 KhadamatHeader(
                     title = headerTitle,
                     badgeText = "${state.filteredServices.size} خدمت",
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
+            }
 
+            item {
                 Spacer(modifier = Modifier.height(16.dp))
+            }
 
-                if (state.isLoading) {
+            // 5. Scrollable Services Grid Items (2 columns layout)
+            if (state.isLoading) {
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .height(200.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = TaminNavy700)
                     }
-                } else {
-                    ServiceGrid(
-                        services = state.filteredServices,
-                        onServiceClick = { onIntent(KhadamatIntent.OnServiceClick(it)) },
+                }
+            } else {
+                val chunkedServices = state.filteredServices.chunked(2)
+                items(chunkedServices, key = { chunk -> chunk.firstOrNull()?.id ?: 0 }) { rowItems ->
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 20.dp)
-                    )
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rowItems.forEach { service ->
+                            ServiceCard(
+                                service = service,
+                                onClick = { onIntent(KhadamatIntent.OnServiceClick(service)) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        // Draw empty placeholder slots to balance Row weight alignment
+                        val emptySlots = 2 - rowItems.size
+                        repeat(emptySlots) {
+                            Box(modifier = Modifier.weight(1f))
+                        }
+                    }
                 }
             }
+
+            // Bottom Spacer padding for aesthetics above the bottom nav bar
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
+    }
 }
 
 @PreviewRtlTheme
