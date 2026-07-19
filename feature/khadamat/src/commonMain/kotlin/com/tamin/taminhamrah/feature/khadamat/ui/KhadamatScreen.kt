@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +23,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.feature.khadamat.ui.contract.*
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
-import com.tamin.taminhamrah.ui.components.EmptyState
+import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.khadamat.*
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
@@ -217,8 +219,9 @@ fun KhadamatScreen(
                 }
             } else if (state.showNoResultsError) {
                 item {
-                    EmptyState(
-                        message = "نتیجه‌ای یافت نشد",
+                    EmptyStateMessage(
+                        icon = Icons.Outlined.SearchOff,
+                        title = "نتیجه‌ای یافت نشد",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
