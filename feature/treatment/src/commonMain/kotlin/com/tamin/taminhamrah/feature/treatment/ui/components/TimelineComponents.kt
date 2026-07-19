@@ -29,6 +29,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminBottomBar
+import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -63,7 +71,7 @@ fun MedicalRecordCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.card)
+            .taminSurface(CornerRadius.card)
             .accentStripe(accentColor)
             .clickable(onClick = onClick)
             .padding(Spacing.lg),
@@ -96,7 +104,7 @@ fun MedicalRecordCard(
             style = MaterialTheme.typography.bodySmall,
             color = colors.textTertiary,
         )
-        TreatmentDivider(modifier = Modifier.padding(top = Spacing.sm))
+        TaminDivider(modifier = Modifier.padding(top = Spacing.sm))
         MedicalRecordFooter(shareAmount = shareAmount)
     }
 }
@@ -229,7 +237,7 @@ fun TreatmentFilterChipRow(
 
 /**
  * The person / date-range / search row that sits inside the teal header on the
- * timeline screen. Designed for [TreatmentHeader]'s content slot.
+ * timeline screen. Designed for [TaminTopAppBar]'s content slot.
  */
 @Composable
 fun TimelineFilterBar(
@@ -333,7 +341,7 @@ fun CostTotalsBar(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    TreatmentBottomBar(modifier = modifier) {
+    TaminBottomBar(modifier = modifier) {
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             StatTile(
                 label = insuredShareLabel,

@@ -14,6 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.LabeledBlock
+import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -37,13 +43,13 @@ fun RecordSummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.cardCompact)
+            .taminSurface(CornerRadius.cardCompact)
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
     ) {
         DetailRow(label = metaLabel, value = metaValue, numeric = false)
-        TreatmentDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
+        TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
         DetailRow(label = "کد رهگیری", value = trackingCode)
-        TreatmentDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
+        TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
         DetailRow(label = "تاریخ", value = date)
     }
 }
@@ -64,7 +70,7 @@ fun PrescriptionItemCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.cardCompact)
+            .taminSurface(CornerRadius.cardCompact)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
@@ -111,14 +117,14 @@ fun VisitSummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.cardCompact)
+            .taminSurface(CornerRadius.cardCompact)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
         LabeledBlock(label = "دلیل مراجعه", value = reason)
-        TreatmentDivider()
+        TaminDivider()
         LabeledBlock(label = "تشخیص", value = diagnosis)
-        TreatmentDivider()
+        TaminDivider()
         LabeledBlock(label = "یادداشت پزشک", value = note)
     }
 }
@@ -141,7 +147,7 @@ fun LabTestCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.cardCompact)
+            .taminSurface(CornerRadius.cardCompact)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
@@ -197,7 +203,7 @@ fun CostBreakdownCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.cardCompact)
+            .taminSurface(CornerRadius.cardCompact)
             .padding(Spacing.lg),
     ) {
         Text(
@@ -212,7 +218,7 @@ fun CostBreakdownCard(
             value = organizationShare,
             valueColor = colors.blueText,
         )
-        TreatmentDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+        TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
         DetailRow(
             label = "سهم شما",
             value = insuredShare,

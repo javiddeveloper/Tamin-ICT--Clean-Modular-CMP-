@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -19,15 +16,22 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.icons.TaminIcons
+import com.tamin.taminhamrah.ui.components.TaminSearchField
+import com.tamin.taminhamrah.ui.components.IconTile
+import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminBottomBar
+import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -35,23 +39,19 @@ import com.tamin.taminhamrah.ui.toPriceFormat
 /**
  * Previews for the treatment component library.
  *
- * These wrap [PreviewRtlThemeContent] in an explicit right-to-left override because
- * TaminHamrahTheme currently provides a same-named CompositionLocal of its own rather
- * than the platform one, so it does not actually flip the preview. The override is
- * harmless once the theme starts providing the real local.
+ * [PreviewRtlThemeContent] applies the app theme, which provides the right-to-left layout
+ * direction, so these need no direction override of their own.
  */
 @Composable
 private fun PreviewSurface(content: @Composable () -> Unit) {
     PreviewRtlThemeContent {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Column(
-                modifier = Modifier
-                    .background(LocalTaminColors.current.bgPage)
-                    .padding(Spacing.page),
-                verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-            ) {
-                content()
-            }
+        Column(
+            modifier = Modifier
+                .background(LocalTaminColors.current.bgPage)
+                .padding(Spacing.page),
+            verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
+        ) {
+            content()
         }
     }
 }
@@ -64,6 +64,7 @@ private fun InsuranceCardPreview() {
             holderName = "علی رضایی",
             nationalId = "0079542318",
             coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
+            coverageBadge = { CoverageBadge(icon = TaminIcons.Verified) },
         )
     }
 }
@@ -71,20 +72,23 @@ private fun InsuranceCardPreview() {
 @PreviewRtlTheme
 @Composable
 private fun InsuranceCardCarouselPreview() {
-    val people = listOf("علی رضایی", "مریم رضایی", "سارا رضایی")
+    val people = listOf("سنا حقیقی", "نگین رضایی", "آرمین حقیقی", "آوا حقیقی")
     PreviewRtlThemeContent {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
-                InsuranceCardCarousel(
-                    pageCount = people.size,
-                    pagerState = rememberPagerState { people.size },
-                ) { page ->
-                    InsuranceCard(
-                        holderName = people[page],
-                        nationalId = "007954231$page",
-                        coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
-                    )
-                }
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            InsuranceCardCarousel(
+                pageCount = people.size,
+                pagerState = rememberPagerState { people.size },
+            ) { page ->
+                InsuranceCard(
+                    holderName = people[page],
+                    nationalId = "007954231$page",
+                    coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
+                    coverageBadge = { CoverageBadge(icon = TaminIcons.Verified) },
+                    background = insuranceCardGradient(
+                        isDependent = page > 0,
+                        dependantOrdinal = page - 1,
+                    ),
+                )
             }
         }
     }
@@ -99,17 +103,17 @@ private fun HubCardsPreview() {
         QuickAccessCard(
             title = "سوابق درمانی من",
             subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
-            icon = Icons.AutoMirrored.Filled.List,
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            icon = TaminIcons.MedicalRecords,
+            trailingIcon = TaminIcons.ChevronForward,
             onClick = {},
         )
         TreatmentNavigationCard(
             title = "پروندهٔ سلامت من",
             subtitle = "خوداظهاری سلامت و اطلاعات پزشکی",
-            icon = Icons.Filled.Favorite,
+            icon = TaminIcons.HealthProfile,
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            trailingIcon = TaminIcons.ChevronForward,
             onClick = {},
             status = {
                 StatusPill(
@@ -122,10 +126,10 @@ private fun HubCardsPreview() {
         TreatmentNavigationCard(
             title = "مراکز درمانی طرف قرارداد",
             subtitle = "جست‌وجوی بیمارستان و داروخانه",
-            icon = Icons.Filled.LocationOn,
+            icon = TaminIcons.MedicalCenters,
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            trailingIcon = TaminIcons.ChevronForward,
             onClick = {},
         )
     }
@@ -141,13 +145,13 @@ private fun CategoryGridPreview() {
             horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
         ) {
             listOf(
-                "نسخه‌های الکترونیک" to colors.blueText,
-                "تاییدیه‌های پزشکی" to colors.teal,
-                "خسارت متفرقه" to colors.orangeText,
-            ).forEach { (label, tint) ->
+                Triple("نسخه‌های الکترونیک", colors.blueText, TaminIcons.Prescriptions),
+                Triple("تاییدیه‌های پزشکی", colors.teal, TaminIcons.MedicalApprovals),
+                Triple("خسارت متفرقه", colors.orangeText, TaminIcons.MiscClaims),
+            ).forEach { (label, tint, glyph) ->
                 CategoryTile(
                     label = label,
-                    icon = Icons.Filled.Info,
+                    icon = glyph,
                     iconTint = tint,
                     iconBackground = Brush.linearGradient(
                         listOf(colors.bgPage, colors.divider),
@@ -202,42 +206,40 @@ private fun TimelineRecordPreview() {
 @Composable
 private fun TimelineChromePreview() {
     PreviewRtlThemeContent {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
-                TreatmentHeader(
-                    title = "سوابق درمانی",
-                    navigationIcon = {
-                        TreatmentHeaderButton(
-                            icon = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "برگشت",
-                            onClick = {},
-                        )
-                    },
-                ) {
-                    TimelineFilterBar(
-                        personLabel = "علی رضایی",
-                        dateLabel = "۶ ماه اخیر",
-                        dropdownIcon = Icons.Filled.KeyboardArrowDown,
-                        searchIcon = Icons.Filled.Search,
-                        onPersonClick = {},
-                        onDateClick = {},
-                        onSearchClick = {},
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            TaminTopAppBar(
+                title = "سوابق درمانی",
+                navigationIcon = {
+                    TaminTopAppBarButton(
+                        icon = TaminIcons.ChevronBack,
+                        contentDescription = "برگشت",
+                        onClick = {},
                     )
-                }
-                TreatmentFilterChipRow(
-                    categories = listOf("همه", "دارو", "ویزیت", "پاراکلینیک"),
-                    selectedIndex = 0,
-                    onSelect = {},
-                )
-                CostTotalsBar(
-                    insuredShareLabel = "سهم بیمه‌شده",
-                    insuredShareAmount = 65_910L.toPriceFormat(),
-                    organizationShareLabel = "سهم سازمان",
-                    organizationShareAmount = 153_790L.toPriceFormat(),
-                    totalLabel = "جمع کل",
-                    totalAmount = 219_700L.toPriceFormat(),
+                },
+            ) {
+                TimelineFilterBar(
+                    personLabel = "علی رضایی",
+                    dateLabel = "۶ ماه اخیر",
+                    dropdownIcon = Icons.Filled.KeyboardArrowDown,
+                    searchIcon = TaminIcons.Search,
+                    onPersonClick = {},
+                    onDateClick = {},
+                    onSearchClick = {},
                 )
             }
+            TreatmentFilterChipRow(
+                categories = listOf("همه", "دارو", "ویزیت", "پاراکلینیک"),
+                selectedIndex = 0,
+                onSelect = {},
+            )
+            CostTotalsBar(
+                insuredShareLabel = "سهم بیمه‌شده",
+                insuredShareAmount = 65_910L.toPriceFormat(),
+                organizationShareLabel = "سهم سازمان",
+                organizationShareAmount = 153_790L.toPriceFormat(),
+                totalLabel = "جمع کل",
+                totalAmount = 219_700L.toPriceFormat(),
+            )
         }
     }
 }
@@ -328,57 +330,55 @@ private fun RecordDetailVisitAndLabPreview() {
 @Composable
 private fun MedicalCentersPreview() {
     PreviewRtlThemeContent {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            val colors = LocalTaminColors.current
-            Column(modifier = Modifier.background(colors.bgPage)) {
-                TreatmentHeader(
-                    title = "مراکز طرف قرارداد",
-                    navigationIcon = {
-                        TreatmentHeaderButton(
-                            icon = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "برگشت",
-                            onClick = {},
-                        )
-                    },
-                ) {
-                    TreatmentSearchField(
-                        value = "",
-                        onValueChange = {},
-                        placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
-                        searchIcon = Icons.Filled.Search,
-                        modifier = Modifier.padding(top = Spacing.lg),
+        val colors = LocalTaminColors.current
+        Column(modifier = Modifier.background(colors.bgPage)) {
+            TaminTopAppBar(
+                title = "مراکز طرف قرارداد",
+                navigationIcon = {
+                    TaminTopAppBarButton(
+                        icon = TaminIcons.ChevronBack,
+                        contentDescription = "برگشت",
+                        onClick = {},
                     )
-                }
-                Column(
-                    modifier = Modifier.padding(Spacing.page),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-                ) {
-                    MedicalCenterCard(
-                        name = "بیمارستان میلاد",
-                        type = "بیمارستان",
-                        address = "تهران، بزرگراه همت، بین شیخ فضل‌الله و برق آلستوم",
-                        distanceLabel = "۲٫۴ کیلومتر",
-                        icon = Icons.Filled.Home,
-                        accentColor = colors.blueText,
-                        accentContainerColor = colors.blueBg,
-                        distanceIcon = Icons.Filled.LocationOn,
-                        callIcon = Icons.Filled.Phone,
-                        onCallClick = {},
-                    )
-                    MedicalCenterCard(
-                        name = "داروخانهٔ دکتر رضایی",
-                        type = "داروخانه",
-                        address = "تهران، خیابان ولیعصر، نبش کوچهٔ بهار",
-                        distanceLabel = "۰٫۸ کیلومتر",
-                        icon = Icons.Filled.Favorite,
-                        accentColor = colors.teal,
-                        accentContainerColor = colors.greenBg,
-                        distanceIcon = Icons.Filled.LocationOn,
-                        callIcon = Icons.Filled.Phone,
-                        onCallClick = {},
-                    )
-                    TreatmentEmptyState(message = "مرکزی با این مشخصات پیدا نشد")
-                }
+                },
+            ) {
+                TaminSearchField(
+                    value = "",
+                    onValueChange = {},
+                    placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
+                    searchIcon = TaminIcons.Search,
+                    modifier = Modifier.padding(top = Spacing.lg),
+                )
+            }
+            Column(
+                modifier = Modifier.padding(Spacing.page),
+                verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
+            ) {
+                MedicalCenterCard(
+                    name = "بیمارستان میلاد",
+                    type = "بیمارستان",
+                    address = "تهران، بزرگراه همت، بین شیخ فضل‌الله و برق آلستوم",
+                    distanceLabel = "۲٫۴ کیلومتر",
+                    icon = Icons.Filled.Home,
+                    accentColor = colors.blueText,
+                    accentContainerColor = colors.blueBg,
+                    distanceIcon = Icons.Filled.LocationOn,
+                    callIcon = Icons.Filled.Phone,
+                    onCallClick = {},
+                )
+                MedicalCenterCard(
+                    name = "داروخانهٔ دکتر رضایی",
+                    type = "داروخانه",
+                    address = "تهران، خیابان ولیعصر، نبش کوچهٔ بهار",
+                    distanceLabel = "۰٫۸ کیلومتر",
+                    icon = Icons.Filled.Favorite,
+                    accentColor = colors.teal,
+                    accentContainerColor = colors.greenBg,
+                    distanceIcon = Icons.Filled.LocationOn,
+                    callIcon = Icons.Filled.Phone,
+                    onCallClick = {},
+                )
+                TaminEmptyState(message = "مرکزی با این مشخصات پیدا نشد")
             }
         }
     }
@@ -388,16 +388,15 @@ private fun MedicalCentersPreview() {
 @Composable
 private fun BottomBarPreview() {
     PreviewRtlThemeContent {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
-                TreatmentBottomBar {
-                    TreatmentPrimaryButton(
-                        text = "دریافت نسخهٔ الکترونیک",
-                        icon = Icons.Filled.KeyboardArrowDown,
-                        onClick = {},
-                    )
-                }
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            TaminBottomBar {
+                TaminPrimaryButton(
+                    text = "دریافت نسخهٔ الکترونیک",
+                    icon = Icons.Filled.KeyboardArrowDown,
+                    onClick = {},
+                )
             }
         }
     }
 }
+

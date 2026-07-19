@@ -33,10 +33,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.icons.TaminIcons
+import com.tamin.taminhamrah.ui.components.IconTile
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.startToEndGradient
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
+import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminTeal500
+import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberStart
@@ -59,6 +69,14 @@ import com.tamin.taminhamrah.util.toPersianDigits
  * None of these depend on a domain model — they take display strings and lambdas, so
  * they stay decoupled from whatever shape the treatment entities settle on.
  */
+
+private val COVERAGE_BADGE_SIZE = 16.dp
+
+private val COVERAGE_BADGE_ICON_SIZE = 10.dp
+
+private val BRAND_TICK_SIZE = 24.dp
+
+private val BRAND_TICK_ICON_SIZE = 13.dp
 
 private const val CARD_DECOR_ALPHA = 0.07f
 private const val CARD_PEEK_FRACTION = 0.87f
@@ -99,7 +117,8 @@ fun InsuranceCard(
     nationalId: String,
     coverageLabel: String,
     modifier: Modifier = Modifier,
-    background: Brush = LocalTaminColors.current.medicalGradient,
+    background: Brush = insuranceCardGradient(isDependent = false),
+    coverageBadge: @Composable (() -> Unit)? = null,
     footerAction: @Composable (() -> Unit)? = null,
 ) {
     Column(
@@ -129,9 +148,40 @@ fun InsuranceCard(
                 color = Color.White,
             )
         }
-        InsuranceCardFooter(coverageLabel = coverageLabel, action = footerAction)
+        InsuranceCardFooter(
+            coverageLabel = coverageLabel,
+            badge = coverageBadge,
+            action = footerAction,
+        )
     }
 }
+
+/**
+ * The small round glyph beside the coverage line — a tick when treatment support is
+ * active, a cross when it is not. Defaults to the design's mint-on-deep-green tick.
+ */
+@Composable
+fun CoverageBadge(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    containerColor: Color = TaminCoverageBadgeBg,
+    contentColor: Color = TaminCoverageBadgeFg,
+) {
+    Box(
+        modifier = modifier
+            .size(COVERAGE_BADGE_SIZE)
+            .background(containerColor, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(COVERAGE_BADGE_ICON_SIZE),
+        )
+    }
+}
+
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
@@ -170,7 +220,7 @@ private fun InsuranceCardBrandRow(initial: String) {
                 color = Color.White,
             )
         }
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "سازمان تامین اجتماعی",
                 style = MaterialTheme.typography.labelMedium,
@@ -182,12 +232,27 @@ private fun InsuranceCardBrandRow(initial: String) {
                 color = Color.White.copy(alpha = 0.75f),
             )
         }
+        Box(
+            modifier = Modifier
+                .size(BRAND_TICK_SIZE)
+                .background(Color.White.copy(alpha = 0.13f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = TaminIcons.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(BRAND_TICK_ICON_SIZE),
+            )
+        }
     }
 }
+
 
 @Composable
 private fun InsuranceCardFooter(
     coverageLabel: String,
+    badge: @Composable (() -> Unit)?,
     action: @Composable (() -> Unit)?,
 ) {
     Row(
@@ -198,6 +263,7 @@ private fun InsuranceCardFooter(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
+        badge?.invoke()
         Text(
             text = coverageLabel,
             style = MaterialTheme.typography.labelMedium,
@@ -272,6 +338,16 @@ private fun PageIndicator(
 }
 
 /**
+ * The quick-access card's wash, sweeping right to left: deep teal under the title on the
+ * start edge, brightening toward the end edge.
+ *
+ * The design writes this as `135deg, #2FB9BC → #0E7C82`, but a CSS angle is absolute and
+ * ignores direction, so reading its stop order literally mirrors the card under RTL.
+ */
+@Composable
+fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
+
+/**
  * The prominent gradient entry point at the top of the quick-access group —
  * "سوابق درمانی من".
  */
@@ -283,12 +359,13 @@ fun QuickAccessCard(
     trailingIcon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    background: Brush = quickAccessGradient(),
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.card))
-            .background(LocalTaminColors.current.medicalGradient)
+            .background(background)
             .clickable(onClick = onClick)
             .padding(Spacing.page),
         verticalAlignment = Alignment.CenterVertically,
@@ -342,7 +419,7 @@ fun TreatmentNavigationCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.card)
+            .taminSurface(CornerRadius.card)
             .clickable(onClick = onClick)
             .padding(Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
@@ -387,7 +464,7 @@ fun CategoryTile(
     val colors = LocalTaminColors.current
     Column(
         modifier = modifier
-            .treatmentSurface(CornerRadius.cardCompact)
+            .taminSurface(CornerRadius.cardCompact)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.sm, vertical = Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -427,7 +504,7 @@ fun CostSummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .treatmentSurface(CornerRadius.card)
+            .taminSurface(CornerRadius.card)
             .padding(Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {

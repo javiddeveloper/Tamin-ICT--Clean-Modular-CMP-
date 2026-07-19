@@ -16,32 +16,33 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.icons.TaminIcons
+import com.tamin.taminhamrah.ui.components.TaminSearchField
+import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminBottomBar
+import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminTeal700
 import com.tamin.taminhamrah.ui.toPriceFormat
 
 /**
@@ -67,21 +68,19 @@ private val CARD_OVERLAP = 40.dp
 @Composable
 private fun PreviewPage(content: @Composable BoxScope.() -> Unit) {
     PreviewRtlThemeContent {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Box(
-                modifier = Modifier
-                    .size(PAGE_WIDTH, PAGE_HEIGHT)
-                    .background(LocalTaminColors.current.bgPage),
-                content = content,
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(PAGE_WIDTH, PAGE_HEIGHT)
+                .background(LocalTaminColors.current.bgPage),
+            content = content,
+        )
     }
 }
 
 @Composable
 private fun BackButton() {
-    TreatmentHeaderButton(
-        icon = Icons.AutoMirrored.Filled.ArrowBack,
+    TaminTopAppBarButton(
+        icon = TaminIcons.ChevronBack,
         contentDescription = "برگشت",
         onClick = {},
     )
@@ -94,12 +93,12 @@ private fun BackButton() {
 private fun TreatmentHubPagePreview() {
     PreviewPage {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            TreatmentHeader(
+            TaminTopAppBar(
                 title = "درمان",
                 centerTitle = false,
                 action = {
-                    TreatmentHeaderButton(
-                        icon = Icons.Filled.Search,
+                    TaminTopAppBarButton(
+                        icon = TaminIcons.Search,
                         contentDescription = "جست‌وجو",
                         onClick = {},
                         bordered = true,
@@ -107,7 +106,6 @@ private fun TreatmentHubPagePreview() {
                 },
                 // Deep enough that the carousel can ride up into it without covering
                 // the title, matching the design's tall header plus negative margin.
-                background = treatmentHeaderGradient(TaminTeal700),
                 bottomPadding = CARD_OVERLAP + Spacing.xl,
             )
             // Everything below the header shifts up together, so the overlap does not
@@ -124,20 +122,29 @@ private fun TreatmentHubPagePreview() {
 
 @Composable
 private fun HubCarousel(modifier: Modifier = Modifier) {
+    // First entry is the main insured person; the rest are dependants, so each takes
+    // the next card identity.
     val people = listOf(
-        "علی رضایی" to "0079542318",
-        "مریم رضایی" to "0079542319",
-        "سارا رضایی" to "0079542320",
+        Triple("سنا حقیقی", "0441456789", false),
+        Triple("نگین رضایی", "0012345678", true),
+        Triple("آرمین حقیقی", "0098765432", true),
+        Triple("آوا حقیقی", "0055443322", true),
     )
     InsuranceCardCarousel(
         pageCount = people.size,
         pagerState = rememberPagerState { people.size },
         modifier = modifier,
     ) { page ->
+        val (name, nid, isDependent) = people[page]
         InsuranceCard(
-            holderName = people[page].first,
-            nationalId = people[page].second,
+            holderName = name,
+            nationalId = nid,
             coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
+            coverageBadge = { CoverageBadge(icon = TaminIcons.Verified) },
+            background = insuranceCardGradient(
+                isDependent = isDependent,
+                dependantOrdinal = people.take(page).count { it.third },
+            ),
         )
     }
 }
@@ -153,17 +160,17 @@ private fun HubQuickAccess() {
         QuickAccessCard(
             title = "سوابق درمانی من",
             subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
-            icon = Icons.AutoMirrored.Filled.List,
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            icon = TaminIcons.MedicalRecords,
+            trailingIcon = TaminIcons.ChevronForward,
             onClick = {},
         )
         TreatmentNavigationCard(
             title = "پروندهٔ سلامت من",
             subtitle = "خوداظهاری سلامت و اطلاعات پزشکی",
-            icon = Icons.Filled.Favorite,
+            icon = TaminIcons.HealthProfile,
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            trailingIcon = TaminIcons.ChevronForward,
             onClick = {},
             status = {
                 StatusPill(
@@ -176,10 +183,10 @@ private fun HubQuickAccess() {
         TreatmentNavigationCard(
             title = "مراکز درمانی طرف قرارداد",
             subtitle = "جست‌وجوی بیمارستان و داروخانه",
-            icon = Icons.Filled.LocationOn,
+            icon = TaminIcons.MedicalCenters,
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            trailingIcon = TaminIcons.ChevronForward,
             onClick = {},
         )
     }
@@ -189,19 +196,19 @@ private fun HubQuickAccess() {
 private fun HubCategories() {
     val colors = LocalTaminColors.current
     val categories = listOf(
-        "نسخه‌های الکترونیک" to colors.blueText,
-        "تاییدیه‌های پزشکی" to colors.teal,
-        "خسارت متفرقه" to colors.orangeText,
+        Triple("نسخه‌های الکترونیک", colors.blueText, TaminIcons.Prescriptions),
+        Triple("تاییدیه‌های پزشکی", colors.teal, TaminIcons.MedicalApprovals),
+        Triple("خسارت متفرقه", colors.orangeText, TaminIcons.MiscClaims),
     )
     Column(
         modifier = Modifier.padding(Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
-            categories.forEach { (label, tint) ->
+            categories.forEach { (label, tint, glyph) ->
                 CategoryTile(
                     label = label,
-                    icon = Icons.Filled.Info,
+                    icon = glyph,
                     iconTint = tint,
                     iconBackground = Brush.linearGradient(
                         listOf(colors.bgPage, colors.divider),
@@ -321,12 +328,12 @@ private fun MedicalRecordsPagePreview() {
 
 @Composable
 private fun RecordsHeader() {
-    TreatmentHeader(
+    TaminTopAppBar(
         title = "سوابق درمانی",
         navigationIcon = { BackButton() },
         action = {
-            TreatmentHeaderButton(
-                icon = Icons.Filled.Share,
+            TaminTopAppBarButton(
+                icon = TaminIcons.Print,
                 contentDescription = "اشتراک‌گذاری",
                 onClick = {},
             )
@@ -336,7 +343,7 @@ private fun RecordsHeader() {
             personLabel = "علی رضایی",
             dateLabel = "۶ ماه اخیر",
             dropdownIcon = Icons.Filled.KeyboardArrowDown,
-            searchIcon = Icons.Filled.Search,
+            searchIcon = TaminIcons.Search,
             onPersonClick = {},
             onDateClick = {},
             onSearchClick = {},
@@ -353,12 +360,12 @@ private fun RecordsHeader() {
 private fun RecordDetailPagePreview() {
     PreviewPage {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            TreatmentHeader(
+            TaminTopAppBar(
                 title = "نسخهٔ الکترونیک",
                 navigationIcon = { BackButton() },
                 action = {
-                    TreatmentHeaderButton(
-                        icon = Icons.Filled.Share,
+                    TaminTopAppBarButton(
+                        icon = TaminIcons.Print,
                         contentDescription = "اشتراک‌گذاری",
                         onClick = {},
                     )
@@ -396,8 +403,8 @@ private fun RecordDetailPagePreview() {
             // Clearance so the cost card is not hidden behind the pinned action bar.
             Spacer(modifier = Modifier.height(100.dp))
         }
-        TreatmentBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
-            TreatmentPrimaryButton(
+        TaminBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
+            TaminPrimaryButton(
                 text = "دریافت نسخهٔ الکترونیک",
                 icon = Icons.Filled.KeyboardArrowDown,
                 onClick = {},
@@ -413,7 +420,7 @@ private fun RecordDetailVisitPagePreview() {
     PreviewPage {
         val colors = LocalTaminColors.current
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            TreatmentHeader(
+            TaminTopAppBar(
                 title = "تاییدیهٔ پزشکی",
                 navigationIcon = { BackButton() },
             )
@@ -503,15 +510,15 @@ private fun MedicalCentresPagePreview() {
     PreviewPage {
         val colors = LocalTaminColors.current
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            TreatmentHeader(
+            TaminTopAppBar(
                 title = "مراکز طرف قرارداد",
                 navigationIcon = { BackButton() },
             ) {
-                TreatmentSearchField(
+                TaminSearchField(
                     value = "",
                     onValueChange = {},
                     placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
-                    searchIcon = Icons.Filled.Search,
+                    searchIcon = TaminIcons.Search,
                     modifier = Modifier.padding(top = Spacing.lg),
                 )
             }
@@ -559,15 +566,15 @@ private fun MedicalCentresPagePreview() {
 private fun MedicalCentresEmptyPagePreview() {
     PreviewPage {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            TreatmentHeader(
+            TaminTopAppBar(
                 title = "مراکز طرف قرارداد",
                 navigationIcon = { BackButton() },
             ) {
-                TreatmentSearchField(
+                TaminSearchField(
                     value = "بیمارستان نامشخص",
                     onValueChange = {},
                     placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
-                    searchIcon = Icons.Filled.Search,
+                    searchIcon = TaminIcons.Search,
                     modifier = Modifier.padding(top = Spacing.lg),
                 )
             }
@@ -576,7 +583,7 @@ private fun MedicalCentresEmptyPagePreview() {
                 selectedIndex = 1,
                 onSelect = {},
             )
-            TreatmentEmptyState(message = "مرکزی با این مشخصات پیدا نشد")
+            TaminEmptyState(message = "مرکزی با این مشخصات پیدا نشد")
         }
     }
 }
