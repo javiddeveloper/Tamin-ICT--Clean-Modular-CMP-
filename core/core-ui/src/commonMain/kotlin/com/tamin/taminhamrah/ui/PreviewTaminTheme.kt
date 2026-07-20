@@ -11,9 +11,10 @@ annotation class PreviewRtlTheme
 
 @Composable
 fun PreviewRtlThemeContent(
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    TaminHamrahTheme {
+    TaminHamrahTheme(darkTheme = darkTheme) {
         content()
     }
 }

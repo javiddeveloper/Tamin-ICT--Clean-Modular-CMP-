@@ -17,6 +17,7 @@ data class TaminColors(
     val iconGradientSecondary: Brush,
     val iconGradientNeutral: Brush,
     val iconGradientDanger: Brush,
+    val iconGradientSuccess: Brush,
     val iconGlassShine: Brush,
     val iconGlassBorder: Brush,
 
@@ -29,6 +30,7 @@ data class TaminColors(
 
     // Status pills (background + foreground pairs)
     val greenBg: Color,
+    val greenBorder: Color,
     val greenText: Color,
     val blueBg: Color,
     val blueText: Color,
@@ -41,6 +43,9 @@ data class TaminColors(
 
     // Medical / Teal
     val teal: Color,
+
+    // Shadows
+    val shadowPrimary: Color,
 
     // Glass / tab-bar tokens (translucency layers for the bottom nav)
     val glassA1: Color,
@@ -77,6 +82,7 @@ val LightTaminColors = TaminColors(
     textMuted = Gray400,
     chevron = Gray300,
     greenBg = Secondary50,
+    greenBorder = TaminDarkGreenAlpha,
     greenText = TaminLightSuccess,
     blueBg = Primary50,
     blueText = TaminLightInfo,
@@ -91,6 +97,7 @@ val LightTaminColors = TaminColors(
     iconGradientSecondary = Brush.verticalGradient(listOf(IconGradientPurpleStart, IconGradientPurpleEnd)),
     iconGradientNeutral = Brush.verticalGradient(listOf(IconGradientGrayStart, IconGradientGrayEnd)),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
+    iconGradientSuccess = Brush.verticalGradient(listOf(TaminGreen, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
     iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
     disabledAlpha = 0.38f,
@@ -112,6 +119,7 @@ val LightTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    shadowPrimary = Primary700.copy(alpha = 0.2f),
 )
 
 val DarkTaminColors = TaminColors(
@@ -126,6 +134,7 @@ val DarkTaminColors = TaminColors(
     textMuted = TaminDarkTextMuted,
     chevron = TaminDarkChevron,
     greenBg = TaminDarkGreenBg,
+    greenBorder = TaminDarkGreenAlpha,
     greenText = TaminDarkSuccess,
     blueBg = TaminDarkBlueBg,
     blueText = TaminDarkInfo,
@@ -140,6 +149,7 @@ val DarkTaminColors = TaminColors(
     iconGradientSecondary = Brush.verticalGradient(listOf(IconGradientPurpleStart, IconGradientPurpleEnd)),
     iconGradientNeutral = Brush.verticalGradient(listOf(IconGradientGrayStart, IconGradientGrayEnd)),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
+    iconGradientSuccess = Brush.verticalGradient(listOf(TaminDarkSuccess, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
     iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
     disabledAlpha = 0.38f,
@@ -162,4 +172,5 @@ val DarkTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    shadowPrimary = Color.Black.copy(alpha = 0.4f),
 )
