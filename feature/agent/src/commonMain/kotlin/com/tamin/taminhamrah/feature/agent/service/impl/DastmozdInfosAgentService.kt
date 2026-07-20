@@ -87,33 +87,34 @@ class DastmozdInfosAgentService(
                 )
             }
 
-            // 6. Map to Bubbles
-            if (!msg.isNullOrBlank()) {
-                bubbles.add(ChatBubbleContent.Text(msg))
-            }
+            // 6. Combine all data into ONE single KeyValue bubble (like old Android GroupButton)
+            val allDetails = mutableListOf<Pair<String, String>>()
 
-            filteredList.forEach { info ->
-                val year = info.hisyear ?: return@forEach
-                val details = mutableListOf<Pair<String, String>>()
-                details.add("سال سابقه" to year)
-                details.add("نام کارگاه" to (info.rwshname ?: "-"))
-                details.add("نوع سابقه" to (info.historytypedesc ?: "-"))
-                details.add("نام شعبه" to (info.brhname ?: "-"))
+            filteredList.forEachIndexed { index, info ->
+                val year = info.hisyear ?: return@forEachIndexed
+                allDetails.add("سال سابقه" to year)
+                allDetails.add("نام کارگاه" to (info.rwshname ?: "-"))
+                allDetails.add("نوع سابقه" to (info.historytypedesc ?: "-"))
+                allDetails.add("نام شعبه" to (info.brhname ?: "-"))
 
                 // Map monthly wage details
                 info.wageDetails.forEach { detail ->
                     val month = detail.month ?: return@forEach
                     val amount = detail.wage ?: "-"
-                    details.add("مبلغ دستمزد $month" to amount)
+                    allDetails.add("مبلغ دستمزد $month" to amount)
                 }
 
-                bubbles.add(
-                    ChatBubbleContent.KeyValue(
-                        title = "اطلاعات دستمزد سال $year",
-                        items = details
-                    )
-                )
+                if (index < filteredList.lastIndex) {
+                    allDetails.add("----------------" to "")
+                }
             }
+
+            bubbles.add(
+                ChatBubbleContent.KeyValue(
+                    title = msg?.takeIf { it.isNotBlank() } ?: "اطلاعات دستمزد",
+                    items = allDetails
+                )
+            )
 
             AgentServiceResult.Success(bubbles)
 
