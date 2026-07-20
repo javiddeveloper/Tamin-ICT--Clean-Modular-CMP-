@@ -3,25 +3,15 @@ package com.tamin.taminhamrah.feature.taminServices.ui.contract
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
-import com.tamin.taminhamrah.ui.components.taminServices.TaminServicesTab
+import com.tamin.taminhamrah.feature.taminServices.model.RolePR
 
-sealed interface TaminScreens {
-    data object History : TaminScreens
-    data object Workshops : TaminScreens
-    data object Contracts : TaminScreens
-    data object StudentInsurance : TaminScreens
-    data object FreelanceInsurance : TaminScreens
-    data object OptionalInsurance : TaminScreens
-    data object HousewifeInsurance : TaminScreens
-    data object PensionInquiry : TaminScreens
-    data class WebView(val url: String) : TaminScreens
-}
 
 @Immutable
 data class TaminServicesUiState(
     val isLoading: Boolean = false,
     val searchQuery: String = "",
-    val selectedTab: TaminServicesTab = TaminServicesTab.INSURED,
+    val tabs: List<RolePR> = emptyList(),
+    val selectedTab: RolePR? = null,
     val menuItems: List<MainServiceDN> = emptyList(),
     val filteredServices: List<MainServiceDN> = emptyList(),
     val error: String? = null,
@@ -30,7 +20,8 @@ data class TaminServicesUiState(
     sealed interface TaminServicesPartialState {
         data class Loading(val isLoading: Boolean) : TaminServicesPartialState
         data class MenuLoaded(val menuItems: List<MainServiceDN>) : TaminServicesPartialState
-        data class TabSelected(val tab: TaminServicesTab) : TaminServicesPartialState
+        data class RolesLoaded(val tabs: List<RolePR>) : TaminServicesPartialState
+        data class TabSelected(val tab: RolePR) : TaminServicesPartialState
         data class SearchQueryChanged(val query: String) : TaminServicesPartialState
         data class Error(val message: String?) : TaminServicesPartialState
     }
@@ -39,7 +30,7 @@ data class TaminServicesUiState(
 sealed interface TaminServicesIntent {
     data object LoadMenu : TaminServicesIntent
     data class OnSearchQueryChanged(val query: String) : TaminServicesIntent
-    data class OnTabSelected(val tab: TaminServicesTab) : TaminServicesIntent
+    data class OnTabSelected(val tab: RolePR) : TaminServicesIntent
     data class OnServiceClick(val service: MainServiceDN) : TaminServicesIntent
 }
 

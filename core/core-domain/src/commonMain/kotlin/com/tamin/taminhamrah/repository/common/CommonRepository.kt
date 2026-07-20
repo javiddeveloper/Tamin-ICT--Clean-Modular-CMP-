@@ -8,4 +8,5 @@ import kotlinx.coroutines.flow.Flow
 interface CommonRepository {
     fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>>
     fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>>
+    fun getRoles(): Flow<List<com.tamin.taminhamrah.model.common.RoleDN>>
 }

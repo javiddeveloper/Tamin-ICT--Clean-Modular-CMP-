@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.components.taminServices
+package com.tamin.taminhamrah.feature.taminServices.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,10 +22,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -133,18 +131,10 @@ fun ServiceCard(
         }
 
         if (showRedDot) {
-            val layoutDirection = LocalLayoutDirection.current
-            val badgeAlignment =
-                if (layoutDirection == LayoutDirection.Rtl) {
-                    Alignment.TopEnd
-                } else {
-                    Alignment.TopStart
-                }
-
             Box(
                 modifier = Modifier
                     .size(IconSize.statIcon)
-                    .align(badgeAlignment)
+                    .align(Alignment.TopEnd)
                     .absoluteOffset(x = (-4).dp, y = (-4).dp)
                     .background(
                         MaterialTheme.colorScheme.error,

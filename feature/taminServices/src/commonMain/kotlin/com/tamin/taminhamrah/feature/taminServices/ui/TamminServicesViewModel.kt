@@ -5,8 +5,10 @@ import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.feature.taminServices.model.toPR
 import com.tamin.taminhamrah.feature.taminServices.ui.contract.*
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
+import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class TamminServicesViewModel(
+    private val getRolesUseCase: GetRolesUseCase,
     private val getMainMenuUseCase: GetMainMenuUseCase,
     private val featureManager: FeatureManager
 ) : BaseViewModel<TaminServicesUiState, TaminServicesUiState.TaminServicesPartialState, TaminSericesEvent, TaminServicesIntent>(
@@ -29,9 +32,15 @@ class TamminServicesViewModel(
             is TaminServicesIntent.LoadMenu -> {
                 emit(TaminServicesUiState.TaminServicesPartialState.Loading(true))
                 emitAll(
-                    getMainMenuUseCase("1.0.0", false).map {
-                        TaminServicesUiState.TaminServicesPartialState.MenuLoaded(it)
-                    }
+                    kotlinx.coroutines.flow.merge(
+                        getRolesUseCase().map { roles ->
+                            val tabs = roles.map { it.toPR() }
+                            TaminServicesUiState.TaminServicesPartialState.RolesLoaded(tabs)
+                        },
+                        getMainMenuUseCase("1.0.0", false).map {
+                            TaminServicesUiState.TaminServicesPartialState.MenuLoaded(it)
+                        }
+                    )
                 )
             }
             is TaminServicesIntent.OnTabSelected -> {
@@ -75,6 +84,13 @@ class TamminServicesViewModel(
         partialState: TaminServicesUiState.TaminServicesPartialState
     ): TaminServicesUiState = when (partialState) {
         is TaminServicesUiState.TaminServicesPartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+        is TaminServicesUiState.TaminServicesPartialState.RolesLoaded -> {
+            val updatedState = currentState.copy(
+                tabs = partialState.tabs,
+                selectedTab = currentState.selectedTab ?: partialState.tabs.firstOrNull()
+            )
+            deriveFilteredServices(updatedState)
+        }
         is TaminServicesUiState.TaminServicesPartialState.MenuLoaded -> {
             val updatedState = currentState.copy(isLoading = false, menuItems = partialState.menuItems)
             deriveFilteredServices(updatedState)
@@ -95,7 +111,9 @@ class TamminServicesViewModel(
 
     private fun deriveFilteredServices(state: TaminServicesUiState): TaminServicesUiState {
         val tabFiltered = state.menuItems.filter { service ->
-            service.showRole.contains(state.selectedTab.roleId)
+            state.selectedTab?.let { tab ->
+                service.showRole.contains(tab.roleId)
+            } ?: false
         }
         val queryFiltered = if (state.searchQuery.trim().isEmpty()) {
             tabFiltered

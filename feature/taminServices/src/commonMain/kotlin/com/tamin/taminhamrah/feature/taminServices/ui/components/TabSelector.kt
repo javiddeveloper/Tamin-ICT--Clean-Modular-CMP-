@@ -1,5 +1,6 @@
-package com.tamin.taminhamrah.ui.components.taminServices
+package com.tamin.taminhamrah.feature.taminServices.ui.components
 
+import com.tamin.taminhamrah.feature.taminServices.model.RolePR
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,8 +22,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 fun TabSelector(
-    selectedTab: TaminServicesTab,
-    onTabSelected: (TaminServicesTab) -> Unit,
+    tabs: List<RolePR>,
+    selectedTab: RolePR?,
+    onTabSelected: (RolePR) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,9 +34,8 @@ fun TabSelector(
             .padding(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val tabs = listOf(TaminServicesTab.INSURED, TaminServicesTab.PENSIONER, TaminServicesTab.EMPLOYER)
         tabs.forEach { tab ->
-            val isSelected = selectedTab == tab
+            val isSelected = selectedTab?.roleId == tab.roleId
             val itemModifier = if (isSelected) {
                 Modifier
                     .clip(MaterialTheme.shapes.medium)
@@ -77,7 +78,8 @@ fun TabSelector(
 private fun ProfileScreenPreview() {
     PreviewRtlThemeContent {
         TabSelector(
-            selectedTab = TaminServicesTab.INSURED,
+            tabs = listOf(RolePR(1, "بیمه ‌شده"),RolePR(2, "مستمری بگیر"),RolePR(3, "کارفرما")),
+            selectedTab = RolePR(1, "بیمه ‌شده"),
             onTabSelected = {}
         )
     }

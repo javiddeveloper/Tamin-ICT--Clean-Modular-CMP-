@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.components.taminServices
+package com.tamin.taminhamrah.feature.taminServices.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -29,8 +29,7 @@ fun TaminServicesHeader(
     ) {
         Text(
             text = title,
-            color = LocalTaminColors.current.textSecondary,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.labelLarge.copy(color = LocalTaminColors.current.textSecondary),
             fontWeight = FontWeight.SemiBold
         )
 
