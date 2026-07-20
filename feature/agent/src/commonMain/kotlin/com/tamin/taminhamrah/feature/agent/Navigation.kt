@@ -7,20 +7,20 @@ import com.tamin.taminhamrah.feature.agent.ui.AgentScreen
 import kotlinx.serialization.Serializable
 
 /**
- * مسیر اختصاصی مربوط به ماژول Agent
+ * Dedicated route for the Agent module.
  */
 @Serializable
 data object AgentRoute
 
 /**
- * متد کمکی برای هدایت به صفحه Agent
+ * Helper method to navigate to the Agent screen.
  */
 fun NavController.navigateToAgent() {
     navigate(AgentRoute)
 }
 
 /**
- * ثبت صفحه Agent در NavGraph
+ * Registers the Agent screen in the NavGraph.
  */
 fun NavGraphBuilder.agentScreen() {
     composable<AgentRoute> {
