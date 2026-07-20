@@ -13,9 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.openUrl
-import com.tamin.taminhamrah.ui.components.LocalThemeRevealController
-import com.tamin.taminhamrah.ui.components.ThemeRevealHost
-import com.tamin.taminhamrah.ui.components.rememberThemeRevealController
 import com.tamin.taminhamrah.ui.contract.MainEvent
 import com.tamin.taminhamrah.ui.navigation.TaminHamrahNavGraph
 import com.tamin.taminhamrah.ui.system.StatusBarIcons
