@@ -54,7 +54,7 @@ class FakeFeatureManager : FeatureManager {
  * A fake AgentServiceUseCase that always succeeds.
  */
 class FakeAgentService(
-    override val actionKey: AgentActionKey = AgentActionKey.DASTMOZD_INFOS
+    override val supportedKeys: List<AgentActionKey> = listOf(AgentActionKey.DASTMOZD_INFOS)
 ) : AgentServiceUseCase {
     var executeCallCount = 0
 
@@ -90,7 +90,7 @@ class AgentActionDispatcherTest {
     @BeforeTest
     fun setup() {
         fakeFeatureManager = FakeFeatureManager()
-        fakeService = FakeAgentService(AgentActionKey.DASTMOZD_INFOS)
+        fakeService = FakeAgentService(listOf(AgentActionKey.DASTMOZD_INFOS))
         registry = AgentServiceRegistry(listOf(fakeService))
         val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
         dispatcher = AgentActionDispatcher(registry, fakeFeatureManager, json)
@@ -196,7 +196,7 @@ class AgentActionDispatcherTest {
     fun `dispatch - GENERAL_RESPONSE has null FeatureFlag - skips flag check and executes`() = runTest {
         // Arrange: GENERAL_RESPONSE does not require a FeatureFlag
         // FeatureManager should not block the execution
-        val generalService = FakeAgentService(AgentActionKey.GENERAL_RESPONSE)
+        val generalService = FakeAgentService(listOf(AgentActionKey.GENERAL_RESPONSE))
         val localRegistry = AgentServiceRegistry(listOf(generalService))
         val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
         val localDispatcher = AgentActionDispatcher(localRegistry, fakeFeatureManager, json)

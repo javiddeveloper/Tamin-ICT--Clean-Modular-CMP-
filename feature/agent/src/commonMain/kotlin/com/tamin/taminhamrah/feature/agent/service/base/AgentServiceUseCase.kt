@@ -24,7 +24,7 @@ import com.tamin.taminhamrah.model.agent.AgentActionKey
  */
 interface AgentServiceUseCase {
     /** Service identifier — must be unique */
-    val actionKey: AgentActionKey
+    val supportedKeys: List<AgentActionKey>
 
     /**
      * Executes the service.

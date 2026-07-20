@@ -18,9 +18,9 @@ class AgentServiceRegistry(
      * @return The corresponding service or null if no handler is registered.
      */
     fun get(actionKey: AgentActionKey): AgentServiceUseCase? =
-        services.firstOrNull { it.actionKey == actionKey }
+        services.firstOrNull { it.supportedKeys.contains(actionKey) }
 
     /** Checks if a handler exists for this key. */
     fun hasHandler(actionKey: AgentActionKey): Boolean =
-        services.any { it.actionKey == actionKey }
+        services.any { it.supportedKeys.contains(actionKey) }
 }

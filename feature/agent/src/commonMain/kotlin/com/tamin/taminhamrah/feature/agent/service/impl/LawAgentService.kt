@@ -32,7 +32,7 @@ class LawAgentService(
     private val json: Json
 ) : AgentServiceUseCase {
 
-    override val actionKey = AgentActionKey.LAW
+    override val supportedKeys = listOf(AgentActionKey.LAW)
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
         val rawData = params.rawData

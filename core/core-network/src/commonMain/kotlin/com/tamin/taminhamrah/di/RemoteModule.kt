@@ -127,8 +127,9 @@ val remoteModule = module {
     }
 
     single<AgentRemoteDataSource> {
-        // Temporarily swapped to Fake Implementation as requested by user
-        com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl(
+        AgentRemoteDataSourceImpl(
+            agentApiService = get(),
+            errorParser = get(),
             json = get()
         )
     }

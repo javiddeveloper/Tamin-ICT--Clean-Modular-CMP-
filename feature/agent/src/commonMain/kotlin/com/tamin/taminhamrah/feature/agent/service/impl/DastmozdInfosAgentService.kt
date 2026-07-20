@@ -18,7 +18,13 @@ class DastmozdInfosAgentService(
     private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase
 ) : AgentServiceUseCase {
 
-    override val actionKey: AgentActionKey = AgentActionKey.DASTMOZD_INFOS
+    override val supportedKeys: List<AgentActionKey> = listOf(
+        AgentActionKey.DASTMOZD_INFOS,
+        AgentActionKey.DASTMOZD_INFOS_LAST,
+        AgentActionKey.DASTMOZD_INFOS_PER_YEAR,
+        AgentActionKey.DASTMOZD_INFOS_SALARY,
+        AgentActionKey.DASTMOZD_INFOS_SUM_TOTAL
+    )
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
         return try {

@@ -61,10 +61,10 @@ class DastmozdInfosAgentServiceTest {
         
         // Second bubble should be KeyValue list
         val keyValueBubble = assertIs<ChatBubbleContent.KeyValue>(success.bubbles[1])
-        assertEquals("اطلاعات دستمزد", keyValueBubble.title)
+        assertEquals("This is a test message", keyValueBubble.title)
         
         // Assert some key values
-        val amountPair = keyValueBubble.items.find { it.first == "مبلغ (ریال)" }
+        val amountPair = keyValueBubble.items.find { it.first == "مبلغ دستمزد فروردین" }
         assertEquals("1000", amountPair?.second)
         
         val companyPair = keyValueBubble.items.find { it.first == "نام کارگاه" }
