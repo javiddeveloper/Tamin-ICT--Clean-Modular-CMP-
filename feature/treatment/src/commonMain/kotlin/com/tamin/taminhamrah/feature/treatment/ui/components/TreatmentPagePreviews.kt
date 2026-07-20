@@ -40,7 +40,6 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat

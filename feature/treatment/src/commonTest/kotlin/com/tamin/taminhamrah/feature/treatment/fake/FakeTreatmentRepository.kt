@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.fake
 
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
@@ -41,21 +40,20 @@ class FakeTreatmentRepository : TreatmentRepository {
 
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String, nationalCode: String, dependantUserNationalCode: String,
-        startDate: String, endDate: String, filters: List<ApiFilterDN>
+        startDate: String, endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = result(prescriptionListResult)
 
     override suspend fun getElectronicPrescriptionDetail(
         noteHeadID: String, nationalCode: String, childNationalCode: String,
-        flagSata: String, type: String, filters: List<ApiFilterDN>
+        flagSata: String, type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>> = result(prescriptionDetailResult)
 
     override suspend fun getElectronicPrescriptionPrice(
-        noteHeadID: String, nationalCode: String, filters: List<ApiFilterDN>
+        noteHeadID: String, nationalCode: String
     ): Flow<List<ElectronicPrescriptionPriceDN>> = result(prescriptionPriceResult)
 
     override suspend fun getDependantUnderEighteen(
-        nationalCode: String,
-        filters: List<ApiFilterDN>
+        nationalCode: String
     ): Flow<List<DependantUserUnderEighteenDN>> = result(dependantResult)
 
     override suspend fun getPrescriptionPdfFile(prescriptionID: String): Flow<PdfDownloadDN> =

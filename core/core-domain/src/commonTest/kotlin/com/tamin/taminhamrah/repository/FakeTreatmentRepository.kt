@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.repository
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -27,7 +26,7 @@ class FakeTreatmentRepository : TreatmentRepository {
 
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String, nationalCode: String, dependantUserNationalCode: String,
-        startDate: String, endDate: String, filters: List<ApiFilterDN>
+        startDate: String, endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = flow {
         if (shouldThrowError) throw error
         emit(getElectronicPrescriptionListResult)
@@ -35,21 +34,21 @@ class FakeTreatmentRepository : TreatmentRepository {
 
     override suspend fun getElectronicPrescriptionDetail(
         noteHeadID: String, nationalCode: String, childNationalCode: String,
-        flagSata: String, type: String, filters: List<ApiFilterDN>
+        flagSata: String, type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>> = flow {
         if (shouldThrowError) throw error
         emit(getElectronicPrescriptionDetailResult)
     }
 
     override suspend fun getElectronicPrescriptionPrice(
-        noteHeadID: String, nationalCode: String, filters: List<ApiFilterDN>
+        noteHeadID: String, nationalCode: String
     ): Flow<List<ElectronicPrescriptionPriceDN>> = flow {
         if (shouldThrowError) throw error
         emit(getElectronicPrescriptionPriceResult)
     }
 
     override suspend fun getDependantUnderEighteen(
-        nationalCode: String, filters: List<ApiFilterDN>
+        nationalCode: String
     ): Flow<List<DependantUserUnderEighteenDN>> = flow {
         if (shouldThrowError) throw error
         emit(getDependantUnderEighteenResult)

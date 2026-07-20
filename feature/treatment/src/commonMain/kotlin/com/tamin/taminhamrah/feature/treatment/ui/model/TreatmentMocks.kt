@@ -96,8 +96,6 @@ object TreatmentMocks {
         insuredShareTotal = 65_910L,
         organizationShareTotal = 153_790L,
         healthProfileCompleted = false
-        selectedPatientName = "رضا احمدی",
-        activeFlow = TreatmentFlow.MAIN
     )
 
     val prescriptionsUiState = PrescriptionsUiState(
