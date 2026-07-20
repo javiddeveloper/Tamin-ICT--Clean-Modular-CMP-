@@ -21,4 +21,41 @@
     <string name="health_intro_update">امکان بروزرسانی اطلاعات در آینده</string>
     <string name="health_intro_privacy">اطلاعات شما محرمانه نگهداری می‌شود</string>
     <string name="health_intro_btn_next">شروع خوداظهاری</string>
+
+    <!-- Shared Navigation & Buttons -->
+    <string name="health_btn_next_step">مرحلهٔ بعدی</string>
+    <string name="health_btn_prev_step">مرحلهٔ قبلی</string>
+    <string name="health_btn_cancel">انصراف</string>
+    <string name="health_step_1_of_10">مرحلهٔ ۱ از ۱۰</string>
+    <string name="health_step_2_of_10">مرحلهٔ ۲ از ۱۰</string>
+
+    <!-- Identity Screen Strings -->
+    <string name="health_identity_title">اطلاعات هویتی</string>
+    <string name="health_identity_notice">این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح، با پشتیبانی تماس بگیرید.</string>
+    <string name="health_identity_insurance_number_prefix">شمارهٔ بیمه:</string>
+    <string name="health_label_first_name">نام</string>
+    <string name="health_label_last_name">نام خانوادگی</string>
+    <string name="health_label_father_name">نام پدر</string>
+    <string name="health_label_gender">جنسیت</string>
+    <string name="health_label_birth_date">تاریخ تولد</string>
+    <string name="health_label_insurance_number">شمارهٔ بیمه</string>
+    <string name="health_identity_insurance_card_title">اطلاعات بیمه</string>
+    <string name="health_label_insurance_type">نوع بیمه</string>
+    <string name="health_label_last_visit">آخرین ویزیت</string>
+
+    <!-- Personal Screen Strings -->
+    <string name="health_personal_title">اطلاعات تکمیلی فردی</string>
+    <string name="health_personal_heading">اطلاعات تکمیلی فردی</string>
+    <string name="health_personal_desc">لطفاً وضعیت تاهل و شغل خود را به همراه اطلاعات تابعیت وارد کنید.</string>
+    <string name="health_personal_marital_status">وضعیت تأهل</string>
+    <string name="health_marital_single">مجرد</string>
+    <string name="health_marital_married">متأهل</string>
+    <string name="health_marital_divorced">مطلقه</string>
+    <string name="health_marital_widowed">همسر فوت شده</string>
+    <string name="health_personal_job_label">شغل / نوع فعالیت</string>
+    <string name="health_personal_job_placeholder">مثلاً کارمند، آزاد و...</string>
+    <string name="health_personal_citizenship_label">تابعیت</string>
+    <string name="health_personal_citizenship_placeholder">وارد کنید</string>
+    <string name="health_personal_nationality_label">ملیت</string>
+    <string name="health_personal_nationality_placeholder">مثلاً ایرانی</string>
 </resources>

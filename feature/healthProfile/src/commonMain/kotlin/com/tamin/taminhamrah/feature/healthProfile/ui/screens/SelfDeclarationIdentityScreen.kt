@@ -2,10 +2,13 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,6 +21,9 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 @Composable
 fun SelfDeclarationIdentityScreen(
@@ -30,13 +36,18 @@ fun SelfDeclarationIdentityScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                title = stringResource(Res.string.health_identity_title),
+                currentStep = 1,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی",
+                primaryText = stringResource(Res.string.health_btn_next_step),
                 onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL)) },
-                secondaryText = "انصراف",
+                secondaryText = stringResource(Res.string.health_btn_cancel),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -50,42 +61,172 @@ fun SelfDeclarationIdentityScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 1, totalSteps = 10)
-
-            TaminText(
-                text = "اطلاعات هویتی",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
+            // Header Step Count
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TaminText(
+                    text = stringResource(Res.string.health_step_1_of_10),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.blueText
+                    )
                 )
-            )
+            }
 
-            TaminText(
-                text = "لطفاً اطلاعات هویتی ثبت شدهٔ خود در سازمان تأمین اجتماعی را بررسی و در صورت صحت، تایید کنید.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textTertiary,
-                    lineHeight = 22.sp
+            // Info Notice Banner (Non-editable notice with lock icon)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(taminColors.blueBg, RoundedCornerShape(14.dp))
+                    .border(1.dp, taminColors.blueText.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_health_identity_lock),
+                    contentDescription = null,
+                    tint = taminColors.blueText,
+                    modifier = Modifier.size(20.dp)
                 )
-            )
+                TaminText(
+                    text = stringResource(Res.string.health_identity_notice),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.5.sp,
+                        color = taminColors.blueText,
+                        lineHeight = 20.sp
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
+            // Main Patient Profile Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                 border = BorderStroke(1.dp, taminColors.border)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    IdentityRow(label = "نام و نام خانوادگی:", value = "${state.patientName} ${state.patientFamily}")
-                    IdentityRow(label = "نام پدر:", value = state.patientFather)
-                    IdentityRow(label = "جنسیت:", value = state.patientGender)
-                    IdentityRow(label = "تاریخ تولد:", value = state.patientBirthDate)
-                    IdentityRow(label = "شماره بیمه:", value = state.insuranceNumber)
-                    IdentityRow(label = "نوع بیمه:", value = state.insuranceType)
-                    IdentityRow(label = "آخرین مراجعه:", value = state.lastVisitDate)
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Avatar Icon
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(taminColors.blueBg, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_health_identity_avatar),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    TaminText(
+                        text = "${state.patientName} ${state.patientFamily}".ifBlank { "علی محمدی" },
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = taminColors.textPrimary
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    TaminText(
+                        text = "${stringResource(Res.string.health_identity_insurance_number_prefix)} ${state.insuranceNumber.ifBlank { "۵۶۷۸۹" }}",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 13.sp,
+                            color = taminColors.textTertiary
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                    HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // 2-Column Info Grid:
+                    // In RTL layout direction:
+                    // - First Column (starts on RIGHT): First Name, Father Name, Birth Date
+                    // - Second Column (starts on LEFT): Last Name, Gender, Insurance Number
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            IdentityGridItem(label = stringResource(Res.string.health_label_first_name), value = state.patientName.ifBlank { "علی" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_father_name), value = state.patientFather.ifBlank { "حسین" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_birth_date), value = state.patientBirthDate.ifBlank { "۱۳۶۸/۰۵/۱۲" })
+                        }
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            IdentityGridItem(label = stringResource(Res.string.health_label_last_name), value = state.patientFamily.ifBlank { "محمدی" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_gender), value = state.patientGender.ifBlank { "مرد" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_number), value = state.insuranceNumber.ifBlank { "۰۰۲۳۴۵۶۷۸۹" })
+                        }
+                    }
                 }
             }
 
-            InfoBanner(message = "این اطلاعات از پایگاه داده‌های سازمان تأمین اجتماعی استخراج شده و به دلایل امنیتی غیرقابل ویرایش است.")
+            // Insurance Info Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                border = BorderStroke(1.dp, taminColors.border)
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_health_identity_heart),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        TaminText(
+                            text = stringResource(Res.string.health_identity_insurance_card_title),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = taminColors.textPrimary
+                            )
+                        )
+                    }
+
+                    HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+
+                    // In RTL layout direction:
+                    // - First Column (RIGHT): Insurance Type
+                    // - Second Column (LEFT): Last Visit Date
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_type), value = state.insuranceType.ifBlank { "اجباری (کارگری)" })
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            IdentityGridItem(label = stringResource(Res.string.health_label_last_visit), value = state.lastVisitDate.ifBlank { "۱۴۰۴/۰۲/۱۸" })
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
@@ -114,13 +255,44 @@ fun IdentityRow(label: String, value: String) {
     HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
 }
 
+@Composable
+private fun IdentityGridItem(label: String, value: String) {
+    val taminColors = LocalTaminColors.current
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        TaminText(
+            text = label,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.sp,
+                color = taminColors.textTertiary
+            )
+        )
+        TaminText(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textPrimary
+            )
+        )
+    }
+}
+
 @PreviewRtlTheme
 @Preview
 @Composable
 fun SelfDeclarationIdentityScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationIdentityScreen(
-            state = SelfDeclarationUiState(),
+            state = SelfDeclarationUiState(
+                patientName = "علی",
+                patientFamily = "محمدی",
+                patientFather = "حسین",
+                patientGender = "مرد",
+                patientBirthDate = "۱۳۶۸/۰۵/۱۲",
+                insuranceNumber = "۰۰۲۳۴۵۶۷۸۹",
+                insuranceType = "اجباری (کارگری)",
+                lastVisitDate = "۱۴۰۴/۰۲/۱۸"
+            ),
             onIntent = {},
             onBackClicked = {}
         )
