@@ -83,6 +83,7 @@ val TaminDarkTextMuted = Color(0xFF7C8BA6)
 val TaminDarkChevron = Color(0xFF48536B)
 val TaminDarkOuterBorder = Color(0xFF1E293F)
 val TaminDarkGreenText = Color(0xFF34D399)
+val TaminDarkGreenAlpha = Color(0x5934D399)  // #34D399 with 59 (hex) alpha
 val TaminDarkBlueBg = Color(0x293B82F6)      // rgba(59,130,246,.16)
 val TaminDarkBlueText = Color(0xFF5B9CFF)
 val TaminDarkOrangeBg = Color(0x29F59E0B)    // rgba(245,158,11,.16)
