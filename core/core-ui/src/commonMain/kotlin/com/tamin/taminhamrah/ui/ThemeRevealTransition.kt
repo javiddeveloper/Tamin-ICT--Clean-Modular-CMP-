@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.ui.components
+package com.tamin.taminhamrah.ui
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
