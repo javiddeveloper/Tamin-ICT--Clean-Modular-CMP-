@@ -6,12 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.ui.components.LocalThemeRevealController
+import com.tamin.taminhamrah.ui.components.ThemeRevealHost
+import com.tamin.taminhamrah.ui.components.rememberThemeRevealController
 import com.tamin.taminhamrah.ui.contract.MainEvent
 import com.tamin.taminhamrah.ui.navigation.TaminHamrahNavGraph
 import com.tamin.taminhamrah.ui.system.StatusBarIcons
@@ -36,24 +40,30 @@ fun MainApp(
         DarkThemeConfig.DARK -> true
     }
 
+    val revealController = rememberThemeRevealController()
     TaminHamrahTheme(
         darkTheme = darkTheme
     ) {
-        // App-wide default: dark icons over the light theme's pale surfaces, light ones
-        // over the dark theme's. A screen that puts a dark header behind the status bar
-        // can override this for as long as it is shown.
-        StatusBarIcons(darkIcons = !darkTheme)
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TaminHamrahNavGraph(
-                    isLoggedIn = uiState.isLoggedIn,
-                    isLoading = uiState.isLoading,
-                    onLoginClick = { viewModel.login() }
-                )
-            }
+        CompositionLocalProvider(
+            LocalThemeRevealController provides revealController
+        ) {
+            ThemeRevealHost(
+                controller = revealController
+            ) {
+                StatusBarIcons(darkIcons = !darkTheme)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        TaminHamrahNavGraph(
+                            isLoggedIn = uiState.isLoggedIn,
+                            isLoading = uiState.isLoading,
+                            onLoginClick = { viewModel.login() }
+                        )
+                    }
 
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                }
             }
         }
     }
