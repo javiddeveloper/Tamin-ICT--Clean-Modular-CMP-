@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.repository.agentRepository
 
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
 import com.tamin.taminhamrah.model.agent.AgentActionKey
-import com.tamin.taminhamrah.model.agent.AgentDomainMapper
 import com.tamin.taminhamrah.model.agent.AgentPollingState
 import com.tamin.taminhamrah.model.agent.AgentRequest
 import com.tamin.taminhamrah.model.agent.AgentRequestDTO
@@ -17,13 +16,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 /**
- * پیاده‌سازی [AgentRepository] با مکانیسم polling مبتنی بر Kotlin Flow
+ * Implementation of [AgentRepository] with Kotlin Flow-based polling mechanism.
  *
- * بهبودهای اصلی نسبت به نسخه Android قدیمی:
- * 1. به جای `while` loop، از `flow {}` با `emit` استفاده می‌شود → lifecycle-safe
- * 2. `MAX_POLLS` حداکثر تعداد تلاش را محدود می‌کند → بدون infinite loop
- * 3. اگر ETA از سرور نیامد، از [DEFAULT_POLL_DELAY_MS] استفاده می‌شود
- * 4. خطاها با `.catch {}` به صورت تمیز مدیریت می‌شوند
+ * Key improvements over the legacy Android version:
+ * 1. Uses `flow {}` with `emit` instead of a `while` loop → lifecycle-safe.
+ * 2. `MAX_POLLS` limits the maximum number of attempts → avoids infinite loops.
+ * 3. Uses server-provided ETA, falling back to [DEFAULT_POLL_DELAY_MS].
+ * 4. Errors are cleanly managed with `.catch {}`.
  */
 class AgentRepositoryImpl(
     private val remoteDataSource: AgentRemoteDataSource
@@ -36,7 +35,7 @@ class AgentRepositoryImpl(
     }
 
     override fun sendPrompt(request: AgentRequest): Flow<AgentPollingState> = flow {
-        // ۱. ارسال اولیه درخواست
+        // 1. Initial request submission
         val initialResponse = if (request.isLawPrompt) {
             remoteDataSource.sendLawPrompt(request.toDTO())
         } else {
@@ -44,19 +43,19 @@ class AgentRepositoryImpl(
         }
 
         val requestId = initialResponse.data?.id
-            ?: throw IllegalStateException("شناسه درخواست دریافت نشد")
+            ?: throw IllegalStateException("Request ID not received")
 
         val etaSeconds = initialResponse.data?.eta ?: 5
 
-        // ۲. emit وضعیت Pending
+        // 2. Emit Pending state
         emit(AgentPollingState.Pending(requestId = requestId, etaSeconds = etaSeconds))
 
-        // ۳. شروع polling loop
+        // 3. Start polling loop
         var pollCount = 0
         var currentEta = etaSeconds
 
         while (pollCount < MAX_POLLS) {
-            // تاخیر هوشمند: از ETA سرور استفاده می‌کنیم اما max را رعایت می‌کنیم
+            // Smart delay: Use server ETA but respect the maximum threshold
             val delayMs = (currentEta * 1000L).coerceIn(1_000L, MAX_POLL_DELAY_MS)
             delay(delayMs)
 
@@ -66,13 +65,13 @@ class AgentRepositoryImpl(
             when (trackData?.status?.uppercase()) {
                 "DONE" -> {
                     val result = trackData.result
-                        ?: throw IllegalStateException("پاسخ نهایی خالی است")
+                        ?: throw IllegalStateException("Final response is empty")
                     emit(AgentPollingState.Done(result.toDomain()))
                     return@flow
                 }
                 "FAILED" -> {
                     emit(AgentPollingState.Failed(
-                        trackResponse.data?.result?.message ?: "پردازش با خطا مواجه شد"
+                        trackData.result?.message ?: trackData.message ?: "Processing failed"
                     ))
                     return@flow
                 }
@@ -80,7 +79,7 @@ class AgentRepositoryImpl(
                     emit(AgentPollingState.Cancelled)
                     return@flow
                 }
-                // PENDING — ادامه polling
+                // PENDING — continue polling
                 else -> {
                     currentEta = trackData?.eta ?: currentEta
                 }
@@ -89,10 +88,10 @@ class AgentRepositoryImpl(
             pollCount++
         }
 
-        emit(AgentPollingState.Failed("زمان انتظار به پایان رسید. لطفاً دوباره تلاش کنید."))
+        emit(AgentPollingState.Failed("Request timed out. Please try again."))
 
     }.catch { e ->
-        emit(AgentPollingState.Failed(e.message ?: "خطای غیرمنتظره"))
+        emit(AgentPollingState.Failed(e.message ?: "Unexpected error"))
     }
 
     override suspend fun cancelRequest(requestId: String): Result<Unit> {

@@ -7,7 +7,7 @@
 package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
@@ -127,9 +127,9 @@ val remoteModule = module {
     }
 
     single<AgentRemoteDataSource> {
-        AgentRemoteDataSourceImpl(
-            agentApiService = get(named("agentApiService")),
-            errorParser = get()
+        // Temporarily swapped to Fake Implementation as requested by user
+        com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl(
+            json = get()
         )
     }
 

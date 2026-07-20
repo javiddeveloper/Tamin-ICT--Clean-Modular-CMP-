@@ -26,5 +26,7 @@ data class PollingDataDTO(
     /** وضعیت: PENDING | DONE | FAILED | CANCEL */
     @SerialName("status") val status: String? = null,
     /** پاسخ نهایی - فقط وقتی status == DONE مقدار دارد */
-    @SerialName("result") val result: AgentResponseDTO? = null
+    @SerialName("result") val result: AgentResponseDTO? = null,
+    @SerialName("message") val message: String? = null,
+    @SerialName("errorStatus") val errorStatus: String? = null
 )

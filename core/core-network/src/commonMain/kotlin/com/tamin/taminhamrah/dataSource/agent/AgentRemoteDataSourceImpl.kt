@@ -8,10 +8,18 @@ import com.tamin.taminhamrah.model.agent.PollingResponseDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 internal class AgentRemoteDataSourceImpl(
     private val agentApiService: AgentApiService,
-    private val errorParser: ErrorParser
+    private val errorParser: ErrorParser,
+    private val json: Json
 ) : AgentRemoteDataSource {
 
     override suspend fun checkChatAllowed(): ChatAllowedDTO {
@@ -28,7 +36,19 @@ internal class AgentRemoteDataSourceImpl(
 
     override suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO {
         return try {
-            agentApiService.sendServicePrompt(request)
+            val content = MultiPartFormDataContent(
+                formData {
+                    append(
+                        key = "data",
+                        value = json.encodeToString(request),
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, "application/json; charset=UTF-8")
+                            append("Content-Transfer-Encoding", "binary")
+                        }
+                    )
+                }
+            )
+            agentApiService.sendServicePrompt(content)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -40,7 +60,19 @@ internal class AgentRemoteDataSourceImpl(
 
     override suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO {
         return try {
-            agentApiService.sendLawPrompt(request)
+            val content = MultiPartFormDataContent(
+                formData {
+                    append(
+                        key = "data",
+                        value = json.encodeToString(request),
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, "application/json; charset=UTF-8")
+                            append("Content-Transfer-Encoding", "binary")
+                        }
+                    )
+                }
+            )
+            agentApiService.sendLawPrompt(content)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

@@ -14,7 +14,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AgentRequestDTO(
     @SerialName("prompt") val prompt: String,
-    @SerialName("session_id") val sessionId: String? = null,
-    @SerialName("last_entity") val lastEntity: String? = null,
-    @SerialName("chat_token") val chatToken: String? = null
+    @SerialName("sessionId") val sessionId: String? = null,
+    @SerialName("lastEntity") val lastEntity: String? = null,
+    @SerialName("chatToken") val chatToken: String? = null,
+    @SerialName("userType") val userType: String? = "INSURED"
 )

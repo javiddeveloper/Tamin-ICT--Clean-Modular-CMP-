@@ -20,29 +20,29 @@ interface AgentApiService {
     /**
      * بررسی می‌کند که آیا این کاربر مجاز به استفاده از چت‌بات هست یا نه
      */
-    @GET("api/chat-allowed")
+    @GET("chat-allowed")
     suspend fun checkChatAllowed(): ChatAllowedDTO
 
     /**
      * ارسال پرامپت متنی برای سرویس‌های بیمه‌ای
      */
-    @POST("api/search/service")
+    @POST("search/service")
     suspend fun sendServicePrompt(
-        @Body data: AgentRequestDTO
+        @Body data: io.ktor.client.request.forms.MultiPartFormDataContent
     ): PollingResponseDTO
 
     /**
      * ارسال پرامپت متنی برای جستجوی قوانین
      */
-    @POST("api/search/rule")
+    @POST("search/rule")
     suspend fun sendLawPrompt(
-        @Body data: AgentRequestDTO
+        @Body data: io.ktor.client.request.forms.MultiPartFormDataContent
     ): PollingResponseDTO
 
     /**
      * پیگیری وضعیت یک درخواست ارسال‌شده (polling)
      */
-    @GET("api/request/track/{id}")
+    @GET("request/track/{id}")
     suspend fun trackRequest(
         @Path("id") requestId: String
     ): PollingResponseDTO
@@ -50,11 +50,8 @@ interface AgentApiService {
     /**
      * لغو یک درخواست در حال پردازش
      */
-    @GET("api/request/cancel/{id}")
+    @GET("request/cancel/{id}")
     suspend fun cancelRequest(
         @Path("id") requestId: String
     ): CancelResponseDTO
 }
-
-suspend fun de.jensklingenberg.ktorfit.Ktorfit.createAgentApiService(): AgentApiService =
-    this.create()
