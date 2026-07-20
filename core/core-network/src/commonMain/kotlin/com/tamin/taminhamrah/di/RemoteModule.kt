@@ -14,7 +14,6 @@ import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AgentRepository
 import com.tamin.taminhamrah.repository.agentRepository.AgentRepositoryImpl
-import com.tamin.taminhamrah.repository.agentRepository.FakeAgentRepository
 import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
@@ -138,16 +137,15 @@ val remoteModule = module {
     }
 
     single<AgentRemoteDataSource> {
-        AgentRemoteDataSourceImpl(
-            agentApiService = get(named("agentApiService")),
-            errorParser = get(),
+        // Switch to AgentRemoteDataSourceImpl when the real API is ready
+        com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl(
             json = get()
         )
     }
 
     single<AgentRepository> {
-        FakeAgentRepository()
-        // TODO: Switch back to real implementation when server is ready:
-        // AgentRepositoryImpl(remoteDataSource = get())
+        AgentRepositoryImpl(
+            remoteDataSource = get()
+        )
     }
 }
