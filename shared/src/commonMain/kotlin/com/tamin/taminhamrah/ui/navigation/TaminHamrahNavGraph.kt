@@ -1,19 +1,25 @@
 package com.tamin.taminhamrah.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.*
-import androidx.compose.animation.*
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,9 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -51,7 +59,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
-import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.HistoryRoute
@@ -80,8 +87,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
@@ -89,14 +94,14 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentI
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
-import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
-import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
-import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
+import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
+import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -138,14 +143,9 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
-    // Any destination inside the treatment graph keeps the tab selected, so records and
-    // record-detail do not drop the highlight or hide the bottom bar.
-    val isTreatmentSelected = currentDestination?.hierarchy?.any {
-        it.hasRoute<TreatmentRoute.Graph>()
-    } == true
+    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
-
 
     val navigationItems = listOf(
         NavigationTab(
@@ -178,7 +178,7 @@ internal fun TaminHamrahNavGraph(
             isSelected = isTreatmentSelected,
             icon = Res.drawable.ic_treatment_menu,
             onClick = {
-                navController.navigate(TreatmentRoute.Graph) {
+                navController.navigate(TreatmentRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -206,13 +206,13 @@ internal fun TaminHamrahNavGraph(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = isBottomBarVisible,
-                enter = androidx.compose.animation.slideInVertically(
+                enter = slideInVertically(
                     initialOffsetY = { it },
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
                 ),
-                exit = androidx.compose.animation.slideOutVertically(
+                exit = slideOutVertically(
                     targetOffsetY = { it },
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
                 )
@@ -351,7 +351,7 @@ internal fun TaminHamrahNavGraph(
 
                 treatmentGraph(
                     navController = navController,
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.popBackStack() }
                 )
 
                 profileGraph(
@@ -406,7 +406,7 @@ internal fun TaminHamrahNavGraph(
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
             }
 
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
