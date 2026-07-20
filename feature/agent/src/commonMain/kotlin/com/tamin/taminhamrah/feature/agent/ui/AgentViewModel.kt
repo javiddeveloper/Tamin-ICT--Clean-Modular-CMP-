@@ -154,10 +154,8 @@ class AgentViewModel(
                         AgentProcessingState(steps = allSteps, currentActiveIndex = 1.coerceAtMost(allSteps.size - 1), isCompleted = false)
                     ))
 
-                    // Execute the pipeline via dispatcher
+                    // --- Phase 1: Show the ProcessingSteps bubble and run all steps ---
                     var currentStepIndex = 1
-                    
-                    // 1. Show the ProcessingSteps bubble IMMEDIATELY at the top of the response
                     val processingBubbleId = "processing_${UUID.randomUUID()}"
                     emit(PartialState.NewChatItems(listOf(
                         ChatItem(
@@ -173,8 +171,11 @@ class AgentViewModel(
                     )))
                     sendEvent(AgentEvent.ScrollToBottom)
 
+                    // Collect all result bubbles while animating steps
+                    val allResultItems = mutableListOf<ChatItem>()
+
                     response.entities.forEach { entity ->
-                        // Update Extension Card & ProcessingBubble for the active step if it has a title
+                        // Advance step indicator
                         val stepTitle = entity.action.toProcessingStepTitle()
                         if (stepTitle != null) {
                             val stepIndex = allSteps.indexOf(stepTitle)
@@ -185,10 +186,7 @@ class AgentViewModel(
                                     currentActiveIndex = currentStepIndex,
                                     isCompleted = false
                                 )
-                                // Update floating extension card
                                 emit(PartialState.ProcessingStateUpdated(updatedState))
-                                
-                                // Update the processing bubble in chat history
                                 emit(PartialState.UpdateChatItem(
                                     ChatItem(
                                         id = processingBubbleId,
@@ -201,12 +199,11 @@ class AgentViewModel(
                                         isTypingAnimating = false
                                     )
                                 ))
-                                
-                                // Artificial delay to ensure the UI has time to animate the step
-                                kotlinx.coroutines.delay(600L)
+                                kotlinx.coroutines.delay(500L)
                             }
                         }
 
+                        // Dispatch entity and COLLECT results (don't emit yet)
                         val result = dispatchEntity(entity)
                         val newItems = result.map { bubble ->
                             ChatItem(
@@ -216,17 +213,11 @@ class AgentViewModel(
                                 isTypingAnimating = true
                             )
                         }
-                        
-                        if (newItems.isNotEmpty()) {
-                            emit(PartialState.NewChatItems(newItems))
-                            sendEvent(AgentEvent.ScrollToBottom)
-                        }
+                        allResultItems.addAll(newItems)
                     }
 
-                    // Pipeline complete — hide floating card
+                    // --- Phase 2: Mark steps as complete ---
                     emit(PartialState.ProcessingStateUpdated(null))
-
-                    // Final update: Mark the processing bubble in chat history as completed
                     emit(PartialState.UpdateChatItem(
                         ChatItem(
                             id = processingBubbleId,
@@ -239,6 +230,17 @@ class AgentViewModel(
                             isTypingAnimating = false
                         )
                     ))
+
+                    // Brief pause so user sees the completed stepper before content appears
+                    kotlinx.coroutines.delay(400L)
+
+                    // --- Phase 3: Emit all result bubbles sequentially ---
+                    allResultItems.forEach { item ->
+                        emit(PartialState.NewChatItems(listOf(item)))
+                        sendEvent(AgentEvent.ScrollToBottom)
+                        // Small delay between bubbles so typewriter effect is visible
+                        kotlinx.coroutines.delay(200L)
+                    }
 
                 }
 

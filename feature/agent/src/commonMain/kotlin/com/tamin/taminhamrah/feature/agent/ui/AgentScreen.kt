@@ -168,11 +168,17 @@ private fun ChatLayout(
                             TypingIndicatorBubble(processingState = uiState.processingState)
                         }
                     }
+                    // reverseLayout = true means index 0 is at the BOTTOM.
+                    // reversedItems[0] is the LATEST message, shown at bottom.
                     val reversedItems = uiState.chatItems.reversed()
                     itemsIndexed(reversedItems, key = { _, it -> it.id }) { index, item ->
+                        // showAvatar: only for agent. Show if this is the first agent msg in a
+                        // consecutive agent group (i.e. the item BEFORE it in visual order is
+                        // not an agent — note: index 0 is bottom, so index-1 is visually above).
                         val showAvatar = item.sender != ChatSender.User &&
-                            (index == reversedItems.lastIndex || reversedItems[index + 1].sender == ChatSender.User)
+                            (index == 0 || reversedItems[index - 1].sender == ChatSender.User)
 
+                        // Compute typing delay for SuggestedPrompts based on preceding Text bubble
                         val textLength = if (item.content is ChatBubbleContent.SuggestedPrompts) {
                             (reversedItems.getOrNull(index + 1)?.content as? ChatBubbleContent.Text)?.message?.length ?: 0
                         } else 0
@@ -291,6 +297,7 @@ private fun ExtensionCard(
             modifier = Modifier.padding(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Header row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -302,13 +309,13 @@ private fun ExtensionCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Done",
+                        contentDescription = null,
                         tint = Color(0xFF4CAF50),
                         modifier = Modifier.size(16.dp)
                     )
                 }
                 Text(
-                    text = if (state.isCompleted) "Processing complete" else "⚙️ Processing...",
+                    text = if (state.isCompleted) "پردازش تمام شد" else "در حال پردازش...",
                     style = MaterialTheme.typography.labelMedium.copy(
                         color = if (state.isCompleted) Color(0xFF4CAF50) else AgentAccent,
                         fontWeight = FontWeight.SemiBold
@@ -325,7 +332,9 @@ private fun ExtensionCard(
                 ) {
                     val isDone = state.isCompleted || index < state.currentActiveIndex
                     val isActive = index == state.currentActiveIndex && !state.isCompleted
-                    val showLine = !isDone && index != state.steps.lastIndex
+                    // Show connector line only between steps that are not yet done,
+                    // and not after the last step
+                    val showLine = !state.isCompleted && index < state.steps.lastIndex
                     ExtensionCardStep(
                         label = step,
                         isActive = isActive,
@@ -350,29 +359,27 @@ private fun ExtensionCardStep(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        // Icon column with optional connector line
+        Box(
+            modifier = Modifier.width(20.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier.width(16.dp),
-                contentAlignment = Alignment.Center
+            // Vertical connector line to next step
+            if (showLine) {
+                Box(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .height(24.dp)
+                        .offset(y = 16.dp)
+                        .background(AgentBubbleBorder)
+                )
+            }
+            // Step state icon
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isDone,
+                enter = fadeIn(tween(400)),
+                exit = fadeOut(tween(400))
             ) {
-                if (showLine) {
-                    Box(
-                        modifier = Modifier
-                            .width(2.dp)
-                            .height(24.dp)
-                            .offset(y = 16.dp)
-                            .background(AgentBubbleBorder)
-                    )
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = isDone,
-                    enter = fadeIn(tween(400)),
-                    exit = fadeOut(tween(400))
-                ) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Done",
@@ -380,7 +387,6 @@ private fun ExtensionCardStep(
                     modifier = Modifier.size(14.dp)
                 )
             }
-
             androidx.compose.animation.AnimatedVisibility(
                 visible = isActive && !isDone,
                 enter = fadeIn(tween(400)),
@@ -391,7 +397,6 @@ private fun ExtensionCardStep(
                     color = AgentAccent
                 )
             }
-
             androidx.compose.animation.AnimatedVisibility(
                 visible = !isActive && !isDone,
                 enter = fadeIn(tween(400)),
@@ -406,18 +411,22 @@ private fun ExtensionCardStep(
             }
         }
 
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = when {
-                        isDone -> AgentOnSurface.copy(alpha = 0.6f)
-                        isActive -> AgentOnSurface
-                        else -> AgentOnSurface.copy(alpha = 0.4f)
-                    }
-                )
-            )
-        }
+        Spacer(Modifier.width(10.dp))
 
+        // Step label - fills remaining space
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodySmall.copy(
+                color = when {
+                    isDone -> AgentOnSurface.copy(alpha = 0.6f)
+                    isActive -> AgentOnSurface
+                    else -> AgentOnSurface.copy(alpha = 0.35f)
+                }
+            )
+        )
+
+        // Arrow icon for completed steps
         if (isDone) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowLeft,
@@ -490,6 +499,7 @@ private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.Start
         ) {
+            // Avatar
             Box(modifier = Modifier.size(28.dp)) {
                 Box(
                     modifier = Modifier
@@ -504,16 +514,21 @@ private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
             Spacer(Modifier.width(8.dp))
 
             CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
-                Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                    processingState?.let {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                ) {
+                    if (processingState != null) {
+                        // Show step progress card instead of dots
                         ExtensionCard(
-                            state = it,
+                            state = processingState,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Spacer(Modifier.height(8.dp))
+                    } else {
+                        // Only show dots when not in a processing step
+                        TypingDotsIndicator()
                     }
-
-                    TypingDotsIndicator()
                 }
             }
         }
@@ -643,14 +658,22 @@ private fun ChatBubbleItem(item: ChatItem, showAvatar: Boolean = true, typingDel
                                          item.content is ChatBubbleContent.EmbeddedModel
 
             if (isProcessingOrEmbedded) {
-                // Render without chat bubble background
-                Box(modifier = Modifier.fillMaxWidth().padding(start = if (isUser) 0.dp else 8.dp)) {
-                    CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
-                        BubbleContentRenderer(content = item.content, isTypingAnimating = item.isTypingAnimating, typingDelay = typingDelay)
+                // Full-width cards with no bubble background
+                CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 36.dp) // align with avatar-less content
+                    ) {
+                        BubbleContentRenderer(
+                            content = item.content,
+                            isTypingAnimating = item.isTypingAnimating,
+                            typingDelay = typingDelay
+                        )
                     }
                 }
             } else {
-                // Render with standard chat bubble background
+                // Standard chat bubble
                 Surface(
                     shape = RoundedCornerShape(
                         topStart = if (isUser) 20.dp else 4.dp,
@@ -658,13 +681,21 @@ private fun ChatBubbleItem(item: ChatItem, showAvatar: Boolean = true, typingDel
                         bottomStart = 20.dp,
                         bottomEnd = 20.dp
                     ),
-                    color = if (isUser) AgentBubbleUser else Color.Transparent,
-                    border = null,
-                    modifier = Modifier.widthIn(max = 320.dp)
+                    color = if (isUser) AgentBubbleUser else AgentSurfaceVariant,
+                    modifier = Modifier.widthIn(max = 300.dp)
                 ) {
-                    Box(modifier = Modifier.padding(vertical = 12.dp, horizontal = if (isUser) 12.dp else 8.dp)) {
+                    Box(
+                        modifier = Modifier.padding(
+                            vertical = 10.dp,
+                            horizontal = if (isUser) 14.dp else 12.dp
+                        )
+                    ) {
                         CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
-                            BubbleContentRenderer(content = item.content, isTypingAnimating = item.isTypingAnimating, typingDelay = typingDelay)
+                            BubbleContentRenderer(
+                                content = item.content,
+                                isTypingAnimating = item.isTypingAnimating,
+                                typingDelay = typingDelay
+                            )
                         }
                     }
                 }
@@ -784,14 +815,14 @@ private fun BubbleContentRenderer(content: ChatBubbleContent, isTypingAnimating:
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        text = "Suggestions:",
+                        text = "پیشنهادات:",
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = AgentOnSurface.copy(alpha = 0.5f)
                         )
                     )
                     content.prompts.forEach { prompt ->
                         SuggestionChip(
-                            onClick = { /* onIntent(AgentIntent.SendTextPrompt(prompt)) */ },
+                            onClick = { /* onSendPrompt(prompt) */ },
                             label = {
                                 Text(
                                     text = prompt,
