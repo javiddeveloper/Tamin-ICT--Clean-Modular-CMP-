@@ -44,9 +44,53 @@ class DastmozdInfosAgentService(
                 bubbles.add(ChatBubbleContent.Text(msg))
             }
 
-            // TODO: Parse `params.payload` into DateFilter to filter the list locally
-            // if AI provided date ranges like {"filter":["startDate:14020101", ...]}
-            val filteredList = list // For now using the whole list
+            var filteredList = list
+
+            // 4. Extract filters from payload
+            val payload = params.payload
+            var startYear: Int? = null
+            var endYear: Int? = null
+
+            if (payload != null && payload is kotlinx.serialization.json.JsonObject) {
+                val filterArray = payload["filter"] as? kotlinx.serialization.json.JsonArray
+                filterArray?.forEach { element ->
+                    val filterStr = element.run { if (this is kotlinx.serialization.json.JsonPrimitive) this.content else "" }
+                    if (filterStr.startsWith("startDate:")) {
+                        val date = filterStr.removePrefix("startDate:")
+                        if (date.length >= 4) startYear = date.substring(0, 4).toIntOrNull()
+                    }
+                    if (filterStr.startsWith("endDate:")) {
+                        val date = filterStr.removePrefix("endDate:")
+                        if (date.length >= 4) endYear = date.substring(0, 4).toIntOrNull()
+                    }
+                }
+            }
+
+            // 5. Apply filters
+            if (startYear != null || endYear != null) {
+                filteredList = list.filter { info ->
+                    val year = info.hisyear?.toIntOrNull() ?: return@filter true
+                    when {
+                        startYear != null && endYear != null -> year in startYear..endYear
+                        startYear != null -> year >= startYear
+                        endYear != null -> year <= endYear
+                        else -> true
+                    }
+                }
+            }
+
+            if (filteredList.isEmpty()) {
+                return AgentServiceResult.Success(
+                    bubbles = listOf(
+                        ChatBubbleContent.Text(msg ?: "رکوردی در این بازه تاریخی یافت نشد.")
+                    )
+                )
+            }
+
+            // 6. Map to Bubbles
+            if (!msg.isNullOrBlank()) {
+                bubbles.add(ChatBubbleContent.Text(msg))
+            }
 
             filteredList.forEach { info ->
                 val year = info.hisyear ?: return@forEach
@@ -60,12 +104,12 @@ class DastmozdInfosAgentService(
                 info.wageDetails.forEach { detail ->
                     val month = detail.month ?: return@forEach
                     val amount = detail.wage ?: "-"
-                    details.add("مبلغ (ریال)" to amount)
+                    details.add("مبلغ دستمزد $month" to amount)
                 }
 
                 bubbles.add(
                     ChatBubbleContent.KeyValue(
-                        title = "اطلاعات دستمزد",
+                        title = "اطلاعات دستمزد سال $year",
                         items = details
                     )
                 )

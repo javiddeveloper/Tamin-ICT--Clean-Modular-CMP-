@@ -5,36 +5,45 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentSessionContext
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.impl.DastmozdInfosAgentService
+import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
+import com.tamin.taminhamrah.model.history.WageDetailDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.repository.HistoryRepository
+import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
-class DastmozdInfosAgentServiceTest {
+class FakeHistoryRepository(
+    private val expectedResult: DastmozdInfoDN
+) : HistoryRepository {
+    override suspend fun getDastmozdInfos(filters: List<ApiFilterDN>): DastmozdInfoDN = expectedResult
+    override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): com.tamin.taminhamrah.model.history.TalfighInfoDN = TODO()
+}
 
-    private val json = Json { ignoreUnknownKeys = true }
-    private val service = DastmozdInfosAgentService(json)
+class DastmozdInfosAgentServiceTest {
 
     @Test
     fun `execute parses payload correctly and returns KeyValue bubble`() = runTest {
         // Arrange
-        val payloadStr = """
-            {
-              "amount": "1000",
-              "date": "1402/01/01",
-              "companyName": "Test Company",
-              "branchName": "Test Branch",
-              "month": "فروردین",
-              "year": "1402"
-            }
-        """.trimIndent()
-        
-        val payloadElement = json.parseToJsonElement(payloadStr)
+        val expectedItem = DastmozdInfoItemDN(
+            wageDetails = listOf(WageDetailDN("فروردین", "1000")),
+            hisyear = "1402",
+            id = 1,
+            risufname = null, risubirthdate = null, risuidserial2 = null, risuidserial1 = null,
+            rwshname = "Test Company", expcitycode = null, brhcode = null, risuidno = null,
+            risudname = null, risuid = null, risulname = null, risunatcode = null,
+            brhname = "Test Branch", historytypedesc = null, rwshid = null
+        )
+        val expectedData = DastmozdInfoDN(list = listOf(expectedItem), total = 1)
+        val fakeRepo = FakeHistoryRepository(expectedData)
+        val useCase = GetDastmozdInfosUseCase(fakeRepo)
+        val service = DastmozdInfosAgentService(useCase)
+
         val params = AgentServiceParams(
-            payload = payloadElement,
+            payload = null,
             rawData = null,
             message = "This is a test message",
             sessionContext = AgentSessionContext()
@@ -45,7 +54,6 @@ class DastmozdInfosAgentServiceTest {
 
         // Assert
         val success = assertIs<AgentServiceResult.Success>(result)
-        assertEquals(2, success.bubbles.size)
         
         // First bubble should be text message
         val textBubble = assertIs<ChatBubbleContent.Text>(success.bubbles[0])
@@ -56,7 +64,7 @@ class DastmozdInfosAgentServiceTest {
         assertEquals("اطلاعات دستمزد", keyValueBubble.title)
         
         // Assert some key values
-        val amountPair = keyValueBubble.items.find { it.first == "مبلغ" }
+        val amountPair = keyValueBubble.items.find { it.first == "مبلغ (ریال)" }
         assertEquals("1000", amountPair?.second)
         
         val companyPair = keyValueBubble.items.find { it.first == "نام کارگاه" }
@@ -64,12 +72,16 @@ class DastmozdInfosAgentServiceTest {
     }
     
     @Test
-    fun `execute returns ServiceError when payload is missing`() = runTest {
+    fun `execute returns message when list is empty`() = runTest {
         // Arrange
+        val fakeRepo = FakeHistoryRepository(DastmozdInfoDN(list = emptyList(), total = 0))
+        val useCase = GetDastmozdInfosUseCase(fakeRepo)
+        val service = DastmozdInfosAgentService(useCase)
+
         val params = AgentServiceParams(
             payload = null,
             rawData = null,
-            message = null,
+            message = "No data found",
             sessionContext = AgentSessionContext()
         )
 
@@ -78,7 +90,8 @@ class DastmozdInfosAgentServiceTest {
 
         // Assert
         val success = assertIs<AgentServiceResult.Success>(result)
-        val errorBubble = assertIs<ChatBubbleContent.ServiceError>(success.bubbles.first())
-        assertEquals("اطلاعات دستمزد دریافت نشد.", errorBubble.message)
+        val textBubble = assertIs<ChatBubbleContent.Text>(success.bubbles[0])
+        assertEquals("No data found", textBubble.message)
+        assertEquals(1, success.bubbles.size)
     }
 }

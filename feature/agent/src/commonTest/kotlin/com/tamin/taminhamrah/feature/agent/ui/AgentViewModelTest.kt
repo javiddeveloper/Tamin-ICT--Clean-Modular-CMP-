@@ -110,7 +110,7 @@ class AgentViewModelTest {
         viewModel = createViewModel()
         fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(true, null, "test-token"))
         
-        viewModel.onIntent(AgentIntent.CheckPermission)
+        viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
         
         val state = viewModel.uiState.value
@@ -124,7 +124,7 @@ class AgentViewModelTest {
         viewModel = createViewModel()
         fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(false, "You are blocked", null))
         
-        viewModel.onIntent(AgentIntent.CheckPermission)
+        viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
         
         val state = viewModel.uiState.value
@@ -137,7 +137,7 @@ class AgentViewModelTest {
     fun `ChangeInputMode intent updates input mode`() = runTest {
         viewModel = createViewModel()
         
-        viewModel.onIntent(AgentIntent.ChangeInputMode(InputMode.Voice))
+        viewModel.sendIntent(AgentIntent.ChangeInputMode(InputMode.Voice))
         runCurrent()
         
         assertEquals(InputMode.Voice, viewModel.uiState.value.inputMode)

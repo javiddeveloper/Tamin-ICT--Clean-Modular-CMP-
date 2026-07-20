@@ -157,18 +157,6 @@ class AgentViewModel(
                     // --- Phase 1: Show the ProcessingSteps bubble and run all steps ---
                     var currentStepIndex = 1
                     val processingBubbleId = "processing_${UUID.randomUUID()}"
-                    emit(PartialState.NewChatItems(listOf(
-                        ChatItem(
-                            id = processingBubbleId,
-                            sender = ChatSender.Agent,
-                            content = ChatBubbleContent.ProcessingSteps(
-                                steps = allSteps,
-                                currentActiveIndex = 1,
-                                isCompleted = false
-                            ),
-                            isTypingAnimating = false
-                        )
-                    )))
                     sendEvent(AgentEvent.ScrollToBottom)
 
                     // Collect all result bubbles while animating steps
@@ -187,18 +175,6 @@ class AgentViewModel(
                                     isCompleted = false
                                 )
                                 emit(PartialState.ProcessingStateUpdated(updatedState))
-                                emit(PartialState.UpdateChatItem(
-                                    ChatItem(
-                                        id = processingBubbleId,
-                                        sender = ChatSender.Agent,
-                                        content = ChatBubbleContent.ProcessingSteps(
-                                            steps = allSteps,
-                                            currentActiveIndex = currentStepIndex,
-                                            isCompleted = false
-                                        ),
-                                        isTypingAnimating = false
-                                    )
-                                ))
                                 kotlinx.coroutines.delay(500L)
                             }
                         }
@@ -218,18 +194,6 @@ class AgentViewModel(
 
                     // --- Phase 2: Mark steps as complete ---
                     emit(PartialState.ProcessingStateUpdated(null))
-                    emit(PartialState.UpdateChatItem(
-                        ChatItem(
-                            id = processingBubbleId,
-                            sender = ChatSender.Agent,
-                            content = ChatBubbleContent.ProcessingSteps(
-                                steps = allSteps,
-                                currentActiveIndex = allSteps.size - 1,
-                                isCompleted = true
-                            ),
-                            isTypingAnimating = false
-                        )
-                    ))
 
                     // Brief pause so user sees the completed stepper before content appears
                     kotlinx.coroutines.delay(400L)
@@ -238,8 +202,24 @@ class AgentViewModel(
                     allResultItems.forEach { item ->
                         emit(PartialState.NewChatItems(listOf(item)))
                         sendEvent(AgentEvent.ScrollToBottom)
-                        // Small delay between bubbles so typewriter effect is visible
-                        kotlinx.coroutines.delay(200L)
+                        
+                        // Calculate how long this bubble takes to animate
+                        val typingDuration = when (val content = item.content) {
+                            is ChatBubbleContent.Text -> {
+                                val lines = content.message.split("\n")
+                                lines.sumOf { (it.length * 15L).coerceAtLeast(150L) }
+                            }
+                            is ChatBubbleContent.KeyValue -> {
+                                (content.items.size * 150L) + 500L
+                            }
+                            is ChatBubbleContent.SuggestedPrompts -> {
+                                500L
+                            }
+                            else -> 500L
+                        }
+                        
+                        // Wait for this bubble to finish before emitting the next
+                        kotlinx.coroutines.delay(typingDuration + 200L)
                     }
 
                 }
