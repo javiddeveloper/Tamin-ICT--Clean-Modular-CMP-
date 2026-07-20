@@ -107,9 +107,9 @@ class AgentActionDispatcherTest {
         val result = dispatcher.dispatch(entity, context)
 
         // Assert
-        assertIs<AgentServiceResult.Success>(result)
+        val successResult = result as AgentServiceResult.Success
         assertEquals(1, fakeService.executeCallCount, "UseCase should be called exactly once")
-        assertEquals("Fake Dastmozd Response", (result.bubbles.first() as ChatBubbleContent.Text).text)
+        assertEquals("Fake Dastmozd Response", (successResult.bubbles.first() as ChatBubbleContent.Text).message)
     }
 
     // ─── Scenario 2: Disabled + AI Message ───────────────────────────────────
@@ -128,10 +128,10 @@ class AgentActionDispatcherTest {
         val result = dispatcher.dispatch(entity, context)
 
         // Assert: entity.message takes priority over FeatureManager message
-        assertIs<AgentServiceResult.FeatureDisabled>(result)
+        val disabledResult = result as AgentServiceResult.FeatureDisabled
         assertEquals(
             "The history service is temporarily unavailable.",
-            result.message,
+            disabledResult.message,
             "Should display the AI server message (entity.message)"
         )
         assertEquals(0, fakeService.executeCallCount, "UseCase should not be called")
@@ -153,8 +153,8 @@ class AgentActionDispatcherTest {
         val result = dispatcher.dispatch(entity, context)
 
         // Assert
-        assertIs<AgentServiceResult.FeatureDisabled>(result)
-        assertEquals("Service is currently updating", result.message)
+        val disabledResult = result as AgentServiceResult.FeatureDisabled
+        assertEquals("Service is currently updating", disabledResult.message)
     }
 
     // ─── Scenario 4: Disabled + No Message -> Fallback ───────────────────────
@@ -170,8 +170,8 @@ class AgentActionDispatcherTest {
         val result = dispatcher.dispatch(entity, context)
 
         // Assert: A default fallback text should be shown instead of null
-        assertIs<AgentServiceResult.FeatureDisabled>(result)
-        assert(result.message.isNotBlank()) { "Fallback message should not be blank" }
+        val disabledResult = result as AgentServiceResult.FeatureDisabled
+        assert(disabledResult.message.isNotBlank()) { "Fallback message should not be blank" }
     }
 
     // ─── Scenario 5: No Handler Available ────────────────────────────────────
@@ -226,10 +226,10 @@ class AgentActionDispatcherTest {
     @Test
     fun `dispatchMessage - with valid message - returns Success with Text bubble`() {
         val result = dispatcher.dispatchMessage("Hello!")
-        assertIs<AgentServiceResult.Success>(result)
-        val bubble = result.bubbles.firstOrNull()
-        assertIs<ChatBubbleContent.Text>(bubble)
-        assertEquals("Hello!", bubble.text)
+        val successResult = result as AgentServiceResult.Success
+        val bubble = successResult.bubbles.firstOrNull()
+        val textBubble = bubble as ChatBubbleContent.Text
+        assertEquals("Hello!", textBubble.message)
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
