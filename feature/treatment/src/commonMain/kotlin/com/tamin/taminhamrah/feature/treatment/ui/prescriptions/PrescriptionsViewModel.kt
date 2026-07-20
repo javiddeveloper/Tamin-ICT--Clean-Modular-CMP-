@@ -54,7 +54,7 @@ class PrescriptionsViewModel(
         val endD = intent.endDate ?: getCurrentTimestamp()
 
         try {
-            getElectronicPrescriptionListUseCase("1", nationalCode, dependantCode, startD, endD).collect { list ->
+            getElectronicPrescriptionListUseCase(intent.requestTypeId, nationalCode, dependantCode, startD, endD).collect { list ->
                 emit(PartialState.PrescriptionsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
@@ -69,7 +69,7 @@ class PrescriptionsViewModel(
         val childCode = if (intent.nationalCode == nationalCode) "0" else intent.nationalCode
 
         try {
-            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, childCode, "null", "1").collect { list ->
+            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, childCode, intent.flagSata, intent.type).collect { list ->
                 emit(PartialState.PrescriptionDetailsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {

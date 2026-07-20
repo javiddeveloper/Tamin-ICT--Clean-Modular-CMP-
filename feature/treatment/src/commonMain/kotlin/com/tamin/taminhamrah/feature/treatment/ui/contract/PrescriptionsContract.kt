@@ -30,10 +30,22 @@ data class PrescriptionsUiState(
 sealed class PrescriptionsIntent {
     data class LoadList(
         val nationalCode: String,
+        /** Record category the endpoint filters on; see [RecordTab]. */
+        val requestTypeId: String,
         val startDate: String? = null,
         val endDate: String? = null
     ) : PrescriptionsIntent()
-    data class SelectPrescription(val noteHeadID: String, val nationalCode: String) : PrescriptionsIntent()
+
+    /**
+     * [noteHeadID] is the record's `noteHeadEprescID`, not its tracking code, and [type] and
+     * [flagSata] come from the record itself — the detail endpoint keys on all three.
+     */
+    data class SelectPrescription(
+        val noteHeadID: String,
+        val nationalCode: String,
+        val type: String,
+        val flagSata: String
+    ) : PrescriptionsIntent()
     data object ClearSelectedPrescription : PrescriptionsIntent()
     data class DownloadPdf(val prescriptionID: String) : PrescriptionsIntent()
     data class DownloadTestResult(val patientID: String?, val noteHeadEprescID: String?) : PrescriptionsIntent()
