@@ -26,7 +26,7 @@ fun ImageErrorPlaceholder(
         Icon(
             imageVector = Icons.Outlined.LocationOn,
             contentDescription = null,
-            modifier = Modifier.size(IconSize.errorPlaceholder),
+            modifier = Modifier.size(IconSize.large),
             tint = iconTint,
         )
     }

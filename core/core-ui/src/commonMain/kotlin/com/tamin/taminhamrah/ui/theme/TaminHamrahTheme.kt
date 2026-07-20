@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 
 val LocalTaminColors = compositionLocalOf { LightTaminColors }
-val LocalAppLanguage = compositionLocalOf { "fa" }
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkTaminColors.blueText,
@@ -54,22 +53,14 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun TaminHamrahTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    language: String = "fa",
     content: @Composable () -> Unit,
 ) {
     val extendedColors = if (darkTheme) DarkTaminColors else LightTaminColors
     val materialColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    val layoutDirection = if ((language == "fa") || (language == "ar")) {
-        LayoutDirection.Rtl
-    } else {
-        LayoutDirection.Ltr
-    }
-
     CompositionLocalProvider(
         LocalTaminColors provides extendedColors,
-        LocalLayoutDirection provides layoutDirection,
-        LocalAppLanguage provides language,
+        LocalLayoutDirection provides LayoutDirection.Rtl,
     ) {
         MaterialTheme(
             colorScheme = materialColorScheme,
