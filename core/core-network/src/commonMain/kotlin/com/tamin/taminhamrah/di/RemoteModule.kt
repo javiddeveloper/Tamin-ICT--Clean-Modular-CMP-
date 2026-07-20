@@ -128,7 +128,7 @@ val remoteModule = module {
 
     single<AgentRemoteDataSource> {
         AgentRemoteDataSourceImpl(
-            agentApiService = get(),
+            agentApiService = get(named("agentApiService")),
             errorParser = get(),
             json = get()
         )
