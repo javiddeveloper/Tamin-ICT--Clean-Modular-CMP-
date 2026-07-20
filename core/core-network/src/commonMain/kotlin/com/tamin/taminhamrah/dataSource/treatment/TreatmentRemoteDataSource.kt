@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.dataSource.treatment
 
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface TreatmentRemoteDataSource {
@@ -14,7 +13,7 @@ interface TreatmentRemoteDataSource {
         dependantUserNationalCode: String,
         startDate: String,
         endDate: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<ElectronicPrescriptionDTO>?
 
     suspend fun getElectronicPrescriptionDetail(
@@ -23,18 +22,18 @@ interface TreatmentRemoteDataSource {
         childNationalCode: String,
         flagSata: String,
         type: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<ElectronicPrescriptionDetailDTO>?
 
     suspend fun getElectronicPrescriptionPrice(
         noteHeadID: String,
         nationalCode: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<ElectronicPrescriptionPriceDTO>?
 
     suspend fun getDependantUnderEighteen(
         nationalCode: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<DependantUserUnderEighteenDTO>?
 
     suspend fun getPrescriptionPdfFile(prescriptionID: String): PdfDownloadDTO

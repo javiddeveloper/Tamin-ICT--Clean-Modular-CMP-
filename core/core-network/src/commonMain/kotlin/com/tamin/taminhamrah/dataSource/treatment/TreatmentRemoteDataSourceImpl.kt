@@ -3,14 +3,12 @@ package com.tamin.taminhamrah.dataSource.treatment
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDTO
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
@@ -18,7 +16,6 @@ import com.tamin.taminhamrah.tools.extractData
 
 internal class TreatmentRemoteDataSourceImpl(
     private val apiService: TreatmentApiService,
-    private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser
 ) : TreatmentRemoteDataSource {
 
@@ -39,10 +36,9 @@ internal class TreatmentRemoteDataSourceImpl(
         dependantUserNationalCode: String,
         startDate: String,
         endDate: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<ElectronicPrescriptionDTO>? {
         return try {
-            val params = queryBuilder.buildQuery(query)
             val response = apiService.getElectronicPrescriptionList(
                 requestTypeId, nationalCode, dependantUserNationalCode, startDate, endDate, params
             )
@@ -60,10 +56,9 @@ internal class TreatmentRemoteDataSourceImpl(
         childNationalCode: String,
         flagSata: String,
         type: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<ElectronicPrescriptionDetailDTO>? {
         return try {
-            val params = queryBuilder.buildQuery(query)
             val response = apiService.getElectronicPrescriptionDetail(
                 noteHeadID, nationalCode, childNationalCode, flagSata, type, params
             )
@@ -78,10 +73,9 @@ internal class TreatmentRemoteDataSourceImpl(
     override suspend fun getElectronicPrescriptionPrice(
         noteHeadID: String,
         nationalCode: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<ElectronicPrescriptionPriceDTO>? {
         return try {
-            val params = queryBuilder.buildQuery(query)
             val response = apiService.getElectronicPrescriptionPrice(noteHeadID, nationalCode, params)
             response.extractData()
         } catch (e: TaminErrorUriException) {
@@ -93,10 +87,9 @@ internal class TreatmentRemoteDataSourceImpl(
 
     override suspend fun getDependantUnderEighteen(
         nationalCode: String,
-        query: ApiQueryParamDN
+        params: Map<String, String>
     ): ListData<DependantUserUnderEighteenDTO>? {
         return try {
-            val params = queryBuilder.buildQuery(query)
             val response = apiService.getDependantUnderEighteen(nationalCode, params)
             response.extractData()
         } catch (e: TaminErrorUriException) {
