@@ -111,6 +111,8 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import org.koin.compose.koinInject
 import kotlinx.coroutines.flow.map
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.ic_home_menu
@@ -214,6 +216,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
         isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(contentWindowInsets = WindowInsets(0),
+        floatingActionButton = {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isHomeRoute && isAgentEnabled,
+                enter = androidx.compose.animation.scaleIn(),
+                exit = androidx.compose.animation.scaleOut()
+            ) {
+                AgentFab(onClick = { navController.navigateToAgent() })
+            }
+        },
         bottomBar = {
             androidx.compose.animation.AnimatedVisibility(
                 visible = isBottomBarVisible,

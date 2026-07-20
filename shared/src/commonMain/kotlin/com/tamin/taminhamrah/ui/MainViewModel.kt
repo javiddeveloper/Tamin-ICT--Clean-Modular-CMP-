@@ -61,8 +61,7 @@ class MainViewModel(
     override fun reduceState(currentState: MainUiState, partialState: PartialState): MainUiState {
         return when (partialState) {
             is PartialState.SetDarkThemeConfig -> currentState.copy(
-                darkThemeConfig = partialState.config,
-                isLoading = false
+                darkThemeConfig = partialState.config
             )
             is PartialState.SetLoginStatus -> currentState.copy(
                 isLoggedIn = partialState.isLoggedIn,
