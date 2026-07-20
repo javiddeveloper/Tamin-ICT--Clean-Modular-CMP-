@@ -188,6 +188,12 @@ private fun ListItemRow(
 
                 val boxModifier = if (item.colors.leadingIconBackgroundGradient != null) {
                     baseModifier
+                        .coloredShadow(
+                            color = taminColors.shadowPrimary,
+                            borderRadius = CornerRadius.x3l,
+                            blurRadius = Spacing.xlg,
+                            offsetY = Elevation.smPlus
+                        )
                         .clip(item.leadingIconShape)
                         .background(item.colors.leadingIconBackgroundGradient)
                         .border(

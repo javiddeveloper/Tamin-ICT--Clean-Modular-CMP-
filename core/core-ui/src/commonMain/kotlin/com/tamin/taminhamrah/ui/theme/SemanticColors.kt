@@ -20,6 +20,7 @@ data class TaminColors(
     val iconGradientSuccess: Brush,
     val iconGlassShine: Brush,
     val iconGlassBorder: Brush,
+    val validationCardGradient: Brush,
 
     // Text
     val textPrimary: Color,
@@ -100,6 +101,7 @@ val LightTaminColors = TaminColors(
     iconGradientSuccess = Brush.verticalGradient(listOf(TaminGreen, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
     iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
+    validationCardGradient = Brush.verticalGradient(listOf(Color(0xADFFFFFF), Color(0x6BFFFFFF))),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8CFFFFFF),
     glassA2 = Color(0x52FFFFFF),
@@ -152,6 +154,7 @@ val DarkTaminColors = TaminColors(
     iconGradientSuccess = Brush.verticalGradient(listOf(TaminDarkSuccess, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
     iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
+    validationCardGradient = Brush.horizontalGradient(listOf(TaminTeal700.copy(alpha = 0.35f))),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8C1E293B),
     glassA2 = Color(0x47111827),

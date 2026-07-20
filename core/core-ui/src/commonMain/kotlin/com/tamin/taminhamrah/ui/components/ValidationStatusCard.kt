@@ -60,12 +60,7 @@ fun ValidationStatusCard(
     val colors = LocalTaminColors.current
     val isDark = colors == DarkTaminColors
 
-    val cardGlassGradient = Brush.verticalGradient(
-        colorStops = arrayOf(
-            0f to colors.glassB1,
-            1f to colors.glassB2,
-        )
-    )
+    val cardGlassGradient = colors.validationCardGradient
     val cardBorderColor = if (isDark) {
         if (isValid) colors.greenBorder else colors.dangerBorder
     } else {
@@ -89,7 +84,7 @@ fun ValidationStatusCard(
                 style = HazeStyle(
                     noiseFactor = 0.02f,
                     tint =  HazeTint(
-                        color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                        color = colors.bgPage.copy(alpha = 0.8f),
                         blendMode = BlendMode.Luminosity
                     ),
                     blurRadius = 32.dp
