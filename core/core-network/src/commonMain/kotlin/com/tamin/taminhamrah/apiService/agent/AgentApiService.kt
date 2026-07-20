@@ -24,19 +24,19 @@ interface AgentApiService {
     suspend fun checkChatAllowed(): ChatAllowedDTO
 
     /**
-     * ارسال پرامپت متنی برای سرویس‌های بیمه‌ای
+     * ارسال متن برای دریافت سرویس‌های بیمه‌ای
      */
     @POST("search/service")
     suspend fun sendServicePrompt(
-        @Body data: io.ktor.client.request.forms.MultiPartFormDataContent
+        @Body request: AgentRequestDTO
     ): PollingResponseDTO
 
     /**
-     * ارسال پرامپت متنی برای جستجوی قوانین
+     * ارسال متن برای جستجوی قوانین
      */
     @POST("search/rule")
     suspend fun sendLawPrompt(
-        @Body data: io.ktor.client.request.forms.MultiPartFormDataContent
+        @Body request: AgentRequestDTO
     ): PollingResponseDTO
 
     /**

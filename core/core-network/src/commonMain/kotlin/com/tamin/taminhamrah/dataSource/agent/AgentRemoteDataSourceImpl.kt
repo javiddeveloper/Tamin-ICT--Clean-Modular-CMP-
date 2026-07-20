@@ -36,19 +36,7 @@ internal class AgentRemoteDataSourceImpl(
 
     override suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO {
         return try {
-            val content = MultiPartFormDataContent(
-                formData {
-                    append(
-                        key = "data",
-                        value = json.encodeToString(request),
-                        headers = Headers.build {
-                            append(HttpHeaders.ContentType, "application/json; charset=UTF-8")
-                            append("Content-Transfer-Encoding", "binary")
-                        }
-                    )
-                }
-            )
-            agentApiService.sendServicePrompt(content)
+            agentApiService.sendServicePrompt(request)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -60,19 +48,7 @@ internal class AgentRemoteDataSourceImpl(
 
     override suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO {
         return try {
-            val content = MultiPartFormDataContent(
-                formData {
-                    append(
-                        key = "data",
-                        value = json.encodeToString(request),
-                        headers = Headers.build {
-                            append(HttpHeaders.ContentType, "application/json; charset=UTF-8")
-                            append("Content-Transfer-Encoding", "binary")
-                        }
-                    )
-                }
-            )
-            agentApiService.sendLawPrompt(content)
+            agentApiService.sendLawPrompt(request)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
