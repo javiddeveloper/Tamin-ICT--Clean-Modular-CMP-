@@ -12,6 +12,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.chrisbanes.haze)
             implementation(project(":core:core-domain"))
             implementation(project(":core:core-network"))
         }

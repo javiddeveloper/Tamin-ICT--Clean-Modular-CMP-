@@ -44,7 +44,12 @@ import com.tamin.taminhamrah.feature.agent.ui.contract.AgentProcessingState
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentUiState
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatItem
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
+import com.tamin.taminhamrah.ui.blur.safeHazeEffect
+import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -114,13 +119,22 @@ private fun ChatLayout(
     listState: LazyListState,
     onIntent: (AgentIntent) -> Unit
 ) {
+    val hazeState = remember { HazeState() }
+
     Scaffold(
         modifier = Modifier.imePadding(),
         containerColor = Color.Transparent,
-        topBar = { AgentTopBar(isGenerating = uiState.isGenerating, onIntent = onIntent) },
+        topBar = {
+            AgentTopBar(
+                isGenerating = uiState.isGenerating,
+                hazeState = hazeState,
+                onIntent = onIntent
+            )
+        },
         bottomBar = {
             AgentInputBar(
                 isGenerating = uiState.isGenerating,
+                hazeState = hazeState,
                 onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
                 onCancel = { onIntent(AgentIntent.CancelGeneration) }
             )
@@ -136,7 +150,9 @@ private fun ChatLayout(
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .safeHazeSource(state = hazeState),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
                     reverseLayout = true
@@ -174,14 +190,40 @@ private fun ChatLayout(
 @Composable
 private fun AgentTopBar(
     isGenerating: Boolean,
+    hazeState: HazeState,
     onIntent: (AgentIntent) -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(taminColors.aiAssistantGradient)
+            .safeHazeEffect(
+                state = hazeState,
+                style = HazeStyle(
+                    blurRadius = 28.dp,
+                    noiseFactor = 0.03f,
+                    tint = HazeTint(
+                        color = Color(0xFF3B1E86).copy(alpha = 0.55f)
+                    )
+                ),
+                fallbackColor = Color(0xFF3B1E86).copy(alpha = 0.9f)
+            )
     ) {
+        // Gradient overlay on top of the blur
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(taminColors.aiAssistantGradient.let { brush ->
+                    // Apply at reduced opacity so blur shows through
+                    androidx.compose.ui.graphics.Brush.linearGradient(
+                        colorStops = arrayOf(
+                            0f to Color(0xFF3B1E86).copy(alpha = 0.60f),
+                            0.5f to Color(0xFF3F5BD9).copy(alpha = 0.50f),
+                            1f to Color(0xFF1F4FA3).copy(alpha = 0.55f)
+                        )
+                    )
+                })
+        )
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
@@ -202,7 +244,7 @@ private fun AgentTopBar(
                         Text(
                             text = "در حال پردازش...",
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = Color.White.copy(alpha = 0.8f)
+                                color = Color.White.copy(alpha = 0.85f)
                             )
                         )
                     }
@@ -885,17 +927,36 @@ private fun BubbleContentRenderer(
 @Composable
 private fun AgentInputBar(
     isGenerating: Boolean,
+    hazeState: HazeState,
     onSend: (String) -> Unit,
     onCancel: () -> Unit
 ) {
     var text by remember { mutableStateOf("") }
     val taminColors = LocalTaminColors.current
+    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
 
     Surface(
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-        tonalElevation = 2.dp
+        color = Color.Transparent,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .safeHazeEffect(
+                    state = hazeState,
+                    style = HazeStyle(
+                        blurRadius = 24.dp,
+                        noiseFactor = 0.02f,
+                        tint = HazeTint(
+                            color = if (isDark)
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)
+                            else
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+                        )
+                    ),
+                    fallbackColor = MaterialTheme.colorScheme.surface
+                )
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -975,6 +1036,7 @@ private fun AgentInputBar(
                 }
             }
         }
+        } // end haze Box
     }
 }
 
