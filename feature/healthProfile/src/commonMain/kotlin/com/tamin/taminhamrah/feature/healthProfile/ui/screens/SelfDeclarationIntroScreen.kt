@@ -26,8 +26,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
@@ -87,7 +86,7 @@ fun SelfDeclarationIntroContent(
                 )
             },
             bottomBar = {
-                HealthNavigationBar(
+                HealthIrritateNavigationBar(
                     primaryText = stringResource(Res.string.health_intro_btn_next),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),

@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
@@ -107,7 +107,7 @@ fun SelfDeclarationGateContent(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             bottomBar = {
-                HealthNavigationBar(
+                HealthIrritateNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),

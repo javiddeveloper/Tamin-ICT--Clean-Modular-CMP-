@@ -9,14 +9,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -67,7 +66,7 @@ fun HealthProgressBar(
  * Contains primary and secondary buttons, with glass-morphic background blur style.
  */
 @Composable
-fun HealthNavigationBar(
+fun HealthIrritateNavigationBar(
     modifier: Modifier = Modifier,
     primaryText: String,
     onPrimaryClick: () -> Unit,
@@ -82,19 +81,17 @@ fun HealthNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.glassSolid)
-            .padding(horizontal = 18.dp, vertical = 14.dp)
+            .padding(horizontal = 12.dp, vertical = 14.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp), // Replaces Arrangement.SpaceEvenly & Spacer for clean, consistent spacing
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Horizontal line separating content
-            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Primary Solid Button
+            // Primary Solid Button (Takes all remaining width)
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .weight(1f)
                     .height(54.dp)
                     .background(
                         brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
@@ -119,7 +116,7 @@ fun HealthNavigationBar(
                     if (showChevron) {
                         Spacer(modifier = Modifier.width(9.dp))
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft, // RTL forward direction points Left
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = null,
                             tint = if (primaryEnabled) Color.White else taminColors.textMuted,
                             modifier = Modifier.size(20.dp)
@@ -128,25 +125,21 @@ fun HealthNavigationBar(
                 }
             }
 
-            // Optional Secondary outlined button
+            // Optional Secondary outlined button (Square: 54.dp x 54.dp to match Primary height)
             if (secondaryText != null && onSecondaryClick != null) {
-                Spacer(modifier = Modifier.height(10.dp))
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
+                        .size(54.dp) // Sets both width and height to 54.dp making it a perfect square
                         .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
                         .clip(RoundedCornerShape(15.dp))
                         .clickable { onSecondaryClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    TaminText(
-                        text = secondaryText,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 14.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = taminColors.textTertiary
-                        )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -154,9 +147,99 @@ fun HealthNavigationBar(
     }
 }
 
+
+//@Composable
+//fun HealthIrritateNavigationBar(
+//    modifier: Modifier = Modifier,
+//    primaryText: String,
+//    onPrimaryClick: () -> Unit,
+//    primaryEnabled: Boolean = true,
+//    showChevron: Boolean = true,
+//    secondaryText: String? = null,
+//    onSecondaryClick: (() -> Unit)? = null
+//) {
+//    val taminColors = LocalTaminColors.current
+//
+//    Box(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .background(taminColors.glassSolid)
+//            .padding(horizontal = 18.dp, vertical = 14.dp)
+//    ) {
+//        Row(
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            // Horizontal line separating content
+//            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+//            Spacer(modifier = Modifier.height(14.dp))
+//
+//            // Primary Solid Button
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(54.dp)
+//                    .background(
+//                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
+//                        shape = RoundedCornerShape(15.dp)
+//                    )
+//                    .clip(RoundedCornerShape(15.dp))
+//                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    TaminText(
+//                        text = primaryText,
+//                        style = MaterialTheme.typography.titleMedium.copy(
+//                            fontSize = 15.5.sp,
+//                            fontWeight = FontWeight.Bold,
+//                            color = if (primaryEnabled) Color.White else taminColors.textMuted
+//                        )
+//                    )
+//                    if (showChevron) {
+//                        Spacer(modifier = Modifier.width(9.dp))
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+//                            contentDescription = null,
+//                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
+//                            modifier = Modifier.size(20.dp)
+//                        )
+//                    }
+//                }
+//            }
+//
+//            // Optional Secondary outlined button
+//            if (secondaryText != null && onSecondaryClick != null) {
+//                Spacer(modifier = Modifier.height(10.dp))
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(50.dp)
+//                        .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
+//                        .clip(RoundedCornerShape(15.dp))
+//                        .clickable { onSecondaryClick() },
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    TaminText(
+//                        text = secondaryText,
+//                        style = MaterialTheme.typography.bodyMedium.copy(
+//                            fontSize = 14.5.sp,
+//                            fontWeight = FontWeight.Bold,
+//                            color = taminColors.textTertiary
+//                        )
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
+
 @PreviewRtlTheme
 @Composable
-private fun HealthNavigationComponentsPreview() {
+private fun HealthIrritateNavigationComponentsPreview() {
     PreviewRtlThemeContent {
         Column(
             modifier = Modifier
@@ -169,13 +252,13 @@ private fun HealthNavigationComponentsPreview() {
             HealthProgressBar(currentStep = 3, totalSteps = 9)
 
             TaminText("Navigation Bar (Primary Only)")
-            HealthNavigationBar(
+            HealthIrritateNavigationBar(
                 primaryText = "تکمیل خوداظهاری سلامت",
                 onPrimaryClick = {}
             )
 
             TaminText("Navigation Bar (Primary + Secondary)")
-            HealthNavigationBar(
+            HealthIrritateNavigationBar(
                 primaryText = "مرحله بعدی",
                 onPrimaryClick = {},
                 secondaryText = "انصراف",
