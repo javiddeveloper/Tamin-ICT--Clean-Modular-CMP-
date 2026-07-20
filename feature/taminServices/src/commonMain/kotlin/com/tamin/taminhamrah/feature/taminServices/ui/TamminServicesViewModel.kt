@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.taminServices.model.toPR
 import com.tamin.taminhamrah.feature.taminServices.ui.contract.*
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
+import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -37,7 +38,7 @@ class TamminServicesViewModel(
                             val tabs = roles.map { it.toPR() }
                             TaminServicesUiState.TaminServicesPartialState.RolesLoaded(tabs)
                         },
-                        getMainMenuUseCase("1.0.0", false).map {
+                        getMainMenuUseCase(AppConfig.versionName, false).map {
                             TaminServicesUiState.TaminServicesPartialState.MenuLoaded(it)
                         }
                     )
