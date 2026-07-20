@@ -4,7 +4,6 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
@@ -60,15 +59,7 @@ class PaymentSheetsViewModel(
                 filters.add(ApiFilterDN(FilterProperty.DOC_DATE_TO, it, FilterOperator.EQ))
             }
 
-            val queryParam = ApiQueryParamDN(
-                page = 1,
-                start = 0,
-                limit = 100,
-                filters = filters,
-                sorts = emptyList()
-            )
-
-            val response = getAllPaymentSheetsUseCase(query = queryParam)
+            val response = getAllPaymentSheetsUseCase(filters = filters)
             val list = response?.list?.map { it.toPresentation() } ?: emptyList()
             emit(PartialState.PaymentSheetsLoaded(list))
 
