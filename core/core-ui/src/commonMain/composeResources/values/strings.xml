@@ -57,4 +57,24 @@
     <string name="profile_share">اشتراک‌گذاری</string>
     <string name="profile_version_history">تاریخچهٔ نسخه</string>
     <string name="profile_logout">خروج از حساب کاربری</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">خانه</string>
+    <string name="tab_services">خدمات</string>
+    <string name="tab_treatment">درمان</string>
+    <string name="tab_profile">پروفایل</string>
+
+    <!-- Login Bottom Sheet -->
+    <string name="login_to_tamin_man">ورود به سامانه تأمین من</string>
+    <string name="please_login_to_your_account">لطفاً وارد حساب کاربری خود شوید</string>
+    <string name="login_required_desc">برای دسترسی به تمام امکانات اپلیکیشن، ابتدا باید وارد حساب کاربری خود شوید.</string>
+
+    <!-- Home Screen -->
+    <string name="tamin_man_services">خدمات تأمین من</string>
+    <string name="select_group">انتخاب گروه</string>
+    <string name="user_type_insured">بیمه شدگان</string>
+    <string name="user_type_pensioner">مستمری بگیران</string>
+    <string name="user_type_employer">کارفرمایان</string>
+    <string name="error_load_menu_failed">خطا در دریافت اطلاعات یا لیست خالی است</string>
+    <string name="retry">تلاش مجدد</string>
 </resources>
