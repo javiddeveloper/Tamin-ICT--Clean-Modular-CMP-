@@ -55,8 +55,6 @@ import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
-import com.tamin.taminhamrah.feature.contracts.contractsScreen
-import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -74,11 +72,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
@@ -98,10 +94,13 @@ import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.ScaffoldDefaults
+import com.tamin.taminhamrah.feature.cartable.navigateToCartable
 import com.tamin.taminhamrah.feature.history.navigateToHistory
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
@@ -116,6 +115,7 @@ import com.tamin.taminhamrah.feature.taminServices.TaminServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.navigateToTaminServices
 import com.tamin.taminhamrah.feature.taminServices.ui.contract.TaminScreens
+import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
@@ -153,11 +153,7 @@ internal fun TaminHamrahNavGraph(
     val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute>() == true
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
-    val isBottomBarVisible = currentDestination?.hasRoute<Route.Home>() == true ||
-            currentDestination?.hasRoute<TreatmentRoute>() == true ||
-            currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
-            currentDestination?.hasRoute<CartableRoute.Main>() == true ||
-            currentDestination?.hasRoute<TaminServicesRoute>() == true
+    val isTaminServicesSelected = currentDestination?.hasRoute<TaminServicesRoute>() == true
 
 
     val navigationItems = listOf(
@@ -176,10 +172,10 @@ internal fun TaminHamrahNavGraph(
 
         NavigationTab(
             title = stringResource(Res.string.tab_services),
-            isSelected = isCartableSelected,
+            isSelected = isTaminServicesSelected,
             icon = Res.drawable.ic_services_menu,
             onClick = {
-                navController.navigate(CartableRoute.Main) {
+                navController.navigate(TaminServicesRoute) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -214,7 +210,7 @@ internal fun TaminHamrahNavGraph(
         )
 
     val isBottomBarVisible =
-        isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected
+        isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected || isTaminServicesSelected
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(
         contentWindowInsets = WindowInsets(0),
@@ -289,96 +285,6 @@ internal fun TaminHamrahNavGraph(
                             )
                         }
                     }
-    Scaffold(
-        contentWindowInsets = if (drawsUnderStatusBar) {
-            ScaffoldDefaults.contentWindowInsets
-                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-        } else {
-            ScaffoldDefaults.contentWindowInsets
-        },
-        bottomBar = {
-            androidx.compose.animation.AnimatedVisibility(
-                visible = isBottomBarVisible,
-                enter = androidx.compose.animation.slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
-                ),
-                exit = androidx.compose.animation.slideOutVertically(
-                    targetOffsetY = { it },
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
-                )
-            ) {
-                NavigationBar {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, null) },
-                        label = { Text("Home") },
-                        selected = currentDestination?.hasRoute<Route.Home>() == true,
-                        onClick = {
-                            navController.navigate(Route.Home) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Menu, null) },
-                        label = { Text("Services") },
-                        selected = currentDestination?.hasRoute<TaminServicesRoute>() == true,
-                        onClick = {
-                            navController.navigateToTaminServices {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Favorite, null) },
-                        label = { Text("Treatment") },
-                        selected = currentDestination?.hasRoute<TreatmentRoute>() == true,
-                        onClick = {
-                            navController.navigateToTreatment {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Person, null) },
-                        label = { Text("Profile") },
-                        selected = currentDestination?.hasRoute<ProfileRoute.Main>() == true,
-                        onClick = {
-                            navController.navigate(ProfileRoute.Main(userId = "TaminUser")) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Inbox, null) },
-                        label = { Text("Cartable") },
-                        selected = currentDestination?.hasRoute<CartableRoute.Main>() == true,
-                        onClick = {
-                            navController.navigateToCartable {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
                 }
             }
         }
@@ -452,25 +358,6 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                TaminServicesScreen(
-                    onNavigateToRoute = { screen ->
-                        when (screen) {
-                            is TaminScreens.History -> navController.navigateToHistory()
-                            is TaminScreens.Workshops -> navController.navigateToWorkshops()
-                            is TaminScreens.Contracts -> navController.navigateToContracts()
-                            is TaminScreens.StudentInsurance -> navController.navigateToStudentInsuranceContract()
-                            is TaminScreens.FreelanceInsurance -> navController.navigateToFreelanceInsuranceContract()
-                            is TaminScreens.OptionalInsurance -> navController.navigateToOptionalInsuranceContract()
-                            is TaminScreens.HousewifeInsurance -> navController.navigateToHousewifeInsuranceContract()
-                            is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
-                            is TaminScreens.WebView -> openUrl(screen.url)
-                        }
-                    },
-                    onBackClicked = {
-                        navController.popBackStack()
-                    }
-                )
-
                 treatmentScreen()
 
                 profileGraph(
@@ -490,6 +377,25 @@ internal fun TaminHamrahNavGraph(
                         navController.navigate(CartableRoute.PersonalInbox)
                     },
                     onBack = { navController.popBackStack() }
+                )
+
+                TaminServicesScreen(
+                    onNavigateToRoute = { screen ->
+                        when (screen) {
+                            is TaminScreens.History -> navController.navigateToHistory()
+                            is TaminScreens.Workshops -> navController.navigateToWorkshops()
+                            is TaminScreens.Contracts -> navController.navigateToContracts()
+                            is TaminScreens.StudentInsurance -> navController.navigateToStudentInsuranceContract()
+                            is TaminScreens.FreelanceInsurance -> navController.navigateToFreelanceInsuranceContract()
+                            is TaminScreens.OptionalInsurance -> navController.navigateToOptionalInsuranceContract()
+                            is TaminScreens.HousewifeInsurance -> navController.navigateToHousewifeInsuranceContract()
+                            is TaminScreens.PensionInquiry -> navController.navigateToPensionInquiry()
+                            is TaminScreens.WebView -> openUrl(screen.url)
+                        }
+                    },
+                    onBackClicked = {
+                        navController.popBackStack()
+                    }
                 )
 
                 pensionInquiryScreen()
@@ -887,5 +793,8 @@ private fun Handleevents(
         }
     }
 }
+
+
+
 
 
