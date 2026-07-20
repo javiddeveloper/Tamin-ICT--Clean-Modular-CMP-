@@ -32,6 +32,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import org.jetbrains.compose.resources.stringResource
@@ -86,7 +87,7 @@ fun SelfDeclarationIntroContent(
                 )
             },
             bottomBar = {
-                HealthIrritateNavigationBar(
+                HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_intro_btn_next),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),

@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,13 +28,12 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIn
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.SectionHeader
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
-import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
+import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 
 @Composable
 fun HealthProfileScreen(
@@ -310,7 +308,7 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    SectionHeader(title = "اطلاعات عمومی پرونده سلامت", showDivider = false)
+                    SectionHeaderTitle(title = "اطلاعات عمومی پرونده سلامت",)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     val name = "${general.patientName ?: ""} ${general.patientFamily ?: ""}".trim()
@@ -371,7 +369,7 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    SectionHeader(title = "سبک زندگی و خود اظهاری", showDivider = false)
+                    SectionHeaderTitle(title = "سبک زندگی و خود اظهاری",)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     ProfileRowItem(label = "مصرف سیگار / دخانیات:", value = lifestyle.smokingStatusTitle ?: "نامشخص")
@@ -393,7 +391,7 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                SectionHeader(title = "حساسیت‌های دارویی", showDivider = false)
+                SectionHeaderTitle(title = "حساسیت‌های دارویی",)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (state.drugAllergies.isEmpty()) {
@@ -443,7 +441,7 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        SectionHeader(title = "اطلاعات تماس اضطراری", showDivider = false)
+                        SectionHeaderTitle(title = "اطلاعات تماس اضطراری",)
                         Spacer(modifier = Modifier.height(12.dp))
 
                         ProfileRowItem(label = "نام مخاطب اضطراری:", value = "${general.emergencyName} ${general.emergencyFamily ?: ""}".trim())

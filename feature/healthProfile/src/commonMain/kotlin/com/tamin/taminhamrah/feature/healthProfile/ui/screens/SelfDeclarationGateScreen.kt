@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import org.jetbrains.compose.resources.stringResource
@@ -107,7 +108,7 @@ fun SelfDeclarationGateContent(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             bottomBar = {
-                HealthIrritateNavigationBar(
+                HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
@@ -132,13 +133,15 @@ fun SelfDeclarationGateContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                ) {
+                )
+                {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
                             .padding(horizontal = 18.dp)
-                            .padding(bottom = 18.dp)
+                            .padding(bottom = 18.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Spacer(modifier = Modifier.height(10.dp))
 
@@ -146,7 +149,7 @@ fun SelfDeclarationGateContent(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .offset(y = (-20).dp),
+                                .offset(y = (-10).dp),
                             shape = RoundedCornerShape(22.dp),
                             colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                             border = BorderStroke(1.dp, taminColors.border),
@@ -200,7 +203,6 @@ fun SelfDeclarationGateContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .offset(y = (-20).dp)
                                 .background(taminColors.orangeBg, RoundedCornerShape(16.dp))
                                 .border(
                                     1.dp,
@@ -244,8 +246,7 @@ fun SelfDeclarationGateContent(
                         // 3. Step indicators list
                         Card(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .offset(y = (-20).dp),
+                                .fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                             border = BorderStroke(1.dp, taminColors.border)

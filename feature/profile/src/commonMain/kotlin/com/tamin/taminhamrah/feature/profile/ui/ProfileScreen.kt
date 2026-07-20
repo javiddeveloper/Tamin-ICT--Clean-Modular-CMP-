@@ -53,6 +53,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_identity
 import taminx.core.core_ui.ic_person
 import taminx.core.core_ui.ic_communication
@@ -67,6 +68,7 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_history
 import taminx.core.core_ui.ic_exit
+import taminx.core.core_ui.ic_tamin_logo
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable

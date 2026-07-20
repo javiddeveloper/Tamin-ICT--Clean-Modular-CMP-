@@ -19,18 +19,19 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
-
+import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 
 @Composable
 fun FloatingGlassNavigationBar(
     hazeState: HazeState,
     modifier: Modifier = Modifier,
+    isBlurEnabled: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
     val glassShape = RoundedCornerShape(24.dp) // Deeply rounded pill shape
     val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomPadding = if (bottomInset > 0.dp) bottomInset + 12.dp else 24.dp
-
+    
     Box(
         modifier = modifier
             .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = bottomPadding)
@@ -40,8 +41,8 @@ fun FloatingGlassNavigationBar(
                 spotColor = Color.Black.copy(alpha = 0.05f),
                 ambientColor = Color.Black.copy(alpha = 0.05f)
             ).background(brush = Brush.linearGradient(colors = listOf(MaterialTheme.colorScheme.background.copy(alpha = 0.1f) , MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))))
-            // 3. Apply the True Blur Effect
-            .hazeEffect(
+            // 3. Apply the True Blur Effect conditionally
+            .safeHazeEffect(
                 state = hazeState,
                 style = HazeStyle(
                     noiseFactor = 0.02f,
@@ -50,7 +51,9 @@ fun FloatingGlassNavigationBar(
                         blendMode = BlendMode.Luminosity
                     ),
                     blurRadius = 24.dp // How heavy the blur is
-                )
+                ),
+                fallbackColor = MaterialTheme.colorScheme.background.copy(alpha = 0.85f),
+                isEnabled = isBlurEnabled
             )
             .clip(glassShape)
             // The Glass Edge (Optional, but helps define the shape)

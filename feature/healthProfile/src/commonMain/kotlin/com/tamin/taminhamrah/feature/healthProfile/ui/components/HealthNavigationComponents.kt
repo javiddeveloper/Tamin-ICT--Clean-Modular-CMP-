@@ -88,6 +88,26 @@ fun HealthIrritateNavigationBar(
             horizontalArrangement = Arrangement.spacedBy(12.dp), // Replaces Arrangement.SpaceEvenly & Spacer for clean, consistent spacing
             verticalAlignment = Alignment.CenterVertically
         ) {
+
+            // Optional Secondary outlined button (Square: 54.dp x 54.dp to match Primary height)
+            if (secondaryText != null && onSecondaryClick != null) {
+                Box(
+                    modifier = Modifier
+                        .size(54.dp) // Sets both width and height to 54.dp making it a perfect square
+                        .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
+                        .clip(RoundedCornerShape(15.dp))
+                        .clickable { onSecondaryClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
             // Primary Solid Button (Takes all remaining width)
             Box(
                 modifier = Modifier
@@ -125,116 +145,99 @@ fun HealthIrritateNavigationBar(
                 }
             }
 
-            // Optional Secondary outlined button (Square: 54.dp x 54.dp to match Primary height)
+
+        }
+    }
+}
+
+
+@Composable
+fun HealthNavigationBar(
+    modifier: Modifier = Modifier,
+    primaryText: String,
+    onPrimaryClick: () -> Unit,
+    primaryEnabled: Boolean = true,
+    showChevron: Boolean = true,
+    secondaryText: String? = null,
+    onSecondaryClick: (() -> Unit)? = null
+) {
+    val taminColors = LocalTaminColors.current
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(taminColors.glassSolid)
+            .padding(horizontal = 18.dp, vertical = 14.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Horizontal line separating content
+            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Primary Solid Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+                    .background(
+                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
+                        shape = RoundedCornerShape(15.dp)
+                    )
+                    .clip(RoundedCornerShape(15.dp))
+                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TaminText(
+                        text = primaryText,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 15.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (primaryEnabled) Color.White else taminColors.textMuted
+                        )
+                    )
+                    if (showChevron) {
+                        Spacer(modifier = Modifier.width(9.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            // Optional Secondary outlined button
             if (secondaryText != null && onSecondaryClick != null) {
+                Spacer(modifier = Modifier.height(10.dp))
                 Box(
                     modifier = Modifier
-                        .size(54.dp) // Sets both width and height to 54.dp making it a perfect square
+                        .fillMaxWidth()
+                        .height(50.dp)
                         .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
                         .clip(RoundedCornerShape(15.dp))
                         .clickable { onSecondaryClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(20.dp)
+                    TaminText(
+                        text = secondaryText,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 14.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = taminColors.textTertiary
+                        )
                     )
                 }
             }
         }
     }
 }
-
-
-//@Composable
-//fun HealthIrritateNavigationBar(
-//    modifier: Modifier = Modifier,
-//    primaryText: String,
-//    onPrimaryClick: () -> Unit,
-//    primaryEnabled: Boolean = true,
-//    showChevron: Boolean = true,
-//    secondaryText: String? = null,
-//    onSecondaryClick: (() -> Unit)? = null
-//) {
-//    val taminColors = LocalTaminColors.current
-//
-//    Box(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .background(taminColors.glassSolid)
-//            .padding(horizontal = 18.dp, vertical = 14.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            // Horizontal line separating content
-//            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
-//            Spacer(modifier = Modifier.height(14.dp))
-//
-//            // Primary Solid Button
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(54.dp)
-//                    .background(
-//                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
-//                        shape = RoundedCornerShape(15.dp)
-//                    )
-//                    .clip(RoundedCornerShape(15.dp))
-//                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    horizontalArrangement = Arrangement.Center
-//                ) {
-//                    TaminText(
-//                        text = primaryText,
-//                        style = MaterialTheme.typography.titleMedium.copy(
-//                            fontSize = 15.5.sp,
-//                            fontWeight = FontWeight.Bold,
-//                            color = if (primaryEnabled) Color.White else taminColors.textMuted
-//                        )
-//                    )
-//                    if (showChevron) {
-//                        Spacer(modifier = Modifier.width(9.dp))
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-//                            contentDescription = null,
-//                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
-//                            modifier = Modifier.size(20.dp)
-//                        )
-//                    }
-//                }
-//            }
-//
-//            // Optional Secondary outlined button
-//            if (secondaryText != null && onSecondaryClick != null) {
-//                Spacer(modifier = Modifier.height(10.dp))
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(50.dp)
-//                        .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
-//                        .clip(RoundedCornerShape(15.dp))
-//                        .clickable { onSecondaryClick() },
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    TaminText(
-//                        text = secondaryText,
-//                        style = MaterialTheme.typography.bodyMedium.copy(
-//                            fontSize = 14.5.sp,
-//                            fontWeight = FontWeight.Bold,
-//                            color = taminColors.textTertiary
-//                        )
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
 
 
 @PreviewRtlTheme
@@ -259,6 +262,16 @@ private fun HealthIrritateNavigationComponentsPreview() {
 
             TaminText("Navigation Bar (Primary + Secondary)")
             HealthIrritateNavigationBar(
+                primaryText = "مرحله بعدی",
+                onPrimaryClick = {},
+                secondaryText = "انصراف",
+                onSecondaryClick = {}
+            )
+
+
+
+            TaminText("Navigation Vertical Bar (Primary + Secondary)")
+            HealthNavigationBar(
                 primaryText = "مرحله بعدی",
                 onPrimaryClick = {},
                 secondaryText = "انصراف",
