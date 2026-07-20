@@ -1,5 +1,9 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
+import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
@@ -44,7 +48,8 @@ class ProfileViewModel(
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
     private val getElectronicFileUseCase: GetElectronicFileUseCase,
     private val changeMobileUseCase: ChangeMobileUseCase,
-    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase
+    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
+    private val setThemeUseCase: SetThemeUseCase
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -60,6 +65,7 @@ class ProfileViewModel(
             )
             is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
             is ProfileIntent.LoadBankAccountList -> handleLoadElectronicFile()
+            is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
     }
 
@@ -180,6 +186,14 @@ class ProfileViewModel(
                 emit(PartialState.ScreenStateChanged.Success)
             }
         }
+    }
+
+    private fun handleToggleTheme(isDark: Boolean): Flow<PartialState> {
+        viewModelScope.launch {
+            val config = if (isDark) DarkThemeConfig.DARK else DarkThemeConfig.LIGHT
+            setThemeUseCase(config)
+        }
+        return emptyFlow()
     }
 
 

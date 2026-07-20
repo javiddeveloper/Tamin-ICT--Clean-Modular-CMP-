@@ -90,7 +90,7 @@ data class ListItemData(
     val enabled: Boolean = true,
     val titleStyle: TextStyle? = null,
     val subtitleStyle: TextStyle? = null,
-    val colors: com.tamin.taminhamrah.ui.components.ListItemColors = ListItemColors(),
+    val colors: ListItemColors = ListItemColors(),
     val showDivider: Boolean? = null,
     val itemBorder: BorderStroke? = null
 )

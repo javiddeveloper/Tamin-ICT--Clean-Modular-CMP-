@@ -43,8 +43,7 @@ sealed class ProfileIntent {
 
     data object LoadSubDominants : ProfileIntent()
     data object LoadBankAccountList : ProfileIntent()
-
-
+    data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 
 sealed class ProfileEvent {
