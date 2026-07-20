@@ -6,10 +6,8 @@
 */
 package com.tamin.taminhamrah.dataSource.commonSource
 
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.core.network.model.common.CityNameDto
 import com.tamin.taminhamrah.model.common.MainServiceDto
-import com.tamin.taminhamrah.model.common.MenuServiceStatus
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder

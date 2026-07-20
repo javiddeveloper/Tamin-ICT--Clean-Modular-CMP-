@@ -45,6 +45,13 @@ val ApiClientsModule = module {
             .build()
     }
 
+    // AI Ktorfit instance
+    single(named("aiKtorfit")) {
+        Ktorfit.Builder()
+            .httpClient(get<HttpClient>(named("aiHttpClient")))
+            .build()
+    }
+
     // API Services
     single<UserApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
@@ -96,7 +103,7 @@ val ApiClientsModule = module {
     }
 
     single<AgentApiService>(named("agentApiService")) {
-        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
     }
 

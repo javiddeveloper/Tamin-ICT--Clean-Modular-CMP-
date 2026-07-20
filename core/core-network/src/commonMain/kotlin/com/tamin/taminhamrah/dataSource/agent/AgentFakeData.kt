@@ -1,5 +1,68 @@
 ﻿package com.tamin.taminhamrah.dataSource.agent
 
+internal const val FAKE_AGENT_ONE_RESPONSE = """{
+    "id": "0a9e6612-0f10-46ad-a875-7b6fcead7219",
+    "eta": 3,
+    "status": "DONE",
+    "message": null,
+    "result": {
+        "session_id": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
+        "lastEntity": "doctorName:ali , proficiency:heart, nezam:123456",
+        "entities": [
+            {
+                "key": "dastmozd_infos_per_year",
+                "step_number": 1,
+                "payload": {
+                    "itemType": 1,
+                    "filter": [
+                        "startDate:14030401",
+                        "endDate:14040430"
+                    ]
+                },
+                "data": null,
+                "message": "کاربر محترم سابقه مربوط به 1402 تا 1404 به صورت زیر می‌باشد",
+                "message_id": "8a7ae66e-1fb7-4dc9-89d3-aacdf8a228fe"
+            },
+            {
+                "key": "occurrence_report",
+                "step_number": 1,
+                "payload": {
+                    "filter": []
+                },
+                "data": [
+                    {
+                        "item_type": "prompt_item",
+                        "action_type": "occurrence_report",
+                        "prompt": "اعلام حادثه"
+                    }
+                ],
+                "message": "اعلام حادثه",
+                "message_id": "34dfef1b-6296-4742-9544-0c0af8926a3f"
+            },
+            {
+                "key": "edit_profile",
+                "step_number": 1,
+                "payload": {
+                    "filter": []
+                },
+                "data": [],
+                "message": "ویرایش تاریخ تولد",
+                "message_id": "34dfef1b-6296-4742-9544-0c0af8926a3f"
+            },
+            {
+                "key": "edit_address",
+                "step_number": 1,
+                "payload": {
+                    "filter": []
+                },
+                "data": [],
+                "message": "اصلاح نشانی",
+                "message_id": "34dfef1b-6296-4742-9544-0c0af8926a3f"
+            }
+        ]
+    }
+}
+"""
 internal const val FAKE_AGENT_RESPONSE = """{
     "id": "0a9e6612-0f10-46ad-a875-7b6fcead7219",
     "eta": 3,

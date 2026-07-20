@@ -48,3 +48,50 @@
 - افزودن سرویس‌های جدید در آینده نیازی به آپدیت‌های کلان در منطقِ رابط کاربری نداشته باشد.
 - وضعیت دسترسی و پیام‌های خطا، بدون نیاز به انتشار نسخه جدیدی از اپلیکیشن، بلافاصله از سوی سرور به سمت کلاینت اعمال شوند.
 - کنترل خطاهای مسیریابی و هندلینگ ویوها به صورت متمرکز در کلاسی مثل `FeatureManager` هدایت شود.
+
+---
+
+## ۶. Feature Flag اختصاصی ایجنت (`AGENT`)
+
+قابلیت هوش مصنوعی (Agent) به عنوان یک فیچر مستقل در سیستم Feature Flag پروژه اضافه شده است.
+
+**شناسه:** `AGENT(2000)` در `FeatureFlag.kt`
+
+این Flag با سایر Flagهای بخش کارفرمایی (`1001`–`1012`) در یک محدوده قرار ندارد تا از نظر معنایی مجزا و قابل تشخیص باشد.
+
+### کنترل دسترسی دو مرحله‌ای
+
+هنگام ورود کاربر به صفحه Agent، سیستم دو بررسی را به ترتیب انجام می‌دهد:
+
+```
+Step 1: FeatureFlag check (fast — no API call)
+  ├── AGENT Enabled  →  proceed to Step 2
+  └── AGENT Disabled →  show server message immediately (no network request)
+
+Step 2: User-level permission (API call — CheckChatAllowedUseCase)
+  ├── canStartChat = true  →  enter chatbot
+  └── canStartChat = false →  show errorMessage from API
+```
+
+**نقطه پیاده‌سازی:** `AgentViewModel.handleCheckPermission()`
+
+### کنترل نمایش FAB در صفحه خانه
+
+دکمه شناور (FAB) ورود به Agent در `TaminHamrahNavGraph.kt` فقط زمانی نمایش داده می‌شود که هر دو شرط برقرار باشد:
+
+1. صفحه جاری `Route.Home` باشد
+2. وضعیت `FeatureFlag.AGENT` برابر `FeatureStatus.Enabled` باشد
+
+این اتصال از طریق `collectAsState` روی `featureManager.getFeatureStatus(FeatureFlag.AGENT)` پیاده‌سازی شده و به‌صورت لحظه‌ای با تغییر وضعیت سرور به‌روز می‌شود.
+
+### اولویت‌بندی پیام غیرفعال بودن
+
+در صورت غیرفعال بودن یک سرویس در Agent، پیام نمایشی به این ترتیب انتخاب می‌شود:
+
+| اولویت | منبع پیام | توضیح |
+|--------|-----------|-------|
+| ۱ | `entity.message` | پیام اختصاصی هوش مصنوعی برای این اکشن خاص |
+| ۲ | `featureManager.getDisabledMessage(flag)` | پیام تعریف‌شده در `menu.json` برای این سرویس |
+| ۳ | Fallback string | متن پیش‌فرض (آخرین چاره) |
+
+این اولویت‌بندی در `AgentActionDispatcher.dispatch()` پیاده‌سازی شده است.

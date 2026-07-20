@@ -4,7 +4,7 @@
 * @email: javiddeveloper@gmail.com
 *
 */
-package com.tamin.core.network.datasource.commonSource
+package com.tamin.taminhamrah.dataSource.commonSource
 
 import com.tamin.core.network.model.common.CityNameDto
 import com.tamin.taminhamrah.model.common.MainServiceDto

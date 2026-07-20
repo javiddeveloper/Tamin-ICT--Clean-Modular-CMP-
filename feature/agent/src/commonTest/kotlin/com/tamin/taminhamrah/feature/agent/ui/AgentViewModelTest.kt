@@ -59,7 +59,6 @@ class FakeAgentRepository : AgentRepository {
 @OptIn(ExperimentalCoroutinesApi::class)
 class AgentViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
     private lateinit var viewModel: AgentViewModel
     private lateinit var fakeFeatureManager: FakeFeatureManager
     private lateinit var actionDispatcher: AgentActionDispatcher
@@ -68,8 +67,8 @@ class AgentViewModelTest {
     private lateinit var sendAgentPromptUseCase: SendAgentPromptUseCase
 
     @BeforeTest
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         
         fakeFeatureManager = FakeFeatureManager()
         val registry = AgentServiceRegistry(emptyList())

@@ -30,7 +30,6 @@ class AgentRepositoryImpl(
 
     companion object {
         private const val MAX_POLLS = 30
-        private const val DEFAULT_POLL_DELAY_MS = 5_000L
         private const val MAX_POLL_DELAY_MS = 30_000L
     }
 

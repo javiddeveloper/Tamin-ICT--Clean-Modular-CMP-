@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -185,7 +186,12 @@ private fun ChatLayout(
                         } else 0
                         val typingDelay = if (item.isTypingAnimating && textLength > 0) (textLength * 15L) + 200L else 1500L
 
-                        ChatBubbleItem(item = item, showAvatar = showAvatar, typingDelay = typingDelay)
+                        ChatBubbleItem(
+                            item = item,
+                            showAvatar = showAvatar,
+                            typingDelay = typingDelay,
+                            onIntent = onIntent
+                        )
                     }
                 }
             }
@@ -629,7 +635,12 @@ private fun parseMarkdownBlock(text: String): androidx.compose.ui.text.Annotated
 }
 
 @Composable
-private fun ChatBubbleItem(item: ChatItem, showAvatar: Boolean = true, typingDelay: Long = 1500L) {
+private fun ChatBubbleItem(
+    item: ChatItem,
+    showAvatar: Boolean = true,
+    typingDelay: Long = 1500L,
+    onIntent: (AgentIntent) -> Unit = {}
+) {
     val isUser = item.sender == ChatSender.User
     val currentLayoutDirection = LocalLayoutDirection.current
 
@@ -669,7 +680,8 @@ private fun ChatBubbleItem(item: ChatItem, showAvatar: Boolean = true, typingDel
                         BubbleContentRenderer(
                             content = item.content,
                             isTypingAnimating = item.isTypingAnimating,
-                            typingDelay = typingDelay
+                            typingDelay = typingDelay,
+                            onIntent = onIntent
                         )
                     }
                 }
@@ -695,7 +707,8 @@ private fun ChatBubbleItem(item: ChatItem, showAvatar: Boolean = true, typingDel
                             BubbleContentRenderer(
                                 content = item.content,
                                 isTypingAnimating = item.isTypingAnimating,
-                                typingDelay = typingDelay
+                                typingDelay = typingDelay,
+                                onIntent = onIntent
                             )
                         }
                     }
@@ -719,7 +732,12 @@ private fun ChatBubbleItem(item: ChatItem, showAvatar: Boolean = true, typingDel
 }
 
 @Composable
-private fun BubbleContentRenderer(content: ChatBubbleContent, isTypingAnimating: Boolean = false, typingDelay: Long = 1500L) {
+private fun BubbleContentRenderer(
+    content: ChatBubbleContent,
+    isTypingAnimating: Boolean = false,
+    typingDelay: Long = 1500L,
+    onIntent: (AgentIntent) -> Unit = {}
+) {
     when (content) {
         is ChatBubbleContent.Text -> {
             if (isTypingAnimating) {

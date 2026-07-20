@@ -43,6 +43,8 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewif
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.agent.agentScreen
+import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
@@ -50,6 +52,11 @@ import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import org.koin.compose.viewmodel.koinViewModel
+import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.model.common.FeatureStatus
+import org.koin.compose.koinInject
+import kotlinx.coroutines.flow.map
+import androidx.compose.animation.core.animateFloat
 
 @Composable
 internal fun TaminHamrahNavGraph(
@@ -67,7 +74,25 @@ internal fun TaminHamrahNavGraph(
             currentDestination?.hasRoute<ProfileRoute.Main>() == true ||
             currentDestination?.hasRoute<CartableRoute.Main>() == true
 
+    val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
+
+    // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
+    val featureManager: FeatureManager = koinInject()
+    val isAgentEnabled by featureManager
+        .getFeatureStatus(FeatureFlag.AGENT)
+        .map { it is FeatureStatus.Enabled }
+        .collectAsState(initial = false)
+
     Scaffold(
+        floatingActionButton = {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isHomeRoute && isAgentEnabled,
+                enter = androidx.compose.animation.scaleIn(),
+                exit = androidx.compose.animation.scaleOut()
+            ) {
+                AgentFab(onClick = { navController.navigateToAgent() })
+            }
+        },
         bottomBar = {
             androidx.compose.animation.AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -201,6 +226,8 @@ internal fun TaminHamrahNavGraph(
                 workshopsScreen(navController)
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+
+                agentScreen()
             }
 
             if (isLoading) {
@@ -483,4 +510,63 @@ private fun Handleevents(
     }
 }
 
+@Composable
+private fun AgentFab(onClick: () -> Unit) {
+    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.9f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween<Float>(1200),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.08f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween<Float>(1200),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
 
+    androidx.compose.ui.layout.Layout(
+        content = {
+            androidx.compose.foundation.Canvas(modifier = Modifier.size(72.dp)) {
+                drawCircle(
+                    color = androidx.compose.ui.graphics.Color(0xFF1A73E8).copy(alpha = glowAlpha * 0.4f),
+                    radius = size.minDimension / 2f * 1.3f
+                )
+            }
+            FloatingActionButton(
+                onClick = onClick,
+                modifier = Modifier.size(56.dp),
+                containerColor = androidx.compose.ui.graphics.Color(0xFF1A73E8),
+                contentColor = androidx.compose.ui.graphics.Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 8.dp,
+                    pressedElevation = 4.dp
+                )
+            ) {
+                Text(
+                    text = "AI",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White
+                    )
+                )
+            }
+        }
+    ) { measurables, constraints ->
+        val glow = measurables[0].measure(constraints)
+        val fab = measurables[1].measure(constraints)
+        val w = maxOf(glow.width, fab.width)
+        val h = maxOf(glow.height, fab.height)
+        layout(w, h) {
+            glow.placeRelative((w - glow.width) / 2, (h - glow.height) / 2)
+            fab.placeRelative((w - fab.width) / 2, (h - fab.height) / 2)
+        }
+    }
+}

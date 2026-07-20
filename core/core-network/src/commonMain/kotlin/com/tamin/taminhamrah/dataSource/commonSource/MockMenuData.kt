@@ -40,7 +40,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 42, name = "اعتراض به سابقه کسری دار", showRole = listOf(1), icon = "objecting_history_bugs", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 46, name = "پرونده الکترونیک من", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 47, name = "اطلاعات پرداختی کارگران", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
-    
+
     MainServiceDto(id = 101, name = "استحقاق درمان", showRole = listOf(2), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 104, name = "استعلام وضعیت مستمری", showRole = listOf(2), icon = "insurance", status = MenuServiceStatus.TEMPORARY_DISABLED, message = "سرویس استعلام وضعیت مستمری در حال بروزرسانی است"),
     MainServiceDto(id = 105, name = "مشاهده فیش حقوقی", showRole = listOf(2), icon = "ticket", status = MenuServiceStatus.ACTIVE),
@@ -50,7 +50,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 110, name = "تعهدنامه فرزندان دختر", showRole = listOf(2), icon = "agreement", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 112, name = "برقراری مستمری توسط بازماندگان", showRole = listOf(2), icon = "survivors", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 113, name = "مستمری از کارافتادگی", showRole = listOf(2), icon = "disability", status = MenuServiceStatus.ACTIVE),
-    
+
     MainServiceDto(id = 1001, name = "کارگاه‌ها", showRole = listOf(3), icon = "workshop", status = MenuServiceStatus.ENABLED_WITH_ERROR, message = "دریافت اطلاعات لیست کارگاه‌ها با کندی همراه است"),
     MainServiceDto(id = 1002, name = "اطلاعات پیمان", showRole = listOf(3), icon = "contract", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1003, name = "واگذارندگان", showRole = listOf(3), icon = "ic_assigner", status = MenuServiceStatus.ACTIVE),
@@ -62,5 +62,6 @@ val mockMenuData = listOf(
     MainServiceDto(id = 1009, name = "مدیریت بدهی", showRole = listOf(3), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1010, name = "بیمه ساختمانی", showRole = listOf(3), icon = "workshop", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1011, name = "بروزرسانی", showRole = listOf(3), icon = "update", status = MenuServiceStatus.ACTIVE),
-    MainServiceDto(id = 1012, name = "قوانین", showRole = listOf(3), icon = "document", status = MenuServiceStatus.ACTIVE)
+    MainServiceDto(id = 1012, name = "قوانین", showRole = listOf(3), icon = "document", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 2000, name = "دستیار هوشمند (ایجنت)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE)
 )

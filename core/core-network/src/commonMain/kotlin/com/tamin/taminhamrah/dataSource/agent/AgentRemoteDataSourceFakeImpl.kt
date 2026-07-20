@@ -51,7 +51,7 @@ internal class AgentRemoteDataSourceFakeImpl(
     override suspend fun trackRequest(requestId: String): PollingResponseDTO {
         delay(1000)
         // Parse the inner PollingDataDTO from the JSON file and wrap it in PollingResponseDTO
-        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_RESPONSE)
+        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_ONE_RESPONSE)
         return PollingResponseDTO(
             status = 200,
             family = "SUCCESSFUL",
