@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp"
+    android:height="22dp"
+    android:viewportWidth="22"
+    android:viewportHeight="22">
+
+    <path
+        android:fillColor="#000000"
+        android:strokeColor="#9AA8BC"
+        android:strokeWidth="1.83333"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M4.4 2.75H7.51667C8.42733 2.75 9.16667 3.48934 9.16667 4.4V7.51667C9.16667 8.42733 8.42733 9.16667 7.51667 9.16667H4.4C3.48934 9.16667 2.75 8.42733 2.75 7.51667V4.4C2.75 3.48934 3.48934 2.75 4.4 2.75V2.75" />
+    <path
+        android:fillColor="#000000"
+        android:strokeColor="#9AA8BC"
+        android:strokeWidth="1.83333"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M14.4833 2.75H17.5999C18.5106 2.75 19.2499 3.48934 19.2499 4.4V7.51667C19.2499 8.42733 18.5106 9.16667 17.5999 9.16667H14.4833C13.5726 9.16667 12.8333 8.42733 12.8333 7.51667V4.4C12.8333 3.48934 13.5726 2.75 14.4833 2.75V2.75" />
+    <path
+        android:fillColor="#000000"
+        android:strokeColor="#9AA8BC"
+        android:strokeWidth="1.83333"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M4.4 12.8334H7.51667C8.42733 12.8334 9.16667 13.5727 9.16667 14.4834V17.6C9.16667 18.5107 8.42733 19.25 7.51667 19.25H4.4C3.48934 19.25 2.75 18.5107 2.75 17.6V14.4834C2.75 13.5727 3.48934 12.8334 4.4 12.8334V12.8334" />
+    <path
+        android:fillColor="#000000"
+        android:strokeColor="#9AA8BC"
+        android:strokeWidth="1.83333"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M14.4833 12.8334H17.5999C18.5106 12.8334 19.2499 13.5727 19.2499 14.4834V17.6C19.2499 18.5107 18.5106 19.25 17.5999 19.25H14.4833C13.5726 19.25 12.8333 18.5107 12.8333 17.6V14.4834C12.8333 13.5727 13.5726 12.8334 14.4833 12.8334V12.8334" />
+</vector>

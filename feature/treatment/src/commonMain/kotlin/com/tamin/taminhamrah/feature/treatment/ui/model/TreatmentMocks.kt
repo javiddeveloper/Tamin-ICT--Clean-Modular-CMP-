@@ -93,6 +93,10 @@ object TreatmentMocks {
         mainUserNationalCode = "1234567890",
         selectedNationalCode = "1234567890",
         selectedPatientName = "رضا احمدی",
+        insuredShareTotal = 65_910L,
+        organizationShareTotal = 153_790L,
+        healthProfileCompleted = false
+        selectedPatientName = "رضا احمدی",
         activeFlow = TreatmentFlow.MAIN
     )
 

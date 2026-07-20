@@ -10,6 +10,7 @@ android {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)

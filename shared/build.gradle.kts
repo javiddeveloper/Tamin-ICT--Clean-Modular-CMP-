@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     listOf(
-        iosX64(),
+//        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.aboutlibraries.compose.m3)
+            implementation(libs.chrisbanes.haze)
         }
 
         androidMain.dependencies {

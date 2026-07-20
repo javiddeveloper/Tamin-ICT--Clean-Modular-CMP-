@@ -20,6 +20,29 @@ val TaminPurple700 = Color(0xFF5B2FC4)
 val TaminPurple500 = Color(0xFF6D4BE0)
 val TaminPurple300 = Color(0xFFA78BFA)
 
+// ---- Insurance card identities ----
+// One three-stop gradient per insured person, so adjacent cards in the treatment
+// carousel stay visually distinct. The main insured person always takes the teal set.
+val TaminCardTealStart = Color(0xFF0BA5A0)
+val TaminCardTealMid = Color(0xFF0E7FA6)
+val TaminCardTealEnd = Color(0xFF1655A8)
+
+val TaminCardPurpleStart = Color(0xFFB25CC9)
+val TaminCardPurpleMid = Color(0xFF8B4FC7)
+val TaminCardPurpleEnd = Color(0xFF5A3AA8)
+
+val TaminCardBlueStart = Color(0xFF3E9BE0)
+val TaminCardBlueMid = Color(0xFF3E7BD6)
+val TaminCardBlueEnd = Color(0xFF1F4FA3)
+
+val TaminCardAmberStart = Color(0xFFF4A83D)
+val TaminCardAmberMid = Color(0xFFE08A00)
+val TaminCardAmberEnd = Color(0xFFB96B00)
+
+// Coverage badge on the insurance card footer.
+val TaminCoverageBadgeBg = Color(0xFF4BE3A0)
+val TaminCoverageBadgeFg = Color(0xFF0B5F4F)
+
 // ---- Semantic accents ----
 val TaminGreen = Color(0xFF03AD5F)       // success / active dot
 val TaminGreenDark = Color(0xFF03794A)   // success text (on light bg)
@@ -35,7 +58,7 @@ val TaminLightBgSurface = Color(0xFFFFFFFF)
 val TaminLightBorder = Color(0xFFE5E7EB)
 val TaminLightDivider = Color(0xFFF2F4F8)
 val TaminLightTextPrimary = Color(0xFF0F172A)
-val TaminLightTextSecondary = Color(0xFF8E8E8E)
+val TaminLightTextSecondary = Color(0xFF64748B)
 val TaminLightTextTertiary = Color(0xFF64748B)
 val TaminLightTextMuted = Color(0xFF9DB2CE)
 val TaminLightChevron = Color(0xFFC7D2E0)
@@ -44,6 +67,10 @@ val TaminLightGreenBg = Color(0xFFE6F7ED)
 val TaminLightBlueBg = Color(0xFFEFF6FF)
 val TaminLightOrangeBg = Color(0xFFFFF8E1)
 val TaminLightDangerBorder = Color(0xFFFDECEC)
+
+// Dark mode collapses every screen's hero onto one teal-to-blue wash.
+val TaminDarkHeroStart = Color(0xFF10AEB9)
+val TaminDarkHeroEnd = Color(0xFF1E6FD0)
 
 // ---- Neutrals — Dark mode ----
 val TaminDarkBgPage = Color(0xFF0A0F1E)
@@ -55,7 +82,6 @@ val TaminDarkTextSecondary = Color(0xFF8B96AC)
 val TaminDarkTextMuted = Color(0xFF7C8BA6)
 val TaminDarkChevron = Color(0xFF48536B)
 val TaminDarkOuterBorder = Color(0xFF1E293F)
-val TaminDarkGreenBg = Color(0x29109E7B)     // rgba(16,185,129,.16)
 val TaminDarkGreenText = Color(0xFF34D399)
 val TaminDarkBlueBg = Color(0x293B82F6)      // rgba(59,130,246,.16)
 val TaminDarkBlueText = Color(0xFF5B9CFF)
@@ -63,5 +89,62 @@ val TaminDarkOrangeBg = Color(0x29F59E0B)    // rgba(245,158,11,.16)
 val TaminDarkOrangeText = Color(0xFFFBBF24)
 val TaminDarkDangerBorder = Color(0x38F87171) // rgba(248,113,113,.22)
 val TaminDarkDangerText = Color(0xFFF87171)
+val TaminDarkGreenBg = Color(0x2910B981)     // rgba(16,185,129,.16)
 
+val Primary50 = Color(0xFFEFF4FF)
+val Primary100 = Color(0xFFD8E4FA)
+val Primary300 = Color(0xFF6B93D6)
+val Primary700 = Color(0xFF173D7E)
+val Primary900 = Color(0xFF0E2450)
+val Secondary50 = Color(0xFFE7FBF4)
+val Secondary500 = Color(0xFF2FB9BC)
+val Secondary700 = Color(0xFF0E7C82)
 
+// Neutral / Grays
+val Gray50 = Color(0xFFF8FAFC)
+val Gray100 = Color(0xFFF2F4F8)
+val Gray200 = Color(0xFFE5E7EB)
+val Gray300 = Color(0xFFD1D9E6)
+val Gray400 = Color(0xFF94A3B8)
+val Gray500 = Color(0xFF64748B)
+val Gray600 = Color(0xFF475569)
+val Gray700 = Color(0xFF334155)
+val Gray800 = Color(0xFF1E293B)
+val Gray900 = Color(0xFF0F172A)
+
+// Semantic Light
+val TaminLightSuccess = Color(0xFF03AD5F)
+val TaminLightInfo = Color(0xFF1F4FA3)
+val TaminLightWarning = Color(0xFFC97E0A)
+val TaminLightError = Color(0xFFD32F2F)
+val TaminLightTextDefault = Color(0xFF0F172A)
+val TaminLightBackground = Color(0xFFF8FAFC)
+val TaminLightSurface = Color(0xFFFFFFFF)
+
+// Semantic Dark
+val TaminDarkSuccess = Color(0xFF34D399)
+val TaminDarkInfo = Color(0xFF5B9CFF)
+val TaminDarkWarning = Color(0xFFFBBF24)
+val TaminDarkError = Color(0xFFF87171)
+val TaminDarkTextDefault = Color(0xFFEDF1F7)
+val TaminDarkBackground = Color(0xFF0A0F1E)
+val TaminDarkSurface = Color(0xFF141B2E)
+
+// Surface / Background (General)
+val CoreSurface = Color(0xFFFFFFFF)
+val CoreBackground = Color(0xFFF8FAFC)
+val CoreBorder = Color(0xFFE5E7EB)
+val CoreDivider = Color(0xFFF2F4F8)
+
+// Profile Icon Gradients
+val IconGradientBlueStart = Color(0xFF3B6FD4)
+val IconGradientBlueEnd = Color(0xFF173D7E)
+
+val IconGradientPurpleStart = Color(0xFF8B7CE8)
+val IconGradientPurpleEnd = Color(0xFF5B4CC4)
+
+val IconGradientGrayStart = Color(0xFF8C97A8)
+val IconGradientGrayEnd = Color(0xFF4A5567)
+
+val IconGradientRedStart = Color(0xFFF0635F)
+val IconGradientRedEnd = Color(0xFFC42121)

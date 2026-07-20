@@ -12,7 +12,7 @@ data class PatientItem(
     val brhName: String? = null,
     val insuranceType: String? = null
 ) {
-    /** Label for the patient filter: the insured reads as «خودم», dependants as «رابطه - نام». */
+    /** Label for the records patient filter: the insured reads as «خودم», dependants as «رابطه - نام». */
     val filterLabel: String
         get() = when {
             !isDependent -> "خودم"
@@ -21,33 +21,37 @@ data class PatientItem(
         }
 }
 
+private const val FALLBACK_MAIN_INSURED_NAME = "بیمه‌شده اصلی"
+private const val DEPENDANT_RELATION = "تحت تکفل"
+
 /**
- * The people whose treatment data can be viewed: the main insured first, then dependants under 18.
- *
- * Shared by the dashboard carousel and the records patient filter so both list the same people.
+ * Flattens the treatment state into the carousel's display order: the main insured
+ * person first, then dependants under 18. Returns an empty list until the main national
+ * code arrives, which the screen surfaces as its empty state.
  */
-fun TreatmentUiState.toPatientItems(): List<PatientItem> = buildList {
-    val mainUserCode = mainUserNationalCode
-    if (mainUserCode != null) {
-        val mainUser = deservedList.firstOrNull()
+fun TreatmentUiState.toPatientList(): List<PatientItem> = buildList {
+    mainUserNationalCode?.let { nationalCode ->
+        val mainRecord = deservedList.firstOrNull()
         add(
             PatientItem(
-                nationalId = mainUserCode,
-                fullName = mainUser?.fullName ?: selectedPatientName ?: "بیمه‌شده اصلی",
+                nationalId = nationalCode,
+                fullName = mainRecord?.fullName
+                    ?: selectedPatientName
+                    ?: FALLBACK_MAIN_INSURED_NAME,
                 isDependent = false,
-                brhName = mainUser?.brhName,
-                insuranceType = mainUser?.insuranceType
-            )
+                brhName = mainRecord?.brhName,
+                insuranceType = mainRecord?.insuranceType,
+            ),
         )
     }
-    dependantList.forEach { dep ->
+    dependantList.forEach { dependant ->
         add(
             PatientItem(
-                nationalId = dep.nationalId,
-                fullName = dep.fullName,
+                nationalId = dependant.nationalId,
+                fullName = dependant.fullName,
                 isDependent = true,
-                relation = "تحت تکفل"
-            )
+                relation = DEPENDANT_RELATION,
+            ),
         )
     }
 }
