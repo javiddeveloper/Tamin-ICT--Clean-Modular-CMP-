@@ -52,17 +52,20 @@ class DastmozdInfosAgentService(
                 val year = info.hisyear ?: return@forEach
                 val details = mutableListOf<Pair<String, String>>()
                 details.add("سال سابقه" to year)
-                details.add("اطلاعات کارگاه" to (info.rwshname ?: "-"))
+                details.add("نام کارگاه" to (info.rwshname ?: "-"))
                 details.add("نوع سابقه" to (info.historytypedesc ?: "-"))
                 details.add("نام شعبه" to (info.brhname ?: "-"))
-                
-                // Add monthly entries just like the old Android app
-                // Assuming info has fields like month1, month2 etc, or getMonthlyKeyValue logic
-                // For demonstration, we add summary. In a real scenario, map month fields.
-                
+
+                // Map monthly wage details
+                info.wageDetails.forEach { detail ->
+                    val month = detail.month ?: return@forEach
+                    val amount = detail.wage ?: "-"
+                    details.add("مبلغ (ریال)" to amount)
+                }
+
                 bubbles.add(
                     ChatBubbleContent.KeyValue(
-                        title = null,
+                        title = "اطلاعات دستمزد",
                         items = details
                     )
                 )

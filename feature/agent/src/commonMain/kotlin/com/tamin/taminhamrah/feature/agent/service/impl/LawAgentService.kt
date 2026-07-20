@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.agent.AgentActionKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class LawItemDTO(
@@ -19,49 +21,78 @@ data class LawItemDTO(
 
 /**
  * Dedicated handler for the "Law Search" service in the chatbot.
- * Takes the raw data which is an array of law items, and formats them beautifully using markdown.
+ *
+ * Supports two data formats from the backend:
+ *  1. rawData: Array of LawItemDTO (item_type = "law_item") — real backend format
+ *  2. payload: Object with "description" field — simple/test format
+ *
+ * When both are absent, returns a ServiceError bubble.
  */
 class LawAgentService(
     private val json: Json
 ) : AgentServiceUseCase {
+
     override val actionKey = AgentActionKey.LAW
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            val data = params.rawData
-            if (data == null) {
-                return AgentServiceResult.Success(listOf(ChatBubbleContent.Text(params.message ?: "قانونی یافت نشد.")))
-            }
+        val rawData = params.rawData
+        val payload = params.payload
 
+        // No data at all → error bubble
+        if (rawData == null && payload == null) {
+            return AgentServiceResult.Success(
+                bubbles = listOf(ChatBubbleContent.ServiceError("اطلاعات قانون دریافت نشد."))
+            )
+        }
+
+        val bubbles = mutableListOf<ChatBubbleContent>()
+
+        // Prepend the AI message if present
+        if (!params.message.isNullOrBlank()) {
+            bubbles.add(ChatBubbleContent.Text(params.message))
+        }
+
+        // ── Strategy 1: rawData as a list of LawItemDTO (real backend) ──────────
+        if (rawData != null) {
             val laws = try {
-                json.decodeFromJsonElement<List<LawItemDTO>>(data)
+                json.decodeFromJsonElement<List<LawItemDTO>>(rawData)
             } catch (e: Exception) {
                 emptyList()
             }
-            
+
             val lawItems = laws.filter { it.item_type == "law_item" }
-            if (lawItems.isEmpty()) {
-                return AgentServiceResult.Success(listOf(ChatBubbleContent.Text(params.message ?: "قانونی یافت نشد.")))
+            if (lawItems.isNotEmpty()) {
+                val sb = StringBuilder()
+                lawItems.forEachIndexed { index, law ->
+                    val lawName = law.name?.replace(")", "")?.trim() ?: "${index + 1}"
+                    sb.append("- **").append(lawName).append("**: ").append(law.content ?: "").append("\n")
+                }
+                bubbles.add(ChatBubbleContent.Text(sb.toString().trimEnd()))
+                return AgentServiceResult.Success(bubbles)
+            }
+        }
+
+        // ── Strategy 2: payload as { "description": "..." } ──────────────────────
+        if (payload != null) {
+            val description = try {
+                payload.jsonObject["description"]?.jsonPrimitive?.content
+            } catch (e: Exception) {
+                null
             }
 
-            val sb = StringBuilder()
-            if (!params.message.isNullOrBlank()) {
-                sb.append("**").append(params.message).append("**\n\n")
+            if (!description.isNullOrBlank()) {
+                bubbles.add(ChatBubbleContent.Text(description))
+                return AgentServiceResult.Success(bubbles)
             }
-            
-            lawItems.forEachIndexed { index, law ->
-                val lawName = law.name?.replace(")", "")?.trim() ?: "${index + 1}"
-                sb.append("- **").append(lawName).append("**: ").append(law.content ?: "").append("\n")
-            }
+        }
 
-            AgentServiceResult.Success(
-                bubbles = listOf(ChatBubbleContent.Text(sb.toString().trimEnd()))
-            )
-        } catch (e: Exception) {
-            AgentServiceResult.Error(
-                message = "خطا در پردازش قوانین: ${e.message}",
-                cause = e
+        // Nothing useful found
+        if (bubbles.isEmpty()) {
+            return AgentServiceResult.Success(
+                bubbles = listOf(ChatBubbleContent.ServiceError("اطلاعات قانون دریافت نشد."))
             )
         }
+
+        return AgentServiceResult.Success(bubbles)
     }
 }
