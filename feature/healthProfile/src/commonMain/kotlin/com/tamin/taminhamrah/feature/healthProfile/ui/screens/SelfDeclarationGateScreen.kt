@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -110,6 +111,7 @@ fun SelfDeclarationGateContent(
             bottomBar = {
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
+                    primaryIconPainter = painterResource(Res.drawable.ic_health_gate_button),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
@@ -119,7 +121,7 @@ fun SelfDeclarationGateContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(top = paddingValues.calculateTopPadding())
             ) {
                 // Space for TopAppBar
                 Spacer(
@@ -167,9 +169,9 @@ fun SelfDeclarationGateContent(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Security,
+                                        painter = painterResource(Res.drawable.ic_health_gate_shield),
                                         contentDescription = null,
-                                        tint = taminColors.blueText,
+                                        tint = Color.Unspecified,
                                         modifier = Modifier.size(46.dp)
                                     )
                                 }
@@ -214,7 +216,7 @@ fun SelfDeclarationGateContent(
                             verticalAlignment = Alignment.Top
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Lock,
+                                painter = painterResource(Res.drawable.ic_health_gate_lock),
                                 contentDescription = null,
                                 tint = taminColors.orangeText,
                                 modifier = Modifier
