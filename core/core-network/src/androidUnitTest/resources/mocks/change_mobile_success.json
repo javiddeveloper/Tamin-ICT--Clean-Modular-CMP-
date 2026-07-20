@@ -1,0 +1,6 @@
+{
+    "traceId": "test-trace-id-123",
+    "data": {
+        "hash": "test-hash-456"
+    }
+}

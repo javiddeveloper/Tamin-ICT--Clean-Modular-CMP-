@@ -1,0 +1,24 @@
+{
+    "branch": "1",
+    "branchName": "Branch 1",
+    "insuranceId": "12345678",
+    "mobileNumber": "09121234567",
+    "organizationId": "ORG1",
+    "personal": {
+    "firstName": "Ali",
+    "lastName": "Alavi",
+    "fatherName": "Hassan",
+    "nationalId": "0012345678",
+    "dateOfBirth": 631152000000
+},
+    "provinceName": "Tehran",
+    "work": {
+    "job": {
+    "jobCode": "101",
+    "jobDescription": "Engineer"
+},
+    "workshopId": "W123"
+},
+    "strAge": "34",
+    "verificationResult": "Verified"
+}

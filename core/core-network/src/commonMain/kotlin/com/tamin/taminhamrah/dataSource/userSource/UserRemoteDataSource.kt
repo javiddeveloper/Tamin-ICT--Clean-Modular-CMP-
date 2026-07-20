@@ -19,6 +19,8 @@ import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 
+import com.tamin.taminhamrah.model.user.UserProfileDto
+
 interface UserRemoteDataSource {
     suspend fun getIdentityInfo(): IdentityInfoDto
     suspend fun getUserProfileImage(): String
@@ -26,6 +28,7 @@ interface UserRemoteDataSource {
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
     suspend fun changeMobile(mobile: String): EditMobileResponseDto
     suspend fun verifyChangeMobileCode(request: VerifyMobileRequest): String
+    suspend fun checkUserIsNew(nationalId: String): Boolean
 
     suspend fun getSubDominantsInfo(
         query: ApiQueryParamDN
@@ -44,4 +47,6 @@ interface UserRemoteDataSource {
     suspend fun getElectronicFile(
         query: ApiQueryParamDN
     ): ListData<ElectronicFileDTO>?
+
+    suspend fun getUserProfile(): UserProfileDto?
 }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class GetElectronicFileUseCase(
     private val userRepository: UserRepository
 )  {
-     suspend operator fun invoke(
+    operator fun invoke(
         filters: List<ApiFilterDN> = emptyList(),
     ): Flow<List<ElectronicFileDN>> {
         return userRepository.getElectronicFile(filters)

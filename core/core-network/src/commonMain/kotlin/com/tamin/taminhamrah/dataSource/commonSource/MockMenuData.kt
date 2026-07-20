@@ -42,7 +42,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 47, name = "اطلاعات پرداختی کارگران", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
 
     MainServiceDto(id = 101, name = "استحقاق درمان", showRole = listOf(2), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
-    MainServiceDto(id = 104, name = "استعلام وضعیت مستمری", showRole = listOf(2), icon = "insurance", status = MenuServiceStatus.TEMPORARY_DISABLED, message = "سرویس استعلام وضعیت مستمری در حال بروزرسانی است"),
+    MainServiceDto(id = 104, name = "استعلام وضعیت مستمری", showRole = listOf(2), icon = "insurance", status = MenuServiceStatus.ACTIVE, message = "سرویس استعلام وضعیت مستمری در حال بروزرسانی است"),
     MainServiceDto(id = 105, name = "مشاهده فیش حقوقی", showRole = listOf(2), icon = "ticket", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 106, name = "مشاهده حکم", showRole = listOf(2), icon = "announcement", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 107, name = "صدور گواهی حقوق", showRole = listOf(2), icon = "stamp", status = MenuServiceStatus.ACTIVE),
@@ -63,5 +63,5 @@ val mockMenuData = listOf(
     MainServiceDto(id = 1010, name = "بیمه ساختمانی", showRole = listOf(3), icon = "workshop", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1011, name = "بروزرسانی", showRole = listOf(3), icon = "update", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1012, name = "قوانین", showRole = listOf(3), icon = "document", status = MenuServiceStatus.ACTIVE),
-    MainServiceDto(id = 2000, name = "دستیار هوشمند (ایجنت)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE)
+    MainServiceDto(id = 2000, name = "دستیار هوشمند (آزمایشی)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE)
 )

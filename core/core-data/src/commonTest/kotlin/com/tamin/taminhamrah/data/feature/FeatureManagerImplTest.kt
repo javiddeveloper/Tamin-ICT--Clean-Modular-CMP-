@@ -2,8 +2,10 @@ package com.tamin.taminhamrah.data.feature
 
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -22,6 +24,14 @@ class FakeRepositoryForFeatureManager : CommonRepository {
         emit(mainMenuResult)
     }
 
+    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
+        emit(byteArrayOf())
+    }
+
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
+        emit(null)
+    }
+
     override fun getBeneficiary(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>): Flow<List<com.tamin.taminhamrah.model.common.BeneficiaryDN>> = flow {}
 }
 
@@ -35,6 +45,7 @@ class FeatureManagerImplTest {
         fakeRepository = FakeRepositoryForFeatureManager()
         featureManager = FeatureManagerImpl(fakeRepository)
     }
+
 
     @Test
     fun `test getFeatureStatus returns Enabled when ACTIVE`() = runTest {

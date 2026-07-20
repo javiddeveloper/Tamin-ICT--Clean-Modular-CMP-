@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.util
 
 object NetworkConstants {
     const val BASE_URL = "https://eservices.tamin.ir/api/"
+    const val BASE_URL_VIEW = "https://eservices.tamin.ir/view/"
     const val BASE_URL_ACCOUNT = "https://account.tamin.ir/auth/"
     const val AI_BASE_URL = "https://sw.tamin.ir/api/"
     const val CLIENT_ID = "1c13370e0148031d1546242f2448152e"

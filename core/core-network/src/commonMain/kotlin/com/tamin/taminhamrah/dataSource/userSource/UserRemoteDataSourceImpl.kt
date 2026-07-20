@@ -25,6 +25,9 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.util.NetworkConstants
 
+import com.tamin.taminhamrah.model.user.UserProfileDto
+import co.touchlab.kermit.Logger
+
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
     private val queryBuilder: ApiQueryBuilder,
@@ -196,5 +199,25 @@ internal class UserRemoteDataSourceImpl(
         }
     }
 
-
+    override suspend fun getUserProfile(): UserProfileDto? {
+        return try {
+            val response = userApiService.getUserProfile()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            Logger.e("UserDS") { "getUserProfile failed: ${e::class.simpleName} - ${e.message}" }
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+    override suspend fun checkUserIsNew(nationalId: String): Boolean {
+        return try {
+            val response = userApiService.checkUserIsNew(nationalId)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
 }

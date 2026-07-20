@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.useCases.workshops
 
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
@@ -37,7 +36,7 @@ class GetAllEmployerAgreementByNationalIdUseCaseTest : BaseUseCaseTest() {
         )
         repository.result = expectedList
 
-        val result = useCase.invoke(ApiQueryParamDN())
+        val result = useCase.invoke(filters = emptyList())
 
         assertEquals(1, result?.list?.size)
         assertEquals("Workshop 1", result?.list?.get(0)?.workshop?.workshopName)
@@ -51,9 +50,9 @@ class GetAllEmployerAgreementByNationalIdUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val exception = assertFailsWith<RuntimeException> {
-            useCase.invoke(ApiQueryParamDN())
+            useCase.invoke(filters = emptyList())
         }
-        
+
         assertEquals(expectedException.message, exception.message)
     }
 }

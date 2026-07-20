@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.useCases.workshops
 
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
 import com.tamin.taminhamrah.repository.workshops.FakeWorkShopsRepository
@@ -51,7 +50,7 @@ class GetAllPaymentSheetsUseCaseTest : BaseUseCaseTest() {
         )
         repository.paymentSheetsResult = expectedList
 
-        val result = useCase.invoke(ApiQueryParamDN())
+        val result = useCase.invoke(emptyList())
 
         assertEquals(1, result?.list?.size)
         assertEquals("12345", result?.list?.get(0)?.orderNo)
@@ -66,7 +65,7 @@ class GetAllPaymentSheetsUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val exception = assertFailsWith<RuntimeException> {
-            useCase.invoke(ApiQueryParamDN())
+            useCase.invoke(emptyList())
         }
         
         assertEquals(expectedException.message, exception.message)

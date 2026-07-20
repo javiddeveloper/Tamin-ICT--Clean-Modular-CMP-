@@ -14,6 +14,8 @@ import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AgentRepository
 import com.tamin.taminhamrah.repository.agentRepository.AgentRepositoryImpl
+import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
@@ -67,6 +69,14 @@ val remoteModule = module {
         AuthRemoteDataSourceImpl(
             userApiService = get(named("authUserApiService")),
             errorParser = get(),
+        )
+    }
+
+    single<TreatmentRemoteDataSource> {
+        TreatmentRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
+            errorParser = get()
         )
     }
 

@@ -1,0 +1,21 @@
+{
+    "list": [
+    {
+        "firstName": "Ali",
+        "lastName": "Alavi",
+        "nationalCode": "0012345678",
+        "insuranceNumber": "12345678",
+        "fatherName": "Hassan",
+        "branchCode": "123",
+        "activityType": "Type A",
+        "workshopName": "Workshop A",
+        "workshopCode": "W123",
+        "workshopAddress": "Address A",
+        "managerName": "Manager A",
+        "address": "Home Address",
+        "phoneNumber": "0211234567",
+        "mobileNumber": "09121234567"
+    }
+    ],
+    "total": 1
+}

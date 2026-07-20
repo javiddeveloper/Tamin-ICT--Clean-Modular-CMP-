@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActive
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.user.UserProfileDN
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
@@ -32,8 +33,11 @@ interface UserRepository {
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ActiveRelationDN>>
 
-    suspend fun getElectronicFile(
+    fun getElectronicFile(
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ElectronicFileDN>>
 
+    suspend fun getUserProfile(): Flow<UserProfileDN>
+
+    fun checkUserIsNew(nationalId: String): Flow<Boolean>
 }
