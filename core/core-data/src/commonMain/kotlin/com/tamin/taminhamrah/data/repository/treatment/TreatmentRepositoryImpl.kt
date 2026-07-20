@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.data.mapper.toDomain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -19,8 +20,22 @@ import kotlinx.coroutines.flow.map
 
 internal class TreatmentRepositoryImpl(
     private val treatmentRemoteDataSource: TreatmentRemoteDataSource,
-    private val treatmentDao: TreatmentDao
+    private val treatmentDao: TreatmentDao,
+    private val queryBuilder: ApiQueryBuilder
 ) : TreatmentRepository {
+
+    /**
+     * Query parameters for the treatment list endpoints.
+     *
+     * Filters and paging are decided here rather than by callers: the use cases express intent
+     * («give me this patient's prescriptions»), and the data source only transports what it is
+     * handed. Endpoints needing their own filters pass them in.
+     */
+    private fun treatmentQuery(
+        limit: Int = TREATMENT_PAGE_SIZE,
+        filters: List<ApiFilterDN> = emptyList(),
+    ): Map<String, String> =
+        queryBuilder.buildQuery(ApiQueryParamDN(limit = limit, filters = filters))
 
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> = flow {
         val localDeservedTreatment = treatmentDao.getDeservedTreatment(nationalCode).first()
@@ -43,8 +58,7 @@ internal class TreatmentRepositoryImpl(
         nationalCode: String,
         dependantUserNationalCode: String,
         startDate: String,
-        endDate: String,
-        filters: List<ApiFilterDN>
+        endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = flow {
         val localElectronicPrescriptionList = treatmentDao.getElectronicPrescriptions(dependantUserNationalCode).first()
         if (localElectronicPrescriptionList.isNotEmpty()) {
@@ -57,7 +71,7 @@ internal class TreatmentRepositoryImpl(
                 dependantUserNationalCode,
                 startDate,
                 endDate,
-                ApiQueryParamDN(filters = filters)
+                treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
             treatmentDao.clearElectronicPrescriptions(dependantUserNationalCode)
@@ -73,8 +87,7 @@ internal class TreatmentRepositoryImpl(
         nationalCode: String,
         childNationalCode: String,
         flagSata: String,
-        type: String,
-        filters: List<ApiFilterDN>
+        type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>> = flow {
         val localElectronicPrescriptionDetail = treatmentDao.getElectronicPrescriptionDetails(noteHeadID).first()
         if (localElectronicPrescriptionDetail.isNotEmpty()) {
@@ -87,7 +100,7 @@ internal class TreatmentRepositoryImpl(
                 childNationalCode,
                 flagSata,
                 type,
-                ApiQueryParamDN(filters = filters)
+                treatmentQuery(limit = PRESCRIPTION_DETAIL_PAGE_SIZE)
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
             treatmentDao.clearElectronicPrescriptionDetails(noteHeadID)
@@ -100,8 +113,7 @@ internal class TreatmentRepositoryImpl(
 
     override suspend fun getElectronicPrescriptionPrice(
         noteHeadID: String,
-        nationalCode: String,
-        filters: List<ApiFilterDN>
+        nationalCode: String
     ): Flow<List<ElectronicPrescriptionPriceDN>> = flow {
         val localElectronicPrescriptionPrice = treatmentDao.getElectronicPrescriptionPrices(noteHeadID).first()
         if (localElectronicPrescriptionPrice.isNotEmpty()) {
@@ -111,7 +123,7 @@ internal class TreatmentRepositoryImpl(
             val result = treatmentRemoteDataSource.getElectronicPrescriptionPrice(
                 noteHeadID,
                 nationalCode,
-                ApiQueryParamDN(filters = filters)
+                treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
             treatmentDao.clearElectronicPrescriptionPrices(noteHeadID)
@@ -123,8 +135,7 @@ internal class TreatmentRepositoryImpl(
     }.distinctUntilChanged()
 
     override suspend fun getDependantUnderEighteen(
-        nationalCode: String,
-        filters: List<ApiFilterDN>
+        nationalCode: String
     ): Flow<List<DependantUserUnderEighteenDN>> = flow {
         val localDependantUnderEighteen = treatmentDao.getDependantsUnderEighteen(nationalCode).first()
         if (localDependantUnderEighteen.isNotEmpty()) {
@@ -133,7 +144,7 @@ internal class TreatmentRepositoryImpl(
         try {
             val result = treatmentRemoteDataSource.getDependantUnderEighteen(
                 nationalCode,
-                ApiQueryParamDN(filters = filters)
+                treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
             treatmentDao.clearDependantsUnderEighteen(nationalCode)
@@ -156,3 +167,12 @@ internal class TreatmentRepositoryImpl(
         emit(result.toDomain())
     }
 }
+
+/**
+ * Page sizes for the treatment endpoints.
+ *
+ * These screens render a whole result set rather than paging, so the defaults (10) would silently
+ * truncate both lists. The detail size matches the old app's `queryPageSize = "50"`.
+ */
+private const val TREATMENT_PAGE_SIZE = 100
+private const val PRESCRIPTION_DETAIL_PAGE_SIZE = 50
