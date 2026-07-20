@@ -115,6 +115,7 @@ private fun ChatLayout(
     onIntent: (AgentIntent) -> Unit
 ) {
     Scaffold(
+        modifier = Modifier.imePadding(),
         containerColor = Color.Transparent,
         topBar = { AgentTopBar(isGenerating = uiState.isGenerating, onIntent = onIntent) },
         bottomBar = {
@@ -899,8 +900,7 @@ private fun AgentInputBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .navigationBarsPadding()
-                .imePadding(),
+                .navigationBarsPadding(),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
