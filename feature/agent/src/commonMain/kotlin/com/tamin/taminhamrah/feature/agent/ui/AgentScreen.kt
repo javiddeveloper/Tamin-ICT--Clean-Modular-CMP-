@@ -361,10 +361,23 @@ private fun ExtensionCardStep(
     isDone: Boolean,
     showLine: Boolean = false
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "step_shimmer")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shimmer_alpha"
+    )
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isActive && !isDone) Modifier.alpha(pulseAlpha) else Modifier)
     ) {
         // Icon column with optional connector line
         Box(
