@@ -29,7 +29,7 @@ class AgentRepositoryImpl(
 ) : AgentRepository {
 
     companion object {
-        private const val MAX_POLLS = 30
+        private const val MAX_POLLS = 5
         private const val MAX_POLL_DELAY_MS = 30_000L
     }
 
@@ -46,14 +46,19 @@ class AgentRepositoryImpl(
 
         val etaSeconds = initialResponse.data?.eta ?: 5
 
-        // 2. Emit Pending state
-        emit(AgentPollingState.Pending(requestId = requestId, etaSeconds = etaSeconds))
-
         // 3. Start polling loop
-        var pollCount = 0
+        var pollCount = 1
         var currentEta = etaSeconds
 
-        while (pollCount < MAX_POLLS) {
+        while (pollCount <= MAX_POLLS) {
+            // Emit Pending state with current attempt
+            emit(AgentPollingState.Pending(
+                requestId = requestId,
+                etaSeconds = currentEta,
+                attempt = pollCount,
+                maxAttempts = MAX_POLLS
+            ))
+
             // Smart delay: Use server ETA but respect the maximum threshold
             val delayMs = (currentEta * 1000L).coerceIn(1_000L, MAX_POLL_DELAY_MS)
             delay(delayMs)
@@ -69,28 +74,25 @@ class AgentRepositoryImpl(
                     return@flow
                 }
                 "FAILED" -> {
-                    emit(AgentPollingState.Failed(
-                        trackData.result?.message ?: trackData.message ?: "Processing failed"
-                    ))
+                    emit(AgentPollingState.Failed("عملیات ناموفق بود"))
                     return@flow
                 }
                 "CANCEL" -> {
                     emit(AgentPollingState.Cancelled)
                     return@flow
                 }
-                // PENDING — continue polling
                 else -> {
-                    currentEta = trackData?.eta ?: currentEta
+                    // Still processing
+                    currentEta = trackData?.eta ?: 5
                 }
             }
-
             pollCount++
         }
 
-        emit(AgentPollingState.Failed("Request timed out. Please try again."))
-
+        // 4. Timeout after MAX_POLLS
+        emit(AgentPollingState.Failed("عملیات ناموفق بود"))
     }.catch { e ->
-        emit(AgentPollingState.Failed(e.message ?: "Unexpected error"))
+        emit(AgentPollingState.Failed("عملیات ناموفق بود"))
     }
 
     override suspend fun cancelRequest(requestId: String): Result<Unit> {

@@ -28,7 +28,7 @@ interface AgentApiService {
      */
     @POST("search/service")
     suspend fun sendServicePrompt(
-        @Body request: AgentRequestDTO
+        @Body request: io.ktor.client.request.forms.MultiPartFormDataContent
     ): PollingResponseDTO
 
     /**
@@ -36,7 +36,7 @@ interface AgentApiService {
      */
     @POST("search/rule")
     suspend fun sendLawPrompt(
-        @Body request: AgentRequestDTO
+        @Body request: io.ktor.client.request.forms.MultiPartFormDataContent
     ): PollingResponseDTO
 
     /**

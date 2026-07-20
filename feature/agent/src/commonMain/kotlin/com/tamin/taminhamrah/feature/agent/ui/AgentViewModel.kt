@@ -130,10 +130,16 @@ class AgentViewModel(
                         requestId = pollingState.requestId,
                         etaSeconds = pollingState.etaSeconds
                     ))
+                    
+                    val attemptSteps = mutableListOf("درحال بررسی درخواست...")
+                    for (i in 1..pollingState.attempt) {
+                        attemptSteps.add("درحال ارسال درخواست ($i/${pollingState.maxAttempts})")
+                    }
+                    
                     emit(PartialState.ProcessingStateUpdated(
                         AgentProcessingState(
-                            steps = listOf("در حال بررسی درخواست..."),
-                            currentActiveIndex = 0,
+                            steps = attemptSteps,
+                            currentActiveIndex = attemptSteps.size - 1,
                             isCompleted = false
                         )
                     ))

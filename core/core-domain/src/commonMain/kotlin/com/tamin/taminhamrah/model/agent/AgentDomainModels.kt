@@ -12,7 +12,12 @@ import kotlinx.serialization.json.JsonElement
  */
 sealed class AgentPollingState {
     /** Request registered and in queue — ETA provided */
-    data class Pending(val requestId: String, val etaSeconds: Int) : AgentPollingState()
+    data class Pending(
+        val requestId: String,
+        val etaSeconds: Int,
+        val attempt: Int = 1,
+        val maxAttempts: Int = 5
+    ) : AgentPollingState()
 
     /** Processing complete and response is ready */
     data class Done(val response: AgentResponseDN) : AgentPollingState()
