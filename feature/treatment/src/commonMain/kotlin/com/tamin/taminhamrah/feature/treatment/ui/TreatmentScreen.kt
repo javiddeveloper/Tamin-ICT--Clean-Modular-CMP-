@@ -49,10 +49,10 @@ private val CARD_OVERLAP = 40.dp
 @Composable
 fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel(),
-    onOpenMedicalRecords: () -> Unit = {},
+    onOpenMedicalRecords: (String) -> Unit = {},
     onOpenHealthProfile: () -> Unit = {},
     onOpenCenters: () -> Unit = {},
-    onOpenPrescriptions: () -> Unit = {},
+    onOpenPrescriptions: (String) -> Unit = {},
     onOpenMedicalApprovals: () -> Unit = {},
     onOpenMiscClaims: () -> Unit = {},
     onSearch: () -> Unit = {},
@@ -93,10 +93,10 @@ fun TreatmentContent(
     state: TreatmentUiState,
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenMedicalRecords: () -> Unit = {},
+    onOpenMedicalRecords: (String) -> Unit = {},
     onOpenHealthProfile: () -> Unit = {},
     onOpenCenters: () -> Unit = {},
-    onOpenPrescriptions: () -> Unit = {},
+    onOpenPrescriptions: (String) -> Unit = {},
     onOpenMedicalApprovals: () -> Unit = {},
     onOpenMiscClaims: () -> Unit = {},
     onSearch: () -> Unit = {},
@@ -126,17 +126,19 @@ fun TreatmentContent(
                 patients = patients,
                 pagerState = pagerState,
                 onShowEntitlementReason = { entitlementReason = it },
+                onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
-                onOpenMedicalRecords = onOpenMedicalRecords,
+                // Nothing to open until a patient is selected.
+                onOpenMedicalRecords = { state.selectedNationalCode?.let(onOpenMedicalRecords) },
                 onOpenHealthProfile = onOpenHealthProfile,
                 onOpenCenters = onOpenCenters,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
-                onOpenPrescriptions = onOpenPrescriptions,
+                onOpenPrescriptions = { state.selectedNationalCode?.let(onOpenPrescriptions) },
                 onOpenMedicalApprovals = onOpenMedicalApprovals,
                 onOpenMiscClaims = onOpenMiscClaims,
             )
