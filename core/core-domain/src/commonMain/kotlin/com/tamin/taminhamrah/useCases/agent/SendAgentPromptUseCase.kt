@@ -6,11 +6,11 @@ import com.tamin.taminhamrah.repository.AgentRepository
 import kotlinx.coroutines.flow.Flow
 
 /**
- * ارسال پرامپت متنی به سرور AI و دریافت Flow از نتایج
+ * Sends a text prompt to the AI server and receives a Flow of results.
  *
- * استفاده:
+ * Usage:
  * ```kotlin
- * sendAgentPromptUseCase(AgentRequest(prompt = "سوابق بیمه‌ام چقدره؟"))
+ * sendAgentPromptUseCase(AgentRequest(prompt = "What is my insurance history?"))
  *     .collect { state ->
  *         when (state) {
  *             is AgentPollingState.Pending -> showLoading(state.etaSeconds)

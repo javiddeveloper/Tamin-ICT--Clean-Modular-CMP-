@@ -1,13 +1,13 @@
 package com.tamin.taminhamrah.model.agent
 
 /**
- * مدل درخواست ارسالی به repository
+ * Model for requests sent to the repository.
  *
- * @param prompt متن پرامپت کاربر
- * @param sessionId شناسه جلسه (null در اولین پیام جلسه)
- * @param lastEntity آخرین entity برگشتی از سرور (برای حفظ context مکالمه)
- * @param chatToken توکن احراز هویت چت‌بات
- * @param isLawPrompt اگر true باشد به endpoint قوانین ارسال می‌شود
+ * @param prompt User prompt text
+ * @param sessionId Session identifier (null for the first session message)
+ * @param lastEntity Last entity returned from the server (to maintain conversation context)
+ * @param chatToken Chatbot authentication token
+ * @param isLawPrompt If true, sent to the laws endpoint
  */
 data class AgentRequest(
     val prompt: String,

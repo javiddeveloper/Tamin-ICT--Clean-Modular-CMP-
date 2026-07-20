@@ -6,31 +6,31 @@ import com.tamin.taminhamrah.model.agent.ChatAllowedDN
 import kotlinx.coroutines.flow.Flow
 
 /**
- * قرارداد لایه داده برای سیستم Agent
+ * Data layer contract for the Agent system.
  *
- * - [sendPrompt]: ارسال پرامپت و دریافت Flow از وضعیت‌های polling
- * - [cancelRequest]: لغو یک درخواست در حال پردازش
- * - [checkChatAllowed]: بررسی اینکه آیا کاربر مجاز به استفاده از چت هست
+ * - [sendPrompt]: Sends a prompt and receives a Flow of polling states.
+ * - [cancelRequest]: Cancels a currently processing request.
+ * - [checkChatAllowed]: Checks if the user is authorized to use the chat.
  */
 interface AgentRepository {
 
     /**
-     * ارسال پرامپت به سرور AI و poll کردن تا دریافت پاسخ
+     * Sends a prompt to the AI server and polls until a response is received.
      *
-     * Flow emit می‌کند:
-     * 1. [AgentPollingState.Pending] — بلافاصله بعد از ثبت درخواست
-     * 2. [AgentPollingState.Done] — وقتی پردازش تمام شد
-     * 3. [AgentPollingState.Failed] — در صورت خطا یا timeout
+     * The Flow emits:
+     * 1. [AgentPollingState.Pending] — Immediately after registering the request.
+     * 2. [AgentPollingState.Done] — When processing is complete.
+     * 3. [AgentPollingState.Failed] — In case of an error or timeout.
      */
     fun sendPrompt(request: AgentRequest): Flow<AgentPollingState>
 
     /**
-     * لغو یک درخواست polling در حال اجرا
+     * Cancels an active polling request.
      */
     suspend fun cancelRequest(requestId: String): Result<Unit>
 
     /**
-     * بررسی مجاز بودن کاربر برای استفاده از چت‌بات
+     * Checks if the user is authorized to use the chatbot.
      */
     suspend fun checkChatAllowed(): Result<ChatAllowedDN>
 }

@@ -4,10 +4,10 @@ import com.tamin.taminhamrah.model.agent.ChatAllowedDN
 import com.tamin.taminhamrah.repository.AgentRepository
 
 /**
- * بررسی اینکه آیا این کاربر مجاز به استفاده از چت‌بات AI است
+ * Checks if the user is authorized to use the AI chatbot.
  *
- * باید قبل از نمایش صفحه چت فراخوانی شود.
- * در صورت عدم مجاز بودن، [ChatAllowedDN.errorMessage] پیام را نگه می‌دارد.
+ * Should be called before displaying the chat screen.
+ * If not authorized, [ChatAllowedDN.errorMessage] will contain the message.
  */
 class CheckChatAllowedUseCase(
     private val agentRepository: AgentRepository
