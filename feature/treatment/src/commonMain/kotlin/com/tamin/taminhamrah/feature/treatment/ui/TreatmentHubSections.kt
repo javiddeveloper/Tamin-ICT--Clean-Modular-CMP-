@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,38 +10,44 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.components.CategoryTile
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.CoverageBadge
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
-import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
 import com.tamin.taminhamrah.feature.treatment.ui.components.insuranceCardGradient
+import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.coverageStatusOf
-import com.tamin.taminhamrah.ui.icons.TaminIcons
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.icons.TaminIcons
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
@@ -48,9 +55,9 @@ import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
 import com.tamin.taminhamrah.ui.theme.TaminRed
 import com.tamin.taminhamrah.ui.theme.TaminRedDark
 import com.tamin.taminhamrah.ui.toPriceFormat
-import kotlinx.collections.immutable.persistentListOf
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * The stacked sections of the treatment hub, kept out of [TreatmentScreen] so that file
@@ -71,6 +78,7 @@ internal fun PatientCarousel(
     patients: List<PatientItem>,
     pagerState: PagerState,
     onShowEntitlementReason: (String) -> Unit,
+    onRetry: () -> Unit = {},
 ) {
     when {
         state.isLoading && patients.isEmpty() -> Box(
@@ -82,8 +90,12 @@ internal fun PatientCarousel(
             CircularProgressIndicator(color = LocalTaminColors.current.teal)
         }
 
-        patients.isEmpty() -> TaminEmptyState(
+        // A failure or an empty result still renders a card, so the carousel slot never
+        // collapses into a bare line of text.
+        patients.isEmpty() -> PatientPlaceholderCard(
             message = state.error ?: "بیمه‌شده‌ای برای نمایش وجود ندارد",
+            isError = state.error != null,
+            onRetry = onRetry,
         )
 
         else -> InsuranceCardCarousel(
@@ -98,6 +110,64 @@ internal fun PatientCarousel(
                 dependantOrdinal = patients.take(page).count { it.isDependent },
                 onShowEntitlementReason = onShowEntitlementReason,
             )
+        }
+    }
+}
+
+/**
+ * Stands in for the insurance card when there is nobody to show.
+ *
+ * Keeps the carousel's footprint so the hub does not jump between states, and offers a retry when
+ * the cause was a failure rather than a genuinely empty result.
+ */
+@Composable
+private fun PatientPlaceholderCard(
+    message: String,
+    isError: Boolean,
+    onRetry: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val accent = if (isError) colors.dangerText else colors.textSecondary
+    val container = if (isError) colors.dangerBg else colors.bgSurface
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page)
+            .clip(RoundedCornerShape(CornerRadius.card))
+            .background(container)
+            .border(
+                width = 1.dp,
+                color = if (isError) colors.dangerBorder else colors.border,
+                shape = RoundedCornerShape(CornerRadius.card),
+            )
+            .height(CARD_LOADING_HEIGHT),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.page),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Icon(
+                imageVector = if (isError) TaminIcons.Cross else TaminIcons.HealthProfile,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier.size(IconSize.medium),
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = accent,
+                textAlign = TextAlign.Center,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (isError) {
+                TextButton(onClick = onRetry) {
+                    Text(text = "تلاش دوباره", color = colors.teal)
+                }
+            }
         }
     }
 }
