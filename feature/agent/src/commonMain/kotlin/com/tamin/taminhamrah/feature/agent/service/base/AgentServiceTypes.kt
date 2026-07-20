@@ -101,5 +101,10 @@ sealed class ChatBubbleContent {
     data class EmbeddedModel(val model: Any) : ChatBubbleContent()
 
     /** Error in service execution */
-    data class ServiceError(val message: String) : ChatBubbleContent()
+    data class ServiceError(
+        val message: String,
+        val canRetryPrompt: Boolean = false,
+        val actionKey: AgentActionKey? = null,
+        val payload: kotlinx.serialization.json.JsonElement? = null
+    ) : ChatBubbleContent()
 }

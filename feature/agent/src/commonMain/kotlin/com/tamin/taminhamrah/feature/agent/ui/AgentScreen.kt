@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Refresh
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -872,9 +873,29 @@ private fun BubbleContentRenderer(content: ChatBubbleContent, isTypingAnimating:
         is ChatBubbleContent.ServiceError -> {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .run {
+                        if (content.canRetryPrompt) {
+                            clickable { onIntent(AgentIntent.OnRetryClick) }
+                        } else if (content.actionKey != null) {
+                            clickable { onIntent(AgentIntent.ExecuteServiceAction(content.actionKey, content.payload)) }
+                        } else {
+                            this
+                        }
+                    }
+                    .padding(4.dp)
             ) {
-                Text("⚠️", fontSize = 16.sp)
+                if (content.canRetryPrompt || content.actionKey != null) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Retry",
+                        tint = AgentError,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Text("⚠️", fontSize = 16.sp)
+                }
                 Text(
                     text = content.message,
                     style = MaterialTheme.typography.bodySmall.copy(color = AgentError)

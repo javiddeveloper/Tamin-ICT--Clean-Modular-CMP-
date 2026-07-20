@@ -56,6 +56,7 @@ class AgentViewModel(
         is AgentIntent.SendTextPrompt          -> handleSendPrompt(intent.message)
         is AgentIntent.CancelGeneration        -> handleCancelGeneration()
         is AgentIntent.StartNewSession         -> handleStartNewSession()
+        is AgentIntent.OnRetryClick            -> handleRetryClick()
         is AgentIntent.ChangeInputMode         -> flow {
             emit(PartialState.InputModeChanged(intent.mode))
         }
@@ -97,20 +98,22 @@ class AgentViewModel(
         emit(PartialState.CheckingPermission(false))
     }
 
-    private fun handleSendPrompt(message: String): Flow<PartialState> = flow {
+    private fun handleSendPrompt(message: String, isRetry: Boolean = false): Flow<PartialState> = flow {
         val currentState = uiState.value
         if (currentState.isGenerating) return@flow
 
         emit(PartialState.Loading(true))
 
-        // Append the user's message to the chat
-        val userItem = ChatItem(
-            id = UUID.randomUUID().toString(),
-            sender = ChatSender.User,
-            content = ChatBubbleContent.Text(message)
-        )
-        emit(PartialState.NewChatItems(listOf(userItem)))
-        sendEvent(AgentEvent.ScrollToBottom)
+        if (!isRetry) {
+            // Append the user's message to the chat
+            val userItem = ChatItem(
+                id = UUID.randomUUID().toString(),
+                sender = ChatSender.User,
+                content = ChatBubbleContent.Text(message)
+            )
+            emit(PartialState.NewChatItems(listOf(userItem)))
+            sendEvent(AgentEvent.ScrollToBottom)
+        }
 
         val request = AgentRequest(
             prompt = message,
@@ -229,12 +232,12 @@ class AgentViewModel(
                     val errorItem = ChatItem(
                         id = UUID.randomUUID().toString(),
                         sender = ChatSender.Agent,
-                        content = ChatBubbleContent.ServiceError(pollingState.message)
+                        content = ChatBubbleContent.ServiceError(pollingState.message, canRetryPrompt = true)
                     )
                     emit(PartialState.NewChatItems(listOf(errorItem)))
                     sendEvent(AgentEvent.ShowError(pollingState.message))
                 }
-
+                
                 is AgentPollingState.Cancelled -> {
                     emit(PartialState.GenerationCancelled)
                     emit(PartialState.ProcessingStateUpdated(null))
@@ -251,6 +254,15 @@ class AgentViewModel(
         emit(PartialState.Loading(false))
     }
 
+    private fun handleRetryClick(): Flow<PartialState> {
+        val lastUserMessage = uiState.value.chatItems.lastOrNull { it.sender == ChatSender.User }
+        val textMessage = (lastUserMessage?.content as? ChatBubbleContent.Text)?.message
+        if (!textMessage.isNullOrBlank()) {
+            return handleSendPrompt(textMessage, isRetry = true)
+        }
+        return flow { }
+    }
+
     private fun handleStartNewSession(): Flow<PartialState> = flow {
         sessionContext.clear()
         emit(PartialState.SessionUpdated(sessionId = null, lastEntity = null))
@@ -260,13 +272,13 @@ class AgentViewModel(
 
     private fun handleServiceAction(
         actionKey: AgentActionKey,
-        payload: Map<String, String>
+        payload: kotlinx.serialization.json.JsonElement?
     ): Flow<PartialState> = flow {
         // Build a synthetic entity for dispatch
         val entity = AiEntityDN(
             action = actionKey,
             stepNumber = 0,
-            payload = null,
+            payload = payload,
             data = null,
             message = null,
             itemType = null
@@ -303,7 +315,7 @@ class AgentViewModel(
             }
 
             is AgentServiceResult.Error ->
-                listOf(ChatBubbleContent.ServiceError(result.message))
+                listOf(ChatBubbleContent.ServiceError(result.message, actionKey = entity.action, payload = entity.payload))
         }
     }
 

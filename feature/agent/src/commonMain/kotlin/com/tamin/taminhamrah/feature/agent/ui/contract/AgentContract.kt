@@ -98,8 +98,11 @@ sealed interface AgentIntent {
     /** Cancel the current request */
     object CancelGeneration : AgentIntent
 
-    /** Restart the chat session */
+    /** Start a new session */
     object StartNewSession : AgentIntent
+
+    /** Retry the last failed user prompt */
+    object OnRetryClick : AgentIntent
 
     /** Change the input mode */
     data class ChangeInputMode(val mode: InputMode) : AgentIntent
@@ -107,7 +110,7 @@ sealed interface AgentIntent {
     /** Execute a service action triggered by user click (e.g., suggested prompts) */
     data class ExecuteServiceAction(
         val actionKey: AgentActionKey,
-        val payload: Map<String, String> = emptyMap()
+        val payload: kotlinx.serialization.json.JsonElement? = null
     ) : AgentIntent
 }
 
