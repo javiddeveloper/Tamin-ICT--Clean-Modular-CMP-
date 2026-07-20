@@ -18,6 +18,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 // ─── Fakes ───────────────────────────────────────────────────────────────────
 
@@ -171,7 +172,7 @@ class AgentActionDispatcherTest {
 
         // Assert: A default fallback text should be shown instead of null
         val disabledResult = result as AgentServiceResult.FeatureDisabled
-        kotlin.test.assertTrue(disabledResult.message.isNotBlank(), "Fallback message should not be blank")
+        assertTrue(disabledResult.message.isNotBlank(), "Fallback message should not be blank")
     }
 
     // ─── Scenario 5: No Handler Available ────────────────────────────────────
