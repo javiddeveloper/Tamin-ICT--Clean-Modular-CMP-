@@ -30,6 +30,9 @@ fun SelfDeclarationReviewScreen(
     val scrollState = rememberScrollState()
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(title = "بررسی نهایی پروندهٔ سلامت", onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "تأیید و ثبت نهایی اطلاعات",
@@ -42,10 +45,10 @@ fun SelfDeclarationReviewScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             TaminText(
@@ -135,6 +138,7 @@ fun SelfDeclarationReviewScreen(
                 val allergyStr = state.allergies.joinToString { it.drugName }
                 IdentityRow(label = "داروهای آلرژیک:", value = allergyStr.ifEmpty { "ندارد" })
             }
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

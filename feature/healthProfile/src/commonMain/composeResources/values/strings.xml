@@ -5,9 +5,9 @@
     <string name="health_gate_desc">برای مشاهدهٔ پروندهٔ سلامت، لازم است یک‌بار فرم خوداظهاری سلامت را تکمیل کنید.</string>
     <string name="health_gate_locked_title">دسترسی غیرفعال است</string>
     <string name="health_gate_locked_desc">تا زمان تکمیل خوداظهاری، امکان ورود به پرونده وجود ندارد.</string>
-    <string name="health_gate_step1">۱. تأیید اطلاعات هویتی</string>
-    <string name="health_gate_step2">۲. اطلاعات تماس و سکونت</string>
-    <string name="health_gate_step3">۳. پرسش‌های سلامت و تکمیلی</string>
+    <string name="health_gate_step1"> تأیید اطلاعات هویتی</string>
+    <string name="health_gate_step2"> اطلاعات تماس و سکونت</string>
+    <string name="health_gate_step3"> پرسش‌های سلامت و تکمیلی</string>
     <string name="health_gate_btn_start">تکمیل خوداظهاری سلامت</string>
     <string name="health_gate_btn_back">بازگشت</string>
 
@@ -17,6 +17,8 @@
     <string name="health_intro_desc">با تکمیل این فرم، اطلاعات سلامت پایهٔ شما ثبت می‌شود. تکمیل آن برای دسترسی به «پروندهٔ سلامت من» الزامی است.</string>
     <string name="health_intro_duration">تکمیل فرم حدود ۴ دقیقه زمان می‌برد</string>
     <string name="health_intro_steps">در ۹ مرحلهٔ کوتاه و ساده تکمیل می‌شود</string>
+    <string name="health_intro_fast">تکمیل سریع در چند دقیقه</string>
+    <string name="health_intro_update">امکان بروزرسانی اطلاعات در آینده</string>
     <string name="health_intro_privacy">اطلاعات شما محرمانه نگهداری می‌شود</string>
     <string name="health_intro_btn_next">شروع خوداظهاری</string>
 </resources>

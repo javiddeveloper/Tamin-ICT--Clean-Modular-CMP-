@@ -24,7 +24,7 @@ data class SelfDeclarationUiState(
     val currentStep: SelfDeclarationStep = SelfDeclarationStep.GATE,
     val isLoading: Boolean = false,
     val error: String? = null,
-    
+
     // User Identity Info (Read-only) (Step 1)
     val patientName: String = "علی",
     val patientFamily: String = "محمدی",
@@ -48,6 +48,8 @@ data class SelfDeclarationUiState(
     val city: String = "",
     val address: String = "",
     val postcode: String = "",
+    val landline: String = "",
+    val postalCode: String = "",
 
     // Step 4: Emergency Contact
     val emergencyName: String = "",

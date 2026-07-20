@@ -35,6 +35,9 @@ fun SelfDeclarationBloodScreen(
     val isNextEnabled = state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null && state.selectedBloodGroupRh != null)
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -48,10 +51,10 @@ fun SelfDeclarationBloodScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -150,6 +153,7 @@ fun SelfDeclarationBloodScreen(
                     }
                 )
             }
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

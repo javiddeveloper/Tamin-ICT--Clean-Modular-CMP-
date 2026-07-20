@@ -30,6 +30,9 @@ fun SelfDeclarationPersonalScreen(
     val isNextEnabled = state.maritalStatus.isNotEmpty() && state.job.isNotEmpty()
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -43,10 +46,10 @@ fun SelfDeclarationPersonalScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HealthProgressBar(currentStep = 2, totalSteps = 10)
@@ -60,24 +63,23 @@ fun SelfDeclarationPersonalScreen(
             )
 
             TaminText(
-                text = "لطفاً اطلاعات تکمیلی فردی خود را جهت تکمیل پروندهٔ سلامت وارد کنید.",
+                text = "لطفاً وضعیت تاهل و شغل خود را به همراه اطلاعات تابعیت وارد کنید.",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textTertiary
+                    color = taminColors.textTertiary,
+                    lineHeight = 22.sp
                 )
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            // Marital status
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TaminText(
                     text = "وضعیت تأهل",
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.textTertiary
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.textPrimary
+                    )
                 )
-
-                val maritalOptions = listOf("مجرد", "متاهل")
+                val maritalOptions = listOf("مجرد", "متأهل", "مطلقه", "همسر فوت شده")
                 val maritalIndex = maritalOptions.indexOf(state.maritalStatus)
                 SegmentedControl(
                     options = maritalOptions,
@@ -120,6 +122,7 @@ fun SelfDeclarationPersonalScreen(
                 label = "ملیت",
                 placeholder = "مثلاً ایرانی"
             )
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

@@ -29,6 +29,9 @@ fun SelfDeclarationIdentityScreen(
     val scrollState = rememberScrollState()
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -41,10 +44,10 @@ fun SelfDeclarationIdentityScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HealthProgressBar(currentStep = 1, totalSteps = 10)
@@ -83,6 +86,7 @@ fun SelfDeclarationIdentityScreen(
             }
 
             InfoBanner(message = "این اطلاعات از پایگاه داده‌های سازمان تأمین اجتماعی استخراج شده و به دلایل امنیتی غیرقابل ویرایش است.")
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

@@ -28,6 +28,9 @@ fun SelfDeclarationSuccessScreen(
     val taminColors = LocalTaminColors.current
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(title = "ثبت موفق خوداظهاری", onBackClicked = { onFinish(false) })
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "ورود به پروندهٔ سلامت",

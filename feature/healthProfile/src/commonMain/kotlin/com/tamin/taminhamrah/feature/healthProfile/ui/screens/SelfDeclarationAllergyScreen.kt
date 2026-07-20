@@ -40,6 +40,9 @@ fun SelfDeclarationAllergyScreen(
     val drugList = listOf("پنی‌سیلین", "استامینوفن", "آسپیرین", "ایبوپروفن", "آموکسی‌سیلین", "سفکسیم", "سفالکسین", "مترونیدازول")
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی (بررسی نهایی)",
@@ -52,10 +55,10 @@ fun SelfDeclarationAllergyScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HealthProgressBar(currentStep = 10, totalSteps = 10)
@@ -113,6 +116,7 @@ fun SelfDeclarationAllergyScreen(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
 
         // Add Allergy Dialog

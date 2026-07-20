@@ -18,8 +18,7 @@ import com.tamin.taminhamrah.ui.contract.CustomNavigationBar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
-import com.tamin.taminhamrah.ui.blur.safeHazeEffect
+
 
 @Composable
 fun FloatingGlassNavigationBar(
@@ -31,7 +30,7 @@ fun FloatingGlassNavigationBar(
     val glassShape = RoundedCornerShape(24.dp) // Deeply rounded pill shape
     val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomPadding = if (bottomInset > 0.dp) bottomInset + 12.dp else 24.dp
-    
+
     Box(
         modifier = modifier
             .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = bottomPadding)
@@ -65,7 +64,7 @@ fun FloatingGlassNavigationBar(
     ) {
         // We use standard M3 NavigationBar but strip its background
         CustomNavigationBar(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp , horizontal = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp , horizontal = 4.dp),
             containerColor = Color.Transparent,
             tonalElevation = 0.dp,
             windowInsets = WindowInsets(0, 0, 0, 0), // Remove bottom padding to keep it tight

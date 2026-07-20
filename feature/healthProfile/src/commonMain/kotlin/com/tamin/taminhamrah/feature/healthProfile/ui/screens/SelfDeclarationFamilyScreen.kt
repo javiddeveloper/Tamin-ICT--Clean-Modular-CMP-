@@ -30,6 +30,9 @@ fun SelfDeclarationFamilyScreen(
     val optionsYesNo = listOf("خیر", "بله")
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -42,10 +45,10 @@ fun SelfDeclarationFamilyScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HealthProgressBar(currentStep = 7, totalSteps = 10)
@@ -135,6 +138,7 @@ fun SelfDeclarationFamilyScreen(
                     }
                 )
             }
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

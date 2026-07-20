@@ -31,9 +31,10 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.koin.compose.viewmodel.koinViewModel
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HealthProfileScreen(
@@ -225,25 +226,9 @@ fun HealthProfileMainContent(
                 else -> {
                     Scaffold(
                         topBar = {
-                            TaminTopAppBar(
-                                title = {
-                                    TaminText(
-                                        text = "پروندهٔ سلامت",
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 18.sp
-                                        )
-                                    )
-                                },
-                                navigationIcon = {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "بازگشت"
-                                    )
-                                },
-                                onNavigationClick = {
-                                    onBackClicked()
-                                }
+                            HealthTopAppBar(
+                                title = "پروندهٔ سلامت",
+                                onBackClicked = onBackClicked
                             )
                         }
                     ) { paddingValues ->

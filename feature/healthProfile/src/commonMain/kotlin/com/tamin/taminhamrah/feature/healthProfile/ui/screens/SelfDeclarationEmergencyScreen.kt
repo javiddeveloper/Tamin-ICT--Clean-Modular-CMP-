@@ -32,6 +32,9 @@ fun SelfDeclarationEmergencyScreen(
     val isNextEnabled = state.emergencyName.isNotEmpty() && state.emergencyFamily.isNotEmpty() && state.emergencyRelation.isNotEmpty() && state.emergencyMobile.length >= 10
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -45,10 +48,10 @@ fun SelfDeclarationEmergencyScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HealthProgressBar(currentStep = 4, totalSteps = 10)
@@ -105,6 +108,7 @@ fun SelfDeclarationEmergencyScreen(
                 placeholder = "09123456789",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

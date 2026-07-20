@@ -33,6 +33,9 @@ fun SelfDeclarationPhysicalScreen(
     val bmiValue = if (heightInMeters > 0) state.weight / (heightInMeters * heightInMeters) else 0f
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -45,10 +48,10 @@ fun SelfDeclarationPhysicalScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -110,6 +113,7 @@ fun SelfDeclarationPhysicalScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             BmiMeter(bmi = bmiValue)
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

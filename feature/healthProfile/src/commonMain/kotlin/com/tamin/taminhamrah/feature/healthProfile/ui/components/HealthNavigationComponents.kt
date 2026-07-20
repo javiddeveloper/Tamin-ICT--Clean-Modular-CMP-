@@ -22,9 +22,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Surface
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+
+/**
+ * Static Top Bar for Health Profile screens with status bar inset padding.
+ */
+@Composable
+fun HealthTopAppBar(
+    title: String = "خوداظهاری سلامت",
+    onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TaminTopAppBar(
+        modifier = modifier.statusBarsPadding(),
+        title = {
+            TaminText(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            )
+        },
+        navigationIcon = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "بازگشت"
+            )
+        },
+        onNavigationClick = onBackClicked
+    )
+}
 
 /**
  * A premium segmented progress bar indicating multi-step form progress.
@@ -76,24 +109,31 @@ fun HealthIrritateNavigationBar(
     onSecondaryClick: (() -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val imeBottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    val bottomInset = maxOf(navBarBottom, imeBottom)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.glassSolid)
-            .padding(horizontal = 12.dp, vertical = 14.dp)
+            .padding(
+                start = 12.dp,
+                top = 14.dp,
+                end = 12.dp,
+                bottom = 14.dp + bottomInset
+            )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp), // Replaces Arrangement.SpaceEvenly & Spacer for clean, consistent spacing
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // Optional Secondary outlined button (Square: 54.dp x 54.dp to match Primary height)
+            // Optional Secondary outlined button
             if (secondaryText != null && onSecondaryClick != null) {
                 Box(
                     modifier = Modifier
-                        .size(54.dp) // Sets both width and height to 54.dp making it a perfect square
+                        .size(54.dp)
                         .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
                         .clip(RoundedCornerShape(15.dp))
                         .clickable { onSecondaryClick() },
@@ -108,7 +148,7 @@ fun HealthIrritateNavigationBar(
                 }
             }
 
-            // Primary Solid Button (Takes all remaining width)
+            // Primary Solid Button
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -144,8 +184,6 @@ fun HealthIrritateNavigationBar(
                     }
                 }
             }
-
-
         }
     }
 }
@@ -158,25 +196,29 @@ fun HealthNavigationBar(
     onPrimaryClick: () -> Unit,
     primaryEnabled: Boolean = true,
     showChevron: Boolean = true,
+    primaryIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     secondaryText: String? = null,
     onSecondaryClick: (() -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val imeBottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    val bottomInset = maxOf(navBarBottom, imeBottom)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.glassSolid)
-            .padding(horizontal = 18.dp, vertical = 14.dp)
+            .padding(
+                start = 18.dp,
+                top = 14.dp,
+                end = 18.dp,
+                bottom = 14.dp + bottomInset
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Horizontal line separating content
-            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Primary Solid Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -201,7 +243,15 @@ fun HealthNavigationBar(
                             color = if (primaryEnabled) Color.White else taminColors.textMuted
                         )
                     )
-                    if (showChevron) {
+                    if (primaryIconPainter != null) {
+                        Spacer(modifier = Modifier.width(9.dp))
+                        Icon(
+                            painter = primaryIconPainter,
+                            contentDescription = null,
+                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    } else if (showChevron) {
                         Spacer(modifier = Modifier.width(9.dp))
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -213,7 +263,6 @@ fun HealthNavigationBar(
                 }
             }
 
-            // Optional Secondary outlined button
             if (secondaryText != null && onSecondaryClick != null) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Box(

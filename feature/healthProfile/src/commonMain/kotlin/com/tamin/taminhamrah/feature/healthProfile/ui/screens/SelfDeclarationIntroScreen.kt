@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.FlashOn
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -33,6 +35,7 @@ import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import org.jetbrains.compose.resources.stringResource
@@ -67,23 +70,9 @@ fun SelfDeclarationIntroContent(
         Scaffold(
             modifier = modifier.fillMaxSize(),
             topBar = {
-                TaminTopAppBar(
-                    title = {
-                        TaminText(
-                            text = stringResource(Res.string.health_intro_title),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.health_gate_btn_back)
-                        )
-                    },
-                    onNavigationClick = onBackClicked
+                HealthTopAppBar(
+                    title = stringResource(Res.string.health_intro_title),
+                    onBackClicked = onBackClicked
                 )
             },
             bottomBar = {
@@ -98,10 +87,10 @@ fun SelfDeclarationIntroContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(top = paddingValues.calculateTopPadding())
                     .background(taminColors.bgPage)
                     .verticalScroll(scrollState)
-                    .padding(18.dp),
+                    .padding(horizontal = 18.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -158,19 +147,21 @@ fun SelfDeclarationIntroContent(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
                         InstructionFeatureItem(
-                            icon = Icons.Default.AccessTime,
-                            message = stringResource(Res.string.health_intro_duration),
+                            icon = Icons.Default.FlashOn,
+                            message = stringResource(Res.string.health_intro_fast),
                             iconBgColor = taminColors.blueBg,
                             iconColor = taminColors.blueText,
                             isLast = false
                         )
+                        HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
                         InstructionFeatureItem(
-                            icon = Icons.AutoMirrored.Filled.Assignment,
-                            message = stringResource(Res.string.health_intro_steps),
-                            iconBgColor = taminColors.blueBg,
-                            iconColor = taminColors.blueText,
+                            icon = Icons.Default.EditNote,
+                            message = stringResource(Res.string.health_intro_update),
+                            iconBgColor = taminColors.orangeBg,
+                            iconColor = taminColors.orangeText,
                             isLast = false
                         )
+                        HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
                         InstructionFeatureItem(
                             icon = Icons.Default.Shield,
                             message = stringResource(Res.string.health_intro_privacy),
@@ -180,6 +171,7 @@ fun SelfDeclarationIntroContent(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
     }

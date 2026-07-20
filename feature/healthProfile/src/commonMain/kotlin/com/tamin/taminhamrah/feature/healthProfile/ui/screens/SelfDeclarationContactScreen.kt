@@ -35,6 +35,9 @@ fun SelfDeclarationContactScreen(
     val isNextEnabled = state.mobile.length >= 10 && state.city.isNotEmpty() && state.province.isNotEmpty() && state.address.isNotEmpty()
 
     Scaffold(
+        topBar = {
+            HealthTopAppBar(onBackClicked = onBackClicked)
+        },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
@@ -48,99 +51,108 @@ fun SelfDeclarationContactScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(taminColors.bgPage)
                 .verticalScroll(scrollState)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             HealthProgressBar(currentStep = 3, totalSteps = 10)
 
             TaminText(
-                text = "تماس و سکونت",
+                text = "اطلاعات تماس و سکونت",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
                     color = taminColors.textPrimary
                 )
             )
 
+            TaminText(
+                text = "اطلاعات تماس جهت ارتباط‌های بعدی و موارد اضطراری استفاده خواهد شد.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = taminColors.textTertiary,
+                    lineHeight = 22.sp
+                )
+            )
+
             StyledTextField(
                 value = state.mobile,
-                onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(mobile = valStr) })
+                onValueChange = { mob ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(mobile = mob) })
                 },
-                label = "شمارهٔ تلفن همراه",
-                placeholder = "مثلاً 09123456789",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                isValid = state.mobile.startsWith("09") && state.mobile.length == 11,
-                errorText = if (state.mobile.isNotEmpty() && (!state.mobile.startsWith("09") || state.mobile.length != 11)) "شماره همراه معتبر نیست" else null
+                label = "شماره تلفن همراه",
+                placeholder = "۰۹۱۲۳۴۵۶۷۸۹"
             )
 
             StyledTextField(
-                value = state.email,
-                onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(email = valStr) })
+                value = state.landline,
+                onValueChange = { land ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(landline = land) })
                 },
-                label = "آدرس ایمیل (اختیاری)",
-                placeholder = "example@mail.com",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                label = "تلفن ثابت (به همراه کد استان)",
+                placeholder = "۰۲۱۲۲۳۳۴۴۵۵"
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StyledTextField(
-                    value = state.province,
-                    onValueChange = { valStr ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(province = valStr) })
-                    },
-                    label = "استان",
-                    placeholder = "وارد کنید",
-                    modifier = Modifier.weight(1f)
-                )
-                StyledTextField(
-                    value = state.city,
-                    onValueChange = { valStr ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(city = valStr) })
-                    },
-                    label = "شهر",
-                    placeholder = "وارد کنید",
-                    modifier = Modifier.weight(1f)
-                )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.weight(1f)) {
+                    StyledTextField(
+                        value = state.province,
+                        onValueChange = { prov ->
+                            onIntent(SelfDeclarationIntent.UpdateState { copy(province = prov) })
+                        },
+                        label = "استان",
+                        placeholder = "مثلاً تهران"
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    StyledTextField(
+                        value = state.city,
+                        onValueChange = { c ->
+                            onIntent(SelfDeclarationIntent.UpdateState { copy(city = c) })
+                        },
+                        label = "شهر",
+                        placeholder = "مثلاً تهران"
+                    )
+                }
             }
 
             StyledTextField(
                 value = state.address,
-                onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(address = valStr) })
+                onValueChange = { addr ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(address = addr) })
                 },
-                label = "آدرس دقیق محل سکونت",
-                placeholder = "خیابان، کوچه، پلاک، واحد"
+                label = "نشانی کامل محل سکونت",
+                placeholder = "خیابان، کوچه، پلاک، واحد",
+                singleLine = false
             )
 
             StyledTextField(
-                value = state.postcode,
-                onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(postcode = valStr) })
+                value = state.postalCode,
+                onValueChange = { post ->
+                    onIntent(SelfDeclarationIntent.UpdateState { copy(postalCode = post) })
                 },
-                label = "کد پستی",
-                placeholder = "کد پستی ۱۰ رقمی",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                label = "کد پستی ۱۰ رقمی",
+                placeholder = "۱۲۳۴۵۶۷۸۹۰"
             )
 
-            // Map selection placeholder
             OutlinedButton(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                onClick = { /* Open map dialog */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, taminColors.blueText),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = taminColors.blueText)
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = taminColors.blueText),
+                border = BorderStroke(1.dp, taminColors.blueText)
             ) {
-                Icon(imageVector = Icons.Default.LocationOn, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 TaminText("انتخاب موقعیت روی نقشه (جهت ثبت آدرس دقیق)", fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
+            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }

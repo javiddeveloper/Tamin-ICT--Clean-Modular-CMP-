@@ -185,7 +185,8 @@ fun StyledTextField(
     isValid: Boolean? = null,
     errorText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -233,7 +234,7 @@ fun StyledTextField(
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                singleLine = true,
+                singleLine = singleLine,
                 keyboardOptions = keyboardOptions,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = taminColors.textPrimary,
