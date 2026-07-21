@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.contract.MainEvent
@@ -39,22 +40,25 @@ fun MainApp(
     TaminHamrahTheme(
         darkTheme = darkTheme
     ) {
-        // App-wide default: dark icons over the light theme's pale surfaces, light ones
-        // over the dark theme's. A screen that puts a dark header behind the status bar
-        // can override this for as long as it is shown.
-        StatusBarIcons(darkIcons = !darkTheme)
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TaminHamrahNavGraph(
-                    isLoggedIn = uiState.isLoggedIn,
-                    isLoading = uiState.isLoading,
-                    onLoginClick = { viewModel.login() }
-                )
-            }
+        AppToastHost {
+            // App-wide default: dark icons over the light theme's pale surfaces, light ones
+            // over the dark theme's. A screen that puts a dark header behind the status bar
+            // can override this for as long as it is shown.
+            StatusBarIcons(darkIcons = !darkTheme)
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    TaminHamrahNavGraph(
+                        isLoggedIn = uiState.isLoggedIn,
+                        isLoading = uiState.isLoading,
+                        onLoginClick = { viewModel.login() }
+                    )
+                }
 
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
             }
         }
+
     }
 }

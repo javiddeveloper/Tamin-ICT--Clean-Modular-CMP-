@@ -1,0 +1,487 @@
+package com.tamin.taminhamrah.feature.healthProfile.ui
+
+import com.tamin.taminhamrah.ui.components.TaminText
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationEvent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
+import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun HealthProfileScreen(
+    viewModel: HealthProfileViewModel = koinViewModel(),
+    selfDecViewModel: SelfDeclarationViewModel = koinViewModel(),
+    onBackClicked: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val selfDecState by selfDecViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile)
+    }
+
+    HandleHealthProfileEvents(
+        events = viewModel.events,
+        selfDecEvents = selfDecViewModel.events,
+        onBackClicked = onBackClicked
+    )
+
+    HealthProfileMainContent(
+        state = uiState,
+        selfDecState = selfDecState,
+        onIntent = viewModel::sendIntent,
+        onSelfDecIntent = selfDecViewModel::sendIntent,
+        onBackClicked = onBackClicked
+    )
+}
+
+@Composable
+fun HandleHealthProfileEvents(
+    events: Flow<HealthProfileEvent>,
+    selfDecEvents: Flow<SelfDeclarationEvent>,
+    onBackClicked: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            HealthProfileEvent.NavigateBack -> {
+                scope.launch { onBackClicked() }
+            }
+        }
+    }
+    selfDecEvents.collectWithLifecycleAware { event ->
+        when (event) {
+            SelfDeclarationEvent.NavigateBack -> {
+                scope.launch { onBackClicked() }
+            }
+        }
+    }
+}
+
+@Composable
+fun HealthProfileMainContent(
+    state: HealthProfileUiState,
+    selfDecState: SelfDeclarationUiState,
+    onIntent: (HealthProfileIntent) -> Unit,
+    onSelfDecIntent: (SelfDeclarationIntent) -> Unit,
+    onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        ProvideTextStyle(value = MaterialTheme.typography.bodyMedium) {
+            when (selfDecState.currentStep) {
+                SelfDeclarationStep.GATE -> {
+                    SelfDeclarationGateScreen(
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = onBackClicked
+                    )
+                }
+                SelfDeclarationStep.INTRO -> {
+                    SelfDeclarationIntroScreen(
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.GATE))
+                        }
+                    )
+                }
+                SelfDeclarationStep.IDENTITY -> {
+                    SelfDeclarationIdentityScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO))
+                        }
+                    )
+                }
+                SelfDeclarationStep.PERSONAL -> {
+                    SelfDeclarationPersonalScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.CONTACT -> {
+                    SelfDeclarationContactScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL))
+                        }
+                    )
+                }
+                SelfDeclarationStep.EMERGENCY -> {
+                    SelfDeclarationEmergencyScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.CONTACT))
+                        }
+                    )
+                }
+                SelfDeclarationStep.PHYSICAL -> {
+                    SelfDeclarationPhysicalScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.DISEASES -> {
+                    SelfDeclarationDiseasesScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
+                        }
+                    )
+                }
+                SelfDeclarationStep.FAMILY -> {
+                    SelfDeclarationFamilyScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.DISEASES))
+                        }
+                    )
+                }
+                SelfDeclarationStep.BLOOD -> {
+                    SelfDeclarationBloodScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.FAMILY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.LIFESTYLE -> {
+                    SelfDeclarationLifestyleScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.BLOOD))
+                        }
+                    )
+                }
+                SelfDeclarationStep.ALLERGY -> {
+                    SelfDeclarationAllergyScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
+                        }
+                    )
+                }
+                SelfDeclarationStep.REVIEW -> {
+                    SelfDeclarationReviewScreen(
+                        state = selfDecState,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
+                        }
+                    )
+                }
+                SelfDeclarationStep.SUCCESS -> {
+                    SelfDeclarationSuccessScreen(
+                        onFinish = { enterProfile ->
+                            if (enterProfile) {
+                                onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.COMPLETED))
+                            } else {
+                                onBackClicked()
+                            }
+                        }
+                    )
+                }
+                else -> {
+                    Scaffold(
+                        topBar = {
+                            HealthTopAppBar(
+                                title = "پروندهٔ سلامت",
+                                onBackClicked = onBackClicked
+                            )
+                        }
+                    ) { paddingValues ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .background(MaterialTheme.colorScheme.background)
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else if (!state.error.isNullOrEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                        .align(Alignment.Center),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    TaminText(
+                                        text = state.error ?: "",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.error,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(onClick = { onIntent(HealthProfileIntent.LoadHealthProfile) }) {
+                                        TaminText("تلاش مجدد")
+                                    }
+                                }
+                            } else {
+                                HealthProfileContent(state = state)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HealthProfileContent(state: HealthProfileUiState) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // 1. General Profile Card
+        state.generalInfo?.let { general ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    SectionHeaderTitle(title = "اطلاعات عمومی پرونده سلامت",)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val name = "${general.patientName ?: ""} ${general.patientFamily ?: ""}".trim()
+                    ProfileRowItem(label = "نام بیمار:", value = name.ifEmpty { "نامشخص" })
+                    ProfileRowItem(label = "کد ملی:", value = general.patientNatCode ?: "نامشخص")
+                    ProfileRowItem(label = "نام پدر:", value = general.patientFather ?: "نامشخص")
+                    ProfileRowItem(label = "سن:", value = "${general.patientAge ?: "نامشخص"} سال")
+                    ProfileRowItem(label = "تاریخ تولد:", value = general.patientBirthDate ?: "نامشخص")
+                    ProfileRowItem(label = "جنسیت:", value = general.patientGender ?: "نامشخص")
+                    ProfileRowItem(label = "شماره همراه:", value = general.patientMobile ?: "نامشخص")
+                    ProfileRowItem(label = "آدرس بیمار:", value = general.patientAddress ?: "نامشخص")
+                }
+            }
+
+            // Health Metrics Card (BMI, Height, Weight, Blood Type)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    MetricItem(
+                        label = "گروه خونی",
+                        value = general.patientBloodGroup ?: "نامشخص",
+                        modifier = Modifier.weight(1f)
+                    )
+                    MetricItem(
+                        label = "قد (سانتی‌متر)",
+                        value = general.patientHeight?.let { "${it.toInt()}" } ?: "نامشخص",
+                        modifier = Modifier.weight(1f)
+                    )
+                    MetricItem(
+                        label = "وزن (کیلوگرم)",
+                        value = general.patientWeight?.let { "${it.toInt()}" } ?: "نامشخص",
+                        modifier = Modifier.weight(1f)
+                    )
+                    MetricItem(
+                        label = "شاخص توده بدنی (BMI)",
+                        value = general.patientBMI?.let { String.format("%.1f", it) } ?: "نامشخص",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        // 2. Lifestyle/Self-Declarative Info Card
+        state.lifestyleInfo?.let { lifestyle ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    SectionHeaderTitle(title = "سبک زندگی و خود اظهاری",)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ProfileRowItem(label = "مصرف سیگار / دخانیات:", value = lifestyle.smokingStatusTitle ?: "نامشخص")
+                    ProfileRowItem(label = "توضیحات دخانیات:", value = lifestyle.smokingDesc ?: "ندارد")
+                    ProfileRowItem(label = "مصرف الکل:", value = lifestyle.alcoholUsageTitle ?: "نامشخص")
+                    ProfileRowItem(label = "توضیحات الکل:", value = lifestyle.alcoholDesc ?: "ندارد")
+                    ProfileRowItem(label = "فراوانی ورزش:", value = lifestyle.exerciseFreqTitle ?: "نامشخص")
+                    ProfileRowItem(label = "توضیحات فعالیت ورزشی:", value = lifestyle.exerciseDesc ?: "ندارد")
+                    ProfileRowItem(label = "سوء مصرف مواد:", value = lifestyle.substanceUsageTitle ?: "نامشخص")
+                }
+            }
+        }
+
+        // 3. Drug Allergies Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                SectionHeaderTitle(title = "حساسیت‌های دارویی",)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (state.drugAllergies.isEmpty()) {
+                    TaminText(
+                        text = "هیچ حساسیت دارویی ثبت نشده است.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                } else {
+                    state.drugAllergies.forEach { allergy ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                TaminText(
+                                    text = allergy.drugName ?: "داروی نامشخص",
+                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                TaminText(
+                                    text = allergy.allergyComments ?: "فاقد توضیحات",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Emergency Contact Details Card
+        state.generalInfo?.let { general ->
+            if (!general.emergencyName.isNullOrEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        SectionHeaderTitle(title = "اطلاعات تماس اضطراری",)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        ProfileRowItem(label = "نام مخاطب اضطراری:", value = "${general.emergencyName} ${general.emergencyFamily ?: ""}".trim())
+                        ProfileRowItem(label = "نسبت خانوادگی:", value = general.emergencyRelation ?: "نامشخص")
+                        ProfileRowItem(label = "تلفن همراه اضطراری:", value = general.emergencyMobile ?: "نامشخص")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileRowItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TaminText(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        TaminText(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+@Composable
+private fun MetricItem(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TaminText(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        TaminText(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            ),
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
+        )
+    }
+}

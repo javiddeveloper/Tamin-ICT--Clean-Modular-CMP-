@@ -18,13 +18,13 @@ import com.tamin.taminhamrah.ui.contract.CustomNavigationBar
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
 
 
 @Composable
 fun FloatingGlassNavigationBar(
     hazeState: HazeState,
     modifier: Modifier = Modifier,
+    isBlurEnabled: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
     val glassShape = RoundedCornerShape(24.dp) // Deeply rounded pill shape
@@ -40,8 +40,8 @@ fun FloatingGlassNavigationBar(
                 spotColor = Color.Black.copy(alpha = 0.05f),
                 ambientColor = Color.Black.copy(alpha = 0.05f)
             ).background(brush = Brush.linearGradient(colors = listOf(MaterialTheme.colorScheme.background.copy(alpha = 0.1f) , MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))))
-            // 3. Apply the True Blur Effect
-            .hazeEffect(
+            // 3. Apply the True Blur Effect conditionally
+            .safeHazeEffect(
                 state = hazeState,
                 style = HazeStyle(
                     noiseFactor = 0.02f,
@@ -50,7 +50,9 @@ fun FloatingGlassNavigationBar(
                         blendMode = BlendMode.Luminosity
                     ),
                     blurRadius = 24.dp // How heavy the blur is
-                )
+                ),
+                fallbackColor = MaterialTheme.colorScheme.background.copy(alpha = 0.85f),
+                isEnabled = isBlurEnabled
             )
             .clip(glassShape)
             // The Glass Edge (Optional, but helps define the shape)
@@ -62,7 +64,7 @@ fun FloatingGlassNavigationBar(
     ) {
         // We use standard M3 NavigationBar but strip its background
         CustomNavigationBar(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp , horizontal = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp , horizontal = 4.dp),
             containerColor = Color.Transparent,
             tonalElevation = 0.dp,
             windowInsets = WindowInsets(0, 0, 0, 0), // Remove bottom padding to keep it tight

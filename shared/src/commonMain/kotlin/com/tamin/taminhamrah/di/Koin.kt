@@ -37,6 +37,7 @@ val sharedModules: List<Module>
         TaminServicesModule,
         workshopsModule,
         studentInsuranceContractModule,
+        com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
