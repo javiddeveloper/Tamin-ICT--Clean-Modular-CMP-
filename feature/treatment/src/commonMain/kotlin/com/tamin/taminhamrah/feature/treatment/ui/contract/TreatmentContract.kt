@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
@@ -14,12 +13,6 @@ data class TreatmentUiState(
     val deservedList: List<DeservedTreatmentPR> = emptyList(),
     /** Under-18 dependants — the only ones with their own insurance card. */
     val dependantList: List<DependantUserUnderEighteenPR> = emptyList(),
-
-    /**
-     * Spouse and children from the subdominant endpoint: not cardholders, but their records can
-     * be viewed, so they appear in the records patient filter.
-     */
-    val familyDependantList: List<DisabilityDependentPR> = emptyList(),
     val mainUserNationalCode: String? = null,
 
     val selectedNationalCode: String? = null,
@@ -41,7 +34,6 @@ data class TreatmentUiState(
 
         data class DeservedLoaded(val list: List<DeservedTreatmentPR>) : PartialState()
         data class DependantsLoaded(val list: List<DependantUserUnderEighteenPR>) : PartialState()
-        data class FamilyDependantsLoaded(val list: List<DisabilityDependentPR>) : PartialState()
         data class MainUserNationalCodeLoaded(val nationalCode: String) : PartialState()
         data class PatientSelected(val nationalCode: String, val fullName: String) : PartialState()
         data class HealthProfileStatusLoaded(val isCompleted: Boolean) : PartialState()

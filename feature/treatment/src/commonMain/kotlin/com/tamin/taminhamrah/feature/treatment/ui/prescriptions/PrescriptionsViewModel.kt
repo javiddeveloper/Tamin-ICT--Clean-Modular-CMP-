@@ -16,8 +16,8 @@ import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.util.getCurrentTimestamp
 import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 
 class PrescriptionsViewModel(
@@ -67,8 +67,8 @@ class PrescriptionsViewModel(
         val endD = intent.endDate ?: getCurrentTimestamp()
 
         try {
-            // One request per category. The endpoint has no "all", so «همه» asks for each of them
-            // and the lists are merged here, newest first.
+            // One request per category. «همه» asks for each type and the lists are merged here,
+            // newest first; a single-type tab is just a list of one.
             val perType = intent.requestTypeIds.map { requestTypeId ->
                 getElectronicPrescriptionListUseCase(
                     requestTypeId,
@@ -85,7 +85,7 @@ class PrescriptionsViewModel(
             }.collect { merged ->
                 emit(PartialState.PrescriptionsLoaded(merged.toPresentation()))
             }
-        } catch (e: Exception) {
+                } catch (e: Exception) {
             emit(PartialState.Error(e.messageOr(ERROR_LOAD_LIST)))
         }
     }
@@ -95,9 +95,12 @@ class PrescriptionsViewModel(
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
         val childCode = if (intent.nationalCode == nationalCode) "0" else intent.nationalCode
+        // An empty flagSata is a path segment; the old app sends the literal "null" so the URL
+        // does not collapse and 404, exactly as with the national code.
+        val flagSata = intent.flagSata.ifBlank { "null" }
 
         try {
-            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, childCode, intent.flagSata, intent.type).collect { list ->
+            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, childCode, flagSata, intent.type).collect { list ->
                 emit(PartialState.PrescriptionDetailsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {

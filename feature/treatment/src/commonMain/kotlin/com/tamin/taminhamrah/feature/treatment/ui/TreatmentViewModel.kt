@@ -14,8 +14,6 @@ import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
-import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
-import com.tamin.taminhamrah.mapper.personal.toPresentation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -28,7 +26,6 @@ import kotlinx.coroutines.flow.transform
 class TreatmentViewModel(
     private val getDeservedTreatmentUseCase: GetDeservedTreatmentUseCase,
     private val getDependantUnderEighteenUseCase: GetDependantUnderEighteenUseCase,
-    private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val featureManager: FeatureManager
 ) : BaseViewModel<TreatmentUiState, PartialState, TreatmentEvent, TreatmentIntent>(
@@ -136,17 +133,7 @@ class TreatmentViewModel(
                 emit(PartialState.DependantsLoaded(emptyList()))
             }
 
-        // Spouse and older children: the under-18 endpoint cannot return them, and this one
-        // carries the relation label the filter shows. Filters are empty because the endpoint
-        // resolves the family from the signed-in user.
-        val familyFlow: Flow<PartialState> = getDisabilityDependentInfoUseCase(emptyList())
-            .map { list -> PartialState.FamilyDependantsLoaded(list.toPresentation()) }
-            .catch {
-                // The carousel and the under-18 list must still work, so this stays quiet.
-                emit(PartialState.FamilyDependantsLoaded(emptyList()))
-            }
-
-        emitAll(merge(deservedFlow, dependantFlow, familyFlow))
+        emitAll(merge(deservedFlow, dependantFlow))
     }
 
     override fun reduceState(
@@ -158,10 +145,6 @@ class TreatmentViewModel(
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.DeservedLoaded -> currentState.copy(isLoading = false, deservedList = partialState.list)
         is PartialState.DependantsLoaded -> currentState.copy(isLoading = false, dependantList = partialState.list)
-        is PartialState.FamilyDependantsLoaded -> currentState.copy(
-            isLoading = false,
-            familyDependantList = partialState.list,
-        )
 
         // Navigation and sub-flow switches
         is PartialState.HealthProfileStatusLoaded -> currentState.copy(

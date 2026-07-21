@@ -8,6 +8,7 @@ import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_download
 import taminx.core.core_ui.ic_tamin_health_profile
 import taminx.core.core_ui.ic_tamin_medical_approvals
 import taminx.core.core_ui.ic_tamin_medical_centers
@@ -27,7 +28,7 @@ import taminx.core.core_ui.ic_tamin_verified
  * XML carries the design's original path data unchanged.
  *
  * They are stroke-only outlines on a 24x24 viewport; [androidx.compose.material3.Icon]
- * recolours them via its `tint`, so the stroke colour in the XML is irrelevant.
+ * recolours them via its `tint`, so the stroke color in the XML is irrelevant.
  *
  * The chevrons set `android:autoMirrored="true"` and are declared in their left-to-right
  * form, so they flip automatically under a right-to-left layout.
@@ -89,4 +90,7 @@ object TaminIcons {
     /** Print / share action. */
     val Print: ImageVector
         @Composable get() = vectorResource(Res.drawable.ic_tamin_print)
+
+    val Download: ImageVector
+        @Composable get() = vectorResource(Res.drawable.ic_tamin_download)
 }

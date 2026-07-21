@@ -34,6 +34,7 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -83,10 +84,11 @@ import org.koin.compose.viewmodel.koinViewModel
 private const val SELF_LABEL = "خودم"
 
 /**
- * The filter chooser, drawn as a panel under the bar rather than a floating menu.
+ * The full-width filter chooser that drops below the bar.
  *
- * A popup anchored to the top bar lands in the wrong place and overlaps the chips; the design
- * shows a full-width panel, so that is what this is.
+ * Rendered as an overlay in the content with a [Scrim] behind it, so it floats over the list,
+ * dismisses on an outside tap, and always lands in the same place regardless of which chip opened
+ * it — unlike a menu anchored to one trigger.
  */
 @Composable
 private fun <T> RecordFilterPanel(
@@ -133,6 +135,28 @@ private fun <T> RecordFilterPanel(
             }
         }
     }
+}
+
+/** A transparent full-size catch layer: a tap anywhere behind the panel closes it. */
+@Composable
+private fun Scrim(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onDismiss,
+            ),
+    )
+}
+
+/** The date trigger reads back the chosen custom range instead of the bare "تاریخ دلخواه". */
+private fun periodLabel(period: RecordPeriod, customRange: Pair<String, String>?): String {
+    if (period != RecordPeriod.CUSTOM || customRange == null) return period.label
+    val from = PersianDateFormatter.formatTimestamp(customRange.first.toLongOrNull())
+    val to = PersianDateFormatter.formatTimestamp(customRange.second.toLongOrNull())
+    return "$from - $to"
 }
 
 /**
@@ -238,6 +262,7 @@ fun MedicalRecordsScreen(
         patients = patients,
         selectedPatient = selectedPatient,
         selectedPeriod = selectedPeriod,
+        customRange = customRange,
         selectedTab = selectedTab,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
@@ -283,6 +308,7 @@ fun MedicalRecordsContent(
     patients: List<PatientItem>,
     selectedPatient: String,
     selectedPeriod: RecordPeriod,
+    customRange: Pair<String, String>?,
     selectedTab: RecordTab,
     onBack: () -> Unit,
     onTabSelected: (RecordTab) -> Unit,
@@ -358,7 +384,7 @@ fun MedicalRecordsContent(
                 TimelineFilterBar(
                     // Never blank: the insured person is the default until the list arrives.
                     personLabel = currentPatient?.filterLabel ?: SELF_LABEL,
-                    dateLabel = selectedPeriod.label,
+                    dateLabel = periodLabel(selectedPeriod, customRange),
                     dropdownIcon = TaminIcons.ChevronBack,
                     searchIcon = TaminIcons.Search,
                     onPersonClick = {
@@ -377,44 +403,17 @@ fun MedicalRecordsContent(
         },
         bottomBar = { RecordsTotals(prices = state.prescriptionPriceList) },
     ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         PullToRefreshBox(
             isRefreshing = state.isLoading,
             onRefresh = onRetry,
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize(),
         ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
-            when {
-                showPatientMenu -> RecordFilterPanel(
-                    // Falls back to the person already being viewed: an empty list would open an
-                    // empty panel, which reads as "the dropdown is broken".
-                    options = patients
-                        .map { it.nationalId to it.filterLabel }
-                        .ifEmpty { listOf(selectedPatient to SELF_LABEL) },
-                    isSelected = { it == selectedPatient },
-                    onSelect = {
-                        onPatientSelected(it)
-                        showPatientMenu = false
-                    },
-                )
-                showPeriodMenu -> RecordFilterPanel(
-                    options = RecordPeriod.entries.map { it to it.label },
-                    isSelected = { it == selectedPeriod },
-                    onSelect = { period ->
-                        showPeriodMenu = false
-                        // The presets apply immediately; a custom range needs two dates first.
-                        if (period == RecordPeriod.CUSTOM) {
-                            pickingRangeStart = true
-                        } else {
-                            onPeriodSelected(period)
-                        }
-                    },
-                )
-            }
-
             TreatmentFilterChipRow(
                 categories = RecordTab.chips.map { it.label },
                 selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
@@ -441,6 +440,41 @@ fun MedicalRecordsContent(
                 else -> RecordTimeline(
                     records = state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) },
                     onRecordSelected = onRecordSelected,
+                )
+            }
+        }
+        }
+
+        // Both filters share one full-width panel that drops below the bar, so neither can anchor
+        // to the wrong chip. A tap on the scrim behind it dismisses.
+        if (showPatientMenu || showPeriodMenu) {
+            Scrim(onDismiss = {
+                showPatientMenu = false
+                showPeriodMenu = false
+            })
+            if (showPatientMenu) {
+                RecordFilterPanel(
+                    options = patients
+                        .map { it.nationalId to it.filterLabel }
+                        .ifEmpty { listOf(selectedPatient to SELF_LABEL) },
+                    isSelected = { it == selectedPatient },
+                    onSelect = {
+                        onPatientSelected(it)
+                        showPatientMenu = false
+                    },
+                )
+            } else {
+                RecordFilterPanel(
+                    options = RecordPeriod.entries.map { it to it.label },
+                    isSelected = { it == selectedPeriod },
+                    onSelect = { period ->
+                        showPeriodMenu = false
+                        if (period == RecordPeriod.CUSTOM) {
+                            pickingRangeStart = true
+                        } else {
+                            onPeriodSelected(period)
+                        }
+                    },
                 )
             }
         }
@@ -571,6 +605,7 @@ fun MedicalRecordsPreview() {
             patients = TreatmentMocks.mainUiState.toPatientList(),
             selectedPatient = "1234567890",
             selectedPeriod = RecordPeriod.LAST_SIX_MONTHS,
+            customRange = null,
             selectedTab = RecordTab.MEDICINE,
             onBack = {},
             onTabSelected = {},
@@ -587,6 +622,6 @@ fun MedicalRecordsPreview() {
 
 /** Turns the endpoint's numeric category into its Persian name; unknown ids show as-is. */
 private fun String.toCategoryLabel(): String =
-    RecordTab.entries.firstOrNull { this in it.requestTypeIds && it != RecordTab.ALL }?.label
+    RecordTab.entries.firstOrNull { it != RecordTab.ALL && this in it.requestTypeIds }?.label
         ?: RecordTab.labelForTypeId(this)
         ?: this

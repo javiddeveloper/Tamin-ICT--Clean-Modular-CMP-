@@ -140,6 +140,7 @@ fun TreatmentContent(
     val patients = remember(state) { state.toPatientList() }
     var entitlementReason by remember { mutableStateOf<String?>(null) }
     val pagerState = rememberPagerState(pageCount = { patients.size })
+    val scrollState = rememberScrollState()
 
     SyncPagerWithSelection(
         state = state,
@@ -152,7 +153,7 @@ fun TreatmentContent(
         modifier = modifier
             .fillMaxSize()
             .background(LocalTaminColors.current.bgPage)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scrollState),
     ) {
         TreatmentHubHeader(onSearch = onSearch)
         // The whole body shifts up together, so the overlap does not leave a gap below.
@@ -168,7 +169,7 @@ fun TreatmentContent(
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
                 // Nothing to open until a patient is selected.
-                onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.ALL)) },
+                onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) },
                 onOpenHealthProfile = onOpenHealthProfile,
                 onOpenCenters = onOpenCenters,
             )
@@ -260,3 +261,4 @@ fun TreatmentScreenPreview() {
         )
     }
 }
+

@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import com.tamin.taminhamrah.ui.icons.TaminIcons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -107,7 +110,8 @@ fun MedicalRecordCard(
             style = MaterialTheme.typography.bodySmall,
             color = colors.textTertiary,
         )
-        TaminDivider(modifier = Modifier.padding(top = Spacing.sm))
+        TaminDivider(modifier = Modifier.padding(top = Spacing.md))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         MedicalRecordFooter(shareAmount = shareAmount)
     }
 }
@@ -154,16 +158,25 @@ private fun MedicalRecordFooter(shareAmount: String) {
                 color = colors.textMuted,
             )
         }
-        Box(
+        Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(CornerRadius.chip))
                 .background(colors.medicalGradient)
                 .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
                 text = "جزئیات",
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
+            )
+            // Points toward the detail screen; autoMirrored, so it sits on the left in RTL.
+            Icon(
+                imageVector = TaminIcons.ChevronForward,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.small),
             )
         }
     }

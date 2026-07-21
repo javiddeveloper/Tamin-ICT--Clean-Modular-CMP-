@@ -267,6 +267,7 @@ fun TaminPrimaryButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
+        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -275,7 +276,6 @@ fun TaminPrimaryButton(
                 modifier = Modifier.size(IconSize.medium),
             )
         }
-        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
     }
 }
 
