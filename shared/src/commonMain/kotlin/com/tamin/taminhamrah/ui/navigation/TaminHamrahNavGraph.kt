@@ -79,6 +79,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
+import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
@@ -106,6 +109,11 @@ import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.Lifecycle
+import androidx.compose.runtime.getValue
+import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import org.koin.compose.koinInject
@@ -249,7 +257,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                             )
                         )
                 ) {
-                    FloatingGlassNavigationBar(hazeState = hazeState) {
+                    FloatingGlassNavigationBar(
+                        hazeState = hazeState,
+                        isBlurEnabled = isBottomBarVisible
+                    ) {
 
                         navigationItems.forEach { navigationItem ->
 
@@ -304,7 +315,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
-                .hazeSource(state = hazeState)
+                .safeHazeSource(state = hazeState, isEnabled = isBottomBarVisible)
         ) {
             NavHost(
                 navController = navController,
@@ -369,12 +380,19 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     )
                 }
 
-                treatmentScreen()
+                treatmentScreen(
+                    onOpenHealthProfile = {
+                        navController.navigateToHealthProfile()
+                    }
+                )
 
                 profileGraph(
                     navController = navController,
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
+                    },
+                    onNavigateToHealthProfile = {
+                        navController.navigateToHealthProfile()
                     },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
@@ -423,6 +441,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
 
                 agentScreen()
+
+                healthProfileScreen(onBack = { navController.popBackStack() })
             }
 
             androidx.compose.animation.AnimatedVisibility(

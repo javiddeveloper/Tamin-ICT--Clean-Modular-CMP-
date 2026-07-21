@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import org.koin.compose.viewmodel.koinViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.contract.DeferredInstallmentIntent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeferredInstallmentScreen(
     onBack: () -> Unit,
