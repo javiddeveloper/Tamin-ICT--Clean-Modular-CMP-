@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    style="@style/AppTheme"
+    tools:context=".ui.home.dashboard.DrawerFragment">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="@dimen/margin_82dp"
+        android:layout_height="@dimen/margin_63dp"
+        android:layout_marginTop="@dimen/_30sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_logo_tamin" />
+
+
+    <View
+        android:id="@+id/viewProfile"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="?attr/colorSurfaceContainerHighest"
+        app:layout_constraintBottom_toBottomOf="@+id/tvNationalCode"
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginVertical="@dimen/_15sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvNationalCode"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvUsername"
+        app:srcCompat="@drawable/ic_account" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvUsername"
+        style="@style/TextStyle.Title"
+        android:layout_width="0dp"
+        android:layout_alignTop="@+id/imgProfile"
+        android:layout_marginStart="@dimen/margin_20dp"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:layout_toStartOf="@+id/imgProfile"
+        android:paddingTop="@dimen/_10sdp"
+        android:textDirection="rtl"
+        app:layout_constraintBottom_toTopOf="@id/tvNationalCode"
+        app:layout_constraintEnd_toStartOf="@id/imgProfile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/viewProfile"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="سمیه مدبری" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvNationalCode"
+        style="@style/TextStyle.Title"
+        android:layout_width="0dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:gravity="right"
+        android:textDirection="rtl"
+        android:paddingBottom="@dimen/_10sdp"
+        app:layout_constraintEnd_toEndOf="@id/tvUsername"
+        app:layout_constraintStart_toStartOf="@id/tvUsername"
+        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+        tools:text="0083834001" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

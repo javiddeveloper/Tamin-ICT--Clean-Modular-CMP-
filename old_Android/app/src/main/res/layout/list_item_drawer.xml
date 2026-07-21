@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/icon_size_24dp"
+        android:layout_height="@dimen/icon_size_24dp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:tag="main_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvTitle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_logo_placeholder"
+        app:tint="?attr/colorPrimary" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvTitle"
+        style="@style/TextStyle.Title"
+        android:textSize="@dimen/font_sub_title_size"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="start"
+        android:tag="title"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:textColor="?attr/colorOnBackground"
+        app:layout_constraintBottom_toTopOf="@id/tvSubTitle"
+        app:layout_constraintEnd_toStartOf="@id/icon"
+        app:layout_constraintStart_toEndOf="@id/imgShowMore"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="زززز" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvSubTitle"
+        style="@style/TextStyle.SubTitle"
+        android:textSize="@dimen/font_menu_size"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="start"
+        android:tag="subTitle"
+        android:textColor="?attr/colorOutline"
+        android:layout_marginTop="@dimen/_4sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/tvTitle"
+        app:layout_constraintStart_toEndOf="@id/imgShowMore"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        tools:text="زززز" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgShowMore"
+        android:layout_width="@dimen/icon_size_24dp"
+        android:layout_height="@dimen/icon_size_24dp"
+        android:padding="@dimen/margin_4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorOnBackground"
+        app:srcCompat="@drawable/ic_arrow_show_more" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+

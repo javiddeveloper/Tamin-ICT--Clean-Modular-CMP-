@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.entity.ServiceModel" />
+
+        <variable
+            name="isEmployer"
+            type="Boolean" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bg"
+        android:layout_width="@dimen/item_width_service_main"
+        android:layout_height="@dimen/item_height_service_main"
+        android:elevation="2dp"
+        android:background="@drawable/bg_item_blue"
+        android:clickable='@{item.active?true:true}'
+        android:focusable='@{item.active?true:true}'>
+
+        <View
+            android:id="@+id/container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="@dimen/margin_4dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable='@{item.active?true:true}'
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            style="@style/TextStyle.SubTitle"
+            android:layout_margin="@dimen/margin_10dp"
+            android:background="@drawable/bg_yellow"
+            android:paddingStart="@dimen/margin_4dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="@dimen/margin_4dp"
+            android:paddingBottom="2dp"
+            android:text="@string/label_new"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="10sp"
+            android:visibility='@{item.newService?View.VISIBLE:View.GONE}'
+            app:layout_constraintEnd_toStartOf="@+id/img_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/img_icon"
+            android:layout_width="@dimen/icon_width_40dp"
+            android:layout_height="@dimen/icon_height_33dp"
+            android:layout_margin="@dimen/margin_16dp"
+            android:adjustViewBounds="true"
+            android:layerType="software"
+            android:scaleType="centerInside"
+            tools:srcCompat="@drawable/ic_notification"
+            android:transitionName="aaaaaaaaaaa"
+            app:layout_constraintEnd_toEndOf="@id/container"
+            app:layout_constraintStart_toStartOf="@id/container"
+            app:layout_constraintTop_toTopOf="@id/container" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txt_title"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_10dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@{item.name}"
+            app:autoSizeMaxTextSize="@dimen/font_sub_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="@id/container"
+            app:layout_constraintEnd_toEndOf="@+id/container"
+            app:layout_constraintStart_toStartOf="@+id/container"
+            app:layout_constraintTop_toBottomOf="@+id/img_icon"
+            tools:text="TextViewTextViewTextViewTextViewTextViewTextViewTextViewTextViewTextView" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItemMafasahesabDocs"
+        style="@style/VerticalStepperItemView"
+        tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_20dp">
+
+            <include
+                android:id="@+id/item_Desc_1"
+                layout="@layout/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:item='@{@string/label_doc_guid}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddImage"
+                style="@style/TextButtonBordered.Green"
+                android:layout_width="0dp"
+                android:drawableRight="@drawable/ic_add_circle"
+                app:drawableTint="@color/green"
+                android:text="@string/label_add_image"
+                android:textSize="@dimen/margin_12dp"
+                android:layout_marginTop="@dimen/margin_20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/item_Desc_1" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerImage"
+                style="@style/LinearRecyclerStyle"
+                tools:layout_height="100dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAddImage" />
+
+            <View
+                android:id="@+id/line"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recyclerImage"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:background="@color/lineColor"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddPDF"
+                style="@style/TextButtonBordered.Blue"
+                android:layout_width="0dp"
+                android:drawableRight="@drawable/ic_add_circle"
+                app:drawableTint="@color/colorPrimary"
+                android:text="@string/label_add_pdf"
+                android:textSize="@dimen/margin_12dp"
+                android:layout_marginTop="@dimen/margin_20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerPDf"
+                style="@style/LinearRecyclerStyle"
+                tools:layout_height="100dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAddPDF" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="itemFreelanceJob"
+            type="com.tamin.taminhamrah.data.remote.models.services.RadioButtonModel" />
+
+        <variable
+            name="itemOptional"
+            type="com.tamin.taminhamrah.data.remote.models.services.RadioButtonModel" />
+
+        <variable
+            name="itemCompleteFractional"
+            type="com.tamin.taminhamrah.data.remote.models.services.RadioButtonModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurfaceContainerHigh"
+        android:layoutDirection="rtl">
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="30dp"
+            android:layout_height="4dp"
+            android:layout_margin="@dimen/margin_10dp"
+            android:background="#dadce0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleSearch"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/label_search_contract"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            tools:text="جستجو قرارداد" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputContractNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:editText_hint="@string/contract_code"
+            app:editText_max_len="10"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitleSearch"
+            />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleSelectInsuranceType"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/label_select_insurance_type_name_contract_list"
+            android:layout_marginTop="@dimen/_20sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inputContractNumber"
+            tools:text="انتخاب نوع بیمه" />
+
+        <RadioGroup
+            android:id="@+id/rgSelectInsuranceType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleSelectInsuranceType"
+            app:layout_constraintStart_toStartOf="parent"
+            android:orientation="vertical"
+            >
+
+            <include
+                android:id="@+id/layoutRbFreelanceJob"
+                layout="@layout/list_item_radio_button_rtl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:item = '@{itemFreelanceJob}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/layoutRbOptional"
+                layout="@layout/list_item_radio_button_rtl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:item = '@{itemOptional}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/layoutCompleteFractional"
+                layout="@layout/list_item_radio_button_rtl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                app:item = '@{itemCompleteFractional}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </RadioGroup>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSearch"
+            style="@style/MainButton"
+            android:layout_margin="@dimen/margin_20dp"
+            android:text="@string/label_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rgSelectInsuranceType"
+            />
+
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnSearch" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

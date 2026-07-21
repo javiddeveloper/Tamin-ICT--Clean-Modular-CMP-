@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.user.ContractItem" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/contractId"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/contract_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/contractCode"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end|center_vertical"
+            android:text='@{item.contractNumber.toString()}'
+            app:layout_constraintBottom_toBottomOf="@id/contractId"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/contractId"
+            tools:text="1234567890" />
+
+        <View
+            android:id="@+id/line13"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/contractId" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/contractDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/request_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/line13" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvContractDate"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end|center_vertical"
+            android:text='@{item.getPersianDate(item.contractDate)}'
+            app:layout_constraintBottom_toBottomOf="@id/contractDate"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/contractDate"
+            tools:text="1400/12/29" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/contractDate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvInsuranceType"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            android:text='@{item.premiumType.insuranceDescription}'
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line1"
+            tools:text="درخواست اعلام شماره حساب بانکي" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelType"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_insurance_type"
+            app:layout_constraintBottom_toBottomOf="@id/tvInsuranceType"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="@id/tvInsuranceType" />
+
+        <View
+            android:id="@+id/line10"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvInsuranceType" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvInsuranceRates"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.premiumRate.spcrateDescription}'
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line10"
+            tools:text="متن تست برای نرخ بیمه که ممکن است طولانی باشد" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/InsuranceRates"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_insurance_rates"
+            app:layout_constraintBottom_toBottomOf="@id/tvInsuranceRates"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="@id/tvInsuranceRates" />
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvInsuranceRates" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvMonthlyWage"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.getSalaryWithSeparator()}'
+            android:textColor="@color/green"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line2"
+            tools:text="1.000.000 ریال" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/monthlyWage"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_monthly_wage"
+            app:layout_constraintBottom_toBottomOf="@id/tvMonthlyWage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="@id/tvMonthlyWage" />
+
+        <View
+            android:id="@+id/line11"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvMonthlyWage" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTreatmentSupport"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.getSupportCondition()}'
+            android:textColor='@{item.cntDrmn.equals("1") ?@color/colorPrimary:@color/red}'
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line11"
+            tools:text="حمایت درمان ندارد" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/treatmentSupport"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_treatment_support"
+            app:layout_constraintBottom_toBottomOf="@id/tvTreatmentSupport"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="@id/tvTreatmentSupport" />
+
+        <View
+            android:id="@+id/line12"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTreatmentSupport" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupVisit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="line12, tvTreatmentSupport, treatmentSupport, line11, tvMonthlyWage, monthlyWage"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvJob"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.freeJob.discrioption}'
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line12"
+            tools:text="دانشجو" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/job"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_job"
+            app:layout_constraintBottom_toBottomOf="@id/tvJob"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="@id/tvJob" />
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvJob" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvContractStatus"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.contractStatusObject.selfIsuContStatDesc}'
+            android:textColor='@{item.contractStatusObject.selfIsuContStatCode == 1 ?@color/green:@color/red}'
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line3"
+            tools:text="وضعیت تستی قرارداد" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelContractStatus"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_contract_status"
+            app:layout_constraintBottom_toBottomOf="@id/tvContractStatus"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guideline_center"
+            app:layout_constraintTop_toTopOf="@id/tvContractStatus" />
+
+        <View
+            android:id="@+id/line4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvContractStatus" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnAction"
+            style="@style/TextButtonBordered.ActionButton"
+            android:layout_width="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line4"
+            tools:ignore="TouchTargetSizeCheck"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="isSelectRate"
+            type="Boolean" />
+    </data>
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+
+        android:id="@+id/stepperPaymentRate"
+        style="@style/VerticalStepperItemView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:nextStepEnable="false"
+        app:step_index="8"
+        app:step_title="@string/label_step7_contract"
+        tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            >
+
+
+            <LinearLayout
+                android:id="@+id/hingGroup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/_2sdp"
+                android:paddingBottom="@dimen/_2sdp"
+                app:layout_constraintEnd_toEndOf="@id/recyclerPaymentRate"
+                app:layout_constraintStart_toStartOf="@id/recyclerPaymentRate"
+                app:layout_constraintTop_toTopOf="parent"
+
+                >
+
+                <include
+                    android:id="@+id/ItemDesc5"
+                    layout="@layout/item_desc_static"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/_10sdp"
+
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+                <include
+                    android:id="@+id/ItemDesc6"
+                    layout="@layout/item_desc_static"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ItemDesc5" />
+
+                <include
+                    android:id="@+id/ItemDesc7"
+                    layout="@layout/item_desc_static"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ItemDesc6" />
+            </LinearLayout>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerPaymentRate"
+                style="@style/LinearRecyclerStyle"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hingGroup" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

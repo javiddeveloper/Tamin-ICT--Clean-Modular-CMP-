@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.entity.MenuModel" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_main">
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/cbConfirmRules"
+            style="@style/CheckBoxStepperStyle"
+            android:layout_width="wrap_content"
+            android:checked="false"
+            android:layoutDirection="ltr"
+            android:textDirection="rtl"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:checked="true" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDescCommitment"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:elevation="@dimen/_2sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:justificationMode="inter_word"
+            android:padding="@dimen/_2sdp"
+            android:text="@{item.title}"
+            tools:text="بیمه اختیاری"
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/cbConfirmRules"
+            app:layout_constraintEnd_toStartOf="@+id/cbConfirmRules"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cbConfirmRules" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

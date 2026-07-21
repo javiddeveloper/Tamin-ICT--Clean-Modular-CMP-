@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperRules"
+        style="@style/VerticalStepperItemView"
+        app:layout_constraintTop_toBottomOf="@+id/stepperEligibilityStatus"
+        app:nextStepEnable="false"
+        app:previousStepEnable="true"
+        app:step_index="3"
+        app:step_title="@string/label_employer_online_services_agreement"
+        tools:step_state="selected">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_400sdp"
+                android:animateLayoutChanges="true">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv1"
+                    style="@style/TextStyle.Title"
+                    android:text="@string/label_employer_online_services_agreement_1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <include
+                    android:id="@+id/rule1"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:item='@{@string/label_employer_online_services_agreement_2}'
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv1" />
+
+                <include
+                    android:id="@+id/rule2"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:item='@{@string/label_employer_online_services_agreement_3}'
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rule1" />
+
+                <include
+                    android:id="@+id/rule3"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:item='@{@string/label_employer_online_services_agreement_4}'
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rule2" />
+
+                <include
+                    android:id="@+id/rule4"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:item='@{@string/label_employer_online_services_agreement_5}'
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rule3" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/cbConfirmRules"
+                    style="@style/CheckBoxStepperStyle"
+                    android:layout_width="wrap_content"
+                    android:checked="false"
+                    android:layoutDirection="ltr"
+                    android:textDirection="rtl"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rule4"
+                    tools:checked="true" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelDescCommitment"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:elevation="@dimen/_2sdp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:justificationMode="inter_word"
+                    android:padding="@dimen/_2sdp"
+                    android:text="@string/label_employer_online_services_agreement_6"
+                    android:textColor="?attr/colorOnSurface"
+                    app:layout_constraintEnd_toStartOf="@+id/cbConfirmRules"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/cbConfirmRules" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

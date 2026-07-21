@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="@dimen/_5sdp"
+        android:paddingBottom="@dimen/_10sdp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitlePrescriptionNumber"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:gravity="center"
+            android:lines="1"
+            android:text="@string/prescription_number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValuePrescriptionNumber"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:background="@drawable/bg_btn_dialog_light_primary"
+            android:gravity="center"
+            android:padding="@dimen/_5sdp"
+            android:lines="1"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="@+id/tvTitlePrescriptionNumber"
+            app:layout_constraintStart_toStartOf="@+id/tvTitlePrescriptionNumber"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitlePrescriptionNumber"
+            tools:text="20" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleReceivedNumber"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:gravity="center"
+            android:lines="1"
+            android:text="@string/received_number"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitlePrescriptionNumber" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueReceivedNumber"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:padding="@dimen/_5sdp"
+            android:background="@drawable/bg_btn_dialog_green_light"
+            android:gravity="center"
+            android:lines="1"
+            android:textColor="@color/textGreenColorSubTitle"
+            app:layout_constraintEnd_toEndOf="@+id/tvTitleReceivedNumber"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleReceivedNumber"
+            tools:text="20" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleServiceName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_15sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:text="@string/label_Service_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvValuePrescriptionNumber" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueServiceName"
+            style="@style/TextStyle.Title.colorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleServiceName"
+            tools:text="APOTEL INJECTION, SOLUTION, CONCENTRATE INTRAVENOUS 150 mg/1mL 6.7 mL	" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleUseOrder"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:text="@string/use_order"
+            app:layout_constraintEnd_toEndOf="@+id/tvValueUseOrder"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueServiceName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueUseOrder"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_10sdp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleUseOrder"
+            tools:text="هر 8 ساعت هفت و نيم سي سي-Syrup/Susp  هر 8 ساعت هفت و نيم سي سي-Syrup/Susp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleActionDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:gravity="center"
+            android:text="@string/action_date"
+            app:layout_constraintEnd_toEndOf="@+id/tvValueServiceName"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueUseOrder" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueActionDate"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:gravity="end"
+            android:textColor="@color/text_color_orange"
+            app:layout_constraintEnd_toEndOf="@+id/tvTitleActionDate"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleActionDate"
+            app:layout_constraintWidth_percent="0.33"
+            tools:text="1402/01/02" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitlePharmacy"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/pharmacy"
+            app:layout_constraintStart_toStartOf="@+id/tvValuePharmacy"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleActionDate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValuePharmacy"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:gravity="end"
+            app:layout_constraintEnd_toStartOf="@+id/totalView"
+            app:layout_constraintStart_toEndOf="@+id/organizationShareView"
+            app:layout_constraintStart_toStartOf="@+id/tvValueUseOrder"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitlePharmacy"
+            app:layout_constraintWidth_percent="0.6"
+            tools:text="داروخانه شبانه روزی شهید دکتر شریفی" />
+
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flowCast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:orientation="horizontal"
+            app:constraint_referenced_ids="organizationShareView,patientShareView,totalView"
+            app:flow_horizontalGap="@dimen/_2sdp"
+            app:layout_constraintBottom_toTopOf="@+id/btnShowMore"
+            app:layout_constraintTop_toBottomOf="@+id/tvValuePharmacy"
+            app:layout_constraintVertical_bias="0"
+            tools:layout_editor_absoluteX="10dp" />
+
+        <include
+            android:id="@+id/totalView"
+            layout="@layout/list_item_cast_prescription"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <include
+            android:id="@+id/patientShareView"
+            layout="@layout/list_item_cast_prescription"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <include
+            android:id="@+id/organizationShareView"
+            layout="@layout/list_item_cast_prescription"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowMore"
+            style="@style/TextButton"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:minWidth="80dp"
+            android:text="@string/label_see_detail"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:constraint_referenced_ids="flowCast,tvValuePharmacy,tvTitlePharmacy" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupDetailMedicalInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="tvTitlePrescriptionNumber,tvValuePrescriptionNumber,tvTitleReceivedNumber,tvValueReceivedNumber,tvTitleUseOrder,tvValueUseOrder"
+            tools:visibility="visible" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

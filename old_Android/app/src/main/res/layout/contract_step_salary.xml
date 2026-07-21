@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        app:layout_constraintTop_toBottomOf="@+id/stepperTherapeuticSupport"
+        app:step_index="9"
+        app:step_title="@string/label_step9_contract"
+        tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            >
+
+            <include
+                android:id="@+id/ItemDesc9"
+                layout="@layout/item_desc_static"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/ItemDesc10"
+                layout="@layout/item_desc_static"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ItemDesc9" />
+
+
+            <include
+                android:id="@+id/ItemDesc11"
+                layout="@layout/item_desc_static"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ItemDesc10" />
+
+
+            <!--          <androidx.appcompat.widget.AppCompatTextView
+                          android:id="@+id/titleMonthlyPremium"
+                          style="@style/TextStyle.SubTitle"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginTop="@dimen/_10sdp"
+                          android:drawablePadding="@dimen/margin_10dp"
+                          android:justificationMode="inter_word"
+                          android:padding="@dimen/margin_20dp"
+                          android:text="@string/title_select_monthly_premium"
+                          android:textColor="?attr/colorOnSurface"
+                          android:textSize="@dimen/font_title_size"
+                          app:layout_constraintEnd_toEndOf="parent"
+                          app:layout_constraintHorizontal_bias="0.5"
+                          app:layout_constraintTop_toBottomOf="@+id/ItemDesc11" />-->
+
+            <include
+                android:id="@+id/layoutPriceSeekBar"
+                layout="@layout/view_price_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ItemDesc11" />
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCalculate"
+                style="@style/TextButtonBordered.Blue"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:text="@string/label_calculate_monthly_premium"
+                app:layout_constraintEnd_toEndOf="@+id/ItemDesc11"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutPriceSeekBar"
+                tools:visibility="visible" />
+
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="tvShowValueOfCal,img" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvShowValueOfCal"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:drawablePadding="@dimen/margin_10dp"
+                android:justificationMode="inter_word"
+                android:paddingStart="@dimen/margin_5dp"
+                android:paddingEnd="@dimen/margin_5dp"
+                android:text="@string/value_calcaluate_salary_for_contract"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="@dimen/font_title_size"
+                app:layout_constraintEnd_toStartOf="@id/img"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/img"
+                tools:visibility="visible" />
+
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_15sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+
+                app:layout_constraintTop_toBottomOf="@+id/tvSelectedValue"
+                app:srcCompat="@drawable/ic_info_outline" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvSelectedValue"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:drawablePadding="@dimen/margin_10dp"
+                android:justificationMode="inter_word"
+                android:paddingStart="@dimen/margin_5dp"
+                android:paddingEnd="@dimen/margin_5dp"
+                android:text="@string/value_calcaluate_salary_for_contract"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="@dimen/font_title_size"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@id/imgSelectedValue"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imgSelectedValue"
+                tools:visibility="gone" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgSelectedValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnCalculate"
+                app:srcCompat="@drawable/ic_info_outline"
+                tools:visibility="gone" />
+
+
+            <include
+                android:id="@+id/ItemDesc8"
+                layout="@layout/item_desc_static"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@+id/btnCalculate"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvShowValueOfCal"
+                tools:visibility="visible" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+
+</layout>

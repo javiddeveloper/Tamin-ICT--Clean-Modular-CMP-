@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.tamin.taminhamrah.ui.home.services.employer.contract.assignerContract.EnumMafasaHesabStep"/>
+    </data>
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/correspondenceStepDescription"
+        style="@style/VerticalStepperItemView"
+        app:step_state="normal"
+        app:step_is_last="false"
+        app:nextStepEnable="false"
+        app:step_index="2"
+        tools:step_state="selected">
+
+        <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+            android:id="@+id/inputDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:editText_max_line="5"
+            app:editText_max_len="500"
+            />
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

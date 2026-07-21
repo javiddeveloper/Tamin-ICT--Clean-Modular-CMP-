@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperInquiryInfo"
+        style="@style/VerticalStepperItemView"
+        app:previousStepVisible="false"
+        app:step_index="1"
+        app:step_state="selected"
+        app:nextStepTitle="@string/inquiry_info"
+        app:step_title="@string/receive_info_from_registry">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_5sdp">
+
+            <com.tamin.taminhamrah.widget.edittext.nationalcode.EditTextNationalCode
+                android:id="@+id/edNationalId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/datePickerBirthDate"
+                layout="@layout/widget_date_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:hint="@{@string/birthdate}"
+                app:layout_constraintTop_toBottomOf="@+id/edNationalId" />
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/selectDependent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:editText_hint="@string/relative"
+                app:layout_constraintTop_toBottomOf="@+id/datePickerBirthDate" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:text="@string/full_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvValueName"
+                app:layout_constraintTop_toBottomOf="@id/selectDependent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueName"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:gravity="end|center_vertical"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleName"
+                app:layout_constraintEnd_toStartOf="@+id/tvTitleName"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleName"
+                tools:text="سعید هنری" />
+
+            <View
+                android:id="@+id/line"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:background="@color/lineColor"
+                app:layout_constraintTop_toBottomOf="@id/tvTitleName" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleFatherName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/father_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvValueFatherName"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueFatherName"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="end|center_vertical"
+                app:layout_constraintEnd_toStartOf="@+id/tvTitleFatherName"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleFatherName"
+                tools:text="احمد" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupDependentInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:constraint_referenced_ids="tvTitleName,tvValueName,tvTitleFatherName,tvValueFatherName,line" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

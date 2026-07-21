@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#6c63ff</color>
+    <color name="colorPrimaryDark">#4b44b1</color>
+    <color name="colorPrimaryLight">#6c63ff</color>
+    <color name="colorAccent">#47c7ca</color>
+    <color name="button_background_default_theme2">#266C63FF</color>
+    <color name="button_background_pressed_theme2">#4D6C63FF</color>
+    <color name="button_background_default_theme1">#2647C7CA</color>
+    <color name="button_background_pressed_theme1">#4D47C7CA</color>
+    <color name="backgroundColor">#FAF8F8</color>
+    <color name="colorindigo">#FAF8F8</color>
+
+    <color name="appupdater_light_blue">#2ea3cc</color>
+    <color name="appupdater_text_colors">#4d4d4d</color>
+    <color name="bgTransparent">#D51B1B1B</color>
+    <color name="textColorTitle">#1B1B1B</color>
+    <color name="textColorSubTitle">#878787</color>
+    <color name="textGreenColorSubTitle">#3acc6c</color>
+    <color name="label_debt">#afafaf</color>
+    <color name="textColorHint">#CB616161</color>
+
+    <color name="textColorOrange">#f6cd51</color>
+
+    <color name="orange">#f6cd51</color>
+    <color name="bg_color_item_orange_top">#fedc75</color>
+    <color name="bg_dey_smaller_365">#f6cd51</color>
+    <color name="bg_dey_bigger_365">#6c63ff</color>
+
+    <color name="bg_dialog_blue_light">#c9ebfb</color>
+    <color name="bg_dialog_red_light">#f9adad</color>
+    <color name="bg_dialog_green_light">#92ecb1</color>
+    <color name="grey_color_text_button_bordered">#c1c1c1</color>
+
+    <color name="text_color_dialog_green">#038730</color>
+    <color name="text_color_dialog_red">#CF0328</color>
+    <color name="text_color_dialog_orange">#C67001</color>
+    <color name="text_color_dialog_green_20">#33038730</color>
+    <color name="text_color_dialog_red_20">#33CF0328</color>
+    <color name="text_color_dialog_orange_20">#33C67001</color>
+    <color name="text_color_orange">#ff8f00</color>
+    <color name="text_color_dialog_blue">#00b7c2</color>
+    <color name="debt_percent_color">#bfbfbf</color>
+    <color name="debt_percent_selected_color">#6c63ff</color>
+
+    <color name="gray_debt">#f8f8f8</color>
+    <color name="lineColor">#14000000</color>
+    <color name="lineColor2">#6e7d96</color>
+    <color name="color_workshop_code">#92949c</color>
+    <color name="loading_background">#B3000000</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="black">#1B1B1B</color>
+    <color name="black_alpha">#44000000</color>
+    <color name="debt_orange">#ff8f00</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray_light">#EEECEC</color>
+    <color name="gray_light_stepper">#CAC9C9</color>
+    <color name="gray_light_buble">#efefef</color>
+    <color name="gray_dark">#4A4A4A</color>
+    <color name="gray_dark_workshop_edited">#9c9c9c</color>
+    <color name="gray">#AEAEAE</color>
+    <color name="green">#3acc6c</color>
+    <color name="persian_green">#00A693</color>
+    <color name="green_dark">#03A848</color>
+    <color name="red">#FD6565</color>
+    <color name="green_font">#47C7CA</color>
+    <color name="btn_bkg">?colorPrimary</color>
+
+    <color name="bg_spring">#fed8d8</color>
+    <color name="bg_summer">#67e693</color>
+    <color name="bg_fall">#fedc75</color>
+    <color name="bg_winter">#cef5f5</color>
+
+    <color name="color_image_box_grey">#1f000000</color>
+    <color name="color_image_box_red">#f9adad</color>
+    <color name="color_image_box_green">#3acc6c</color>
+
+    <color name="color_icon">#B0B2BC</color>
+
+    <color name="text_color_blue">#216EF3</color>
+    <color name="green_blue">#47c7ca</color>
+    <color name="bg_dialog_cancel">#f4f4f4</color>
+    <color name="color_title_tap_target_view">#fcd664</color>
+    <color name="bg_tap_target_view">#E6050505</color>
+
+    <color name="bg_label_new">#ff8f00</color>
+
+    <color name="amber">#ff8f00</color>
+    <color name="red_recycler_color_icon">#b5112f</color>
+    <color name="grey_dark_workshop_edited">#b5112f</color>
+    <color name="light_blue">#30b7f6</color>
+    <color name="light_blue_magenta">#f4f3ff</color>
+    <color name="grey_color_transparent">#23000000</color>
+    <color name="bg_color_item_orange_light">#f6eac7</color>
+
+
+    <color name="light_primary_square_button">#f0efff</color>
+    <color name="light_green_square_button">#eafcfc</color>
+    <color name="light_orange_square_button">#fbf0cf</color>
+    <color name="light_blue_square_button">#eafcfc</color>
+    <color name="green_blue_line">#47c7ca</color>
+    <color name="light_green_filter">#f1f8d3</color>
+    <color name="light_green_filter_line">#92ecb1</color>
+    <color name="text_color_green_filter">#b8c873</color>
+    <color name="text_color_green_blue_filter">#95dada</color>
+    <color name="text_color_orange_filter">#deb11f</color>
+    <color name="tint_color_green_icon">#67e693</color>
+
+    <color name="light_blue_main">#f0efff</color>
+    <color name="bg_button_light_orange">#fcf8ed</color>
+    <color name="bg_button_light_green">#EDFCF1</color>
+    <color name="bg_button_light_red">#fee9e9</color>
+    <color name="text_color_red_light">#fc8f8f</color>
+    <color name="text_color_orange_light">#f4c12f</color>
+
+    <color name="selectedIndicatorColor">#6c63ff</color>
+    <color name="deselectedIndicatorColor">#fefefe</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="light_blue_900">#FF01579B</color>
+    <color name="light_blue_A200">#FF40C4FF</color>
+    <color name="light_blue_A400">#FF00B0FF</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="bgTreatmentCard">#faf9fc</color>
+
+    <!--Material 3-->
+    <color name="seed">#6c63ff</color>
+    <color name="md_theme_light_primary">#4F44E2</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#E3DFFF</color>
+    <color name="md_theme_light_onPrimaryContainer">#100069</color>
+    <color name="md_theme_light_secondary">#5E5C71</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#E3E0F9</color>
+    <color name="md_theme_light_onSecondaryContainer">#1A1A2C</color>
+    <color name="md_theme_light_tertiary">#7A5368</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#FFD8EA</color>
+    <color name="md_theme_light_onTertiaryContainer">#2F1123</color>
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+    <color name="md_theme_light_background">#FFFBFF</color>
+    <color name="md_theme_light_onBackground">#1C1B1F</color>
+    <color name="md_theme_light_surface">#FFFBFF</color>
+    <color name="md_theme_light_onSurface">#1C1B1F</color>
+    <color name="md_theme_light_surfaceVariant">#E4E1EC</color>
+    <color name="md_theme_light_onSurfaceVariant">#47464F</color>
+    <color name="md_theme_light_outline">#787680</color>
+    <color name="md_theme_light_inverseOnSurface">#F3EFF4</color>
+    <color name="md_theme_light_inverseSurface">#313034</color>
+    <color name="md_theme_light_inversePrimary">#C4C0FF</color>
+    <color name="md_theme_light_shadow">#000000</color>
+    <color name="md_theme_light_surfaceTint">#4F44E2</color>
+    <color name="md_theme_light_outlineVariant">#C8C5D0</color>
+    <color name="md_theme_light_scrim">#000000</color>
+    <color name="md_theme_dark_primary">#C4C0FF</color>
+    <color name="md_theme_dark_onPrimary">#2000A4</color>
+    <color name="md_theme_dark_primaryContainer">#3622CA</color>
+    <color name="md_theme_dark_onPrimaryContainer">#E3DFFF</color>
+    <color name="md_theme_dark_secondary">#C7C4DD</color>
+    <color name="md_theme_dark_onSecondary">#2F2E42</color>
+    <color name="md_theme_dark_secondaryContainer">#464559</color>
+    <color name="md_theme_dark_onSecondaryContainer">#E3E0F9</color>
+    <color name="md_theme_dark_tertiary">#EAB9D1</color>
+    <color name="md_theme_dark_onTertiary">#472639</color>
+    <color name="md_theme_dark_tertiaryContainer">#603B4F</color>
+    <color name="md_theme_dark_onTertiaryContainer">#FFD8EA</color>
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    <color name="md_theme_dark_background">#38363E</color>
+    <color name="md_theme_dark_onBackground">#E5E1E6</color>
+    <color name="md_theme_dark_surface">#1C1B1F</color>
+    <color name="md_theme_dark_onSurface">#E5E1E6</color>
+    <color name="md_theme_dark_surfaceVariant">#47464F</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C8C5D0</color>
+    <color name="md_theme_dark_outline">#928F9A</color>
+    <color name="md_theme_dark_inverseOnSurface">#1C1B1F</color>
+    <color name="md_theme_dark_inverseSurface">#E5E1E6</color>
+    <color name="md_theme_dark_inversePrimary">#4F44E2</color>
+    <color name="md_theme_dark_shadow">#000000</color>
+    <color name="md_theme_dark_surfaceTint">#C4C0FF</color>
+    <color name="md_theme_dark_outlineVariant">#47464F</color>
+    <color name="md_theme_dark_scrim">#000000</color>
+    <color name="md_theme_primary">#6750A4</color>
+</resources>

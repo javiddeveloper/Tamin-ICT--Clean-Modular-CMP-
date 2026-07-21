@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true">
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputLetterNo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_letter_number"
+            android:tag="letterNo"
+            app:editText_max_len="10"
+            app:editText_min_len="10"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.tamin.taminhamrah.widget.DatePickerWidget
+            android:id="@+id/widgetEndDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:date_piker_hint="@string/label_letter_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inputLetterNo" />
+
+        <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+            android:id="@+id/selectCertificateType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_certificate_type"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/widgetEndDate" />
+
+        <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+            android:id="@+id/inputAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_address_2"
+            android:tag="address"
+            app:editText_max_len="200"
+            app:editText_max_line="3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/selectCertificateType" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

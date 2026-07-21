@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true">
+
+
+        <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+            android:id="@+id/selectMonth"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_5dp"
+            app:editText_hint="@string/label_month" />
+
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputYear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            app:editText_hint="@string/label_year"
+            app:editText_max_len="4"
+            app:editText_min_len="4"
+            android:tag="year"
+            app:editText_text_size="@dimen/_9sdp" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputDebitNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:editText_hint="@string/label_list_debit_number"
+            app:editText_max_len="13"
+            app:editText_min_len="13"
+            android:layout_marginTop="10dp"
+            android:tag="dbtno"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flow3" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputPaymentPaper"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_payment_paper"
+            app:editText_max_len="15"
+            app:editText_min_len="15"
+            android:tag="ordno"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputDebitNumber" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputInsuranceNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_insurance_number"
+            app:editText_max_len="10"
+            app:editText_min_len="10"
+            android:tag="risuid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputPaymentPaper" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingVertical="@dimen/_2sdp"
+            app:flow_verticalAlign="center"
+            app:flow_horizontalGap="@dimen/_10sdp"
+            android:tag="year"
+            app:constraint_referenced_ids="inputYear,selectMonth" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

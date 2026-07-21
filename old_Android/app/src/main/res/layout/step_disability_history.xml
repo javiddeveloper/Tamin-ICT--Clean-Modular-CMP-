@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/historyStepper"
+        style="@style/VerticalStepperItemView"
+        app:step_index="5"
+        app:step_title="@string/history_info"
+        app:nextStepEnable="false"
+        tools:step_state="selected"
+        app:step_state="normal">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:fillViewport="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/_10sdp">
+
+                <View
+                    android:id="@+id/containerHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@color/gray_light"
+                    app:layout_constraintTop_toTopOf="@+id/layoutHistory"
+                    app:layout_constraintBottom_toBottomOf="@id/tvYears" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvYears"
+                    style="@style/OvalButton"
+                    android:background="@drawable/bg_oval_accent"
+                    tools:text="15\nسال"
+                    android:layout_marginVertical="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_5sdp"
+                    app:layout_constraintBottom_toBottomOf="@+id/containerHistory"
+                    app:layout_constraintTop_toTopOf="@+id/containerHistory"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvMonths"
+                    style="@style/OvalButton"
+                    android:layout_marginHorizontal="@dimen/_5sdp"
+                    android:background="@drawable/bg_oval_green_blue"
+                    app:layout_constraintTop_toTopOf="@+id/tvYears"
+                    app:layout_constraintStart_toEndOf="@+id/tvYears"
+                    tools:text="03\nماه" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvDays"
+                    style="@style/OvalButton"
+                    android:background="@drawable/bg_oval_green"
+                    app:layout_constraintTop_toTopOf="@+id/tvMonths"
+                    app:layout_constraintStart_toEndOf="@id/tvMonths"
+                    android:layout_marginStart="@dimen/_5sdp"
+                    tools:text="29\nروز" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvTitleHistory"
+                    android:text="@string/total_days"
+                    app:layout_constraintEnd_toEndOf="@id/containerHistory"
+                    app:layout_constraintTop_toTopOf="@+id/containerHistory"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:layout_marginEnd="@dimen/_5sdp" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvTotalDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleHistory"
+                    app:layout_constraintStart_toStartOf="@+id/tvTitleHistory"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleHistory"
+                    tools:text="1234 روز" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    style="@style/TextButtonBordered.Green"
+                    android:id="@+id/btnObjection"
+                    android:layout_width="match_parent"
+                    app:layout_constraintTop_toBottomOf="@+id/containerHistory"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:text="@string/history_objection" />
+
+                <View
+                    android:id="@+id/containerConfirm"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_height="0dp"
+                    android:background="@color/gray_light"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvDescCommitment"
+                    app:layout_constraintTop_toBottomOf="@+id/btnObjection" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    style="@style/CheckBoxStepperStyle"
+                    android:id="@+id/cb_confirm_history_step"
+                    android:checked="false"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/containerConfirm" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvDescCommitment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    style="@style/TextStyle.Title"
+                    android:textSize="16sp"
+                    android:text="@string/desc_confirm_history"
+                    android:paddingTop="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    android:justificationMode="inter_word"
+                    app:layout_constraintEnd_toStartOf="@+id/cb_confirm_history_step"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/containerConfirm" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

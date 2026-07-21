@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center_horizontal"
+
+    android:minWidth="@dimen/dialog_min_width"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="30dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:background="#dadce0" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTitle"
+       style="@style/TextStyle.Title"
+        android:layout_width="match_parent"
+        android:padding="@dimen/margin_20dp"
+        android:checked="true"
+        android:layoutDirection="ltr"
+        android:textSize="@dimen/font_header_size"
+        tools:text="ااااااااااا"/>
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/cbSelectAll"
+        style="@style/CheckBoxStyle"
+        android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/margin_20dp"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:checked="false"
+        android:layoutDirection="ltr"
+        android:text="@string/label_select_all"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        style="@style/LinearRecyclerStyle"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@id/btnConfirm"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnConfirm"
+        style="@style/MainButton"
+        android:layout_width="match_parent"
+        android:layout_margin="@dimen/margin_20dp"
+        android:text="@string/label_ok" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>
+

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="isConfirmRules"
+            type="Boolean" />
+
+    </data>
+
+<com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+    android:id="@+id/stepperItem"
+    style="@style/VerticalStepperItemView"
+    app:layout_constraintTop_toBottomOf="@+id/stepperEligibilityStatus"
+    tools:step_state="selected"
+    app:previousStepEnable="true"
+    app:nextStepEnable="false">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_400sdp"
+                android:animateLayoutChanges="true"
+                >
+
+                <include
+                    android:id="@+id/ItemDescRules"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:item='@{@string/desc_view_rules}'
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnShowRules"
+                    style="@style/TextButtonBordered.Blue"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:text="@string/label_show_rules"
+                    app:drawableTint="@android:color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ItemDescRules"
+                    tools:visibility="visible" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelTitleCommitment"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:elevation="@dimen/_2sdp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:justificationMode="inter_word"
+                    android:padding="@dimen/_2sdp"
+                    android:text="@string/label_commitment"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnShowRules" />
+
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/cbConfirmRules"
+                    style="@style/CheckBoxStepperStyle"
+                    android:layout_width="wrap_content"
+                    android:checked="false"
+                    android:layoutDirection="ltr"
+                    android:textDirection="rtl"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/labelTitleCommitment"
+                    tools:checked="true" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelDescCommitment"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:elevation="@dimen/_2sdp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:justificationMode="inter_word"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:padding="@dimen/_2sdp"
+                    android:text="@string/confirm_rules_desc"
+                    android:textColor="?attr/colorOnSurface"
+                    app:layout_constraintEnd_toStartOf="@+id/cbConfirmRules"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/cbConfirmRules" />
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

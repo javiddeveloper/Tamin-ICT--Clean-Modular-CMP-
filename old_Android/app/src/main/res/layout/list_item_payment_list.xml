@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.concludingStudentInsuranceContract.paymentList.PaymentListModel" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelAmountPayment"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_20sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_amount_paid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/valueAmountPayment"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueAmountPayment"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.getPriceWithSeparator(item.amountPayment)}'
+            app:layout_constraintBottom_toBottomOf="@+id/labelAmountPayment"
+            app:layout_constraintEnd_toStartOf="@+id/labelAmountPayment"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelAmountPayment"
+            tools:text="2.500.000 ریال" />
+
+        <View
+            android:id="@+id/lineAmountPayment"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/valueAmountPayment" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelPaymentDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_20sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_payment_date"
+            app:layout_constraintBottom_toTopOf="@id/linePaymentDate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valuePaymentDate"
+            app:layout_constraintTop_toBottomOf="@id/lineAmountPayment" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valuePaymentDate"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:textColor="@color/colorPrimary"
+            android:text='@{item.getDateWithSeparator(item.datePayment)}'
+            app:layout_constraintBottom_toBottomOf="@+id/labelPaymentDate"
+            app:layout_constraintEnd_toStartOf="@+id/labelPaymentDate"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelPaymentDate"
+            tools:text="1400/12/29" />
+
+        <View
+            android:id="@+id/linePaymentDate"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelPaymentDate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelReceiptStatus"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/receipt_status_label"
+            app:layout_constraintBottom_toTopOf="@id/lineRecipientStatus"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueReceiptStatus"
+            app:layout_constraintTop_toBottomOf="@id/linePaymentDate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueReceiptStatus"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.statusRecipient??"-"}'
+            app:layout_constraintBottom_toTopOf="@id/lineRecipientStatus"
+            app:layout_constraintEnd_toStartOf="@+id/labelReceiptStatus"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linePaymentDate"
+            tools:text="پرداخت شده" />
+
+        <View
+            android:id="@+id/lineRecipientStatus"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelReceiptStatus" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDebitNumber"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_debit_number"
+            app:layout_constraintBottom_toTopOf="@id/lineDebitNumber"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueDebitNumber"
+            app:layout_constraintTop_toBottomOf="@id/lineRecipientStatus" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueDebitNumber"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:text='@{item.debtNumber??"-"}'
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@id/lineDebitNumber"
+            app:layout_constraintEnd_toStartOf="@+id/labelDebitNumber"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineRecipientStatus"
+            tools:text="3221213" />
+
+        <View
+            android:id="@+id/lineDebitNumber"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelDebitNumber" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/LabelNationalId"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_national_code"
+            app:layout_constraintBottom_toTopOf="@id/lineNationalId"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueNationalId"
+            app:layout_constraintTop_toBottomOf="@id/lineDebitNumber" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueNationalId"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:text='@{item.nationalId??"-"}'
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@id/lineNationalId"
+            app:layout_constraintEnd_toStartOf="@+id/LabelNationalId"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineDebitNumber"
+            tools:text="3860616511" />
+
+        <View
+            android:id="@+id/lineNationalId"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/LabelNationalId" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelInsuranceId"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_insurance_number"
+            app:layout_constraintBottom_toTopOf="@id/lineInsuranceId"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueInsuranceId"
+            app:layout_constraintTop_toBottomOf="@id/lineNationalId" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueInsuranceId"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:text='@{item.insuranceId??"-"}'
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@id/lineInsuranceId"
+            app:layout_constraintEnd_toStartOf="@+id/labelInsuranceId"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineNationalId"
+            tools:text="231213312" />
+
+        <View
+            android:id="@+id/lineInsuranceId"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelInsuranceId" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelStatusContract"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_status_contract"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueStatusContract"
+            app:layout_constraintTop_toBottomOf="@id/lineInsuranceId" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueStatusContract"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.statusContract}'
+            app:layout_constraintBottom_toBottomOf="@+id/labelStatusContract"
+            app:layout_constraintEnd_toStartOf="@+id/labelStatusContract"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelStatusContract"
+            tools:text="فعال" />
+
+        <View
+            android:id="@+id/lineStatusContract"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelStatusContract" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelPaymentDeadLine"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_payment_dead_line"
+            app:layout_constraintBottom_toTopOf="@id/linePaymentDeadLine"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valuePaymentDeadLine"
+            app:layout_constraintTop_toBottomOf="@id/lineStatusContract" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valuePaymentDeadLine"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:textColor="@color/text_color_orange"
+            android:text="@{item.getDateWithSeparator(item.paymentDeadLine)}"
+            app:layout_constraintBottom_toTopOf="@id/linePaymentDeadLine"
+            app:layout_constraintEnd_toStartOf="@+id/labelPaymentDeadLine"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineStatusContract"
+            tools:text="1400/12/29" />
+
+        <View
+            android:id="@+id/linePaymentDeadLine"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelPaymentDeadLine" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelStartTermPayment"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_start_term_payment"
+            app:layout_constraintBottom_toTopOf="@id/lineStartTermPayment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueStartTermPayment"
+            app:layout_constraintTop_toBottomOf="@id/linePaymentDeadLine" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueStartTermPayment"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:textColor="@color/colorPrimary"
+            android:text='@{item.getDateWithSeparator(item.startTermPayment)}'
+            app:layout_constraintBottom_toTopOf="@id/lineStartTermPayment"
+            app:layout_constraintEnd_toStartOf="@+id/labelStartTermPayment"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linePaymentDeadLine"
+            tools:text="1400/09/01" />
+
+        <View
+            android:id="@+id/lineStartTermPayment"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelStartTermPayment" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelEndTermPayment"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_end_term_payment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueEndTermPayment"
+            app:layout_constraintTop_toBottomOf="@id/lineStartTermPayment" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueEndTermPayment"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:textColor="@color/colorPrimary"
+            android:text='@{item.getDateWithSeparator(item.endTermPayment)}'
+            app:layout_constraintEnd_toStartOf="@+id/labelEndTermPayment"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineStartTermPayment"
+            tools:text="1400/12/29" />
+
+        <View
+            android:id="@+id/lineEndTermPayment"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelEndTermPayment" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTotalAmountDebt"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_total_amount_debt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/valueTotalAmountDebt"
+            app:layout_constraintTop_toBottomOf="@id/lineEndTermPayment" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueTotalAmountDebt"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:textColor="@color/text_color_orange"
+            android:text='@{item.getPriceWithSeparator(item.totalDebt)??"-"}'
+            app:layout_constraintEnd_toStartOf="@+id/labelTotalAmountDebt"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineEndTermPayment"
+            tools:text="2.500.000 ریال" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowDetail"
+            style="@style/TextButton"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:text="@string/show_detail"
+            android:textSize="@dimen/font_sub_title_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="@dimen/_10sdp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/valueTotalAmountDebt" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnViewDetailOfPayment"
+            style="@style/TextButtonBordered.Blue"
+            android:layout_width="0dp"
+            android:text="@string/label_view_detail_payment"
+            app:layout_constraintBottom_toBottomOf="@+id/btnShowDetail"
+            app:layout_constraintEnd_toEndOf="@+id/labelTotalAmountDebt"
+            app:layout_constraintTop_toTopOf="@+id/btnShowDetail" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="valueInsuranceId,lineStatusContract,labelTotalAmountDebt,valueStatusContract,valuePaymentDeadLine,lineNationalId,LabelNationalId,linePaymentDeadLine,lineStartTermPayment,valueTotalAmountDebt,labelStartTermPayment,valueStartTermPayment,labelStatusContract,labelPaymentDeadLine,valueNationalId,valueEndTermPayment,lineEndTermPayment,lineInsuranceId,labelEndTermPayment,labelInsuranceId"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

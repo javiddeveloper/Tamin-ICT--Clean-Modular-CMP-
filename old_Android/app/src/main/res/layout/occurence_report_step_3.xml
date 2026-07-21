@@ -1,0 +1,292 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        app:nextStepEnable="true"
+        app:previousStepVisible="true"
+        app:previousStepEnable="true"
+        app:step_index="3"
+        app:step_state="normal"
+        app:step_title="@string/label_step_personal_info">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelFullName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_fullname"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvFullName"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="end|center_vertical"
+                android:text=""
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelFullName"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelFullName"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="سمیه مدبری " />
+
+            <View
+                android:id="@+id/line1"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvFullName" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelNationality"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_nationality"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvNationality"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="end|center_vertical"
+                android:text=""
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelNationality"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelNationality"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="ایرانی" />
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvNationality" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelInsuranceType"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_insurance_type_2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line2" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvInsuranceType"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="end|center_vertical"
+                android:text=""
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelInsuranceType"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelInsuranceType"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="اجباری" />
+
+            <View
+                android:id="@+id/line3"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvInsuranceType" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelGender"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_gender"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvGender"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="end|center_vertical"
+                android:text=""
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelGender"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelGender"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="زن" />
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/selectMarriageStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_marriage_status"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/widgetDatePicker"
+                app:layout_constraintTop_toBottomOf="@id/tvGender" />
+
+            <include
+                android:id="@+id/widgetDatePicker"
+                layout="@layout/widget_date_picker"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_20dp"
+                app:hint='@{@string/label_select_employment_date}'
+                app:layout_constraintEnd_toStartOf="@id/selectMarriageStatus"
+                app:layout_constraintTop_toBottomOf="@id/tvGender"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+
+            <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                android:id="@+id/etJobDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_job_description"
+                app:editText_max_len="300"
+                app:editText_max_line="3"
+                app:layout_constraintTop_toBottomOf="@+id/widgetDatePicker"
+                app:type="custom" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/etJobLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_job_location"
+                app:editText_max_len="100"
+                app:layout_constraintTop_toBottomOf="@+id/etJobDescription"
+                app:type="custom" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/etTransportType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_transport_type"
+                app:editText_max_len="100"
+                app:layout_constraintTop_toBottomOf="@+id/etJobLocation"
+                app:type="custom" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/etWorkStartTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_work_start_time"
+                app:editText_max_len="5"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/etTransportType"
+                app:layout_constraintStart_toStartOf="parent"
+                app:type="time_format"/>
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/etWorkEndTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_work_End_time"
+                app:editText_max_len="5"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etWorkStartTime"
+                app:type="time_format" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                android:id="@+id/etAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_home_address"
+                android:tag="address"
+                app:editText_max_len="300"
+                app:editText_max_line="3"
+                app:layout_constraintTop_toBottomOf="@+id/etWorkEndTime"
+                app:type="address" />
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/etHomePhone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_phone"
+                app:editText_max_len="12"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/etAddress"
+                app:layout_constraintStart_toEndOf="@id/etHomeZipCode"
+                android:layout_marginStart="@dimen/margin_5dp" />
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/etHomeZipCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_zipcode"
+                app:editText_max_len="10"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/etHomePhone"
+                app:layout_constraintTop_toTopOf="@id/etHomePhone"
+                android:layout_marginEnd="@dimen/margin_5dp" />
+            
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

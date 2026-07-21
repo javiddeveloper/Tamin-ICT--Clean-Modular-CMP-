@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.concludingStudentInsuranceContract.paymentList.CalculationModel" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelYear"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:gravity="center"
+            android:text="@string/label_year"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvYear"
+            app:layout_constraintStart_toEndOf="@id/labelMonth"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvYear"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text='@{item.year}'
+            tools:text="1111"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:layout_constraintStart_toStartOf="@id/labelYear"
+            app:layout_constraintEnd_toEndOf="@id/labelYear"
+            app:layout_constraintTop_toBottomOf="@id/labelYear" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelMonth"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:gravity="center"
+            android:text="@string/label_month"
+            app:layout_constraintEnd_toStartOf="@id/labelYear"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvMonth"
+            app:layout_constraintStart_toEndOf="@id/labelDay"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvMonth"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text='@{item.month}'
+            tools:text="1111"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:layout_constraintStart_toStartOf="@id/labelMonth"
+            app:layout_constraintEnd_toEndOf="@id/labelMonth"
+            app:layout_constraintTop_toBottomOf="@id/labelMonth" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDay"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:gravity="center"
+            android:text="@string/label_day"
+            app:layout_constraintEnd_toStartOf="@id/labelMonth"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvDay"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDay"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text='@{item.day}'
+            tools:text="1111"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:layout_constraintStart_toStartOf="@id/labelDay"
+            app:layout_constraintEnd_toEndOf="@id/labelDay"
+            app:layout_constraintTop_toBottomOf="@id/labelDay" />
+
+
+
+        <View
+            android:id="@+id/lineDate"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvYear" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWage"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_wage"
+            app:layout_constraintBottom_toTopOf="@id/lineWage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvWage"
+            app:layout_constraintTop_toBottomOf="@id/lineDate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvWage"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.getPriceWithSeparator(item.wage)}'
+            app:layout_constraintBottom_toBottomOf="@+id/labelWage"
+            app:layout_constraintEnd_toStartOf="@+id/labelWage"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelWage"
+            tools:text="11,000" />
+
+        <View
+            android:id="@+id/lineWage"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelWage" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelAmount"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_amount"
+            app:layout_constraintBottom_toTopOf="@id/lineAmount"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvAmount"
+            app:layout_constraintTop_toBottomOf="@id/lineWage" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvAmount"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.getPriceWithSeparator(item.amount)}'
+            app:layout_constraintBottom_toTopOf="@id/lineAmount"
+            app:layout_constraintEnd_toStartOf="@+id/labelAmount"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineWage"
+            tools:text="11111" />
+
+        <View
+            android:id="@+id/lineAmount"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelAmount" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDescription"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_description"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvDescription"
+            app:layout_constraintTop_toBottomOf="@id/lineAmount" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDescription"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.description??"-"}'
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/labelDescription"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineAmount"
+            tools:text="انتانتا" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

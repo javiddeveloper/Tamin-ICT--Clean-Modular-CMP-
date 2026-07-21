@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.tamin.taminhamrah.utils.Utility" />
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.entity.PaymentModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+
+        android:background="@android:color/white"
+        android:layoutDirection="rtl">
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="30dp"
+            android:layout_height="4dp"
+            android:layout_margin="@dimen/margin_10dp"
+            android:background="#dadce0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelAmount"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_height="@dimen/button_height"
+            android:ellipsize="end"
+            android:gravity="center_vertical|right"
+            android:layout_margin="@dimen/margin_16dp"
+            android:text="@string/label_payment_value"
+            android:textDirection="rtl"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvAmount"
+            app:layout_constraintTop_toBottomOf="@id/view" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvAmount"
+            style="@style/TextStyle.Header"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height"
+            android:ellipsize="end"
+            android:gravity="center_vertical|right"
+            android:layout_margin="@dimen/margin_16dp"
+            android:textDirection="rtl"
+            app:layout_constraintBottom_toBottomOf="@id/labelAmount"
+            app:layout_constraintEnd_toStartOf="@id/labelAmount"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/labelAmount"
+            tools:text="123,456 ریال" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelReason"
+            style="@style/TextStyle.Title"
+            android:layout_height="@dimen/button_height"
+            android:ellipsize="end"
+            android:gravity="center_vertical|right"
+            android:layout_margin="@dimen/margin_16dp"
+            android:text="@string/label_reason"
+            android:textDirection="rtl"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvReason"
+            app:layout_constraintTop_toBottomOf="@id/labelAmount" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvReason"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height"
+            android:ellipsize="end"
+            android:gravity="center_vertical|right"
+            android:layout_margin="@dimen/margin_16dp"
+            android:textDirection="rtl"
+            app:layout_constraintBottom_toBottomOf="@id/labelReason"
+            app:layout_constraintEnd_toStartOf="@id/labelReason"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/labelReason"
+            tools:text="دریافت لیست"
+            android:text='@{item.reason}'/>
+
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvReason"
+            android:background="@color/lineColor"/>
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnPayment"
+            style="@style/MainButton"
+            android:layout_width="0dp"
+            android:layout_margin="@dimen/margin_16dp"
+            android:text="@string/label_payment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvReason" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

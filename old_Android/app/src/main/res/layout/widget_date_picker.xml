@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="hint"
+            type="String"/>
+
+        <variable
+            name="input"
+            type="String"/>
+    </data>
+
+<com.google.android.material.textfield.TextInputLayout
+    android:id="@+id/tilDate"
+    style="@style/TextInputLayout"
+    android:hint='@{hint}'
+    app:errorEnabled="false"
+    tools:hint="@string/label_selecte_date">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputDate"
+        style="@style/EditTextStyle"
+        android:clickable="false"
+        android:focusable="false"
+        android:inputType="none"
+        android:hint=""
+        android:text='@{input}'
+        android:maxLength="20"
+        android:drawableStart="@drawable/ic_calendar"
+        android:drawablePadding="@dimen/margin_10dp"
+        />
+
+</com.google.android.material.textfield.TextInputLayout>
+
+</layout>
+

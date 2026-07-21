@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.ActiveRelation" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/margin_40dp"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelOrganizationName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_organization_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvOrganizationName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.getOrganizationName()}'
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/labelOrganizationName"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelOrganizationName"
+            tools:text="@string/label_organization_name" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvOrganizationName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelInsuranceCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_insurance_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvInsuranceCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_20dp"
+            android:gravity="end|center_vertical"
+            android:text='@{item.insuranceId}'
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/labelInsuranceCode"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelInsuranceCode"
+            tools:text="1234" />
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvInsuranceCode" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelRelationWithTamin"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_tamin_relation_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvRelationWithTamin"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:layout_marginHorizontal="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.getRelationName()}'
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/labelRelationWithTamin"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelRelationWithTamin"
+            tools:text="@string/label_organization_name" />
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvRelationWithTamin" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkShopName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/label_workshop_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/line3" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvWorkShopName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text='@{item.workshopName}'
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/labelWorkShopName"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelWorkShopName"
+            tools:text="عفعففب" />
+
+        <View
+            android:id="@+id/line4"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWorkShopName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkShopCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/label_workshop_number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/line4" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvWorkShopCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end"
+            android:text='@{item.workshopId}'
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/labelWorkShopCode"
+            tools:text="123123" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelStartDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/label_date_from"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line4" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvStartDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end"
+            android:text='@{item.getDate()}'
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelStartDate"
+            tools:text="123" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/btnCertificate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:text="@string/label_send_certificate"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWorkShopCode" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupActiveRelation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility='@{item.hasRelation()?View.VISIBLE:View.GONE}'
+            app:constraint_referenced_ids="line3,line4,labelWorkShopName,tvWorkShopName,labelWorkShopCode,tvWorkShopCode,labelStartDate,tvStartDate,btnCertificate " />
+
+        <include
+            android:id="@+id/layoutAnimation"
+            layout="@layout/view_stamp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:isTrue='@{item.hasRelation()}'
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:textStamp='@{item.hasRelation()?@string/label_stamp_enable_relation_with_tamin:@string/label_stamp_disable_relation_with_tamin}' />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

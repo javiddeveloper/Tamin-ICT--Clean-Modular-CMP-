@@ -1,0 +1,126 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        app:nextStepEnable="true"
+        app:previousStepVisible="true"
+        app:previousStepEnable="true"
+        app:step_index="2"
+        app:step_state="normal"
+        app:step_title="@string/label_occurrence_workshop">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/selectWorkshopCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_workshop_code"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupWorkshopName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="gone"
+                app:constraint_referenced_ids="labelWorkshopName, tvWorkshopName"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelWorkshopName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text="@string/label_workshop_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/selectWorkshopCode"
+                />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWorkshopName"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:text=""
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelWorkshopName"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelWorkshopName"
+                app:layout_constraintEnd_toStartOf="@id/labelWorkshopName"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="خدمات ماشینی تامین" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/etEmployeeFullName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_employee_fullname"
+                app:editText_max_len="50"
+                app:layout_constraintTop_toBottomOf="@+id/tvWorkshopName"
+                app:type="first_name" />
+
+            <com.tamin.taminhamrah.widget.edittext.MobileView
+                android:id="@+id/etEmployeePhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_employee_phone"
+                app:layout_constraintTop_toBottomOf="@+id/etEmployeeFullName"/>
+
+            <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                android:id="@+id/etWorkshopAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_address_2"
+                android:tag="address"
+                app:editText_max_len="300"
+                app:editText_max_line="3"
+                app:layout_constraintTop_toBottomOf="@+id/etEmployeePhone"
+                app:type="address" />
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/etWorkshopPhone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_phone"
+                app:editText_max_len="13"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/etWorkshopAddress"
+                app:layout_constraintStart_toEndOf="@id/etWorkshopZipCode"
+                android:layout_marginStart="@dimen/margin_5dp" />
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/etWorkshopZipCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_zipcode"
+                app:editText_max_len="10"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/etWorkshopPhone"
+                app:layout_constraintTop_toBottomOf="@id/etWorkshopAddress"
+                android:layout_marginEnd="@dimen/margin_5dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

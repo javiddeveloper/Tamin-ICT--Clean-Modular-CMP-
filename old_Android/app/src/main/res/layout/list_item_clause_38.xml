@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+        <import type="com.tamin.taminhamrah.utils.Utility"/>
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.contract.Clause38Info" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_item_blue"
+            android:elevation="2dp"
+            android:animateLayoutChanges="true">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelMafasaHesabSerial"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_mafasahesab_serial"
+                app:layout_constraintBottom_toTopOf="@id/line1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/TvMafasaHesabSerial"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/TvMafasaHesabSerial"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text='@{item.clearanceSerial}'
+                app:layout_constraintBottom_toTopOf="@id/line1"
+                app:layout_constraintEnd_toStartOf="@+id/labelMafasaHesabSerial"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="140005" />
+
+            <View
+                android:id="@+id/line1"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelMafasaHesabSerial" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractRow"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_contract_row"
+                app:layout_constraintBottom_toTopOf="@id/line2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractRow"
+                app:layout_constraintTop_toBottomOf="@id/line1"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractRow"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end|center_vertical"
+                android:layout_margin="@dimen/margin_20dp"
+                android:text='@{item.contractRow}'
+                tools:text="323"
+                app:layout_constraintBottom_toTopOf="@id/line2"
+                app:layout_constraintEnd_toStartOf="@+id/labelContractRow"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line1" />
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelContractRow" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractNumber"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_contract_number"
+                app:layout_constraintBottom_toTopOf="@id/line3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractNumber"
+                app:layout_constraintTop_toBottomOf="@id/line2" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractNumber"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text="@{item.contractNumber}"
+                tools:text="234234"
+                app:layout_constraintBottom_toTopOf="@id/line3"
+                app:layout_constraintEnd_toStartOf="@+id/labelContractNumber"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line2" />
+
+            <View
+                android:id="@+id/line3"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelContractNumber" />
+
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelContractInitialAmount"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_contract_initial_amount"
+            app:layout_constraintBottom_toBottomOf="@id/tvContractInitialAmount"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvContractInitialAmount"
+            app:layout_constraintTop_toTopOf="@id/tvContractInitialAmount" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvContractInitialAmount"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text="@{Utility.INSTANCE.getRialWithSeparator(item.contractAmount)}"
+            tools:text="2,500,000 ریال"
+            app:layout_constraintBottom_toTopOf="@id/btnShowDetail"
+            app:layout_constraintEnd_toStartOf="@+id/labelContractInitialAmount"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line3" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowDetail"
+            style="@style/TextButtonBordered.Blue"
+            android:layout_margin="@dimen/margin_20dp"
+            android:text="@string/label_show_mafasahesab"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvContractInitialAmount"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

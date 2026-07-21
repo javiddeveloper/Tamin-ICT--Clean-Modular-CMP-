@@ -1,0 +1,59 @@
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        style="@style/VerticalStepperItemView"
+        android:id="@+id/finalConfirmStepper"
+        app:step_state="normal"
+        tools:step_state="selected"
+        app:step_index="4"
+        app:step_title="@string/final_submit_request"
+        app:nextStepEnable="false"
+        app:nextStepTitle="@string/final_submit"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:layout_marginBottom="@dimen/_20sdp"
+           >
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            style="@style/CheckBoxStepperStyle"
+            android:id="@+id/cbConfirmRules"
+            android:checked="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDescCommitment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/TextStyle.Title"
+            tools:text="@string/desc_rules_pension_survivor"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:justificationMode="inter_word"
+            app:layout_constraintEnd_toStartOf="@+id/cbConfirmRules"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                style="@style/TextButtonBordered.Green"
+                android:id="@+id/btnShowPdf"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvDescCommitment"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:text="@string/show_survivor_form"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+
+</layout>

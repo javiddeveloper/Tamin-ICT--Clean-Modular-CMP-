@@ -1,0 +1,24 @@
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        style="@style/VerticalStepperItemView"
+        android:id="@+id/survivorStepper"
+        app:step_state="normal"
+        tools:step_state="selected"
+        app:step_index="3"
+        app:step_title="@string/survivor_info"
+        >
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginHorizontal="@dimen/_4sdp"
+            />
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

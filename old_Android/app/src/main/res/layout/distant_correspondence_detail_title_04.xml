@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true">
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputInsuranceNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:editText_hint="@string/label_insurance_number"
+            app:editText_max_len="10"
+            app:editText_min_len="10"
+            android:tag="risuid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputTechSkillNo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_tech_skill_number"
+            app:editText_max_len="16"
+            app:editText_min_len="16"
+            android:tag="letterNo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputInsuranceNumber" />
+
+        <com.tamin.taminhamrah.widget.DatePickerWidget
+            android:id="@+id/widgetTechSkillDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:date_piker_hint="@string/label_tech_skill_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inputTechSkillNo" />
+
+        <com.tamin.taminhamrah.widget.DatePickerWidget
+            android:id="@+id/widgetStartDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:date_piker_hint="@string/label_start_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/widgetTechSkillDate" />
+
+        <com.tamin.taminhamrah.widget.DatePickerWidget
+            android:id="@+id/widgetEndDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:date_piker_hint="@string/label_end_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/widgetStartDate" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

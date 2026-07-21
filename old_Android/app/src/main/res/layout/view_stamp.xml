@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="isTrue"
+            type="Boolean" />
+
+        <variable
+            name="textStamp"
+            type="String"/>
+    </data>
+
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/margin_200dp"
+        android:textDirection="rtl"
+        android:id="@+id/root_layout"
+        app:layoutDescription="@xml/view_stamp_scene">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ImgView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_400dp"
+            android:rotation="2"
+            android:scaleX="2"
+            android:scaleY="2"
+            android:tint="@{isTrue?@color/green:@color/red}"
+            tools:tint="@color/green"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_stamp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvToolbarTitle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/iran_sans_mobile_fa_num"
+            android:gravity="center"
+            android:maxLines="1"
+            android:rotation="-20"
+            android:scaleX="2"
+            android:scaleY="2"
+            android:text="@{textStamp}"
+            android:textColor="@{isTrue?@color/green:@color/red}"
+            android:textSize="@dimen/font_size_20"
+            app:layout_constraintBottom_toBottomOf="@+id/ImgView"
+            app:layout_constraintEnd_toEndOf="@+id/ImgView"
+            app:layout_constraintHorizontal_bias="0.501"
+            app:layout_constraintStart_toStartOf="@+id/ImgView"
+            app:layout_constraintTop_toTopOf="@+id/ImgView"
+            app:layout_constraintVertical_bias="0.0"
+            tools:text="@string/label_you_are_pensioner" />
+
+    </androidx.constraintlayout.motion.widget.MotionLayout>
+</layout>

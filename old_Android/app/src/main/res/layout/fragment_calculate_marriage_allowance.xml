@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.tamin.taminhamrah.ui.home.services.calculateMarriageAllowance.CalculateMarriageAllowanceViewModel" />
+
+        <variable
+            name="Total_Salary"
+            type="String" />
+        <variable
+            name="Amount_Payable"
+            type="String" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true"
+        android:layoutDirection="ltr">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorSurface"
+                android:layoutDirection="ltr">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelDetailRecords"
+                    style="@style/TextStyle.Title"
+                    android:layout_marginTop="@dimen/margin_24dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:text="@string/label_specifications_marriage"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.tamin.taminhamrah.widget.DatePickerWidget
+                    android:id="@+id/widgetDatePickerMarriage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    app:date_piker_hint="@string/label_contract_date"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/labelDetailRecords" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnCal"
+                    style="@style/MainButton"
+                    android:layout_width="0dp"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:text="@string/label_calculate_marriage_allowance"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/widgetDatePickerMarriage" />
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/root_layout_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:animateLayoutChanges="true"
+                    android:background="@android:color/transparent"
+                    android:elevation="@dimen/margin_5dp"
+                    android:layout_marginTop="@dimen/corner_radius_35dp"
+                    android:layoutDirection="ltr"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnCal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    >
+
+
+                    <View
+                        android:id="@+id/containerWorkshopInformation"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_left_corner_rounded_indigo"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/rootLayoutWorkshopInformation"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/AmountPayableValueTitle"
+                            style="@style/TextStyle.Title.Bold"
+                            android:layout_width="wrap_content"
+                            android:layout_marginTop="@dimen/margin_20dp"
+                            android:padding="@dimen/margin_20dp"
+                            android:text="@string/the_amount_wedding_gift"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/AmountPayableValue"
+                            style="@style/TextStyle.SubTitle.Green"
+                            android:layout_width="wrap_content"
+                            android:text="@{Amount_Payable}"
+                            android:layout_marginStart="@dimen/margin_10dp"
+                            app:layout_constraintBottom_toBottomOf="@+id/AmountPayableValueTitle"
+                            app:layout_constraintStart_toEndOf="@+id/labelAmountPayableRial"
+                            app:layout_constraintTop_toTopOf="@+id/AmountPayableValueTitle"
+                            tools:text="30,124,325" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/labelAmountPayableRial"
+                            style="@style/TextStyle.SubTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:text="ریال"
+                            app:layout_constraintBottom_toBottomOf="@+id/AmountPayableValue"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/AmountPayableValue"
+                            tools:text="ریال" />
+
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/SumSalaryLastTwoYearsTitle"
+                            style="@style/TextStyle.Title"
+                            android:layout_width="wrap_content"
+                            android:padding="@dimen/margin_20dp"
+                            android:text="@string/sum_salary_last_two_years"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/AmountPayableValueTitle" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/SumSalaryLastTwoYearsTitleValue"
+                            style="@style/TextStyle.SubTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="@{Total_Salary}"
+                            app:layout_constraintBottom_toBottomOf="@+id/SumSalaryLastTwoYearsTitle"
+                            app:layout_constraintStart_toEndOf="@id/labelSumSalaryLastTwoYearsTitleValue"
+                            app:layout_constraintTop_toTopOf="@+id/SumSalaryLastTwoYearsTitle"
+                            tools:text="200,123,658" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/labelSumSalaryLastTwoYearsTitleValue"
+                            style="@style/TextStyle.SubTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:text="ریال"
+                            app:layout_constraintBottom_toBottomOf="@+id/SumSalaryLastTwoYearsTitleValue"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/SumSalaryLastTwoYearsTitleValue"
+                            tools:text="ریال" />
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

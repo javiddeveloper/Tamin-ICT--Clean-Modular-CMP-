@@ -761,27 +761,38 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.KeyValue -> {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Column(
+                modifier = Modifier.animateContentSize(animationSpec = tween(durationMillis = 300)),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                content.title?.let { title ->
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
+
                 content.items.forEachIndexed { lineIndex, (key, value) ->
                     key(lineIndex) {
-                        val visible = remember {
-                            androidx.compose.animation.core.MutableTransitionState(false)
-                                .apply { targetState = true }
+                        var visible by remember { mutableStateOf(false) }
+                        
+                        LaunchedEffect(Unit) {
+                            delay(lineIndex * 150L) // Staggered delay for each line
+                            visible = true
                         }
+
                         AnimatedVisibility(
-                            visibleState = visible,
-                            enter = fadeIn(
-                                animationSpec = tween(
-                                    durationMillis = 250,
-                                    delayMillis = lineIndex * 60
-                                )
-                            ) + slideInVertically(
-                                animationSpec = tween(
-                                    durationMillis = 250,
-                                    delayMillis = lineIndex * 60
-                                ),
-                                initialOffsetY = { it / 3 }
-                            )
+                            visible = visible,
+                            enter = fadeIn(animationSpec = tween(durationMillis = 300)) + 
+                                    expandVertically(animationSpec = tween(durationMillis = 300))
                         ) {
                             if (key.startsWith("----") || key.startsWith("────")) {
                                 HorizontalDivider(

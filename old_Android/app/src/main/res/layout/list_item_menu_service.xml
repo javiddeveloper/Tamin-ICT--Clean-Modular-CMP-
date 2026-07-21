@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable name="item" type="com.tamin.taminhamrah.data.entity.MenuModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="?android:attr/selectableItemBackground"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/icon"
+            style="@style/ImageViewIcon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:tint="@color/color_icon"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:background="@drawable/ic_close_outline"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvTitle"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:minWidth="@dimen/dialog_min_width"
+            android:text='@{item.title}'
+            app:layout_constraintEnd_toStartOf="@id/icon"
+            app:layout_constraintStart_toEndOf="@+id/labelNew"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvDescription"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="زززز" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelNew"
+            style="@style/TextStyle.SubTitle"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:background="@drawable/bg_yellow"
+            android:paddingStart="@dimen/margin_4dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="@dimen/margin_4dp"
+            android:paddingBottom="2dp"
+            android:text="@string/label_new"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="10sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintEnd_toStartOf="@id/tvTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvTitle"
+            app:layout_constraintBottom_toBottomOf="@id/tvTitle"/>
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/cbEdited"
+            style="@style/CheckBoxStyle"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:checked='@{item.isEdited}'
+            android:clickable="false"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:checked="true"
+            tools:visibility="visible"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvDescription"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:minWidth="@dimen/dialog_min_width"
+            android:text='@{item.description}'
+            android:visibility="@{item.showDesc?View.VISIBLE:View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/icon"
+            app:layout_constraintStart_toEndOf="@+id/cbEdited"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            tools:text="زززز"
+            tools:visibility="visible"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

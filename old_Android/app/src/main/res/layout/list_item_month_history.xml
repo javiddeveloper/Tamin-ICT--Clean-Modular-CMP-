@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/_5sdp"
+    >
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/margin_5dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <View
+        android:id="@+id/verticalLine2"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="@dimen/margin_10dp"
+        android:background="@color/lineColor"
+        android:elevation="@dimen/margin_5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/titleDay"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTitleMonth"
+        style="@style/TextStyle.Title"
+        android:layout_width="0dp"
+        android:elevation="@dimen/margin_5dp"
+        android:text="@string/month1"
+        app:layout_constraintBottom_toBottomOf="@+id/verticalLine2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/verticalLine2" />
+
+    <View
+        android:id="@+id/verticalLine"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="30dp"
+        android:background="@color/lineColor"
+        android:elevation="@dimen/margin_5dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth"
+        app:layout_constraintStart_toEndOf="@+id/tvValueMonth"
+        app:layout_constraintTop_toTopOf="@+id/tvTitleMonth" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvValueMonth"
+        style="@style/TextStyle.Title.colorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_marginStart="@dimen/margin_1dp"
+        android:elevation="@dimen/margin_5dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/tvTitleMonth"
+        tools:text="31" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/titleDay"
+        style="@style/TextStyle.SubTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_1dp"
+        android:elevation="@dimen/margin_5dp"
+        android:text="@string/day"
+        app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/tvValueMonth" />
+
+    <com.tamin.taminhamrah.widget.edittext.EditTextDay
+        android:id="@+id/tvDayObjection"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_border_rectangle_grey"
+        android:elevation="@dimen/margin_5dp"
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="2"
+        app:editText_max_day="31"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/titleDay"
+        app:layout_constraintBottom_toBottomOf="@+id/titleDay"
+        tools:text="00" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

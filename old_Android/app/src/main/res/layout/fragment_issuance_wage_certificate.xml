@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <import type="com.tamin.taminhamrah.utils.Utility"/>
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.issuanceWageCertificate.IssuanceWageCertificateViewModel" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:background="?attr/colorSurface"
+            android:fillViewport="true"
+            android:id="@+id/nestedScrollView"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelTitle"
+                style="@style/TextStyle.Title.Bold"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:padding="@dimen/margin_20dp"
+                android:text="@string/label_certificate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:id="@+id/selectPensionId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:textAlignment="textStart"
+                    app:editText_hint="@string/pension_number"
+                    app:layout_constraintTop_toBottomOf="@+id/labelTitle" />
+
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:id="@+id/selectReceiver"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:editText_hint="@string/recipient_certificate_hint"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/selectPensionId" />
+
+                <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                    android:id="@+id/layoutBranchName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/selectReceiver"
+                    app:type="place_name"
+                    />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnCertificateSendToInbox"
+                    style="@style/MainButton"
+                    android:layout_width="match_parent"
+                    android:text="@string/label_certificate_send_to_inbox"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutBranchName" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

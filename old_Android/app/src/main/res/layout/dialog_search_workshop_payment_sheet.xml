@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:layoutDirection="rtl">
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="30dp"
+            android:layout_height="4dp"
+            android:layout_margin="@dimen/margin_10dp"
+            android:background="#dadce0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputPayNumberFrom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_10dp"
+            app:editText_hint="@string/label_payment_number_from"
+            app:editText_max_len="10"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/inputPayNumberTo"
+            app:layout_constraintTop_toBottomOf="@id/view"
+            app:layout_constraintBottom_toTopOf="@id/inputPaymentType"/>
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputPayNumberTo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            app:editText_hint="@string/label_payment_number_to"
+            app:editText_max_len="10"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/inputPayNumberFrom"
+            app:layout_constraintTop_toTopOf="@id/inputPayNumberFrom"
+            app:layout_constraintBottom_toBottomOf="@id/inputPayNumberFrom"/>
+
+        <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+            android:id="@+id/inputPaymentType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_10dp"
+            app:editText_hint="@string/label_payment_sheet_type"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputPayNumberFrom"
+            app:layout_constraintBottom_toTopOf="@id/inputDebitCause"/>
+
+        <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+            android:id="@+id/inputDebitCause"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_10dp"
+            app:editText_hint="@string/label_debit_cause"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputPaymentType"
+            app:layout_constraintBottom_toTopOf="@id/widgetDatePickerStart"/>
+
+        <include
+            android:id="@+id/widgetDatePickerStart"
+            layout="@layout/widget_date_picker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/widgetDatePickerEnd"
+            app:layout_constraintTop_toBottomOf="@id/inputDebitCause"
+            app:hint='@{@string/label_issued_date_from}'/>
+
+        <include
+            android:id="@+id/widgetDatePickerEnd"
+            layout="@layout/widget_date_picker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            app:layout_constraintEnd_toStartOf="@id/widgetDatePickerStart"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/widgetDatePickerStart"
+            app:layout_constraintBottom_toBottomOf="@id/widgetDatePickerStart"
+            app:hint='@{@string/label_issued_date_to}'/>
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSearch"
+            style="@style/MainButton"
+            android:layout_margin="@dimen/margin_20dp"
+            android:text="@string/label_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/widgetDatePickerStart"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

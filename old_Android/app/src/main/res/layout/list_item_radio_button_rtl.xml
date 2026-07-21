@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.RadioButtonModel" />
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/layoutRadios"
+        >
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValue2"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="top|right"
+            android:text= "@{item.desc}"
+            android:textDirection="rtl"
+            app:layout_constraintBottom_toBottomOf="@+id/radioButton"
+            app:layout_constraintEnd_toStartOf="@+id/radioButton"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintTop_toTopOf="@+id/radioButton"
+            app:layout_constraintWidth_percent=".5"
+            tools:text="@string/label_insurance_freelance_job" />
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/cbConfirmRules"
+            style="@style/CheckBoxStepperStyle"
+            android:layout_width="wrap_content"
+            android:checked='@{item.isSelected}'
+            android:layoutDirection="ltr"
+            android:clickable="false"
+            android:textDirection="rtl"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/labelTitleCommitment"
+            tools:checked="true" />
+
+
+    </LinearLayout>
+
+</layout>

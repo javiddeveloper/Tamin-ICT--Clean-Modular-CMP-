@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/deceasedStepper"
+        style="@style/VerticalStepperItemView"
+        app:nextStepTitle="@string/inquiry_info"
+        app:step_index="2"
+        android:animateLayoutChanges="true"
+        app:step_state="normal"
+        app:step_title="@string/deceased_title"
+        tools:step_state="selected">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_5sdp"
+
+                android:paddingBottom="@dimen/_10sdp">
+
+                <com.tamin.taminhamrah.widget.edittext.nationalcode.EditTextNationalCode
+                    android:id="@+id/edNationalIdDeceased"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:editText_hint="@string/deceased_national_id"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnModifyNationalId"
+                    style="@style/TextButton"
+                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:text="@string/modify_national_code"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:layout_constraintTop_toBottomOf="@+id/edNationalIdDeceased" />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/deceasedInfoRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    
+                    android:layout_marginTop="@dimen/_5sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/btnModifyNationalId"
+                     />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnShowDetailDeceased"
+                    style="@style/TextButton"
+                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:text="@string/show_detail"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/deceasedInfoRecycler"
+                   />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@color/backgroundColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tvDescUpload" />
+
+                <include
+                    android:id="@+id/tvDescUpload"
+                    layout="@layout/item_desc_static"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/_5sdp"
+                    app:layout_constraintTop_toBottomOf="@id/btnShowDetailDeceased" />
+
+                <include
+                    android:id="@+id/itemAddDoc"
+                    layout="@layout/item_add_doc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescUpload"
+                   />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/docRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:paddingHorizontal="@dimen/_5sdp"
+                    app:layout_constraintTop_toBottomOf="@id/itemAddDoc" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/cbConfirmHistory"
+                    style="@style/CheckBoxStepperStyle"
+                    android:checked="false"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/docRecycler"
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvDescCommitment"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:justificationMode="inter_word"
+                    android:paddingHorizontal="@dimen/_5sdp"
+                    android:layout_marginVertical="@dimen/_10sdp"
+                    android:text="@string/desc_confirm_history_deceased"
+                    app:layout_constraintEnd_toStartOf="@+id/cbConfirmHistory"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/docRecycler" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupDetailInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:constraint_referenced_ids="btnShowDetailDeceased,deceasedInfoRecycler,tvDescUpload,itemAddDoc,docRecycler" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

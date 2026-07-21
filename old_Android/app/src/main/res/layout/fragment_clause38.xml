@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.employer.contract.clause38.Clause38ViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <com.tamin.taminhamrah.widget.CustomRecyclerView
+            android:id="@+id/recycler"
+            style="@style/LinearPaginationRecyclerStyle"
+            android:layout_height="match_parent"
+
+            app:decoration_type="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

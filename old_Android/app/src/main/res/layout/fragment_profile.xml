@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.profile.ProfileViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layoutDirection="ltr"
+        android:textDirection="rtl">
+
+        <include
+            android:id="@+id/layHeader"
+            layout="@layout/view_toolbar_login"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="@dimen/profile_image_medium_size"
+            android:layout_height="@dimen/profile_image_medium_size"
+            android:layout_margin="@dimen/margin_20dp"
+            android:background="@drawable/ic_account"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layHeader" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnEdiImage"
+            style="@style/ImageButton.Clickable"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginTop="-40dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:background="@drawable/bg_oval_image"
+            android:tint="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imgProfile"
+            app:srcCompat="@drawable/ic_camera" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvUsername"
+            style="@style/TextStyle.Title"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            app:layout_constraintBottom_toTopOf="@+id/tvNationalCode"
+            app:layout_constraintEnd_toStartOf="@id/imgProfile"
+            app:layout_constraintTop_toTopOf="@id/imgProfile"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="سمیه مدبری" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvNationalCode"
+            style="@style/TextStyle.Title"
+            android:layout_marginVertical="@dimen/margin_4dp"
+            app:layout_constraintBottom_toTopOf="@id/tvMobile"
+            app:layout_constraintEnd_toEndOf="@id/tvUsername"
+            app:layout_constraintTop_toBottomOf="@id/tvUsername"
+            tools:text="0083834001" />
+
+        <!--        <androidx.appcompat.widget.AppCompatTextView-->
+        <!--            android:id="@+id/labelMobile"-->
+        <!--            style="@style/TextStyle.SubTitle"-->
+        <!--            android:layout_marginTop="@dimen/margin_20dp"-->
+        <!--            android:layout_marginEnd="@dimen/margin_20dp"-->
+        <!--            android:text="@string/mobile"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="0.5"-->
+        <!--            app:layout_constraintStart_toEndOf="@+id/tvMobile"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/imgProfile" />-->
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvMobile"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:gravity="end"
+            app:layout_constraintBottom_toBottomOf="@+id/imgProfile"
+            app:layout_constraintEnd_toEndOf="@+id/tvNationalCode"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintTop_toBottomOf="@id/tvNationalCode"
+            tools:text="09123232333" />
+
+        <!--        <androidx.appcompat.widget.AppCompatTextView-->
+        <!--            android:id="@+id/labelEmail"-->
+        <!--            style="@style/TextStyle.SubTitle"-->
+        <!--            android:layout_marginStart="@dimen/margin_20dp"-->
+        <!--            android:layout_marginTop="8dp"-->
+        <!--            android:layout_marginEnd="@dimen/margin_20dp"-->
+        <!--            android:text="@string/label_email"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="1.0"-->
+        <!--            app:layout_constraintStart_toEndOf="@+id/tvEmail"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/tvMobile" />-->
+
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvMobile" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line2">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/parent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnUserMode"
+                    style="@style/TextButton"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:drawableEnd="@drawable/ic_user_mode"
+                    android:text="@string/label_change_user_mode"
+                    android:visibility="gone"
+                    app:drawableTint="?colorPrimary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/line1"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/line1"
+                    android:layout_width="@dimen/line_height"
+                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/margin_8dp"
+                    android:background="@color/lineColor"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/btnUserMode"
+                    app:layout_constraintEnd_toStartOf="@+id/btnUserMode"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/btnLogOut"
+                    app:layout_constraintTop_toTopOf="@id/btnUserMode" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnLogOut"
+                    style="@style/TextButton"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:drawableEnd="@drawable/ic_exit_to_app"
+                    android:text="@string/label_logout"
+                    android:textColor="@color/red"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toStartOf="@+id/line1"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler"
+                    style="@style/LinearRecyclerStyle"
+                    android:nestedScrollingEnabled="false"
+                    app:layout_constraintBottom_toTopOf="@id/line4"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/btnUserMode" />
+
+                <View
+                    android:id="@+id/line4"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/line_height"
+                    android:background="@color/lineColor"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recycler" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/animation_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:adjustViewBounds="true"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/line4"
+                    app:layout_constraintVertical_chainStyle="packed"
+                    app:lottie_autoPlay="true"
+                    app:lottie_fileName="support.json"
+                    app:lottie_loop="true" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:background="@drawable/bg_cancel_button"
+                    android:backgroundTint="@color/amber"
+                    android:padding="6dp"
+                    android:text="@string/label_contact_to_1420"
+                    android:textColor="@android:color/white"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/animation_view"
+                    app:layout_constraintEnd_toEndOf="@id/animation_view" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelAnswering"
+                    style="@style/TextStyle.Header.Black"
+                    android:backgroundTint="@color/bg_label_new"
+                    android:padding="10dp"
+                    android:text="@string/label_answering"
+                    android:textColor="@color/textColorSubTitle"
+                    android:textSize="25dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="@id/animation_view"
+                    app:layout_constraintStart_toStartOf="@id/animation_view"
+                    app:layout_constraintTop_toBottomOf="@id/animation_view" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupAnswering"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/labelAnswering"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/animation_view" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

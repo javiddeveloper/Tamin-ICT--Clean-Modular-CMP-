@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.AllHistoryInsuranceResponseModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/margin_5dp"
+        android:layoutDirection="ltr">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnInfoWorkShopExpand"
+            style="@style/ImageButton.Clickable"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:tint="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/item_workshop_name_information"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_expand_more"
+            android:visibility="gone"/>
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkshopInformation"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:text="@string/workshop_information"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/item_workshop_name_information"
+            app:layout_constraintBottom_toBottomOf="@id/item_workshop_name_information"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/item_workshop_name_information"
+            style="@style/TextStyle.Title.colorPrimary"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:padding="@dimen/margin_6dp"
+            app:layout_constraintEnd_toStartOf="@+id/labelWorkshopInformation"
+            app:layout_constraintHeight_max="@dimen/dimen_60dp"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_margin="@dimen/margin_20dp"
+            android:text="@{item.workShopName}"
+            tools:text="تسیبامنتبا نتباسمنتب یتبا تیابسمنت ینتبا نیتا نتیا بن سنتبیاتیان س س نیتنب تسا ینتبیسنت ستب اینب یبنت سابی بنست ابب ی سنت ا ب سینتاب  سنتاب نت" />
+
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelHistoryTypeNameTitle"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@string/label_history_typeName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_workshop_name_information" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelHistoryTypeNameValue"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@{item.historyTypeName}"
+            app:layout_constraintStart_toStartOf="@+id/lineInfo1"
+            app:layout_constraintTop_toBottomOf="@+id/item_workshop_name_information"
+            tools:text="ssss" />
+
+        <View
+            android:id="@+id/lineInfo1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_1dp"
+            android:layout_marginStart="@dimen/margin_16dp"
+            android:layout_marginEnd="@dimen/margin_16dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelHistoryTypeNameValue" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelBranchNameTitle"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@string/label_branch_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineInfo1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelBranchNameValue"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@{item.branchname}"
+            app:layout_constraintStart_toStartOf="@+id/lineInfo2"
+            app:layout_constraintTop_toBottomOf="@id/lineInfo1"
+            tools:text="ssss" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkshopNumberValue"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@{item.workShopCode}"
+            app:layout_constraintStart_toStartOf="@+id/labelBranchNameValue"
+            app:layout_constraintTop_toBottomOf="@id/lineInfo2"
+            tools:text="ssss" />
+
+        <View
+            android:id="@+id/lineInfo2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_1dp"
+            android:layout_marginStart="@dimen/margin_16dp"
+            android:layout_marginEnd="@dimen/margin_16dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelBranchNameValue" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkshopNumberTitle"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@string/label_workshop_number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lineInfo2" />
+
+
+        <View
+            android:id="@+id/lineInfo3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_1dp"
+            android:layout_marginStart="@dimen/margin_16dp"
+            android:layout_marginEnd="@dimen/margin_16dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/labelWorkshopNumberTitle" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDetailHistory"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="wrap_content"
+            android:paddingTop="@dimen/margin_20dp"
+            android:paddingRight="@dimen/margin_20dp"
+            android:text="@string/label_history_details"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lineInfo3" />
+
+            <include
+                android:id="@+id/season1"
+                layout="@layout/list_item_season_history"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/labelDetailHistory"
+                android:layout_marginTop="10dp"
+                app:season='@{1}'
+                app:valueMonth1='@{item.month1}'
+                app:valueMonth2='@{item.month2}'
+                app:valueMonth3='@{item.month3}'
+                />
+
+            <include
+                android:id="@+id/season2"
+                layout="@layout/list_item_season_history"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/season1"
+                android:layout_marginTop="@dimen/margin_5dp"
+                app:season='@{2}'
+                app:valueMonth1='@{item.month4}'
+                app:valueMonth2='@{item.month5}'
+                app:valueMonth3='@{item.month6}'
+                />
+
+            <include
+                android:id="@+id/season3"
+                layout="@layout/list_item_season_history"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/season2"
+                android:layout_marginTop="@dimen/margin_5dp"
+                app:season='@{3}'
+                app:valueMonth1='@{item.month7}'
+                app:valueMonth2='@{item.month8}'
+                app:valueMonth3='@{item.month9}'
+                />
+
+            <include
+                android:id="@+id/season4"
+                layout="@layout/list_item_season_history"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/season3"
+                android:layout_marginTop="@dimen/margin_5dp"
+                app:season='@{4}'
+                app:valueMonth1='@{item.month10}'
+                app:valueMonth2='@{item.month11}'
+                app:valueMonth3='@{item.month12}'
+                app:leapYear='@{item.isLeapYear(item.year)?"اسفند(سال کبیسه)":"اسفند"}'
+                />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

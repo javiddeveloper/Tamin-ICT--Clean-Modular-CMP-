@@ -1,0 +1,1073 @@
+{
+  "session_id": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
+  "lastEntity": "doctorName:ali , proficiency:heart, nezam:123456",
+  "entities": [
+    {
+      "key": "dastmozd_infos_per_year",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "کاربر محترم سابقه مربوط به @startDate تا @endDate به صورت زیر می‌باشد",
+      "failed_message": null,
+      "message_id": "8a7ae66e-1fb7-4dc9-89d3-aacdf8a228fe"
+    },
+    {
+      "key": "dastmozd_infos_per_month",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      }
+    },
+    {
+      "key": "dastmozd_infos_salary",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "کاربر محترم سابقه حقوق مربوط به @startDate تا @endDate به صورت زیر می‌باشد",
+      "failed_message": null,
+      "message_id": "2c83c66c-e449-4541-88b6-e460fe0356fc"
+    },
+    {
+      "key": "dastmozd_infos_sum_total",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "کاربر محترم مجموع کل سابقه مربوط به @startDate تا @endDate به صورت زیر می‌باشد",
+      "failed_message": null,
+      "message_id": "302ca9ae-9654-4315-9e8c-5c1172b3d5f0"
+    },
+    {
+      "key": "dastmozd_infos_last",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "آخرین سابقه بیمه شما به صورت زیر می‌باشد",
+      "failed_message": null,
+      "message_id": "ecca966b-0680-42e9-84cd-8329b4453f12"
+    },
+    {
+      "key": "dastmozd_infos",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "سابقه پرداخت حق بیمه",
+      "failed_message": null,
+      "message_id": "46fc9583-a27c-43d2-aa02-1cba3dfe60f6"
+    },
+    {
+      "key": "dastmozd_infos",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "سابقه پرداخت حق بیمه از تاریخ شروع",
+      "failed_message": null,
+      "message_id": "81307dc3-3b75-4796-80ef-fd42ae3d6fdc"
+    },
+    {
+      "key": "dastmozd_infos",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "سابقه پرداخت حق بیمه تا تاریخ پایان",
+      "failed_message": null,
+      "message_id": "cafabfcf-db89-4ed1-8437-46ac820cf98c"
+    },
+    {
+      "key": "dastmozd_infos",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "سابقه پرداخت حق بیمه",
+      "failed_message": null,
+      "message_id": "7e2d8329-d5d1-42ab-9960-bd9202c225ab"
+    },
+    {
+      "key": "history_job_infos",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "لیست عناوین شغلی بر اساس تاریخ شروع",
+      "failed_message": null,
+      "message_id": "0bbb3e22-cba6-4ac5-a1d0-b57eddc7a638"
+    },
+    {
+      "key": "history_job_infos_last",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "آخرین عنوان شغلی",
+      "failed_message": null,
+      "message_id": "40a5c92c-0d46-4437-801d-5e1c53d38571"
+    },
+    {
+      "key": "calcIllness",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "محاسبه غرامت دستمزد",
+      "failed_message": null,
+      "message_id": "9685dfe5-91da-4c09-8e0e-f5caa88ed3e9"
+    },
+    {
+      "key": "calcIllness",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "محاسبه غرامت دستمزد از تاریخ شروع",
+      "failed_message": null,
+      "message_id": "0447c044-b8f5-404f-9fc5-128ed154816f"
+    },
+    {
+      "key": "calcIllness",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "محاسبه غرامت دستمزد تا تاریخ پایان",
+      "failed_message": null,
+      "message_id": "c171a2d4-a8c7-47eb-9439-aebbc7a17a14"
+    },
+    {
+      "key": "calcIllness_rep_last",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "گزارش غرامت دستمزد (آخرین)",
+      "failed_message": null,
+      "message_id": "0a2d3971-7a3e-4c6d-8643-9895ffe1fc27"
+    },
+    {
+      "key": "calcIllness_rep",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "گزارش غرامت دستمزد (همه)",
+      "failed_message": null,
+      "message_id": "b5f71c88-7e9a-446f-b119-c1534e318efe"
+    },
+    {
+      "key": "calcIllness_rep",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "گزارش غرامت دستمزد (همه)",
+      "failed_message": null,
+      "message_id": "b5f71c88-7e9a-446f-b119-c1534e318efe"
+    },
+    {
+      "key": "calcIllness_rep",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14020401"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "گزارش غرامت دستمزد (همه)",
+      "failed_message": null,
+      "message_id": "b5f71c88-7e9a-446f-b119-c1534e318efe"
+    },
+    {
+      "key": "calcIllness_rep",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "گزارش غرامت دستمزد (همه)",
+      "failed_message": null,
+      "message_id": "b5f71c88-7e9a-446f-b119-c1534e318efe"
+    },
+    {
+      "key": "dastmozd_infos_pension",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [ ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "محاسبه مستمری بازنشستگی",
+      "failed_message": null,
+      "message_id": "8026976f-c666-4a6d-a6dd-35ff07702863"
+    },
+    {
+      "key": "dastmozd_infos_estehghagh",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "مبلغ استحقاق مستمری",
+      "failed_message": null,
+      "message_id": "be362317-4fc4-4a1e-b6bc-366f4298d997"
+    },
+    {
+      "key": "dastmozd_infos",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "averageSalaryYear:9"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "میانگین دستمزد 9 سال آخر",
+      "failed_message": null,
+      "message_id": "859d3340-81d2-48c9-9718-6ef367d9ded4"
+    },
+    {
+      "key": "pension_inquiry_last",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "استعلام وضعیت مستمری (آخرین)",
+      "failed_message": null,
+      "message_id": "697088b2-3416-478a-8a12-df4cbfc84d7b"
+    },
+    {
+      "key": "pension_inquiry_all",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "استعلام وضعیت مستمری (همه)",
+      "failed_message": null,
+      "message_id": "97a1a04e-bc76-4f6c-a06b-2be080f7d67a"
+    },
+    {
+      "key": "hokm_last",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14030101",
+          "endDate:14031229"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "مشاهده حکم",
+      "failed_message": null,
+      "message_id": "b90350dd-afbd-40ca-a76d-077dc18d42e2"
+    },
+    {
+      "key": "hokm",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14030101"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "مشاهده حکم از تاریخ شروع",
+      "failed_message": null,
+      "message_id": "92c3fa9f-e219-4bcf-99e3-f240df2392e1"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 101"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (فرزند)",
+      "failed_message": null,
+      "message_id": "117cb392-6abf-4500-8f9b-91adf3001cd6"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (همه)",
+      "failed_message": null,
+      "message_id": "a066006f-d91a-47c6-9370-9057c39a3fe3"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 101"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (پسر)",
+      "failed_message": null,
+      "message_id": "21488487-3535-4fde-bf01-c0d4ec54427c"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 102"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (دختر)",
+      "failed_message": null,
+      "message_id": "7810b2fe-c02b-4fcb-b6a3-a63d48d551c6"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 106",
+          "gendercode : 01"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (پدر)",
+      "failed_message": null,
+      "message_id": "a72373fb-af5d-4afa-b864-9bc90bc74c56"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 106",
+          "gendercode : 02"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (مادر)",
+      "failed_message": null,
+      "message_id": "7fa9f388-a356-4674-b519-2347c6923e7c"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode:124"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (خواهر)",
+      "failed_message": null,
+      "message_id": "c5f7b087-4a7a-44ae-8201-13ef6f1e66e3"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode : 124"
+
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (برادر)",
+      "failed_message": null,
+      "message_id": "f6c8790b-f09b-4240-8ac1-89054b66a68c"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode : 103"
+
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (همسر)",
+      "failed_message": null,
+      "message_id": "f6c8790b-f09b-4240-8ac1-89054b66a68c"
+    },
+    {
+      "key": "Incidental_damages",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "خسارت متفرقه از تاریخ 14030101 تا تاریخ 14031229",
+      "failed_message": null,
+      "message_id": "b90350dd-afbd-40ca-a76d-077dc18d42e2"
+    },
+
+    {
+      "key": "fish",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14040401",
+          "endDate:14040430",
+          "pensionerId:@pensionerId",
+          "nationalId:@nationalID",
+          "paymentType:01"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "کاربر محترم فیش مربوط به @startDate به صورت زیر می‌باشد",
+      "failed_message": null,
+      "message_id": "7eaa9e53-2f88-47d2-a08a-4f33af550e1f"
+    },
+    {
+      "key": "fish",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:14040401",
+          "pensionerId:@pensionerId",
+          "NationalId:@nationalID",
+          "paymentType:01"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "کاربر محترم فیش مربوط به @startDate به صورت زیر می‌باشد",
+      "failed_message": null,
+      "message_id": "7e6bec64-b935-42ba-b193-9681e748e98e"
+    },
+    {
+      "key": "patient_history",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "button_deeplink",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:1723235400000",
+          "endDate:1755498791983"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "لیست نسخه های شما از تاریخ startDate@ تا تاریخ endDate@ به صورت زیر میباشد: ",
+      "failed_message": null,
+      "message_id": "fd1ab80e-e497-4aa9-8598-9a54a47f5ba0"
+    },
+    {
+      "key": "patient_history",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "button_deeplink",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:1723235400000"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "لیست نسخه های شما از تاریخ startDate@ به صورت زیر میباشد: ",
+      "failed_message": null,
+      "message_id": "2ae1299f-a447-4e79-8a19-b033ca32078d"
+    },
+    {
+      "key": "patient_history",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "button_deeplink",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "endDate:1755498791983"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "لیست نسخه های شما از تاریخ startDate@ تا تاریخ endDate@ به صورت زیر میباشد: ",
+      "failed_message": null,
+      "message_id": "fd1ab80e-e497-4aa9-8598-9a54a47f5ba0"
+    },
+    {
+      "key": "booklet_req",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "وضعیت استحقاق درمان به صورت زیر میباشد",
+      "failed_message": null,
+      "message_id": "4e9dc4d8-fead-488d-be28-3d645dc65ab1"
+    },
+    {
+      "key": "history_services",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 0,
+        "start": 0,
+        "limit": 60,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "آخرین بیمه پردازی شما به صورت زیر میباشد",
+      "failed_message": null,
+      "message_id": "ff2b4a85-4a82-4e70-bd2c-bdab1c099069"
+    },
+    {
+      "key": "history_services",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 0,
+        "start": 0,
+        "limit": 60,
+        "filter": [
+          "startDate:14020401",
+          "endDate:14040430"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "آخرین بیمه پردازی شما به صورت زیر میباشد",
+      "failed_message": null,
+      "message_id": "65a3f4cc-d3ac-4739-b2ec-210c993abdbd"
+    },
+    {
+      "key": "last_tracking_code",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:1723235400000",
+          "endDate:1755498791983"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "لیست کد پیگیری: ",
+      "failed_message": null,
+      "message_id": "4ce0813b-2106-41d8-8ebd-a62553ebd555"
+    },
+    {
+      "key": "last_tracking_code",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "startDate:1723235400000"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "لیست کد پیگیری: ",
+      "failed_message": null,
+      "message_id": "59fea35b-effd-44db-9b06-1c246944ec73"
+    },
+    {
+      "key": "appoinmet",
+      "step_number": 1,
+      "move_new_session": true,
+      "item_type": "button_deeplink_web",
+      "has_data": true,
+      "payload": {
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "nezam: @nezam"
+        ],
+        "sort": {}
+      },
+      "data": [
+        {
+          "doctorName": "ali",
+          "proficiency": "3",
+          "nezam": 11111
+        },
+        {
+          "doctorName": "mohsen",
+          "proficiency": "2",
+          "nezam": 22222
+        },
+        {
+          "doctorName": "javid",
+          "proficiency": "1",
+          "nezam": 33333
+        }
+      ],
+      "success_message": "",
+      "failed_message": "",
+      "message_id": "e6e66430-8de6-41cc-ba7d-b405377118a0"
+    },
+    {
+      "key": "appoinmet",
+      "step_number": 1,
+      "item_type": "button_deeplink_web",
+      "move_new_session": true,
+      "has_data": false,
+      "payload": {
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "",
+      "failed_message": "جستجو بی نتیجه بود",
+      "message_id": "47da4216-5509-4f17-a12e-c5196f0f8c3b"
+    },
+    {
+      "key": "dastmozdinfos-last-pay",
+      "step_number": 1,
+      "item_type": "text",
+      "move_new_session": false,
+      "has_data": false,
+      "payload": {
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "",
+      "failed_message": "آحرین بیمه پردازی شما به صورت زیر میباشذ",
+      "message_id": "47da4216-5509-4f17-a12e-c5196f0f8c3b"
+    },
+    {
+      "key": "law",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "button_deeplink_web",
+      "has_data": true,
+      "payload": {
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": [
+        {
+          "name": "10)",
+          "reference": "مدیر عامل",
+          "content": "بیکاری به علت بروز حوادث قهریه و غیر مترقبه از قبیل سیل، زلزله، جنگ و آتش سوزی.",
+          "source_file": "WZ31AR0G89FL1VWIB8YJKHE81E0E0PCH.json",
+          "score": 0.85,
+          "url":"https://ai.tamin.ir/tree3_html?idx=6845&id=9P7LB4KFB4B9GDRF55K70HY4QBB2Y502"
+        },
+        {
+          "name": "8)",
+          "reference": "مدیر عامل",
+          "content": "بیکار از نظر قانون، بیمه شده ای است که بدون میل واراده بیکار شده و آماده کار باشد.",
+          "source_file": "WZ31AR0G89FL1VWIB8YJKHE81E0E0PCH.json",
+          "score": 0.85,
+          "url":"https://ai.tamin.ir/tree3_html?idx=6842&id=KC1AXYZ6AMG6ZGIVTX75FJ1JUW6MRIIA"
+
+        }
+      ],
+      "success_message": "قوانین این است",
+      "failed_message": "",
+      "message_id": "e6e66430-8de6-41cc-ba7d-b405377118a0"
+    }
+  ]
+}

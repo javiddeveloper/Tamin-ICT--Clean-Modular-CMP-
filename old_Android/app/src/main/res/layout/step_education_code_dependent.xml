@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperInquiryEducation"
+        style="@style/VerticalStepperItemView"
+        app:step_index="2"
+        app:step_state="normal"
+        app:nextStepTitle="@string/inquiry_info"
+        app:step_title="@string/inquiry_certificate_study_code"
+        tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:layout_marginEnd="@dimen/_5sdp"
+            android:layout_marginBottom="@dimen/_10sdp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgDescIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:srcCompat="@drawable/ic_info_outline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:tint="@color/light_blue" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvDesc"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:paddingStart="@dimen/_5sdp"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:textColor="?attr/colorOnSurface"
+                android:gravity="start"
+                android:paddingBottom="@dimen/_5sdp"
+                android:layout_gravity="center_vertical|end"
+                android:autoLink="web"
+                android:textColorLink="@color/colorPrimary"
+                app:layout_constraintEnd_toStartOf="@+id/imgDescIcon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imgDescIcon"
+                android:text="@string/desc_inquiry_certificate_study_code" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/edEducationCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/inquiry_study_code"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:editText_max_len="10"
+                app:layout_constraintTop_toBottomOf="@+id/tvDesc"
+                app:type="english_input" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvUniversity"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:gravity="start"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:text="@string/university_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/edEducationCode" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueUniversity"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/tvUniversity"
+                app:layout_constraintEnd_toStartOf="@+id/tvUniversity"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvUniversity"
+                tools:text="دانشگاه تهران" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

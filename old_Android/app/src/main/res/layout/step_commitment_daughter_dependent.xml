@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperDaughterConfirm"
+        style="@style/VerticalStepperItemView"
+        app:step_index="2"
+        app:step_state="normal"
+        tools:step_state="selected"
+        app:nextStepTitle="@string/ok_and_continue"
+        app:nextStepEnable="false"
+        app:step_title="@string/commitment_daughter">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbDescDaughterConfirm"
+                style="@style/CheckBoxStepperStyle"
+                android:layout_width="wrap_content"
+                android:checked="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvDescDaughterConfirm"
+                style="@style/TextStyle.Title"
+                android:layout_width="0sp"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/_2sdp"
+                android:gravity="start"
+                android:justificationMode="inter_word"
+                android:padding="@dimen/_2sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:layout_constraintEnd_toStartOf="@+id/cbDescDaughterConfirm"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="@string/confirm_daughter_18" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

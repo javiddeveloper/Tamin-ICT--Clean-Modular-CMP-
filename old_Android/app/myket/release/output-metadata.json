@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.tamin.taminhamrah",
+  "variantName": "myketRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 50,
+      "versionName": "1.12.0",
+      "outputFile": "mytaminhamrah_C50_N1120_myket(release)_20250527.apk"
+    }
+  ],
+  "elementType": "File",
+  "baselineProfiles": [
+    {
+      "minApi": 28,
+      "maxApi": 30,
+      "baselineProfiles": [
+        "baselineProfiles/1/mytaminhamrah_C50_N1120_myket(release)_20250527.dm"
+      ]
+    },
+    {
+      "minApi": 31,
+      "maxApi": 2147483647,
+      "baselineProfiles": [
+        "baselineProfiles/0/mytaminhamrah_C50_N1120_myket(release)_20250527.dm"
+      ]
+    }
+  ],
+  "minSdkVersionForDexing": 21
+}

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="5dp"
+        android:paddingBottom="@dimen/_10sdp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitlePatientName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_margin="@dimen/_10sdp"
+            android:text="@string/treatment_center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueTreatmentCenter"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_marginHorizontal="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="right|center_vertical"
+            android:textColor="?attr/colorPrimary"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            android:layout_marginTop="@dimen/_5sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitlePatientName"
+            tools:text="پزشک معتمد درمانگاه شماره 2 رشت	" />
+
+
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@id/tvValueTreatmentCenter" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            style="@style/LinearRecyclerStyle"
+            android:layout_width="match_parent"
+            android:nestedScrollingEnabled="false"
+            app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@id/recycler" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleStatusMedicalAuthority"
+            style="@style/TextStyle.SubTitle"
+            android:layout_margin="@dimen/_10sdp"
+            android:drawablePadding="@dimen/_2sdp"
+            android:text="@string/confirm_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueStatusMedicalAuthority"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:textColor="@color/green_blue"
+            app:layout_constraintEnd_toEndOf="@+id/tvTitleStatusMedicalAuthority"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="@+id/tvTitleStatusMedicalAuthority"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleStatusMedicalAuthority"
+            tools:text="تایید نشده" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleConfirmBranch"
+            style="@style/TextStyle.SubTitle"
+            android:layout_margin="@dimen/_10sdp"
+            android:drawablePadding="@dimen/_2sdp"
+            android:text="@string/confirm_in_branch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueConfirmBranch"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:textColor="@color/green_blue"
+            app:layout_constraintEnd_toEndOf="@+id/tvTitleConfirmBranch"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="@+id/tvTitleConfirmBranch"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitleConfirmBranch"
+            tools:text="تایید نشده" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowDetail"
+            style="@style/TextButton"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:text="@string/show_detail"
+            android:textSize="@dimen/font_sub_title_size"
+            android:layout_marginTop="@dimen/_5sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueConfirmBranch" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperUploadResignation"
+        style="@style/VerticalStepperItemView"
+        app:step_index="7"
+        app:step_state="normal"
+        tools:step_state="selected"
+        app:nextStepEnable="false"
+        app:previousStepVisible="false"
+        app:step_title="@string/upload_documents_resignation_letter">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/_10sdp"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgInfoResignation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/descInfoResignation"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_info_outline"
+                android:tint="@color/text_color_dialog_blue"
+                />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/descInfoResignation"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:justificationMode="inter_word"
+                android:text="@string/desc_resignation_letter_in_electronic_prescription"
+                app:layout_constraintEnd_toStartOf="@+id/imgInfoResignation"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imgInfoResignation"
+                />
+
+            <include
+                android:id="@+id/itemAddResignation"
+                layout="@layout/item_add_doc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:layout_constraintTop_toBottomOf="@+id/descInfoResignation" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerResignationItem"
+                style="@style/LinearRecyclerStyle"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@+id/itemAddResignation" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface">
+
+        <include android:id="@+id/appBar"
+            layout="@layout/view_appbar_service_info_payment" />
+
+        <include android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/colorSurface"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="@dimen/_10sdp"
+            android:animateLayoutChanges="true"
+            android:layoutDirection="ltr"
+            android:textDirection="rtl">
+
+            <include
+                android:id="@+id/tvDescSelectUserType"
+                layout="@layout/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="?attr/colorSurfaceContainerHigh"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="13dp" />
+
+            <RadioGroup
+                android:id="@+id/rgUserType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="?attr/colorSurfaceContainerHigh"
+                android:paddingHorizontal="@dimen/_10sdp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvDescSelectUserType">
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/rbCurrentUser"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/current_user_payment" />
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/rbOtherUser"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/other_user_payment" />
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/rbNationalID"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/national_id_payment" />
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/rbForeigners"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/foreigners_payment" />
+            </RadioGroup>
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/inputUserCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:visibility="gone"
+                app:editText_hint="@string/other_user_payment"
+                app:editText_max_len="11"
+                tools:visibility="visible" />
+
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/inputUserCodeForeigners"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:visibility="gone"
+                app:editText_hint="@string/foreigners_payment"
+                app:editText_max_len="16"
+                />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnPayment"
+                style="@style/MainButton"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/label_payment"
+                app:layout_constraintTop_toBottomOf="@+id/flowUserCode" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelCountDown"
+                style="@style/TextStyle.SubTitle"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:gravity="center"
+                android:text="@string/label_remaining_time"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnPayment"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvCountDown"
+                style="@style/TextStyle.Title"
+                android:layout_marginStart="@dimen/margin_6dp"
+                android:gravity="center"
+                android:text="00:00"
+                android:textColor="@color/text_color_orange"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/labelCountDown"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelCountDown" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelInfo"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_margin="@dimen/_10sdp"
+                android:gravity="center"
+                android:text="@string/label_payment_help"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/labelCountDown" />
+
+            <androidx.constraintlayout.helper.widget.Flow
+                android:id="@+id/flowUserCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/rgUserType"
+                app:constraint_referenced_ids="inputUserCode,inputUserCodeForeigners" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

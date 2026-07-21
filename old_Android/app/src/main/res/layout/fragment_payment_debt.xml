@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+            <include
+                android:id="@+id/appBar"
+                layout="@layout/view_appbar_service"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/appbarBackgroundImage"
+                layout="@layout/view_appbar_image"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/contentLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:paddingBottom="@dimen/_60sdp"
+                    android:background="?attr/colorSurface"
+                    android:clickable="false"
+                    android:nestedScrollingEnabled="true"
+                    android:orientation="vertical">
+
+                    <include
+                        android:id="@+id/ItemDesc1"
+                        layout="@layout/item_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_10sdp"
+                        app:item='@{@string/desc_payment_debt_1}' />
+
+                    <include
+                        android:id="@+id/ItemDesc2"
+                        layout="@layout/item_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_10sdp"
+                        app:item='@{@string/desc_payment_debt_2}' />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler"
+                        style="@style/LinearPaginationRecyclerStyle"
+                        android:layout_marginHorizontal="@dimen/_10sdp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_10sdp" />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+            </androidx.core.widget.NestedScrollView>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnPayment"
+            style="@style/MainButton"
+            android:layout_margin="@dimen/_10sdp"
+            android:text="@string/label_payment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_anchor="@id/nestedScrollView"
+            app:layout_anchorGravity="bottom"
+            />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
+

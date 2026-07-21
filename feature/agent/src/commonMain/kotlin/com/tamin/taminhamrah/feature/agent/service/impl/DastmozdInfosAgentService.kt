@@ -45,11 +45,9 @@ class DastmozdInfosAgentService(
             // 3. Map data to displayable chat bubbles with full formatting exactly like old_Android
             val bubbles = mutableListOf<ChatBubbleContent>()
 
+            // Remove adding message as a separate Text bubble. We'll use it as KeyValue title.
             val msg = params.message
-            if (!msg.isNullOrBlank()) {
-                bubbles.add(ChatBubbleContent.Text(msg))
-            }
-
+            
             var filteredList = list
 
             // 4. Extract filters from payload
@@ -117,7 +115,7 @@ class DastmozdInfosAgentService(
 
             bubbles.add(
                 ChatBubbleContent.KeyValue(
-                    title = null, // msg is already shown as a separate Text bubble above
+                    title = msg?.takeIf { it.isNotBlank() } ?: "اطلاعات دستمزد",
                     items = allDetails
                 )
             )

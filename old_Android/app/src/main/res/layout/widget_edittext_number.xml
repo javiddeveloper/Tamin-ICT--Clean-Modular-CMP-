@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="valueOfText"
+            type="String" />
+    </data>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layInputNumber"
+        style="@style/TextInputLayout"
+        android:hint="@string/national_code"
+        app:errorEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtTextNumber"
+            style="@style/EditTextStyle"
+            android:inputType="number"
+            android:maxLines="1"
+            android:minHeight="32dp"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</layout>

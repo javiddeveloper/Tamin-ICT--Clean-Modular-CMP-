@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout>
+
+    <data>
+
+        <variable
+            name="isSelectRate"
+            type="Boolean" />
+    </data>
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/CorrespondenceStepperItemUploadImage"
+        style="@style/VerticalStepperItemView"
+        app:layout_constraintTop_toBottomOf="@+id/stepperUserInfo"
+        tools:step_state="selected"
+        app:step_is_last="true"
+        app:nextStepTitle="@string/label_save">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
+
+            <include
+                android:id="@+id/item_Desc"
+                layout="@layout/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:item='@{@string/label_image_guid}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddDocument"
+                style="@style/TextButtonBordered.Green"
+                android:layout_width="0dp"
+                android:drawableRight="@drawable/ic_add_circle"
+                android:text="@string/label_add_document"
+                android:layout_marginTop="@dimen/margin_20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/item_Desc" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                style="@style/LinearRecyclerStyle"
+                android:layout_marginTop="@dimen/margin_20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAddDocument" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

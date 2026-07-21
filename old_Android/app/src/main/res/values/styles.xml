@@ -1,0 +1,677 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+
+    <style name="TextStyle" parent="TextAppearance.AppCompat">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:drawablePadding">@dimen/margin_12dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+    </style>
+
+    <style name="TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="boxBackgroundMode">outline</item>
+        <item name="boxStrokeErrorColor">@color/red</item>
+        <item name="boxStrokeWidth">@dimen/line_height</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="android:textColorHint">@color/textColorHint</item>
+
+    </style>
+
+    <style name="EditTextStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+<!--        <item name="android:textColor">@color/textColorHint</item>-->
+        <item name="editText_text_color">@color/textColorHint</item>
+        <item name="editText_hint_color">@color/textColorHint</item>
+        <item name="editText_max_line">1</item>
+        <item name="editText_text_size">@dimen/font_title_size</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:maxLines">1</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+
+    </style>
+
+    <style name="TextStyle.Header">
+        <item name="android:textSize">@dimen/font_header_size</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_header_size</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
+    <style name="TextStyle.StepperTitle">
+        <item name="android:textSize">@dimen/font_header_size</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_header_size</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextStyle.Header.White">
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">16sp</item>
+        <item name="autoSizeMaxTextSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="TextStyle.Header.Black">
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textSize">16sp</item>
+        <item name="autoSizeMaxTextSize">16sp</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextStyle.SubHeader">
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">12sp</item>
+        <item name="autoSizeMaxTextSize">12sp</item>
+        <item name="android:textColor">?attr/colorOnSurfaceInverse</item>
+        <item name="android:lineSpacingExtra">8dp</item>
+    </style>
+
+    <style name="TextStyle.SubTitle.Green">
+        <item name="android:textSize">@dimen/font_size_18</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_size_18</item>
+        <item name="android:textColor">@color/textGreenColorSubTitle</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.SubTitle.Green.font14">
+        <item name="android:textSize">@dimen/font_size_14</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_size_14</item>
+        <item name="android:textColor">@color/textGreenColorSubTitle</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.SubTitle.Black">
+        <item name="android:textSize">@dimen/font_size_14</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_size_14</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.SubTitle.Red">
+        <item name="android:textSize">@dimen/font_size_18</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_size_18</item>
+        <item name="android:textColor">@color/text_color_dialog_red</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.SubTitle.Orange">
+        <item name="android:textSize">@dimen/font_size_18</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_size_18</item>
+        <item name="android:textColor">@color/textColorOrange</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.Title">
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+
+    </style>
+
+    <style name="TextStyle.Title.colorPrimary">
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="TextStyle.Title.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextStyle.SubTitle">
+        <item name="android:textSize">@dimen/font_sub_title_size</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_sub_title_size</item>
+        <item name="android:textColor">?attr/colorOutline</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.DebtLabel">
+        <item name="android:textSize">@dimen/_7ssp</item>
+        <item name="autoSizeMaxTextSize">@dimen/_8ssp</item>
+        <item name="android:textColor">?attr/colorOutline</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textDirection">rtl</item>
+    </style>
+
+    <style name="TextStyle.menu">
+        <item name="android:textSize">@dimen/font_menu_size</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_menu_size</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="ImageViewIcon">
+        <item name="android:layout_width">42dp</item>
+        <item name="android:layout_height">42dp</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="ImageViewIconDialog">
+        <item name="android:layout_width">@dimen/margin_80dp</item>
+        <item name="android:layout_height">@dimen/margin_70dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="MainButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:minWidth">@dimen/button_min_width</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+    </style>
+
+    <style name="PrevButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/bg_white_rectangle</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:drawableEnd">@drawable/ic_baseline_back</item>
+        <item name="android:text">@string/prev_step</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+    </style>
+
+    <style name="NextButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/bg_main_button</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:drawableStart">@drawable/ic_arrow_show_more</item>
+        <item name="android:text">@string/next_step</item>
+        <item name="android:visibility">visible</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+    </style>
+
+    <style name="RequestButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/bg_main_button</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:text">@string/next_step</item>
+        <item name="android:layout_marginTop">@dimen/_20sdp</item>
+        <item name="android:layout_marginStart">@dimen/_5sdp</item>
+        <item name="android:layout_marginEnd">@dimen/_5sdp</item>
+        <item name="android:visibility">visible</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+    </style>
+
+    <style name="TextButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:foreground">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:drawablePadding">@dimen/margin_8dp</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+    </style>
+
+    <style name="OvalButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">@dimen/oval_button_size</item>
+        <item name="android:layout_height">@dimen/oval_button_size</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/font_header_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/bg_oval_accent</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:foreground">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:drawablePadding">@dimen/margin_8dp</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_header_size</item>
+    </style>
+
+    <style name="TextButtonBordered" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">?colorAccent</item>
+        <item name="drawableTint">?colorAccent</item>
+        <item name="android:drawablePadding">@dimen/margin_8dp</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/bg_border</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:paddingStart">6dp</item>
+        <item name="android:paddingEnd">6dp</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">.5sp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMaxTextSize">@dimen/font_title_size</item>
+    </style>
+
+
+    <style name="TextButtonBordered.ActionButton" parent="TextButtonBordered">
+        <item name="android:minWidth">@dimen/button_min_width</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="drawableTint">?attr/colorPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:drawableEnd">@drawable/ic_settings</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:text">@string/label_actions</item>
+        <item name="android:drawablePadding">@dimen/margin_8dp</item>
+
+    </style>
+
+    <style name="TextButtonBordered.ActionButtonJustIcon" parent="TextButtonBordered">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="drawableTint">?attr/colorPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:drawableStart">@drawable/ic_settings</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+
+    </style>
+
+    <style name="TextButtonBordered.Amer" parent="TextButtonBordered">
+        <item name="android:backgroundTint">@color/amber</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="TextButtonBordered.Green" parent="TextButtonBordered">
+        <item name="android:backgroundTint">@color/green</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="drawableTint">@color/white</item>
+    </style>
+
+    <style name="TextButtonBordered.Red" parent="TextButtonBordered">
+        <item name="android:backgroundTint">@color/red</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="drawableTint">@color/white</item>
+    </style>
+
+    <style name="TextButtonBordered.Blue" parent="TextButtonBordered">
+        <item name="android:backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="TextButtonBordered.Blue.Light" parent="TextButtonBordered">
+        <item name="android:minWidth">@dimen/button_min_width</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="drawableTint">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:text">@string/label_actions</item>
+    </style>
+
+
+    <style name="TextButtonBordered.Grey" parent="TextButtonBordered">
+        <item name="android:backgroundTint">@color/grey_color_text_button_bordered</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="ImageButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:layout_height">@dimen/icon_size_24dp</item>
+        <item name="android:layout_width">@dimen/icon_size_24dp</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:background">@null</item>
+        <!--        <item name="android:foreground">?android:attr/selectableItemBackgroundBorderless</item>-->
+    </style>
+
+    <style name="ImageButton.Clickable">
+        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_width">46dp</item>
+        <item name="android:padding">@dimen/margin_10dp</item>
+        <item name="android:foreground">?android:attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="ImageButton.ClickableSocial">
+        <item name="android:layout_height">@dimen/_32sdp</item>
+        <item name="android:layout_width">@dimen/_32sdp</item>
+        <item name="android:padding">@dimen/_5sdp</item>
+        <item name="android:foreground">?android:attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="FabStyleMini">
+        <item name="android:layout_width">@dimen/margin_40dp</item>
+        <item name="android:layout_height">@dimen/margin_40dp</item>
+        <item name="backgroundTint">@color/red</item>
+        <item name="tint">@color/white</item>
+    </style>
+
+    <style name="FabStyleMini.Camera">
+        <item name="android:layout_width">@dimen/margin_56dp</item>
+        <item name="android:layout_height">@dimen/margin_56dp</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="tint">@color/colorPrimary</item>
+    </style>
+    <!-- <style name="MainToolbarStyle" parent="Widget.MaterialComponents.Toolbar.Primary">
+         <item name="android:background">@color/backgroundColor</item>
+         <item name="titleTextColor">@color/textTitleColor</item>
+         <item name="colorControlNormal">@color/textTitleColor</item>
+     </style>
+
+     <style name="TextStyle.Title.ToolbarExpanded">
+         <item name="android:textColor">@color/textColorToolbarExpanded</item>
+     </style>
+
+     <style name="DetailsToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
+         <item name="android:background">@android:color/transparent</item>
+         <item name="titleTextColor">@color/textTitleColor</item>
+         <item name="colorControlNormal">@color/textTitleColor</item>
+     </style>
+
+     <style name="ToolbarColoredBackArrow" parent="AppTheme">
+         <item name="android:textColorSecondary">@color/textTitleColor</item>
+     </style>-->
+
+
+    <style name="CheckBoxStyle" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:drawablePadding">@dimen/margin_12dp</item>
+        <item name="android:lineSpacingExtra">8dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="background">?attr/colorSurface</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:checked">true</item>
+
+    </style>
+
+    <style name="CheckBoxStepperStyle" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:checked">true</item>
+    </style>
+
+    <style name="SearchView" parent="Widget.AppCompat.SearchView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="android:layoutDirection">rtl</item>
+        <item name="defaultQueryHint">@string/message_search_service</item>
+        <item name="queryHint">@string/message_search_service</item>
+        <item name="android:textSize">@dimen/font_title_size</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:animateLayoutChanges">true</item>
+        <item name="android:iconifiedByDefault">false</item>
+        <item name="iconifiedByDefault">false</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:imeOptions">actionSearch</item>
+        <!-- Change the text color for the input text -->
+        <item name="android:textColor">@color/red</item>
+        <!-- Change the hint color -->
+        <item name="android:textColorHint">@color/red</item>
+    </style>
+
+    <style name="RecyclerViewStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:nestedScrollingEnabled">true</item>
+        <item name="android:layoutDirection">rtl</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="android:overScrollMode">never</item>
+        <item name="android:scrollbars">none</item>
+    </style>
+
+    <style name="PaginationRecyclerViewStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:nestedScrollingEnabled">true</item>
+        <item name="decoration_type">vertical</item>
+        <item name="android:layoutDirection">rtl</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="android:overScrollMode">never</item>
+        <item name="android:scrollbars">none</item>
+    </style>
+
+    <style name="PaginationRecyclerViewStyleBottomSheetDialog">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:nestedScrollingEnabled">false</item>
+        <item name="decoration_type">vertical</item>
+        <item name="android:layoutDirection">rtl</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="android:overScrollMode">never</item>
+        <item name="android:scrollbars">none</item>
+    </style>
+
+    <style name="LinearRecyclerStyle" parent="RecyclerViewStyle">
+        <item name="layoutManager">androidx.recyclerview.widget.LinearLayoutManager</item>
+    </style>
+
+    <style name="LinearPaginationRecyclerStyle" parent="PaginationRecyclerViewStyle">
+        <item name="layoutManager">androidx.recyclerview.widget.LinearLayoutManager</item>
+    </style>
+
+    <style name="LinearPaginationRecyclerStyle2">
+        <item name="layoutManager">androidx.recyclerview.widget.LinearLayoutManager</item>
+    </style>
+
+    <style name="LinearPaginationRecyclerStyleBottomSheetDialog" parent="PaginationRecyclerViewStyleBottomSheetDialog">
+        <item name="layoutManager">androidx.recyclerview.widget.LinearLayoutManager</item>
+    </style>
+
+    <style name="TextAppearance.Widget.Stepper.Done" parent="TextAppearance.MaterialCompat.Body1">
+
+    </style>
+
+    <style name="TextAppearance.Widget.Stepper.Selected" parent="TextAppearance.MaterialCompat.Body2">
+
+    </style>
+
+    <style name="TextAppearance.Widget.Stepper.Normal" parent="TextAppearance.MaterialCompat.Body1">
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <style name="VerticalStepperItemView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layoutDirection">rtl</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="step_activated_color">@color/green</item>
+        <!--
+                <item name="step_done_icon">@drawable/ic_check</item>
+        -->
+        <item name="step_line_color">?attr/colorSurface</item>
+        <item name="borderWidth">0dp</item>
+        <item name="step_normal_color">@color/gray_light_stepper</item>
+        <item name="step_error_highlight_color">@color/red</item>
+        <item name="android:textColor">@color/red</item>
+        <item name="step_state">normal</item>
+    </style>
+
+    <style name="Widget.Stepper" parent="">
+        <item name="step_normal_color">@color/material_grey_500</item>
+        <item name="step_activated_color">@color/material_blue_500</item>
+        <item name="step_done_icon">@drawable/ic_done_white_16dp</item>
+        <item name="step_animation_duration">@android:integer/config_shortAnimTime</item>
+        <item name="step_line_color">@color/material_grey_500</item>
+        <item name="step_error_highlight_color">@color/material_red_500</item>
+    </style>
+
+    <style name="TextAppearance" />
+
+    <style name="TextAppearance.MaterialCompat" />
+
+    <style name="TextAppearance.MaterialCompat.Body1">
+        <item name="android:textSize">@dimen/_10sdp</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.MaterialCompat.Body2">
+        <item name="android:textSize">@dimen/_12sdp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@drawable/tab_indicator_colors</item>
+    </style>
+
+    <dimen name="dp1">1dp</dimen>
+
+    <!-- Stepper View -->
+    <dimen name="stepper_margin_top">24dp</dimen>
+    <dimen name="stepper_point_size">24dp</dimen>
+    <dimen name="stepper_point_half_size">12dp</dimen>
+    <dimen name="vertical_stepper_point_margin_start">24dp</dimen>
+    <dimen name="vertical_stepper_point_margin_end">12dp</dimen>
+    <dimen name="vertical_stepper_line_margin_top">8dp</dimen>
+    <dimen name="vertical_stepper_line_width">1dp</dimen>
+    <dimen name="vertical_stepper_item_space_height">8dp</dimen>
+
+    <attr name="step_normal_color" format="color" />
+    <attr name="step_activated_color" format="color" />
+    <attr name="step_done_icon" format="reference" />
+    <attr name="step_animation_duration" format="integer" />
+    <attr name="step_enable_animation" format="boolean" />
+    <attr name="step_line_color" format="color" />
+    <attr name="step_error_highlight_color" format="color" />
+    <attr name="step_show_summary_always" format="boolean" />
+
+    <declare-styleable name="VerticalStepperView">
+        <attr name="step_normal_color" />
+        <attr name="step_activated_color" />
+        <attr name="step_done_icon" />
+        <attr name="step_animation_duration" />
+        <attr name="step_enable_animation" />
+        <attr name="step_line_color" />
+        <attr name="step_error_highlight_color" />
+        <attr name="step_show_summary_always" />
+    </declare-styleable>
+
+    <declare-styleable name="VerticalStepperItemView">
+        <attr name="step_index" format="integer" />
+        <attr name="step_title" format="string" />
+        <attr name="nextStepTitle" format="string" />
+        <attr name="previousStepTitle" format="string" />
+
+        <attr name="nextStepEnable" format="boolean" />
+        <attr name="previousStepEnable" format="boolean" />
+
+        <attr name="nextStepVisible" format="boolean" />
+        <attr name="previousStepVisible" format="boolean" />
+
+        <attr name="step_summary" format="string" />
+        <attr name="step_summary_done" format="string" />
+        <attr name="step_is_last" format="boolean" />
+        <attr name="step_state" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="selected" value="1" />
+            <enum name="done" value="2" />
+        </attr>
+        <attr name="step_normal_color" />
+        <attr name="step_activated_color" />
+        <attr name="step_done_icon" />
+        <attr name="step_animation_duration" />
+        <attr name="step_enable_animation" />
+        <attr name="step_line_color" />
+        <attr name="step_error_highlight_color" />
+        <attr name="step_show_summary_always" />
+    </declare-styleable>
+    <color name="material_grey_500">#9E9E9E</color>
+    <color name="material_grey_400">#BDBDBD</color>
+    <color name="material_red_500">#F44336</color>
+    <color name="material_blue_500">#2196F3</color>
+
+    <style name="Widget.AppTheme.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
+    </style>
+
+    <style name="MyChipTextStyle" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="android:fontFamily">@font/iran_sans_mobile_fa_num</item>
+        <item name="fontFamily">@font/iran_sans_mobile_fa_num</item> <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/black</item> </style>
+
+</resources>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.entity.MenuModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:minWidth="@dimen/dialog_min_width"
+        android:background='@{item.selected?@drawable/bg_item_selected:@drawable/bg_item_unselected}'
+        android:clickable="true"
+        android:focusable="true">
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="@dimen/profile_image_small_size"
+            android:layout_height="@dimen/profile_image_small_size"
+            android:background="@drawable/ic_account"
+            android:adjustViewBounds="true"
+            android:layout_marginTop="@dimen/margin_8dp"
+            android:layout_marginBottom="@dimen/margin_8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/txtUsername"
+            android:visibility="gone"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/txtUsername"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="@dimen/margin_8dp"
+            android:layout_marginEnd="@dimen/margin_8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/imgProfile"
+            app:layout_constraintStart_toEndOf="@id/imgCheck"
+            android:gravity="right"
+            android:text='@{item.title}'
+            tools:text="TextView"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgCheck"
+            android:layout_width="@dimen/icon_size_24dp"
+            android:layout_height="@dimen/icon_size_24dp"
+            android:src='@{item.selected?@drawable/ic_check:@drawable/ic_uncheck}'
+            android:adjustViewBounds="true"
+            android:layout_marginStart="@dimen/margin_8dp"
+            app:layout_constraintEnd_toStartOf="@id/txtUsername"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/imgProfile"
+            app:layout_constraintTop_toTopOf="@id/imgProfile" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

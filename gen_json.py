@@ -1,0 +1,106 @@
+import re
+import json
+
+content = """
+    MainServiceDto(id = 1, name = "اطلاعات هویتی", showRole = listOf(1), icon = "user", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 2, name = "ارتباط فعال", showRole = listOf(1), icon = "relation", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3, name = "شماره حساب‌ها", showRole = listOf(1), icon = "credit-card", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 4, name = "ویرایش تصویر", showRole = listOf(1), icon = "camera", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 5, name = "افراد تبعی", showRole = listOf(1), icon = "relationship", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 6, name = "سوابق تلفیقی", showRole = listOf(1), icon = "inbox", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 7, name = "سوابق و دستمزد", showRole = listOf(1), icon = "bill", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 8, name = "مجموع سوابق", showRole = listOf(1), icon = "budget", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 9, name = "اعلام سابقه", showRole = listOf(1), icon = "paper-plane", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 10, name = "اعتراض به سوابق ناموجود", showRole = listOf(1), icon = "protest", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 11, name = "عناوین شغلی", showRole = listOf(1), icon = "list", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 13, name = "درخواست‌های تعهدات کوتاه مدت", showRole = listOf(1), icon = "obligation", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 14, name = "هدیه ازدواج", showRole = listOf(1), icon = "love", status = MenuServiceStatus.DISABLED, message = "شما شرایط دریافت هدیه ازدواج را ندارید"),
+    MainServiceDto(id = 15, name = "کمک هزینه اروتز پروتز", showRole = listOf(1), icon = "crutch", status = MenuServiceStatus.WEB_VIEW, url = "https://tamin.ir/ortez"),
+    MainServiceDto(id = 16, name = "کمک هزینه ایام بارداری", showRole = listOf(1), icon = "pregnancystp", status = MenuServiceStatus.COMPLETELY_DISABLED, message = "این سرویس کلا غیر فعال است"),
+    MainServiceDto(id = 17, name = "غرامت دستمزد ایام بیماری", showRole = listOf(1), icon = "medical", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 18, name = "کمک هزینه مراسم ترحیم", showRole = listOf(1), icon = "death", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 19, name = "بازرسی‌ها", showRole = listOf(1), icon = "cctv", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 20, name = "محاسبه هدیه ازدواج", showRole = listOf(1), icon = "wedding-presents", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 21, name = "محاسبه غرامت ایام بیماری", showRole = listOf(1), icon = "medicine", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 22, name = "محاسبه غرامت ایام بارداری", showRole = listOf(1), icon = "scan", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 23, name = "نحوه محاسبه مبلغ مستمری", showRole = listOf(1, 2), icon = "calc", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 25, name = "وضعیت حمایت درمانی", showRole = listOf(1), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 26, name = "نسخ الکترونیک", showRole = listOf(1, 2), icon = "folder", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 33, name = "بیمه صاحبان حرف و مشاغل آزاد", showRole = listOf(1), icon = "agreement-freelance", status = MenuServiceStatus.TEMPORARY_DISABLED, message = "سرویس موقتاً در دسترس نیست"),
+    MainServiceDto(id = 34, name = "بیمه دانشجویی", showRole = listOf(1), icon = "student", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 35, name = "امور قراردادها و پرداخت", showRole = listOf(1), icon = "contract_payment", status = MenuServiceStatus.ENABLED_WITH_ERROR, message = "ارتباط با سامانه با کندی مواجه است"),
+    MainServiceDto(id = 36, name = "بیمه زنان خانه‌دار", showRole = listOf(1), icon = "woman_agreement-freelance", status = MenuServiceStatus.DISABLED, message = "شما شرایط ثبت‌نام را ندارید"),
+    MainServiceDto(id = 37, name = "بیمه اختیاری", showRole = listOf(1), icon = "optional-insurance", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 38, name = "استعلام گواهی اشتغال به تحصیل", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 39, name = "تکمیل سوابق کسری از ماه", showRole = listOf(1), icon = "employer_info", status = MenuServiceStatus.COMPLETELY_DISABLED, message = "غیرفعال"),
+    MainServiceDto(id = 40, name = "درخواست مستمری بازماندگان", showRole = listOf(1), icon = "survivors", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 41, name = "مستمری بازنشستگی", showRole = listOf(1), icon = "ticket", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 42, name = "اعتراض به سابقه کسری دار", showRole = listOf(1), icon = "objecting_history_bugs", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 46, name = "پرونده الکترونیک من", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 47, name = "اطلاعات پرداختی کارگران", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 101, name = "استحقاق درمان", showRole = listOf(2), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 104, name = "استعلام وضعیت مستمری", showRole = listOf(2), icon = "insurance", status = MenuServiceStatus.TEMPORARY_DISABLED, message = "سرویس استعلام وضعیت مستمری در حال بروزرسانی است"),
+    MainServiceDto(id = 105, name = "مشاهده فیش حقوقی", showRole = listOf(2), icon = "ticket", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 106, name = "مشاهده حکم", showRole = listOf(2), icon = "announcement", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 107, name = "صدور گواهی حقوق", showRole = listOf(2), icon = "stamp", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 108, name = "گواهی کسر اقساط معوق", showRole = listOf(2), icon = "document", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 110, name = "تعهدنامه فرزندان دختر", showRole = listOf(2), icon = "agreement", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 112, name = "برقراری مستمری توسط بازماندگان", showRole = listOf(2), icon = "survivors", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 113, name = "مستمری از کارافتادگی", showRole = listOf(2), icon = "disability", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1001, name = "کارگاه‌ها", showRole = listOf(3), icon = "workshop", status = MenuServiceStatus.ENABLED_WITH_ERROR, message = "دریافت اطلاعات لیست کارگاه‌ها با کندی همراه است"),
+    MainServiceDto(id = 1002, name = "اطلاعات پیمان", showRole = listOf(3), icon = "contract", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1003, name = "واگذارندگان", showRole = listOf(3), icon = "ic_assigner", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1004, name = "تکمیل اطلاعات کارفرمایی", showRole = listOf(3), icon = "employer_info", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1005, name = "لیست ذینفعان", showRole = listOf(3), icon = "relationship", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1006, name = "پیگیری وضعیت اعتراض", showRole = listOf(3), icon = "protest", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1007, name = "درخواست خدمات غیرحضوری", showRole = listOf(3), icon = "onlineServiceReq", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1008, name = "بازرسی انجام شده", showRole = listOf(3), icon = "cctv", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1009, name = "مدیریت بدهی", showRole = listOf(3), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1010, name = "بیمه ساختمانی", showRole = listOf(3), icon = "workshop", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1011, name = "بروزرسانی", showRole = listOf(3), icon = "update", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1012, name = "قوانین", showRole = listOf(3), icon = "document", status = MenuServiceStatus.ACTIVE)
+"""
+
+json_data = []
+
+lines = [l.strip() for l in content.split('\n') if l.strip()]
+
+for line in lines:
+    match = re.search(r'MainServiceDto\((.*?)\)', line)
+    if not match: continue
+    inner = match.group(1)
+    
+    obj = {}
+    
+    # parse id
+    m_id = re.search(r'id = (\d+)', inner)
+    if m_id: obj['id'] = int(m_id.group(1))
+        
+    m_name = re.search(r'name = "([^"]+)"', inner)
+    if m_name: obj['name'] = m_name.group(1)
+        
+    m_icon = re.search(r'icon = "([^"]+)"', inner)
+    if m_icon: obj['icon'] = m_icon.group(1)
+        
+    m_status = re.search(r'status = MenuServiceStatus\.([A-Z_]+)', inner)
+    if m_status: obj['status'] = m_status.group(1)
+        
+    m_msg = re.search(r'message = "([^"]+)"', inner)
+    if m_msg: obj['message'] = m_msg.group(1)
+        
+    m_url = re.search(r'url = "([^"]+)"', inner)
+    if m_url: obj['url'] = m_url.group(1)
+        
+    m_roles = re.search(r'showRole = listOf\(([\d, ]+)\)', inner)
+    if m_roles:
+        obj['showRole'] = [int(r.strip()) for r in m_roles.group(1).split(',')]
+            
+    if 'active' not in obj:
+        obj['active'] = True
+    if obj.get('status') in ['DISABLED', 'COMPLETELY_DISABLED']:
+        obj['active'] = False
+        
+    json_data.append(obj)
+
+with open('menu.json', 'w', encoding='utf-8') as f:
+    json.dump({"data": json_data}, f, ensure_ascii=False, indent=4)

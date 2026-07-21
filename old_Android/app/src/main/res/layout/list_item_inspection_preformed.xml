@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleNumInspection"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_num_inspection"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueNumInspection"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end|center_vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTitleNumInspection"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleNumInspection"
+            tools:text="14000710" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@id/tvValueNumInspection" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleDateInspections"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_date_inspections"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueDateInspections"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end|center_vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTitleDateInspections"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleDateInspections"
+            tools:text="1400/10/12" />
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueDateInspections" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleWorkshopName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_workshop_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueWorkshopName"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTitleWorkshopName"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleWorkshopName"
+            tools:text="مشاوره مدیریت و خدمات تأمین" />
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueWorkshopName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleBranchName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_branch_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line5" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueBranchName"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTitleBranchName"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleBranchName"
+            tools:text="شعبه 13 تهران" />
+
+        <View
+            android:id="@+id/line4"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@id/itemWorkshopCode" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTypeActivity"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/label_type_activity"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line4" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDocSpecification"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            app:layout_constraintBottom_toBottomOf="@+id/labelTypeActivity"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelTypeActivity"
+            tools:text="خدمات نرم افزار و برنامه نویسی" />
+
+        <View
+            android:id="@+id/line5"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintTop_toBottomOf="@id/tvDocSpecification" />
+
+        <include
+            android:id="@+id/itemWorkshopCode"
+            layout="@layout/item_workshop_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/margin_20dp"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@+id/line3" />
+
+        <include
+            android:id="@+id/itemInsuranceCode"
+            layout="@layout/item_insurance_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/_10sdp"
+            app:layout_constraintBottom_toBottomOf="@id/itemWorkshopCode"
+            app:layout_constraintEnd_toStartOf="@id/guideline_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/itemWorkshopCode" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDownloadDetail"
+            style="@style/TextButtonBordered.Green"
+            android:layout_width="0dp"
+            android:layout_marginHorizontal="@dimen/margin_20dp"
+            android:layout_marginTop="@dimen/margin_40dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:paddingHorizontal="@dimen/_10sdp"
+            android:text="@string/download_detail"
+            app:layout_constraintTop_toBottomOf="@id/valueBranchName"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

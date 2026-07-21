@@ -1,0 +1,11 @@
+{
+    "status": 200,
+    "family": "SUCCESSFUL",
+    "reason": "OK",
+    "data": {
+              "basicAuthLogin": "QI7GV4jDBU0iXMUJ",
+			  "basicAuthPassword": "lk85Gx7O5ZWeUon1",
+              "uri": "/report",
+              "httpMethod": "HttpSender.Method.POST"
+            }
+}

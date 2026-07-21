@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="payInfo"
+            type="com.tamin.taminhamrah.data.remote.models.services.construction.WorkersPaymentInfo" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:paddingTop="@dimen/_8sdp"
+        android:background="@drawable/bg_item_blue">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDays"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_8sdp"
+            android:gravity="end"
+            android:text="@{payInfo.titleDays}"
+            app:layout_constraintEnd_toStartOf="@id/title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="@dimen/_3sdp"
+            tools:text="حق بیمه" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/title"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_8sdp"
+            android:gravity="start"
+            android:padding="@dimen/_3sdp"
+            android:text="@{payInfo.monthTitle}"
+            app:layout_constraintStart_toEndOf="@id/tvDays"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text=" 1حق بیمه" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            style="@style/LinearRecyclerStyle"
+            android:layout_width="match_parent"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/btnShowDetail"
+            app:layout_constraintTop_toBottomOf="@+id/tvDays" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnPayIt"
+            style="@style/TextButtonBordered"
+            android:layout_height="36dp"
+            android:layout_margin="@dimen/_8sdp"
+            android:enabled="@{payInfo.payable}"
+            android:text="@string/label_payment"
+            tools:visibility="visible"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycler" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowDetail"
+            style="@style/TextButton"
+            android:layout_height="@dimen/_28sdp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_5sdp"
+            android:maxLines="1"
+            android:text="@string/show_detail"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycler" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

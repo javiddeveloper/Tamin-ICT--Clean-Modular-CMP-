@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<data>
+    <import type="android.view.View" />
+    <variable
+        name="viewModel"
+        type="com.tamin.taminhamrah.ui.home.services.employer.legalStackHolders.LegalStackHolderViewModel" />
+</data>
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="?attr/colorSurface"
+    android:clickable="true"
+    android:fitsSystemWindows="false"
+    android:focusable="true">
+
+    <include
+        android:id="@+id/appBar"
+        layout="@layout/view_appbar_service" />
+
+    <include
+        android:id="@+id/appbarBackgroundImage"
+        layout="@layout/view_appbar_image" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:fillViewport="true"
+
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="30dp"
+                android:layout_height="4dp"
+                android:layout_margin="@dimen/margin_10dp"
+                android:background="#dadce0"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.tamin.taminhamrah.widget.edittext.nationalcode.EditTextNationalCode
+                android:id="@+id/inputNationalCode"
+                style="@style/TextInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                app:editText_hint="@string/label_agent_national_code"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/view" />
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/inputVerificationCode"
+                style="@style/TextInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_verification_code"
+                app:editText_max_len="6"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toEndOf="@id/inputNationalCode"
+                app:layout_constraintStart_toEndOf="@id/btnVerifyCode"
+                app:layout_constraintTop_toBottomOf="@id/inputNationalCode"
+                app:layout_constraintBottom_toBottomOf="@id/btnVerifyCode" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnVerifyCode"
+                style="@style/TextButtonBordered.Blue"
+                android:layout_width="0dp"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:text="@string/label_request_ticket"
+                app:layout_constraintStart_toStartOf="@id/inputNationalCode"
+                app:layout_constraintEnd_toStartOf="@id/inputVerificationCode"
+                app:layout_constraintTop_toTopOf="@id/inputVerificationCode"
+                app:layout_constraintBottom_toBottomOf="@id/inputVerificationCode"/>
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/inputSelectContract"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="پیمان های انتخاب شده"
+                app:layout_constraintEnd_toEndOf="@id/inputNationalCode"
+                app:layout_constraintStart_toStartOf="@id/inputNationalCode"
+                app:layout_constraintTop_toBottomOf="@id/inputVerificationCode"
+                tools:visibility="visible"
+                android:visibility="gone"/>
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelList"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/_20sdp"
+                app:layout_constraintStart_toStartOf="@id/inputNationalCode"
+                app:layout_constraintEnd_toEndOf="@id/inputNationalCode"
+                app:layout_constraintTop_toBottomOf="@id/inputSelectContract"
+                android:text="سرویسهایی که نماینده می بایست به آنها دسترسی داشته باشد را تعیین نمایید."
+                />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelCheckBoxElecNotif"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:textSize="@dimen/font_header_size"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:text="ابلاغ الکترونیکی"
+                app:layout_constraintEnd_toStartOf="@id/cbSelectElecNotif"
+                app:layout_constraintTop_toTopOf="@id/cbSelectElecNotif"
+                app:layout_constraintBottom_toBottomOf="@id/cbSelectElecNotif"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbSelectElecNotif"
+                style="@style/CheckBoxStyle"
+                android:layout_width="wrap_content"
+                android:checked="false"
+                app:layout_constraintEnd_toEndOf="@id/labelList"
+                app:layout_constraintTop_toBottomOf="@id/labelList"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelCheckBox"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:textSize="@dimen/font_header_size"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:text="لیست اینترنتی"
+                app:layout_constraintEnd_toStartOf="@id/cbSelect"
+                app:layout_constraintTop_toTopOf="@id/cbSelect"
+                app:layout_constraintBottom_toBottomOf="@id/cbSelect"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbSelect"
+                style="@style/CheckBoxStyle"
+                android:layout_width="wrap_content"
+                android:checked="false"
+                app:layout_constraintEnd_toEndOf="@id/cbSelectElecNotif"
+                app:layout_constraintTop_toBottomOf="@id/cbSelectElecNotif"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelCheckBoxRegistration"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:textSize="@dimen/font_header_size"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:text="نام نویسی بیمه شده"
+                app:layout_constraintEnd_toStartOf="@id/cbSelectRegistration"
+                app:layout_constraintTop_toTopOf="@id/cbSelectRegistration"
+                app:layout_constraintBottom_toBottomOf="@id/cbSelectRegistration"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbSelectRegistration"
+                style="@style/CheckBoxStyle"
+                android:layout_width="wrap_content"
+                android:checked="false"
+                app:layout_constraintEnd_toEndOf="@id/cbSelect"
+                app:layout_constraintTop_toBottomOf="@id/cbSelect"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSubmit"
+                style="@style/MainButton"
+                android:layout_width="0dp"
+                android:layout_margin="@dimen/margin_20dp"
+                android:text="@string/label_submit"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cbSelectRegistration"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperPensionerInfo"
+        style="@style/VerticalStepperItemView"
+        app:step_index="1"
+        app:step_title="@string/pensioner_info"
+        app:step_state="selected"
+        app:previousStepVisible="false"
+        android:paddingTop="@dimen/_10sdp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/_2sdp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvInfo"
+                style="@style/LinearRecyclerStyle"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

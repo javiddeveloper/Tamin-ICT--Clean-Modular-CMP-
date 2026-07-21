@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.dashboard.ServicesViewModel" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layoutDirection="ltr"
+        android:minHeight="?attr/actionBarSize">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgProfile"
+            style="@style/ImageButton"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_margin="@dimen/_8sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_account"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgAlert"
+            style="@style/ImageButton.Clickable"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/imgProfile"
+            app:layout_constraintStart_toEndOf="@id/imgProfile"
+            app:layout_constraintTop_toTopOf="@id/imgProfile"
+            app:srcCompat="@drawable/ic_notification" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgFilter"
+            style="@style/ImageButton.Clickable"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/imgProfile"
+            app:layout_constraintStart_toEndOf="@id/imgAlert"
+            app:layout_constraintTop_toTopOf="@id/imgProfile"
+            app:srcCompat="@drawable/ic_filter" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgAppLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            app:layout_constraintBottom_toBottomOf="@+id/imgProfile"
+            app:layout_constraintEnd_toStartOf="@+id/menu"
+            app:layout_constraintStart_toEndOf="@+id/imgFilter"
+            app:layout_constraintTop_toTopOf="@id/imgProfile"
+            app:srcCompat="@drawable/ic_logo_tamin" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/menu"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            app:srcCompat="@drawable/ic_menu"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

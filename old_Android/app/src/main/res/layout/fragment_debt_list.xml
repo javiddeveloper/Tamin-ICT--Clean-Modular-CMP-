@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:background="?attr/colorSurface"
+            android:fitsSystemWindows="true"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorSurface"
+                android:fitsSystemWindows="true"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/imageBack"
+                        style="@style/ImageButton.Clickable"
+                        android:layout_margin="@dimen/margin_8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_arrow_back" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/white"
+                        android:id="@+id/tvWorkshopName"
+                        app:layout_constraintEnd_toStartOf="@+id/imageBack"
+                        android:text="@string/accountable_debts"
+                        tools:text="بدهی های قابل رسیدگی" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:background="@color/backgroundColor"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTitleSearch"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="@dimen/_10sdp"
+                    android:text="@string/search_debt_list"
+                    app:layout_constraintBottom_toBottomOf="@+id/btnCloseSearch"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/btnCloseSearch" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btnCloseSearch"
+                    style="@style/ImageButton.Clickable"
+                    android:layout_height="48dp"
+                    android:scaleY="-1"
+                    android:tint="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_expand_more" />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/inputDebtNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:textAlignment="textStart"
+                    app:editText_hint="@string/label_debit_number"
+                    app:editText_max_len="20"
+                    app:layout_constraintTop_toBottomOf="@+id/btnCloseSearch" />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/inputAgreementRow"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    app:editText_hint="@string/label_agreement_row"
+                    app:editText_max_len="20"
+                    app:layout_constraintEnd_toEndOf="@+id/inputDebtNumber"
+                    app:layout_constraintStart_toStartOf="@+id/inputDebtNumber"
+                    app:layout_constraintTop_toBottomOf="@+id/inputDebtNumber" />
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSearch"
+                    style="@style/MainButton"
+                    android:layout_width="0dp"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:text="@string/label_search"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/btnAllItem"
+                    app:layout_constraintTop_toBottomOf="@id/inputAgreementRow" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnAllItem"
+                    style="@style/PrevButton"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:text="@string/all_items"
+                    app:layout_constraintEnd_toStartOf="@+id/btnSearch"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/inputAgreementRow" />
+
+
+
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btnOpenSearch"
+                    style="@style/ImageButton.Clickable"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnSearch"
+                    app:srcCompat="@drawable/ic_search_black" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btnFilter"
+                    style="@style/ImageButton.Clickable"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:tint="@color/black"
+                    app:layout_constraintStart_toEndOf="@+id/btnOpenSearch"
+                    app:layout_constraintTop_toBottomOf="@+id/btnSearch"
+                    app:srcCompat="@drawable/ic_filter" />
+
+                <TextView
+                    android:id="@+id/tvTitleService"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
+                    android:text="@string/debt_list"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnSearch" />
+
+                <com.tamin.taminhamrah.widget.CustomRecyclerView
+                    android:id="@+id/workshopListRecycler"
+                    style="@style/LinearPaginationRecyclerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@+id/btnFilter" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:constraint_referenced_ids="btnSearch,btnAllItem,inputAgreementRow,inputDebtNumber,btnCloseSearch,tvTitleSearch"
+                    tools:visibility="visible" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

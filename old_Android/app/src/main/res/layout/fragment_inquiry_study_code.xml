@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service"/>
+
+        <include android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image"/>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/subLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:paddingStart="@dimen/_10sdp"
+                android:paddingEnd="@dimen/_10sdp"
+                >
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvTitle"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:text="@string/inquiry_certificate_study_code"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/imgDescIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:tint="@color/light_blue"
+                    app:layout_constraintEnd_toEndOf="@+id/tvTitle"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+                    app:srcCompat="@drawable/ic_info_outline" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/descTxt"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_width="0dp"
+                    android:layout_marginEnd="@dimen/_5sdp"
+                    android:layout_marginTop="@dimen/_2sdp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:gravity="start"
+                    android:autoLink="web"
+                    android:paddingBottom="@dimen/_5sdp"
+                    android:textColorLink="@color/colorPrimary"
+                    app:layout_constraintEnd_toStartOf="@+id/imgDescIcon"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/imgDescIcon"
+                    android:text="@string/desc_inquiry_certificate_study_code" />
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:id="@+id/selectSon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/descTxt"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    />
+
+                <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                    android:id="@+id/edStudyCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:editText_hint="@string/inquiry_study_code"
+                    app:editText_max_len="10"
+                    app:layout_constraintTop_toBottomOf="@+id/selectSon"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    app:type="english_input" />
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnInquiry"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/MainButton"
+                    android:text="@string/inquiry_study_code_ministry_science"
+                    app:layout_constraintTop_toBottomOf="@id/edStudyCode"
+                    android:layout_marginTop="@dimen/_40sdp"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
+
+
