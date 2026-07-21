@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payroll_title">مشاهده فیش حقوقی</string>
+    <string name="btn_show_payroll_pdf">نمایش فیش حقوقی (PDF)</string>
+    <string name="error_unknown">خطای ناشناخته</string>
+    <string name="pdf_loaded_successfully">فایل PDF با موفقیت دریافت شد</string>
+    <string name="pdf_ready_rendering">آماده نمایش (نیاز به پیاده سازی رندرینگ)</string>
+    <string name="btn_close">بستن</string>
+    <string name="pdf_viewer_title">نمایش PDF</string>
+    <string name="payroll_header">فیش حقوقی</string>
+    <string name="payroll_desc">توضیحات: %1$s</string>
+    <string name="payroll_sum_amount">مبلغ کل: %1$s</string>
+    <string name="payroll_sum_pay">مبلغ قابل پرداخت: %1$s</string>
+    <string name="payroll_year">سال: %1$s</string>
+    <string name="payroll_month">ماه: %1$s</string>
+    <string name="payroll_type">نوع: %1$s</string>
+    <string name="no_items_found">موردی یافت نشد</string>
+    <string name="payroll_start_date_label">تاریخ شروع</string>
+    <string name="payroll_start_date_placeholder">مثال: 140201</string>
+    <string name="payroll_payment_type_label">نوع پرداخت</string>
+    <string name="payroll_payment_type_placeholder">مثال: 01</string>
+    <string name="payroll_pensioner_id_label">شناسه مستمری‌بگیر</string>
+    <string name="btn_load_payroll">استعلام فیش حقوقی</string>
+    <string name="error_empty_pensioner_id">شناسه مستمری‌بگیر یافت نشد</string>
+    <string name="error_generic">خطا: %1$s</string>
+    <string name="edict_title">مشاهده حکم</string>
+    <string name="btn_load_edict">استعلام حکم</string>
+    <string name="edict_header">اطلاعات حکم مستمری</string>
+    <string name="edict_first_name">نام: %1$s</string>
+    <string name="edict_last_name">نام خانوادگی: %1$s</string>
+    <string name="edict_national_code">کد ملی: %1$s</string>
+    <string name="edict_father_name">نام پدر: %1$s</string>
+    <string name="edict_birth_date">تاریخ تولد: %1$s</string>
+    <string name="edict_branch">شعبه: %1$s</string>
+    <string name="edict_insurance_id">شماره بیمه: %1$s</string>
+    <string name="edict_pension_start_date">تاریخ شروع مستمری: %1$s</string>
+    <string name="edict_payable_monthly">مبلغ مستمری ماهانه: %1$s ریال</string>
+    <string name="edict_title_label">عنوان حکم: %1$s</string>
+    <string name="edict_year_month">سال حکم: %1$s ماه: %2$s</string>
+    <string name="profile_personal_info">اطلاعات شخصی</string>
+    <string name="profile_identity_info">اطلاعات هویتی</string>
+    <string name="profile_dependents">مشاهده و ثبت افراد تبعی</string>
+    <string name="profile_dependents_badge_test">۳ نفر تست</string>
+    <string name="profile_active_relation">ارتباط فعال با تأمین</string>
+    <string name="profile_electronic_file">پرونده الکترونیک</string>
+    <string name="profile_bank_account">شماره حساب بانکی</string>
+    <string name="profile_change_mobile">تغییر شماره موبایل</string>
+    <string name="profile_cartable">کارتابل</string>
+    <string name="profile_requests">درخواست ها</string>
+    <string name="profile_personal_inbox">صندوق شخصی</string>
+    <string name="profile_security_settings">امنیت و تنظیمات</string>
+    <string name="profile_security">امنیت</string>
+    <string name="profile_settings">تنظیمات</string>
+    <string name="profile_support_section">پشتیبانی</string>
+    <string name="profile_support">پشتیبانی</string>
+    <string name="profile_contact_me">تماس با من</string>
+    <string name="profile_share">اشتراک‌گذاری</string>
+    <string name="profile_version_history">تاریخچهٔ نسخه</string>
+    <string name="profile_logout">خروج از حساب کاربری</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">خانه</string>
+    <string name="tab_services">خدمات</string>
+    <string name="tab_treatment">درمان</string>
+    <string name="tab_profile">پروفایل</string>
+
+    <!-- Login Bottom Sheet -->
+    <string name="login_to_tamin_man">ورود به سامانه تأمین من</string>
+    <string name="please_login_to_your_account">لطفاً وارد حساب کاربری خود شوید</string>
+    <string name="login_required_desc">برای دسترسی به تمام امکانات اپلیکیشن، ابتدا باید وارد حساب کاربری خود شوید.</string>
+
+    <!-- Home Screen -->
+    <string name="tamin_man_services">خدمات تأمین من</string>
+    <string name="select_group">انتخاب گروه</string>
+    <string name="user_type_insured">بیمه شدگان</string>
+    <string name="user_type_pensioner">مستمری بگیران</string>
+    <string name="user_type_employer">کارفرمایان</string>
+    <string name="error_load_menu_failed">خطا در دریافت اطلاعات یا لیست خالی است</string>
+    <string name="retry">تلاش مجدد</string>
+</resources>

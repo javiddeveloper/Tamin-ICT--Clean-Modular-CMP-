@@ -36,6 +36,22 @@ object UserTestData {
 
     val verifyMobileSuccess: String
         get() = readResourceFile("mocks/verify_mobile_success.json")
+
+    val checkUserIsNewSuccess: String
+        get() = readResourceFile("mocks/check_user_is_new_success.json")
+}
+
+object CommonTestData {
+    val jobTitleSuccess: String
+        get() = readResourceFile("mocks/job_title_success.json")
+}
+
+object PersonalTestData {
+    val insuredDocSuccess: String
+        get() = readResourceFile("mocks/insured_doc_success.json")
+
+    val requestSummarySuccess: String
+        get() = readResourceFile("mocks/request_summary_success.json")
 }
 
 object UserRequestTestData {
@@ -104,8 +120,26 @@ object PensionTestData {
     val disabilityPersonalInfoSuccess : String
         get() = readResourceFile("mocks/pension/disability_personal_info_success.json")
 
+    val getAuthenticationCode : String
+        get() = readResourceFile("mocks/pension/get_authentication_code.json")
+
     val retirementRequestInfoSuccess: String
         get() = readResourceFile("mocks/pension/retirement_request_info_success.json")
+
+    val retirementStatusSuccess: String
+        get() = readResourceFile("mocks/pension/retirement_status_success.json")
+
+    val sendRetirementDocumentSuccess: String
+        get() = readResourceFile("mocks/pension/send_retirement_document_success.json")
+
+    val authenticationAndGetPersonalInfoSuccess: String
+        get() = readResourceFile("mocks/pension/get_personal_info_success.json")
+
+    val sendEdictToInboxSuccess: String
+        get() = readResourceFile("mocks/pension/send_edict_to_inbox_success.json")
+
+    val inquirePensionCertificateSuccess: String
+        get() =  readResourceFile("mocks/pension/inquire_pension_certificate_success.json")
 }
 
 object TreatmentTestData {
@@ -151,4 +185,25 @@ object WorkshopTestData {
 
     val workshopDebtInquirySuccess: String
         get() = readResourceFile("mocks/workshop_debt_inquiry_success.json")
+
+    val employerAgreementSuccess: String
+        get() = readResourceFile("mocks/employer_agreement_success.json")
+
+    val paymentSheetsSuccess: String
+        get() = readResourceFile("mocks/payment_sheets_success.json")
+
+    val objectionableDebitSuccess: String
+        get() = readResourceFile("mocks/objectionable_debit_success.json")
+
+    val recentlyAddedMembersSuccess: String
+        get() = readResourceFile("mocks/recently_added_members_success.json")
+
+    val managementDebitSuccess: String
+        get() = readResourceFile("mocks/management_debit_success.json")
+
+    val workshopMembersSuccess: String
+        get() = readResourceFile("mocks/workshop_members_success.json")
+
+    val workshopStackholdersSuccess: String
+        get() = readResourceFile("mocks/workshop_stackholders_success.json")
 }

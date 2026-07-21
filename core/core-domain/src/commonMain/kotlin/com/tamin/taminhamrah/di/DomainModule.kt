@@ -16,12 +16,15 @@ import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
+import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
+import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
@@ -38,6 +41,8 @@ import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
@@ -55,6 +60,9 @@ import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
+import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
+import com.tamin.taminhamrah.useCases.user.CheckUserIsNewUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
@@ -74,6 +82,11 @@ import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationa
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -92,7 +105,9 @@ val domainModule = module {
     factoryOf(::GetPensionerPayRollPDFUseCase)
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
+    factoryOf(::CheckRetirementStatusUseCase)
     factoryOf(::GetEdictPensionerUseCase)
+    factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
     factoryOf(::SignOutUseCase)
@@ -139,11 +154,22 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    factoryOf(::SendRetirementDocumentUseCase)
 
     // Treatment UseCases
     factoryOf(::GetDeservedTreatmentUseCase)
     factoryOf(::GetDependantUnderEighteenUseCase)
     factoryOf(::GetUserProfileUseCase)
+    factoryOf(::GetJobTitleUseCase)
+    factoryOf(::GetRegistrationDeclarationFormUseCase)
+    factoryOf(::GetRequestSummaryUseCase)
+    factoryOf(::PutInsuredRegistrationDocListUseCase)
+    factoryOf(::CheckUserIsNewUseCase)
+    factoryOf(::GetWorkshopMembersUseCase)
+    factoryOf(::GetWorkshopObjectionableDebitListUseCase)
+    factoryOf(::GetWorkshopRecentlyAddedMembersUseCase)
+    factoryOf(::GetWorkshopsDebtsListUseCase)
+    factoryOf(::GetWorkshopStackHoldersUseCase)
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)

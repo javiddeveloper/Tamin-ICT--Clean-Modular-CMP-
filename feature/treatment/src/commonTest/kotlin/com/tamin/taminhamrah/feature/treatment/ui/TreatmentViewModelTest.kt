@@ -2,10 +2,8 @@ package com.tamin.taminhamrah.feature.treatment.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.treatment.fake.FakeCityProvinceRepository
-import com.tamin.taminhamrah.feature.treatment.fake.FakeTokenStoreManager
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
-import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentFlow
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
@@ -33,7 +31,6 @@ class TreatmentViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var tokenStoreManager: FakeTokenStoreManager
     private lateinit var repository: FakeTreatmentRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var viewModel: TreatmentViewModel
@@ -41,7 +38,6 @@ class TreatmentViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        tokenStoreManager = FakeTokenStoreManager()
         repository = FakeTreatmentRepository()
         userRepository = FakeUserRepository()
         viewModel = buildViewModel()
@@ -53,7 +49,6 @@ class TreatmentViewModelTest {
     }
 
     private fun buildViewModel() = TreatmentViewModel(
-        tokenStoreManager = tokenStoreManager,
         getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
         getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
         identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository())
@@ -63,7 +58,6 @@ class TreatmentViewModelTest {
     fun testInitTreatmentFlow_loadsDeservedAndDependants() = runTest(testDispatcher) {
         viewModel.uiState.test {
             val initialState = awaitItem()
-            assertEquals(TreatmentFlow.MAIN, initialState.activeFlow)
             assertEquals(null, initialState.selectedNationalCode)
 
             viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
@@ -80,6 +74,7 @@ class TreatmentViewModelTest {
 
             assertEquals(1, state.dependantList.size)
             assertEquals("9876543210", state.dependantList.first().nationalId)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -93,18 +88,7 @@ class TreatmentViewModelTest {
             val state = awaitItem()
             assertEquals("9876543210", state.selectedNationalCode)
             assertEquals("Child Name", state.selectedPatientName)
-        }
-    }
-
-    @Test
-    fun testSwitchFlow_updatesActiveFlowState() = runTest(testDispatcher) {
-        viewModel.uiState.test {
-            awaitItem() // initial state
-
-            viewModel.sendIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.HEALTH_PROFILE))
-
-            val state = awaitItem()
-            assertEquals(TreatmentFlow.HEALTH_PROFILE, state.activeFlow)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -121,6 +105,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("1234567890", state.mainUserNationalCode)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -138,12 +123,12 @@ class TreatmentViewModelTest {
             }
             assertNotNull(state.error)
             assertEquals(false, state.isLoading)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun testInitTreatmentFlow_whenNoUserIdAndNoIdentity_emitsUserNotFoundError() = runTest(testDispatcher) {
-        tokenStoreManager = FakeTokenStoreManager(storedUserId = null)
         userRepository = FakeUserRepository().apply {
             identityResult = identityResult.copy(nationalId = null)
         }
@@ -158,6 +143,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("اطلاعات کاربری یافت نشد.", state.error)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

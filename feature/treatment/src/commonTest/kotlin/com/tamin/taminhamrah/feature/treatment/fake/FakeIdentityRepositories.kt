@@ -44,6 +44,7 @@ class FakeUserRepository : UserRepository {
     override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow { emit(identityResult) }
     override suspend fun getUserProfileImage(): Flow<String> = flowOf("")
     override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow {}
+    override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {}
     override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> = flowOf("")
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {}
     override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flowOf("")
@@ -51,7 +52,7 @@ class FakeUserRepository : UserRepository {
     override suspend fun getBankAccountList(filters: List<ApiFilterDN>): Flow<List<BankAccountDN>> = flowOf(emptyList())
     override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> = flowOf(emptyList())
     override suspend fun getRelationTaminAll(filters: List<ApiFilterDN>): Flow<List<ActiveRelationDN>> = flowOf(emptyList())
-    override suspend fun getElectronicFile(filters: List<ApiFilterDN>): Flow<List<ElectronicFileDN>> = flowOf(emptyList())
+    override fun getElectronicFile(filters: List<ApiFilterDN>): Flow<List<ElectronicFileDN>> = flowOf(emptyList())
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flowOf(
         UserProfileDN(
             entityId = null,
@@ -63,6 +64,7 @@ class FakeUserRepository : UserRepository {
             mobile = "09123456789"
         )
     )
+
 }
 
 /** Minimal fake [CityProvinceRepository] dependency of `IdentityInfoUseCase`. */

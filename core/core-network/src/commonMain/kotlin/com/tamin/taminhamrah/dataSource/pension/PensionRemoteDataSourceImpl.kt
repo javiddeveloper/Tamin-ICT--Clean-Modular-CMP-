@@ -4,10 +4,14 @@ import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
+import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
+import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
+import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
@@ -20,6 +24,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 import io.ktor.client.statement.bodyAsChannel
 
 class PensionRemoteDataSourceImpl(
@@ -84,7 +89,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun getPensionerPayRoll(
         filter: List<ApiFilterDN>
-    ): PayRollDTO {
+    ): ListData<PayRollDTO> {
         return try {
             val response =
                 pensionApiService.getPensionerPayRoll(apiQueryBuilder.buildFilterJson(filter))
@@ -151,6 +156,90 @@ class PensionRemoteDataSourceImpl(
             val response =
                 pensionApiService.getRetirementRequestInfo(mapOf("filter" to filterJson))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun checkRetirementStatus(): RetirementStatusDTO {
+        return try {
+            val response = pensionApiService.checkRetirementStatus()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+    override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): RetirementPersonalDTO {
+        return try {
+            val response = pensionApiService.authenticationAndGetPersonalInfo(authenticationsCode)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun sendRetirementDocument(
+        requestId: String,
+        request: RetirementSaveDocumentRequest
+    ): String? {
+        return try {
+            val response = pensionApiService.sendRetirementDocument(requestId, request)
+            response?.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+    override suspend fun getAuthenticationCode(): AuthenticationTicketDTO {
+        return try {
+            val response = pensionApiService.getAuthenticationCode()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun sendEdictPensionerToMyInbox(filter: List<ApiFilterDN>): String? {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response =
+                pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+    override suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) :String? {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+
+            val response = pensionApiService.sendRequestInquirePensionCertificate(
+                mapOf("filter" to filterJson)
+            )
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

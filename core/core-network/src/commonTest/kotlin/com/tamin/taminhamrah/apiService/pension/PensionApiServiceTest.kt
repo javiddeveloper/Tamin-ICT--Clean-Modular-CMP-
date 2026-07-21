@@ -1,9 +1,11 @@
 package com.tamin.taminhamrah.apiService.pension
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
+import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.PensionTestData
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,10 +23,10 @@ class PensionApiServiceTest : BaseApiTest() {
         val response = apiService.getPensionerPayRoll("filter-json")
 
         assertEquals(200, response.status)
-        assertEquals(1, response.data?.id)
-        assertEquals("Type A", response.data?.clpType)
-        assertEquals(5000000L, response.data?.sumAmount)
-        assertEquals("1402", response.data?.hisYear)
+        assertEquals(1, response.data?.list?.first()?.id)
+        assertEquals("Type A", response.data?.list?.first()?.clpType)
+        assertEquals(5000000L, response.data?.list?.first()?.sumAmount)
+        assertEquals("1402", response.data?.list?.first()?.hisYear)
     }
 
     @Test
@@ -106,5 +108,116 @@ class PensionApiServiceTest : BaseApiTest() {
         val response = apiService.pensionerPayRollPDF(emptyMap())
 
         assertEquals(200, response.execute().status.value)
+    }
+
+    @Test
+    fun `authenticationAndGetPersonalInfo should return personal info data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.authenticationAndGetPersonalInfoSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.authenticationAndGetPersonalInfo(123456L)
+
+        assertEquals(200, response.status)
+        assertEquals("Ali", response.data?.personal?.firstName)
+        assertEquals("Alavi", response.data?.personal?.lastName)
+        assertEquals("Engineer", response.data?.work?.job?.jobDescription)
+    }
+
+    @Test
+    fun `checkRetirementStatus should return retirement status data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.retirementStatusSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.checkRetirementStatus()
+
+        assertEquals(200, response.status)
+        assertEquals("123", response.data?.requestId)
+        assertEquals("1", response.data?.requestStatusCode)
+    }
+
+    @Test
+    fun `sendRetirementDocument should return success data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.sendRetirementDocumentSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendRetirementDocument("requestId", RetirementSaveDocumentRequest())
+
+        assertEquals(200, response.status)
+        assertEquals("Success", response.data)
+    }
+
+    @Test
+    fun `getAuthenticationCode should return ticket data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.getAuthenticationCode
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.getAuthenticationCode()
+
+        assertEquals(200, response.status)
+        assertEquals("09123456789", response.data?.mobileNumber)
+    }
+
+    @Test
+    fun `sendEdictPensionerToMyInbox should return success message`() = runTest {
+        val successMessage = "عملیات با موفقیت انجام شد"
+        val jsonResponse =  PensionTestData.sendEdictToInboxSuccess
+
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendEdictPensionerToMyInbox(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals(successMessage, response.data)
+    }
+
+    @Test
+    fun `sendRequestInquirePensionCertificate should return success message`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = PensionTestData.inquirePensionCertificateSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendRequestInquirePensionCertificate(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals("درخواست شما با موفقیت ثبت شد", response.data?.jsonPrimitive?.content)
+    }
+
+    @Test
+    fun `sendRequestInquirePensionCertificate should return error on 400`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = "null",
+            status = 400,
+            family = "CLIENT_ERROR",
+            reason = "Bad Request"
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPensionApiService()
+
+        val response = apiService.sendRequestInquirePensionCertificate(emptyMap())
+
+        assertEquals(400, response.status)
+        assertEquals("CLIENT_ERROR", response.family)
     }
 }

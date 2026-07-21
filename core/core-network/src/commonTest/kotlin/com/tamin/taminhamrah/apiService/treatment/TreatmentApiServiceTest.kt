@@ -26,26 +26,16 @@ class TreatmentApiServiceTest {
     private lateinit var interceptedUrl: String
     private lateinit var interceptedMethod: String
     private lateinit var responseContent: String
-    private var responseBytes: ByteArray? = null
 
     private fun createApiService(): TreatmentApiService {
         val mockEngine = MockEngine { request ->
             interceptedUrl = request.url.toString()
             interceptedMethod = request.method.value
-            val response = responseBytes
-            if (response != null) {
-                respond(
-                    content = response,
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, ContentType.Application.OctetStream.toString())
-                )
-            } else {
-                respond(
-                    content = responseContent,
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                )
-            }
+            respond(
+                content = responseContent,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            )
         }
 
         val httpClient = HttpClient(mockEngine) {
@@ -73,7 +63,6 @@ class TreatmentApiServiceTest {
         interceptedUrl = ""
         interceptedMethod = ""
         responseContent = ""
-        responseBytes = null
     }
 
     @Test

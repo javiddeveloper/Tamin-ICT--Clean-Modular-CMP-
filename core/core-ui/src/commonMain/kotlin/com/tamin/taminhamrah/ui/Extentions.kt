@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.ViewModel
+import com.tamin.taminhamrah.util.toPersianDigits
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.Flow
@@ -146,36 +147,49 @@ val hashtagRegex = "#[\\p{L}0-9_\\p{M}]+".toRegex()
 val stringListRegex = "(\\S+|\\s)".toRegex()
 val emojiRegex = """[\uD83C\uDF00-\uD83D\uDFFF\uD83E\uDD00-\uD83E\uDFFF]+""".toRegex()
 
+private const val PERSIAN_THOUSANDS_SEPARATOR = '٬'
+
 /**
- * Groups a run of digits into thousands separated by commas, e.g. "1234567" -> "1,234,567".
- * The input must already be clean (digits only); an empty input yields "0".
+ * Groups a run of digits into thousands and renders them in Persian numerals,
+ * e.g. "1234567" -> "۱٬۲۳۴٬۵۶۷". Matches how [com.tamin.taminhamrah.util.PersianDateFormatter]
+ * renders dates, so amounts and dates read consistently.
+ *
+ * An optional leading minus is preserved. Empty input yields "۰".
  */
 private fun groupThousands(digits: String): String {
-    if (digits.isEmpty()) return "0"
-    val reversed = digits.reversed()
+    if (digits.isEmpty()) return "۰"
+    // Split the sign-off first: grouping it along with the digits inserts a separator
+    // straight after the minus whenever the digit count is a multiple of three.
+    val isNegative = digits.startsWith('-')
+    val magnitude = if (isNegative) digits.substring(1) else digits
+    if (magnitude.isEmpty()) return "۰"
+
+    val reversed = magnitude.reversed()
     val builder = StringBuilder()
     for (i in reversed.indices) {
         if (i > 0 && i % 3 == 0) {
-            builder.append(',')
+            builder.append(PERSIAN_THOUSANDS_SEPARATOR)
         }
         builder.append(reversed[i])
     }
-    return builder.reverse().toString()
+    val grouped = builder.reverse().toString().toPersianDigits()
+    return if (isNegative) "-$grouped" else grouped
 }
 
 /**
- * Formats a numeric [String] as a thousands-grouped price (e.g. "1234567" -> "1,234,567").
+ * Formats a numeric [String] as a Persian thousands-grouped price
+ * (e.g. "1234567" -> "۱٬۲۳۴٬۵۶۷").
  *
  * Unlike the previous implementation this does NOT silently strip unexpected characters:
  * if the input contains any non-digit character it is considered invalid and an
  * [IllegalArgumentException] is raised so the caller can surface the problem instead of
- * displaying a corrupted value. An empty string formats to "0".
+ * displaying a corrupted value. An empty string formats to "۰".
  *
  * @throws IllegalArgumentException if [this] contains a non-digit character.
  */
 fun String.toPriceFormat(): String {
     require(all { it.isDigit() }) {
-        "toPriceFormat: input must contain digits only but was \"$this\""
+        this
     }
     return groupThousands(this)
 }
