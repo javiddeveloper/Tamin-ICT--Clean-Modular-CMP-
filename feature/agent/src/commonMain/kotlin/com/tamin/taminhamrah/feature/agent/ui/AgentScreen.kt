@@ -630,20 +630,26 @@ private fun TypewriterText(text: String, style: androidx.compose.ui.text.TextSty
         }
     }
 
-    Column {
+    Column(modifier = Modifier.animateContentSize(animationSpec = tween(durationMillis = 150))) {
         lines.forEachIndexed { index, line ->
             val isVisible = isFinished || index <= revealedLineIndex
-            val alpha by animateFloatAsState(
-                targetValue = if (isVisible) 1f else 0f,
-                animationSpec = tween(durationMillis = 800) // Thanos fade effect
-            )
+            
+            if (isVisible) {
+                val initialAlpha = if (isFinished) 1f else 0f
+                val alpha = remember { androidx.compose.animation.core.Animatable(initialAlpha) }
+                
+                LaunchedEffect(Unit) {
+                    if (alpha.value < 1f) {
+                        alpha.animateTo(1f, animationSpec = tween(durationMillis = 800))
+                    }
+                }
 
-            // Render always but fade alpha (prevents layout lag and jumpy scroll)
-            Text(
-                text = parseMarkdownLine(line), 
-                style = style,
-                modifier = Modifier.alpha(alpha)
-            )
+                Text(
+                    text = parseMarkdownLine(line), 
+                    style = style,
+                    modifier = Modifier.alpha(alpha.value)
+                )
+            }
         }
     }
 }
@@ -852,37 +858,41 @@ private fun BubbleContentRenderer(
                             }
                         }
 
-                        val alpha by animateFloatAsState(
-                            targetValue = if (visible) 1f else 0f,
-                            animationSpec = tween(durationMillis = 800) // Thanos fade
-                        )
+                        if (visible) {
+                            val alpha = remember { androidx.compose.animation.core.Animatable(if (!isTypingAnimating) 1f else 0f) }
+                            LaunchedEffect(Unit) {
+                                if (alpha.value < 1f) {
+                                    alpha.animateTo(1f, animationSpec = tween(durationMillis = 800))
+                                }
+                            }
 
-                        // Wrap with box to apply alpha fade without AnimatedVisibility
-                        Box(modifier = Modifier.alpha(alpha)) {
-                            if (key.startsWith("----") || key.startsWith("────")) {
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                    thickness = 0.5.dp,
-                                    modifier = Modifier.padding(vertical = 3.dp)
-                                )
-                            } else {
-                                Text(
-                                    text = androidx.compose.ui.text.buildAnnotatedString {
-                                        withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
-                                            append("$key: ")
-                                        }
-                                        withStyle(style = androidx.compose.ui.text.SpanStyle(
-                                            fontWeight = FontWeight.Medium,
-                                            color = contentColor
-                                        )) {
-                                            append(value)
-                                        }
-                                    },
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = contentColor,
-                                        lineHeight = 21.sp
+                            // Wrap with box to apply alpha fade
+                            Box(modifier = Modifier.alpha(alpha.value)) {
+                                if (key.startsWith("----") || key.startsWith("────")) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                        thickness = 0.5.dp,
+                                        modifier = Modifier.padding(vertical = 3.dp)
                                     )
-                                )
+                                } else {
+                                    Text(
+                                        text = androidx.compose.ui.text.buildAnnotatedString {
+                                            withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
+                                                append("$key: ")
+                                            }
+                                            withStyle(style = androidx.compose.ui.text.SpanStyle(
+                                                fontWeight = FontWeight.Medium,
+                                                color = contentColor
+                                            )) {
+                                                append(value)
+                                            }
+                                        },
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = contentColor,
+                                            lineHeight = 21.sp
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
