@@ -346,6 +346,8 @@ internal fun TaminHamrahNavGraph(
 
                 treatmentScreen(navController = navController)
 
+                treatmentScreen()
+
                 profileGraph(
                     navController = navController,
                     onNavigateToIdentity = { userId ->
