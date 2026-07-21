@@ -20,6 +20,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.foundation.text.BasicTextField
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -161,35 +164,61 @@ private fun ChatLayout(
             if (uiState.chatItems.isEmpty() && !uiState.isGenerating) {
                 EmptyState(modifier = Modifier.weight(1f))
             } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .safeHazeSource(state = hazeState),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    // Top-to-bottom: no reverseLayout, newest items at bottom
-                ) {
-                    itemsIndexed(uiState.chatItems, key = { _, it -> it.id }) { index, item ->
-                        val showAvatar = item.sender != ChatSender.User &&
-                            (index == 0 || uiState.chatItems[index - 1].sender == ChatSender.User)
+                Box(modifier = Modifier.weight(1f)) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .safeHazeSource(state = hazeState),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        // Top-to-bottom: no reverseLayout, newest items at bottom
+                    ) {
+                        itemsIndexed(uiState.chatItems, key = { _, it -> it.id }) { index, item ->
+                            val showAvatar = item.sender != ChatSender.User &&
+                                (index == 0 || uiState.chatItems[index - 1].sender == ChatSender.User)
 
-                        val textLength = if (item.content is ChatBubbleContent.SuggestedPrompts) {
-                            (uiState.chatItems.getOrNull(index - 1)?.content as? ChatBubbleContent.Text)?.message?.length ?: 0
-                        } else 0
-                        val typingDelay = if (item.isTypingAnimating && textLength > 0) (textLength * 15L) + 200L else 1500L
+                            val textLength = if (item.content is ChatBubbleContent.SuggestedPrompts) {
+                                (uiState.chatItems.getOrNull(index - 1)?.content as? ChatBubbleContent.Text)?.message?.length ?: 0
+                            } else 0
+                            val typingDelay = if (item.isTypingAnimating && textLength > 0) (textLength * 15L) + 200L else 1500L
 
-                        ChatBubbleItem(
-                            item = item,
-                            showAvatar = showAvatar,
-                            typingDelay = typingDelay,
-                            onIntent = onIntent
+                            ChatBubbleItem(
+                                item = item,
+                                showAvatar = showAvatar,
+                                typingDelay = typingDelay,
+                                onIntent = onIntent
+                            )
+                        }
+
+                        if (uiState.isGenerating) {
+                            item { TypingIndicatorBubble(processingState = uiState.processingState) }
+                        }
+                    }
+
+                    // Top Gradient
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                        .align(Alignment.TopCenter)
+                        .background(
+                            androidx.compose.ui.graphics.Brush.verticalGradient(
+                                listOf(MaterialTheme.colorScheme.background, Color.Transparent)
+                            )
                         )
-                    }
+                    )
 
-                    if (uiState.isGenerating) {
-                        item { TypingIndicatorBubble(processingState = uiState.processingState) }
-                    }
+                    // Bottom Gradient
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            androidx.compose.ui.graphics.Brush.verticalGradient(
+                                listOf(Color.Transparent, MaterialTheme.colorScheme.background)
+                            )
+                        )
+                    )
                 }
             }
         }
@@ -997,13 +1026,16 @@ private fun AgentInputBar(
     val taminColors = LocalTaminColors.current
     val isDark = androidx.compose.foundation.isSystemInDarkTheme()
 
-    Surface(
-        color = Color.Transparent,
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(32.dp))
                 .safeHazeEffect(
                     state = hazeState,
                     style = HazeStyle(
@@ -1011,94 +1043,100 @@ private fun AgentInputBar(
                         noiseFactor = 0.02f,
                         tint = HazeTint(
                             color = if (isDark)
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
                             else
                                 MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
                         )
                     ),
                     fallbackColor = MaterialTheme.colorScheme.surface
                 )
+                .border(
+                    BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                    shape = RoundedCornerShape(32.dp)
+                )
         ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .navigationBarsPadding(),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                modifier = Modifier.weight(1f),
-                enabled = !isGenerating,
-                placeholder = {
-                    Text(
-                        text = "سوال خود را بپرسید...",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textMuted)
-                    )
-                },
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textPrimary),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor   = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                    cursorColor          = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor   = MaterialTheme.colorScheme.background,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.background
-                ),
-                shape = RoundedCornerShape(20.dp),
-                maxLines = 4,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(
-                    onSend = {
-                        if (text.isNotBlank() && !isGenerating) {
-                            onSend(text.trim())
-                            text = ""
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Plus button
+                IconButton(
+                    onClick = { /* attachments */ },
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "افزودن", tint = MaterialTheme.colorScheme.onSurface)
+                }
+
+                // Text field
+                BasicTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    modifier = Modifier.weight(1f).padding(vertical = 12.dp),
+                    enabled = !isGenerating,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textPrimary),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(
+                        onSend = {
+                            if (text.isNotBlank() && !isGenerating) {
+                                onSend(text.trim())
+                                text = ""
+                            }
                         }
+                    ),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                    decorationBox = { innerTextField ->
+                        if (text.isEmpty()) {
+                            Text(
+                                text = "هر چیزی بپرسید...",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textMuted)
+                            )
+                        }
+                        innerTextField()
                     }
                 )
-            )
 
-            AnimatedContent(
-                targetState = isGenerating,
-                label = "send_cancel_btn",
-                transitionSpec = { scaleIn(tween(200)) togetherWith scaleOut(tween(200)) }
-            ) { generating ->
-                if (generating) {
-                    IconButton(
-                        onClick = onCancel,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f))
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = "لغو", tint = MaterialTheme.colorScheme.error)
-                    }
-                } else {
-                    val sendEnabled = text.isNotBlank()
-                    IconButton(
-                        onClick = {
-                            if (sendEnabled) { onSend(text.trim()); text = "" }
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (sendEnabled) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
-                            )
-                    ) {
-                        Icon(
-                            Icons.Default.Send,
-                            contentDescription = "ارسال",
-                            tint = if (sendEnabled) Color.White
-                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                // Send/Mic button
+                val isTyping = text.isNotBlank()
+                IconButton(
+                    onClick = {
+                        if (isGenerating) {
+                            onCancel()
+                        } else if (isTyping) {
+                            onSend(text.trim())
+                            text = ""
+                        } else {
+                            // Mic logic goes here
+                        }
+                    },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isGenerating) MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
+                            else if (isTyping) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
                         )
+                ) {
+                    AnimatedContent(
+                        targetState = when {
+                            isGenerating -> 2
+                            isTyping -> 1
+                            else -> 0
+                        },
+                        label = "send_mic_anim"
+                    ) { state ->
+                        when (state) {
+                            2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = MaterialTheme.colorScheme.error)
+                            1 -> Icon(Icons.Default.ArrowUpward, contentDescription = "ارسال", tint = Color.White)
+                            0 -> Icon(Icons.Default.Mic, contentDescription = "ضبط صدا", tint = MaterialTheme.colorScheme.onSurface)
+                        }
                     }
                 }
             }
         }
-        } // end haze Box
     }
 }
 
