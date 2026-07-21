@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
+import com.tamin.taminhamrah.feature.healthProfile.ui.HealthProfileScreen
 import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileScreen
 import kotlinx.serialization.Serializable
 
@@ -59,7 +60,7 @@ fun NavGraphBuilder.treatmentGraph(
             val route = backStackEntry.toRoute<TreatmentRoute.HealthProfile>()
             HealthProfileScreen(
                 nationalCode = route.nationalCode,
-                onBack = onBack,
+                onBackClicked = onBack,
             )
         }
     }

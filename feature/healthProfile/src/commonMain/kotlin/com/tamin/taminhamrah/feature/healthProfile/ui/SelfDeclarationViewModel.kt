@@ -14,17 +14,18 @@ class SelfDeclarationViewModel : BaseViewModel<SelfDeclarationUiState, PartialSt
 ) {
     override fun handleIntent(intent: SelfDeclarationIntent): Flow<PartialState> {
         return when (intent) {
-            is SelfDeclarationIntent.ChangeStep -> handleChangeStep(intent.step)
-            is SelfDeclarationIntent.UpdateState -> handleUpdateState(intent.transform)
+            is SelfDeclarationIntent.ChangeStep -> flow { emit(PartialState.StepChanged(intent.step)) }
+            is SelfDeclarationIntent.UpdateIdentity -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
+            is SelfDeclarationIntent.UpdatePersonal -> flow { emit(PartialState.PersonalUpdated(intent.personal)) }
+            is SelfDeclarationIntent.UpdateContact -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
+            is SelfDeclarationIntent.UpdateEmergency -> flow { emit(PartialState.EmergencyUpdated(intent.emergency)) }
+            is SelfDeclarationIntent.UpdatePhysical -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
+            is SelfDeclarationIntent.UpdateDiseases -> flow { emit(PartialState.DiseasesUpdated(intent.diseases)) }
+            is SelfDeclarationIntent.UpdateFamily -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
+            is SelfDeclarationIntent.UpdateBloodGroup -> flow { emit(PartialState.BloodGroupUpdated(intent.bloodGroup)) }
+            is SelfDeclarationIntent.UpdateLifestyle -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
+            is SelfDeclarationIntent.UpdateAllergy -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
         }
-    }
-
-    private fun handleChangeStep(step: SelfDeclarationStep): Flow<PartialState> = flow {
-        emit(PartialState.StepChanged(step))
-    }
-
-    private fun handleUpdateState(transform: SelfDeclarationUiState.() -> SelfDeclarationUiState): Flow<PartialState> = flow {
-        emit(PartialState.StateUpdated(transform))
     }
 
     override fun reduceState(
@@ -42,9 +43,19 @@ class SelfDeclarationViewModel : BaseViewModel<SelfDeclarationUiState, PartialSt
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step
         )
-        is PartialState.StateUpdated -> partialState.transform(currentState)
+        is PartialState.IdentityUpdated -> currentState.copy(identity = partialState.identity)
+        is PartialState.PersonalUpdated -> currentState.copy(personal = partialState.personal)
+        is PartialState.ContactUpdated -> currentState.copy(contact = partialState.contact)
+        is PartialState.EmergencyUpdated -> currentState.copy(emergency = partialState.emergency)
+        is PartialState.PhysicalUpdated -> currentState.copy(physical = partialState.physical)
+        is PartialState.DiseasesUpdated -> currentState.copy(diseases = partialState.diseases)
+        is PartialState.FamilyUpdated -> currentState.copy(family = partialState.family)
+        is PartialState.BloodGroupUpdated -> currentState.copy(bloodGroup = partialState.bloodGroup)
+        is PartialState.LifestyleUpdated -> currentState.copy(lifestyle = partialState.lifestyle)
+        is PartialState.AllergyUpdated -> currentState.copy(allergy = partialState.allergy)
     }
 
     override fun createErrorState(message: String): PartialState =
         PartialState.Error(message)
 }
+

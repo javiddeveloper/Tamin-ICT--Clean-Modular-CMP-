@@ -11,9 +11,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.BloodGroupStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationBloodScreen(
-    state: SelfDeclarationUiState,
+    state: BloodGroupStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -84,13 +84,16 @@ fun SelfDeclarationBloodScreen(
                     .background(taminColors.bgSurface)
                     .border(1.dp, taminColors.border, RoundedCornerShape(12.dp))
                     .clickable {
-                        onIntent(SelfDeclarationIntent.UpdateState {
-                            copy(
-                                isBloodGroupUnknown = !isBloodGroupUnknown,
-                                selectedBloodGroupLetter = if (!isBloodGroupUnknown) null else selectedBloodGroupLetter,
-                                selectedBloodGroupRh = if (!isBloodGroupUnknown) null else selectedBloodGroupRh
+                        val newUnknown = !state.isBloodGroupUnknown
+                        onIntent(
+                            SelfDeclarationIntent.UpdateBloodGroup(
+                                state.copy(
+                                    isBloodGroupUnknown = newUnknown,
+                                    selectedBloodGroupLetter = if (newUnknown) null else state.selectedBloodGroupLetter,
+                                    selectedBloodGroupRh = if (newUnknown) null else state.selectedBloodGroupRh
+                                )
                             )
-                        })
+                        )
                     }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -98,13 +101,15 @@ fun SelfDeclarationBloodScreen(
                 Checkbox(
                     checked = state.isBloodGroupUnknown,
                     onCheckedChange = { chk ->
-                        onIntent(SelfDeclarationIntent.UpdateState {
-                            copy(
-                                isBloodGroupUnknown = chk,
-                                selectedBloodGroupLetter = if (chk) null else selectedBloodGroupLetter,
-                                selectedBloodGroupRh = if (chk) null else selectedBloodGroupRh
+                        onIntent(
+                            SelfDeclarationIntent.UpdateBloodGroup(
+                                state.copy(
+                                    isBloodGroupUnknown = chk,
+                                    selectedBloodGroupLetter = if (chk) null else state.selectedBloodGroupLetter,
+                                    selectedBloodGroupRh = if (chk) null else state.selectedBloodGroupRh
+                                )
                             )
-                        })
+                        )
                     },
                     colors = CheckboxDefaults.colors(checkedColor = taminColors.blueText)
                 )
@@ -131,7 +136,7 @@ fun SelfDeclarationBloodScreen(
                     selectedIndices = state.selectedBloodGroupLetter?.let { setOf(bloodLetters.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val letter = idxs.firstOrNull()?.let { bloodLetters[it] }
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(selectedBloodGroupLetter = letter) })
+                        onIntent(SelfDeclarationIntent.UpdateBloodGroup(state.copy(selectedBloodGroupLetter = letter)))
                     }
                 )
 
@@ -149,7 +154,7 @@ fun SelfDeclarationBloodScreen(
                     selectedIndices = state.selectedBloodGroupRh?.let { setOf(rhFactors.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val rh = idxs.firstOrNull()?.let { rhFactors[it] }
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(selectedBloodGroupRh = rh) })
+                        onIntent(SelfDeclarationIntent.UpdateBloodGroup(state.copy(selectedBloodGroupRh = rh)))
                     }
                 )
             }
@@ -164,9 +169,10 @@ fun SelfDeclarationBloodScreen(
 fun SelfDeclarationBloodScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationBloodScreen(
-            state = SelfDeclarationUiState(selectedBloodGroupLetter = "O", selectedBloodGroupRh = "+"),
+            state = BloodGroupStepState(selectedBloodGroupLetter = "O", selectedBloodGroupRh = "+"),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

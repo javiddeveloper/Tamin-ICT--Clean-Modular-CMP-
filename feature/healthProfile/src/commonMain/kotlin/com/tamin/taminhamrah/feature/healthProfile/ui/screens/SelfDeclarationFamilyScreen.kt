@@ -9,9 +9,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.FamilyStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationFamilyScreen(
-    state: SelfDeclarationUiState,
+    state: FamilyStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -78,7 +78,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHighBloodSugar == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(familyHighBloodSugar = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHighBloodSugar = idx == 1)))
                     }
                 )
             }
@@ -92,7 +92,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHighBloodPressure == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(familyHighBloodPressure = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHighBloodPressure = idx == 1)))
                     }
                 )
             }
@@ -106,7 +106,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHighCholesterol == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(familyHighCholesterol = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHighCholesterol = idx == 1)))
                     }
                 )
             }
@@ -122,7 +122,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHasCancer == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(familyHasCancer = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHasCancer = idx == 1)))
                     }
                 )
             }
@@ -134,7 +134,7 @@ fun SelfDeclarationFamilyScreen(
                     options = cancerOptions,
                     selectedIndices = state.familyCancers,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(familyCancers = indices) })
+                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyCancers = indices)))
                     }
                 )
             }
@@ -149,9 +149,10 @@ fun SelfDeclarationFamilyScreen(
 fun SelfDeclarationFamilyScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationFamilyScreen(
-            state = SelfDeclarationUiState(familyHasCancer = true, familyCancers = setOf(1)),
+            state = FamilyStepState(familyHasCancer = true, familyCancers = setOf(1)),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+
