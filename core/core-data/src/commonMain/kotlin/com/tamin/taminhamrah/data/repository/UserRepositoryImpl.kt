@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.model.user.UserProfileDN
@@ -109,11 +110,10 @@ internal class UserRepositoryImpl(
         emit(relationList ?: emptyList())
     }
 
-    override suspend fun getElectronicFile(
+    override fun getElectronicFile(
         filters: List<ApiFilterDN>
-    ): Flow<List<com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN>> = flow {
+    ): Flow<List<ElectronicFileDN>> = flow {
         val remoteData = userRemoteDataSource.getElectronicFile(ApiQueryParamDN(filters = filters))
-        Logger.d("getElectronicFile", remoteData?.list.toString())
         val electronicFileList = remoteData?.list?.map { it.toDomain() }
         emit(electronicFileList ?: emptyList())
     }
@@ -121,5 +121,8 @@ internal class UserRepositoryImpl(
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
         val result = userRemoteDataSource.getUserProfile()
         emit(result!!.toDomain())
+    }
+    override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {
+        emit(userRemoteDataSource.checkUserIsNew(nationalId))
     }
 }

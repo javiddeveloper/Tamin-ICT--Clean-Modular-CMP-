@@ -5,8 +5,13 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -79,6 +84,80 @@ internal class WorkShopsRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
+        }
+    }
+
+    override suspend fun getWorkshopObjectionableDebitList(
+        workshopNumber: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkShopDebtDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = apiService.getWorkshopObjectionableDebitList(workshopNumber, branchCode, queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getWorkshopRecentlyAddedMembers(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopNewMemberDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = apiService.getWorkshopRecentlyAddedMembers(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getWorkshopsDebtsList(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopsDebtListModelDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = apiService.getWorkshopsDebtsList(workshopId, branchId, queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getWorkshopMembers(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopMemberDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = apiService.getWorkshopMembers(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getWorkshopStackHolders(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopStackHolderDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = apiService.getWorkshopStackHolders(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }

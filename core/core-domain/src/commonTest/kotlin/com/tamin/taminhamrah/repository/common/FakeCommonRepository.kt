@@ -3,10 +3,12 @@ package com.tamin.taminhamrah.repository.common
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.RoleDN
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import io.ktor.client.statement.HttpStatement
 
 class FakeCommonRepository : CommonRepository {
     var beneficiaryResult: List<BeneficiaryDN> = emptyList()
@@ -16,6 +18,9 @@ class FakeCommonRepository : CommonRepository {
     var getMainMenuError: Throwable = RuntimeException("Menu Error")
     var rolesResult: List<RoleDN> = emptyList()
     var getRolesError: Throwable = RuntimeException("Roles Error")
+    var jobTitleResult: JobTitleListDN? = null
+    var registrationDeclarationFormResult: ByteArray = byteArrayOf()
+    var registrationDeclarationFormError: Throwable = RuntimeException("PDF Error")
 
 
     override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = flow {
@@ -31,6 +36,18 @@ class FakeCommonRepository : CommonRepository {
             throw getMainMenuError
         }
         emit(mainMenuResult)
+    }
+
+    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
+        if (shouldThrowError) {
+            throw registrationDeclarationFormError
+        }
+        emit(registrationDeclarationFormResult)
+    }
+
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
+        if (shouldThrowError) throw getBeneficiaryError
+        emit(jobTitleResult)
     }
 
     override fun getRoles(): Flow<List<RoleDN>> = flow {

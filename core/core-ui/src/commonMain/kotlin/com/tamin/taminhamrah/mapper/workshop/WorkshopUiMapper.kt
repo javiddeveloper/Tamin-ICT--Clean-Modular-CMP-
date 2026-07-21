@@ -10,12 +10,22 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListPR
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitPR
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitListPR
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryPR
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberPR
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelPR
 
 fun EmployerWorkshopDN.toPresentation(): EmployerWorkshopPR {
     return EmployerWorkshopPR(
@@ -150,5 +160,45 @@ fun WorkshopDebtInquiryDN.toPresentation(): WorkshopDebtInquiryPR {
         sDate = sDate,
         amount2 = amount2,
         amount3 = amount3
+    )
+}
+
+fun WorkShopDebtDN.toPresentation(): WorkShopDebtPR {
+    return WorkShopDebtPR(
+        rowNum = rowNum, debitNumber = debitNumber, debitAmount = debitAmount,
+        debitRemain = debitRemain, debitCreateReasonDesc = debitCreateReasonDesc,
+        debitStatDesc = debitStatDesc
+    )
+}
+
+fun WorkshopsDebtListModelDN.toPresentation(): WorkshopsDebtListModelPR {
+    return WorkshopsDebtListModelPR(
+        debitNumber = debitNumber, debitAmount = debitAmount, debitRemain = debitRemain,
+        status = status, debitCreateReasonCode = debitCreateReasonCode
+    )
+}
+
+fun WorkshopMemberDN.toPresentation(): WorkshopMemberPR {
+    return WorkshopMemberPR(
+        leavingWorkStatus = leavingWorkStatus, leavingWorkDate = leavingWorkDate,
+        specialSubType = specialSubType
+    )
+}
+
+fun WorkshopNewMemberDN.toPresentation(): WorkshopNewMemberPR {
+    return WorkshopNewMemberPR(
+        id = id,
+        dateOfStart = dateOfStart,
+        insuranceId = insuranceId,
+        relationWithTamin = relationWithTamin,
+        organizationId = organizationId,
+        workshopId = workshopId,
+        job = job
+    )
+}
+
+fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR {
+    return WorkshopStackHolderPR(
+        stackId = stackId, nationalId = nationalId, mobile = mobile, stackType = stackType
     )
 }
