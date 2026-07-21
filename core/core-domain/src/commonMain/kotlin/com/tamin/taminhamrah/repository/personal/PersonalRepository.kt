@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.personal
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
@@ -22,4 +24,6 @@ interface PersonalRepository {
     fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionDN): Flow<String?>
     fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?>
     fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN>
+    fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): Flow<String?>
+    fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?>
 }

@@ -7,7 +7,11 @@ import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.DocumentFileDTO
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
@@ -23,6 +27,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlin.collections.map
 
 class PersonalRepositoryImpl(
     private val personalRemoteDataSource: PersonalRemoteDataSource,
@@ -102,5 +107,17 @@ class PersonalRepositoryImpl(
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {
         emit(personalRemoteDataSource.saveSurvivorInfo(body.toDTO()))
     }
-}
 
+    override fun putInsuredRegistrationDocList(
+        personalId: String,
+        docs: List<InsuredDocDN>
+    ): Flow<String?> = flow {
+        val dtos = docs.map { it.toDTO() }
+        emit(personalRemoteDataSource.putInsuredRegistrationDocList(personalId, dtos))
+    }
+
+    override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow {
+        val response = personalRemoteDataSource.getRequestSummary(requestId)
+        emit(response?.toDomain())
+    }
+}

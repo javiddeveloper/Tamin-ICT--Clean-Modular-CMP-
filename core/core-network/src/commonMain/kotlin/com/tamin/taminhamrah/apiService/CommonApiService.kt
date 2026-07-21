@@ -12,10 +12,16 @@ import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
+import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Streaming
 import de.jensklingenberg.ktorfit.http.Url
+import io.ktor.client.statement.HttpResponse
+import de.jensklingenberg.ktorfit.http.Path
+import io.ktor.client.statement.HttpStatement
+import com.tamin.taminhamrah.util.NetworkConstants
 
 internal interface CommonApiService {
     @GET("proxy/models/city/")
@@ -41,5 +47,14 @@ internal interface CommonApiService {
     @GET("recipients")
     suspend fun getRecipientList(@QueryMap parameters: Map<String, String>): BaseDTO<ListData<RecipientDTO>>
 
+    @GET
+    @Streaming
+    suspend fun getRegistrationDeclarationForm(
+        @Url url: String = "${NetworkConstants.BASE_URL_VIEW}assets/pdfs/questionair.pdf"
+    ): HttpStatement
 
+    @GET("baseinfo/job")
+    suspend fun getJobTitle(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<JobTitleDTO>>
 }
