@@ -13,18 +13,17 @@ private const val TYPE_VISIT = "3"
 private const val TYPE_MEDICAL_SERVICE = "5"
 
 /**
- * Record categories of سوابق درمانی.
+ * Record categories of سوابق درمانی, in the design's order.
  *
- * [requestTypeIds] is what the endpoint is actually queried with. It is a list because [ALL] has no
- * server-side equivalent — the previous app tried one and shipped without it — so that tab fans out
- * across the real categories and the results are merged client-side.
+ * [requestTypeIds] is what the endpoint is queried with. It is a list because [ALL] has no
+ * server-side value — the endpoint filters one type at a time — so «همه» fans out across the real
+ * categories and the results are merged client-side. Every other tab holds a single type.
+ * داروخانه (`0`) is not a tab: it only ever labelled a record, never filtered.
  */
 @Serializable
 enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
     ALL(
         label = "همه",
-        // The four the previous app actually queried. داروخانه is excluded on purpose: it was only
-        // ever used to label a record, never as a filter, so it stays unverified as a query value.
         requestTypeIds = listOf(
             TYPE_MEDICINE,
             TYPE_VISIT,
@@ -39,18 +38,15 @@ enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
     ;
 
     companion object {
-        /**
-         * The chips the design shows, in order. خدمات پزشکی and داروخانه are deliberately not
-         * chips — the design has four — but [ALL] still queries خدمات پزشکی so those records
-         * are not lost.
-         */
+        /** The default landing tab: «همه». */
+        val Default: RecordTab = ALL
+
         val chips: List<RecordTab> = entries
 
-        /** داروخانه has no chip but can appear in results, so records still style correctly. */
         val medicalServiceTypeId: String = TYPE_MEDICAL_SERVICE
         val pharmacyTypeId: String = TYPE_PHARMACY
 
-        /** Persian name for a category id, including the ones without a chip. */
+        /** Persian name for a category id, including the two that have no tab. */
         fun labelForTypeId(typeId: String): String? = when (typeId) {
             TYPE_PHARMACY -> "داروخانه"
             TYPE_MEDICAL_SERVICE -> "خدمات پزشکی"

@@ -12,7 +12,7 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
  */
 @Immutable
 data class RecordSearchCriteria(
-    val tab: RecordTab = RecordTab.ALL,
+    val tab: RecordTab = RecordTab.Default,
     /** Epoch millis, or null to fall back to the selected period. */
     val startDate: String? = null,
     val endDate: String? = null,

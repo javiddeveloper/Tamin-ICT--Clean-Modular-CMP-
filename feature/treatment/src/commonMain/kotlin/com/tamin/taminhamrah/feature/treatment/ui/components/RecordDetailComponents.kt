@@ -65,6 +65,11 @@ fun PrescriptionItemCard(
     prescribedCount: String,
     receivedCount: String,
     modifier: Modifier = Modifier,
+    // Optional, from the old app's per-item detail: dispensing centre, action date and cost.
+    centerName: String = "",
+    actionDate: String = "",
+    itemTotal: String = "",
+    insuredShare: String = "",
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -102,6 +107,26 @@ fun PrescriptionItemCard(
                 contentColor = colors.greenText,
                 modifier = Modifier.weight(1f),
             )
+        }
+
+        // The old app's remaining per-item fields, each shown only when present.
+        if (centerName.isNotBlank() || actionDate.isNotBlank() ||
+            itemTotal.isNotBlank() || insuredShare.isNotBlank()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colors.bgPage, RoundedCornerShape(CornerRadius.chip))
+                    .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                if (centerName.isNotBlank()) DetailRow(label = "مرکز ارائه", value = centerName)
+                if (actionDate.isNotBlank()) DetailRow(label = "تاریخ اقدام", value = actionDate)
+                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = "$itemTotal ریال")
+                if (insuredShare.isNotBlank()) {
+                    DetailRow(label = "سهم شما", value = "$insuredShare ریال")
+                }
+            }
         }
     }
 }

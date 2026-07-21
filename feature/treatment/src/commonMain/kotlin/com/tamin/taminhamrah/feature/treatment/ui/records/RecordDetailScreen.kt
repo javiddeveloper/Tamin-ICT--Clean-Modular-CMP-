@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,6 +31,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -69,6 +68,9 @@ fun RecordDetailScreen(
     noteHeadId: String,
     type: String,
     flagSata: String,
+    docName: String,
+    prescDate: String,
+    trackingCode: String,
     onBack: () -> Unit,
     viewModel: PrescriptionsViewModel = koinViewModel(),
 ) {
@@ -86,6 +88,9 @@ fun RecordDetailScreen(
     RecordDetailContent(
         state = state,
         noteHeadId = noteHeadId,
+        docName = docName,
+        prescDate = prescDate,
+        trackingCode = trackingCode,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
         onDownloadPdf = { viewModel.sendIntent(PrescriptionsIntent.DownloadPdf(noteHeadId)) },
@@ -110,6 +115,9 @@ fun RecordDetailScreen(
 fun RecordDetailContent(
     state: PrescriptionsUiState,
     noteHeadId: String,
+    docName: String = "",
+    prescDate: String = "",
+    trackingCode: String = "",
     onBack: () -> Unit,
     onDownloadPdf: () -> Unit,
     onDownloadTestResult: () -> Unit,
@@ -133,14 +141,14 @@ fun RecordDetailContent(
                     title = "نسخهٔ الکترونیک",
                     navigationIcon = {
                         TaminTopAppBarButton(
-                            icon = TaminIcons.ChevronForward,
+                            icon = TaminIcons.ChevronBack,
                             contentDescription = "بازگشت",
                             onClick = onBack,
                         )
                     },
                     action = {
                         TaminTopAppBarButton(
-                            icon = TaminIcons.Print,
+                            icon = TaminIcons.Download,
                             contentDescription = "دریافت جواب آزمایش",
                             onClick = onDownloadTestResult,
                         )
@@ -168,9 +176,9 @@ fun RecordDetailContent(
                     ) {
                         RecordSummaryCard(
                             metaLabel = "پزشک",
-                            metaValue = record?.docName?.let { "دکتر $it" } ?: UNKNOWN_VALUE,
-                            trackingCode = record?.trackingCode?.toPersianDigits() ?: UNKNOWN_VALUE,
-                            date = record?.prescDate?.toPersianDigits() ?: UNKNOWN_VALUE,
+                            metaValue = if (docName.isBlank()) UNKNOWN_VALUE else "دکتر $docName",
+                            trackingCode = trackingCode.ifBlank { UNKNOWN_VALUE }.toPersianDigits(),
+                            date = prescDate.ifBlank { UNKNOWN_VALUE }.toJalaliDateLabel(),
                         )
 
                         SectionLabel(text = "اقلام دارویی")
@@ -180,6 +188,10 @@ fun RecordDetailContent(
                                 dose = item.drugInstruction.ifBlank { item.drugAmount },
                                 prescribedCount = item.serviceQuantity.toPersianDigits(),
                                 receivedCount = item.deliveredNo.toPersianDigits(),
+                                centerName = item.serverName,
+                                actionDate = item.registerDate.toJalaliDateLabel(),
+                                itemTotal = item.sumPriceItem.toPriceFormat(),
+                                insuredShare = item.insurancePayment.toPriceFormat(),
                             )
                         }
 
@@ -199,7 +211,7 @@ fun RecordDetailContent(
             TaminBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
                 TaminPrimaryButton(
                     text = "دریافت نسخهٔ الکترونیک",
-                    icon = Icons.Filled.KeyboardArrowDown,
+                    icon = TaminIcons.Download,
                     onClick = onDownloadPdf,
                 )
             }
