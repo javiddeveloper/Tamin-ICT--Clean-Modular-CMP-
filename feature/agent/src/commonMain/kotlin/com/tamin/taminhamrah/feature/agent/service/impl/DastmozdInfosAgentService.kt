@@ -117,7 +117,7 @@ class DastmozdInfosAgentService(
 
             bubbles.add(
                 ChatBubbleContent.KeyValue(
-                    title = msg?.takeIf { it.isNotBlank() } ?: "اطلاعات دستمزد",
+                    title = null, // msg is already shown as a separate Text bubble above
                     items = allDetails
                 )
             )
