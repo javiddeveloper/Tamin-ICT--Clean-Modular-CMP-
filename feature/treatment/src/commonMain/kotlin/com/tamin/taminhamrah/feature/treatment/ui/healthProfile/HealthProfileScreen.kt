@@ -26,6 +26,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,12 +36,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.components.LifestyleItem
 import com.tamin.taminhamrah.feature.treatment.ui.components.SubFlowHeader
+import com.tamin.taminhamrah.feature.treatment.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.HealthProfileUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.koin.compose.viewmodel.koinViewModel
+
+/**
+ * Health-profile destination: connects the ViewModel and loads the profile for the given
+ * insured person. Reached by navigation from the treatment hub (was an in-screen sub-flow).
+ */
+@Composable
+fun HealthProfileScreen(
+    nationalCode: String,
+    onBack: () -> Unit,
+    viewModel: HealthProfileViewModel = koinViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(nationalCode) {
+        viewModel.sendIntent(HealthProfileIntent.LoadProfile(nationalCode))
+    }
+
+    HealthProfileContent(state = uiState, onBack = onBack)
+}
 
 @Composable
 fun HealthProfileContent(

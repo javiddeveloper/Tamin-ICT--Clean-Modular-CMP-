@@ -50,7 +50,7 @@ private val CARD_OVERLAP = 40.dp
 fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel(),
     onOpenMedicalRecords: () -> Unit = {},
-    onOpenHealthProfile = { navController.navigate(HealthProfile(selectedNationalCode))
+    onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenCenters: () -> Unit = {},
     onOpenPrescriptions: () -> Unit = {},
     onOpenMedicalApprovals: () -> Unit = {},
@@ -94,7 +94,7 @@ fun TreatmentContent(
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
     onOpenMedicalRecords: () -> Unit = {},
-    onOpenHealthProfile: () -> Unit = {},
+    onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenCenters: () -> Unit = {},
     onOpenPrescriptions: () -> Unit = {},
     onOpenMedicalApprovals: () -> Unit = {},
@@ -131,7 +131,9 @@ fun TreatmentContent(
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
                 onOpenMedicalRecords = onOpenMedicalRecords,
-                onOpenHealthProfile = onOpenHealthProfile,
+                // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
+                // which patient card is in view. No-op until the main code is known.
+                onOpenHealthProfile = { state.mainUserNationalCode?.let(onOpenHealthProfile) },
                 onOpenCenters = onOpenCenters,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))

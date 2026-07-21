@@ -344,7 +344,7 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                treatmentScreen()
+                treatmentScreen(navController = navController)
 
                 profileGraph(
                     navController = navController,
