@@ -7,7 +7,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState.PartialState
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
-import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.DownloadTestResultPdfUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
@@ -16,10 +16,12 @@ import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.util.getCurrentTimestamp
 import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 class PrescriptionsViewModel(
-    private val tokenStoreManager: TokenStoreManager,
+    private val identityInfoUseCase: IdentityInfoUseCase,
     private val getElectronicPrescriptionListUseCase: GetElectronicPrescriptionListUseCase,
     private val getElectronicPrescriptionDetailUseCase: GetElectronicPrescriptionDetailUseCase,
     private val getElectronicPrescriptionPriceUseCase: GetElectronicPrescriptionPriceUseCase,
@@ -37,11 +39,22 @@ class PrescriptionsViewModel(
             is PrescriptionsIntent.DownloadPdf -> downloadPdf(intent)
             is PrescriptionsIntent.DownloadTestResult -> downloadTestResult(intent)
             is PrescriptionsIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
+            is PrescriptionsIntent.LoadRecordPrices -> loadRecordPrices(intent)
         }
     }
 
-    private fun getLoggedNationalCode(): String {
-        return tokenStoreManager.getUserId() ?: ""
+    /**
+     * The signed-in person's national code, from the identity use case rather than the token
+     * store — the same source the treatment hub uses, so both screens agree on who is signed in.
+     *
+     * Falls back to "0", never "": these values are URL path segments, so an empty one collapses
+     * `patient-history/{nationalCode}/...` into a double slash and the endpoint 404s. The previous
+     * app used the same placeholder.
+     */
+    private suspend fun getLoggedNationalCode(): String = try {
+        identityInfoUseCase().first().nationalId?.takeIf { it.isNotBlank() } ?: NO_NATIONAL_CODE
+    } catch (e: Exception) {
+        NO_NATIONAL_CODE
     }
 
     private fun loadList(intent: PrescriptionsIntent.LoadList): Flow<PartialState> = flow {
@@ -54,11 +67,26 @@ class PrescriptionsViewModel(
         val endD = intent.endDate ?: getCurrentTimestamp()
 
         try {
-            getElectronicPrescriptionListUseCase(intent.requestTypeId, nationalCode, dependantCode, startD, endD).collect { list ->
-                emit(PartialState.PrescriptionsLoaded(list.toPresentation()))
+            // One request per category. The endpoint has no "all", so «همه» asks for each of them
+            // and the lists are merged here, newest first.
+            val perType = intent.requestTypeIds.map { requestTypeId ->
+                getElectronicPrescriptionListUseCase(
+                    requestTypeId,
+                    nationalCode,
+                    dependantCode,
+                    startD,
+                    endD,
+                )
+            }
+            combine(perType) { lists ->
+                lists.toList()
+                    .flatten()
+                    .sortedByDescending { it.prescDate }
+            }.collect { merged ->
+                emit(PartialState.PrescriptionsLoaded(merged.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.messageOr(ERROR_LOAD_LIST)))
         }
     }
 
@@ -73,7 +101,7 @@ class PrescriptionsViewModel(
                 emit(PartialState.PrescriptionDetailsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.messageOr(ERROR_LOAD_DETAIL)))
         }
 
         try {
@@ -85,6 +113,34 @@ class PrescriptionsViewModel(
         }
     }
 
+    /**
+     * Fetches the insured share for each record.
+     *
+     * One request per record, because the price endpoint is keyed by a single `noteHeadID` and the
+     * list carries no amount. Only run when the cost filter is actually in use, and records whose
+     * price fails are simply left out rather than failing the whole search.
+     */
+    private fun loadRecordPrices(intent: PrescriptionsIntent.LoadRecordPrices): Flow<PartialState> =
+        flow {
+            emit(PartialState.LoadingPrices(true))
+            val nationalCode = getLoggedNationalCode()
+            val prices = mutableMapOf<String, Long>()
+            intent.noteHeadIds.forEach { noteHeadId ->
+                try {
+                    getElectronicPrescriptionPriceUseCase(noteHeadId, nationalCode)
+                        .first()
+                        .firstOrNull()
+                        ?.let { price ->
+                            price.headInsuPayment?.let { prices[noteHeadId] = it }
+                        }
+                } catch (e: Exception) {
+                    // A record without a price stays unfiltered rather than disappearing.
+                }
+            }
+            emit(PartialState.RecordPricesLoaded(prices))
+            emit(PartialState.LoadingPrices(false))
+        }
+
     private fun downloadPdf(intent: PrescriptionsIntent.DownloadPdf): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
@@ -92,7 +148,7 @@ class PrescriptionsViewModel(
                 emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.messageOr(ERROR_RECEIVE_FILE)))
         }
     }
 
@@ -107,7 +163,7 @@ class PrescriptionsViewModel(
                 emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.messageOr(ERROR_RECEIVE_FILE)))
         }
     }
 
@@ -124,6 +180,10 @@ class PrescriptionsViewModel(
         is PartialState.PdfLoaded -> currentState.copy(isLoading = false, viewerPdf = partialState.pdf, showPdfDialog = true)
         is PartialState.TogglePdfDialog -> currentState.copy(showPdfDialog = partialState.show)
         is PartialState.PrescriptionSelected -> currentState.copy(selectedNoteHeadId = partialState.noteHeadID)
+        is PartialState.RecordPricesLoaded -> currentState.copy(
+            recordPrices = currentState.recordPrices + partialState.prices,
+        )
+        is PartialState.LoadingPrices -> currentState.copy(isLoadingPrices = partialState.isLoading)
         is PartialState.PrescriptionCleared -> currentState.copy(
             selectedNoteHeadId = null,
             prescriptionDetailList = emptyList(),
@@ -133,3 +193,20 @@ class PrescriptionsViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
+
+/**
+ * The message shown when a request fails.
+ *
+ * Falls back to [fallback] when the exception carries nothing readable: a null here would leave
+ * `error` null and the screen would render "no records" for what was actually a failure. The
+ * wording follows the previous app, which named the failed step rather than showing raw errors.
+ */
+private fun Throwable.messageOr(fallback: String): String =
+    message?.takeIf { it.isNotBlank() } ?: fallback
+
+private const val ERROR_LOAD_LIST = "خطا در دریافت سوابق درمانی"
+private const val ERROR_LOAD_DETAIL = "خطا در دریافت جزئیات نسخه"
+private const val ERROR_RECEIVE_FILE = "خطا در دریافت فایل"
+
+/** Placeholder for an unknown national code, matching the previous app's path segment. */
+private const val NO_NATIONAL_CODE = "0"

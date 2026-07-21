@@ -1,7 +1,9 @@
 package com.tamin.taminhamrah.feature.treatment.ui.prescriptions
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.feature.treatment.fake.FakeTokenStoreManager
+import com.tamin.taminhamrah.feature.treatment.fake.FakeCityProvinceRepository
+import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.TreatmentTestData
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
@@ -38,7 +40,7 @@ class PrescriptionsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = FakeTreatmentRepository()
         viewModel = PrescriptionsViewModel(
-            tokenStoreManager = FakeTokenStoreManager(),
+            identityInfoUseCase = IdentityInfoUseCase(FakeUserRepository(), FakeCityProvinceRepository()),
             getElectronicPrescriptionListUseCase = GetElectronicPrescriptionListUseCase(repository),
             getElectronicPrescriptionDetailUseCase = GetElectronicPrescriptionDetailUseCase(repository),
             getElectronicPrescriptionPriceUseCase = GetElectronicPrescriptionPriceUseCase(repository),
@@ -56,7 +58,7 @@ class PrescriptionsViewModelTest {
 
         viewModel.uiState.test {
             awaitItem() // initial
-            viewModel.sendIntent(PrescriptionsIntent.LoadList(nationalCode))
+            viewModel.sendIntent(PrescriptionsIntent.LoadList(nationalCode, requestTypeIds = listOf("1")))
 
             var state = awaitItem()
             while (state.prescriptionList.isEmpty()) state = awaitItem()
@@ -72,7 +74,7 @@ class PrescriptionsViewModelTest {
 
         viewModel.uiState.test {
             awaitItem() // initial
-            viewModel.sendIntent(PrescriptionsIntent.LoadList(nationalCode))
+            viewModel.sendIntent(PrescriptionsIntent.LoadList(nationalCode, requestTypeIds = listOf("1")))
 
             var state = awaitItem()
             while (state.error == null) state = awaitItem()
@@ -89,7 +91,7 @@ class PrescriptionsViewModelTest {
 
         viewModel.uiState.test {
             awaitItem() // initial
-            viewModel.sendIntent(PrescriptionsIntent.SelectPrescription("100", nationalCode))
+            viewModel.sendIntent(PrescriptionsIntent.SelectPrescription("100", nationalCode, type = "1", flagSata = "0"))
 
             var state = awaitItem()
             while (state.prescriptionDetailList.isEmpty() || state.prescriptionPriceList.isEmpty()) {
@@ -109,7 +111,7 @@ class PrescriptionsViewModelTest {
 
         viewModel.uiState.test {
             awaitItem() // initial
-            viewModel.sendIntent(PrescriptionsIntent.SelectPrescription("100", nationalCode))
+            viewModel.sendIntent(PrescriptionsIntent.SelectPrescription("100", nationalCode, type = "1", flagSata = "0"))
 
             // Wait for the selection flow to fully complete before clearing, so the
             // clear cannot race with still-pending detail/price emissions.
