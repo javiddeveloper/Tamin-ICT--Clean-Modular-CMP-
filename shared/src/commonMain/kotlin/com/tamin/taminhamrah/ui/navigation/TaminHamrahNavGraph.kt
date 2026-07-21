@@ -79,8 +79,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
-import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
@@ -92,7 +90,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceCo
 import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.treatmentScreen
+import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -154,7 +152,7 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
-    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute>() == true
+    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
@@ -198,7 +196,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
             isSelected = isTreatmentSelected,
             icon = Res.drawable.ic_treatment_menu,
             onClick = {
-                navController.navigate(TreatmentRoute) {
+                navController.navigate(TreatmentRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -380,19 +378,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     )
                 }
 
-                treatmentScreen(
-                    onOpenHealthProfile = {
-                        navController.navigateToHealthProfile()
-                    }
+                treatmentGraph(
+                    navController = navController,
+                    onBack = { navController.popBackStack() }
                 )
 
                 profileGraph(
                     navController = navController,
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
-                    },
-                    onNavigateToHealthProfile = {
-                        navController.navigateToHealthProfile()
                     },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }

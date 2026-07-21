@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.model.treatment.*
+import com.tamin.taminhamrah.model.health.*
 
 object TreatmentMocks {
     val patientMain = PatientItem(
@@ -40,6 +41,42 @@ object TreatmentMocks {
         trackingCode = ""
     )
 
+    val patientGeneral = PatientGeneralPR(
+        ptientID = 101,
+        patientName = "رضا",
+        patientFamily = "احمدی",
+        patientNatCode = "1234567890",
+        patientAge = "42",
+        patientGender = "مرد",
+        patientBirthDate = "1360/01/15",
+        patientMobile = "09123456789",
+        patientAddress = "تهران، خیابان ولیعصر، کوچه دوم، پلاک ۱۰",
+        patientFather = "محمد"
+    )
+
+    val selfDeclarative = PatientSelfDeclarativePR(
+        alcoholDesc = "",
+        alcoholUsage = 0,
+        alcoholUsageTitle = "عدم مصرف",
+        exerciseDesc = "",
+        exerciseFreq = 3,
+        exerciseFreqTitle = "هفته‌ای سه بار",
+        lastUpdateDate = "1402/03/15",
+        objectID = 101,
+        smokingDesc = "",
+        smokingStatus = 0,
+        smokingStatusTitle = "غیر سیگاری",
+        substanceDesc = "",
+        substanceUsage = 0,
+        substanceUsageTitle = "عدم مصرف"
+    )
+
+    val drugAllergy = DrugItemAllergiesPR(
+        allergyComments = "حساسیت شدید پوستی و تنگی نفس",
+        drugId = 505,
+        drugName = "پنی‌سیلین"
+    )
+
     val mainUiState = TreatmentUiState(
         deservedList = listOf(deservedTreatment),
         dependantList = listOf(
@@ -56,6 +93,12 @@ object TreatmentMocks {
         selectedPatientName = "رضا احمدی",
         insuredShareTotal = 65_910L,
         organizationShareTotal = 153_790L,
-        healthProfileCompleted = false
+        healthProfileCompleted = true
+    )
+
+    val healthProfileUiState = HealthProfileUiState(
+        patientGeneral = patientGeneral,
+        patientSelfDeclarative = selfDeclarative,
+        patientDrugAllergies = listOf(drugAllergy)
     )
 }
