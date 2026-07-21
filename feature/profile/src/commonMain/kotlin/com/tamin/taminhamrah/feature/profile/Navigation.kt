@@ -28,6 +28,7 @@ sealed interface ProfileRoute {
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
+    onNavigateToHealthProfile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -40,6 +41,7 @@ fun NavGraphBuilder.profileGraph(
                 userId = route.userId,
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
+                onNavigateToHealthProfile = onNavigateToHealthProfile,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
