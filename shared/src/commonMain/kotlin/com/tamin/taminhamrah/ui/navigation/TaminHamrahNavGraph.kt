@@ -87,7 +87,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptional
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.treatmentScreen
+import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -137,7 +137,7 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
-    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute>() == true
+    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
@@ -173,7 +173,7 @@ internal fun TaminHamrahNavGraph(
             isSelected = isTreatmentSelected,
             icon = Res.drawable.ic_treatment_menu,
             onClick = {
-                navController.navigate(TreatmentRoute) {
+                navController.navigate(TreatmentRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -344,9 +344,10 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                treatmentScreen(navController = navController)
-
-                treatmentScreen()
+                treatmentGraph(
+                    navController = navController,
+                    onBack = { navController.popBackStack() }
+                )
 
                 profileGraph(
                     navController = navController,
