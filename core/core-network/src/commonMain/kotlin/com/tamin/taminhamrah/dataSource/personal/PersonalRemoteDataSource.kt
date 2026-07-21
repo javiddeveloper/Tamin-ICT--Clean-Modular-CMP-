@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.dataSource.personal
 
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDTO
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -20,4 +22,6 @@ interface PersonalRemoteDataSource {
     suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO
     suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String?
     suspend fun checkGirlSurvivorConditions(nationalCode: String, pensionerId: String): String?
+    suspend fun putInsuredRegistrationDocList(personalId: String, body: List<InsuredDocDTO>): String?
+    suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO?
 }

@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.data.repository
 
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.data.local.dao.RecipientDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
