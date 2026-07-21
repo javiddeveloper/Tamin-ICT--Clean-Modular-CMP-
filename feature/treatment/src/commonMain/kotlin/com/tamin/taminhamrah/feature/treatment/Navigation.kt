@@ -19,8 +19,24 @@ fun NavController.navigateToTreatment(builder: NavOptionsBuilder.() -> Unit) {
     navigate(TreatmentRoute, builder)
 }
 
-fun NavGraphBuilder.treatmentScreen() {
+fun NavGraphBuilder.treatmentScreen(
+    onOpenMedicalRecords: () -> Unit = {},
+    onOpenHealthProfile: () -> Unit = {},
+    onOpenCenters: () -> Unit = {},
+    onOpenPrescriptions: () -> Unit = {},
+    onOpenMedicalApprovals: () -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
+    onSearch: () -> Unit = {},
+) {
     composable<TreatmentRoute> {
-        TreatmentScreen()
+        TreatmentScreen(
+            onOpenMedicalRecords = onOpenMedicalRecords,
+            onOpenHealthProfile = onOpenHealthProfile,
+            onOpenCenters = onOpenCenters,
+            onOpenPrescriptions = onOpenPrescriptions,
+            onOpenMedicalApprovals = onOpenMedicalApprovals,
+            onOpenMiscClaims = onOpenMiscClaims,
+            onSearch = onSearch,
+        )
     }
 }
