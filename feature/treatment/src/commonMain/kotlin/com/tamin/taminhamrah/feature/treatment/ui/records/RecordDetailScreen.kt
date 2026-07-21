@@ -39,6 +39,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -97,6 +98,11 @@ fun RecordDetailScreen(
             viewModel.sendIntent(PrescriptionsIntent.DownloadTestResult(patientId, noteHeadId))
         },
         onDismissPdf = { viewModel.sendIntent(PrescriptionsIntent.TogglePdfDialog(false)) },
+        onRetry = {
+            viewModel.sendIntent(
+                PrescriptionsIntent.SelectPrescription(noteHeadId, nationalCode, type, flagSata),
+            )
+        },
     )
 }
 
@@ -108,6 +114,7 @@ fun RecordDetailContent(
     onDownloadPdf: () -> Unit,
     onDownloadTestResult: () -> Unit,
     onDismissPdf: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
@@ -146,8 +153,14 @@ fun RecordDetailContent(
                         contentAlignment = Alignment.Center,
                     ) { CircularProgressIndicator(color = colors.teal) }
 
+                    // A failed lookup offers a retry; a genuinely empty prescription does not.
+                    state.error != null -> ErrorStateView(
+                        message = state.error,
+                        onRetry = onRetry,
+                    )
+
                     state.prescriptionDetailList.isEmpty() ->
-                        TaminEmptyState(message = "جزئیاتی برای این نسخه یافت نشد.")
+                        TaminEmptyState(message = "برای این نسخه قلمی ثبت نشده است.")
 
                     else -> Column(
                         modifier = Modifier.padding(Spacing.page),
@@ -255,6 +268,7 @@ fun RecordDetailPreview() {
             onDownloadPdf = {},
             onDownloadTestResult = {},
             onDismissPdf = {},
+            onRetry = {},
         )
     }
 }

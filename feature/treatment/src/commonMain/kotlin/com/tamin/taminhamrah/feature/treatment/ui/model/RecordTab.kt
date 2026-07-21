@@ -49,5 +49,12 @@ enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
         /** داروخانه has no chip but can appear in results, so records still style correctly. */
         val medicalServiceTypeId: String = TYPE_MEDICAL_SERVICE
         val pharmacyTypeId: String = TYPE_PHARMACY
+
+        /** Persian name for a category id, including the ones without a chip. */
+        fun labelForTypeId(typeId: String): String? = when (typeId) {
+            TYPE_PHARMACY -> "داروخانه"
+            TYPE_MEDICAL_SERVICE -> "خدمات پزشکی"
+            else -> null
+        }
     }
 }

@@ -1,43 +1,39 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.IconSize
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,73 +43,155 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.treatment.ui.components.EmptyState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
+import com.tamin.taminhamrah.feature.treatment.ui.components.MedicalRecordCard
+import com.tamin.taminhamrah.feature.treatment.ui.components.RecordGroupHeader
+import com.tamin.taminhamrah.feature.treatment.ui.components.TimelineFilterBar
+import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChipRow
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
-import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientItems
+import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
+import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliMonthLabel
+import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.icons.TaminIcons
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.ui.toPriceFormat
-import com.tamin.taminhamrah.util.getBeginningTimestamp
-import com.tamin.taminhamrah.util.getOneMonthAgoTimestamp
-import com.tamin.taminhamrah.util.getOneYearAgoTimestamp
-import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * Record categories of سوابق درمانی.
- *
- * Only [MEDICINE] has an endpoint on this branch; the others are declared so the tab row matches
- * the design and each can be wired as its API lands.
- */
-@Serializable
-enum class RecordTab(val label: String) {
-    ALL("همه"),
-    MEDICINE("دارو"),
-    VISIT("ویزیت"),
-    PARACLINIC("پاراکلینیک")
-}
+/** Shown on the person chip until the patient list arrives. */
+private const val SELF_LABEL = "خودم"
 
 /**
- * Ranges offered by the date filter. [ALL_TIME] asks the endpoint for the full history.
+ * The filter chooser, drawn as a panel under the bar rather than a floating menu.
  *
- * «تاریخ دلخواه» (a custom from/to range) is not offered yet: [PrescriptionsIntent.LoadList] already
- * accepts explicit bounds, so it only needs a picker to supply them.
+ * A popup anchored to the top bar lands in the wrong place and overlaps the chips; the design
+ * shows a full-width panel, so that is what this is.
  */
-enum class RecordPeriod(val label: String) {
-    LAST_MONTH("۱ ماه اخیر"),
-    LAST_SIX_MONTHS("۶ ماه اخیر"),
-    LAST_YEAR("۱ سال اخیر"),
-    ALL_TIME("از ابتدا");
-
-    /** Start bound in epoch millis, as the patient-history endpoint expects. */
-    fun startTimestamp(): String = when (this) {
-        LAST_MONTH -> getOneMonthAgoTimestamp()
-        LAST_SIX_MONTHS -> getSixMonthsAgoTimestamp()
-        LAST_YEAR -> getOneYearAgoTimestamp()
-        ALL_TIME -> getBeginningTimestamp()
+@Composable
+private fun <T> RecordFilterPanel(
+    options: List<Pair<T, String>>,
+    isSelected: (T) -> Boolean,
+    onSelect: (T) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page, vertical = Spacing.sm),
+        shape = RoundedCornerShape(CornerRadius.card),
+        color = colors.bgSurface,
+        border = BorderStroke(1.dp, colors.border),
+        shadowElevation = Elevation.md,
+    ) {
+        Column {
+            options.forEach { (value, label) ->
+                val selected = isSelected(value)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(value) }
+                        .background(if (selected) colors.greenBg else colors.bgSurface)
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (selected) colors.teal else colors.textPrimary,
+                    )
+                    if (selected) {
+                        Icon(
+                            imageVector = TaminIcons.Check,
+                            contentDescription = null,
+                            tint = colors.teal,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 /**
- * Medical records ("سوابق درمانی"): patient/period filters, category tabs and the records list.
+ * Failure state for the records list: what went wrong and how to recover, nothing more.
  *
- * Prescriptions are a tab here rather than a screen of their own — the hub's «نسخه‌های الکترونیک»
- * tile opens this on [RecordTab.MEDICINE]. Layout structure only; the design pass owns colors and
- * the shared card/header components.
+ * No retry button — the list is pull-to-refresh, so one gesture both reloads a good list and
+ * recovers from a failure, instead of the screen offering two ways to do the same thing.
+ */
+@Composable
+private fun RecordsErrorState(message: String) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(Spacing.page),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Icon(
+            imageVector = TaminIcons.Cross,
+            contentDescription = null,
+            tint = colors.dangerText,
+            modifier = Modifier.size(IconSize.large),
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = "برای تلاش دوباره، صفحه را به پایین بکشید.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** The one place the list request is built, so a retry always repeats the current filters. */
+private fun retryIntent(
+    nationalCode: String,
+    tab: RecordTab,
+    period: RecordPeriod,
+    customRange: Pair<String, String>? = null,
+) = PrescriptionsIntent.LoadList(
+    nationalCode = nationalCode,
+    requestTypeIds = tab.requestTypeIds,
+    startDate = customRange?.first ?: period.startTimestamp(),
+    endDate = customRange?.second,
+)
+
+/** Shown while a total has not loaded, so a blank never reads as zero spend. */
+private const val UNKNOWN_AMOUNT = "—"
+
+/**
+ * Medical records ("سوابق درمانی"): patient and period filters, the category chips, and the
+ * records timeline grouped by month.
+ *
+ * Prescriptions are a category here rather than a screen of their own — the hub's
+ * «نسخه‌های الکترونیک» tile opens this on [RecordTab.MEDICINE].
  */
 @Composable
 fun MedicalRecordsScreen(
@@ -121,45 +199,76 @@ fun MedicalRecordsScreen(
     initialTab: RecordTab,
     patients: List<PatientItem>,
     onBack: () -> Unit,
-    onOpenRecord: (String) -> Unit,
-    viewModel: PrescriptionsViewModel = koinViewModel()
+    onOpenRecord: (ElectronicPrescriptionPR) -> Unit,
+    viewModel: PrescriptionsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var selectedPatient by remember(nationalCode) { mutableStateOf(nationalCode) }
     var selectedPeriod by remember { mutableStateOf(RecordPeriod.LAST_SIX_MONTHS) }
+    var selectedTab by remember(initialTab) { mutableStateOf(initialTab) }
+    // Set only by the تاریخ دلخواه picker; null means the selected preset decides the range.
+    var customRange by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var searchCriteria by remember { mutableStateOf(RecordSearchCriteria()) }
 
-    // Re-queries whenever the patient or the range changes; both are endpoint parameters.
-    LaunchedEffect(selectedPatient, selectedPeriod) {
-        viewModel.sendIntent(
-            PrescriptionsIntent.LoadList(
-                nationalCode = selectedPatient,
-                startDate = selectedPeriod.startTimestamp()
+    // Patient, period and category are all endpoint parameters, so any change re-queries.
+    LaunchedEffect(selectedPatient, selectedPeriod, selectedTab, customRange) {
+        viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
+    }
+
+    // Prices cost one request per record, so they are only fetched once a cost bound is set and
+    // only for records that do not already have one.
+    LaunchedEffect(searchCriteria, state.prescriptionList) {
+        if (!searchCriteria.filtersOnAmount) return@LaunchedEffect
+        val missing = state.prescriptionList
+            .map { it.noteHeadEprescID }
+            .filter { it !in state.recordPrices }
+        if (missing.isNotEmpty()) {
+            viewModel.sendIntent(
+                PrescriptionsIntent.LoadRecordPrices(missing, selectedPatient),
             )
-        )
+        }
     }
 
     HandleRecordsEvents(events = viewModel.events, snackbarHostState = snackbarHostState)
 
     MedicalRecordsContent(
         state = state,
-        initialTab = initialTab,
         patients = patients,
         selectedPatient = selectedPatient,
         selectedPeriod = selectedPeriod,
+        selectedTab = selectedTab,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
+        onTabSelected = { selectedTab = it },
         onPatientSelected = { selectedPatient = it },
         onPeriodSelected = { selectedPeriod = it },
-        onRecordSelected = onOpenRecord
+        onRecordSelected = onOpenRecord,
+        onRetry = {
+            viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
+        },
+        onCustomRangePicked = { start, end ->
+            customRange = start to end
+            selectedPeriod = RecordPeriod.CUSTOM
+        },
+        searchCriteria = searchCriteria,
+        onSearchApplied = { criteria ->
+            searchCriteria = criteria
+            selectedTab = criteria.tab
+            // A searched date range replaces the period preset, so both cannot disagree.
+            if (criteria.startDate != null && criteria.endDate != null) {
+                customRange = criteria.startDate to criteria.endDate
+                selectedPeriod = RecordPeriod.CUSTOM
+            }
+        },
     )
 }
 
 @Composable
 fun HandleRecordsEvents(
     events: Flow<PrescriptionsEvent>,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
 ) {
     events.collectWithLifecycleAware {
         when (it) {
@@ -171,337 +280,286 @@ fun HandleRecordsEvents(
 @Composable
 fun MedicalRecordsContent(
     state: PrescriptionsUiState,
-    initialTab: RecordTab,
     patients: List<PatientItem>,
     selectedPatient: String,
     selectedPeriod: RecordPeriod,
+    selectedTab: RecordTab,
     onBack: () -> Unit,
+    onTabSelected: (RecordTab) -> Unit,
     onPatientSelected: (String) -> Unit,
     onPeriodSelected: (RecordPeriod) -> Unit,
-    onRecordSelected: (String) -> Unit,
+    onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
+    onRetry: () -> Unit,
+    onCustomRangePicked: (startDate: String, endDate: String) -> Unit,
+    searchCriteria: RecordSearchCriteria,
+    onSearchApplied: (RecordSearchCriteria) -> Unit,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    var selectedTab by remember(initialTab) { mutableStateOf(initialTab) }
+    val colors = LocalTaminColors.current
+    var showPatientMenu by remember { mutableStateOf(false) }
+    var showPeriodMenu by remember { mutableStateOf(false) }
+    var showSearchSheet by remember { mutableStateOf(false) }
+    var pickingRangeStart by remember { mutableStateOf(false) }
+    var rangeStart by remember { mutableStateOf<String?>(null) }
+
+    val currentPatient = patients.firstOrNull { it.nationalId == selectedPatient }
+
+    if (showSearchSheet) {
+        RecordSearchSheet(
+            initial = searchCriteria,
+            onDismiss = { showSearchSheet = false },
+            onApply = {
+                onSearchApplied(it)
+                showSearchSheet = false
+            },
+        )
+    }
+
+    if (pickingRangeStart) {
+        TaminJalaliDatePicker(
+            title = "از تاریخ",
+            onDismiss = { pickingRangeStart = false },
+            onConfirm = { y, m, d ->
+                rangeStart = PersianDateFormatter.toEpochMillis(y, m, d).toString()
+                pickingRangeStart = false
+            },
+        )
+    }
+
+    // The second step opens as soon as the first date is chosen; the old app refused to search
+    // with only one end of the range, so both are required before the query runs.
+    rangeStart?.let { start ->
+        TaminJalaliDatePicker(
+            title = "تا تاریخ",
+            onDismiss = { rangeStart = null },
+            onConfirm = { y, m, d ->
+                onCustomRangePicked(start, PersianDateFormatter.toEpochMillis(y, m, d).toString())
+                rangeStart = null
+            },
+        )
+    }
 
     Scaffold(
         modifier = modifier,
+        containerColor = colors.bgPage,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("سوابق درمانی", fontWeight = FontWeight.Bold) },
+            TaminTopAppBar(
+                title = "سوابق درمانی",
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "بازگشت")
-                    }
+                    TaminTopAppBarButton(
+                        icon = TaminIcons.ChevronBack,
+                        contentDescription = "بازگشت",
+                        onClick = onBack,
+                    )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                TimelineFilterBar(
+                    // Never blank: the insured person is the default until the list arrives.
+                    personLabel = currentPatient?.filterLabel ?: SELF_LABEL,
+                    dateLabel = selectedPeriod.label,
+                    dropdownIcon = TaminIcons.ChevronBack,
+                    searchIcon = TaminIcons.Search,
+                    onPersonClick = {
+                        showPeriodMenu = false
+                        showPatientMenu = !showPatientMenu
+                    },
+                    onDateClick = {
+                        showPatientMenu = false
+                        showPeriodMenu = !showPeriodMenu
+                    },
+                    onSearchClick = { showSearchSheet = true },
+                    personExpanded = showPatientMenu,
+                    dateExpanded = showPeriodMenu,
                 )
-            )
+            }
         },
-        bottomBar = { RecordsCostSummaryBar(state = state) }
+        bottomBar = { RecordsTotals(prices = state.prescriptionPriceList) },
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            RecordFilterRow(
-                patients = patients,
-                selectedPatient = selectedPatient,
-                selectedPeriod = selectedPeriod,
-                onPatientSelected = onPatientSelected,
-                onPeriodSelected = onPeriodSelected
-            )
-            RecordTabRow(selected = selectedTab, onSelect = { selectedTab = it })
-
-            when (selectedTab) {
-                RecordTab.ALL, RecordTab.MEDICINE -> RecordList(
-                    state = state,
-                    onRecordSelected = onRecordSelected
+        PullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = onRetry,
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+        ) {
+            when {
+                showPatientMenu -> RecordFilterPanel(
+                    // Falls back to the person already being viewed: an empty list would open an
+                    // empty panel, which reads as "the dropdown is broken".
+                    options = patients
+                        .map { it.nationalId to it.filterLabel }
+                        .ifEmpty { listOf(selectedPatient to SELF_LABEL) },
+                    isSelected = { it == selectedPatient },
+                    onSelect = {
+                        onPatientSelected(it)
+                        showPatientMenu = false
+                    },
                 )
-                // Visits and paraclinic have no endpoint yet; their branches fill these in.
-                RecordTab.VISIT, RecordTab.PARACLINIC -> EmptyState("این بخش به‌زودی افزوده می‌شود.")
+                showPeriodMenu -> RecordFilterPanel(
+                    options = RecordPeriod.entries.map { it to it.label },
+                    isSelected = { it == selectedPeriod },
+                    onSelect = { period ->
+                        showPeriodMenu = false
+                        // The presets apply immediately; a custom range needs two dates first.
+                        if (period == RecordPeriod.CUSTOM) {
+                            pickingRangeStart = true
+                        } else {
+                            onPeriodSelected(period)
+                        }
+                    },
+                )
+            }
+
+            TreatmentFilterChipRow(
+                categories = RecordTab.chips.map { it.label },
+                selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
+                onSelect = { onTabSelected(RecordTab.chips[it]) },
+            )
+
+            when {
+                // A failed request and a genuinely empty result read very differently, so they
+                // get different states. Both recover the same way: pull to refresh.
+                state.error != null -> RecordsErrorState(message = state.error)
+
+                state.prescriptionList.none { searchCriteria.matches(it, state.recordPrices) } -> TaminEmptyState(
+                    message = if (searchCriteria.nameQuery.isNotBlank()) {
+                        "موردی با «${searchCriteria.nameQuery}» یافت نشد."
+                    } else {
+                        "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است."
+                    },
+                )
+
+                state.prescriptionList.isEmpty() -> TaminEmptyState(
+                    message = "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است.",
+                )
+
+                else -> RecordTimeline(
+                    records = state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) },
+                    onRecordSelected = onRecordSelected,
+                )
             }
         }
+        }
+    }
+}
+
+/** Records grouped under their Jalali month, as the design shows. */
+@Composable
+private fun RecordTimeline(
+    records: List<ElectronicPrescriptionPR>,
+    onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
+) {
+    val groups = remember(records) { records.groupBy { it.prescDate.toJalaliMonthLabel() } }
+
+    groups.forEach { (monthLabel, monthRecords) ->
+        RecordGroupHeader(text = monthLabel)
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.page),
+            verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
+        ) {
+            monthRecords.forEach { record ->
+                val accent = recordAccent(record.prescType)
+                MedicalRecordCard(
+                    category = record.prescType.toCategoryLabel(),
+                    date = record.prescDate.toJalaliDateLabel(),
+                    title = "دکتر ${record.docName}",
+                    subtitle = record.location.ifBlank { record.specDesc },
+                    // The list endpoint carries no per-record amount — the old app's response has
+                    // no payment field either — so the share reads as unknown until the detail's
+                    // price lookup runs. Never show another number here: the label says «سهم شما».
+                    shareAmount = UNKNOWN_AMOUNT,
+                    accentColor = accent.content,
+                    accentContainerColor = accent.container,
+                    categoryIcon = accent.icon,
+                    onClick = { onRecordSelected(record) },
+                )
+            }
+        }
+        Box(modifier = Modifier.height(Spacing.sm))
+    }
+}
+
+/** Totals pinned under the list; hidden until a price lookup has returned. */
+@Composable
+private fun RecordsTotals(prices: List<ElectronicPrescriptionPricePR>) {
+    if (prices.isEmpty()) return
+    CostTotalsBar(
+        insuredShareLabel = "سهم بیمه‌شده",
+        insuredShareAmount = prices.totalOf { it.headInsuPayment },
+        organizationShareLabel = "سهم سازمان",
+        organizationShareAmount = prices.totalOf { it.headSsoPayment },
+        totalLabel = "جمع کل",
+        totalAmount = prices.totalOf { it.requestPrice },
+    )
+}
+
+/** One dropdown shape for both filters, so they stay visually identical. */
+@Composable
+private fun <T> FilterMenu(
+    expanded: Boolean,
+    options: List<Pair<T, String>>,
+    isSelected: (T) -> Boolean,
+    onDismiss: () -> Unit,
+    onSelect: (T) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        options.forEach { (value, label) ->
+            DropdownMenuItem(
+                text = { Text(text = label, color = colors.textPrimary) },
+                onClick = { onSelect(value) },
+                trailingIcon = {
+                    if (isSelected(value)) {
+                        Icon(
+                            imageVector = TaminIcons.Check,
+                            contentDescription = null,
+                            tint = colors.teal,
+                        )
+                    }
+                },
+            )
+        }
+    }
+}
+
+/** Palette and glyph a record category is drawn with, all from the theme. */
+private data class RecordAccent(
+    val content: Color,
+    val container: Color,
+    val icon: ImageVector,
+)
+
+@Composable
+private fun recordAccent(prescType: String): RecordAccent {
+    val colors = LocalTaminColors.current
+    return when (prescType) {
+        in RecordTab.VISIT.requestTypeIds ->
+            RecordAccent(colors.orangeText, colors.orangeBg, TaminIcons.HealthProfile)
+        in RecordTab.PARACLINIC.requestTypeIds ->
+            RecordAccent(colors.blueText, colors.blueBg, TaminIcons.MedicalApprovals)
+        RecordTab.medicalServiceTypeId, RecordTab.pharmacyTypeId ->
+            RecordAccent(colors.greenText, colors.greenBg, TaminIcons.MedicalCenters)
+        else ->
+            RecordAccent(colors.teal, colors.greenBg, TaminIcons.Prescriptions)
     }
 }
 
 /**
- * Patient and period filters.
+ * Sums a money column, which the API reports as strings.
  *
- * Both feed the patient-history query: the patient picks the national code, the period the start
- * bound. Selecting either re-runs the request.
+ * Returns [UNKNOWN_AMOUNT] for an empty list: totals only arrive per opened record, so nothing
+ * loaded means "not known yet" rather than a genuine zero.
  */
-@Composable
-private fun RecordFilterRow(
-    patients: List<PatientItem>,
-    selectedPatient: String,
-    selectedPeriod: RecordPeriod,
-    onPatientSelected: (String) -> Unit,
-    onPeriodSelected: (RecordPeriod) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        PatientFilter(
-            patients = patients,
-            selectedPatient = selectedPatient,
-            onPatientSelected = onPatientSelected,
-            modifier = Modifier.weight(1f)
-        )
-        PeriodFilter(
-            selectedPeriod = selectedPeriod,
-            onPeriodSelected = onPeriodSelected,
-            modifier = Modifier.weight(1f)
-        )
-        IconButton(onClick = {}) {
-            Icon(
-                Icons.Default.Search,
-                contentDescription = "جست‌وجو",
-                tint = LocalTaminColors.current.textSecondary
-            )
-        }
-    }
-}
-
-/** Chooses whose records to show: the insured themselves or one of their dependants. */
-@Composable
-private fun PatientFilter(
-    patients: List<PatientItem>,
-    selectedPatient: String,
-    onPatientSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val current = patients.firstOrNull { it.nationalId == selectedPatient }
-
-    Box(modifier = modifier) {
-        AssistChip(
-            onClick = { expanded = true },
-            label = {
-                Text(
-                    text = current?.filterLabel ?: "خودم",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            patients.forEach { patient ->
-                DropdownMenuItem(
-                    text = { Text(patient.filterLabel) },
-                    onClick = {
-                        onPatientSelected(patient.nationalId)
-                        expanded = false
-                    },
-                    trailingIcon = {
-                        if (patient.nationalId == selectedPatient) {
-                            Icon(
-                                Icons.Default.Check,
-                                contentDescription = null,
-                                tint = LocalTaminColors.current.teal
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
-/** Chooses how far back to query. */
-@Composable
-private fun PeriodFilter(
-    selectedPeriod: RecordPeriod,
-    onPeriodSelected: (RecordPeriod) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(modifier = modifier) {
-        AssistChip(
-            onClick = { expanded = true },
-            label = {
-                Text(text = selectedPeriod.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            },
-            leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            RecordPeriod.entries.forEach { period ->
-                DropdownMenuItem(
-                    text = { Text(period.label) },
-                    onClick = {
-                        onPeriodSelected(period)
-                        expanded = false
-                    },
-                    trailingIcon = {
-                        if (period == selectedPeriod) {
-                            Icon(
-                                Icons.Default.Check,
-                                contentDescription = null,
-                                tint = LocalTaminColors.current.teal
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecordTabRow(selected: RecordTab, onSelect: (RecordTab) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = Spacing.md),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-    ) {
-        RecordTab.entries.forEach { tab ->
-            FilterChip(
-                selected = tab == selected,
-                onClick = { onSelect(tab) },
-                label = { Text(tab.label) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun RecordList(
-    state: PrescriptionsUiState,
-    onRecordSelected: (String) -> Unit
-) {
-    when {
-        state.isLoading -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
-
-        state.prescriptionList.isEmpty() -> EmptyState("هیچ سابقه‌ای یافت نشد.")
-
-        else -> LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-        ) {
-            items(state.prescriptionList) { record ->
-                RecordCard(record = record, onOpenDetails = { onRecordSelected(record.trackingCode) })
-            }
-        }
-    }
-}
-
-/** One record: category badge, date, prescriber, location and the tracking code. */
-@Composable
-private fun RecordCard(
-    record: ElectronicPrescriptionPR,
-    onOpenDetails: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(Spacing.md)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text(
-                        text = record.prescType,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 2.dp)
-                    )
-                }
-                Text(
-                    text = record.prescDate,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                text = "دکتر ${record.docName}",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = record.location.ifEmpty { record.specDesc },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = onOpenDetails) {
-                    Text("جزئیات")
-                }
-                Text(
-                    text = "کد رهگیری: ${record.trackingCode}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-/** Totals pinned under the list. Hidden until a price lookup has returned. */
-@Composable
-private fun RecordsCostSummaryBar(state: PrescriptionsUiState) {
-    val price = state.prescriptionPriceList.firstOrNull() ?: return
-
-    Surface(tonalElevation = 3.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-        ) {
-            CostCell(label = "جمع کل", value = price.requestPrice, modifier = Modifier.weight(1f))
-            CostCell(label = "سهم سازمان", value = price.headSsoPayment, modifier = Modifier.weight(1f))
-            CostCell(label = "سهم بیمه‌شده", value = price.headInsuPayment, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun CostCell(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value.toPriceFormat(),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
+private fun List<ElectronicPrescriptionPricePR>.totalOf(
+    selector: (ElectronicPrescriptionPricePR) -> String,
+): String {
+    if (isEmpty()) return UNKNOWN_AMOUNT
+    return sumOf { selector(it).toLongOrNull() ?: 0L }.toPriceFormat()
 }
 
 @PreviewRtlTheme
@@ -510,14 +568,25 @@ fun MedicalRecordsPreview() {
     PreviewRtlThemeContent {
         MedicalRecordsContent(
             state = TreatmentMocks.prescriptionsUiState,
-            initialTab = RecordTab.MEDICINE,
-            patients = TreatmentMocks.mainUiState.toPatientItems(),
-            selectedPatient = "",
+            patients = TreatmentMocks.mainUiState.toPatientList(),
+            selectedPatient = "1234567890",
             selectedPeriod = RecordPeriod.LAST_SIX_MONTHS,
+            selectedTab = RecordTab.MEDICINE,
             onBack = {},
+            onTabSelected = {},
             onPatientSelected = {},
             onPeriodSelected = {},
-            onRecordSelected = {}
+            onRecordSelected = {},
+            onRetry = {},
+            onCustomRangePicked = { _, _ -> },
+            searchCriteria = RecordSearchCriteria(),
+            onSearchApplied = {},
         )
     }
 }
+
+/** Turns the endpoint's numeric category into its Persian name; unknown ids show as-is. */
+private fun String.toCategoryLabel(): String =
+    RecordTab.entries.firstOrNull { this in it.requestTypeIds && it != RecordTab.ALL }?.label
+        ?: RecordTab.labelForTypeId(this)
+        ?: this
