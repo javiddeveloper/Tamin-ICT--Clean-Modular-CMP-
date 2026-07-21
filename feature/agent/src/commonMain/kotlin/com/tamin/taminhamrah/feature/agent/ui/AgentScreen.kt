@@ -558,18 +558,6 @@ private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.Start
         ) {
-            Box(modifier = Modifier.size(28.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                        .background(taminColors.aiAssistantGradient),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("AI", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-            Spacer(Modifier.width(8.dp))
             CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
@@ -704,30 +692,12 @@ private fun ChatBubbleItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
         ) {
-            // Agent avatar
-            if (!isUser) {
-                Box(modifier = Modifier.size(28.dp)) {
-                    if (showAvatar) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                                .background(taminColors.aiAssistantGradient),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("AI", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-                Spacer(Modifier.width(8.dp))
-            }
-
             val isProcessingOrEmbedded = item.content is ChatBubbleContent.ProcessingSteps ||
                                          item.content is ChatBubbleContent.EmbeddedModel
 
             if (isProcessingOrEmbedded) {
                 CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
-                    Box(modifier = Modifier.fillMaxWidth().padding(start = 36.dp)) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
                         BubbleContentRenderer(
                             content = item.content,
                             isTypingAnimating = item.isTypingAnimating,
@@ -763,8 +733,8 @@ private fun ChatBubbleItem(
                         }
                     }
                 } else {
-                    // Agent: Full width, no Surface card background
-                    Column(modifier = Modifier.fillMaxWidth().padding(end = 16.dp)) {
+                    // Agent: Full width, no Surface card background, no Avatar padding
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Box(modifier = Modifier.padding(vertical = 4.dp)) {
                             CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
                                 BubbleContentRenderer(
