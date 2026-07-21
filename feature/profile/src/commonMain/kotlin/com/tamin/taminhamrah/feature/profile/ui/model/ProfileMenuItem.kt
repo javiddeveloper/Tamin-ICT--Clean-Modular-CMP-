@@ -7,7 +7,6 @@ enum class ProfileMenuItem {
     ELECTRONIC_FILE,
     BANK_ACCOUNTS,
     CHANGE_MOBILE,
-    HEALTH_PROFILE,
     REQUESTS,
     PERSONAL_INBOX,
     SECURITY,
