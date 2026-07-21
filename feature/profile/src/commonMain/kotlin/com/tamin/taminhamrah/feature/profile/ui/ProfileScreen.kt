@@ -53,6 +53,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_identity
 import taminx.core.core_ui.ic_person
 import taminx.core.core_ui.ic_communication
@@ -67,6 +68,7 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_history
 import taminx.core.core_ui.ic_exit
+import taminx.core.core_ui.ic_tamin_logo
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable
@@ -94,6 +96,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
+    onNavigateToHealthProfile: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
@@ -107,6 +110,7 @@ fun ProfileScreen(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToRouteById = onNavigateToRouteById,
+        onNavigateToHealthProfile = onNavigateToHealthProfile,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -122,6 +126,7 @@ fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
+    onNavigateToHealthProfile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -147,7 +152,11 @@ fun HandleProfileEvents(
                     onNavigateToIdentity()
                 }
             }
-
+            ProfileEvent.NavigateToHealthProfile -> {
+                scope.launch {
+                    onNavigateToHealthProfile()
+                }
+            }
             is ProfileEvent.OpenUrl -> {
                 scope.launch {
                     onOpenUrl(it.url)
@@ -281,6 +290,19 @@ fun ProfileContent(
                 }
             }
 
+
+            item {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
+            }
+            item {
+                StandardListItem(
+                    title = "پروفایل سلامت",
+                    subtitle = "نمایش اطلاعات عمومی سلامت، سبک زندگی و حساسیت‌ها",
+                    icon = painterResource(Res.drawable.ic_tamin_logo),
+                    showMoreIcon = painterResource(Res.drawable.ic_arrow_show_more),
+                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.HEALTH_PROFILE)) }
+                )
+            }
             // کارتابل
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {

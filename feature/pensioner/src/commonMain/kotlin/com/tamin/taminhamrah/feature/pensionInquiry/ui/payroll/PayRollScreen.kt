@@ -22,7 +22,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PayRollScreen(
     onBack: () -> Unit,
@@ -210,7 +209,6 @@ fun PayRollDetailCard(item: PayRollPR) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PayRollPdfDialog(
     pdfData: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR,

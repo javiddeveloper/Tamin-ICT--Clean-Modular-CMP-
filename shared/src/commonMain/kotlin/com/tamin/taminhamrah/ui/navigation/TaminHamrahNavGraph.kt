@@ -79,6 +79,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
@@ -104,6 +105,11 @@ import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.Lifecycle
+import androidx.compose.runtime.getValue
+import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.ic_home_menu
@@ -224,7 +230,10 @@ internal fun TaminHamrahNavGraph(
                             )
                         )
                 ) {
-                    FloatingGlassNavigationBar(hazeState = hazeState) {
+                    FloatingGlassNavigationBar(
+                        hazeState = hazeState,
+                        isBlurEnabled = isBottomBarVisible
+                    ) {
 
                         navigationItems.forEach { navigationItem ->
 
@@ -279,7 +288,7 @@ internal fun TaminHamrahNavGraph(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
-                .hazeSource(state = hazeState)
+                .safeHazeSource(state = hazeState, isEnabled = isBottomBarVisible)
         ) {
             NavHost(
                 navController = navController,
