@@ -6,7 +6,6 @@
 */
 package com.tamin.taminhamrah.dataSource.commonSource
 
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
 import com.tamin.core.network.model.common.CityNameDto
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.MenuServiceStatus
@@ -17,10 +16,13 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import io.ktor.client.statement.HttpStatement
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
+import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
+import io.ktor.client.statement.HttpResponse
 
 internal class CommonRemoteDataSourceImpl(
     private val commonApiService: CommonApiService,
@@ -98,6 +100,26 @@ internal class CommonRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.UNKNOWN)
             )
+        }
+    }
+
+    override suspend fun getRegistrationDeclarationForm(): HttpStatement {
+        return try {
+            commonApiService.getRegistrationDeclarationForm()
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = commonApiService.getJobTitle(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }

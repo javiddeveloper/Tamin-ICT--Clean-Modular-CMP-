@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 /**
- * Configurable fake [TreatmentRepository] for ViewModel tests.
+ * Configurable fake [TreatmentRepository] for the dashboard ViewModel tests.
  *
  * Defaults emit realistic [TreatmentTestData] so success paths work out of the box;
- * set [shouldThrowError] to drive failure paths. Errors are thrown inside the emitted
- * flow so the ViewModel's `catch` operators handle them exactly as in production.
+ * set [shouldThrowError] to drive failure paths. The error is thrown inside the emitted
+ * flow so the ViewModel's `catch` handles it exactly as in production.
  */
 class FakeTreatmentRepository : TreatmentRepository {
 
@@ -31,6 +31,7 @@ class FakeTreatmentRepository : TreatmentRepository {
         result(deservedResult)
 
     override suspend fun getDependantUnderEighteen(
-        nationalCode: String, filters: List<ApiFilterDN>
+        nationalCode: String,
+        filters: List<ApiFilterDN>
     ): Flow<List<DependantUserUnderEighteenDN>> = result(dependantResult)
 }

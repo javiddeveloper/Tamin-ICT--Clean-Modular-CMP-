@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +29,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,6 +58,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileContent
@@ -61,81 +68,171 @@ import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileVie
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.icons.TaminIcons
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
+/** How far the insured-person carousel rides up into the teal header. */
+private val CARD_OVERLAP = 40.dp
+
+/**
+ * Treatment hub: the insured person's electronic health-insurance cards, the quick-access
+ * destinations, and the service categories.
+ */
 @Composable
 fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel(),
-    healthProfileViewModel: HealthProfileViewModel = koinViewModel()
+    onOpenMedicalRecords: () -> Unit = {},
+    onOpenHealthProfile: () -> Unit = {},
+    onOpenCenters: () -> Unit = {},
+    onOpenPrescriptions: () -> Unit = {},
+    onOpenMedicalApprovals: () -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
+    onSearch: () -> Unit = {},
 ) {
-    TreatmentScreenContent(
-        state = viewModel.uiState.collectAsState().value,
-        healthProfileState = healthProfileViewModel.uiState.collectAsState().value,
-        onIntent = { viewModel.sendIntent(it) },
-        onHealthProfileIntent = { healthProfileViewModel.sendIntent(it) }
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Auto-fetch data on composition entry
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+    }
+
+    HandleTreatmentEvents(events = viewModel.events)
+
+    TreatmentContent(
+        state = uiState,
+        onIntent = viewModel::sendIntent,
+        onOpenMedicalRecords = onOpenMedicalRecords,
+        onOpenHealthProfile = onOpenHealthProfile,
+        onOpenCenters = onOpenCenters,
+        onOpenPrescriptions = onOpenPrescriptions,
+        onOpenMedicalApprovals = onOpenMedicalApprovals,
+        onOpenMiscClaims = onOpenMiscClaims,
+        onSearch = onSearch,
     )
 }
 
 @Composable
-fun TreatmentScreenContent(
+fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
+    events.collectWithLifecycleAware {
+        when (it) {
+            is TreatmentEvent.ShowMessage -> Unit // TODO: surface via snackbar/toast
+        }
+    }
+}
+
+@Composable
+fun TreatmentContent(
     state: TreatmentUiState,
     healthProfileState: HealthProfileUiState,
     onIntent: (TreatmentIntent) -> Unit,
-    onHealthProfileIntent: (HealthProfileIntent) -> Unit
+    modifier: Modifier = Modifier,
+    onOpenMedicalRecords: () -> Unit = {},
+    onOpenHealthProfile: () -> Unit = {},
+    onOpenCenters: () -> Unit = {},
+    onOpenPrescriptions: () -> Unit = {},
+    onOpenMedicalApprovals: () -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
+    onSearch: () -> Unit = {},
 ) {
-    // Auto-fetch data on composition entry
-    LaunchedEffect(Unit) {
-        onIntent(TreatmentIntent.InitTreatmentFlow)
-    }
-
-    // Side effect: load sub-flow data when flow or patient changes
-    LaunchedEffect(state.activeFlow, state.selectedNationalCode) {
-        val nationalCode = state.selectedNationalCode ?: return@LaunchedEffect
-        when (state.activeFlow) {
-            TreatmentFlow.HEALTH_PROFILE -> {
-                onHealthProfileIntent(HealthProfileIntent.LoadProfile(nationalCode))
-            }
-            else -> {}
-        }
-    }
-
-    // Resolve patient list dynamically
-    val patients = remember(state.deservedList, state.dependantList, state.mainUserNationalCode) {
-        val list = mutableListOf<PatientItem>()
-        val mainUserCode = state.mainUserNationalCode
-        if (mainUserCode != null) {
-            val mainUser = state.deservedList.firstOrNull()
-            list.add(
-                PatientItem(
-                    nationalId = mainUserCode,
-                    fullName = mainUser?.fullName ?: state.selectedPatientName ?: "بیمه‌شده اصلی",
-                    isDependent = false,
-                    brhName = mainUser?.brhName,
-                    insuranceType = mainUser?.insuranceType
-                )
-            )
-        }
-        // Dependents under 18
-        state.dependantList.forEach { dep ->
-            list.add(
-                PatientItem(
-                    nationalId = dep.nationalId,
-                    fullName = dep.fullName,
-                    isDependent = true,
-                    relation = "تحت تکفل"
-                )
-            )
-        }
-        list
-    }
-
-    var showDetailDialog by remember { mutableStateOf<String?>(null) }
+    val patients = remember(state) { state.toPatientList() }
+    var entitlementReason by remember { mutableStateOf<String?>(null) }
     val pagerState = rememberPagerState(pageCount = { patients.size })
 
+    SyncPagerWithSelection(
+        state = state,
+        patients = patients,
+        pagerState = pagerState,
+        onIntent = onIntent,
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(LocalTaminColors.current.bgPage)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        TreatmentHubHeader(onSearch = onSearch)
+        // The whole body shifts up together, so the overlap does not leave a gap below.
+        Column(modifier = Modifier.offset(y = -CARD_OVERLAP)) {
+            PatientCarousel(
+                state = state,
+                patients = patients,
+                pagerState = pagerState,
+                onShowEntitlementReason = { entitlementReason = it },
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            TreatmentQuickAccess(
+                healthProfileCompleted = state.healthProfileCompleted,
+                onOpenMedicalRecords = onOpenMedicalRecords,
+                onOpenHealthProfile = onOpenHealthProfile,
+                onOpenCenters = onOpenCenters,
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            TreatmentCategories(
+                onOpenPrescriptions = onOpenPrescriptions,
+                onOpenMedicalApprovals = onOpenMedicalApprovals,
+                onOpenMiscClaims = onOpenMiscClaims,
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            TreatmentCostSummary(
+                insuredShare = state.insuredShareTotal,
+                organizationShare = state.organizationShareTotal,
+            )
+            Spacer(modifier = Modifier.height(Spacing.xxl + CARD_OVERLAP))
+        }
+    }
+
+    entitlementReason?.let { reason ->
+        EntitlementReasonDialog(
+            reason = reason,
+            onDismiss = { entitlementReason = null },
+        )
+    }
+}
+
+@Composable
+private fun TreatmentHubHeader(onSearch: () -> Unit) {
+    TaminTopAppBar(
+        title = "درمان",
+        centerTitle = false,
+        action = {
+            TaminTopAppBarButton(
+                icon = TaminIcons.Search,
+                contentDescription = "جست‌وجو",
+                onClick = onSearch,
+                bordered = true,
+            )
+        },
+        // Runs deep enough for the carousel to ride up into it. The gradient and the
+        // status-bar fill are left at their defaults, which is what puts the visible
+        // step between the two bands.
+        bottomPadding = CARD_OVERLAP + Spacing.xl,
+    )
+
+
+}
+
+/**
+ * Keeps the pager and the selected national code in step in both directions: a restored
+ * selection scrolls the pager, and a swipe reports the new selection back.
+ */
+@Composable
+private fun SyncPagerWithSelection(
+    state: TreatmentUiState,
+    patients: List<PatientItem>,
+    pagerState: PagerState,
+    onIntent: (TreatmentIntent) -> Unit,
+) {
     LaunchedEffect(state.selectedNationalCode, patients) {
         val index = patients.indexOfFirst { it.nationalId == state.selectedNationalCode }
         if (index >= 0 && pagerState.currentPage != index) {
@@ -144,112 +241,35 @@ fun TreatmentScreenContent(
     }
 
     LaunchedEffect(pagerState.currentPage, patients) {
-        if (patients.isNotEmpty() && pagerState.currentPage < patients.size) {
-            val selectedPatient = patients[pagerState.currentPage]
-            if (selectedPatient.nationalId != state.selectedNationalCode) {
-                onIntent(
-                    TreatmentIntent.SelectPatient(selectedPatient.nationalId, selectedPatient.fullName)
-                )
-            }
+        val selected = patients.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
+        if (selected.nationalId != state.selectedNationalCode) {
+            onIntent(TreatmentIntent.SelectPatient(selected.nationalId, selected.fullName))
         }
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        Text(
-                            "درمان و نسخ الکترونیک",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            if (state.isLoading && patients.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            } else {
-                // Top card pager / selection list
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                PatientSelectionSection(
-                    patients = patients,
-                    pagerState = pagerState,
-                    deservedList = state.deservedList,
-                    onShowDetails = { msg ->
-                        showDetailDialog = msg
-                    }
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = Spacing.md),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                ) {
-                    when (state.activeFlow) {
-                        TreatmentFlow.MAIN -> {
-                            DashboardMenuSection(
-                                activePatientName = state.selectedPatientName ?: "بیمه‌شده اصلی",
-                                onFlowSelected = { flow ->
-                                    onIntent(TreatmentIntent.SwitchFlow(flow))
-                                }
-                            )
-                        }
-                        TreatmentFlow.HEALTH_PROFILE -> {
-                            HealthProfileContent(
-                                state = healthProfileState,
-                                onBack = { onIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.MAIN)) }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showDetailDialog != null) {
-        AlertDialog(
-            onDismissRequest = { showDetailDialog = null },
-            confirmButton = {
-                TextButton(onClick = { showDetailDialog = null }) {
-                    Text("تایید")
-                }
-            },
-            title = { Text("علت عدم استحقاق درمان") },
-            text = { Text(showDetailDialog ?: "") }
-        )
     }
 }
 
+@Composable
+private fun EntitlementReasonDialog(
+    reason: String,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("تایید") }
+        },
+        title = { Text("علت عدم استحقاق درمان") },
+        text = { Text(reason) },
+    )
+}
 @PreviewRtlTheme
 @Composable
 fun TreatmentScreenPreview() {
     PreviewRtlThemeContent {
-        TreatmentScreenContent(
+        TreatmentContent(
             state = TreatmentMocks.mainUiState,
             healthProfileState = TreatmentMocks.healthProfileUiState,
             onIntent = {},
-            onHealthProfileIntent = {}
         )
     }
 }

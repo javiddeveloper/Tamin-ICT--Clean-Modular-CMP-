@@ -8,10 +8,10 @@ import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 
 /**
- * Central factory of sample domain models for treatment/health ViewModel tests.
+ * Central factory of sample domain models for the treatment dashboard ViewModel tests.
  *
  * Keeping fixtures in one place (instead of inlined per fake/test) keeps the test
- * doubles small and lets every ViewModel test share consistent, realistic data.
+ * doubles small and lets every dashboard test share consistent, realistic data.
  */
 object TreatmentTestData {
 

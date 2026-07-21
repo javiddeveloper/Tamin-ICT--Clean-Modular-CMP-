@@ -27,12 +27,12 @@ class TaminHamrahKmpLibraryPlugin : Plugin<Project> {
             }
 
             extensions.configure<KotlinMultiplatformExtension> {
+                jvmToolchain(17)
                 androidTarget {
                     compilerOptions {
                         jvmTarget.set(JvmTarget.JVM_17)
                     }
                 }
-                iosX64()
                 iosArm64()
                 iosSimulatorArm64()
             }

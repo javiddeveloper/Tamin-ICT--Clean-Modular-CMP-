@@ -132,4 +132,9 @@ internal interface UserApiService {
 
     @GET("users/current-user")
     suspend fun getUserProfile(): BaseDTO<UserProfileDto>
+
+    @GET("relation-tamins/isnew/{nationalId}")
+    suspend fun checkUserIsNew(
+        @Path("nationalId") nationalId: String
+    ): BaseDTO<Boolean>
 }

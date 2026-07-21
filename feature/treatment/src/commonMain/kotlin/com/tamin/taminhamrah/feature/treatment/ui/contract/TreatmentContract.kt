@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.contract
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 
@@ -7,6 +8,7 @@ enum class TreatmentFlow {
     MAIN, HEALTH_PROFILE
 }
 
+@Immutable
 data class TreatmentUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -18,7 +20,16 @@ data class TreatmentUiState(
     val activeFlow: TreatmentFlow = TreatmentFlow.MAIN,
     val mainUserNationalCode: String? = null,
     val selectedNationalCode: String? = null,
-    val selectedPatientName: String? = null
+    val selectedPatientName: String? = null,
+
+    // Current-year treatment spend. Null means "not loaded yet" rather than zero, so the
+    // summary card can say so instead of claiming the person has spent nothing.
+    val insuredShareTotal: Long? = null,
+    val organizationShareTotal: Long? = null,
+
+    // Whether the health self-declaration is filled in. Null means the status has not
+    // been fetched, so the card shows no pill rather than guessing either way.
+    val healthProfileCompleted: Boolean? = null
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()

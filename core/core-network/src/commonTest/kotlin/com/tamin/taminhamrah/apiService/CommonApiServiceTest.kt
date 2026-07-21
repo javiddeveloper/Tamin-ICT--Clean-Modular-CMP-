@@ -1,0 +1,37 @@
+package com.tamin.taminhamrah.apiService
+
+import com.tamin.taminhamrah.util.ApiTestUtils
+import com.tamin.taminhamrah.util.CommonTestData
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+
+class CommonApiServiceTest : BaseApiTest() {
+
+    @Test
+    fun `getJobTitle should return job title list`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = CommonTestData.jobTitleSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<CommonApiService>()
+
+        val response = apiService.getJobTitle(emptyMap())
+
+        assertEquals(200, response.status)
+        val list = response.data?.list.orEmpty()
+        assertEquals(1, list.size)
+        assertEquals("123", list.first().jobCode)
+    }
+
+    @Test
+    fun `getRegistrationDeclarationForm should return HttpStatement`() = runTest {
+        val ktorfit = createMockKtorfit(ApiTestUtils.createJsonResponse(dataJson = ""))
+        val apiService = ktorfit.create<CommonApiService>()
+
+        val response = apiService.getRegistrationDeclarationForm()
+        assertNotNull(response)
+    }
+}

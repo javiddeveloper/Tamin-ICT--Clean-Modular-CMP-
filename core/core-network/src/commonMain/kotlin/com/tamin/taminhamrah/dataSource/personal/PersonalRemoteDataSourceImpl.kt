@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.dataSource.personal
 
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDTO
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -16,6 +18,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 import io.ktor.client.statement.bodyAsChannel
 
 class PersonalRemoteDataSourceImpl(
@@ -91,7 +94,7 @@ class PersonalRemoteDataSourceImpl(
                 nationalCode = nationalCode,
                 pensionerId = pensionerId
             )
-            response.extractData()
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -122,7 +125,7 @@ class PersonalRemoteDataSourceImpl(
     ): String? {
         return try {
             val response = personalApiService.submitFinalSurvivorPension(requestId, body)
-            response.extractData()
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -152,13 +155,38 @@ class PersonalRemoteDataSourceImpl(
     override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String? {
         return try {
             val response = personalApiService.saveSurvivorInfo(body)
-            response.extractData()
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.UNKNOWN)
             )
+        }
+    }
+
+    override suspend fun putInsuredRegistrationDocList(
+        personalId: String,
+        body: List<InsuredDocDTO>
+    ): String? {
+        return try {
+            val response = personalApiService.putInsuredRegistrationDocList(personalId, body)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO? {
+        return try {
+            val response = personalApiService.getRequestSummary(requestId)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
