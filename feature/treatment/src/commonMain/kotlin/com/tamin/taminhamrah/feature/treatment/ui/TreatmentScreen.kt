@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,20 +24,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.icons.TaminIcons
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
@@ -64,8 +69,17 @@ fun TreatmentScreen(
         viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
     }
 
-    HandleTreatmentEvents(events = viewModel.events)
+    val snackbarHostState = remember { SnackbarHostState() }
+    HandleTreatmentEvents(
+        events = viewModel.events,
+        snackbarHostState = snackbarHostState,
+        onNavigateToRecords = { nationalCode, tab ->
+            if (tab == RecordTab.MEDICINE) onOpenPrescriptions(nationalCode)
+            else onOpenMedicalRecords(nationalCode)
+        },
+    )
 
+    Box(modifier = Modifier.fillMaxSize()) {
     TreatmentContent(
         state = uiState,
         onIntent = viewModel::sendIntent,
@@ -77,13 +91,35 @@ fun TreatmentScreen(
         onOpenMiscClaims = onOpenMiscClaims,
         onSearch = onSearch,
     )
+        // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
 }
 
 @Composable
-fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
+fun HandleTreatmentEvents(
+    events: Flow<TreatmentEvent>,
+    snackbarHostState: SnackbarHostState,
+    onNavigateToRecords: (String, RecordTab) -> Unit,
+) {
     events.collectWithLifecycleAware {
         when (it) {
-            is TreatmentEvent.ShowMessage -> Unit // TODO: surface via snackbar/toast
+            // Navigation is an event because the feature flag decides it, not the tap.
+            is TreatmentEvent.NavigateToRecords -> onNavigateToRecords(it.nationalCode, it.tab)
+
+            // A gated feature explains itself here; a silent gate would look like a dead button.
+            is TreatmentEvent.ShowMessage -> snackbarHostState.showSnackbar(
+                message = it.message,
+                withDismissAction = it.type == TreatmentMessageType.OPERATION_FAILED,
+                duration = if (it.type == TreatmentMessageType.OPERATION_FAILED) {
+                    SnackbarDuration.Long
+                } else {
+                    SnackbarDuration.Short
+                },
+            )
         }
     }
 }
@@ -132,13 +168,13 @@ fun TreatmentContent(
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
                 // Nothing to open until a patient is selected.
-                onOpenMedicalRecords = { state.selectedNationalCode?.let(onOpenMedicalRecords) },
+                onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.ALL)) },
                 onOpenHealthProfile = onOpenHealthProfile,
                 onOpenCenters = onOpenCenters,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
-                onOpenPrescriptions = { state.selectedNationalCode?.let(onOpenPrescriptions) },
+                onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
                 onOpenMedicalApprovals = onOpenMedicalApprovals,
                 onOpenMiscClaims = onOpenMiscClaims,
             )
@@ -164,14 +200,6 @@ private fun TreatmentHubHeader(onSearch: () -> Unit) {
     TaminTopAppBar(
         title = "درمان",
         centerTitle = false,
-        action = {
-            TaminTopAppBarButton(
-                icon = TaminIcons.Search,
-                contentDescription = "جست‌وجو",
-                onClick = onSearch,
-                bordered = true,
-            )
-        },
         // Runs deep enough for the carousel to ride up into it. The gradient and the
         // status-bar fill are left at their defaults, which is what puts the visible
         // step between the two bands.
