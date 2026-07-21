@@ -11,7 +11,16 @@ data class PrescriptionsUiState(
     val prescriptionPriceList: List<ElectronicPrescriptionPricePR> = emptyList(),
     val viewerPdf: PdfDownloadPR? = null,
     val showPdfDialog: Boolean = false,
-    val selectedNoteHeadId: String? = null
+    val selectedNoteHeadId: String? = null,
+
+    /**
+     * Insured share per record, keyed by `noteHeadEprescID`.
+     *
+     * The list endpoint carries no amount, so these are fetched one record at a time and only
+     * when the advanced search filters on cost — see [PrescriptionsIntent.LoadRecordPrices].
+     */
+    val recordPrices: Map<String, Long> = emptyMap(),
+    val isLoadingPrices: Boolean = false
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -23,6 +32,8 @@ data class PrescriptionsUiState(
         data class PdfLoaded(val pdf: PdfDownloadPR) : PartialState()
         data class TogglePdfDialog(val show: Boolean) : PartialState()
         data class PrescriptionSelected(val noteHeadID: String) : PartialState()
+        data class RecordPricesLoaded(val prices: Map<String, Long>) : PartialState()
+        data class LoadingPrices(val isLoading: Boolean) : PartialState()
         data object PrescriptionCleared : PartialState()
     }
 }
@@ -30,8 +41,11 @@ data class PrescriptionsUiState(
 sealed class PrescriptionsIntent {
     data class LoadList(
         val nationalCode: String,
-        /** Record category the endpoint filters on; see [RecordTab]. */
-        val requestTypeId: String,
+        /**
+         * Categories to query. More than one means the «همه» tab, which the endpoint cannot
+         * express, so the results are fetched per type and merged.
+         */
+        val requestTypeIds: List<String>,
         val startDate: String? = null,
         val endDate: String? = null
     ) : PrescriptionsIntent()
@@ -50,6 +64,10 @@ sealed class PrescriptionsIntent {
     data class DownloadPdf(val prescriptionID: String) : PrescriptionsIntent()
     data class DownloadTestResult(val patientID: String?, val noteHeadEprescID: String?) : PrescriptionsIntent()
     data class TogglePdfDialog(val show: Boolean) : PrescriptionsIntent()
+
+    /** Fetches the amount for each record, so the advanced search can filter on cost. */
+    data class LoadRecordPrices(val noteHeadIds: List<String>, val nationalCode: String) :
+        PrescriptionsIntent()
 }
 
 sealed class PrescriptionsEvent {

@@ -80,7 +80,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificat
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
@@ -94,11 +93,13 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentI
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
@@ -109,6 +110,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
@@ -137,6 +139,7 @@ internal fun TaminHamrahNavGraph(
     onLoginClick: () -> Unit
 ) {
     val navController = rememberNavController()
+    val tokenStoreManager = koinInject<TokenStoreManager>()
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry.value?.destination
 
@@ -320,7 +323,8 @@ internal fun TaminHamrahNavGraph(
                             navController.navigateToCalculatePension()
                         },
                         onNavigateToPrescription = {
-                            navController.navigateToPrescription()
+                            val nationalCode = tokenStoreManager.getUserId() ?: ""
+                            navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
                         },
                         onNavigateToDeservedTreatment = {
                             navController.navigateToDeservedTreatment()

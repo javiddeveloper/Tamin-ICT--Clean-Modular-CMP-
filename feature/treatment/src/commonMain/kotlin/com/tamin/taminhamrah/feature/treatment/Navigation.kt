@@ -11,10 +11,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
-import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientItems
+import com.tamin.taminhamrah.feature.treatment.ui.model.toRecordsPatientList
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
-import com.tamin.taminhamrah.feature.treatment.ui.records.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 
@@ -52,16 +52,18 @@ sealed interface TreatmentRoute {
     @Serializable
     data class RecordDetail(
         val nationalCode: String,
-        val noteHeadId: String
+        val noteHeadId: String,
+        val type: String,
+        val flagSata: String
     ) : TreatmentRoute
 }
 
 fun NavController.navigateToTreatment(navOptions: NavOptions? = null) {
-    navigate(TreatmentRoute.Graph, navOptions)
+    navigate(TreatmentRoute.Main, navOptions)
 }
 
 fun NavController.navigateToTreatment(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(TreatmentRoute.Graph, builder)
+    navigate(TreatmentRoute.Main, builder)
 }
 
 fun NavGraphBuilder.treatmentGraph(
@@ -71,9 +73,15 @@ fun NavGraphBuilder.treatmentGraph(
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
         composable<TreatmentRoute.Main> {
             TreatmentScreen(
-                onNavigateToRecords = { nationalCode, tab ->
-                    navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, tab))
-                }
+                onOpenMedicalRecords = { nationalCode ->
+                    navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.ALL))
+                },
+                // «نسخه‌های الکترونیک» is the medicine category of سوابق درمانی, not its own screen.
+                onOpenPrescriptions = { nationalCode ->
+                    navController.navigate(
+                        TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE),
+                    )
+                },
             )
         }
 
@@ -86,10 +94,17 @@ fun NavGraphBuilder.treatmentGraph(
             MedicalRecordsScreen(
                 nationalCode = route.nationalCode,
                 initialTab = route.tab,
-                patients = treatmentState.toPatientItems(),
+                patients = treatmentState.toRecordsPatientList(),
                 onBack = onBack,
-                onOpenRecord = { noteHeadId ->
-                    navController.navigate(TreatmentRoute.RecordDetail(route.nationalCode, noteHeadId))
+                onOpenRecord = { record ->
+                    navController.navigate(
+                        TreatmentRoute.RecordDetail(
+                            nationalCode = route.nationalCode,
+                            noteHeadId = record.noteHeadEprescID,
+                            type = record.prescType,
+                            flagSata = record.flagSata
+                        )
+                    )
                 }
             )
         }
@@ -99,6 +114,8 @@ fun NavGraphBuilder.treatmentGraph(
             RecordDetailScreen(
                 nationalCode = route.nationalCode,
                 noteHeadId = route.noteHeadId,
+                type = route.type,
+                flagSata = route.flagSata,
                 onBack = onBack
             )
         }

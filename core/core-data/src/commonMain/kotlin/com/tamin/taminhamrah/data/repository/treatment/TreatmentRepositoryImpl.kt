@@ -60,7 +60,7 @@ internal class TreatmentRepositoryImpl(
         startDate: String,
         endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = flow {
-        val localElectronicPrescriptionList = treatmentDao.getElectronicPrescriptions(dependantUserNationalCode).first()
+        val localElectronicPrescriptionList = treatmentDao.getElectronicPrescriptions(dependantUserNationalCode, requestTypeId).first()
         if (localElectronicPrescriptionList.isNotEmpty()) {
             emit(localElectronicPrescriptionList.map { it.toDomain() })
         }
@@ -74,12 +74,12 @@ internal class TreatmentRepositoryImpl(
                 treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearElectronicPrescriptions(dependantUserNationalCode)
+            treatmentDao.clearElectronicPrescriptions(dependantUserNationalCode, requestTypeId)
             treatmentDao.insertElectronicPrescriptions(remote.map { it.toEntity(dependantUserNationalCode) })
         } catch (e: Exception) {
             if (localElectronicPrescriptionList.isEmpty()) throw e
         }
-        emitAll(treatmentDao.getElectronicPrescriptions(dependantUserNationalCode).map { list -> list.map { it.toDomain() } })
+        emitAll(treatmentDao.getElectronicPrescriptions(dependantUserNationalCode, requestTypeId).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
 
     override suspend fun getElectronicPrescriptionDetail(

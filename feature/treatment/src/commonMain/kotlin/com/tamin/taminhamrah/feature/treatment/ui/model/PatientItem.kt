@@ -55,3 +55,52 @@ fun TreatmentUiState.toPatientList(): List<PatientItem> = buildList {
         )
     }
 }
+
+/**
+ * Everyone whose records can be viewed: the insured person, their spouse, and every child.
+ *
+ * Deliberately different from [toPatientList], which feeds the card carousel. Only under-18
+ * dependants hold their own insurance card, but records exist for the whole family — so the
+ * carousel stays narrow while this list is complete.
+ *
+ * The subdominant entries come first because they name the relation ("همسر", "فرزند"); an
+ * under-18 dependant already listed there is not repeated.
+ */
+fun TreatmentUiState.toRecordsPatientList(): List<PatientItem> = buildList {
+    mainUserNationalCode?.let { nationalCode ->
+        val mainRecord = deservedList.firstOrNull()
+        add(
+            PatientItem(
+                nationalId = nationalCode,
+                fullName = mainRecord?.fullName
+                    ?: selectedPatientName
+                    ?: FALLBACK_MAIN_INSURED_NAME,
+                isDependent = false,
+                brhName = mainRecord?.brhName,
+                insuranceType = mainRecord?.insuranceType,
+            ),
+        )
+    }
+    familyDependantList.forEach { relative ->
+        add(
+            PatientItem(
+                nationalId = relative.nationalId,
+                fullName = "${relative.firstName} ${relative.lastName}".trim(),
+                isDependent = true,
+                relation = relative.relation.ifBlank { DEPENDANT_RELATION },
+            ),
+        )
+    }
+    dependantList.forEach { dependant ->
+        if (none { it.nationalId == dependant.nationalId }) {
+            add(
+                PatientItem(
+                    nationalId = dependant.nationalId,
+                    fullName = dependant.fullName,
+                    isDependent = true,
+                    relation = DEPENDANT_RELATION,
+                ),
+            )
+        }
+    }
+}

@@ -20,7 +20,13 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import com.tamin.taminhamrah.feature.treatment.fake.FakePersonalRepository
+import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
+import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
+import com.tamin.taminhamrah.feature.treatment.ui.model.toRecordsPatientList
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -59,6 +65,7 @@ class TreatmentViewModelTest {
         getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
         getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
         identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository()),
+        getDisabilityDependentInfoUseCase = GetDisabilityDependentInfoUseCase(FakePersonalRepository()),
         featureManager = featureManager
     )
 
@@ -182,4 +189,42 @@ class TreatmentViewModelTest {
             assertEquals("سرویس غیرفعال است", event.message)
         }
     }
+
+    @Test
+    fun recordsPatientList_includesSpouseAndChildren_whileCarouselStaysUnderEighteen() =
+        runTest(testDispatcher) {
+            val family = listOf(
+                DisabilityDependentDN(
+                    firstName = "نگین", lastName = "رضایی", nationalId = "1111111111",
+                    dateOfBirth = null, fatherName = null, genderDesc = null,
+                    relation = "همسر", tendencyDescription = null,
+                ),
+                DisabilityDependentDN(
+                    firstName = "آرمین", lastName = "رضایی", nationalId = "2222222222",
+                    dateOfBirth = null, fatherName = null, genderDesc = null,
+                    relation = "فرزند", tendencyDescription = null,
+                ),
+            )
+            viewModel = TreatmentViewModel(
+                getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
+                getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
+                identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository()),
+                getDisabilityDependentInfoUseCase =
+                    GetDisabilityDependentInfoUseCase(FakePersonalRepository(family)),
+                featureManager = featureManager,
+            )
+
+            viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+            testDispatcher.scheduler.advanceUntilIdle()
+            val state = viewModel.uiState.value
+
+            // The filter lists the whole family, labelled by relation.
+            val filterLabels = state.toRecordsPatientList().map { it.filterLabel }
+            assertTrue(filterLabels.contains("همسر - نگین رضایی"), "spouse missing: $filterLabels")
+            assertTrue(filterLabels.contains("فرزند - آرمین رضایی"), "child missing: $filterLabels")
+
+            // The carousel does not: only under-18 dependants hold an insurance card.
+            val carouselIds = state.toPatientList().map { it.nationalId }
+            assertTrue("1111111111" !in carouselIds, "spouse must not get a card: $carouselIds")
+        }
 }
