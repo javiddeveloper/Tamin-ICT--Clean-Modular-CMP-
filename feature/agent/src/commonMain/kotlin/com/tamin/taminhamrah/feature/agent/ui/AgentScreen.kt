@@ -595,7 +595,7 @@ private fun TypewriterText(text: String, style: androidx.compose.ui.text.TextSty
         if (!isFinished) {
             for (i in revealedLineIndex until lines.size) {
                 revealedLineIndex = i
-                delay((lines[i].length * 15L).coerceAtLeast(150L))
+                delay(30L) // Fast typing stagger
             }
             isFinished = true
         }
@@ -603,12 +603,18 @@ private fun TypewriterText(text: String, style: androidx.compose.ui.text.TextSty
 
     Column {
         lines.forEachIndexed { index, line ->
-            AnimatedVisibility(
-                visible = isFinished || index <= revealedLineIndex,
-                enter = fadeIn(tween(500))
-            ) {
-                Text(text = parseMarkdownLine(line), style = style)
-            }
+            val isVisible = isFinished || index <= revealedLineIndex
+            val alpha by animateFloatAsState(
+                targetValue = if (isVisible) 1f else 0f,
+                animationSpec = tween(durationMillis = 800) // Thanos fade effect
+            )
+
+            // Render always but fade alpha (prevents layout lag and jumpy scroll)
+            Text(
+                text = parseMarkdownLine(line), 
+                style = style,
+                modifier = Modifier.alpha(alpha)
+            )
         }
     }
 }
@@ -697,33 +703,48 @@ private fun ChatBubbleItem(
                     }
                 }
             } else {
-                // Wrap bubble + footer together in a Column so footer aligns under the card
-                Column(modifier = Modifier.widthIn(max = 300.dp)) {
-                    Surface(
-                        shape = RoundedCornerShape(
-                            topStart    = if (isUser) 20.dp else 4.dp,
-                            topEnd      = if (isUser) 4.dp else 20.dp,
-                            bottomStart = if (!isUser && item.content !is ChatBubbleContent.SuggestedPrompts) 20.dp else 20.dp,
-                            bottomEnd   = 20.dp
-                        ),
-                        color = bubbleColor,
-                        border = if (!isUser) BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)) else null,
-                    ) {
-                        Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = if (isUser) 14.dp else 12.dp)) {
+                if (isUser) {
+                    Column(modifier = Modifier.widthIn(max = 300.dp)) {
+                        Surface(
+                            shape = RoundedCornerShape(
+                                topStart    = 20.dp,
+                                topEnd      = 4.dp,
+                                bottomStart = 20.dp,
+                                bottomEnd   = 20.dp
+                            ),
+                            color = bubbleColor,
+                        ) {
+                            Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp)) {
+                                CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
+                                    BubbleContentRenderer(
+                                        content = item.content,
+                                        isTypingAnimating = item.isTypingAnimating,
+                                        typingDelay = typingDelay,
+                                        onIntent = onIntent,
+                                        contentColor = contentColor
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Agent: Full width, no Surface card background
+                    Column(modifier = Modifier.fillMaxWidth().padding(end = 16.dp)) {
+                        Box(modifier = Modifier.padding(vertical = 4.dp)) {
                             CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
                                 BubbleContentRenderer(
                                     content = item.content,
                                     isTypingAnimating = item.isTypingAnimating,
                                     typingDelay = typingDelay,
                                     onIntent = onIntent,
-                                    contentColor = contentColor
+                                    contentColor = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
-                    }
-                    // Footer: only for agent bubbles, not SuggestedPrompts
-                    if (!isUser && item.content !is ChatBubbleContent.SuggestedPrompts) {
-                        AgentBubbleFooter()
+                        // Footer: only for agent bubbles, not SuggestedPrompts
+                        if (item.content !is ChatBubbleContent.SuggestedPrompts) {
+                            AgentBubbleFooter()
+                        }
                     }
                 }
             }
@@ -802,11 +823,13 @@ private fun BubbleContentRenderer(
                             }
                         }
 
-                        AnimatedVisibility(
-                            visible = visible,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 300)) + 
-                                    expandVertically(animationSpec = tween(durationMillis = 300))
-                        ) {
+                        val alpha by animateFloatAsState(
+                            targetValue = if (visible) 1f else 0f,
+                            animationSpec = tween(durationMillis = 800) // Thanos fade
+                        )
+
+                        // Wrap with box to apply alpha fade without AnimatedVisibility
+                        Box(modifier = Modifier.alpha(alpha)) {
                             if (key.startsWith("----") || key.startsWith("────")) {
                                 HorizontalDivider(
                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
