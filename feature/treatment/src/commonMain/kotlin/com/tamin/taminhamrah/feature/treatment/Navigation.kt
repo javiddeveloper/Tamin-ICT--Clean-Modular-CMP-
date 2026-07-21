@@ -11,10 +11,12 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
@@ -48,7 +50,8 @@ sealed interface TreatmentRoute {
      */
     @Serializable
     data class MedicalRecords(
-        val nationalCode: String,
+        /** Blank when entered from a shortcut; the records screen falls back to the selected patient. */
+        val nationalCode: String = "",
         val tab: RecordTab = RecordTab.Default
     ) : TreatmentRoute
 
@@ -105,15 +108,27 @@ fun NavGraphBuilder.treatmentGraph(
             val treatmentViewModel = backStackEntry.sharedViewModel<TreatmentViewModel>(navController)
             val treatmentState by treatmentViewModel.uiState.collectAsState()
 
+            // The dashboard normally seeds this; a direct entry (e.g. the prescription shortcut) has
+            // to load it here so the patient filter and national code resolve.
+            LaunchedEffect(Unit) {
+                if (treatmentState.mainUserNationalCode == null) {
+                    treatmentViewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+                }
+            }
+            // A shortcut passes no code, so fall back to whoever the dashboard has selected.
+            val effectiveNationalCode = route.nationalCode.ifBlank {
+                treatmentState.selectedNationalCode ?: treatmentState.mainUserNationalCode ?: ""
+            }
+
             MedicalRecordsScreen(
-                nationalCode = route.nationalCode,
+                nationalCode = effectiveNationalCode,
                 initialTab = route.tab,
                 patients = treatmentState.toPatientList(),
                 onBack = onBack,
                 onOpenRecord = { record ->
                     navController.navigate(
                         TreatmentRoute.RecordDetail(
-                            nationalCode = route.nationalCode,
+                            nationalCode = effectiveNationalCode,
                             noteHeadId = record.noteHeadEprescID,
                             type = record.prescType,
                             flagSata = record.flagSata,

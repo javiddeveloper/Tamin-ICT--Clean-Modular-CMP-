@@ -99,7 +99,6 @@ import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
-import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
@@ -110,7 +109,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
@@ -139,7 +137,6 @@ internal fun TaminHamrahNavGraph(
     onLoginClick: () -> Unit
 ) {
     val navController = rememberNavController()
-    val tokenStoreManager = koinInject<TokenStoreManager>()
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry.value?.destination
 
@@ -323,8 +320,8 @@ internal fun TaminHamrahNavGraph(
                             navController.navigateToCalculatePension()
                         },
                         onNavigateToPrescription = {
-                            val nationalCode = tokenStoreManager.getUserId() ?: ""
-                            navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
+                            // The treatment graph's shared ViewModel resolves the national code.
+                            navController.navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
                         },
                         onNavigateToDeservedTreatment = {
                             navController.navigateToDeservedTreatment()
