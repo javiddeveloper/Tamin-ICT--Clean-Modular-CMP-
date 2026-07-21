@@ -63,11 +63,19 @@ fun AgentScreen(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
+    // ── Smart auto-scroll: stop following if user scrolled up ───────────────
+    var userScrolled by remember { mutableStateOf(false) }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { index -> userScrolled = index > 0 }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is AgentEvent.ScrollToBottom -> {
-                    if (uiState.chatItems.isNotEmpty()) {
+                    if (!userScrolled && uiState.chatItems.isNotEmpty()) {
                         coroutineScope.launch { listState.animateScrollToItem(0) }
                     }
                 }
@@ -754,46 +762,51 @@ private fun BubbleContentRenderer(
 
         is ChatBubbleContent.KeyValue -> {
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                content.title?.let { title ->
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
-                        thickness = 0.5.dp,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
-                }
-                content.items.forEach { (key, value) ->
-                    if (key.startsWith("----") || key.startsWith("────")) {
-                        // Separator between records
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                            thickness = 0.5.dp,
-                            modifier = Modifier.padding(vertical = 3.dp)
-                        )
-                    } else {
-                        Text(
-                            text = androidx.compose.ui.text.buildAnnotatedString {
-                                withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
-                                    append("$key: ")
-                                }
-                                withStyle(style = androidx.compose.ui.text.SpanStyle(
-                                    fontWeight = FontWeight.Medium,
-                                    color = contentColor
-                                )) {
-                                    append(value)
-                                }
-                            },
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = contentColor,
-                                lineHeight = 21.sp
+                content.items.forEachIndexed { index, (key, value) ->
+                    val visible = remember {
+                        androidx.compose.animation.core.MutableTransitionState(false)
+                            .apply { targetState = true }
+                    }
+                    AnimatedVisibility(
+                        visibleState = visible,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                delayMillis = index * 60
                             )
+                        ) + slideInVertically(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                delayMillis = index * 60
+                            ),
+                            initialOffsetY = { it / 3 }
                         )
+                    ) {
+                        if (key.startsWith("----") || key.startsWith("────")) {
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                thickness = 0.5.dp,
+                                modifier = Modifier.padding(vertical = 3.dp)
+                            )
+                        } else {
+                            Text(
+                                text = androidx.compose.ui.text.buildAnnotatedString {
+                                    withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
+                                        append("$key: ")
+                                    }
+                                    withStyle(style = androidx.compose.ui.text.SpanStyle(
+                                        fontWeight = FontWeight.Medium,
+                                        color = contentColor
+                                    )) {
+                                        append(value)
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = contentColor,
+                                    lineHeight = 21.sp
+                                )
+                            )
+                        }
                     }
                 }
             }
