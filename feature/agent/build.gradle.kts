@@ -13,6 +13,7 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.chrisbanes.haze)
+            implementation(libs.kotlinx.datetime)
             implementation(project(":core:core-domain"))
             implementation(project(":core:core-network"))
         }

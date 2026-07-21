@@ -47,10 +47,17 @@ import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
 import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.viewmodel.koinViewModel
 
 // ─── AgentScreen ──────────────────────────────────────────────────────────────
@@ -64,10 +71,12 @@ fun AgentScreen(
     val coroutineScope = rememberCoroutineScope()
 
     // Smart auto-scroll: follows new messages only when user is at the bottom.
-    // Scrolling up stops auto-scroll; returning to bottom re-enables it.
+    // In top-to-bottom layout the "bottom" is the LAST item, not index 0.
     val isAtBottom by remember {
         derivedStateOf {
-            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 150
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = listState.layoutInfo.totalItemsCount
+            totalItems == 0 || lastVisible >= totalItems - 1
         }
     }
 
@@ -75,8 +84,9 @@ fun AgentScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is AgentEvent.ScrollToBottom -> {
+                    val lastIndex = (uiState.chatItems.size).coerceAtLeast(0)
                     if (isAtBottom || uiState.chatItems.isEmpty()) {
-                        coroutineScope.launch { listState.animateScrollToItem(0) }
+                        coroutineScope.launch { listState.animateScrollToItem(lastIndex) }
                     }
                 }
                 is AgentEvent.ShowError -> { /* handled via bubble */ }
@@ -105,16 +115,11 @@ private fun AgentContent(
     listState: LazyListState,
     onIntent: (AgentIntent) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        when {
-            uiState.isCheckingPermission -> PermissionCheckingIndicator()
-            uiState.isNotAllowed        -> NotAllowedMessage(message = uiState.notAllowedMessage)
-            else -> ChatLayout(uiState = uiState, listState = listState, onIntent = onIntent)
-        }
+    // No background box — content fills the screen directly inheriting the host's background
+    when {
+        uiState.isCheckingPermission -> PermissionCheckingIndicator()
+        uiState.isNotAllowed        -> NotAllowedMessage(message = uiState.notAllowedMessage)
+        else -> ChatLayout(uiState = uiState, listState = listState, onIntent = onIntent)
     }
 }
 
@@ -162,20 +167,15 @@ private fun ChatLayout(
                         .weight(1f)
                         .safeHazeSource(state = hazeState),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
-                    reverseLayout = true
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    // Top-to-bottom: no reverseLayout, newest items at bottom
                 ) {
-                    if (uiState.isGenerating) {
-                        item { TypingIndicatorBubble(processingState = uiState.processingState) }
-                    }
-
-                    val reversedItems = uiState.chatItems.reversed()
-                    itemsIndexed(reversedItems, key = { _, it -> it.id }) { index, item ->
+                    itemsIndexed(uiState.chatItems, key = { _, it -> it.id }) { index, item ->
                         val showAvatar = item.sender != ChatSender.User &&
-                            (index == 0 || reversedItems[index - 1].sender == ChatSender.User)
+                            (index == 0 || uiState.chatItems[index - 1].sender == ChatSender.User)
 
                         val textLength = if (item.content is ChatBubbleContent.SuggestedPrompts) {
-                            (reversedItems.getOrNull(index + 1)?.content as? ChatBubbleContent.Text)?.message?.length ?: 0
+                            (uiState.chatItems.getOrNull(index - 1)?.content as? ChatBubbleContent.Text)?.message?.length ?: 0
                         } else 0
                         val typingDelay = if (item.isTypingAnimating && textLength > 0) (textLength * 15L) + 200L else 1500L
 
@@ -185,6 +185,10 @@ private fun ChatLayout(
                             typingDelay = typingDelay,
                             onIntent = onIntent
                         )
+                    }
+
+                    if (uiState.isGenerating) {
+                        item { TypingIndicatorBubble(processingState = uiState.processingState) }
                     }
                 }
             }
@@ -693,27 +697,33 @@ private fun ChatBubbleItem(
                     }
                 }
             } else {
-                Surface(
-                    shape = RoundedCornerShape(
-                        topStart    = if (isUser) 20.dp else 4.dp,
-                        topEnd      = if (isUser) 4.dp else 20.dp,
-                        bottomStart = 20.dp,
-                        bottomEnd   = 20.dp
-                    ),
-                    color = bubbleColor,
-                    border = if (!isUser) BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)) else null,
-                    modifier = Modifier.widthIn(max = 300.dp)
-                ) {
-                    Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = if (isUser) 14.dp else 12.dp)) {
-                        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
-                            BubbleContentRenderer(
-                                content = item.content,
-                                isTypingAnimating = item.isTypingAnimating,
-                                typingDelay = typingDelay,
-                                onIntent = onIntent,
-                                contentColor = contentColor
-                            )
+                // Wrap bubble + footer together in a Column so footer aligns under the card
+                Column(modifier = Modifier.widthIn(max = 300.dp)) {
+                    Surface(
+                        shape = RoundedCornerShape(
+                            topStart    = if (isUser) 20.dp else 4.dp,
+                            topEnd      = if (isUser) 4.dp else 20.dp,
+                            bottomStart = if (!isUser && item.content !is ChatBubbleContent.SuggestedPrompts) 20.dp else 20.dp,
+                            bottomEnd   = 20.dp
+                        ),
+                        color = bubbleColor,
+                        border = if (!isUser) BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)) else null,
+                    ) {
+                        Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = if (isUser) 14.dp else 12.dp)) {
+                            CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
+                                BubbleContentRenderer(
+                                    content = item.content,
+                                    isTypingAnimating = item.isTypingAnimating,
+                                    typingDelay = typingDelay,
+                                    onIntent = onIntent,
+                                    contentColor = contentColor
+                                )
+                            }
                         }
+                    }
+                    // Footer: only for agent bubbles, not SuggestedPrompts
+                    if (!isUser && item.content !is ChatBubbleContent.SuggestedPrompts) {
+                        AgentBubbleFooter()
                     }
                 }
             }
@@ -782,11 +792,14 @@ private fun BubbleContentRenderer(
 
                 content.items.forEachIndexed { lineIndex, (key, value) ->
                     key(lineIndex) {
-                        var visible by remember { mutableStateOf(false) }
-                        
-                        LaunchedEffect(Unit) {
-                            delay(lineIndex * 150L) // Staggered delay for each line
-                            visible = true
+                        // rememberSaveable: persist visible across scroll — only animates once
+                        var visible by rememberSaveable(key, value) { mutableStateOf(!isTypingAnimating) }
+
+                        LaunchedEffect(isTypingAnimating) {
+                            if (!visible && isTypingAnimating) {
+                                delay(lineIndex * 50L) // Fast stagger: 50ms per line
+                                visible = true
+                            }
                         }
 
                         AnimatedVisibility(
@@ -1182,6 +1195,102 @@ private fun NotAllowedMessage(message: String?) {
                     textAlign = TextAlign.Center
                 )
             )
+        }
+    }
+}
+
+// ─── Agent Bubble Footer ──────────────────────────────────────────────────────
+
+@Composable
+private fun AgentBubbleFooter() {
+    val timeString = rememberSaveable {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}"
+    }
+
+    // State for like/dislike toggle
+    var liked    by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    var copied   by rememberSaveable { mutableStateOf(false) }
+
+    val iconTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+    val activeTint = MaterialTheme.colorScheme.primary
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, start = 2.dp, end = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Timestamp
+        Text(
+            text = timeString,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+        )
+
+        // Action icons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { liked = if (liked == true) null else true },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ThumbUp,
+                    contentDescription = "پسندیدن",
+                    tint = if (liked == true) activeTint else iconTint,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+
+            IconButton(
+                onClick = { liked = if (liked == false) null else false },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ThumbDown,
+                    contentDescription = "نپسندیدن",
+                    tint = if (liked == false) MaterialTheme.colorScheme.error.copy(alpha = 0.8f) else iconTint,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+
+            // Divider
+            Box(
+                modifier = Modifier
+                    .height(12.dp)
+                    .width(1.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            )
+
+            IconButton(
+                onClick = { copied = true },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ContentCopy,
+                    contentDescription = "کپی",
+                    tint = if (copied) activeTint else iconTint,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+
+            IconButton(
+                onClick = { },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = "اشتراک‌گذاری",
+                    tint = iconTint,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
         }
     }
 }
