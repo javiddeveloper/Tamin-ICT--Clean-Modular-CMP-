@@ -17,6 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.rotate
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -249,6 +252,9 @@ fun TimelineFilterBar(
     onDateClick: () -> Unit,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
+    // Which chooser is open, so its chevron can point the other way.
+    personExpanded: Boolean = false,
+    dateExpanded: Boolean = false,
 ) {
     Row(
         modifier = modifier
@@ -262,12 +268,14 @@ fun TimelineFilterBar(
             trailingIcon = dropdownIcon,
             onClick = onPersonClick,
             modifier = Modifier.weight(1f),
+            expanded = personExpanded,
         )
         FilterTrigger(
             label = dateLabel,
             trailingIcon = dropdownIcon,
             onClick = onDateClick,
             modifier = Modifier.weight(1f),
+            expanded = dateExpanded,
         )
         Box(
             modifier = Modifier
@@ -294,7 +302,14 @@ private fun FilterTrigger(
     trailingIcon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    expanded: Boolean = false,
 ) {
+    // The chevron points down when closed and up when open, animated so the flip reads as one
+    // control rather than two icons swapping.
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) CHEVRON_ROTATION_EXPANDED else CHEVRON_ROTATION_COLLAPSED,
+        label = "filterChevron",
+    )
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
@@ -321,10 +336,16 @@ private fun FilterTrigger(
             imageVector = trailingIcon,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(IconSize.small),
+            modifier = Modifier
+                .size(IconSize.small)
+                .rotate(chevronRotation),
         )
     }
 }
+
+/** The supplied chevron points back/right, so closed rotates it down and open rotates it up. */
+private const val CHEVRON_ROTATION_COLLAPSED = 90f
+private const val CHEVRON_ROTATION_EXPANDED = -90f
 
 /**
  * Pinned footer summarizing the filtered timeline: the insured person's share, the
