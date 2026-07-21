@@ -133,7 +133,6 @@ fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
 @Composable
 fun TreatmentContent(
     state: TreatmentUiState,
-    healthProfileState: HealthProfileUiState,
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
     onOpenMedicalRecords: () -> Unit = {},
@@ -268,7 +267,6 @@ fun TreatmentScreenPreview() {
     PreviewRtlThemeContent {
         TreatmentContent(
             state = TreatmentMocks.mainUiState,
-            healthProfileState = TreatmentMocks.healthProfileUiState,
             onIntent = {},
         )
     }

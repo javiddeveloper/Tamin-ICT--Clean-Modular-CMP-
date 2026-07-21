@@ -96,10 +96,6 @@ import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
-import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
-import com.tamin.taminhamrah.feature.treatment.treatmentScreen
-import androidx.compose.material.icons.filled.Favorite
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
