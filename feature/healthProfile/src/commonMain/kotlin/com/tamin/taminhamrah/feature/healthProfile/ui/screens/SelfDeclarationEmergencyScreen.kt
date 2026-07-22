@@ -33,7 +33,11 @@ fun SelfDeclarationEmergencyScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 4,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
@@ -54,7 +58,6 @@ fun SelfDeclarationEmergencyScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 4, totalSteps = 10)
 
             TaminText(
                 text = "تماس اضطراری",

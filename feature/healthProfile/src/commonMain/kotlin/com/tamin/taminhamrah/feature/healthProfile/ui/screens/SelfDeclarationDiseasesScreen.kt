@@ -31,7 +31,11 @@ fun SelfDeclarationDiseasesScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 6,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
@@ -51,7 +55,6 @@ fun SelfDeclarationDiseasesScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 6, totalSteps = 10)
 
             TaminText(
                 text = "سابقهٔ بیماری‌های فردی",

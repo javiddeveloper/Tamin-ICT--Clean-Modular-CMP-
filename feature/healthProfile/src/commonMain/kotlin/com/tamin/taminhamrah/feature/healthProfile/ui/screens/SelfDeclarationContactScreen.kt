@@ -36,7 +36,11 @@ fun SelfDeclarationContactScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 3,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
@@ -57,7 +61,6 @@ fun SelfDeclarationContactScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 3, totalSteps = 10)
 
             TaminText(
                 text = "اطلاعات تماس و سکونت",

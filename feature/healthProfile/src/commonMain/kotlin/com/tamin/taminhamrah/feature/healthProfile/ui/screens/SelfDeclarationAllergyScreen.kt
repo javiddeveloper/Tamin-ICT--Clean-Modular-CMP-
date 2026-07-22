@@ -41,7 +41,11 @@ fun SelfDeclarationAllergyScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 10,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
@@ -61,7 +65,6 @@ fun SelfDeclarationAllergyScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 10, totalSteps = 10)
 
             TaminText(
                 text = "حساسیت‌های دارویی",

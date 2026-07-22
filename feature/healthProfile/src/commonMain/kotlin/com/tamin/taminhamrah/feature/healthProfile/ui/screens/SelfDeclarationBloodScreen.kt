@@ -36,7 +36,11 @@ fun SelfDeclarationBloodScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 8,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
@@ -58,7 +62,6 @@ fun SelfDeclarationBloodScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HealthProgressBar(currentStep = 8, totalSteps = 10)
 
             TaminText(
                 text = "گروه خونی",

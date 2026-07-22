@@ -34,7 +34,11 @@ fun SelfDeclarationPhysicalScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 5,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
@@ -55,7 +59,6 @@ fun SelfDeclarationPhysicalScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HealthProgressBar(currentStep = 5, totalSteps = 10)
 
             TaminText(
                 text = "قد و وزن",
