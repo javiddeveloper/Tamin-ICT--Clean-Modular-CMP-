@@ -10,9 +10,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.IdentityStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationIdentityScreen(
-    state: SelfDeclarationUiState,
+    state: IdentityStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -120,9 +120,10 @@ fun IdentityRow(label: String, value: String) {
 fun SelfDeclarationIdentityScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationIdentityScreen(
-            state = SelfDeclarationUiState(),
+            state = IdentityStepState(),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

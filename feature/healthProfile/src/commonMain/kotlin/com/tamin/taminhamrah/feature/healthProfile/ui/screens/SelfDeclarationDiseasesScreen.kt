@@ -9,9 +9,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.DiseasesStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationDiseasesScreen(
-    state: SelfDeclarationUiState,
+    state: DiseasesStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -77,7 +77,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasHighBloodSugar == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(hasHighBloodSugar = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasHighBloodSugar = idx == 1)))
                     }
                 )
             }
@@ -91,7 +91,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasHighBloodPressure == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(hasHighBloodPressure = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasHighBloodPressure = idx == 1)))
                     }
                 )
             }
@@ -105,7 +105,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasHighCholesterol == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(hasHighCholesterol = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasHighCholesterol = idx == 1)))
                     }
                 )
             }
@@ -122,7 +122,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasChronicDisease == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(hasChronicDisease = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasChronicDisease = idx == 1)))
                     }
                 )
             }
@@ -134,7 +134,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = chronicOptions,
                     selectedIndices = state.chronicDiseases,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(chronicDiseases = indices) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(chronicDiseases = indices)))
                     }
                 )
             }
@@ -149,7 +149,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasMentalIllness == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(hasMentalIllness = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasMentalIllness = idx == 1)))
                     }
                 )
             }
@@ -161,7 +161,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = mentalOptions,
                     selectedIndices = state.mentalIllnesses,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(mentalIllnesses = indices) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(mentalIllnesses = indices)))
                     }
                 )
             }
@@ -176,7 +176,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasCancer == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(hasCancer = idx == 1) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasCancer = idx == 1)))
                     }
                 )
             }
@@ -188,7 +188,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = cancerOptions,
                     selectedIndices = state.cancers,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(cancers = indices) })
+                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(cancers = indices)))
                     }
                 )
             }
@@ -203,9 +203,10 @@ fun SelfDeclarationDiseasesScreen(
 fun SelfDeclarationDiseasesScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationDiseasesScreen(
-            state = SelfDeclarationUiState(hasChronicDisease = true, chronicDiseases = setOf(0, 2)),
+            state = DiseasesStepState(hasChronicDisease = true, chronicDiseases = setOf(0, 2)),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

@@ -10,9 +10,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PhysicalStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationPhysicalScreen(
-    state: SelfDeclarationUiState,
+    state: PhysicalStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -85,7 +85,7 @@ fun SelfDeclarationPhysicalScreen(
             RulerPicker(
                 value = state.height,
                 onValueChange = { h ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(height = h) })
+                    onIntent(SelfDeclarationIntent.UpdatePhysical(state.copy(height = h)))
                 },
                 range = 120..220,
                 unit = "سانتی‌متر"
@@ -103,7 +103,7 @@ fun SelfDeclarationPhysicalScreen(
             RulerPicker(
                 value = state.weight,
                 onValueChange = { w ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(weight = w) })
+                    onIntent(SelfDeclarationIntent.UpdatePhysical(state.copy(weight = w)))
                 },
                 range = 40..150,
                 unit = "کیلوگرم",
@@ -124,9 +124,10 @@ fun SelfDeclarationPhysicalScreen(
 fun SelfDeclarationPhysicalScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationPhysicalScreen(
-            state = SelfDeclarationUiState(height = 175, weight = 75),
+            state = PhysicalStepState(height = 175, weight = 75),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

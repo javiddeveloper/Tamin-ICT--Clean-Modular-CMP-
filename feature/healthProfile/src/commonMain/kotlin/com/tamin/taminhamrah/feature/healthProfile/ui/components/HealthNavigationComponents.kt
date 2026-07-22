@@ -208,7 +208,7 @@ fun HealthNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(taminColors.glassSolid)
+            .background(Color.Transparent)
             .padding(
                 start = 18.dp,
                 top = 14.dp,
