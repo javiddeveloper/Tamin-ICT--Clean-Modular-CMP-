@@ -1,40 +1,31 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Elevation
-import com.tamin.taminhamrah.ui.theme.IconSize
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.util.PersianDateFormatter
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,6 +37,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.MedicalRecordCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordGroupHeader
@@ -54,6 +48,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChip
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
@@ -68,20 +63,30 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.icons.TaminIcons
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Shown on the person chip until the patient list arrives. */
 private const val SELF_LABEL = "خودم"
+
+/** Which filter panel is open over the list; only one shows at a time, or none. */
+private enum class RecordFilter { PATIENT, PERIOD }
+
+/** A filter chip toggles its own panel: open it, or close it if it is already the open one. */
+private fun RecordFilter?.toggle(target: RecordFilter): RecordFilter? =
+    if (this == target) null else target
 
 /**
  * The full-width filter chooser that drops below the bar.
@@ -221,15 +226,30 @@ private const val UNKNOWN_AMOUNT = "—"
 fun MedicalRecordsScreen(
     nationalCode: String,
     initialTab: RecordTab,
-    patients: List<PatientItem>,
     onBack: () -> Unit,
-    onOpenRecord: (ElectronicPrescriptionPR) -> Unit,
+    onOpenRecord: (record: ElectronicPrescriptionPR, patientNationalCode: String) -> Unit,
     viewModel: PrescriptionsViewModel = koinViewModel(),
+    treatmentViewModel: TreatmentViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val treatmentState by treatmentViewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var selectedPatient by remember(nationalCode) { mutableStateOf(nationalCode) }
+    // Self-contained like the health screen: it owns the patient list rather than being handed it,
+    // (re)loading the dashboard's dependants itself so the nav graph passes only the route args.
+    LaunchedEffect(Unit) {
+        if (treatmentState.mainUserNationalCode == null) {
+            treatmentViewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        }
+    }
+    val patients = remember(treatmentState) { treatmentState.toPatientList() }
+
+    // A shortcut opens this with no code; fall back to whoever the dashboard has selected.
+    val effectiveNationalCode = nationalCode.ifBlank {
+        treatmentState.selectedNationalCode ?: treatmentState.mainUserNationalCode ?: ""
+    }
+
+    var selectedPatient by remember(effectiveNationalCode) { mutableStateOf(effectiveNationalCode) }
     var selectedPeriod by remember { mutableStateOf(RecordPeriod.LAST_SIX_MONTHS) }
     var selectedTab by remember(initialTab) { mutableStateOf(initialTab) }
     // Set only by the تاریخ دلخواه picker; null means the selected preset decides the range.
@@ -237,7 +257,9 @@ fun MedicalRecordsScreen(
     var searchCriteria by remember { mutableStateOf(RecordSearchCriteria()) }
 
     // Patient, period and category are all endpoint parameters, so any change re-queries.
+    // Held until a patient resolves, so the shortcut path never fires a blank-code query.
     LaunchedEffect(selectedPatient, selectedPeriod, selectedTab, customRange) {
+        if (selectedPatient.isBlank()) return@LaunchedEffect
         viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
     }
 
@@ -269,7 +291,7 @@ fun MedicalRecordsScreen(
         onTabSelected = { selectedTab = it },
         onPatientSelected = { selectedPatient = it },
         onPeriodSelected = { selectedPeriod = it },
-        onRecordSelected = onOpenRecord,
+        onRecordSelected = { onOpenRecord(it, selectedPatient) },
         onRetry = {
             viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
         },
@@ -323,8 +345,7 @@ fun MedicalRecordsContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val colors = LocalTaminColors.current
-    var showPatientMenu by remember { mutableStateOf(false) }
-    var showPeriodMenu by remember { mutableStateOf(false) }
+    var openFilter by remember { mutableStateOf<RecordFilter?>(null) }
     var showSearchSheet by remember { mutableStateOf(false) }
     var pickingRangeStart by remember { mutableStateOf(false) }
     var rangeStart by remember { mutableStateOf<String?>(null) }
@@ -387,17 +408,11 @@ fun MedicalRecordsContent(
                     dateLabel = periodLabel(selectedPeriod, customRange),
                     dropdownIcon = TaminIcons.ChevronBack,
                     searchIcon = TaminIcons.Search,
-                    onPersonClick = {
-                        showPeriodMenu = false
-                        showPatientMenu = !showPatientMenu
-                    },
-                    onDateClick = {
-                        showPatientMenu = false
-                        showPeriodMenu = !showPeriodMenu
-                    },
+                    onPersonClick = { openFilter = openFilter.toggle(RecordFilter.PATIENT) },
+                    onDateClick = { openFilter = openFilter.toggle(RecordFilter.PERIOD) },
                     onSearchClick = { showSearchSheet = true },
-                    personExpanded = showPatientMenu,
-                    dateExpanded = showPeriodMenu,
+                    personExpanded = openFilter == RecordFilter.PATIENT,
+                    dateExpanded = openFilter == RecordFilter.PERIOD,
                 )
             }
         },
@@ -447,33 +462,27 @@ fun MedicalRecordsContent(
 
         // Both filters share one full-width panel that drops below the bar, so neither can anchor
         // to the wrong chip. A tap on the scrim behind it dismisses.
-        if (showPatientMenu || showPeriodMenu) {
-            Scrim(onDismiss = {
-                showPatientMenu = false
-                showPeriodMenu = false
-            })
-            if (showPatientMenu) {
-                RecordFilterPanel(
+        openFilter?.let { filter ->
+            Scrim(onDismiss = { openFilter = null })
+            when (filter) {
+                RecordFilter.PATIENT -> RecordFilterPanel(
                     options = patients
                         .map { it.nationalId to it.filterLabel }
                         .ifEmpty { listOf(selectedPatient to SELF_LABEL) },
                     isSelected = { it == selectedPatient },
                     onSelect = {
                         onPatientSelected(it)
-                        showPatientMenu = false
+                        openFilter = null
                     },
                 )
-            } else {
-                RecordFilterPanel(
+
+                RecordFilter.PERIOD -> RecordFilterPanel(
                     options = RecordPeriod.entries.map { it to it.label },
                     isSelected = { it == selectedPeriod },
                     onSelect = { period ->
-                        showPeriodMenu = false
-                        if (period == RecordPeriod.CUSTOM) {
-                            pickingRangeStart = true
-                        } else {
-                            onPeriodSelected(period)
-                        }
+                        openFilter = null
+                        if (period == RecordPeriod.CUSTOM) pickingRangeStart = true
+                        else onPeriodSelected(period)
                     },
                 )
             }
