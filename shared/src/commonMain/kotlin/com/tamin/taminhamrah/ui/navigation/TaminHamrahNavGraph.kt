@@ -140,7 +140,7 @@ private fun NavDestination?.toBottomTab(): BottomTab = when {
     this == null -> BottomTab.OTHER
     hasRoute<Route.Home>() -> BottomTab.HOME
     hasRoute<TaminServicesRoute>() -> BottomTab.SERVICES
-    hasRoute<TreatmentRoute>() -> BottomTab.TREATMENT
+    hasRoute<TreatmentRoute.Main>() -> BottomTab.TREATMENT
     hasRoute<ProfileRoute.Main>() -> BottomTab.PROFILE
     else -> BottomTab.OTHER
 }
