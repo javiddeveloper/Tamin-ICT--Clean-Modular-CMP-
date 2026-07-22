@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,19 +39,24 @@ fun ServiceCard(
     modifier: Modifier = Modifier
 ) {
     val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-            service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-            service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+        service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+        service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
     val cardAlpha = if (isDisabled) 0.5f else 1.0f
     val shadowElevation = if (isDisabled) Elevation.none else Elevation.md
 
     val showRedDot = service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-            service.status == MenuServiceStatusDN.DISABLED ||
-            service.status == MenuServiceStatusDN.COMPLETELY_DISABLED ||
-            service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR
+        service.status == MenuServiceStatusDN.DISABLED ||
+        service.status == MenuServiceStatusDN.COMPLETELY_DISABLED ||
+        service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR
 
+    // Outer Box no longer paints its own background (that was causing the sharp-corner
+    // artifact behind the rounded Row). It reserves a little top/end padding so the
+    // badge's overflow has real layout space instead of being clipped by an ancestor.
     Box(
-        modifier = modifier.wrapContentSize(),
+        modifier = modifier
+            .wrapContentSize()
+            .padding(top = Spacing.xxs, end = Spacing.xxs),
         contentAlignment = Alignment.TopStart
     ) {
         Row(
@@ -62,6 +68,7 @@ fun ServiceCard(
                     shape = MaterialTheme.shapes.medium
                 )
                 .clip(MaterialTheme.shapes.medium)
+                .background(color = MaterialTheme.colorScheme.surface)
                 .clickable(
                     enabled = true,
                     indication = null,
@@ -135,7 +142,10 @@ fun ServiceCard(
                 modifier = Modifier
                     .size(IconSize.statIcon)
                     .align(Alignment.TopEnd)
-                    .absoluteOffset(x = (-4).dp, y = (-4).dp)
+                    .offset(
+                        x = IconSize.statIcon / 2,
+                        y = -(IconSize.statIcon / 2)
+                    )
                     .background(
                         MaterialTheme.colorScheme.error,
                         CircleShape
@@ -211,7 +221,6 @@ private fun TaminServicesTagPreview() {
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ServiceCard(
                         service = MainServiceDN(
@@ -221,13 +230,20 @@ private fun TaminServicesTagPreview() {
                         ),
                         onClick = { }
                     )
+                    ServiceCard(
+                        service = MainServiceDN(
+                            name = "کارگاه‌ها",
+                            icon = "workshop",
+                            status = MenuServiceStatusDN.ENABLED_WITH_ERROR
+                        ),
+                        onClick = { }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ServiceCard(
                         service = MainServiceDN(
