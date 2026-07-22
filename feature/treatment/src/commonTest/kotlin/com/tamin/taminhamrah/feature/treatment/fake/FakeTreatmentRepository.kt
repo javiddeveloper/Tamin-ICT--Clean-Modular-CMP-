@@ -28,7 +28,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     var prescriptionDetailResult: List<ElectronicPrescriptionDetailDN> = emptyList()
     var prescriptionPriceResult: List<ElectronicPrescriptionPriceDN> = emptyList()
     var prescriptionPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
-    var testResultPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
+    var labResultPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
 
     private fun <T> result(value: T): Flow<T> = flow {
         if (shouldThrowError) throw error
@@ -39,12 +39,12 @@ class FakeTreatmentRepository : TreatmentRepository {
         result(deservedResult)
 
     override suspend fun getElectronicPrescriptionList(
-        requestTypeId: String, nationalCode: String, dependantUserNationalCode: String,
+        requestTypeId: String, nationalCode: String, patientNationalCode: String,
         startDate: String, endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = result(prescriptionListResult)
 
     override suspend fun getElectronicPrescriptionDetail(
-        noteHeadID: String, nationalCode: String, childNationalCode: String,
+        noteHeadID: String, nationalCode: String, patientNationalCode: String,
         flagSata: String, type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>> = result(prescriptionDetailResult)
 
@@ -59,7 +59,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     override suspend fun getPrescriptionPdfFile(prescriptionID: String): Flow<PdfDownloadDN> =
         result(prescriptionPdfResult)
 
-    override suspend fun downloadTestResultPdf(
+    override suspend fun downloadLabResultPdf(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
-    ): Flow<PdfDownloadDN> = result(testResultPdfResult)
+    ): Flow<PdfDownloadDN> = result(labResultPdfResult)
 }

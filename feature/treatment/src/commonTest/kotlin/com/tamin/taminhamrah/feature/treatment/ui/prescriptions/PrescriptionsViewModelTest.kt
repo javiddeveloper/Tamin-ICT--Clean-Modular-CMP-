@@ -7,7 +7,7 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.TreatmentTestData
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
-import com.tamin.taminhamrah.useCases.treatment.DownloadTestResultPdfUseCase
+import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
@@ -45,7 +45,7 @@ class PrescriptionsViewModelTest {
             getElectronicPrescriptionDetailUseCase = GetElectronicPrescriptionDetailUseCase(repository),
             getElectronicPrescriptionPriceUseCase = GetElectronicPrescriptionPriceUseCase(repository),
             getPrescriptionPdfFileUseCase = GetPrescriptionPdfFileUseCase(repository),
-            downloadTestResultPdfUseCase = DownloadTestResultPdfUseCase(repository)
+            downloadLabResultPdfUseCase = DownloadLabResultPdfUseCase(repository)
         )
     }
 
@@ -149,10 +149,10 @@ class PrescriptionsViewModelTest {
     }
 
     @Test
-    fun testDownloadTestResult_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
+    fun testDownloadLabResult_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
         viewModel.uiState.test {
             awaitItem() // initial
-            viewModel.sendIntent(PrescriptionsIntent.DownloadTestResult(patientID = "0", noteHeadEprescID = "100"))
+            viewModel.sendIntent(PrescriptionsIntent.DownloadLabResult(patientID = "0", noteHeadEprescID = "100"))
 
             var state = awaitItem()
             while (state.viewerPdf == null) state = awaitItem()

@@ -17,7 +17,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     var getElectronicPrescriptionPriceResult: List<ElectronicPrescriptionPriceDN> = emptyList()
     var getDependantUnderEighteenResult: List<DependantUserUnderEighteenDN> = emptyList()
     var getPrescriptionPdfFileResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
-    var downloadTestResultPdfResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
+    var downloadLabResultPdfResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
 
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> = flow {
         if (shouldThrowError) throw error
@@ -25,7 +25,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     }
 
     override suspend fun getElectronicPrescriptionList(
-        requestTypeId: String, nationalCode: String, dependantUserNationalCode: String,
+        requestTypeId: String, nationalCode: String, patientNationalCode: String,
         startDate: String, endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = flow {
         if (shouldThrowError) throw error
@@ -33,7 +33,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     }
 
     override suspend fun getElectronicPrescriptionDetail(
-        noteHeadID: String, nationalCode: String, childNationalCode: String,
+        noteHeadID: String, nationalCode: String, patientNationalCode: String,
         flagSata: String, type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>> = flow {
         if (shouldThrowError) throw error
@@ -59,10 +59,10 @@ class FakeTreatmentRepository : TreatmentRepository {
         emit(getPrescriptionPdfFileResult)
     }
 
-    override suspend fun downloadTestResultPdf(
+    override suspend fun downloadLabResultPdf(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): Flow<PdfDownloadDN> = flow {
         if (shouldThrowError) throw error
-        emit(downloadTestResultPdfResult)
+        emit(downloadLabResultPdfResult)
     }
 }

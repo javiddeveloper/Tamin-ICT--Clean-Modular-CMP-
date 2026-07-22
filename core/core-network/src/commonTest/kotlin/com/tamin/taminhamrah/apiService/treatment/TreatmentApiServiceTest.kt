@@ -198,11 +198,11 @@ class TreatmentApiServiceTest {
     }
 
     @Test
-    fun testDownloadTestResultPdf() = runTest {
+    fun testDownloadLabResultPdf() = runTest {
         val pdfBytes = byteArrayOf(4, 5, 6)
         responseBytes = pdfBytes
         val apiService = createApiService()
-        val executed = apiService.downloadTestResultPdf("patient1", "100", "6319889391").execute()
+        val executed = apiService.downloadLabResultPdf("patient1", "100", "6319889391").execute()
 
         assertEquals("GET", interceptedMethod)
         assertEquals("https://eservices.tamin.ir/api/patient-history/lab-result-PDF/patient1/100/6319889391", interceptedUrl)

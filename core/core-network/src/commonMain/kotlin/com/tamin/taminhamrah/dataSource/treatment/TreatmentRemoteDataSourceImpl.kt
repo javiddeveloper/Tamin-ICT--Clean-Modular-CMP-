@@ -110,11 +110,11 @@ internal class TreatmentRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun downloadTestResultPdf(
+    override suspend fun downloadLabResultPdf(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): PdfDownloadDTO {
         return try {
-            val response = apiService.downloadTestResultPdf(
+            val response = apiService.downloadLabResultPdf(
                 patientID ?: "", noteHeadEprescID ?: "", currentUserNationalCode ?: ""
             )
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = response.body()))

@@ -56,11 +56,13 @@ internal class TreatmentRepositoryImpl(
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String,
         nationalCode: String,
-        dependantUserNationalCode: String,
+        patientNationalCode: String,
         startDate: String,
         endDate: String
     ): Flow<List<ElectronicPrescriptionDN>> = flow {
-        val localElectronicPrescriptionList = treatmentDao.getElectronicPrescriptions(dependantUserNationalCode, requestTypeId).first()
+        // The endpoint expects the insured themselves encoded as "0"; a dependant keeps their code.
+        val patientCode = patientNationalCode.asApiPatientCode(nationalCode)
+        val localElectronicPrescriptionList = treatmentDao.getElectronicPrescriptions(patientCode, requestTypeId).first()
         if (localElectronicPrescriptionList.isNotEmpty()) {
             emit(localElectronicPrescriptionList.map { it.toDomain() })
         }
@@ -68,27 +70,32 @@ internal class TreatmentRepositoryImpl(
             val result = treatmentRemoteDataSource.getElectronicPrescriptionList(
                 requestTypeId,
                 nationalCode,
-                dependantUserNationalCode,
+                patientCode,
                 startDate,
                 endDate,
                 treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearElectronicPrescriptions(dependantUserNationalCode, requestTypeId)
-            treatmentDao.insertElectronicPrescriptions(remote.map { it.toEntity(dependantUserNationalCode) })
+            treatmentDao.clearElectronicPrescriptions(patientCode, requestTypeId)
+            treatmentDao.insertElectronicPrescriptions(remote.map { it.toEntity(patientCode) })
         } catch (e: Exception) {
             if (localElectronicPrescriptionList.isEmpty()) throw e
         }
-        emitAll(treatmentDao.getElectronicPrescriptions(dependantUserNationalCode, requestTypeId).map { list -> list.map { it.toDomain() } })
+        emitAll(treatmentDao.getElectronicPrescriptions(patientCode, requestTypeId).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
 
     override suspend fun getElectronicPrescriptionDetail(
         noteHeadID: String,
         nationalCode: String,
-        childNationalCode: String,
+        patientNationalCode: String,
         flagSata: String,
         type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>> = flow {
+        // Same self-as-"0" rule as the list; a blank flagSata must go out as the literal "null"
+        // so its path segment does not collapse and 404. Both are how the endpoint is addressed,
+        // so they are encoded here rather than by callers.
+        val patientCode = patientNationalCode.asApiPatientCode(nationalCode)
+        val flag = flagSata.ifBlank { FLAG_SATA_ABSENT }
         val localElectronicPrescriptionDetail = treatmentDao.getElectronicPrescriptionDetails(noteHeadID).first()
         if (localElectronicPrescriptionDetail.isNotEmpty()) {
             emit(localElectronicPrescriptionDetail.map { it.toDomain() })
@@ -97,8 +104,8 @@ internal class TreatmentRepositoryImpl(
             val result = treatmentRemoteDataSource.getElectronicPrescriptionDetail(
                 noteHeadID,
                 nationalCode,
-                childNationalCode,
-                flagSata,
+                patientCode,
+                flag,
                 type,
                 treatmentQuery(limit = PRESCRIPTION_DETAIL_PAGE_SIZE)
             )
@@ -160,13 +167,25 @@ internal class TreatmentRepositoryImpl(
         emit(result.toDomain())
     }
 
-    override suspend fun downloadTestResultPdf(
+    override suspend fun downloadLabResultPdf(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): Flow<PdfDownloadDN> = flow {
-        val result = treatmentRemoteDataSource.downloadTestResultPdf(patientID, noteHeadEprescID, currentUserNationalCode)
+        val result = treatmentRemoteDataSource.downloadLabResultPdf(patientID, noteHeadEprescID, currentUserNationalCode)
         emit(result.toDomain())
     }
 }
+
+/**
+ * The patient-history endpoints address the insured themselves as [SELF_PATIENT_CODE] and a
+ * dependant by their own national code. Callers pass whichever person they mean; this turns that
+ * into the code the endpoint expects.
+ */
+private fun String.asApiPatientCode(loggedNationalCode: String): String =
+    if (this == loggedNationalCode) SELF_PATIENT_CODE else this
+
+/** How the endpoints denote the insured person and an absent flagSata as path segments. */
+private const val SELF_PATIENT_CODE = "0"
+private const val FLAG_SATA_ABSENT = "null"
 
 /**
  * Page sizes for the treatment endpoints.

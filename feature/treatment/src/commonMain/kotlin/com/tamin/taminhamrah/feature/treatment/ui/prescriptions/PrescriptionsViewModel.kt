@@ -8,7 +8,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState.
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.treatment.DownloadTestResultPdfUseCase
+import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
@@ -26,7 +26,7 @@ class PrescriptionsViewModel(
     private val getElectronicPrescriptionDetailUseCase: GetElectronicPrescriptionDetailUseCase,
     private val getElectronicPrescriptionPriceUseCase: GetElectronicPrescriptionPriceUseCase,
     private val getPrescriptionPdfFileUseCase: GetPrescriptionPdfFileUseCase,
-    private val downloadTestResultPdfUseCase: DownloadTestResultPdfUseCase
+    private val downloadLabResultPdfUseCase: DownloadLabResultPdfUseCase
 ) : BaseViewModel<PrescriptionsUiState, PartialState, PrescriptionsEvent, PrescriptionsIntent>(
     initialState = PrescriptionsUiState()
 ) {
@@ -37,7 +37,7 @@ class PrescriptionsViewModel(
             is PrescriptionsIntent.SelectPrescription -> selectPrescription(intent)
             is PrescriptionsIntent.ClearSelectedPrescription -> flow { emit(PartialState.PrescriptionCleared) }
             is PrescriptionsIntent.DownloadPdf -> downloadPdf(intent)
-            is PrescriptionsIntent.DownloadTestResult -> downloadTestResult(intent)
+            is PrescriptionsIntent.DownloadLabResult -> downloadLabResult(intent)
             is PrescriptionsIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
             is PrescriptionsIntent.LoadRecordPrices -> loadRecordPrices(intent)
         }
@@ -61,19 +61,19 @@ class PrescriptionsViewModel(
         emit(PartialState.Reset)
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
-        val dependantCode = if (intent.nationalCode == nationalCode) "0" else intent.nationalCode
         // Defaults to the «۶ ماه اخیر» period the records filter advertises.
         val startD = intent.startDate ?: getSixMonthsAgoTimestamp()
         val endD = intent.endDate ?: getCurrentTimestamp()
 
         try {
             // One request per category. «همه» asks for each type and the lists are merged here,
-            // newest first; a single-type tab is just a list of one.
+            // newest first; a single-type tab is just a list of one. The repository encodes how
+            // "self" versus a dependant is addressed, so the raw patient code is handed straight in.
             val perType = intent.requestTypeIds.map { requestTypeId ->
                 getElectronicPrescriptionListUseCase(
                     requestTypeId,
                     nationalCode,
-                    dependantCode,
+                    intent.nationalCode,
                     startD,
                     endD,
                 )
@@ -94,13 +94,11 @@ class PrescriptionsViewModel(
         emit(PartialState.PrescriptionSelected(intent.noteHeadID))
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
-        val childCode = if (intent.nationalCode == nationalCode) "0" else intent.nationalCode
-        // An empty flagSata is a path segment; the old app sends the literal "null" so the URL
-        // does not collapse and 404, exactly as with the national code.
-        val flagSata = intent.flagSata.ifBlank { "null" }
 
         try {
-            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, childCode, flagSata, intent.type).collect { list ->
+            // Raw patient code and flagSata; the repository encodes "self" and an absent flagSata
+            // the way the endpoint expects.
+            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, intent.nationalCode, intent.flagSata, intent.type).collect { list ->
                 emit(PartialState.PrescriptionDetailsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
@@ -155,14 +153,14 @@ class PrescriptionsViewModel(
         }
     }
 
-    private fun downloadTestResult(intent: PrescriptionsIntent.DownloadTestResult): Flow<PartialState> = flow {
+    private fun downloadLabResult(intent: PrescriptionsIntent.DownloadLabResult): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         val patientID = intent.patientID ?: ""
         val noteHeadEprescID = intent.noteHeadEprescID ?: ""
         val currentUserNationalCode = getLoggedNationalCode()
 
         try {
-            downloadTestResultPdfUseCase(patientID, noteHeadEprescID, currentUserNationalCode).collect { pdfDn ->
+            downloadLabResultPdfUseCase(patientID, noteHeadEprescID, currentUserNationalCode).collect { pdfDn ->
                 emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {

@@ -10,21 +10,21 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class DownloadTestResultPdfUseCaseTest : BaseUseCaseTest() {
+class DownloadLabResultPdfUseCaseTest : BaseUseCaseTest() {
 
     private lateinit var repository: FakeTreatmentRepository
-    private lateinit var useCase: DownloadTestResultPdfUseCase
+    private lateinit var useCase: DownloadLabResultPdfUseCase
 
     @BeforeTest
     fun setup() {
         repository = FakeTreatmentRepository()
-        useCase = DownloadTestResultPdfUseCase(repository)
+        useCase = DownloadLabResultPdfUseCase(repository)
     }
 
     @Test
     fun `invoke should return test result pdf data`() = runTest {
         val expected = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
-        repository.downloadTestResultPdfResult = expected
+        repository.downloadLabResultPdfResult = expected
 
         useCase("patientID", "noteHeadEprescID", "currentUserNationalCode").test {
             val item = awaitItem()
@@ -48,7 +48,7 @@ class DownloadTestResultPdfUseCaseTest : BaseUseCaseTest() {
     @Test
     fun `invoke should return pdf when all inputs are null`() = runTest {
         val expected = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
-        repository.downloadTestResultPdfResult = expected
+        repository.downloadLabResultPdfResult = expected
 
         useCase(null, null, null).test {
             assertEquals(expected, awaitItem())

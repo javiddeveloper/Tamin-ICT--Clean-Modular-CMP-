@@ -38,7 +38,7 @@ interface TreatmentRemoteDataSource {
 
     suspend fun getPrescriptionPdfFile(prescriptionID: String): PdfDownloadDTO
 
-    suspend fun downloadTestResultPdf(
+    suspend fun downloadLabResultPdf(
         patientID: String?,
         noteHeadEprescID: String?,
         currentUserNationalCode: String?

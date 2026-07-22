@@ -58,7 +58,7 @@ internal interface TreatmentApiService {
     ): HttpStatement
 
     @GET("patient-history/lab-result-PDF/{patientID}/{noteHeadEprescID}/{currentUserNationalCode}")
-    suspend fun downloadTestResultPdf(
+    suspend fun downloadLabResultPdf(
         @Path("patientID") patientID: String = "",
         @Path("noteHeadEprescID") noteHeadEprescID: String = "",
         @Path("currentUserNationalCode") currentUserNationalCode: String = ""

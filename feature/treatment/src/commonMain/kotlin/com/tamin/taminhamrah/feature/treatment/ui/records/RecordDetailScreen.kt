@@ -60,7 +60,7 @@ private const val UNKNOWN_VALUE = "—"
  * One medical record: the prescribed items, the cost breakdown, and the PDF exports.
  *
  * Opening the record drives `getElectronicPrescriptionDetail` + `getElectronicPrescriptionPrice`;
- * the actions drive `getPrescriptionPdfFile` and `downloadTestResultPdf`.
+ * the actions drive `getPrescriptionPdfFile` and `downloadLabResultPdf`.
  */
 @Composable
 fun RecordDetailScreen(
@@ -94,13 +94,13 @@ fun RecordDetailScreen(
         snackbarHostState = snackbarHostState,
         onBack = onBack,
         onDownloadPdf = { viewModel.sendIntent(PrescriptionsIntent.DownloadPdf(noteHeadId)) },
-        onDownloadTestResult = {
+        onDownloadLabResult = {
             // The list reports the patient via patientID; "0" means the insured themselves.
             val patientId = state.prescriptionList
                 .firstOrNull { it.noteHeadEprescID == noteHeadId }
                 ?.patientID
                 ?: "0"
-            viewModel.sendIntent(PrescriptionsIntent.DownloadTestResult(patientId, noteHeadId))
+            viewModel.sendIntent(PrescriptionsIntent.DownloadLabResult(patientId, noteHeadId))
         },
         onDismissPdf = { viewModel.sendIntent(PrescriptionsIntent.TogglePdfDialog(false)) },
         onRetry = {
@@ -120,7 +120,7 @@ fun RecordDetailContent(
     trackingCode: String = "",
     onBack: () -> Unit,
     onDownloadPdf: () -> Unit,
-    onDownloadTestResult: () -> Unit,
+    onDownloadLabResult: () -> Unit,
     onDismissPdf: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -150,7 +150,7 @@ fun RecordDetailContent(
                         TaminTopAppBarButton(
                             icon = TaminIcons.Download,
                             contentDescription = "دریافت جواب آزمایش",
-                            onClick = onDownloadTestResult,
+                            onClick = onDownloadLabResult,
                         )
                     },
                 )
@@ -278,7 +278,7 @@ fun RecordDetailPreview() {
             noteHeadId = "TRK123456",
             onBack = {},
             onDownloadPdf = {},
-            onDownloadTestResult = {},
+            onDownloadLabResult = {},
             onDismissPdf = {},
             onRetry = {},
         )

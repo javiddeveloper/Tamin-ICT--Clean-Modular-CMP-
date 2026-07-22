@@ -7,18 +7,26 @@ import kotlinx.coroutines.flow.Flow
 interface TreatmentRepository {
     suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>>
 
+    /**
+     * [patientNationalCode] is the person whose records are wanted — pass [nationalCode] itself for
+     * the insured, or a dependant's code. The impl encodes "self" as the endpoint expects.
+     */
     suspend fun getElectronicPrescriptionList(
         requestTypeId: String,
         nationalCode: String,
-        dependantUserNationalCode: String,
+        patientNationalCode: String,
         startDate: String,
         endDate: String
     ): Flow<List<ElectronicPrescriptionDN>>
 
+    /**
+     * [patientNationalCode] follows the same rule as [getElectronicPrescriptionList]; [flagSata]
+     * may be blank and the impl sends the value the endpoint expects for "absent".
+     */
     suspend fun getElectronicPrescriptionDetail(
         noteHeadID: String,
         nationalCode: String,
-        childNationalCode: String,
+        patientNationalCode: String,
         flagSata: String,
         type: String
     ): Flow<List<ElectronicPrescriptionDetailDN>>
@@ -34,7 +42,7 @@ interface TreatmentRepository {
 
     suspend fun getPrescriptionPdfFile(prescriptionID: String): Flow<PdfDownloadDN>
 
-    suspend fun downloadTestResultPdf(
+    suspend fun downloadLabResultPdf(
         patientID: String?,
         noteHeadEprescID: String?,
         currentUserNationalCode: String?

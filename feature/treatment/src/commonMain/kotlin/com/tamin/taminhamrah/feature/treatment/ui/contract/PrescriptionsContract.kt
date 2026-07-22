@@ -62,7 +62,7 @@ sealed class PrescriptionsIntent {
     ) : PrescriptionsIntent()
     data object ClearSelectedPrescription : PrescriptionsIntent()
     data class DownloadPdf(val prescriptionID: String) : PrescriptionsIntent()
-    data class DownloadTestResult(val patientID: String?, val noteHeadEprescID: String?) : PrescriptionsIntent()
+    data class DownloadLabResult(val patientID: String?, val noteHeadEprescID: String?) : PrescriptionsIntent()
     data class TogglePdfDialog(val show: Boolean) : PrescriptionsIntent()
 
     /** Fetches the amount for each record, so the advanced search can filter on cost. */
