@@ -33,7 +33,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_check
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
@@ -239,7 +241,7 @@ private fun InsuranceCardBrandRow(initial: String) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = TaminIcons.Check,
+                imageVector = vectorResource(Res.drawable.ic_tamin_check),
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.size(BRAND_TICK_ICON_SIZE),

@@ -16,7 +16,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -173,7 +175,7 @@ private fun MedicalRecordFooter(shareAmount: String) {
             )
             // Points toward the detail screen; autoMirrored, so it sits on the left in RTL.
             Icon(
-                imageVector = TaminIcons.ChevronForward,
+                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.size(IconSize.small),

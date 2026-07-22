@@ -45,7 +45,16 @@ import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_health_profile
+import taminx.core.core_ui.ic_tamin_medical_approvals
+import taminx.core.core_ui.ic_tamin_medical_centers
+import taminx.core.core_ui.ic_tamin_medical_records
+import taminx.core.core_ui.ic_tamin_misc_claims
+import taminx.core.core_ui.ic_tamin_prescriptions
+import taminx.core.core_ui.ic_tamin_verified
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -150,7 +159,7 @@ private fun PatientPlaceholderCard(
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Icon(
-                imageVector = if (isError) TaminIcons.Cross else TaminIcons.HealthProfile,
+                imageVector = if (isError) vectorResource(Res.drawable.ic_tamin_cross) else vectorResource(Res.drawable.ic_tamin_health_profile),
                 contentDescription = null,
                 tint = accent,
                 modifier = Modifier.size(IconSize.medium),
@@ -224,7 +233,7 @@ private fun CoverageStatus.cardStyle(
             background = Brush.verticalGradient(listOf(TaminRedDark, TaminRed)),
             badge = {
                 CoverageBadge(
-                    icon = TaminIcons.Cross,
+                    icon = vectorResource(Res.drawable.ic_tamin_cross),
                     containerColor = Color.White,
                     contentColor = TaminRedDark,
                 )
@@ -236,7 +245,7 @@ private fun CoverageStatus.cardStyle(
             background = insuranceCardGradient(isDependent, dependantOrdinal),
             badge = {
                 CoverageBadge(
-                    icon = TaminIcons.Verified,
+                    icon = vectorResource(Res.drawable.ic_tamin_verified),
                     containerColor = TaminCoverageBadgeBg,
                     contentColor = TaminCoverageBadgeFg,
                 )
@@ -283,7 +292,7 @@ internal fun TreatmentQuickAccess(
                 ListItemData(
                     title = "سوابق درمانی من",
                     subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
-                    leadingIconPainter = rememberVectorPainter(TaminIcons.MedicalRecords),
+                    leadingIconPainter = rememberVectorPainter(vectorResource(Res.drawable.ic_tamin_medical_records)),
                     titleStyle = MaterialTheme.typography.titleMedium,
                     colors = ListItemColors(
                         titleColor = Color.White,
@@ -302,7 +311,7 @@ internal fun TreatmentQuickAccess(
                 ListItemData(
                     title = "پروندهٔ سلامت من",
                     subtitle = "خوداظهاری سلامت و اطلاعات پزشکی",
-                    leadingIconPainter = rememberVectorPainter(TaminIcons.HealthProfile),
+                    leadingIconPainter = rememberVectorPainter(vectorResource(Res.drawable.ic_tamin_health_profile)),
                     colors = ListItemColors(
                         leadingIconBackgroundColor = colors.blueBg,
                         leadingIconTintColor = colors.blueText,
@@ -326,7 +335,7 @@ internal fun TreatmentQuickAccess(
                 ListItemData(
                     title = "مراکز درمانی طرف قرارداد",
                     subtitle = "جست‌وجوی بیمارستان و داروخانه",
-                    leadingIconPainter = rememberVectorPainter(TaminIcons.MedicalCenters),
+                    leadingIconPainter = rememberVectorPainter(vectorResource(Res.drawable.ic_tamin_medical_centers)),
                     colors = ListItemColors(
                         leadingIconBackgroundColor = colors.greenBg,
                         leadingIconTintColor = colors.teal,
@@ -352,7 +361,7 @@ internal fun TreatmentCategories(
     ) {
         CategoryTile(
             label = "نسخه‌های الکترونیک",
-            icon = TaminIcons.Prescriptions,
+            icon = vectorResource(Res.drawable.ic_tamin_prescriptions),
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
             onClick = onOpenPrescriptions,
@@ -360,7 +369,7 @@ internal fun TreatmentCategories(
         )
         CategoryTile(
             label = "تاییدیه‌های پزشکی",
-            icon = TaminIcons.MedicalApprovals,
+            icon = vectorResource(Res.drawable.ic_tamin_medical_approvals),
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
             onClick = onOpenMedicalApprovals,
@@ -368,7 +377,7 @@ internal fun TreatmentCategories(
         )
         CategoryTile(
             label = "خسارت متفرقه",
-            icon = TaminIcons.MiscClaims,
+            icon = vectorResource(Res.drawable.ic_tamin_misc_claims),
             iconTint = colors.orangeText,
             iconBackground = Brush.linearGradient(listOf(colors.orangeBg, colors.orangeBg)),
             onClick = onOpenMiscClaims,

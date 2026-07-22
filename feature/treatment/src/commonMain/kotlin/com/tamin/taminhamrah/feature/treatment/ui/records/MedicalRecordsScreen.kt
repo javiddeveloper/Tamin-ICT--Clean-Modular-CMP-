@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -67,7 +65,6 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.icons.TaminIcons
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -76,7 +73,17 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_health_profile
+import taminx.core.core_ui.ic_tamin_medical_approvals
+import taminx.core.core_ui.ic_tamin_medical_centers
+import taminx.core.core_ui.ic_tamin_prescriptions
+import taminx.core.core_ui.ic_tamin_search
 
 /** Shown on the person chip until the patient list arrives. */
 private const val SELF_LABEL = "خودم"
@@ -130,7 +137,7 @@ private fun <T> RecordFilterPanel(
                     )
                     if (selected) {
                         Icon(
-                            imageVector = TaminIcons.Check,
+                            imageVector = vectorResource(Res.drawable.ic_tamin_check),
                             contentDescription = null,
                             tint = colors.teal,
                             modifier = Modifier.size(IconSize.small),
@@ -179,7 +186,7 @@ private fun RecordsErrorState(message: String) {
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Icon(
-            imageVector = TaminIcons.Cross,
+            imageVector = vectorResource(Res.drawable.ic_tamin_cross),
             contentDescription = null,
             tint = colors.dangerText,
             modifier = Modifier.size(IconSize.large),
@@ -396,7 +403,7 @@ fun MedicalRecordsContent(
                 title = "سوابق درمانی",
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = TaminIcons.ChevronBack,
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = "بازگشت",
                         onClick = onBack,
                     )
@@ -406,8 +413,8 @@ fun MedicalRecordsContent(
                     // Never blank: the insured person is the default until the list arrives.
                     personLabel = currentPatient?.filterLabel ?: SELF_LABEL,
                     dateLabel = periodLabel(selectedPeriod, customRange),
-                    dropdownIcon = TaminIcons.ChevronBack,
-                    searchIcon = TaminIcons.Search,
+                    dropdownIcon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    searchIcon = vectorResource(Res.drawable.ic_tamin_search),
                     onPersonClick = { openFilter = openFilter.toggle(RecordFilter.PATIENT) },
                     onDateClick = { openFilter = openFilter.toggle(RecordFilter.PERIOD) },
                     onSearchClick = { showSearchSheet = true },
@@ -541,35 +548,6 @@ private fun RecordsTotals(prices: List<ElectronicPrescriptionPricePR>) {
     )
 }
 
-/** One dropdown shape for both filters, so they stay visually identical. */
-@Composable
-private fun <T> FilterMenu(
-    expanded: Boolean,
-    options: List<Pair<T, String>>,
-    isSelected: (T) -> Boolean,
-    onDismiss: () -> Unit,
-    onSelect: (T) -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        options.forEach { (value, label) ->
-            DropdownMenuItem(
-                text = { Text(text = label, color = colors.textPrimary) },
-                onClick = { onSelect(value) },
-                trailingIcon = {
-                    if (isSelected(value)) {
-                        Icon(
-                            imageVector = TaminIcons.Check,
-                            contentDescription = null,
-                            tint = colors.teal,
-                        )
-                    }
-                },
-            )
-        }
-    }
-}
-
 /** Palette and glyph a record category is drawn with, all from the theme. */
 private data class RecordAccent(
     val content: Color,
@@ -582,13 +560,13 @@ private fun recordAccent(prescType: String): RecordAccent {
     val colors = LocalTaminColors.current
     return when (prescType) {
         in RecordTab.VISIT.requestTypeIds ->
-            RecordAccent(colors.orangeText, colors.orangeBg, TaminIcons.HealthProfile)
+            RecordAccent(colors.orangeText, colors.orangeBg, vectorResource(Res.drawable.ic_tamin_health_profile))
         in RecordTab.PARACLINIC.requestTypeIds ->
-            RecordAccent(colors.blueText, colors.blueBg, TaminIcons.MedicalApprovals)
+            RecordAccent(colors.blueText, colors.blueBg, vectorResource(Res.drawable.ic_tamin_medical_approvals))
         RecordTab.medicalServiceTypeId, RecordTab.pharmacyTypeId ->
-            RecordAccent(colors.greenText, colors.greenBg, TaminIcons.MedicalCenters)
+            RecordAccent(colors.greenText, colors.greenBg, vectorResource(Res.drawable.ic_tamin_medical_centers))
         else ->
-            RecordAccent(colors.teal, colors.greenBg, TaminIcons.Prescriptions)
+            RecordAccent(colors.teal, colors.greenBg, vectorResource(Res.drawable.ic_tamin_prescriptions))
     }
 }
 

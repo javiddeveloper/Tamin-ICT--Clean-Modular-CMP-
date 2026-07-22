@@ -27,7 +27,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -138,7 +141,7 @@ private fun MonthHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Icon(
-            imageVector = TaminIcons.ChevronBack,
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
             contentDescription = "ماه قبل",
             tint = colors.textSecondary,
             modifier = Modifier
@@ -152,7 +155,7 @@ private fun MonthHeader(
             color = colors.textPrimary,
         )
         Icon(
-            imageVector = TaminIcons.ChevronForward,
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             contentDescription = "ماه بعد",
             tint = colors.textSecondary,
             modifier = Modifier

@@ -31,7 +31,19 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.ic_tamin_health_profile
+import taminx.core.core_ui.ic_tamin_medical_approvals
+import taminx.core.core_ui.ic_tamin_medical_centers
+import taminx.core.core_ui.ic_tamin_medical_records
+import taminx.core.core_ui.ic_tamin_misc_claims
+import taminx.core.core_ui.ic_tamin_prescriptions
+import taminx.core.core_ui.ic_tamin_print
+import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.ic_tamin_verified
 import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -79,7 +91,7 @@ private fun PreviewPage(content: @Composable BoxScope.() -> Unit) {
 @Composable
 private fun BackButton() {
     TaminTopAppBarButton(
-        icon = TaminIcons.ChevronBack,
+        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
         contentDescription = "برگشت",
         onClick = {},
     )
@@ -97,7 +109,7 @@ private fun TreatmentHubPagePreview() {
                 centerTitle = false,
                 action = {
                     TaminTopAppBarButton(
-                        icon = TaminIcons.Search,
+                        icon = vectorResource(Res.drawable.ic_tamin_search),
                         contentDescription = "جست‌وجو",
                         onClick = {},
                         bordered = true,
@@ -139,7 +151,7 @@ private fun HubCarousel(modifier: Modifier = Modifier) {
             holderName = name,
             nationalId = nid,
             coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
-            coverageBadge = { CoverageBadge(icon = TaminIcons.Verified) },
+            coverageBadge = { CoverageBadge(icon = vectorResource(Res.drawable.ic_tamin_verified)) },
             background = insuranceCardGradient(
                 isDependent = isDependent,
                 dependantOrdinal = people.take(page).count { it.third },
@@ -159,17 +171,17 @@ private fun HubQuickAccess() {
         QuickAccessCard(
             title = "سوابق درمانی من",
             subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
-            icon = TaminIcons.MedicalRecords,
-            trailingIcon = TaminIcons.ChevronForward,
+            icon = vectorResource(Res.drawable.ic_tamin_medical_records),
+            trailingIcon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             onClick = {},
         )
         TreatmentNavigationCard(
             title = "پروندهٔ سلامت من",
             subtitle = "خوداظهاری سلامت و اطلاعات پزشکی",
-            icon = TaminIcons.HealthProfile,
+            icon = vectorResource(Res.drawable.ic_tamin_health_profile),
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
-            trailingIcon = TaminIcons.ChevronForward,
+            trailingIcon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             onClick = {},
             status = {
                 StatusPill(
@@ -182,10 +194,10 @@ private fun HubQuickAccess() {
         TreatmentNavigationCard(
             title = "مراکز درمانی طرف قرارداد",
             subtitle = "جست‌وجوی بیمارستان و داروخانه",
-            icon = TaminIcons.MedicalCenters,
+            icon = vectorResource(Res.drawable.ic_tamin_medical_centers),
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            trailingIcon = TaminIcons.ChevronForward,
+            trailingIcon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             onClick = {},
         )
     }
@@ -195,9 +207,9 @@ private fun HubQuickAccess() {
 private fun HubCategories() {
     val colors = LocalTaminColors.current
     val categories = listOf(
-        Triple("نسخه‌های الکترونیک", colors.blueText, TaminIcons.Prescriptions),
-        Triple("تاییدیه‌های پزشکی", colors.teal, TaminIcons.MedicalApprovals),
-        Triple("خسارت متفرقه", colors.orangeText, TaminIcons.MiscClaims),
+        Triple("نسخه‌های الکترونیک", colors.blueText, vectorResource(Res.drawable.ic_tamin_prescriptions)),
+        Triple("تاییدیه‌های پزشکی", colors.teal, vectorResource(Res.drawable.ic_tamin_medical_approvals)),
+        Triple("خسارت متفرقه", colors.orangeText, vectorResource(Res.drawable.ic_tamin_misc_claims)),
     )
     Column(
         modifier = Modifier.padding(Spacing.page),
@@ -332,7 +344,7 @@ private fun RecordsHeader() {
         navigationIcon = { BackButton() },
         action = {
             TaminTopAppBarButton(
-                icon = TaminIcons.Print,
+                icon = vectorResource(Res.drawable.ic_tamin_print),
                 contentDescription = "اشتراک‌گذاری",
                 onClick = {},
             )
@@ -342,7 +354,7 @@ private fun RecordsHeader() {
             personLabel = "علی رضایی",
             dateLabel = "۶ ماه اخیر",
             dropdownIcon = Icons.Filled.KeyboardArrowDown,
-            searchIcon = TaminIcons.Search,
+            searchIcon = vectorResource(Res.drawable.ic_tamin_search),
             onPersonClick = {},
             onDateClick = {},
             onSearchClick = {},
@@ -364,7 +376,7 @@ private fun RecordDetailPagePreview() {
                 navigationIcon = { BackButton() },
                 action = {
                     TaminTopAppBarButton(
-                        icon = TaminIcons.Print,
+                        icon = vectorResource(Res.drawable.ic_tamin_print),
                         contentDescription = "اشتراک‌گذاری",
                         onClick = {},
                     )
@@ -517,7 +529,7 @@ private fun MedicalCentresPagePreview() {
                     value = "",
                     onValueChange = {},
                     placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
-                    searchIcon = TaminIcons.Search,
+                    searchIcon = vectorResource(Res.drawable.ic_tamin_search),
                     modifier = Modifier.padding(top = Spacing.lg),
                 )
             }
@@ -573,7 +585,7 @@ private fun MedicalCentresEmptyPagePreview() {
                     value = "بیمارستان نامشخص",
                     onValueChange = {},
                     placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
-                    searchIcon = TaminIcons.Search,
+                    searchIcon = vectorResource(Res.drawable.ic_tamin_search),
                     modifier = Modifier.padding(top = Spacing.lg),
                 )
             }

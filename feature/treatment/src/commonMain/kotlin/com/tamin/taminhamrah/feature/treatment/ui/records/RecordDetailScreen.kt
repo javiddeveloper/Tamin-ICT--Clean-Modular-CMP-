@@ -43,7 +43,11 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_download
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -141,14 +145,14 @@ fun RecordDetailContent(
                     title = "نسخهٔ الکترونیک",
                     navigationIcon = {
                         TaminTopAppBarButton(
-                            icon = TaminIcons.ChevronBack,
+                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                             contentDescription = "بازگشت",
                             onClick = onBack,
                         )
                     },
                     action = {
                         TaminTopAppBarButton(
-                            icon = TaminIcons.Download,
+                            icon = vectorResource(Res.drawable.ic_tamin_download),
                             contentDescription = "دریافت جواب آزمایش",
                             onClick = onDownloadLabResult,
                         )
@@ -211,7 +215,7 @@ fun RecordDetailContent(
             TaminBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
                 TaminPrimaryButton(
                     text = "دریافت نسخهٔ الکترونیک",
-                    icon = TaminIcons.Download,
+                    icon = vectorResource(Res.drawable.ic_tamin_download),
                     onClick = onDownloadPdf,
                 )
             }
@@ -243,7 +247,7 @@ fun PdfViewerDialog(
                     title = "نمایش نسخه",
                     navigationIcon = {
                         TaminTopAppBarButton(
-                            icon = TaminIcons.Cross,
+                            icon = vectorResource(Res.drawable.ic_tamin_cross),
                             contentDescription = "بستن",
                             onClick = onDismiss,
                         )
