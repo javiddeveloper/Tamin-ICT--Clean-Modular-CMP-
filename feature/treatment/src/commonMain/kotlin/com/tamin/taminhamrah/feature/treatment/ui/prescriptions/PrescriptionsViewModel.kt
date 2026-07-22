@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailU
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.util.getCurrentTimestamp
 import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.coroutines.flow.Flow
@@ -85,8 +86,8 @@ class PrescriptionsViewModel(
             }.collect { merged ->
                 emit(PartialState.PrescriptionsLoaded(merged.toPresentation()))
             }
-                } catch (e: Exception) {
-            emit(PartialState.Error(e.messageOr(ERROR_LOAD_LIST)))
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
@@ -102,7 +103,7 @@ class PrescriptionsViewModel(
                 emit(PartialState.PrescriptionDetailsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.messageOr(ERROR_LOAD_DETAIL)))
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
 
         try {
@@ -149,7 +150,7 @@ class PrescriptionsViewModel(
                 emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.messageOr(ERROR_RECEIVE_FILE)))
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
@@ -164,7 +165,7 @@ class PrescriptionsViewModel(
                 emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.messageOr(ERROR_RECEIVE_FILE)))
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
@@ -194,20 +195,6 @@ class PrescriptionsViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
-
-/**
- * The message shown when a request fails.
- *
- * Falls back to [fallback] when the exception carries nothing readable: a null here would leave
- * `error` null and the screen would render "no records" for what was actually a failure. The
- * wording follows the previous app, which named the failed step rather than showing raw errors.
- */
-private fun Throwable.messageOr(fallback: String): String =
-    message?.takeIf { it.isNotBlank() } ?: fallback
-
-private const val ERROR_LOAD_LIST = "خطا در دریافت سوابق درمانی"
-private const val ERROR_LOAD_DETAIL = "خطا در دریافت جزئیات نسخه"
-private const val ERROR_RECEIVE_FILE = "خطا در دریافت فایل"
 
 /** Placeholder for an unknown national code, matching the previous app's path segment. */
 private const val NO_NATIONAL_CODE = "0"

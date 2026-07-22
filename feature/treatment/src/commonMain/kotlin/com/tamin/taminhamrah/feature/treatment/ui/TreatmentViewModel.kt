@@ -14,6 +14,8 @@ import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -71,21 +73,24 @@ class TreatmentViewModel(
 
             is FeatureStatus.Disabled -> sendEvent(
                 TreatmentEvent.ShowMessage(
-                    status.message ?: FEATURE_UNAVAILABLE,
+                    status.message ?: ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage(),
                     TreatmentMessageType.OPERATION_FAILED,
                 ),
             )
 
             is FeatureStatus.TemporaryDisabled -> sendEvent(
                 TreatmentEvent.ShowMessage(
-                    status.message ?: FEATURE_TEMPORARILY_UNAVAILABLE,
+                    status.message ?: ErrorUri.FEATURE_TEMPORARILY_UNAVAILABLE.toSingleLineMessage(),
                     TreatmentMessageType.OPERATION_FAILED,
                 ),
             )
 
             // No in-app screen for a web-hosted service yet; saying so beats opening nothing.
             is FeatureStatus.WebView -> sendEvent(
-                TreatmentEvent.ShowMessage(FEATURE_UNAVAILABLE, TreatmentMessageType.OPERATION_FAILED),
+                TreatmentEvent.ShowMessage(
+                    ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage(),
+                    TreatmentMessageType.OPERATION_FAILED
+                ),
             )
         }
     }
@@ -116,9 +121,7 @@ class TreatmentViewModel(
                 emit(PartialState.PatientSelected(nationalCode, fullName))
             }
             .catch { e ->
-                // A null exception message would blank the error state and the hub would render
-                // "no insured person" for what was actually a failed request.
-                emit(PartialState.Error(e.message?.takeIf { it.isNotBlank() } ?: ERROR_LOAD_COVERAGE))
+                emit(PartialState.Error(e.toSingleLineMessage()))
             }
 
         val dependantFlow: Flow<PartialState> = getDependantUnderEighteenUseCase(nationalCode)
@@ -126,7 +129,7 @@ class TreatmentViewModel(
             .catch { e ->
                 sendEvent(
                     TreatmentEvent.ShowMessage(
-                        e.message?.takeIf { it.isNotBlank() } ?: ERROR_LOAD_DEPENDANTS,
+                        e.toSingleLineMessage(),
                         TreatmentMessageType.OPERATION_FAILED
                     )
                 )
@@ -162,9 +165,3 @@ class TreatmentViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
-
-private const val ERROR_LOAD_COVERAGE = "خطا در دریافت وضعیت استحقاق درمان"
-private const val ERROR_LOAD_DEPENDANTS = "خطا در دریافت لیست همراهان زیر ۱۸ سال"
-
-private const val FEATURE_UNAVAILABLE = "این سرویس در حال حاضر در دسترس نیست."
-private const val FEATURE_TEMPORARILY_UNAVAILABLE = "این سرویس موقتاً در دسترس نیست."

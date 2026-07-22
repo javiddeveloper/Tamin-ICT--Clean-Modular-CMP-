@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -47,7 +48,7 @@ class HealthProfileViewModel(
                 }
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
