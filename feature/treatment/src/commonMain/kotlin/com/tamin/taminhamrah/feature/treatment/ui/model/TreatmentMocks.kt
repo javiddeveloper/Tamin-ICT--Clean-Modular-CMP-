@@ -95,10 +95,4 @@ object TreatmentMocks {
         organizationShareTotal = 153_790L,
         healthProfileCompleted = true
     )
-
-    val healthProfileUiState = HealthProfileUiState(
-        patientGeneral = patientGeneral,
-        patientSelfDeclarative = selfDeclarative,
-        patientDrugAllergies = listOf(drugAllergy)
-    )
 }

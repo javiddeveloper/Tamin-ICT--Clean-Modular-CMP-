@@ -89,6 +89,8 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentI
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -355,6 +357,13 @@ internal fun TaminHamrahNavGraph(
 
                 treatmentGraph(
                     navController = navController,
+                    onNavigateToHealthProfile = { nationalCode ->
+                        navController.navigateToHealthProfile(nationalCode)
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+
+                healthProfileScreen(
                     onBack = { navController.popBackStack() }
                 )
 

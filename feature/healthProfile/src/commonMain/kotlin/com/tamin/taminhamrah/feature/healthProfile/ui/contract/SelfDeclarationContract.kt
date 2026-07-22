@@ -144,7 +144,7 @@ data class SelfDeclarationUiState(
     }
 }
 
-sealed interface SelfDeclarationIntent {
+sealed interface SelfDeclarationIntent : HealthProfileIntent {
     data class ChangeStep(val step: SelfDeclarationStep) : SelfDeclarationIntent
     data class UpdateIdentity(val identity: IdentityStepState) : SelfDeclarationIntent
     data class UpdatePersonal(val personal: PersonalStepState) : SelfDeclarationIntent

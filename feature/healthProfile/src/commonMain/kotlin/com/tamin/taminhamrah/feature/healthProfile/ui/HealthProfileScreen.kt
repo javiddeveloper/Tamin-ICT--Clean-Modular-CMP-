@@ -39,12 +39,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HealthProfileScreen(
     viewModel: HealthProfileViewModel = koinViewModel(),
-    selfDecViewModel: SelfDeclarationViewModel = koinViewModel(),
     onBackClicked: () -> Unit,
     nationalCode : String
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val selfDecState by selfDecViewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile)
@@ -52,15 +50,14 @@ fun HealthProfileScreen(
 
     HandleHealthProfileEvents(
         events = viewModel.events,
-        selfDecEvents = selfDecViewModel.events,
         onBackClicked = onBackClicked
     )
 
     HealthProfileMainContent(
         state = uiState,
-        selfDecState = selfDecState,
+        selfDecState = uiState.selfDeclaration,
         onIntent = viewModel::sendIntent,
-        onSelfDecIntent = selfDecViewModel::sendIntent,
+        onSelfDecIntent = viewModel::sendIntent,
         onBackClicked = onBackClicked
     )
 }
@@ -68,20 +65,12 @@ fun HealthProfileScreen(
 @Composable
 fun HandleHealthProfileEvents(
     events: Flow<HealthProfileEvent>,
-    selfDecEvents: Flow<SelfDeclarationEvent>,
     onBackClicked: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware { event ->
         when (event) {
             HealthProfileEvent.NavigateBack -> {
-                scope.launch { onBackClicked() }
-            }
-        }
-    }
-    selfDecEvents.collectWithLifecycleAware { event ->
-        when (event) {
-            SelfDeclarationEvent.NavigateBack -> {
                 scope.launch { onBackClicked() }
             }
         }

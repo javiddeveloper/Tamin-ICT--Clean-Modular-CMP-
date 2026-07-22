@@ -10,7 +10,6 @@ android {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":feature:healthProfile"))
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.compose)
