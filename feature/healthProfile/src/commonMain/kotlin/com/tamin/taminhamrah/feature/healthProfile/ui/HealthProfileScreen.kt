@@ -253,7 +253,7 @@ fun HealthProfileMainContent(
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
-                                    Button(onClick = { onIntent(HealthProfileIntent.LoadHealthProfile) }) {
+                                    Button(onClick = { onIntent(HealthProfileIntent.LoadHealthProfile()) }) {
                                         TaminText("تلاش مجدد")
                                     }
                                 }
