@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -38,6 +39,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigatio
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -78,6 +80,7 @@ fun SelfDeclarationIntroContent(
             bottomBar = {
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_intro_btn_next),
+                    primaryIconPainter = painterResource(Res.drawable.ic_health_gate_button),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
@@ -104,9 +107,9 @@ fun SelfDeclarationIntroContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.PlaylistAddCheck,
+                        painter = painterResource(Res.drawable.ic_health_intro_hero),
                         contentDescription = null,
-                        tint = taminColors.blueText,
+                        tint = Color.Unspecified,
                         modifier = Modifier.size(54.dp)
                     )
                 }
@@ -147,7 +150,7 @@ fun SelfDeclarationIntroContent(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
                         InstructionFeatureItem(
-                            icon = Icons.Default.FlashOn,
+                            painter = painterResource(Res.drawable.ic_health_intro_fast),
                             message = stringResource(Res.string.health_intro_fast),
                             iconBgColor = taminColors.blueBg,
                             iconColor = taminColors.blueText,
@@ -155,7 +158,7 @@ fun SelfDeclarationIntroContent(
                         )
                         HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
                         InstructionFeatureItem(
-                            icon = Icons.Default.EditNote,
+                            painter = painterResource(Res.drawable.ic_health_intro_update),
                             message = stringResource(Res.string.health_intro_update),
                             iconBgColor = taminColors.orangeBg,
                             iconColor = taminColors.orangeText,
@@ -163,7 +166,7 @@ fun SelfDeclarationIntroContent(
                         )
                         HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
                         InstructionFeatureItem(
-                            icon = Icons.Default.Shield,
+                            painter = painterResource(Res.drawable.ic_health_intro_privacy),
                             message = stringResource(Res.string.health_intro_privacy),
                             iconBgColor = taminColors.greenBg,
                             iconColor = taminColors.greenText,
@@ -179,7 +182,7 @@ fun SelfDeclarationIntroContent(
 
 @Composable
 private fun InstructionFeatureItem(
-    icon: ImageVector,
+    painter: androidx.compose.ui.graphics.painter.Painter,
     message: String,
     iconBgColor: androidx.compose.ui.graphics.Color,
     iconColor: androidx.compose.ui.graphics.Color,
@@ -201,7 +204,7 @@ private fun InstructionFeatureItem(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = icon,
+                painter = painter,
                 contentDescription = null,
                 tint = iconColor,
                 modifier = Modifier.size(19.dp)
