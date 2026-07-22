@@ -113,3 +113,180 @@ fun PatientImagingDTO.toDomain() = PatientImagingDN(
     visitDate = visitDate,
     visitType = visitType
 )
+
+// --- Location ---
+
+fun ProvinceItemDTO.toDomain() = ProvinceItemDN(id = id, name = name)
+
+fun ProvinceCitiesItemDTO.toDomain() = ProvinceCityItemDN(id = id, name = name)
+
+// --- Lookup ---
+
+fun BloodGroupDTO.toDomain() = BloodGroupDN(key = key, value = value)
+
+fun MaritalStatusDTO.toDomain() = MaritalStatusDN(key = key, value = value)
+
+fun SmokingStatusDTO.toDomain() = SmokingStatusDN(key = key, value = value)
+
+// --- Illnesses ---
+
+fun IllnessItemDTO.toDomain() = IllnessItemDN(illnessID = illnessID, illnessDesc = illnessDesc)
+
+fun SelfDeclarableIllnessGroupDTO.toDomain() = SelfDeclarableIllnessGroupDN(
+    groupId = groupId,
+    groupTitle = groupTitle,
+    forFamily = forFamily,
+    illnessList = illnessList?.map { it.toDomain() }
+)
+
+// --- Drug ---
+
+fun DrugItemDTO.toDomain() = DrugItemDN(drugID = drugID, drugName = drugName)
+
+// --- Mutation responses ---
+
+fun UpdatePatientDTO.toDomain() = UpdatePatientDN(
+    ptientID = ptientID,
+    patientNatCode = patientNatCode,
+    patientName = patientName,
+    patientFamily = patientFamily,
+    patientMobile = patientMobile,
+    patientAddress = patientAddress,
+    patientBloodGroup = patientBloodGroup,
+    patientBloodGroupCode = patientBloodGroupCode,
+    patientMarriage = patientMarriage,
+    patientMarriageCode = patientMarriageCode,
+    patientJob = patientJob,
+    patientHeight = patientHeight,
+    patientWeight = patientWeight,
+    patientBMI = patientBMI,
+    patientCitizenship = patientCitizenship,
+    patientCity = patientCity,
+    patientCityCode = patientCityCode,
+    patientProvince = patientProvince,
+    patientProvinceCode = patientProvinceCode,
+    patientEmail = patientEmail,
+    patientArea = patientArea,
+    emergencyName = emergencyName,
+    emergencyFamily = emergencyFamily,
+    emergencyMobile = emergencyMobile,
+    emergencyRelation = emergencyRelation,
+    emergencyRelationshipCode = emergencyRelationshipCode,
+    emergencyAddress = emergencyAddress,
+    emergencyCity = emergencyCity,
+    emergencyCityCode = emergencyCityCode,
+    emergencyProvince = emergencyProvince,
+    emergencyProvinceCode = emergencyProvinceCode,
+    emergencyEmail = emergencyEmail,
+    emergencyArea = emergencyArea,
+    lastUpdateDate = lastUpdateDate
+)
+
+fun AddSelfDeclarativeDTO.toDomain() = AddSelfDeclarativeDN(
+    objectID = objectID,
+    smokingStatus = smokingStatus,
+    smokingStatusTitle = smokingStatusTitle,
+    smokingDesc = smokingDesc,
+    alcoholUsage = alcoholUsage,
+    alcoholUsageTitle = alcoholUsageTitle,
+    alcoholDesc = alcoholDesc,
+    substanceUsage = substanceUsage,
+    substanceUsageTitle = substanceUsageTitle,
+    substanceDesc = substanceDesc,
+    exerciseFreq = exerciseFreq,
+    exerciseFreqTitle = exerciseFreqTitle,
+    exerciseDesc = exerciseDesc,
+    lastUpdateDate = lastUpdateDate
+)
+
+fun UpdateSelfDeclarativeDTO.toDomain() = UpdateSelfDeclarativeDN(
+    objectID = objectID,
+    smokingStatus = smokingStatus,
+    smokingStatusTitle = smokingStatusTitle,
+    smokingDesc = smokingDesc,
+    alcoholUsage = alcoholUsage,
+    alcoholUsageTitle = alcoholUsageTitle,
+    alcoholDesc = alcoholDesc,
+    substanceUsage = substanceUsage,
+    substanceUsageTitle = substanceUsageTitle,
+    substanceDesc = substanceDesc,
+    exerciseFreq = exerciseFreq,
+    exerciseFreqTitle = exerciseFreqTitle,
+    exerciseDesc = exerciseDesc,
+    lastUpdateDate = lastUpdateDate
+)
+
+fun SyncIllnessSelfDeclarativesDTO.toDomain() = SyncResultDN(data = data)
+
+fun SyncDrugAllergiesDTO.toDomain() = SyncResultDN(data = data)
+
+// --- Domain request → DTO request converters ---
+
+fun UpdatePatientRequest.toDTO() = UpdatePatientRequestDTO(
+    patientID = patientID,
+    patientNatCode = patientNatCode,
+    patientMobile = patientMobile,
+    patientEmail = patientEmail,
+    patientAddress = patientAddress,
+    patientArea = patientArea,
+    patientCityID = patientCityID,
+    patientBloodGroup = patientBloodGroup,
+    patientMarriage = patientMarriage,
+    patientJob = patientJob,
+    patientHeight = patientHeight,
+    patientWeight = patientWeight,
+    patientCitizenship = patientCitizenship,
+    patientNationality = patientNationality,
+    patientInsurance = patientInsurance,
+    emergencyName = emergencyName,
+    emergencyFamily = emergencyFamily,
+    emergencyMobile = emergencyMobile,
+    emergencyEmail = emergencyEmail,
+    emergencyRelation = emergencyRelation,
+    emergencyAddress = emergencyAddress,
+    emergencyArea = emergencyArea,
+    emergencyCityID = emergencyCityID
+)
+
+fun AddSelfDeclarativeRequest.toDTO() = AddSelfDeclarativeRequestDTO(
+    natCode = natCode,
+    patientID = patientID,
+    smoking = smoking,
+    smokeDesc = smokeDesc,
+    alcoholUse = alcoholUse,
+    alcoholUseDesc = alcoholUseDesc,
+    substanceUse = substanceUse,
+    substanceUseDesc = substanceUseDesc,
+    exerciseFrequency = exerciseFrequency,
+    exerciseDesc = exerciseDesc
+)
+
+fun UpdateSelfDeclarativeRequest.toDTO() = UpdateSelfDeclarativeRequestDTO(
+    patientID = patientID,
+    objectID = objectID,
+    smoking = smoking,
+    smokeDesc = smokeDesc,
+    alcoholUse = alcoholUse,
+    alcoholUseDesc = alcoholUseDesc,
+    substanceUse = substanceUse,
+    substanceUseDesc = substanceUseDesc,
+    exerciseFrequency = exerciseFrequency,
+    exerciseDesc = exerciseDesc
+)
+
+fun SyncIllnessSelfDeclarativesRequest.toDTO() = SyncIllnessesSelfDecRequestDTO(
+    natCode = natCode,
+    patientID = patientID,
+    illnessSelfDeclareList = illnessSelfDeclareList?.map {
+        IllnessSelfDeclareDTO(illnessID = it.illnessID, relation = it.relation, illnessComments = it.illnessComments)
+    }
+)
+
+fun SyncDrugAllergiesRequest.toDTO() = SyncDrugAllergiesRequestDTO(
+    natCode = natCode,
+    patientID = patientID,
+    drugAllergyList = drugAllergyList?.map {
+        DrugAllergyDTO(drugId = it.drugId, allergyComments = it.allergyComments)
+    }
+)
+

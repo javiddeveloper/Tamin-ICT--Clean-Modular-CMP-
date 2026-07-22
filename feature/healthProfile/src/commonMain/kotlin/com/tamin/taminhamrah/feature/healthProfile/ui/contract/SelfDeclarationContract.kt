@@ -156,9 +156,11 @@ sealed interface SelfDeclarationIntent : HealthProfileIntent {
     data class UpdateBloodGroup(val bloodGroup: BloodGroupStepState) : SelfDeclarationIntent
     data class UpdateLifestyle(val lifestyle: LifestyleStepState) : SelfDeclarationIntent
     data class UpdateAllergy(val allergy: AllergyStepState) : SelfDeclarationIntent
+    data object SubmitDeclaration : SelfDeclarationIntent
 }
 
 sealed interface SelfDeclarationEvent {
     data object NavigateBack : SelfDeclarationEvent
 }
+
 

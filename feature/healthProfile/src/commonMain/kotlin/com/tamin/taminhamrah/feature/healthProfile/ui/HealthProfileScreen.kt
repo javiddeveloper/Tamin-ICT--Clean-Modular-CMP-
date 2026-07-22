@@ -44,8 +44,8 @@ fun HealthProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile)
+    LaunchedEffect(nationalCode) {
+        viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile(nationalCode))
     }
 
     HandleHealthProfileEvents(
@@ -72,6 +72,10 @@ fun HandleHealthProfileEvents(
         when (event) {
             HealthProfileEvent.NavigateBack -> {
                 scope.launch { onBackClicked() }
+            }
+
+            else -> {
+                //todo
             }
         }
     }

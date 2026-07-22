@@ -78,6 +78,19 @@ import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
+import com.tamin.taminhamrah.useCases.health.GetAllProvincesUseCase
+import com.tamin.taminhamrah.useCases.health.GetProvinceCitiesUseCase
+import com.tamin.taminhamrah.useCases.health.GetBloodGroupsUseCase
+import com.tamin.taminhamrah.useCases.health.GetMaritalStatusUseCase
+import com.tamin.taminhamrah.useCases.health.GetSmokingStatusUseCase
+import com.tamin.taminhamrah.useCases.health.GetSelfDeclarableIllnessesUseCase
+import com.tamin.taminhamrah.useCases.health.GetSelfDeclarableIllnessesByGroupUseCase
+import com.tamin.taminhamrah.useCases.health.GetAllDrugsUseCase
+import com.tamin.taminhamrah.useCases.health.UpdatePatientUseCase
+import com.tamin.taminhamrah.useCases.health.AddSelfDeclarativeUseCase
+import com.tamin.taminhamrah.useCases.health.UpdateSelfDeclarativeUseCase
+import com.tamin.taminhamrah.useCases.health.SyncIllnessSelfDeclarativesUseCase
+import com.tamin.taminhamrah.useCases.health.SyncDrugAllergiesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -179,4 +192,18 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+    factoryOf(::GetAllProvincesUseCase)
+    factoryOf(::GetProvinceCitiesUseCase)
+    factoryOf(::GetBloodGroupsUseCase)
+    factoryOf(::GetMaritalStatusUseCase)
+    factoryOf(::GetSmokingStatusUseCase)
+    factoryOf(::GetSelfDeclarableIllnessesUseCase)
+    factoryOf(::GetSelfDeclarableIllnessesByGroupUseCase)
+    factoryOf(::GetAllDrugsUseCase)
+    factoryOf(::UpdatePatientUseCase)
+    factoryOf(::AddSelfDeclarativeUseCase)
+    factoryOf(::UpdateSelfDeclarativeUseCase)
+    factoryOf(::SyncIllnessSelfDeclarativesUseCase)
+    factoryOf(::SyncDrugAllergiesUseCase)
 }
+

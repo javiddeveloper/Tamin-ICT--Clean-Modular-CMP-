@@ -111,3 +111,128 @@ data class PatientImagingDN(
     val visitDate: String?,
     val visitType: String?
 )
+
+// --- Location ---
+
+data class ProvinceItemDN(
+    val id: Int?,
+    val name: String?
+)
+
+data class ProvinceCityItemDN(
+    val id: Int?,
+    val name: String?
+)
+
+// --- Lookup ---
+
+data class BloodGroupDN(
+    val key: Int?,
+    val value: String?
+)
+
+data class MaritalStatusDN(
+    val key: Int?,
+    val value: String?
+)
+
+data class SmokingStatusDN(
+    val key: Int?,
+    val value: String?
+)
+
+// --- Illness ---
+
+data class IllnessItemDN(
+    val illnessID: Int?,
+    val illnessDesc: String?
+)
+
+data class SelfDeclarableIllnessGroupDN(
+    val groupId: Int?,
+    val groupTitle: String?,
+    val forFamily: Boolean?,
+    val illnessList: List<IllnessItemDN>?
+)
+
+// --- Drug ---
+
+data class DrugItemDN(
+    val drugID: Int?,
+    val drugName: String?
+)
+
+// --- Mutation results ---
+
+data class UpdatePatientDN(
+    val ptientID: Int?,
+    val patientNatCode: String?,
+    val patientName: String?,
+    val patientFamily: String?,
+    val patientMobile: String?,
+    val patientAddress: String?,
+    val patientBloodGroup: String?,
+    val patientBloodGroupCode: Int?,
+    val patientMarriage: String?,
+    val patientMarriageCode: Int?,
+    val patientJob: String?,
+    val patientHeight: String?,
+    val patientWeight: String?,
+    val patientBMI: String?,
+    val patientCitizenship: String?,
+    val patientCity: String?,
+    val patientCityCode: Int?,
+    val patientProvince: String?,
+    val patientProvinceCode: Int?,
+    val patientEmail: String?,
+    val patientArea: String?,
+    val emergencyName: String?,
+    val emergencyFamily: String?,
+    val emergencyMobile: String?,
+    val emergencyRelation: String?,
+    val emergencyRelationshipCode: Int?,
+    val emergencyAddress: String?,
+    val emergencyCity: String?,
+    val emergencyCityCode: Int?,
+    val emergencyProvince: String?,
+    val emergencyProvinceCode: Int?,
+    val emergencyEmail: String?,
+    val emergencyArea: String?,
+    val lastUpdateDate: String?
+)
+
+data class AddSelfDeclarativeDN(
+    val objectID: Int?,
+    val smokingStatus: Int?,
+    val smokingStatusTitle: String?,
+    val smokingDesc: String?,
+    val alcoholUsage: Int?,
+    val alcoholUsageTitle: String?,
+    val alcoholDesc: String?,
+    val substanceUsage: Int?,
+    val substanceUsageTitle: String?,
+    val substanceDesc: String?,
+    val exerciseFreq: Int?,
+    val exerciseFreqTitle: String?,
+    val exerciseDesc: String?,
+    val lastUpdateDate: String?
+)
+
+data class UpdateSelfDeclarativeDN(
+    val objectID: Int?,
+    val smokingStatus: Int?,
+    val smokingStatusTitle: String?,
+    val smokingDesc: String?,
+    val alcoholUsage: Int?,
+    val alcoholUsageTitle: String?,
+    val alcoholDesc: String?,
+    val substanceUsage: Int?,
+    val substanceUsageTitle: String?,
+    val substanceDesc: String?,
+    val exerciseFreq: Int?,
+    val exerciseFreqTitle: String?,
+    val exerciseDesc: String?,
+    val lastUpdateDate: String?
+)
+
+data class SyncResultDN(val data: String?)

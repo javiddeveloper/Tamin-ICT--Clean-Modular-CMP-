@@ -1,24 +1,65 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
-import com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProfileMockData
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.toUiMock
+import com.tamin.taminhamrah.model.health.*
+import com.tamin.taminhamrah.useCases.health.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.delay
 
-class HealthProfileViewModel : BaseViewModel<HealthProfileUiState, PartialState, HealthProfileEvent, HealthProfileIntent>(
+class HealthProfileViewModel(
+    private val getPatientGeneralUseCase: GetPatientGeneralUseCase,
+    private val getPatientSelfDeclarativeUseCase: GetPatientSelfDeclarativeUseCase,
+    private val getPatientDrugAllergiesUseCase: GetPatientDrugAllergiesUseCase,
+    private val updatePatientUseCase: UpdatePatientUseCase,
+    private val syncIllnessSelfDeclarativesUseCase: SyncIllnessSelfDeclarativesUseCase,
+    private val syncDrugAllergiesUseCase: SyncDrugAllergiesUseCase,
+    private val addSelfDeclarativeUseCase: AddSelfDeclarativeUseCase,
+    private val updateSelfDeclarativeUseCase: UpdateSelfDeclarativeUseCase,
+    private val getAllProvincesUseCase: GetAllProvincesUseCase,
+    private val getProvinceCitiesUseCase: GetProvinceCitiesUseCase,
+    private val getBloodGroupsUseCase: GetBloodGroupsUseCase,
+    private val getMaritalStatusUseCase: GetMaritalStatusUseCase,
+    private val getSmokingStatusUseCase: GetSmokingStatusUseCase,
+    private val getSelfDeclarableIllnessesUseCase: GetSelfDeclarableIllnessesUseCase,
+    private val getSelfDeclarableIllnessesByGroupUseCase: GetSelfDeclarableIllnessesByGroupUseCase,
+    private val getAllDrugsUseCase: GetAllDrugsUseCase
+) : BaseViewModel<HealthProfileUiState, PartialState, HealthProfileEvent, HealthProfileIntent>(
     initialState = HealthProfileUiState()
 ) {
 
+    private var currentPatientNatCode: String = ""
+    private var currentPatientId: Int = 0
+
     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
         return when (intent) {
-            is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile()
-            is SelfDeclarationIntent.ChangeStep -> flow { emit(PartialState.StepChanged(intent.step)) }
+            is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile(intent.nationalCode)
+
+            is SelfDeclarationIntent.ChangeStep -> flow {
+                if (intent.step == SelfDeclarationStep.SUCCESS) {
+                    emit(PartialState.Loading(true))
+                    val success = submitFullDeclaration()
+                    emit(PartialState.Loading(false))
+                    if (success) {
+                        emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
+                    }
+                } else {
+                    emit(PartialState.StepChanged(intent.step))
+                }
+            }
+
+            is SelfDeclarationIntent.SubmitDeclaration -> flow {
+                emit(PartialState.Loading(true))
+                val success = submitFullDeclaration()
+                emit(PartialState.Loading(false))
+                if (success) {
+                    emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
+                }
+            }
+
             is SelfDeclarationIntent.UpdateIdentity -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
             is SelfDeclarationIntent.UpdatePersonal -> flow { emit(PartialState.PersonalUpdated(intent.personal)) }
             is SelfDeclarationIntent.UpdateContact -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
@@ -29,16 +70,135 @@ class HealthProfileViewModel : BaseViewModel<HealthProfileUiState, PartialState,
             is SelfDeclarationIntent.UpdateBloodGroup -> flow { emit(PartialState.BloodGroupUpdated(intent.bloodGroup)) }
             is SelfDeclarationIntent.UpdateLifestyle -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
             is SelfDeclarationIntent.UpdateAllergy -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
+            else -> flow {}
         }
     }
 
-    private fun handleLoadHealthProfile(): Flow<PartialState> = flow {
+    private fun handleLoadHealthProfile(nationalCode: String?): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        // Add a slight delay to simulate network call loading effect
-        delay(500)
-        emit(PartialState.GeneralLoaded(HealthProfileMockData.generalInfo))
-        emit(PartialState.LifestyleLoaded(HealthProfileMockData.lifestyleInfo))
-        emit(PartialState.AllergiesLoaded(HealthProfileMockData.drugAllergies))
+
+        val targetNatCode = nationalCode?.takeIf { it.isNotBlank() } ?: currentPatientNatCode
+
+        getPatientGeneralUseCase(targetNatCode)
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی")) }
+            .collect { general ->
+                val safeNatCode = general.patientNatCode ?: targetNatCode
+                val safePatientId = general.ptientID ?: 0
+
+                currentPatientNatCode = safeNatCode
+                currentPatientId = safePatientId
+
+                emit(PartialState.GeneralLoaded(general.toUiMock()))
+
+                if (safeNatCode.isNotBlank() && safePatientId != 0) {
+                    // Fetch Lifestyle & Self-Declarative info safely
+                    getPatientSelfDeclarativeUseCase(safeNatCode, safePatientId)
+                        .catch { /* non-fatal fallback */ }
+                        .collect { selfDec ->
+                            emit(PartialState.LifestyleLoaded(selfDec.toUiMock()))
+                        }
+
+                    // Fetch Drug Allergies safely
+                    getPatientDrugAllergiesUseCase(safeNatCode, safePatientId)
+                        .catch { /* non-fatal fallback */ }
+                        .collect { allergies ->
+                            emit(PartialState.AllergiesLoaded(allergies.map { it.toUiMock() }))
+                        }
+                }
+            }
+
+        emit(PartialState.Loading(false))
+    }
+
+    private suspend fun submitFullDeclaration(): Boolean {
+        if (currentPatientId == 0 || currentPatientNatCode.isBlank()) {
+            sendEvent(HealthProfileEvent.ShowToast("اطلاعات شناسایی بیمار یا کد ملی یافت نشد."))
+            return false
+        }
+
+        return try {
+            val selfDecState = uiState.value.selfDeclaration
+
+            // A. Update Patient Demographics & Contact & Emergency & Physical
+            val updatePatientReq = UpdatePatientRequest(
+                patientID = currentPatientId,
+                patientNatCode = currentPatientNatCode,
+                patientMobile = selfDecState.contact.mobile,
+                patientEmail = selfDecState.contact.email,
+                patientAddress = selfDecState.contact.address,
+                patientArea = null,
+                patientCityID = null,
+                patientBloodGroup = null,
+                patientMarriage = null,
+                patientJob = selfDecState.personal.job,
+                patientHeight = selfDecState.physical.height,
+                patientWeight = selfDecState.physical.weight,
+                patientCitizenship = selfDecState.personal.citizenship,
+                patientNationality = selfDecState.personal.nationality,
+                patientInsurance = null,
+                emergencyName = selfDecState.emergency.emergencyName,
+                emergencyFamily = selfDecState.emergency.emergencyFamily,
+                emergencyMobile = selfDecState.emergency.emergencyMobile,
+                emergencyEmail = null,
+                emergencyRelation = null,
+                emergencyAddress = null,
+                emergencyArea = null,
+                emergencyCityID = null
+            )
+            updatePatientUseCase(updatePatientReq)
+
+            // B. Sync Diseases & Family History
+            val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
+            selfDecState.diseases.chronicDiseases.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.diseases.mentalIllnesses.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.diseases.cancers.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.family.familyCancers.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
+
+            if (illnessList.isNotEmpty()) {
+                syncIllnessSelfDeclarativesUseCase(
+                    SyncIllnessSelfDeclarativesRequest(
+                        natCode = currentPatientNatCode,
+                        patientID = currentPatientId,
+                        illnessSelfDeclareList = illnessList
+                    )
+                )
+            }
+
+            // C. Sync Drug Allergies
+            val allergyList = selfDecState.allergy.allergies.map {
+                DrugAllergyRequest(drugId = it.drugId.toInt(), allergyComments = it.allergyComments)
+            }
+            if (allergyList.isNotEmpty()) {
+                syncDrugAllergiesUseCase(
+                    SyncDrugAllergiesRequest(
+                        natCode = currentPatientNatCode,
+                        patientID = currentPatientId,
+                        drugAllergyList = allergyList
+                    )
+                )
+            }
+
+            // D. Add / Update Self-Declarative Lifestyle
+            val lifestyleReq = AddSelfDeclarativeRequest(
+                natCode = currentPatientNatCode,
+                patientID = currentPatientId,
+                smoking = if (selfDecState.lifestyle.isSmoking == true) 1 else 0,
+                smokeDesc = selfDecState.lifestyle.smokingPattern,
+                alcoholUse = if (selfDecState.lifestyle.isDrinking == true) 1 else 0,
+                alcoholUseDesc = selfDecState.lifestyle.drinkingPattern,
+                substanceUse = if (selfDecState.lifestyle.hasAddiction == true) 1 else 0,
+                substanceUseDesc = null,
+                exerciseFrequency = if (selfDecState.lifestyle.isExercising == true) 1 else 0,
+                exerciseDesc = selfDecState.lifestyle.exerciseFrequency
+            )
+            addSelfDeclarativeUseCase(lifestyleReq)
+
+            sendEvent(HealthProfileEvent.ShowToast("اطلاعات پرونده سلامت با موفقیت ثبت شد"))
+            true
+        } catch (e: Exception) {
+            sendEvent(HealthProfileEvent.ShowToast("خطا در ثبت اطلاعات: ${e.message}"))
+            false
+        }
     }
 
     override fun reduceState(

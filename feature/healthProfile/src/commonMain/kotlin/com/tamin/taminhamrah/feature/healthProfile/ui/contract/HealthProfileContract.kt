@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.contract
 
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientDrugAllergyMock
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralMock
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativeMock
-import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientDrugAllergyMock
 
 data class HealthProfileUiState(
     val isLoading: Boolean = false,
@@ -34,9 +34,10 @@ data class HealthProfileUiState(
 }
 
 sealed interface HealthProfileIntent {
-    data object LoadHealthProfile : HealthProfileIntent
+    data class LoadHealthProfile(val nationalCode: String? = null) : HealthProfileIntent
 }
 
 sealed interface HealthProfileEvent {
     data object NavigateBack : HealthProfileEvent
+    data class ShowToast(val message: String) : HealthProfileEvent
 }
