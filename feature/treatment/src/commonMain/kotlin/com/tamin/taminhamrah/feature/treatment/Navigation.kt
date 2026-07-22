@@ -11,17 +11,11 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
-import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
-import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
-import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
+import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
-import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 
 /**
@@ -30,7 +24,7 @@ import kotlinx.serialization.Serializable
  * Every sub-flow is its own destination inside [TreatmentRoute.Graph], so the system back button
  * unwinds through the nav back stack rather than through screen-local state. To add a sub-flow:
  * declare a route here, add a `composable<...>` to [treatmentGraph], and hand the hub a callback
- * that navigates to it — nothing outside this file needs to change.
+ * that navigates to it.
  */
 @Serializable
 sealed interface TreatmentRoute {
@@ -69,6 +63,10 @@ sealed interface TreatmentRoute {
         val prescDate: String,
         val trackingCode: String,
     ) : TreatmentRoute
+
+    /** Health profile ("پروندهٔ سلامت") for the main insured person. */
+    @Serializable
+    data class HealthProfile(val nationalCode: String) : TreatmentRoute
 }
 
 fun NavController.navigateToTreatment(navOptions: NavOptions? = null) {
@@ -81,54 +79,33 @@ fun NavController.navigateToTreatment(builder: NavOptionsBuilder.() -> Unit) {
 
 fun NavGraphBuilder.treatmentGraph(
     navController: NavController,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
-        composable<TreatmentRoute.Main> { backStackEntry ->
-            // The hub and the records screen share one graph-scoped ViewModel, so the dependants
-            // the hub loads are the same ones the records patient filter reads. Without this the
-            // records screen gets a fresh ViewModel that never loaded, and the filter is empty.
-            val treatmentViewModel = backStackEntry.sharedViewModel<TreatmentViewModel>(navController)
+        composable<TreatmentRoute.Main> {
             TreatmentScreen(
-                viewModel = treatmentViewModel,
                 onOpenMedicalRecords = { nationalCode ->
                     navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.Default))
                 },
                 onOpenPrescriptions = { nationalCode ->
-                    navController.navigate(
-                        TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE),
-                    )
+                    navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
+                },
+                onOpenHealthProfile = { nationalCode ->
+                    navController.navigate(TreatmentRoute.HealthProfile(nationalCode))
                 },
             )
         }
 
         composable<TreatmentRoute.MedicalRecords> { backStackEntry ->
             val route = backStackEntry.toRoute<TreatmentRoute.MedicalRecords>()
-            // Graph-scoped so the patient filter reuses the dashboard's already-loaded dependants.
-            val treatmentViewModel = backStackEntry.sharedViewModel<TreatmentViewModel>(navController)
-            val treatmentState by treatmentViewModel.uiState.collectAsState()
-
-            // The dashboard normally seeds this; a direct entry (e.g. the prescription shortcut) has
-            // to load it here so the patient filter and national code resolve.
-            LaunchedEffect(Unit) {
-                if (treatmentState.mainUserNationalCode == null) {
-                    treatmentViewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
-                }
-            }
-            // A shortcut passes no code, so fall back to whoever the dashboard has selected.
-            val effectiveNationalCode = route.nationalCode.ifBlank {
-                treatmentState.selectedNationalCode ?: treatmentState.mainUserNationalCode ?: ""
-            }
-
             MedicalRecordsScreen(
-                nationalCode = effectiveNationalCode,
+                nationalCode = route.nationalCode,
                 initialTab = route.tab,
-                patients = treatmentState.toPatientList(),
                 onBack = onBack,
-                onOpenRecord = { record ->
+                onOpenRecord = { record, patientNationalCode ->
                     navController.navigate(
                         TreatmentRoute.RecordDetail(
-                            nationalCode = effectiveNationalCode,
+                            nationalCode = patientNationalCode,
                             noteHeadId = record.noteHeadEprescID,
                             type = record.prescType,
                             flagSata = record.flagSata,
@@ -137,7 +114,7 @@ fun NavGraphBuilder.treatmentGraph(
                             trackingCode = record.trackingCode,
                         )
                     )
-                }
+                },
             )
         }
 
@@ -162,6 +139,14 @@ fun NavGraphBuilder.treatmentGraph(
                 docName = route.docName,
                 prescDate = route.prescDate,
                 trackingCode = route.trackingCode,
+                onBack = onBack,
+            )
+        }
+
+        composable<TreatmentRoute.HealthProfile> { backStackEntry ->
+            val route = backStackEntry.toRoute<TreatmentRoute.HealthProfile>()
+            HealthProfileScreen(
+                nationalCode = route.nationalCode,
                 onBack = onBack,
             )
         }

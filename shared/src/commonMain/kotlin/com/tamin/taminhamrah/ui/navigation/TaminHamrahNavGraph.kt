@@ -97,8 +97,6 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceCo
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
@@ -331,7 +329,7 @@ internal fun TaminHamrahNavGraph(
                             navController.navigateToCalculatePension()
                         },
                         onNavigateToPrescription = {
-                            // The treatment graph's shared ViewModel resolves the national code.
+                            // No code passed; MedicalRecordsScreen falls back to the main insured person.
                             navController.navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
                         },
                         onNavigateToDeservedTreatment = {

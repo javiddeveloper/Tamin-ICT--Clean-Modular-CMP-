@@ -18,4 +18,5 @@ val databaseModule = module {
     single { get<TaminXDatabase>().branchDao() }
     single { get<TaminXDatabase>().menuDao() }
     single { get<TaminXDatabase>().treatmentDao() }
+    single { get<TaminXDatabase>().healthDao() }
 }

@@ -54,8 +54,8 @@ private val CARD_OVERLAP = 40.dp
 @Composable
 fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel(),
-    onOpenMedicalRecords: (String) -> Unit = {},
-    onOpenHealthProfile: () -> Unit = {},
+    onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
+    onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenCenters: () -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
     onOpenMedicalApprovals: () -> Unit = {},
@@ -80,17 +80,17 @@ fun TreatmentScreen(
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-    TreatmentContent(
-        state = uiState,
-        onIntent = viewModel::sendIntent,
-        onOpenMedicalRecords = onOpenMedicalRecords,
-        onOpenHealthProfile = onOpenHealthProfile,
-        onOpenCenters = onOpenCenters,
-        onOpenPrescriptions = onOpenPrescriptions,
-        onOpenMedicalApprovals = onOpenMedicalApprovals,
-        onOpenMiscClaims = onOpenMiscClaims,
-        onSearch = onSearch,
-    )
+        TreatmentContent(
+            state = uiState,
+            onIntent = viewModel::sendIntent,
+            onOpenMedicalRecords = onOpenMedicalRecords,
+            onOpenHealthProfile = onOpenHealthProfile,
+            onOpenCenters = onOpenCenters,
+            onOpenPrescriptions = onOpenPrescriptions,
+            onOpenMedicalApprovals = onOpenMedicalApprovals,
+            onOpenMiscClaims = onOpenMiscClaims,
+            onSearch = onSearch,
+        )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
             hostState = snackbarHostState,
@@ -129,8 +129,8 @@ fun TreatmentContent(
     state: TreatmentUiState,
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenMedicalRecords: (String) -> Unit = {},
-    onOpenHealthProfile: () -> Unit = {},
+    onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
+    onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenCenters: () -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
     onOpenMedicalApprovals: () -> Unit = {},
@@ -168,9 +168,12 @@ fun TreatmentContent(
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
-                // Nothing to open until a patient is selected.
+                // Records are feature-flag gated, so the tap fires an intent; the emitted
+                // NavigateToRecords event carries the selected patient's national code.
                 onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) },
-                onOpenHealthProfile = onOpenHealthProfile,
+                // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
+                // which patient card is in view. No-op until the main code is known.
+                onOpenHealthProfile = { state.mainUserNationalCode?.let(onOpenHealthProfile) },
                 onOpenCenters = onOpenCenters,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
@@ -261,4 +264,3 @@ fun TreatmentScreenPreview() {
         )
     }
 }
-

@@ -28,6 +28,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
@@ -119,6 +121,13 @@ val remoteModule = module {
         PersonalInboxRemoteDataSourceImpl(
             personalInboxApiService = get(named("personalInboxApiService")),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<HealthRemoteDataSource> {
+        HealthRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }
