@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -23,17 +22,15 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationEvent
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import com.tamin.taminhamrah.util.formatDecimal
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -86,7 +83,7 @@ fun HealthProfileMainContent(
     state: HealthProfileUiState,
     selfDecState: SelfDeclarationUiState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onSelfDecIntent: (SelfDeclarationIntent) -> Unit,
+    onSelfDecIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -103,7 +100,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationIntroScreen(
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.GATE))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.GATE))
                         }
                     )
                 }
@@ -112,16 +109,17 @@ fun HealthProfileMainContent(
                         state = selfDecState.identity,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO))
                         }
                     )
                 }
                 SelfDeclarationStep.PERSONAL -> {
                     SelfDeclarationPersonalScreen(
                         state = selfDecState.personal,
+                        maritalStatusOptions = state.maritalStatusOptions,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
                         }
                     )
                 }
@@ -130,7 +128,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.contact,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PERSONAL))
                         }
                     )
                 }
@@ -139,7 +137,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.emergency,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.CONTACT))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.CONTACT))
                         }
                     )
                 }
@@ -148,7 +146,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.physical,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
                         }
                     )
                 }
@@ -157,7 +155,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.diseases,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
                         }
                     )
                 }
@@ -166,7 +164,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.family,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.DISEASES))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES))
                         }
                     )
                 }
@@ -175,7 +173,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.bloodGroup,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.FAMILY))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
                         }
                     )
                 }
@@ -184,7 +182,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.lifestyle,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.BLOOD))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD))
                         }
                     )
                 }
@@ -193,7 +191,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.allergy,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
                         }
                     )
                 }
@@ -202,7 +200,7 @@ fun HealthProfileMainContent(
                         state = selfDecState,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
                         }
                     )
                 }
@@ -211,7 +209,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationSuccessScreen(
                         onFinish = { enterProfile ->
                             if (enterProfile) {
-                                onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.COMPLETED))
+                                onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.COMPLETED))
                             } else {
                                 onBackClicked()
                             }
@@ -333,8 +331,9 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                     )
                     MetricItem(
                         label = "شاخص توده بدنی (BMI)",
-                        value = general.patientBMI?.let { String.format("%.1f", it) } ?: "نامشخص",
+                        value = general.patientBMI.formatDecimal(1) ?: "نامشخص"     ,
                         modifier = Modifier.weight(1f)
+
                     )
                 }
             }
@@ -352,13 +351,13 @@ private fun HealthProfileContent(state: HealthProfileUiState) {
                     SectionHeaderTitle(title = "سبک زندگی و خود اظهاری",)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    ProfileRowItem(label = "مصرف سیگار / دخانیات:", value = lifestyle.smokingStatusTitle ?: "نامشخص")
+                    ProfileRowItem(label = "مصرف سیگار / دخانیات:", value = lifestyle.smokingStatus.toString() ?: "نامشخص")
                     ProfileRowItem(label = "توضیحات دخانیات:", value = lifestyle.smokingDesc ?: "ندارد")
-                    ProfileRowItem(label = "مصرف الکل:", value = lifestyle.alcoholUsageTitle ?: "نامشخص")
+                    ProfileRowItem(label = "مصرف الکل:", value = lifestyle.alcoholUsage.toString() ?: "نامشخص")
                     ProfileRowItem(label = "توضیحات الکل:", value = lifestyle.alcoholDesc ?: "ندارد")
-                    ProfileRowItem(label = "فراوانی ورزش:", value = lifestyle.exerciseFreqTitle ?: "نامشخص")
+                    ProfileRowItem(label = "فراوانی ورزش:", value = lifestyle.exerciseFreq.toString() ?: "نامشخص")
                     ProfileRowItem(label = "توضیحات فعالیت ورزشی:", value = lifestyle.exerciseDesc ?: "ندارد")
-                    ProfileRowItem(label = "سوء مصرف مواد:", value = lifestyle.substanceUsageTitle ?: "نامشخص")
+                    ProfileRowItem(label = "سوء مصرف مواد:", value = lifestyle.substanceUsage.toString() ?: "نامشخص")
                 }
             }
         }

@@ -14,19 +14,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.AllergyStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientDrugAllergyMock
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
 
 @Composable
 fun SelfDeclarationAllergyScreen(
     state: AllergyStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
@@ -50,7 +50,7 @@ fun SelfDeclarationAllergyScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی (بررسی نهایی)",
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.REVIEW)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.REVIEW)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )
@@ -112,7 +112,7 @@ fun SelfDeclarationAllergyScreen(
                         title = allergy.drugName,
                         description = allergy.allergyComments,
                         onDelete = {
-                            onIntent(SelfDeclarationIntent.UpdateAllergy(
+                            onIntent(HealthProfileIntent.UpdateAllergy(
                                 state.copy(allergies = state.allergies.filterIndexed { i, _ -> i != idx })
                             ))
                         }
@@ -173,14 +173,16 @@ fun SelfDeclarationAllergyScreen(
                             Button(
                                 onClick = {
                                     if (selectedDrugIndex >= 0) {
-                                        val allergy = PatientDrugAllergyMock(
-                                            drugId = (state.allergies.size + 1).toLong(),
+                                        //todo
+                                        val allergy = DrugAllergyItemPR(
+                                            drugId = selectedDrugIndex,
                                             drugName = drugList[selectedDrugIndex],
                                             allergyComments = allergyDesc.ifEmpty { "فاقد توضیحات عارضه" }
                                         )
-                                        onIntent(SelfDeclarationIntent.UpdateAllergy(
+                                        onIntent(HealthProfileIntent.UpdateAllergy(
                                             state.copy(allergies = state.allergies + allergy)
-                                        ))
+                                        )
+                                        )
                                     }
                                     showAddDialog = false
                                 },
@@ -220,7 +222,7 @@ fun SelfDeclarationAllergyScreenPreview() {
         SelfDeclarationAllergyScreen(
             state = AllergyStepState(
                 allergies = listOf(
-                    PatientDrugAllergyMock(1, "پنی‌سیلین", "راش پوستی")
+//                    PatientDrugAllergyMock(1, "پنی‌سیلین", "راش پوستی")
                 )
             ),
             onIntent = {},

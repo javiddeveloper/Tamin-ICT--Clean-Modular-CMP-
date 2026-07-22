@@ -3,36 +3,34 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.ContactStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 
 @Composable
 fun SelfDeclarationContactScreen(
     state: ContactStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-    val isNextEnabled = state.mobile.length >= 10 && state.city.isNotEmpty() && state.province.isNotEmpty() && state.address.isNotEmpty()
+    val isNextEnabled = state.mobile.length >= 10 && state.cityLabel.isNotEmpty() && state.provinceLabel.isNotEmpty() && state.address.isNotEmpty()
 
     Scaffold(
         topBar = {
@@ -46,7 +44,7 @@ fun SelfDeclarationContactScreen(
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
                 primaryEnabled = isNextEnabled,
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.EMERGENCY)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )
@@ -81,7 +79,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.mobile,
                 onValueChange = { mob ->
-                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(mobile = mob)))
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(mobile = mob)))
                 },
                 label = "شماره تلفن همراه",
                 placeholder = "۰۹۱۲۳۴۵۶۷۸۹"
@@ -90,7 +88,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.landline,
                 onValueChange = { land ->
-                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(landline = land)))
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(landline = land)))
                 },
                 label = "تلفن ثابت (به همراه کد استان)",
                 placeholder = "۰۲۱۲۲۳۳۴۴۵۵"
@@ -99,9 +97,9 @@ fun SelfDeclarationContactScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
                     StyledTextField(
-                        value = state.province,
+                        value = state.provinceLabel,
                         onValueChange = { prov ->
-                            onIntent(SelfDeclarationIntent.UpdateContact(state.copy(province = prov)))
+                            onIntent(HealthProfileIntent.UpdateContact(state.copy(provinceLabel = prov)))
                         },
                         label = "استان",
                         placeholder = "مثلاً تهران"
@@ -109,9 +107,9 @@ fun SelfDeclarationContactScreen(
                 }
                 Box(modifier = Modifier.weight(1f)) {
                     StyledTextField(
-                        value = state.city,
+                        value = state.cityLabel,
                         onValueChange = { c ->
-                            onIntent(SelfDeclarationIntent.UpdateContact(state.copy(city = c)))
+                            onIntent(HealthProfileIntent.UpdateContact(state.copy(cityLabel = c)))
                         },
                         label = "شهر",
                         placeholder = "مثلاً تهران"
@@ -122,7 +120,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.address,
                 onValueChange = { addr ->
-                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(address = addr)))
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(address = addr)))
                 },
                 label = "نشانی کامل محل سکونت",
                 placeholder = "خیابان، کوچه، پلاک، واحد",
@@ -130,9 +128,9 @@ fun SelfDeclarationContactScreen(
             )
 
             StyledTextField(
-                value = state.postalCode,
+                value = state.postcode,
                 onValueChange = { post ->
-                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(postalCode = post)))
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(postcode = post)))
                 },
                 label = "کد پستی ۱۰ رقمی",
                 placeholder = "۱۲۳۴۵۶۷۸۹۰"
@@ -166,7 +164,7 @@ fun SelfDeclarationContactScreen(
 fun SelfDeclarationContactScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationContactScreen(
-            state = ContactStepState(city = "تهران", province = "تهران", address = "خیابان آزادی"),
+            state = ContactStepState(cityLabel = "تهران", provinceLabel = "تهران", address = "خیابان آزادی"),
             onIntent = {},
             onBackClicked = {}
         )

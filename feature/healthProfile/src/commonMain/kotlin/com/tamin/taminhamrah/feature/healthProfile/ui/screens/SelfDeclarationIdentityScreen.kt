@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.IdentityStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -28,7 +28,7 @@ import taminx.feature.healthprofile.generated.resources.*
 @Composable
 fun SelfDeclarationIdentityScreen(
     state: IdentityStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
@@ -46,7 +46,7 @@ fun SelfDeclarationIdentityScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = stringResource(Res.string.health_btn_next_step),
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PERSONAL)) },
                 secondaryText = stringResource(Res.string.health_btn_cancel),
                 onSecondaryClick = onBackClicked
             )
