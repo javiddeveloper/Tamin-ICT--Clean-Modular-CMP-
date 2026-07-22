@@ -99,6 +99,10 @@ import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
@@ -355,6 +359,10 @@ internal fun TaminHamrahNavGraph(
 
                 treatmentGraph(
                     navController = navController,
+                    onBack = { navController.popBackStack() }
+                )
+
+                healthProfileScreen(
                     onBack = { navController.popBackStack() }
                 )
 

@@ -14,9 +14,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.ContactStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationContactScreen(
-    state: SelfDeclarationUiState,
+    state: ContactStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -78,7 +78,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.mobile,
                 onValueChange = { mob ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(mobile = mob) })
+                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(mobile = mob)))
                 },
                 label = "شماره تلفن همراه",
                 placeholder = "۰۹۱۲۳۴۵۶۷۸۹"
@@ -87,7 +87,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.landline,
                 onValueChange = { land ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(landline = land) })
+                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(landline = land)))
                 },
                 label = "تلفن ثابت (به همراه کد استان)",
                 placeholder = "۰۲۱۲۲۳۳۴۴۵۵"
@@ -98,7 +98,7 @@ fun SelfDeclarationContactScreen(
                     StyledTextField(
                         value = state.province,
                         onValueChange = { prov ->
-                            onIntent(SelfDeclarationIntent.UpdateState { copy(province = prov) })
+                            onIntent(SelfDeclarationIntent.UpdateContact(state.copy(province = prov)))
                         },
                         label = "استان",
                         placeholder = "مثلاً تهران"
@@ -108,7 +108,7 @@ fun SelfDeclarationContactScreen(
                     StyledTextField(
                         value = state.city,
                         onValueChange = { c ->
-                            onIntent(SelfDeclarationIntent.UpdateState { copy(city = c) })
+                            onIntent(SelfDeclarationIntent.UpdateContact(state.copy(city = c)))
                         },
                         label = "شهر",
                         placeholder = "مثلاً تهران"
@@ -119,7 +119,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.address,
                 onValueChange = { addr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(address = addr) })
+                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(address = addr)))
                 },
                 label = "نشانی کامل محل سکونت",
                 placeholder = "خیابان، کوچه، پلاک، واحد",
@@ -129,7 +129,7 @@ fun SelfDeclarationContactScreen(
             StyledTextField(
                 value = state.postalCode,
                 onValueChange = { post ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(postalCode = post) })
+                    onIntent(SelfDeclarationIntent.UpdateContact(state.copy(postalCode = post)))
                 },
                 label = "کد پستی ۱۰ رقمی",
                 placeholder = "۱۲۳۴۵۶۷۸۹۰"
@@ -163,9 +163,10 @@ fun SelfDeclarationContactScreen(
 fun SelfDeclarationContactScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationContactScreen(
-            state = SelfDeclarationUiState(city = "تهران", province = "تهران", address = "خیابان آزادی"),
+            state = ContactStepState(city = "تهران", province = "تهران", address = "خیابان آزادی"),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

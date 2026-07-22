@@ -9,7 +9,8 @@ data class HealthProfileUiState(
     val error: String? = null,
     val generalInfo: PatientGeneralMock? = null,
     val lifestyleInfo: PatientSelfDeclarativeMock? = null,
-    val drugAllergies: List<PatientDrugAllergyMock> = emptyList()
+    val drugAllergies: List<PatientDrugAllergyMock> = emptyList(),
+    val selfDeclaration: SelfDeclarationUiState = SelfDeclarationUiState()
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
@@ -17,6 +18,18 @@ data class HealthProfileUiState(
         data class GeneralLoaded(val info: PatientGeneralMock) : PartialState
         data class LifestyleLoaded(val info: PatientSelfDeclarativeMock) : PartialState
         data class AllergiesLoaded(val list: List<PatientDrugAllergyMock>) : PartialState
+
+        data class StepChanged(val step: SelfDeclarationStep) : PartialState
+        data class IdentityUpdated(val identity: IdentityStepState) : PartialState
+        data class PersonalUpdated(val personal: PersonalStepState) : PartialState
+        data class ContactUpdated(val contact: ContactStepState) : PartialState
+        data class EmergencyUpdated(val emergency: EmergencyStepState) : PartialState
+        data class PhysicalUpdated(val physical: PhysicalStepState) : PartialState
+        data class DiseasesUpdated(val diseases: DiseasesStepState) : PartialState
+        data class FamilyUpdated(val family: FamilyStepState) : PartialState
+        data class BloodGroupUpdated(val bloodGroup: BloodGroupStepState) : PartialState
+        data class LifestyleUpdated(val lifestyle: LifestyleStepState) : PartialState
+        data class AllergyUpdated(val allergy: AllergyStepState) : PartialState
     }
 }
 

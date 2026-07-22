@@ -11,9 +11,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.EmergencyStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationEmergencyScreen(
-    state: SelfDeclarationUiState,
+    state: EmergencyStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -75,7 +75,7 @@ fun SelfDeclarationEmergencyScreen(
             StyledTextField(
                 value = state.emergencyName,
                 onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(emergencyName = valStr) })
+                    onIntent(SelfDeclarationIntent.UpdateEmergency(state.copy(emergencyName = valStr)))
                 },
                 label = "نام مخاطب اضطراری",
                 placeholder = "وارد کنید"
@@ -84,7 +84,7 @@ fun SelfDeclarationEmergencyScreen(
             StyledTextField(
                 value = state.emergencyFamily,
                 onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(emergencyFamily = valStr) })
+                    onIntent(SelfDeclarationIntent.UpdateEmergency(state.copy(emergencyFamily = valStr)))
                 },
                 label = "نام خانوادگی",
                 placeholder = "وارد کنید"
@@ -93,7 +93,7 @@ fun SelfDeclarationEmergencyScreen(
             StyledTextField(
                 value = state.emergencyRelation,
                 onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(emergencyRelation = valStr) })
+                    onIntent(SelfDeclarationIntent.UpdateEmergency(state.copy(emergencyRelation = valStr)))
                 },
                 label = "نسبت با شما",
                 placeholder = "مثلاً همسر، پدر، خواهر و..."
@@ -102,7 +102,7 @@ fun SelfDeclarationEmergencyScreen(
             StyledTextField(
                 value = state.emergencyMobile,
                 onValueChange = { valStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(emergencyMobile = valStr) })
+                    onIntent(SelfDeclarationIntent.UpdateEmergency(state.copy(emergencyMobile = valStr)))
                 },
                 label = "شماره تلفن همراه اضطراری",
                 placeholder = "09123456789",
@@ -119,9 +119,10 @@ fun SelfDeclarationEmergencyScreen(
 fun SelfDeclarationEmergencyScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationEmergencyScreen(
-            state = SelfDeclarationUiState(emergencyName = "مریم", emergencyRelation = "همسر", emergencyMobile = "09129876543"),
+            state = EmergencyStepState(emergencyName = "مریم", emergencyRelation = "همسر", emergencyMobile = "09129876543"),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+
