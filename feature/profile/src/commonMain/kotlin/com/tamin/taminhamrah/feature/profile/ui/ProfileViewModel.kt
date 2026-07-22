@@ -69,10 +69,10 @@ class ProfileViewModel(
         }
     }
 
-    private fun handleLoadProfile(providedUserId: String?): Flow<PartialState> {
+    private fun handleLoadProfile(providedUserId: String?): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
 
         val userIdFlow = flow {
-            emit(PartialState.Loading(true))
             val userId = providedUserId ?: tokenStoreManager.getUserId()
             emit(PartialState.SetUserId(userId))
         }
@@ -100,7 +100,9 @@ class ProfileViewModel(
             }
         }
 
-        return merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow)
+        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow).collect {
+            emit(it)
+        }
     }
 
     private fun handleLogout(): Flow<PartialState> = flow {
@@ -210,14 +212,15 @@ class ProfileViewModel(
         )
 
         is PartialState.SetUserId -> currentState.copy(
-            isLoading = false,
             userId = partialState.userId
         )
 
         is PartialState.ProfileImageLoaded -> currentState.copy(
+            isProfileImageLoading = false,
             profileImage = partialState.image
         )
         is PartialState.IdentityInfoLoaded -> currentState.copy(
+            isLoading = false,
             identityInfo = partialState.info
         )
 
@@ -239,7 +242,11 @@ class ProfileViewModel(
             imageRequestError = partialState.message
         )
 
-        is PartialState.ScreenStateChanged -> currentState
+        is PartialState.ScreenStateChanged -> when (partialState) {
+            is PartialState.ScreenStateChanged.Loading -> currentState.copy(isLoading = true)
+            is PartialState.ScreenStateChanged.Success -> currentState.copy(isLoading = false)
+            is PartialState.ScreenStateChanged.Error -> currentState.copy(isLoading = false, error = partialState.message)
+        }
     }
 
     override fun createErrorState(message: String): PartialState =
