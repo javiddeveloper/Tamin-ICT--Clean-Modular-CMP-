@@ -50,9 +50,6 @@ fun ServiceCard(
         service.status == MenuServiceStatusDN.COMPLETELY_DISABLED ||
         service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR
 
-    // Outer Box no longer paints its own background (that was causing the sharp-corner
-    // artifact behind the rounded Row). It reserves a little top/end padding so the
-    // badge's overflow has real layout space instead of being clipped by an ancestor.
     Box(
         modifier = modifier
             .wrapContentSize()
@@ -65,16 +62,16 @@ fun ServiceCard(
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outlineVariant,
-                    shape = MaterialTheme.shapes.medium
+                    shape = RoundedCornerShape(16.dp)
                 )
-                .clip(MaterialTheme.shapes.medium)
+                .clip(RoundedCornerShape(16.dp))
                 .background(color = MaterialTheme.colorScheme.surface)
                 .clickable(
                     enabled = true,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) { onClick() }
-                .padding(Spacing.sm)
+                .padding(Spacing.lg)
                 .alpha(cardAlpha),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -113,7 +110,6 @@ fun ServiceCard(
                             shape = RoundedCornerShape(CornerRadius.xl)
                         )
                 )
-
                 Icon(
                     imageVector = getIconForName(service.icon),
                     contentDescription = service.name,
@@ -140,11 +136,11 @@ fun ServiceCard(
         if (showRedDot) {
             Box(
                 modifier = Modifier
-                    .size(IconSize.statIcon)
+                    .size(IconSize.small)
                     .align(Alignment.TopEnd)
                     .offset(
-                        x = IconSize.statIcon / 2,
-                        y = -(IconSize.statIcon / 2)
+                        x = IconSize.small / 4,
+                        y = -(IconSize.small / 4)
                     )
                     .background(
                         MaterialTheme.colorScheme.error,
