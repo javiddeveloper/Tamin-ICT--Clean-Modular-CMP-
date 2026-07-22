@@ -34,6 +34,10 @@ class HealthProfileViewModel(
     private var currentPatientNatCode: String = ""
     private var currentPatientId: Int = 0
 
+    init {
+        sendIntent(HealthProfileIntent.LoadHealthProfile())
+    }
+
     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
         return when (intent) {
             is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile(intent.nationalCode)
@@ -213,18 +217,78 @@ class HealthProfileViewModel(
             isLoading = false,
             error = partialState.message
         )
-        is PartialState.GeneralLoaded -> currentState.copy(
-            isLoading = false,
-            generalInfo = partialState.info
-        )
-        is PartialState.LifestyleLoaded -> currentState.copy(
-            isLoading = false,
-            lifestyleInfo = partialState.info
-        )
-        is PartialState.AllergiesLoaded -> currentState.copy(
-            isLoading = false,
-            drugAllergies = partialState.list
-        )
+        is PartialState.GeneralLoaded -> {
+            val info = partialState.info
+            val currentSelfDec = currentState.selfDeclaration
+
+            val bgLetter = info.patientBloodGroup.takeWhile { it.isLetter() || it == ' ' }.trim()
+            val bgRh = info.patientBloodGroup.takeLastWhile { it == '+' || it == '-' }.trim()
+
+            currentState.copy(
+                isLoading = false,
+                generalInfo = info,
+                selfDeclaration = currentSelfDec.copy(
+                    identity = currentSelfDec.identity.copy(
+                        patientName = info.patientName,
+                        patientFamily = info.patientFamily,
+                        patientFather = info.patientFather,
+                        patientGender = info.patientGender,
+                        patientBirthDate = info.patientBirthDate
+                    ),
+                    contact = currentSelfDec.contact.copy(
+                        mobile = info.patientMobile,
+                        address = info.patientAddress
+                    ),
+                    emergency = currentSelfDec.emergency.copy(
+                        emergencyName = info.emergencyName,
+                        emergencyFamily = info.emergencyFamily,
+                        emergencyRelation = info.emergencyRelation,
+                        emergencyMobile = info.emergencyMobile
+                    ),
+                    physical = currentSelfDec.physical.copy(
+                        height = info.patientHeight.toInt(),
+                        weight = info.patientWeight.toInt()
+                    ),
+                    bloodGroup = currentSelfDec.bloodGroup.copy(
+                        selectedBloodGroupLetter = bgLetter.ifBlank { null },
+                        selectedBloodGroupRh = bgRh.ifBlank { null }
+                    )
+                )
+            )
+        }
+        is PartialState.LifestyleLoaded -> {
+            val info = partialState.info
+            val currentSelfDec = currentState.selfDeclaration
+
+            currentState.copy(
+                isLoading = false,
+                lifestyleInfo = info,
+                selfDeclaration = currentSelfDec.copy(
+                    lifestyle = currentSelfDec.lifestyle.copy(
+                        isSmoking = info.smokingStatusTitle.contains("سیگار").or(info.smokingDesc.isNotBlank()),
+                        smokingPattern = info.smokingDesc,
+                        isDrinking = info.alcoholUsageTitle.isNotBlank().and(!info.alcoholUsageTitle.contains("خیر")),
+                        drinkingPattern = info.alcoholDesc,
+                        isExercising = info.exerciseFreqTitle.isNotBlank().and(!info.exerciseFreqTitle.contains("خیر")),
+                        exerciseFrequency = info.exerciseDesc
+                    )
+                )
+            )
+        }
+        is PartialState.AllergiesLoaded -> {
+            val list = partialState.list
+            val currentSelfDec = currentState.selfDeclaration
+
+            currentState.copy(
+                isLoading = false,
+                drugAllergies = list,
+                selfDeclaration = currentSelfDec.copy(
+                    allergy = currentSelfDec.allergy.copy(
+                        allergies = list
+                    )
+                )
+            )
+        }
         is PartialState.StepChanged -> currentState.copy(
             selfDeclaration = currentState.selfDeclaration.copy(currentStep = partialState.step)
         )

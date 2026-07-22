@@ -22,27 +22,27 @@ enum class SelfDeclarationStep {
 
 // Step 1: Read-only Identity Info
 data class IdentityStepState(
-    val patientName: String = "علی",
-    val patientFamily: String = "محمدی",
-    val patientFather: String = "حسین",
-    val patientGender: String = "مرد",
-    val patientBirthDate: String = "۱۳۶۸/۰۵/۱۲",
-    val insuranceNumber: String = "۰۰۲۳۴۵۶۷۸۹",
-    val insuranceType: String = "اجباری (کارگری)",
-    val lastVisitDate: String = "۱۴۰۴/۰۲/۱۸"
+    val patientName: String = "",
+    val patientFamily: String = "",
+    val patientFather: String = "",
+    val patientGender: String = "",
+    val patientBirthDate: String = "",
+    val insuranceNumber: String = "",
+    val insuranceType: String = "",
+    val lastVisitDate: String = ""
 )
 
 // Step 2: Personal Info
 data class PersonalStepState(
     val maritalStatus: String = "",
     val job: String = "",
-    val citizenship: String = "ایرانی",
-    val nationality: String = "ایرانی"
+    val citizenship: String = "",
+    val nationality: String = ""
 )
 
 // Step 3: Contact Info
 data class ContactStepState(
-    val mobile: String = "09123456789",
+    val mobile: String = "",
     val email: String = "",
     val province: String = "",
     val city: String = "",
@@ -62,8 +62,8 @@ data class EmergencyStepState(
 
 // Step 5: Physical Stats
 data class PhysicalStepState(
-    val height: Int = 170,
-    val weight: Int = 70
+    val height: Int = 0,
+    val weight: Int = 0
 )
 
 // Step 6: Health Questions (Diseases)
@@ -162,5 +162,3 @@ sealed interface SelfDeclarationIntent : HealthProfileIntent {
 sealed interface SelfDeclarationEvent {
     data object NavigateBack : SelfDeclarationEvent
 }
-
-
