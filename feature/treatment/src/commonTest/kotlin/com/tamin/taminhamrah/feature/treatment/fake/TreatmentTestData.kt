@@ -1,9 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.fake
 
-import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
-import com.tamin.taminhamrah.model.health.PatientGeneralDN
-import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
-import com.tamin.taminhamrah.model.health.PatientHospitalizationsDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
@@ -55,49 +51,6 @@ object TreatmentTestData {
         lastName = "Name",
         nationalId = nationalId,
         id = 1L
-    )
-
-    fun patientGeneral(natCode: String = MAIN_NATIONAL_CODE) = PatientGeneralDN(
-        ptientID = 1,
-        patientName = "Seyed",
-        patientFamily = "Mirfazli",
-        patientNatCode = natCode,
-        patientAge = "70",
-        patientGender = "مرد",
-        patientBirthDate = "13280407",
-        patientMobile = null,
-        patientAddress = null,
-        patientFather = null
-    )
-
-    fun selfDeclarative(patientID: Int = 1) = PatientSelfDeclarativeDN(
-        alcoholDesc = null,
-        alcoholUsage = null,
-        alcoholUsageTitle = null,
-        exerciseDesc = null,
-        exerciseFreq = null,
-        exerciseFreqTitle = null,
-        lastUpdateDate = null,
-        objectID = patientID,
-        smokingDesc = null,
-        smokingStatus = null,
-        smokingStatusTitle = null,
-        substanceDesc = null,
-        substanceUsage = null,
-        substanceUsageTitle = null
-    )
-
-    fun drugAllergy() = DrugItemAllergiesDN(
-        allergyComments = "Comments", drugId = 1, drugName = "Drug"
-    )
-
-    fun hospitalization() = PatientHospitalizationsDN(
-        admId = 1, admSource = null, admType = null, comments = null, docID = null,
-        docSpeciality = null, doctorName = "Dr", finalDiagCode = null, finalDiagDesc = "Diag",
-        firstDiagCode = null, firstDiagDesc = null, healthcareProvider = "Hospital",
-        hospitalizedDays = 3, hospitalizedEndDate = "14020105", hospitalizedStartDate = "14020102",
-        outcomeDesc = null, referDocId = null, referDocName = null, referDocSpeciality = null,
-        referHealthcareProvider = null
     )
 
     fun prescription() = ElectronicPrescriptionDN(

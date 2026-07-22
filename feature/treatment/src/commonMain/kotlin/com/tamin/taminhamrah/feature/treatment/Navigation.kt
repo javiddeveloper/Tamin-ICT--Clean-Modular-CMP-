@@ -6,16 +6,13 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
-import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileScreen
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
-import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import kotlinx.serialization.Serializable
 
 /**
@@ -63,23 +60,14 @@ sealed interface TreatmentRoute {
         val prescDate: String,
         val trackingCode: String,
     ) : TreatmentRoute
-
-    /** Health profile ("پروندهٔ سلامت") for the main insured person. */
-    @Serializable
-    data class HealthProfile(val nationalCode: String) : TreatmentRoute
-}
-
-fun NavController.navigateToTreatment(navOptions: NavOptions? = null) {
-    navigate(TreatmentRoute.Main, navOptions)
-}
-
-fun NavController.navigateToTreatment(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(TreatmentRoute.Main, builder)
 }
 
 fun NavGraphBuilder.treatmentGraph(
     navController: NavController,
     onBack: () -> Unit,
+    // Health profile is its own feature module now, reached at the app level; the hub tile routes
+    // out through this rather than owning the destination.
+    onNavigateToHealthProfile: (nationalCode: String) -> Unit,
 ) {
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
         composable<TreatmentRoute.Main> {
@@ -90,9 +78,7 @@ fun NavGraphBuilder.treatmentGraph(
                 onOpenPrescriptions = { nationalCode ->
                     navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
                 },
-                onOpenHealthProfile = { nationalCode ->
-                    navController.navigate(TreatmentRoute.HealthProfile(nationalCode))
-                },
+                onOpenHealthProfile = onNavigateToHealthProfile,
             )
         }
 
@@ -139,14 +125,6 @@ fun NavGraphBuilder.treatmentGraph(
                 docName = route.docName,
                 prescDate = route.prescDate,
                 trackingCode = route.trackingCode,
-                onBack = onBack,
-            )
-        }
-
-        composable<TreatmentRoute.HealthProfile> { backStackEntry ->
-            val route = backStackEntry.toRoute<TreatmentRoute.HealthProfile>()
-            HealthProfileScreen(
-                nationalCode = route.nationalCode,
                 onBack = onBack,
             )
         }

@@ -61,6 +61,8 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -99,10 +101,6 @@ import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
-import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
-import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
@@ -359,7 +357,10 @@ internal fun TaminHamrahNavGraph(
 
                 treatmentGraph(
                     navController = navController,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onNavigateToHealthProfile = { nationalCode ->
+                        navController.navigateToHealthProfile(nationalCode)
+                    },
                 )
 
                 healthProfileScreen(
@@ -478,16 +479,6 @@ internal fun TaminHamrahNavGraph(
                 )
             }
         )
-    }
-}
-
-@Composable
-fun SampleScreen(title: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = title)
     }
 }
 
