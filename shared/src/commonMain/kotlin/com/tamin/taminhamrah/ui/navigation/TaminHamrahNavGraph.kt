@@ -78,8 +78,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
-import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
@@ -89,7 +87,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptional
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.treatmentScreen
+import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -193,7 +191,7 @@ internal fun TaminHamrahNavGraph(
             isSelected = currentTab == BottomTab.TREATMENT,
             icon = Res.drawable.ic_treatment_menu,
             onClick = {
-                navController.navigate(TreatmentRoute) {
+                navController.navigate(TreatmentRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -244,7 +242,7 @@ internal fun TaminHamrahNavGraph(
                         )
                 ) {
                     FloatingGlassNavigationBar(
-                        hazeState = hazeState, 
+                        hazeState = hazeState,
                         isBlurEnabled = isBottomBarVisible
                     ) {
 
@@ -314,19 +312,15 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                treatmentScreen(
-                    onOpenHealthProfile = {
-                        navController.navigateToHealthProfile()
-                    }
+                treatmentGraph(
+                    navController = navController,
+                    onBack = { navController.popBackStack() }
                 )
 
                 profileGraph(
                     navController = navController,
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
-                    },
-                    onNavigateToHealthProfile = {
-                        navController.navigateToHealthProfile()
                     },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
@@ -373,8 +367,6 @@ internal fun TaminHamrahNavGraph(
                 workshopsScreen(navController)
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
-
-                healthProfileScreen(onBack = { navController.popBackStack() })
             }
 
             androidx.compose.animation.AnimatedVisibility(

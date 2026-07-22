@@ -5,38 +5,62 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
+import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileScreen
 import kotlinx.serialization.Serializable
 
+/**
+ * Destinations of the treatment ("درمان") tab.
+ *
+ * Every sub-flow is its own destination inside [TreatmentRoute.Graph], so the system back button
+ * unwinds through the nav back stack rather than through screen-local state. To add a sub-flow:
+ * declare a route here, add a `composable<...>` to [treatmentGraph], and hand the hub a callback
+ * that navigates to it.
+ */
 @Serializable
-data object TreatmentRoute
+sealed interface TreatmentRoute {
+    /** Parent graph; used to tell whether any treatment screen is on top. */
+    @Serializable
+    data object Graph : TreatmentRoute
+
+    /** The dashboard hub. */
+    @Serializable
+    data object Main : TreatmentRoute
+
+    /** Health profile ("پروندهٔ سلامت") for the main insured person. */
+    @Serializable
+    data class HealthProfile(val nationalCode: String) : TreatmentRoute
+}
 
 fun NavController.navigateToTreatment(navOptions: NavOptions? = null) {
-    navigate(TreatmentRoute, navOptions)
+    navigate(TreatmentRoute.Main, navOptions)
 }
 
 fun NavController.navigateToTreatment(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(TreatmentRoute, builder)
+    navigate(TreatmentRoute.Main, builder)
 }
 
-fun NavGraphBuilder.treatmentScreen(
-    onOpenMedicalRecords: () -> Unit = {},
-    onOpenHealthProfile: () -> Unit = {},
-    onOpenCenters: () -> Unit = {},
-    onOpenPrescriptions: () -> Unit = {},
-    onOpenMedicalApprovals: () -> Unit = {},
-    onOpenMiscClaims: () -> Unit = {},
-    onSearch: () -> Unit = {},
+fun NavGraphBuilder.treatmentGraph(
+    navController: NavController,
+    onBack: () -> Unit,
 ) {
-    composable<TreatmentRoute> {
-        TreatmentScreen(
-            onOpenMedicalRecords = onOpenMedicalRecords,
-            onOpenHealthProfile = onOpenHealthProfile,
-            onOpenCenters = onOpenCenters,
-            onOpenPrescriptions = onOpenPrescriptions,
-            onOpenMedicalApprovals = onOpenMedicalApprovals,
-            onOpenMiscClaims = onOpenMiscClaims,
-            onSearch = onSearch,
-        )
+    navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
+        composable<TreatmentRoute.Main> {
+            TreatmentScreen(
+                onOpenHealthProfile = { nationalCode ->
+                    navController.navigate(TreatmentRoute.HealthProfile(nationalCode))
+                },
+            )
+        }
+
+        composable<TreatmentRoute.HealthProfile> { backStackEntry ->
+            val route = backStackEntry.toRoute<TreatmentRoute.HealthProfile>()
+            HealthProfileScreen(
+                nationalCode = route.nationalCode,
+                onBack = onBack,
+            )
+        }
     }
 }
