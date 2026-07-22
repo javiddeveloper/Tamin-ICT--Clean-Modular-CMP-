@@ -1,4 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,17 +72,6 @@ import com.tamin.taminhamrah.util.toPersianDigits
  * None of these depend on a domain model — they take display strings and lambdas, so
  * they stay decoupled from whatever shape the treatment entities settle on.
  */
-
-private val COVERAGE_BADGE_SIZE = 16.dp
-
-private val COVERAGE_BADGE_ICON_SIZE = 10.dp
-
-private val BRAND_TICK_SIZE = 24.dp
-
-private val BRAND_TICK_ICON_SIZE = 13.dp
-
-private const val CARD_DECOR_ALPHA = 0.07f
-private const val CARD_PEEK_FRACTION = 0.87f
 
 /** The main insured person's card: teal fading into brand blue. */
 private val MainInsuredCardStops = listOf(TaminCardTealStart, TaminCardTealMid, TaminCardTealEnd)
@@ -171,7 +161,7 @@ fun CoverageBadge(
 ) {
     Box(
         modifier = modifier
-            .size(COVERAGE_BADGE_SIZE)
+            .size(TreatmentDimens.coverageBadgeSize)
             .background(containerColor, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
@@ -179,7 +169,7 @@ fun CoverageBadge(
             imageVector = icon,
             contentDescription = null,
             tint = contentColor,
-            modifier = Modifier.size(COVERAGE_BADGE_ICON_SIZE),
+            modifier = Modifier.size(TreatmentDimens.coverageBadgeIconSize),
         )
     }
 }
@@ -187,7 +177,7 @@ fun CoverageBadge(
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
-    val decor = Color.White.copy(alpha = CARD_DECOR_ALPHA)
+    val decor = Color.White.copy(alpha = TreatmentDimens.cardDecorAlpha)
     drawOval(
         color = decor,
         topLeft = Offset(-size.width * 0.15f, size.height * 0.55f),
@@ -236,7 +226,7 @@ private fun InsuranceCardBrandRow(initial: String) {
         }
         Box(
             modifier = Modifier
-                .size(BRAND_TICK_SIZE)
+                .size(TreatmentDimens.brandTickSize)
                 .background(Color.White.copy(alpha = 0.13f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
@@ -244,7 +234,7 @@ private fun InsuranceCardBrandRow(initial: String) {
                 imageVector = vectorResource(Res.drawable.ic_tamin_check),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(BRAND_TICK_ICON_SIZE),
+                modifier = Modifier.size(TreatmentDimens.brandTickIconSize),
             )
         }
     }
@@ -289,9 +279,9 @@ fun InsuranceCardCarousel(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Each card occupies CARD_PEEK_FRACTION of the viewport and stays centred,
+            // Each card occupies TreatmentDimens.cardPeekFraction of the viewport and stays centred,
             // so the neighboring cards peek evenly on both edges.
-            val sidePadding = maxWidth * (1 - CARD_PEEK_FRACTION) / 2
+            val sidePadding = maxWidth * (1 - TreatmentDimens.cardPeekFraction) / 2
             HorizontalPager(
                 state = pagerState,
                 contentPadding = PaddingValues(horizontal = sidePadding),

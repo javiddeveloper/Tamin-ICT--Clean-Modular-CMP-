@@ -1,4 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -66,11 +67,6 @@ import com.tamin.taminhamrah.ui.toPriceFormat
  * components to real state.
  */
 
-private val PAGE_WIDTH = 412.dp
-private val PAGE_HEIGHT = 892.dp
-
-/** How far the insurance carousel rides up into the hub header. */
-private val CARD_OVERLAP = 40.dp
 
 /**
  * Phone-sized, right-to-left, page-colored frame shared by every page preview.
@@ -81,7 +77,7 @@ private fun PreviewPage(content: @Composable BoxScope.() -> Unit) {
     PreviewRtlThemeContent {
         Box(
             modifier = Modifier
-                .size(PAGE_WIDTH, PAGE_HEIGHT)
+                .size(TreatmentDimens.pageWidth, TreatmentDimens.pageHeight)
                 .background(LocalTaminColors.current.bgPage),
             content = content,
         )
@@ -117,15 +113,15 @@ private fun TreatmentHubPagePreview() {
                 },
                 // Deep enough that the carousel can ride up into it without covering
                 // the title, matching the design's tall header plus negative margin.
-                bottomPadding = CARD_OVERLAP + Spacing.xl,
+                bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
             )
             // Everything below the header shifts up together, so the overlap does not
             // leave a gap the way offsetting the carousel alone would.
-            Column(modifier = Modifier.offset(y = -CARD_OVERLAP)) {
+            Column(modifier = Modifier.offset(y = -TreatmentDimens.cardOverlap)) {
                 HubCarousel()
                 HubQuickAccess()
                 HubCategories()
-                Spacer(modifier = Modifier.height(Spacing.xxl + CARD_OVERLAP))
+                Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
             }
         }
     }

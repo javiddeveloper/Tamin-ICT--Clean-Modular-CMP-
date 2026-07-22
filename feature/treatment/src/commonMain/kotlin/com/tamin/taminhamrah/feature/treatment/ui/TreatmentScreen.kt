@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
@@ -43,9 +42,6 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
-
-/** How far the insured-person carousel rides up into the teal header. */
-private val CARD_OVERLAP = 40.dp
 
 /**
  * Treatment hub: the insured person's electronic health-insurance cards, the quick-access
@@ -157,7 +153,7 @@ fun TreatmentContent(
     ) {
         TreatmentHubHeader(onSearch = onSearch)
         // The whole body shifts up together, so the overlap does not leave a gap below.
-        Column(modifier = Modifier.offset(y = -CARD_OVERLAP)) {
+        Column(modifier = Modifier.offset(y = -TreatmentDimens.cardOverlap)) {
             PatientCarousel(
                 state = state,
                 patients = patients,
@@ -187,7 +183,7 @@ fun TreatmentContent(
                 insuredShare = state.insuredShareTotal,
                 organizationShare = state.organizationShareTotal,
             )
-            Spacer(modifier = Modifier.height(Spacing.xxl + CARD_OVERLAP))
+            Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
         }
     }
 
@@ -207,7 +203,7 @@ private fun TreatmentHubHeader(onSearch: () -> Unit) {
         // Runs deep enough for the carousel to ride up into it. The gradient and the
         // status-bar fill are left at their defaults, which is what puts the visible
         // step between the two bands.
-        bottomPadding = CARD_OVERLAP + Spacing.xl,
+        bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
     )
 
 
