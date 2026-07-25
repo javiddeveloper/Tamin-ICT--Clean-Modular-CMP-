@@ -10,16 +10,19 @@ data class PrescriptionsUiState(
     val prescriptionDetailList: List<ElectronicPrescriptionDetailPR> = emptyList(),
     val prescriptionPriceList: List<ElectronicPrescriptionPricePR> = emptyList(),
     val viewerPdf: PdfDownloadPR? = null,
+    /** Suggested save name for [viewerPdf], shown/used by the PDF viewer's download. */
+    val viewerFileName: String = "",
     val showPdfDialog: Boolean = false,
     val selectedNoteHeadId: String? = null,
 
     /**
-     * Insured share per record, keyed by `noteHeadEprescID`.
+     * Full price breakdown per record, keyed by `noteHeadEprescID`.
      *
-     * The list endpoint carries no amount, so these are fetched one record at a time and only
-     * when the advanced search filters on cost — see [PrescriptionsIntent.LoadRecordPrices].
+     * The list endpoint carries no amount, so these are fetched one record at a time — see
+     * [PrescriptionsIntent.LoadRecordPrices]. They feed both the «سهم شما» shown on each list card
+     * (`headSsoPayment`) and the advanced search's cost filter.
      */
-    val recordPrices: Map<String, Long> = emptyMap(),
+    val recordPrices: Map<String, ElectronicPrescriptionPricePR> = emptyMap(),
     val isLoadingPrices: Boolean = false
 ) {
     sealed class PartialState {
@@ -29,10 +32,10 @@ data class PrescriptionsUiState(
         data class PrescriptionsLoaded(val list: List<ElectronicPrescriptionPR>) : PartialState()
         data class PrescriptionDetailsLoaded(val list: List<ElectronicPrescriptionDetailPR>) : PartialState()
         data class PrescriptionPricesLoaded(val list: List<ElectronicPrescriptionPricePR>) : PartialState()
-        data class PdfLoaded(val pdf: PdfDownloadPR) : PartialState()
+        data class PdfLoaded(val pdf: PdfDownloadPR, val fileName: String) : PartialState()
         data class TogglePdfDialog(val show: Boolean) : PartialState()
         data class PrescriptionSelected(val noteHeadID: String) : PartialState()
-        data class RecordPricesLoaded(val prices: Map<String, Long>) : PartialState()
+        data class RecordPricesLoaded(val prices: Map<String, ElectronicPrescriptionPricePR>) : PartialState()
         data class LoadingPrices(val isLoading: Boolean) : PartialState()
         data object PrescriptionCleared : PartialState()
     }

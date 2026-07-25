@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState.PartialState
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
@@ -126,17 +127,15 @@ class PrescriptionsViewModel(
         flow {
             emit(PartialState.LoadingPrices(true))
             val nationalCode = getLoggedNationalCode()
-            val prices = mutableMapOf<String, Long>()
+            val prices = mutableMapOf<String, ElectronicPrescriptionPricePR>()
             intent.noteHeadIds.forEach { noteHeadId ->
                 try {
                     getElectronicPrescriptionPriceUseCase(noteHeadId, nationalCode)
                         .first()
                         .firstOrNull()
-                        ?.let { price ->
-                            price.headInsuPayment?.let { prices[noteHeadId] = it }
-                        }
+                        ?.let { price -> prices[noteHeadId] = price.toPresentation() }
                 } catch (e: Exception) {
-                    // A record without a price stays unfiltered rather than disappearing.
+                    // A record without a price stays unpriced rather than failing the whole load.
                 }
             }
             emit(PartialState.RecordPricesLoaded(prices))
@@ -146,8 +145,9 @@ class PrescriptionsViewModel(
     private fun downloadPdf(intent: PrescriptionsIntent.DownloadPdf): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
+            // Opens the viewer, which renders the PDF and saves it to the device with a notification.
             getPrescriptionPdfFileUseCase(intent.prescriptionID).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
+                emit(PartialState.PdfLoaded(pdfDn.toPresentation(), "prescription_${intent.prescriptionID}.pdf"))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
@@ -162,7 +162,7 @@ class PrescriptionsViewModel(
 
         try {
             downloadLabResultPdfUseCase(patientID, noteHeadEprescID, currentUserNationalCode).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
+                emit(PartialState.PdfLoaded(pdfDn.toPresentation(), "lab_result_$noteHeadEprescID.pdf"))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
