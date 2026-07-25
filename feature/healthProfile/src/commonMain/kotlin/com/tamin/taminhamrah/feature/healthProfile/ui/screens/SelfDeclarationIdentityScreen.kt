@@ -133,7 +133,7 @@ fun SelfDeclarationIdentityScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     TaminText(
-                        text = "${state.patientName} ${state.patientFamily}".ifBlank { "علی محمدی" },
+                        text = "${state.patientName} ${state.patientFamily}".trim(),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -144,7 +144,7 @@ fun SelfDeclarationIdentityScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     TaminText(
-                        text = "${stringResource(Res.string.health_identity_insurance_number_prefix)} ${state.insuranceNumber.ifBlank { "۵۶۷۸۹" }}",
+                        text = if (state.insuranceNumber.isNotBlank()) "${stringResource(Res.string.health_identity_insurance_number_prefix)} ${state.insuranceNumber}" else "",
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 13.sp,
                             color = taminColors.textTertiary
@@ -164,14 +164,14 @@ fun SelfDeclarationIdentityScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_first_name), value = state.patientName.ifBlank { "علی" })
-                            IdentityGridItem(label = stringResource(Res.string.health_label_father_name), value = state.patientFather.ifBlank { "حسین" })
-                            IdentityGridItem(label = stringResource(Res.string.health_label_birth_date), value = state.patientBirthDate.ifBlank { "۱۳۶۸/۰۵/۱۲" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_first_name), value = state.patientName)
+                            IdentityGridItem(label = stringResource(Res.string.health_label_father_name), value = state.patientFather)
+                            IdentityGridItem(label = stringResource(Res.string.health_label_birth_date), value = state.patientBirthDate)
                         }
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_last_name), value = state.patientFamily.ifBlank { "محمدی" })
-                            IdentityGridItem(label = stringResource(Res.string.health_label_gender), value = state.patientGender.ifBlank { "مرد" })
-                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_number), value = state.insuranceNumber.ifBlank { "۰۰۲۳۴۵۶۷۸۹" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_last_name), value = state.patientFamily)
+                            IdentityGridItem(label = stringResource(Res.string.health_label_gender), value = state.patientGender)
+                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_number), value = state.insuranceNumber)
                         }
                     }
                 }
@@ -218,10 +218,10 @@ fun SelfDeclarationIdentityScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_type), value = state.insuranceType.ifBlank { "اجباری (کارگری)" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_type), value = state.insuranceType)
                         }
                         Column(modifier = Modifier.weight(1f)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_last_visit), value = state.lastVisitDate.ifBlank { "۱۴۰۴/۰۲/۱۸" })
+                            IdentityGridItem(label = stringResource(Res.string.health_label_last_visit), value = state.lastVisitDate)
                         }
                     }
                 }
