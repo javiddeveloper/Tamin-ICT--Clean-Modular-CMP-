@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.ui.home.contract.*
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
+import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -29,7 +30,7 @@ class HomeViewModel(
             is HomeIntent.LoadMenu -> {
                 emit(HomeUiState.HomePartialState.Loading(true))
                 emitAll(
-                    getMainMenuUseCase("1.0.0", false).map {
+                    getMainMenuUseCase(AppConfig.versionName, false).map {
                         HomeUiState.HomePartialState.MenuLoaded(it)
                     }
                 )

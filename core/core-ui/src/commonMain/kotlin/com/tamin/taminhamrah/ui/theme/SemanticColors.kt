@@ -63,7 +63,10 @@ data class TaminColors(
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
     val aiAssistantGradient: Brush,
-    val grey900 : Color
+    val grey900 : Color,
+
+    val hawkesBlue : Color,
+    val chipBg: Color
 )
 
 val LightTaminColors = TaminColors(
@@ -138,6 +141,8 @@ val LightTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    hawkesBlue = Color(0xFFDCE7FB),
+    chipBg = Color(0xFFEFF6FF),
     grey900 = Color(0xFFE2E8F0),
 )
 
@@ -189,5 +194,7 @@ val DarkTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
-    grey900 = Color(0xFFE2E8F0)
+    grey900 = Color(0xFFE2E8F0),
+    hawkesBlue = Color(0xFFDCE7FB),
+    chipBg = Color(0x293B82F6)
 )

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -51,10 +54,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.CustomChip
+import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
@@ -152,17 +158,11 @@ fun HealthBottomSheet(
             }
 
             if (config.showSearchInput) {
-                OutlinedTextField(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    placeholder = {
-                        Text(
-                            text = config.searchInputHint ?: "جستجو...",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                CustomSearchBar(
+                    query = inputText,
+                    onQueryChange = { inputText = it },
+                    placeHolder = config.searchInputHint ?: "جستجو...",
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -184,7 +184,7 @@ fun HealthBottomSheet(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
+                                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                                     if (config.singleSelection) {
                                         selectedIds.clear()
                                         selectedIds.add(item.id)
@@ -194,21 +194,34 @@ fun HealthBottomSheet(
                                     }
                                 }
                                 .padding(vertical = Spacing.sm),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = null,
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = LocalTaminColors.current.teal
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Filled.CheckCircle,
+                                    contentDescription = null,
+                                    tint = LocalTaminColors.current.blueText,
+                                    modifier = Modifier.size(24.dp)
                                 )
-                            )
-                            Spacer(modifier = Modifier.width(Spacing.sm))
-                            TaminText(
-                                text = item.title,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = LocalTaminColors.current.textPrimary
-                            )
+                            } else {
+                                Spacer(modifier = Modifier.size(24.dp))
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                TaminText(
+                                    text = item.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = LocalTaminColors.current.textPrimary
+                                )
+                                Spacer(modifier = Modifier.width(Spacing.sm))
+                                Icon(
+                                    imageVector = Icons.Outlined.LocationOn,
+                                    contentDescription = null,
+                                    tint = LocalTaminColors.current.textSecondary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -220,9 +233,9 @@ fun HealthBottomSheet(
                 ) {
                     filteredItems.forEach { item ->
                         val isSelected = selectedIds.contains(item.id)
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = {
+                        CustomChip(
+                            text = item.title,
+                            modifier = Modifier.clip(RoundedCornerShape(CornerRadius.lg)).clickable {
                                 if (config.singleSelection) {
                                     selectedIds.clear()
                                     selectedIds.add(item.id)
@@ -231,18 +244,8 @@ fun HealthBottomSheet(
                                     else selectedIds.add(item.id)
                                 }
                             },
-                            label = {
-                                TaminText(
-                                    text = item.title,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                labelColor = LocalTaminColors.current.textSecondary,
-                                selectedContainerColor = LocalTaminColors.current.blueBg,
-                                selectedLabelColor = LocalTaminColors.current.blueText,
-                            ),
-                            shape = RoundedCornerShape(50),
+                            containerColor = if (isSelected) LocalTaminColors.current.blueBg else Color.Transparent,
+                            textColor = if (isSelected) LocalTaminColors.current.blueText else LocalTaminColors.current.textSecondary,
                             border = BorderStroke(
                                 width = 1.dp,
                                 color = if (isSelected) LocalTaminColors.current.blueText else LocalTaminColors.current.border

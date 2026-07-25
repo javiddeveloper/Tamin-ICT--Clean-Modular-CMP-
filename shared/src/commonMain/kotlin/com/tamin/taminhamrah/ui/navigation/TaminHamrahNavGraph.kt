@@ -53,8 +53,9 @@ import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
-import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
+import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
@@ -70,11 +71,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
@@ -96,6 +95,9 @@ import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
@@ -106,6 +108,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
@@ -132,6 +136,17 @@ import taminx.core.core_ui.user_type_employer
 import taminx.core.core_ui.user_type_insured
 import taminx.core.core_ui.user_type_pensioner
 
+private enum class BottomTab { HOME, SERVICES, TREATMENT, PROFILE, OTHER }
+
+private fun NavDestination?.toBottomTab(): BottomTab = when {
+    this == null -> BottomTab.OTHER
+    hasRoute<Route.Home>() -> BottomTab.HOME
+    hasRoute<TaminServicesRoute>() -> BottomTab.SERVICES
+    hasRoute<TreatmentRoute.Main>() -> BottomTab.TREATMENT
+    hasRoute<ProfileRoute.Main>() -> BottomTab.PROFILE
+    else -> BottomTab.OTHER
+}
+
 @Composable
 internal fun TaminHamrahNavGraph(
     isLoggedIn: Boolean,
@@ -144,16 +159,13 @@ internal fun TaminHamrahNavGraph(
 
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
-    val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
-    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
-    val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
-    val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
-
+    val currentTab = currentDestination.toBottomTab()
+    val isBottomBarVisible = currentTab != BottomTab.OTHER
 
     val navigationItems = listOf(
         NavigationTab(
             title = stringResource(Res.string.tab_home),
-            isSelected = isHomeSelected,
+            isSelected = currentTab == BottomTab.HOME,
             icon = Res.drawable.ic_home_menu,
             onClick = {
                 navController.navigate(Route.Home) {
@@ -166,10 +178,10 @@ internal fun TaminHamrahNavGraph(
 
         NavigationTab(
             title = stringResource(Res.string.tab_services),
-            isSelected = isCartableSelected,
+            isSelected = currentTab == BottomTab.SERVICES,
             icon = Res.drawable.ic_services_menu,
             onClick = {
-                navController.navigate(CartableRoute.Main) {
+                navController.navigate(TaminServicesRoute) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -178,7 +190,7 @@ internal fun TaminHamrahNavGraph(
         ),
         NavigationTab(
             title = stringResource(Res.string.tab_treatment),
-            isSelected = isTreatmentSelected,
+            isSelected = currentTab == BottomTab.TREATMENT,
             icon = Res.drawable.ic_treatment_menu,
             onClick = {
                 navController.navigate(TreatmentRoute.Main) {
@@ -190,7 +202,7 @@ internal fun TaminHamrahNavGraph(
         ),
         NavigationTab(
             title = stringResource(Res.string.tab_profile),
-            isSelected = isProfileSelected,
+            isSelected = currentTab == BottomTab.PROFILE,
             icon = Res.drawable.ic_profile_menu,
             onClick = {
                 navController.navigate(ProfileRoute.Main()) {
@@ -203,8 +215,7 @@ internal fun TaminHamrahNavGraph(
 
         )
 
-    val isBottomBarVisible =
-        isHomeSelected || isCartableSelected || isTreatmentSelected || isProfileSelected
+
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(
         contentWindowInsets = WindowInsets(0),
@@ -298,60 +309,8 @@ internal fun TaminHamrahNavGraph(
             ) {
                 composable<Route.Home> {
                     HomeScreen(
-                        onNavigateToHistory = {
-                            navController.navigate(HistoryRoute)
-                        },
-                        onNavigateToContracts = {
-                            navController.navigateToContracts()
-                        },
-                        onNavigateToWorkshops = {
-                            navController.navigateToWorkshops()
-                        },
-                        onNavigateToStudentInsuranceContract = {
-                            navController.navigateToStudentInsuranceContract()
-                        },
-                        onNavigateToFreelanceInsuranceContract = {
-                            navController.navigateToFreelanceInsuranceContract()
-                        },
-                        onNavigateToOptionalInsuranceContract = {
-                            navController.navigateToOptionalInsuranceContract()
-                        },
-                        onNavigateToHousewifeInsuranceContract = {
-                            navController.navigateToHousewifeInsuranceContract()
-                        },
-                        onNavigateToPensionInquiry = {
-                            navController.navigateToPensionInquiry()
-                        },
-                        onNavigateToCalculatePension = {
-                            navController.navigateToCalculatePension()
-                        },
-                        onNavigateToPrescription = {
-                            navController.navigateToPrescription()
-                        },
-                        onNavigateToDeservedTreatment = {
-                            navController.navigateToDeservedTreatment()
-                        },
-                        onNavigateToPayRoll = {
-                            navController.navigateToPayRoll()
-                        },
-                        onNavigateToEdict = {
-                            navController.navigateToEdict()
-                        },
-                        onNavigateToIssuanceCertificate = {
-                            navController.navigateToIssuanceCertificate()
-                        },
-                        onNavigateToDeferredInstallment = {
-                            navController.navigateToDeferredInstallment()
-                        },
-                        onNavigateToGirlSurvivor = {
-                            navController.navigateToGirlSurvivor()
-                        },
-                        onNavigateToPensionSurvivor = {
-                            navController.navigateToPensionSurvivor()
-                        },
-                        onNavigateToDisabilityPension = {
-                            navController.navigateToDisabilityPension()
-                        },
+                        onNavigateToService = { flag -> navController.navigateToFeature(flag) },
+                        onNavigateToWeb = { url -> openUrl(url) },
                     )
                 }
 
@@ -386,6 +345,12 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() }
                 )
 
+                taminServicesScreen(
+                    onNavigateToService = { flag -> navController.navigateToFeature(flag) },
+                    onOpenUrl = { url -> openUrl(url) },
+                    onBackClicked = { navController.popBackStack() }
+                )
+
                 pensionInquiryScreen()
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
@@ -403,13 +368,7 @@ internal fun TaminHamrahNavGraph(
                 contractsScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToService = { flag ->
-                        when (flag) {
-                            FeatureFlag.STUDENT_INSURANCE -> navController.navigateToStudentInsuranceContract()
-                            FeatureFlag.FREELANCE_INSURANCE -> navController.navigateToFreelanceInsuranceContract()
-                            FeatureFlag.OPTIONAL_INSURANCE -> navController.navigateToOptionalInsuranceContract()
-                            FeatureFlag.HOUSEWIFE_INSURANCE -> navController.navigateToHousewifeInsuranceContract()
-                            else -> {}
-                        }
+                        navController.navigateToFeature(flag)
                     },
                     onOpenUrl = { url -> openUrl(url) }
                 )
@@ -494,49 +453,21 @@ fun SampleScreen(title: String) {
 
 @Composable
 fun HomeScreen(
-    onNavigateToHistory: () -> Unit,
-    onNavigateToWorkshops: () -> Unit,
-    onNavigateToContracts: () -> Unit,
-    onNavigateToStudentInsuranceContract: () -> Unit,
-    onNavigateToFreelanceInsuranceContract: () -> Unit,
-    onNavigateToOptionalInsuranceContract: () -> Unit,
-    onNavigateToHousewifeInsuranceContract: () -> Unit,
-    onNavigateToPensionInquiry: () -> Unit,
-    onNavigateToCalculatePension: () -> Unit,
-    onNavigateToPrescription: () -> Unit,
-    onNavigateToDeservedTreatment: () -> Unit,
-    onNavigateToPayRoll: () -> Unit,
-    onNavigateToEdict: () -> Unit,
-    onNavigateToIssuanceCertificate: () -> Unit,
-    onNavigateToDeferredInstallment: () -> Unit,
-    onNavigateToGirlSurvivor: () -> Unit,
-    onNavigateToPensionSurvivor: () -> Unit,
-    onNavigateToDisabilityPension: () -> Unit,
+    onNavigateToService: (FeatureFlag) -> Unit,
+    onNavigateToWeb: (String) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Handleevents(
-        viewModel = viewModel,
-        onNavigateToHistory = onNavigateToHistory,
-        onNavigateToWorkshops = onNavigateToWorkshops,
-        onNavigateToContracts = onNavigateToContracts,
-        onNavigateToStudentInsuranceContract = onNavigateToStudentInsuranceContract,
-        onNavigateToFreelanceInsuranceContract = onNavigateToFreelanceInsuranceContract,
-        onNavigateToOptionalInsuranceContract = onNavigateToOptionalInsuranceContract,
-        onNavigateToHousewifeInsuranceContract = onNavigateToHousewifeInsuranceContract,
-        onNavigateToPensionInquiry = onNavigateToPensionInquiry,
-        onNavigateToCalculatePension = onNavigateToCalculatePension,
-        onNavigateToPrescription = onNavigateToPrescription,
-        onNavigateToDeservedTreatment = onNavigateToDeservedTreatment,
-        onNavigateToPayRoll = onNavigateToPayRoll,
-        onNavigateToEdict = onNavigateToEdict,
-        onNavigateToIssuanceCertificate = onNavigateToIssuanceCertificate,
-        onNavigateToDeferredInstallment = onNavigateToDeferredInstallment,
-        onNavigateToGirlSurvivor = onNavigateToGirlSurvivor,
-        onNavigateToPensionSurvivor = onNavigateToPensionSurvivor,
-        onNavigateToDisabilityPension = onNavigateToDisabilityPension
-    )
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is HomeEvent.NavigateToService -> onNavigateToService(event.flag)
+                is HomeEvent.NavigateToWeb -> onNavigateToWeb(event.url)
+                is HomeEvent.ShowMessage -> Unit // TODO: surface via SnackbarHostState
+            }
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -719,67 +650,3 @@ fun HomeScreen(
         }
     }
 }
-
-@Composable
-private fun Handleevents(
-    viewModel: HomeViewModel,
-    onNavigateToHistory: () -> Unit,
-    onNavigateToWorkshops: () -> Unit,
-    onNavigateToContracts: () -> Unit,
-    onNavigateToStudentInsuranceContract: () -> Unit,
-    onNavigateToFreelanceInsuranceContract: () -> Unit,
-    onNavigateToOptionalInsuranceContract: () -> Unit,
-    onNavigateToHousewifeInsuranceContract: () -> Unit,
-    onNavigateToPensionInquiry: () -> Unit,
-    onNavigateToCalculatePension: () -> Unit,
-    onNavigateToPrescription: () -> Unit,
-    onNavigateToDeservedTreatment: () -> Unit,
-    onNavigateToPayRoll: () -> Unit,
-    onNavigateToEdict: () -> Unit,
-    onNavigateToIssuanceCertificate: () -> Unit,
-    onNavigateToDeferredInstallment: () -> Unit,
-    onNavigateToGirlSurvivor: () -> Unit,
-    onNavigateToPensionSurvivor: () -> Unit,
-    onNavigateToDisabilityPension: () -> Unit
-) {
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is HomeEvent.NavigateToService -> {
-                    when (event.flag) {
-                        FeatureFlag.MERGE_HISTORY -> onNavigateToHistory()
-                        FeatureFlag.WORKSHOPS -> onNavigateToWorkshops()
-                        FeatureFlag.CONTRACTS -> onNavigateToContracts()
-                        FeatureFlag.STUDENT_INSURANCE -> onNavigateToStudentInsuranceContract()
-                        FeatureFlag.FREELANCE_INSURANCE -> onNavigateToFreelanceInsuranceContract()
-                        FeatureFlag.OPTIONAL_INSURANCE -> onNavigateToOptionalInsuranceContract()
-                        FeatureFlag.HOUSEWIFE_INSURANCE -> onNavigateToHousewifeInsuranceContract()
-                        FeatureFlag.PENSION_INQUIRY -> onNavigateToPensionInquiry()
-                        FeatureFlag.CALCULATE_WAGE_PENSION -> onNavigateToCalculatePension()
-                        FeatureFlag.PRESCRIPTION -> onNavigateToPrescription()
-                        FeatureFlag.DESERVED_TREATMENT_101 -> onNavigateToDeservedTreatment()
-                        FeatureFlag.PAY_ROLL -> onNavigateToPayRoll()
-                        FeatureFlag.EDICT_PENSIONER -> onNavigateToEdict()
-                        FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> onNavigateToIssuanceCertificate()
-                        FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> onNavigateToDeferredInstallment()
-                        FeatureFlag.GIRL_SURVIVOR -> onNavigateToGirlSurvivor()
-                        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> onNavigateToPensionSurvivor()
-                        FeatureFlag.DISABILITY_PENSION -> onNavigateToDisabilityPension()
-                        else -> { /* Handle other flags if needed */
-                        }
-                    }
-                }
-
-                is HomeEvent.NavigateToWeb -> {
-                    openUrl(event.url)
-                }
-
-                is HomeEvent.ShowMessage -> {
-                    // In a real app, we'd use a SnackbarHostState
-                }
-            }
-        }
-    }
-}
-
-
