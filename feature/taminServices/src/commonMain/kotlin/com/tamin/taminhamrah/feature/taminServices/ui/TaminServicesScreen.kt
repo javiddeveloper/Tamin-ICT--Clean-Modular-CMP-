@@ -1,6 +1,13 @@
 package com.tamin.taminhamrah.feature.taminServices.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
+import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
+import kotlin.math.abs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +20,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.ui.contract.*
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -88,143 +98,185 @@ fun TaminServicesScreen(
     state: TaminServicesUiState,
     onIntent: (TaminServicesIntent) -> Unit,
 ) {
+    val scrollState = rememberTaminServicesScrollState()
+    val motionState = rememberTaminServicesMotionState(scrollState)
 
-    LazyColumn(
+    val decaySpec = rememberSplineBasedDecay<Float>()
+    val snapFlingBehavior = snapFlingBehavior(
+        snapLayoutInfoProvider = object : SnapLayoutInfoProvider {
+            override fun calculateSnapOffset(velocity: Float): Float {
+                val lazyListState = scrollState.lazyListState
+                if (lazyListState.firstVisibleItemIndex == 0) {
+                    val currentOffset = lazyListState.firstVisibleItemScrollOffset.toFloat()
+                    val maxOffset = scrollState.collapseDistancePx
+                    if (currentOffset > 0 && currentOffset < maxOffset) {
+                        val targetOffset = if (abs(velocity) > 500f) {
+                            if (velocity > 0) maxOffset else 0f
+                        } else {
+                            if (currentOffset < maxOffset / 2f) 0f else maxOffset
+                        }
+                        return targetOffset - currentOffset
+                    }
+                }
+                return 0f
+            }
+        },
+        decayAnimationSpec = decaySpec,
+        snapAnimationSpec = spring(stiffness = Spring.StiffnessLow)
+    )
+
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(
-            bottom = 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        ),
+            .background(MaterialTheme.colorScheme.background)
     ) {
-
-        item {
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = Elevation.lg,
+                    shape = RoundedCornerShape(
+                        bottomStart = CornerRadius.x2l,
+                        bottomEnd = CornerRadius.x2l
+                    ),
+                    clip = false
+                )
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(
+                        bottomStart = CornerRadius.x2l,
+                        bottomEnd = CornerRadius.x2l
+                    )
+                )
+                .padding(
+                    top = motionState.headerTopPadding,
+                    start = Spacing.xlg,
+                    end = Spacing.xlg,
+                    bottom = Spacing.xlg
+                )
+        ) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(
-                        elevation = Elevation.lg,
-                        shape = RoundedCornerShape(
-                            bottomStart = CornerRadius.x2l,
-                            bottomEnd = CornerRadius.x2l
-                        ),
-                        clip = false
-                    )
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(
-                            bottomStart = CornerRadius.x2l,
-                            bottomEnd = CornerRadius.x2l
-                        )
-                    )
-                    .padding(
-                        top = Spacing.xxl,
-                        start = Spacing.xlg,
-                        end = Spacing.xlg,
-                        bottom = Spacing.xlg
-                    )
+                    .graphicsLayer {
+                        alpha = 1f - motionState.headerProgress
+                    }
+                    .layout { measurable, constraints ->
+                        val progress = motionState.headerProgress
+                        val placeable = measurable.measure(constraints)
+                        val height = (placeable.height * (1f - progress)).toInt().coerceAtLeast(0)
+                        layout(placeable.width, height) {
+                            placeable.placeRelative(0, height - placeable.height)
+                        }
+                    }
             ) {
-                Text(
-                    text = "خدمات",
-                    style = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = Spacing.md)
-                )
+                Column {
+                    Text(
+                        text = "خدمات",
+                        style = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.md)
+                    )
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
-
-                CustomSearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
-                    placeHolder = "جست‌وجو در میان خدمات ..."
-                )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                }
             }
+
+            CustomSearchBar(
+                query = state.searchQuery,
+                onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
+                placeHolder = "جست‌وجو در میان خدمات ..."
+            )
         }
 
-        item {
-            Spacer(modifier = Modifier.height(Spacing.xlg))
-        }
+        Spacer(modifier = Modifier.height(Spacing.xlg))
 
-        item {
-            if (state.tabs.isNotEmpty()) {
-                TabSelector(
-                    tabs = state.tabs,
-                    selectedTab = state.selectedTab,
-                    onTabSelected = { onIntent(TaminServicesIntent.OnTabSelected(it)) },
-                    modifier = Modifier.padding(horizontal = Spacing.xlg)
-                )
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(Spacing.xlg))
-        }
-
-        item {
-            TaminServicesHeader(
-                title = "خدمات ${state.selectedTab?.title ?: ""}",
-                badgeText = "${state.filteredServices.size} خدمت",
+        if (state.tabs.isNotEmpty()) {
+            TabSelector(
+                tabs = state.tabs,
+                selectedTab = state.selectedTab,
+                onTabSelected = { onIntent(TaminServicesIntent.OnTabSelected(it)) },
                 modifier = Modifier.padding(horizontal = Spacing.xlg)
             )
         }
 
-        item {
-            Spacer(modifier = Modifier.height(Spacing.lg))
-        }
-
-        if (state.isLoading) {
+        LazyColumn(
+            state = scrollState.lazyListState,
+            flingBehavior = snapFlingBehavior,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentPadding = PaddingValues(
+                top = Spacing.xlg,
+                bottom = 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            )
+        ) {
             item {
-                Box(
+                TaminServicesHeader(
+                    title = "خدمات ${state.selectedTab?.title ?: ""}",
+                    badgeText = "${state.filteredServices.size} خدمت",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            }
-        } else if (state.showNoResultsError) {
-            item {
-                EmptyStateMessage(
-                    icon = Icons.Outlined.SearchOff,
-                    title = "نتیجه‌ای یافت نشد",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
                         .padding(horizontal = Spacing.xlg)
+                        .onSizeChanged { size ->
+                            scrollState.collapseDistancePx = size.height.toFloat()
+                        }
                 )
             }
-        } else {
-            val chunkedServices = state.filteredServices.chunked(2)
-            items(
-                chunkedServices,
-                key = { chunk -> chunk.firstOrNull()?.id ?: 0 }
-            ) { rowItems ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.xlg, vertical = Spacing.sm),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
-                    rowItems.forEach { service ->
-                        ServiceCard(
-                            service = service,
-                            onClick = { onIntent(TaminServicesIntent.OnServiceClick(service)) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
 
-                    val emptySlots = 2 - rowItems.size
-                    repeat(emptySlots) {
-                        Box(modifier = Modifier.weight(1f))
+            if (state.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            } else if (state.showNoResultsError) {
+                item {
+                    EmptyStateMessage(
+                        icon = Icons.Outlined.SearchOff,
+                        title = "نتیجه‌ای یافت نشد",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(horizontal = Spacing.xlg)
+                    )
+                }
+            } else {
+                val chunkedServices = state.filteredServices.chunked(2)
+                items(
+                    chunkedServices,
+                    key = { chunk -> chunk.firstOrNull()?.id ?: 0 }
+                ) { rowItems ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.xlg, vertical = Spacing.sm),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                    ) {
+                        rowItems.forEach { service ->
+                            ServiceCard(
+                                service = service,
+                                onClick = { onIntent(TaminServicesIntent.OnServiceClick(service)) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        val emptySlots = 2 - rowItems.size
+                        repeat(emptySlots) {
+                            Box(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            Spacer(modifier = Modifier.height(Spacing.xl))
+            item {
+                Spacer(modifier = Modifier.height(Spacing.xl))
+            }
         }
     }
 }
