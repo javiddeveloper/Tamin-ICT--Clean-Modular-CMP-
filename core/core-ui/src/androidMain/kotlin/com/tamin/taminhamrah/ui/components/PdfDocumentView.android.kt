@@ -62,6 +62,8 @@ private fun renderPdf(cacheDir: File, bytes: ByteArray): List<Bitmap> {
                 }
             }
         }
+    } catch (_: Throwable) {
+        emptyList()
     } finally {
         file.delete()
     }

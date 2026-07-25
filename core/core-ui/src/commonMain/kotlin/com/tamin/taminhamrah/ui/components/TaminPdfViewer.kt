@@ -40,7 +40,15 @@ fun TaminPdfViewer(
     val colors = LocalTaminColors.current
     val saver = rememberPdfSaver()
     val bytes by produceState<ByteArray?>(initialValue = null, pdf) {
-        value = pdf?.pdf?.pdf?.let { withContext(Dispatchers.Default) { it.toByteArray() } } ?: ByteArray(0)
+        val drained = try {
+            pdf?.pdf?.pdf?.let { withContext(Dispatchers.Default) { it.toByteArray() } }
+        } catch (_: Throwable) {
+            null
+        }
+        // A failed download can still answer 200 with a body that isn't a PDF (an HTML/JSON error
+        // page). Rendering that crashes the renderer and saving it writes garbage, so a non-PDF
+        // body is treated exactly like "no file at all": the message below, no render, no save.
+        value = drained?.takeIf { it.looksLikePdf() } ?: ByteArray(0)
     }
 
     // As soon as the bytes are ready, save to the device — the download runs alongside rendering.
@@ -76,4 +84,20 @@ fun TaminPdfViewer(
             }
         }
     }
+}
+
+private fun ByteArray.looksLikePdf(): Boolean {
+    if (size < 4) return false
+    val pdfMagic = byteArrayOf(0x25, 0x50, 0x44, 0x46) // %PDF
+    val limit = minOf(size - 3, 1024)
+    for (i in 0 until limit) {
+        if (this[i] == pdfMagic[0] &&
+            this[i + 1] == pdfMagic[1] &&
+            this[i + 2] == pdfMagic[2] &&
+            this[i + 3] == pdfMagic[3]
+        ) {
+            return true
+        }
+    }
+    return false
 }
