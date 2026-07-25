@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.feature.healthProfile.ui
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
-import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.toUiMock
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.useCases.health.*
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +24,6 @@ class HealthProfileViewModel(
     private val getBloodGroupsUseCase: GetBloodGroupsUseCase,
     private val getMaritalStatusUseCase: GetMaritalStatusUseCase,
     private val getSmokingStatusUseCase: GetSmokingStatusUseCase,
-    private val getSelfDeclarableIllnessesUseCase: GetSelfDeclarableIllnessesUseCase,
     private val getSelfDeclarableIllnessesByGroupUseCase: GetSelfDeclarableIllnessesByGroupUseCase,
     private val getAllDrugsUseCase: GetAllDrugsUseCase
 ) : BaseViewModel<HealthProfileUiState, PartialState, HealthProfileEvent, HealthProfileIntent>(
@@ -34,81 +33,118 @@ class HealthProfileViewModel(
     private var currentPatientNatCode: String = ""
     private var currentPatientId: Int = 0
 
+    init {
+        sendIntent(HealthProfileIntent.LoadHealthProfile())
+    }
+
     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
         return when (intent) {
-            is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile(intent.nationalCode)
+            is HealthProfileIntent.LoadHealthProfile     -> handleLoadHealthProfile(intent.nationalCode)
+            is HealthProfileIntent.LoadCitiesForProvince -> handleLoadCities(intent.provinceId)
 
-            is SelfDeclarationIntent.ChangeStep -> flow {
+            is HealthProfileIntent.ChangeStep -> flow {
                 if (intent.step == SelfDeclarationStep.SUCCESS) {
                     emit(PartialState.Loading(true))
                     val success = submitFullDeclaration()
                     emit(PartialState.Loading(false))
-                    if (success) {
-                        emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
-                    }
+                    if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
                 } else {
                     emit(PartialState.StepChanged(intent.step))
                 }
             }
 
-            is SelfDeclarationIntent.SubmitDeclaration -> flow {
+            is HealthProfileIntent.SubmitDeclaration -> flow {
                 emit(PartialState.Loading(true))
                 val success = submitFullDeclaration()
                 emit(PartialState.Loading(false))
-                if (success) {
-                    emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
-                }
+                if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
             }
 
-            is SelfDeclarationIntent.UpdateIdentity -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
-            is SelfDeclarationIntent.UpdatePersonal -> flow { emit(PartialState.PersonalUpdated(intent.personal)) }
-            is SelfDeclarationIntent.UpdateContact -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
-            is SelfDeclarationIntent.UpdateEmergency -> flow { emit(PartialState.EmergencyUpdated(intent.emergency)) }
-            is SelfDeclarationIntent.UpdatePhysical -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
-            is SelfDeclarationIntent.UpdateDiseases -> flow { emit(PartialState.DiseasesUpdated(intent.diseases)) }
-            is SelfDeclarationIntent.UpdateFamily -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
-            is SelfDeclarationIntent.UpdateBloodGroup -> flow { emit(PartialState.BloodGroupUpdated(intent.bloodGroup)) }
-            is SelfDeclarationIntent.UpdateLifestyle -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
-            is SelfDeclarationIntent.UpdateAllergy -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
-            else -> flow {}
+            is HealthProfileIntent.UpdateIdentity   -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
+            is HealthProfileIntent.UpdatePersonal   -> flow { emit(PartialState.PersonalUpdated(intent.personal)) }
+            is HealthProfileIntent.UpdateContact    -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
+            is HealthProfileIntent.UpdateEmergency  -> flow { emit(PartialState.EmergencyUpdated(intent.emergency)) }
+            is HealthProfileIntent.UpdatePhysical   -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
+            is HealthProfileIntent.UpdateDiseases   -> flow { emit(PartialState.DiseasesUpdated(intent.diseases)) }
+            is HealthProfileIntent.UpdateFamily     -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
+            is HealthProfileIntent.UpdateBloodGroup -> flow { emit(PartialState.BloodGroupUpdated(intent.bloodGroup)) }
+            is HealthProfileIntent.UpdateLifestyle  -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
+            is HealthProfileIntent.UpdateAllergy    -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Load everything on init
+    // ─────────────────────────────────────────────────────────────────────────
 
     private fun handleLoadHealthProfile(nationalCode: String?): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
 
         val targetNatCode = nationalCode?.takeIf { it.isNotBlank() } ?: currentPatientNatCode
 
+        // 1. Patient general info
         getPatientGeneralUseCase(targetNatCode)
             .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی")) }
             .collect { general ->
-                val safeNatCode = general.patientNatCode ?: targetNatCode
+                val safeNatCode = general.patientNatCode?.takeIf { it.isNotBlank() } ?: targetNatCode
                 val safePatientId = general.ptientID ?: 0
 
                 currentPatientNatCode = safeNatCode
                 currentPatientId = safePatientId
 
-                emit(PartialState.GeneralLoaded(general.toUiMock()))
+                emit(PartialState.GeneralLoaded(general.toPresentation()))
 
                 if (safeNatCode.isNotBlank() && safePatientId != 0) {
-                    // Fetch Lifestyle & Self-Declarative info safely
+                    // 2. Lifestyle / self-declarative
                     getPatientSelfDeclarativeUseCase(safeNatCode, safePatientId)
-                        .catch { /* non-fatal fallback */ }
-                        .collect { selfDec ->
-                            emit(PartialState.LifestyleLoaded(selfDec.toUiMock()))
-                        }
+                        .catch { /* non-fatal */ }
+                        .collect { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
 
-                    // Fetch Drug Allergies safely
+                    // 3. Drug allergies
                     getPatientDrugAllergiesUseCase(safeNatCode, safePatientId)
-                        .catch { /* non-fatal fallback */ }
-                        .collect { allergies ->
-                            emit(PartialState.AllergiesLoaded(allergies.map { it.toUiMock() }))
-                        }
+                        .catch { /* non-fatal */ }
+                        .collect { emit(PartialState.AllergiesLoaded(it.map { d -> d.toPresentation() })) }
                 }
             }
 
+        // 4. Lookup lists (all non-fatal — UI degrades gracefully)
+        getMaritalStatusUseCase()
+            .catch { }
+            .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
+
+        getAllProvincesUseCase()
+            .catch { }
+            .collect { emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() })) }
+
+        getBloodGroupsUseCase()
+            .catch { }
+            .collect { emit(PartialState.BloodGroupsLoaded(it.map { b -> b.toPresentation() })) }
+
+        getSmokingStatusUseCase()
+            .catch { }
+            .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
+
+        getSelfDeclarableIllnessesByGroupUseCase()
+            .catch { }
+            .collect { emit(PartialState.IllnessGroupsLoaded(it.map { g -> g.toPresentation() })) }
+
+        getAllDrugsUseCase()
+            .catch { }
+            .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
+
         emit(PartialState.Loading(false))
     }
+
+    // Triggered when user selects a province in Step 3
+    private fun handleLoadCities(provinceId: Int): Flow<PartialState> = flow {
+        getProvinceCitiesUseCase(provinceId)
+            .catch { }
+            .collect { emit(PartialState.CitiesLoaded(it.map { c -> c.toPresentation() })) }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Submit full declaration (called on SUCCESS step or explicit submit)
+    // ─────────────────────────────────────────────────────────────────────────
 
     private suspend fun submitFullDeclaration(): Boolean {
         if (currentPatientId == 0 || currentPatientNatCode.isBlank()) {
@@ -119,77 +155,77 @@ class HealthProfileViewModel(
         return try {
             val selfDecState = uiState.value.selfDeclaration
 
-            // A. Update Patient Demographics & Contact & Emergency & Physical
+            // A. Update patient demographics, contact, emergency, physical
             val updatePatientReq = UpdatePatientRequest(
-                patientID = currentPatientId,
-                patientNatCode = currentPatientNatCode,
-                patientMobile = selfDecState.contact.mobile,
-                patientEmail = selfDecState.contact.email,
-                patientAddress = selfDecState.contact.address,
-                patientArea = null,
-                patientCityID = null,
-                patientBloodGroup = null,
-                patientMarriage = null,
-                patientJob = selfDecState.personal.job,
-                patientHeight = selfDecState.physical.height,
-                patientWeight = selfDecState.physical.weight,
+                patientID        = currentPatientId,
+                patientNatCode   = currentPatientNatCode,
+                patientMobile    = selfDecState.contact.mobile,
+                patientEmail     = selfDecState.contact.email,
+                patientAddress   = selfDecState.contact.address,
+                patientArea      = null,
+                patientCityID    = selfDecState.contact.cityId,
+                patientBloodGroup = selfDecState.bloodGroup.selectedBloodGroupId,
+                patientMarriage  = selfDecState.personal.maritalStatusId,
+                patientJob       = selfDecState.personal.job,
+                patientHeight    = selfDecState.physical.height,
+                patientWeight    = selfDecState.physical.weight,
                 patientCitizenship = selfDecState.personal.citizenship,
                 patientNationality = selfDecState.personal.nationality,
                 patientInsurance = null,
-                emergencyName = selfDecState.emergency.emergencyName,
-                emergencyFamily = selfDecState.emergency.emergencyFamily,
-                emergencyMobile = selfDecState.emergency.emergencyMobile,
-                emergencyEmail = null,
+                emergencyName    = selfDecState.emergency.emergencyName,
+                emergencyFamily  = selfDecState.emergency.emergencyFamily,
+                emergencyMobile  = selfDecState.emergency.emergencyMobile,
+                emergencyEmail   = null,
                 emergencyRelation = null,
                 emergencyAddress = null,
-                emergencyArea = null,
-                emergencyCityID = null
+                emergencyArea    = null,
+                emergencyCityID  = null
             )
             updatePatientUseCase(updatePatientReq)
 
-            // B. Sync Diseases & Family History
+            // B. Sync diseases + family history
             val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
-            selfDecState.diseases.chronicDiseases.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.mentalIllnesses.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.cancers.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.family.familyCancers.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
+            selfDecState.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.diseases.mentalIllnessIds.forEach  { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.diseases.cancerIds.forEach         { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.family.familyCancerIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
 
             if (illnessList.isNotEmpty()) {
                 syncIllnessSelfDeclarativesUseCase(
                     SyncIllnessSelfDeclarativesRequest(
-                        natCode = currentPatientNatCode,
-                        patientID = currentPatientId,
+                        natCode              = currentPatientNatCode,
+                        patientID            = currentPatientId,
                         illnessSelfDeclareList = illnessList
                     )
                 )
             }
 
-            // C. Sync Drug Allergies
+            // C. Sync drug allergies
             val allergyList = selfDecState.allergy.allergies.map {
-                DrugAllergyRequest(drugId = it.drugId.toInt(), allergyComments = it.allergyComments)
+                DrugAllergyRequest(drugId = it.drugId, allergyComments = it.allergyComments)
             }
             if (allergyList.isNotEmpty()) {
                 syncDrugAllergiesUseCase(
                     SyncDrugAllergiesRequest(
-                        natCode = currentPatientNatCode,
-                        patientID = currentPatientId,
+                        natCode        = currentPatientNatCode,
+                        patientID      = currentPatientId,
                         drugAllergyList = allergyList
                     )
                 )
             }
 
-            // D. Add / Update Self-Declarative Lifestyle
+            // D. Add / update self-declarative lifestyle
             val lifestyleReq = AddSelfDeclarativeRequest(
-                natCode = currentPatientNatCode,
-                patientID = currentPatientId,
-                smoking = if (selfDecState.lifestyle.isSmoking == true) 1 else 0,
-                smokeDesc = selfDecState.lifestyle.smokingPattern,
-                alcoholUse = if (selfDecState.lifestyle.isDrinking == true) 1 else 0,
-                alcoholUseDesc = selfDecState.lifestyle.drinkingPattern,
-                substanceUse = if (selfDecState.lifestyle.hasAddiction == true) 1 else 0,
+                natCode          = currentPatientNatCode,
+                patientID        = currentPatientId,
+                smoking          = if (selfDecState.lifestyle.isSmoking == true) selfDecState.lifestyle.smokingStatusId ?: 1 else 0,
+                smokeDesc        = selfDecState.lifestyle.smokingPattern,
+                alcoholUse       = if (selfDecState.lifestyle.isDrinking == true) 1 else 0,
+                alcoholUseDesc   = selfDecState.lifestyle.drinkingPattern,
+                substanceUse     = if (selfDecState.lifestyle.hasAddiction == true) 1 else 0,
                 substanceUseDesc = null,
                 exerciseFrequency = if (selfDecState.lifestyle.isExercising == true) 1 else 0,
-                exerciseDesc = selfDecState.lifestyle.exerciseFrequency
+                exerciseDesc     = selfDecState.lifestyle.exerciseFrequency
             )
             addSelfDeclarativeUseCase(lifestyleReq)
 
@@ -201,65 +237,114 @@ class HealthProfileViewModel(
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Reduce
+    // ─────────────────────────────────────────────────────────────────────────
+
     override fun reduceState(
         currentState: HealthProfileUiState,
         partialState: PartialState
     ): HealthProfileUiState = when (partialState) {
-        is PartialState.Loading -> currentState.copy(
-            isLoading = partialState.isLoading,
-            error = null
-        )
-        is PartialState.Error -> currentState.copy(
-            isLoading = false,
-            error = partialState.message
-        )
-        is PartialState.GeneralLoaded -> currentState.copy(
-            isLoading = false,
-            generalInfo = partialState.info
-        )
-        is PartialState.LifestyleLoaded -> currentState.copy(
-            isLoading = false,
-            lifestyleInfo = partialState.info
-        )
-        is PartialState.AllergiesLoaded -> currentState.copy(
-            isLoading = false,
-            drugAllergies = partialState.list
-        )
+
+        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.Error   -> currentState.copy(isLoading = false, error = partialState.message)
+
+        // ── Remote patient data ───────────────────────────────────────────────
+        is PartialState.GeneralLoaded -> {
+            val info = partialState.info
+            val sd   = currentState.selfDeclaration
+            currentState.copy(
+                isLoading   = false,
+                generalInfo = info,
+                selfDeclaration = sd.copy(
+                    identity = sd.identity.copy(
+                        patientName    = info.patientName,
+                        patientFamily  = info.patientFamily,
+                        patientFather  = info.patientFather,
+                        patientGender  = info.patientGender,
+                        patientBirthDate = info.patientBirthDate,
+                        insuranceNumber = info.insuranceNumber,
+                        insuranceType  = info.insuranceType,
+                        lastVisitDate  = info.lastVisitDate
+                    ),
+                    contact = sd.contact.copy(
+                        mobile  = info.patientMobile,
+                        address = info.patientAddress
+                    ),
+                    emergency = sd.emergency.copy(
+                        emergencyName    = info.emergencyName,
+                        emergencyFamily  = info.emergencyFamily,
+                        emergencyRelation = info.emergencyRelation,
+                        emergencyMobile  = info.emergencyMobile
+                    ),
+                    physical = sd.physical.copy(
+                        height = info.patientHeight.toInt(),
+                        weight = info.patientWeight.toInt()
+                    ),
+                    bloodGroup = sd.bloodGroup.copy(
+                        selectedBloodGroupId = info.patientBloodGroupCode
+                    )
+                )
+            )
+        }
+
+        is PartialState.LifestyleLoaded -> {
+            val info = partialState.info
+            val sd   = currentState.selfDeclaration
+            currentState.copy(
+                isLoading    = false,
+                lifestyleInfo = info,
+                selfDeclaration = sd.copy(
+                    lifestyle = sd.lifestyle.copy(
+                        isSmoking       = (info.smokingStatus ?: 0) > 0,
+                        smokingStatusId = info.smokingStatus,
+                        smokingPattern  = info.smokingDesc.takeIf { it.isNotBlank() },
+                        isDrinking      = (info.alcoholUsage ?: 0) > 0,
+                        drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() },
+                        isExercising    = (info.exerciseFreq ?: 0) > 0,
+                        exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() },
+                        hasAddiction    = (info.substanceUsage ?: 0) > 0
+                    )
+                )
+            )
+        }
+
+        is PartialState.AllergiesLoaded -> {
+            val list = partialState.list
+            val sd   = currentState.selfDeclaration
+            currentState.copy(
+                isLoading    = false,
+                drugAllergies = list,
+                selfDeclaration = sd.copy(allergy = sd.allergy.copy(allergies = list))
+            )
+        }
+
+        // ── Lookup lists ──────────────────────────────────────────────────────
+        is PartialState.MaritalStatusLoaded -> currentState.copy(maritalStatusOptions = partialState.options)
+        is PartialState.ProvincesLoaded     -> currentState.copy(provinceOptions = partialState.options)
+        is PartialState.CitiesLoaded        -> currentState.copy(cityOptions = partialState.options)
+        is PartialState.BloodGroupsLoaded   -> currentState.copy(bloodGroupOptions = partialState.options)
+        is PartialState.SmokingStatusLoaded -> currentState.copy(smokingStatusOptions = partialState.options)
+        is PartialState.IllnessGroupsLoaded -> currentState.copy(illnessGroups = partialState.groups)
+        is PartialState.DrugsLoaded         -> currentState.copy(drugOptions = partialState.options)
+
+        // ── Step navigation ───────────────────────────────────────────────────
         is PartialState.StepChanged -> currentState.copy(
             selfDeclaration = currentState.selfDeclaration.copy(currentStep = partialState.step)
         )
-        is PartialState.IdentityUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(identity = partialState.identity)
-        )
-        is PartialState.PersonalUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(personal = partialState.personal)
-        )
-        is PartialState.ContactUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(contact = partialState.contact)
-        )
-        is PartialState.EmergencyUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(emergency = partialState.emergency)
-        )
-        is PartialState.PhysicalUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(physical = partialState.physical)
-        )
-        is PartialState.DiseasesUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(diseases = partialState.diseases)
-        )
-        is PartialState.FamilyUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(family = partialState.family)
-        )
-        is PartialState.BloodGroupUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(bloodGroup = partialState.bloodGroup)
-        )
-        is PartialState.LifestyleUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(lifestyle = partialState.lifestyle)
-        )
-        is PartialState.AllergyUpdated -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(allergy = partialState.allergy)
-        )
+
+        // ── Per-step updates ──────────────────────────────────────────────────
+        is PartialState.IdentityUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(identity  = partialState.identity))
+        is PartialState.PersonalUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(personal  = partialState.personal))
+        is PartialState.ContactUpdated   -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(contact   = partialState.contact))
+        is PartialState.EmergencyUpdated -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(emergency = partialState.emergency))
+        is PartialState.PhysicalUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(physical  = partialState.physical))
+        is PartialState.DiseasesUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(diseases  = partialState.diseases))
+        is PartialState.FamilyUpdated    -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(family    = partialState.family))
+        is PartialState.BloodGroupUpdated -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(bloodGroup = partialState.bloodGroup))
+        is PartialState.LifestyleUpdated -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(lifestyle = partialState.lifestyle))
+        is PartialState.AllergyUpdated   -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(allergy   = partialState.allergy))
     }
 
-    override fun createErrorState(message: String): PartialState =
-        PartialState.Error(message)
+    override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }

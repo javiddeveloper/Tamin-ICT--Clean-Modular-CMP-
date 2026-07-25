@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.LifestyleStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun SelfDeclarationLifestyleScreen(
     state: LifestyleStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
@@ -31,12 +31,16 @@ fun SelfDeclarationLifestyleScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 9,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.ALLERGY)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )
@@ -51,7 +55,6 @@ fun SelfDeclarationLifestyleScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 9, totalSteps = 10)
 
             TaminText(
                 text = "سبک زندگی",
@@ -77,7 +80,7 @@ fun SelfDeclarationLifestyleScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.isSmoking == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(isSmoking = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = idx == 1)))
                     }
                 )
             }
@@ -90,7 +93,7 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndices = state.smokingPattern?.let { setOf(patterns.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val pat = idxs.firstOrNull()?.let { patterns[it] }
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(smokingPattern = pat)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(smokingPattern = pat)))
                     }
                 )
             }
@@ -107,7 +110,7 @@ fun SelfDeclarationLifestyleScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.isDrinking == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(isDrinking = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = idx == 1)))
                     }
                 )
             }
@@ -120,7 +123,7 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndices = state.drinkingPattern?.let { setOf(patterns.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val pat = idxs.firstOrNull()?.let { patterns[it] }
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(drinkingPattern = pat)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(drinkingPattern = pat)))
                     }
                 )
             }
@@ -137,7 +140,7 @@ fun SelfDeclarationLifestyleScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.isExercising == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(isExercising = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = idx == 1)))
                     }
                 )
             }
@@ -150,7 +153,7 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndices = state.exerciseFrequency?.let { setOf(frequencies.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val freq = idxs.firstOrNull()?.let { frequencies[it] }
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(exerciseFrequency = freq)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(exerciseFrequency = freq)))
                     }
                 )
             }
@@ -167,7 +170,7 @@ fun SelfDeclarationLifestyleScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasAddiction == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateLifestyle(state.copy(hasAddiction = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = idx == 1)))
                     }
                 )
             }

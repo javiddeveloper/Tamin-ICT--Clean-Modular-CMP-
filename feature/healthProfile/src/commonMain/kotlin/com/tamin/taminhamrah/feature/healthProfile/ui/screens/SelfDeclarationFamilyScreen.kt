@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.FamilyStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun SelfDeclarationFamilyScreen(
     state: FamilyStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
@@ -31,12 +31,16 @@ fun SelfDeclarationFamilyScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 7,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.BLOOD)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )
@@ -51,7 +55,6 @@ fun SelfDeclarationFamilyScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 7, totalSteps = 10)
 
             TaminText(
                 text = "سلامتی خانواده درجه یک",
@@ -78,7 +81,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHighBloodSugar == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHighBloodSugar = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyHighBloodSugar = idx == 1)))
                     }
                 )
             }
@@ -92,7 +95,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHighBloodPressure == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHighBloodPressure = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyHighBloodPressure = idx == 1)))
                     }
                 )
             }
@@ -106,7 +109,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHighCholesterol == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHighCholesterol = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyHighCholesterol = idx == 1)))
                     }
                 )
             }
@@ -122,7 +125,7 @@ fun SelfDeclarationFamilyScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.familyHasCancer == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyHasCancer = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyHasCancer = idx == 1)))
                     }
                 )
             }
@@ -132,9 +135,9 @@ fun SelfDeclarationFamilyScreen(
                 TaminText("نوع سرطان عضو درجه یک خانواده را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
                 InteractiveChoiceChips(
                     options = cancerOptions,
-                    selectedIndices = state.familyCancers,
+                    selectedIndices = state.familyCancerIds,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateFamily(state.copy(familyCancers = indices)))
+                        onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyCancerIds = indices)))
                     }
                 )
             }
@@ -149,7 +152,7 @@ fun SelfDeclarationFamilyScreen(
 fun SelfDeclarationFamilyScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationFamilyScreen(
-            state = FamilyStepState(familyHasCancer = true, familyCancers = setOf(1)),
+            state = FamilyStepState(familyHasCancer = true, familyCancerIds = setOf(1)),
             onIntent = {},
             onBackClicked = {}
         )

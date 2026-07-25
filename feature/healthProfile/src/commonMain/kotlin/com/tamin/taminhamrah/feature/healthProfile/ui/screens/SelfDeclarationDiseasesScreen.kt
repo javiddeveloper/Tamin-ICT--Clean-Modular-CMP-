@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.DiseasesStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun SelfDeclarationDiseasesScreen(
     state: DiseasesStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
@@ -31,12 +31,16 @@ fun SelfDeclarationDiseasesScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 6,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.FAMILY)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )
@@ -51,7 +55,6 @@ fun SelfDeclarationDiseasesScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HealthProgressBar(currentStep = 6, totalSteps = 10)
 
             TaminText(
                 text = "سابقهٔ بیماری‌های فردی",
@@ -77,7 +80,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasHighBloodSugar == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasHighBloodSugar = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasHighBloodSugar = idx == 1)))
                     }
                 )
             }
@@ -91,7 +94,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasHighBloodPressure == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasHighBloodPressure = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasHighBloodPressure = idx == 1)))
                     }
                 )
             }
@@ -105,7 +108,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasHighCholesterol == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasHighCholesterol = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasHighCholesterol = idx == 1)))
                     }
                 )
             }
@@ -122,7 +125,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasChronicDisease == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasChronicDisease = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasChronicDisease = idx == 1)))
                     }
                 )
             }
@@ -132,9 +135,9 @@ fun SelfDeclarationDiseasesScreen(
                 TaminText("نوع بیماری خود را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
                 InteractiveChoiceChips(
                     options = chronicOptions,
-                    selectedIndices = state.chronicDiseases,
+                    selectedIndices = state.chronicDiseaseIds,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(chronicDiseases = indices)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(chronicDiseaseIds = indices)))
                     }
                 )
             }
@@ -149,7 +152,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasMentalIllness == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasMentalIllness = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasMentalIllness = idx == 1)))
                     }
                 )
             }
@@ -159,9 +162,9 @@ fun SelfDeclarationDiseasesScreen(
                 TaminText("نوع عارضه را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
                 InteractiveChoiceChips(
                     options = mentalOptions,
-                    selectedIndices = state.mentalIllnesses,
+                    selectedIndices = state.mentalIllnessIds,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(mentalIllnesses = indices)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(mentalIllnessIds = indices)))
                     }
                 )
             }
@@ -176,7 +179,7 @@ fun SelfDeclarationDiseasesScreen(
                     options = optionsYesNo,
                     selectedIndex = if (state.hasCancer == true) 1 else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(hasCancer = idx == 1)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasCancer = idx == 1)))
                     }
                 )
             }
@@ -186,9 +189,9 @@ fun SelfDeclarationDiseasesScreen(
                 TaminText("نوع سرطان را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
                 InteractiveChoiceChips(
                     options = cancerOptions,
-                    selectedIndices = state.cancers,
+                    selectedIndices = state.cancerIds,
                     onSelectionChanged = { indices ->
-                        onIntent(SelfDeclarationIntent.UpdateDiseases(state.copy(cancers = indices)))
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(cancerIds = indices)))
                     }
                 )
             }
@@ -203,7 +206,7 @@ fun SelfDeclarationDiseasesScreen(
 fun SelfDeclarationDiseasesScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationDiseasesScreen(
-            state = DiseasesStepState(hasChronicDisease = true, chronicDiseases = setOf(0, 2)),
+            state = DiseasesStepState(hasChronicDisease = true, chronicDiseaseIds = setOf(0, 2)),
             onIntent = {},
             onBackClicked = {}
         )

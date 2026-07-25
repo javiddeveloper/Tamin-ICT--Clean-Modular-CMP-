@@ -30,7 +30,7 @@ import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -41,7 +41,7 @@ import taminx.feature.healthprofile.generated.resources.*
  */
 @Composable
 fun SelfDeclarationGateScreen(
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -54,7 +54,7 @@ fun SelfDeclarationGateScreen(
 
 @Composable
 fun SelfDeclarationGateContent(
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -108,7 +108,7 @@ fun SelfDeclarationGateContent(
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
                     primaryIconPainter = painterResource(Res.drawable.ic_health_gate_button),
-                    onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
+                    onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
                 )

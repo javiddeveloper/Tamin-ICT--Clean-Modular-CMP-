@@ -36,27 +36,49 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 fun HealthTopAppBar(
     title: String = "خوداظهاری سلامت",
     onBackClicked: () -> Unit,
+    currentStep: Int? = null,
+    totalSteps: Int = 10,
     modifier: Modifier = Modifier
 ) {
-    TaminTopAppBar(
-        modifier = modifier.statusBarsPadding(),
-        title = {
-            TaminText(
-                text = title,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+    val taminColors = LocalTaminColors.current
+    Surface(
+        color = taminColors.bgSurface,
+        shadowElevation = 0.dp
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+        ) {
+            TaminTopAppBar(
+                title = {
+                    TaminText(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    )
+                },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "بازگشت"
+                    )
+                },
+                onNavigationClick = onBackClicked
+            )
+            if (currentStep != null && currentStep > 0) {
+                HealthProgressBar(
+                    currentStep = currentStep,
+                    totalSteps = totalSteps,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 )
-            )
-        },
-        navigationIcon = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "بازگشت"
-            )
-        },
-        onNavigationClick = onBackClicked
-    )
+            }
+        }
+    }
 }
 
 /**

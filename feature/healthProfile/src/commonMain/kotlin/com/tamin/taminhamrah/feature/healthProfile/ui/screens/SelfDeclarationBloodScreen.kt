@@ -12,18 +12,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.BloodGroupStepState
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 
 @Composable
 fun SelfDeclarationBloodScreen(
     state: BloodGroupStepState,
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
@@ -36,13 +36,17 @@ fun SelfDeclarationBloodScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(onBackClicked = onBackClicked)
+            HealthTopAppBar(
+                currentStep = 8,
+                totalSteps = 10,
+                onBackClicked = onBackClicked
+            )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
                 primaryEnabled = isNextEnabled,
-                onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )
@@ -58,7 +62,6 @@ fun SelfDeclarationBloodScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HealthProgressBar(currentStep = 8, totalSteps = 10)
 
             TaminText(
                 text = "گروه خونی",
@@ -86,7 +89,7 @@ fun SelfDeclarationBloodScreen(
                     .clickable {
                         val newUnknown = !state.isBloodGroupUnknown
                         onIntent(
-                            SelfDeclarationIntent.UpdateBloodGroup(
+                            HealthProfileIntent.UpdateBloodGroup(
                                 state.copy(
                                     isBloodGroupUnknown = newUnknown,
                                     selectedBloodGroupLetter = if (newUnknown) null else state.selectedBloodGroupLetter,
@@ -102,7 +105,7 @@ fun SelfDeclarationBloodScreen(
                     checked = state.isBloodGroupUnknown,
                     onCheckedChange = { chk ->
                         onIntent(
-                            SelfDeclarationIntent.UpdateBloodGroup(
+                            HealthProfileIntent.UpdateBloodGroup(
                                 state.copy(
                                     isBloodGroupUnknown = chk,
                                     selectedBloodGroupLetter = if (chk) null else state.selectedBloodGroupLetter,
@@ -136,7 +139,7 @@ fun SelfDeclarationBloodScreen(
                     selectedIndices = state.selectedBloodGroupLetter?.let { setOf(bloodLetters.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val letter = idxs.firstOrNull()?.let { bloodLetters[it] }
-                        onIntent(SelfDeclarationIntent.UpdateBloodGroup(state.copy(selectedBloodGroupLetter = letter)))
+                        onIntent(HealthProfileIntent.UpdateBloodGroup(state.copy(selectedBloodGroupLetter = letter)))
                     }
                 )
 
@@ -154,7 +157,7 @@ fun SelfDeclarationBloodScreen(
                     selectedIndices = state.selectedBloodGroupRh?.let { setOf(rhFactors.indexOf(it)) } ?: emptySet(),
                     onSelectionChanged = { idxs ->
                         val rh = idxs.firstOrNull()?.let { rhFactors[it] }
-                        onIntent(SelfDeclarationIntent.UpdateBloodGroup(state.copy(selectedBloodGroupRh = rh)))
+                        onIntent(HealthProfileIntent.UpdateBloodGroup(state.copy(selectedBloodGroupRh = rh)))
                     }
                 )
             }
