@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.records
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,13 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.tamin.taminhamrah.feature.treatment.ui.components.CostBreakdownCard
+import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
@@ -36,23 +39,23 @@ import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsVie
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.PdfDocumentView
+import com.tamin.taminhamrah.ui.components.rememberPdfDownloader
+import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_cross
-import taminx.core.core_ui.ic_tamin_download
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_download
 
 /** Clearance so the last card is not hidden behind the pinned action bar. */
 private val BOTTOM_BAR_CLEARANCE = 100.dp
@@ -87,7 +90,12 @@ fun RecordDetailScreen(
         )
     }
 
-    HandleRecordsEvents(events = viewModel.events, snackbarHostState = snackbarHostState)
+    val pdfDownloader = rememberPdfDownloader()
+    HandleRecordsEvents(
+        events = viewModel.events,
+        snackbarHostState = snackbarHostState,
+        onPdfReady = { pdf, fileName -> pdfDownloader.download(fileName, pdf) },
+    )
 
     RecordDetailContent(
         state = state,
@@ -151,11 +159,18 @@ fun RecordDetailContent(
                         )
                     },
                     action = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_download),
-                            contentDescription = "دریافت جواب آزمایش",
-                            onClick = onDownloadLabResult,
-                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                            TaminTopAppBarButton(
+                                icon = vectorResource(Res.drawable.ic_tamin_download),
+                                contentDescription = "دریافت نسخهٔ الکترونیک",
+                                onClick = onDownloadPdf,
+                            )
+                            TaminTopAppBarButton(
+                                icon = vectorResource(Res.drawable.ic_tamin_download),
+                                contentDescription = "دریافت جواب آزمایش",
+                                onClick = onDownloadLabResult,
+                            )
+                        }
                     },
                 )
 
@@ -195,28 +210,27 @@ fun RecordDetailContent(
                                 centerName = item.serverName,
                                 actionDate = item.registerDate.toJalaliDateLabel(),
                                 itemTotal = item.sumPriceItem.toPriceFormat(),
-                                insuredShare = item.insurancePayment.toPriceFormat(),
+                                patientShare = item.ssoPayment.toPriceFormat(),
+                                organizationShare = item.insurancePayment.toPriceFormat(),
                             )
                         }
 
-                        price?.let {
-                            CostBreakdownCard(
-                                total = it.requestPrice.toPriceFormat(),
-                                organizationShare = it.headSsoPayment.toPriceFormat(),
-                                insuredShare = it.headInsuPayment.toPriceFormat(),
-                            )
-                        }
+
                     }
                 }
 
                 Box(modifier = Modifier.height(BOTTOM_BAR_CLEARANCE))
             }
 
-            TaminBottomBar(modifier = Modifier.align(Alignment.BottomCenter)) {
-                TaminPrimaryButton(
-                    text = "دریافت نسخهٔ الکترونیک",
-                    icon = vectorResource(Res.drawable.ic_tamin_download),
-                    onClick = onDownloadPdf,
+            price?.let {
+                CostTotalsBar(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    insuredShareLabel = "سهم شما",
+                    insuredShareAmount = it.headSsoPayment.toPriceFormat(),
+                    organizationShareLabel = "سهم سازمان",
+                    organizationShareAmount = it.headInsuPayment.toPriceFormat(),
+                    totalLabel = "جمع کل",
+                    totalAmount = it.requestPrice.toPriceFormat(),
                 )
             }
         }
@@ -228,8 +242,8 @@ fun RecordDetailContent(
 }
 
 /**
- * PDF preview. Mirrors the app's existing viewer (see pensioner's): the file is downloaded but a
- * multiplatform renderer is not wired in yet, so this reports the download rather than drawing it.
+ * Full-screen PDF preview. The downloaded bytes are drawn by the shared multiplatform
+ * [PdfDocumentView] (Android PdfRenderer / iOS PDFKit); a missing file shows a short notice.
  */
 @Composable
 fun PdfViewerDialog(
@@ -253,21 +267,8 @@ fun PdfViewerDialog(
                         )
                     },
                 )
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "فایل PDF با موفقیت دریافت شد",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = colors.textPrimary,
-                        )
-                        Box(modifier = Modifier.height(Spacing.sm))
-                        Text(
-                            text = "آماده نمایش (نیاز به پیاده‌سازی رندرینگ)",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colors.textSecondary,
-                        )
-                    }
-                }
+                // core-ui drains the channel and renders; the feature never touches ktor.
+                PdfDocumentView(pdf = pdfData, modifier = Modifier.fillMaxSize())
             }
         }
     }

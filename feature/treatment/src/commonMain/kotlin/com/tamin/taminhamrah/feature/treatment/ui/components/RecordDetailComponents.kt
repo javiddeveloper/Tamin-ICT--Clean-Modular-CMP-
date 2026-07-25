@@ -65,11 +65,13 @@ fun PrescriptionItemCard(
     prescribedCount: String,
     receivedCount: String,
     modifier: Modifier = Modifier,
-    // Optional, from the old app's per-item detail: dispensing centre, action date and cost.
+    // Optional, from the old app's per-item detail: dispensing center, action date and the cost
+    // split. Old app labels: سهم بیمار = ssoPayment, سهم سازمان = insurancePayment, جمع کل = sumPriceItem.
     centerName: String = "",
     actionDate: String = "",
     itemTotal: String = "",
-    insuredShare: String = "",
+    patientShare: String = "",
+    organizationShare: String = "",
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -110,8 +112,8 @@ fun PrescriptionItemCard(
         }
 
         // The old app's remaining per-item fields, each shown only when present.
-        if (centerName.isNotBlank() || actionDate.isNotBlank() ||
-            itemTotal.isNotBlank() || insuredShare.isNotBlank()
+        if (centerName.isNotBlank() || actionDate.isNotBlank() || itemTotal.isNotBlank() ||
+            patientShare.isNotBlank() || organizationShare.isNotBlank()
         ) {
             Column(
                 modifier = Modifier
@@ -120,12 +122,11 @@ fun PrescriptionItemCard(
                     .padding(horizontal = Spacing.md, vertical = Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
-                if (centerName.isNotBlank()) DetailRow(label = "مرکز ارائه", value = centerName)
+                if (centerName.isNotBlank()) DetailRow(label = "داروخانه/پاراکلینیک", value = centerName)
                 if (actionDate.isNotBlank()) DetailRow(label = "تاریخ اقدام", value = actionDate)
                 if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = "$itemTotal ریال")
-                if (insuredShare.isNotBlank()) {
-                    DetailRow(label = "سهم شما", value = "$insuredShare ریال")
-                }
+                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = "$patientShare ریال")
+                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = "$organizationShare ریال")
             }
         }
     }

@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 
 /**
  * What the advanced search asks for.
@@ -32,11 +33,14 @@ data class RecordSearchCriteria(
     /**
      * Whether a record survives the client-side part of the search.
      *
-     * [prices] is the per-record insured share, fetched separately because the list endpoint
-     * carries no amount; pass an empty map when the cost bounds are not in use.
+     * [prices] is the per-record price breakdown, fetched separately because the list endpoint
+     * carries no amount; the cost filter compares against «سهم شما» (`headSsoPayment`). Pass an
+     * empty map when the cost bounds are not in use.
      */
-    fun matches(record: ElectronicPrescriptionPR, prices: Map<String, Long> = emptyMap()): Boolean =
-        matchesName(record) && matchesAmount(record, prices)
+    fun matches(
+        record: ElectronicPrescriptionPR,
+        prices: Map<String, ElectronicPrescriptionPricePR> = emptyMap(),
+    ): Boolean = matchesName(record) && matchesAmount(record, prices)
 
     private fun matchesName(record: ElectronicPrescriptionPR): Boolean {
         if (nameQuery.isBlank()) return true
@@ -54,10 +58,10 @@ data class RecordSearchCriteria(
      */
     private fun matchesAmount(
         record: ElectronicPrescriptionPR,
-        prices: Map<String, Long>,
+        prices: Map<String, ElectronicPrescriptionPricePR>,
     ): Boolean {
         if (!filtersOnAmount) return true
-        val amount = prices[record.noteHeadEprescID] ?: return true
+        val amount = prices[record.noteHeadEprescID]?.headSsoPayment?.toLongOrNull() ?: return true
         val min = minAmount.toAmountOrNull()
         val max = maxAmount.toAmountOrNull()
         return (min == null || amount >= min) && (max == null || amount <= max)
