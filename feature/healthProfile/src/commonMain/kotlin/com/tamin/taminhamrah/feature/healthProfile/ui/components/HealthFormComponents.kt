@@ -182,11 +182,14 @@ fun StyledTextField(
     label: String,
     placeholder: String,
     leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
     isValid: Boolean? = null,
     errorText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     modifier: Modifier = Modifier,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    readOnly: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -199,94 +202,116 @@ fun StyledTextField(
     }
 
     val leadingIconColor = if (isFocused) taminColors.blueText else taminColors.textMuted
+    val trailingIconColor = if (isFocused) taminColors.blueText else taminColors.textSecondary
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        TaminText(
-            text = label,
-            fontSize = 12.5.sp,
-            fontWeight = FontWeight.Bold,
-            color = taminColors.textTertiary,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
-                .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
-                .onFocusChanged { isFocused = it.isFocused }
-                .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Leading Icon
-            if (leadingIcon != null) {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    tint = leadingIconColor,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-            }
-
-            // Input field
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = singleLine,
-                keyboardOptions = keyboardOptions,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = taminColors.textPrimary,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = applicationFont()
-                ),
-                modifier = Modifier.weight(1f),
-                decorationBox = { innerTextField ->
-                    if (value.isEmpty()) {
-                        TaminText(
-                            text = placeholder,
-                            fontSize = 13.5.sp,
-                            color = taminColors.textMuted,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
-                    innerTextField()
-                }
+    Box(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            TaminText(
+                text = label,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textTertiary,
+                modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // Suffix validation / status checkmark
-            if (isValid == true) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "معتبر",
-                    tint = taminColors.greenText,
-                    modifier = Modifier.size(19.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
+                    .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
+                    .onFocusChanged { isFocused = it.isFocused }
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Leading Icon
+                if (leadingIcon != null) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = leadingIconColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+
+                // Input field
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = singleLine,
+                    readOnly = readOnly || onClick != null,
+                    keyboardOptions = keyboardOptions,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = taminColors.textPrimary,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = applicationFont()
+                    ),
+                    modifier = Modifier.weight(1f),
+                    decorationBox = { innerTextField ->
+                        if (value.isEmpty()) {
+                            TaminText(
+                                text = placeholder,
+                                fontSize = 13.5.sp,
+                                color = taminColors.textMuted,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                        innerTextField()
+                    }
                 )
+
+                // Suffix validation / status checkmark or trailing icon
+                if (isValid == true) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "معتبر",
+                        tint = taminColors.greenText,
+                        modifier = Modifier.size(19.dp)
+                    )
+                } else if (trailingIcon != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = null,
+                        tint = trailingIconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            // Error message below
+            if (isValid == false && !errorText.isNullOrEmpty()) {
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = "خطا",
+                        tint = taminColors.dangerText,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    TaminText(
+                        text = errorText,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.dangerText
+                    )
+                }
             }
         }
 
-        // Error message below
-        if (isValid == false && !errorText.isNullOrEmpty()) {
-            Row(
-                modifier = Modifier.padding(top = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Error,
-                    contentDescription = "خطا",
-                    tint = taminColors.dangerText,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                TaminText(
-                    text = errorText,
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.dangerText
-                )
-            }
+        // Overlay transparent Box over entire field when onClick != null
+        if (onClick != null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(13.dp))
+                    .clickable { onClick() }
+            )
         }
     }
 }

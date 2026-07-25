@@ -1,6 +1,4 @@
-package com.tamin.taminhamrah.feature.healthProfile.components.bottomsheet
-
-import androidx.compose.ui.graphics.vector.ImageVector
+package com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet
 
 data class BottomSheetConfig(
     val title: String = "",

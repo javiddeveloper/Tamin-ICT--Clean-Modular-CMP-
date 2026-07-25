@@ -30,6 +30,7 @@ import com.tamin.taminhamrah.model.health.UpdatePatientRequest
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeRequest
 import com.tamin.taminhamrah.repository.health.HealthRepository
+import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -182,6 +183,7 @@ internal class HealthRepositoryImpl(
 
     override suspend fun getMaritalStatus(): Flow<List<MaritalStatusDN>> = flow {
         val remote = healthRemoteDataSource.getMaritalStatus()?.map { it.toDomain() } ?: emptyList()
+        Logger.d("getMaritalStatus" , remote.toString())
         emit(remote)
     }
 
