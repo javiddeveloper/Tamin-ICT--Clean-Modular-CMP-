@@ -146,14 +146,14 @@ fun ServiceCard(
         if (showRedDot) {
             Box(
                 modifier = Modifier
-                    .size(IconSize.small)
+                    .size(IconSize.statIcon)
                     .align(Alignment.TopEnd)
                     .offset(
-                        x = IconSize.small / 4,
-                        y = -(IconSize.small / 4)
+                        x = 2.dp / 4,
+                        y = -(2.dp / 4)
                     )
                     .background(
-                        MaterialTheme.colorScheme.error,
+                        MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
                         CircleShape
                     )
             )
