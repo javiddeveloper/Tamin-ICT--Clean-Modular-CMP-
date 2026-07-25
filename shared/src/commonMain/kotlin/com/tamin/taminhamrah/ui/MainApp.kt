@@ -43,24 +43,24 @@ fun MainApp(
         darkTheme = darkTheme
     ) {
         AppToastHost {
-        CompositionLocalProvider(
-            LocalThemeRevealController provides revealController
-        ) {
-            ThemeRevealHost(
-                controller = revealController
+            CompositionLocalProvider(
+                LocalThemeRevealController provides revealController
             ) {
-                StatusBarIcons(darkIcons = !darkTheme)
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        TaminHamrahNavGraph(
-                            isLoggedIn = uiState.isLoggedIn,
-                            isLoading = uiState.isLoading,
-                            onLoginClick = { viewModel.login() }
-                        )
-                    }
+                ThemeRevealHost(
+                    controller = revealController
+                ) {
+                    StatusBarIcons(darkIcons = !darkTheme)
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            TaminHamrahNavGraph(
+                                isLoggedIn = uiState.isLoggedIn,
+                                isLoading = uiState.isLoading,
+                                onLoginClick = { viewModel.login() }
+                            )
+                        }
 
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 }
             }
