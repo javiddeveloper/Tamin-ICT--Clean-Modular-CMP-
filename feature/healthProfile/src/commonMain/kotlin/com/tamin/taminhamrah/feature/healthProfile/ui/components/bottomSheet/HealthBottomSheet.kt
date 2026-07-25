@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.healthProfile.components.bottomsheet
+package com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -25,18 +25,11 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,12 +51,13 @@ import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
+
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.InteractiveChoiceChips
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -103,6 +97,17 @@ fun HealthBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
+
+                TaminText(
+                    modifier = Modifier,
+                    text = config.title,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        textAlign = TextAlign.End,
+                        color = LocalTaminColors.current.textPrimary,
+                        fontWeight = FontWeight(800)
+                    ),
+                )
                 Box(
                     modifier = Modifier.size(34.dp)
                         .clip(TaminHamrahShapes.medium)
@@ -117,18 +122,6 @@ fun HealthBottomSheet(
                         tint = LocalTaminColors.current.textSecondary
                     )
                 }
-
-                TaminText(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = config.title,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        textAlign = TextAlign.End,
-                        color = LocalTaminColors.current.textPrimary,
-                        fontWeight = FontWeight(800)
-                    ),
-                )
-
-                Spacer(modifier = Modifier.size(48.dp))
             }
 
             if (config.subtitle != null) {
@@ -138,7 +131,7 @@ fun HealthBottomSheet(
                         color = LocalTaminColors.current.textTertiary,
                         textAlign = TextAlign.End
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
                 )
             }
 
@@ -226,33 +219,32 @@ fun HealthBottomSheet(
                     }
                 }
             } else if (config.items.isNotEmpty()) {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
-                    filteredItems.forEach { item ->
-                        val isSelected = selectedIds.contains(item.id)
-                        CustomChip(
-                            text = item.title,
-                            modifier = Modifier.clip(RoundedCornerShape(CornerRadius.lg)).clickable {
-                                if (config.singleSelection) {
-                                    selectedIds.clear()
-                                    selectedIds.add(item.id)
-                                } else {
-                                    if (isSelected) selectedIds.remove(item.id)
-                                    else selectedIds.add(item.id)
+                val options = filteredItems.map { it.title }
+                val selectedIndices = filteredItems
+                    .mapIndexedNotNull { index, item -> if (selectedIds.contains(item.id)) index else null }
+                    .toSet()
+
+                InteractiveChoiceChips(
+                    options = options,
+                    selectedIndices = selectedIndices,
+                    onSelectionChanged = { newIndices ->
+                        if (config.singleSelection) {
+                            val addedIndex = (newIndices - selectedIndices).firstOrNull()
+                                ?: newIndices.firstOrNull()
+                            selectedIds.clear()
+                            if (addedIndex != null && addedIndex in filteredItems.indices) {
+                                selectedIds.add(filteredItems[addedIndex].id)
+                            }
+                        } else {
+                            selectedIds.clear()
+                            newIndices.forEach { idx ->
+                                if (idx in filteredItems.indices) {
+                                    selectedIds.add(filteredItems[idx].id)
                                 }
-                            },
-                            containerColor = if (isSelected) LocalTaminColors.current.blueBg else Color.Transparent,
-                            textColor = if (isSelected) LocalTaminColors.current.blueText else LocalTaminColors.current.textSecondary,
-                            border = BorderStroke(
-                                width = 1.dp,
-                                color = if (isSelected) LocalTaminColors.current.blueText else LocalTaminColors.current.border
-                            )
-                        )
+                            }
+                        }
                     }
-                }
+                )
             }
 
             if (config.description != null) {
