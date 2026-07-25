@@ -1,43 +1,69 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChipRow
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
-import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_cross
 
 /** Which date field the picker is currently filling, if any. */
 private enum class DateField { NONE, FROM, TO }
 
 /**
- * Advanced search for سوابق درمانی.
- *
- * The category and the date range become query parameters; the name and amount bounds are applied
- * to the results, because the endpoint cannot filter on them.
+ * Advanced search bottom sheet for سوابق درمانی.
+ * Features title on the right, cross icon on the left, gradient chosen chips, and theme adaptation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,10 +78,32 @@ fun RecordSearchSheet(
     var criteria by remember { mutableStateOf(initial) }
     var editingDate by remember { mutableStateOf(DateField.NONE) }
 
+    val filterChips = remember { RecordTab.chips }
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    // Smoothly scroll to selected chip when criteria changes or initial sheet opens
+    LaunchedEffect(criteria.tab) {
+        val index = filterChips.indexOf(criteria.tab)
+        if (index >= 0) {
+            lazyListState.animateScrollToItem(index)
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = colors.bgSurface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = Spacing.sm, bottom = Spacing.xs)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .background(colors.border, CircleShape),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
@@ -63,79 +111,194 @@ fun RecordSearchSheet(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.page)
                 .padding(bottom = Spacing.xl),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            Text(
-                text = "جست‌وجوی پیشرفته",
-                style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
-                color = colors.textPrimary,
-            )
+            // Header Row: Title on right (first child in RTL), Cross icon without background container on left (second child in RTL)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Spacing.xs),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "جستجوی پیشرفته",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary,
+                )
 
-            SectionLabel(text = "نوع خدمت")
-            TreatmentFilterChipRow(
-                categories = RecordTab.chips.map { it.label },
-                selectedIndex = RecordTab.chips.indexOf(criteria.tab).coerceAtLeast(0),
-                onSelect = { criteria = criteria.copy(tab = RecordTab.chips[it]) },
-            )
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_tamin_cross),
+                        contentDescription = "بستن",
+                        tint = colors.textSecondary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
 
-            SectionLabel(text = "بازهٔ تاریخ دلخواه")
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            // Section 1: Service Type (نوع خدمت)
+            SectionHeader(text = "نوع خدمت")
+            LazyRow(
+                state = lazyListState,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                itemsIndexed(filterChips) { index, tab ->
+                    val isSelected = criteria.tab == tab
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .then(
+                                if (isSelected) Modifier.background(colors.medicalGradient)
+                                else Modifier
+                                    .background(colors.bgSurface)
+                                    .border(1.dp, colors.border, CircleShape),
+                            )
+                            .clickable {
+                                criteria = criteria.copy(tab = tab)
+                                coroutineScope.launch {
+                                    lazyListState.animateScrollToItem(index)
+                                }
+                            }
+                            .padding(horizontal = 18.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = tab.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) Color.White else colors.textSecondary,
+                        )
+                    }
+                }
+            }
+
+            // Section 2: Custom Date Range (بازهٔ تاریخ دلخواه)
+            SectionHeader(text = "بازهٔ تاریخ دلخواه")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
                 DateFieldButton(
-                    label = "از",
+                    placeholder = "از (۱۴۰۴/۰۱/۰۱)",
+                    prefix = "از",
                     value = criteria.startDate,
                     onClick = { editingDate = DateField.FROM },
                     modifier = Modifier.weight(1f),
                 )
                 DateFieldButton(
-                    label = "تا",
+                    placeholder = "تا (۱۴۰۴/۱۲/۲۹)",
+                    prefix = "تا",
                     value = criteria.endDate,
                     onClick = { editingDate = DateField.TO },
                     modifier = Modifier.weight(1f),
                 )
             }
 
-            SectionLabel(text = "نام پزشک یا مرکز")
+            // Section 3: Doctor or Center Name (نام پزشک یا مرکز)
+            SectionHeader(text = "نام پزشک یا مرکز")
             OutlinedTextField(
                 value = criteria.nameQuery,
                 onValueChange = { criteria = criteria.copy(nameQuery = it) },
-                placeholder = { Text("مثلاً دکتر محمدی یا آزمایشگاه مرکزی") },
+                placeholder = {
+                    Text(
+                        text = "مثلاً دکتر محمدی یا آزمایشگاه مرکزی",
+                        color = colors.textMuted,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
                 singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            SectionLabel(text = "بازهٔ مبلغ هزینه (ریال)")
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            // Section 4: Cost Range (بازهٔ مبلغ هزینه (ریال))
+            SectionHeader(text = "بازهٔ مبلغ هزینه (ریال)")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
                 OutlinedTextField(
                     value = criteria.minAmount,
                     onValueChange = { criteria = criteria.copy(minAmount = it) },
-                    placeholder = { Text("حداقل") },
+                    placeholder = {
+                        Text(
+                            text = "حداقل",
+                            color = colors.textMuted,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
                     singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = textFieldColors(),
                     modifier = Modifier.weight(1f),
                 )
                 OutlinedTextField(
                     value = criteria.maxAmount,
                     onValueChange = { criteria = criteria.copy(maxAmount = it) },
-                    placeholder = { Text("حداکثر") },
+                    placeholder = {
+                        Text(
+                            text = "حداکثر",
+                            color = colors.textMuted,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
                     singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = textFieldColors(),
                     modifier = Modifier.weight(1f),
                 )
             }
 
+            Spacer(modifier = Modifier.height(Spacing.xs))
+
+            // Action Buttons: Clear on the right (first child in RTL), Apply Search Gradient on the left (second child in RTL)
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.xs),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 OutlinedButton(
                     onClick = { criteria = RecordSearchCriteria() },
-                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, colors.border),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
                 ) {
-                    Text(text = "پاک کردن", color = colors.textSecondary)
+                    Text(
+                        text = "پاک کردن",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.textSecondary,
+                    )
                 }
-                TaminPrimaryButton(
-                    text = "اعمال جست‌وجو",
-                    onClick = { onApply(criteria) },
-                    modifier = Modifier.weight(1f),
-                )
+
+                Box(
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(colors.medicalGradient)
+                        .clickable { onApply(criteria) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "اعمال جستجو",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                    )
+                }
             }
         }
     }
@@ -158,20 +321,62 @@ fun RecordSearchSheet(
     }
 }
 
-/** A date slot that reads as a field but opens the Jalali picker. */
+@Composable
+private fun SectionHeader(text: String) {
+    val colors = LocalTaminColors.current
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = colors.textPrimary,
+        modifier = Modifier.padding(top = Spacing.xs),
+    )
+}
+
+/** A date field button matching the input box design in the mockup. */
 @Composable
 private fun DateFieldButton(
-    label: String,
+    placeholder: String,
+    prefix: String,
     value: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    OutlinedButton(onClick = onClick, modifier = modifier) {
+    val displayText = remember(value) {
+        if (value.isNullOrBlank()) {
+            placeholder
+        } else {
+            val formatted = PersianDateFormatter.formatTimestamp(value.toLongOrNull())
+            if (formatted.isNotBlank()) "$prefix ($formatted)" else placeholder
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .height(56.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.bgSurface)
+            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md),
+        contentAlignment = Alignment.CenterStart,
+    ) {
         Text(
-            text = value?.let { PersianDateFormatter.formatTimestamp(it.toLongOrNull()) } ?: label,
-            color = if (value == null) colors.textTertiary else colors.textPrimary,
-            textAlign = TextAlign.Center,
+            text = displayText,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (value.isNullOrBlank()) colors.textMuted else colors.textPrimary,
+            textAlign = TextAlign.Start,
         )
     }
 }
+
+@Composable
+private fun textFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = LocalTaminColors.current.teal,
+    unfocusedBorderColor = LocalTaminColors.current.border,
+    focusedContainerColor = LocalTaminColors.current.bgSurface,
+    unfocusedContainerColor = LocalTaminColors.current.bgSurface,
+    focusedTextColor = LocalTaminColors.current.textPrimary,
+    unfocusedTextColor = LocalTaminColors.current.textPrimary,
+)

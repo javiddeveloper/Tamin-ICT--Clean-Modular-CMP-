@@ -16,9 +16,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.ic_tamin_user
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -218,11 +226,9 @@ fun TreatmentFilterChip(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(if (selected) colors.teal else colors.bgSurface)
-            .border(
-                width = 1.dp,
-                color = if (selected) Color.Transparent else colors.border,
-                shape = CircleShape,
+            .then(
+                if (selected) Modifier.background(colors.medicalGradient)
+                else Modifier.background(colors.bgSurface).border(1.dp, colors.border, CircleShape)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
@@ -230,12 +236,12 @@ fun TreatmentFilterChip(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else colors.textTertiary,
+            color = if (selected) Color.White else colors.textSecondary,
         )
     }
 }
 
-/** Horizontally scrollable strip of category filters above the timeline. */
+/** Horizontally scrollable strip of category filters above the timeline with auto-scrolling. */
 @Composable
 fun TreatmentFilterChipRow(
     categories: List<String>,
@@ -243,18 +249,32 @@ fun TreatmentFilterChipRow(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex in categories.indices) {
+            lazyListState.animateScrollToItem(selectedIndex)
+        }
+    }
+
+    LazyRow(
+        state = lazyListState,
         modifier = modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        categories.forEachIndexed { index, label ->
+        itemsIndexed(categories) { index, label ->
             TreatmentFilterChip(
                 label = label,
                 selected = index == selectedIndex,
-                onClick = { onSelect(index) },
+                onClick = {
+                    onSelect(index)
+                    coroutineScope.launch {
+                        lazyListState.animateScrollToItem(index)
+                    }
+                },
             )
         }
     }
@@ -287,6 +307,7 @@ fun TimelineFilterBar(
     ) {
         FilterTrigger(
             label = personLabel,
+            leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
             trailingIcon = dropdownIcon,
             onClick = onPersonClick,
             modifier = Modifier.weight(1f),
@@ -294,6 +315,7 @@ fun TimelineFilterBar(
         )
         FilterTrigger(
             label = dateLabel,
+            leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
             trailingIcon = dropdownIcon,
             onClick = onDateClick,
             modifier = Modifier.weight(1f),
@@ -324,6 +346,7 @@ private fun FilterTrigger(
     trailingIcon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    leadingIcon: ImageVector? = null,
     expanded: Boolean = false,
 ) {
     // The chevron points down when closed and up when open, animated so the flip reads as one
@@ -344,8 +367,16 @@ private fun FilterTrigger(
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
+        if (leadingIcon != null) {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
