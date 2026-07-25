@@ -80,35 +80,8 @@ class HealthProfileViewModel(
     private fun handleLoadHealthProfile(nationalCode: String?): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
 
-        val targetNatCode = nationalCode?.takeIf { it.isNotBlank() } ?: currentPatientNatCode
-
-        // 1. Patient general info
-        getPatientGeneralUseCase(targetNatCode)
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی")) }
-            .collect { general ->
-                val safeNatCode = general.patientNatCode?.takeIf { it.isNotBlank() } ?: targetNatCode
-                val safePatientId = general.ptientID ?: 0
-
-                currentPatientNatCode = safeNatCode
-                currentPatientId = safePatientId
-
-                emit(PartialState.GeneralLoaded(general.toPresentation()))
-
-                if (safeNatCode.isNotBlank() && safePatientId != 0) {
-                    // 2. Lifestyle / self-declarative
-                    getPatientSelfDeclarativeUseCase(safeNatCode, safePatientId)
-                        .catch { /* non-fatal */ }
-                        .collect { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
-
-                    // 3. Drug allergies
-                    getPatientDrugAllergiesUseCase(safeNatCode, safePatientId)
-                        .catch { /* non-fatal */ }
-                        .collect { emit(PartialState.AllergiesLoaded(it.map { d -> d.toPresentation() })) }
-                }
-            }
-
-        // 4. Lookup lists (all non-fatal — UI degrades gracefully)
-        getMaritalStatusUseCase()
+        // 1. Lookup lists (independent of patient data — load immediately)
+        getMaritalStatusUseCase.invoke()
             .catch { }
             .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
 
@@ -131,6 +104,35 @@ class HealthProfileViewModel(
         getAllDrugsUseCase()
             .catch { }
             .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
+
+        val targetNatCode = nationalCode?.takeIf { it.isNotBlank() } ?: currentPatientNatCode
+
+        if (targetNatCode.isNotBlank()) {
+            // 2. Patient general info
+            getPatientGeneralUseCase(targetNatCode)
+                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی")) }
+                .collect { general ->
+                    val safeNatCode = general.patientNatCode?.takeIf { it.isNotBlank() } ?: targetNatCode
+                    val safePatientId = general.ptientID ?: 0
+
+                    currentPatientNatCode = safeNatCode
+                    currentPatientId = safePatientId
+
+                    emit(PartialState.GeneralLoaded(general.toPresentation()))
+
+                    if (safeNatCode.isNotBlank() && safePatientId != 0) {
+                        // 3. Lifestyle / self-declarative
+                        getPatientSelfDeclarativeUseCase(safeNatCode, safePatientId)
+                            .catch { /* non-fatal */ }
+                            .collect { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
+
+                        // 4. Drug allergies
+                        getPatientDrugAllergiesUseCase(safeNatCode, safePatientId)
+                            .catch { /* non-fatal */ }
+                            .collect { emit(PartialState.AllergiesLoaded(it.map { d -> d.toPresentation() })) }
+                    }
+                }
+        }
 
         emit(PartialState.Loading(false))
     }

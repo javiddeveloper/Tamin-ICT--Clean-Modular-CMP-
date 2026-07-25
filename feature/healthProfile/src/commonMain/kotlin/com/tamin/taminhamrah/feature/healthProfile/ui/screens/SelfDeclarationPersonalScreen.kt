@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,6 +13,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PersonalStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
@@ -32,14 +38,13 @@ fun SelfDeclarationPersonalScreen(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
+    var showMaritalBottomSheet by remember { mutableStateOf(false) }
+
     val isNextEnabled = state.maritalStatusId != null && state.job.isNotEmpty()
 
-    // Labels to show in SegmentedControl — fall back to API options if available,
-    // otherwise show nothing (UI degrades gracefully until lookup loads)
-    val maritalLabels = maritalStatusOptions.map { it.label }
-
-    // Find which index in the chip list matches the currently selected ID
-    val selectedMaritalIndex = maritalStatusOptions.indexOfFirst { it.id == state.maritalStatusId }
+    val selectedMaritalLabel = state.maritalStatusLabel.ifEmpty {
+        maritalStatusOptions.firstOrNull { it.id == state.maritalStatusId }?.label ?: ""
+    }
 
     Scaffold(
         topBar = {
@@ -101,48 +106,16 @@ fun SelfDeclarationPersonalScreen(
                 )
             )
 
-            // Marital Status — driven by API lookup list
-            if (maritalLabels.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TaminText(
-                        text = stringResource(Res.string.health_personal_marital_status),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = taminColors.textPrimary
-                        )
-                    )
-                    SegmentedControl(
-                        options = maritalLabels,
-                        selectedIndex = if (selectedMaritalIndex >= 0) selectedMaritalIndex else 0,
-                        onOptionSelected = { idx ->
-                            val selected = maritalStatusOptions[idx]
-                            onIntent(
-                                HealthProfileIntent.UpdatePersonal(
-                                    state.copy(
-                                        maritalStatusId = selected.id,
-                                        maritalStatusLabel = selected.label
-                                    )
-                                )
-                            )
-                        }
-                    )
-                }
-
-                // Pre-select first option only when nothing has been selected yet
-                LaunchedEffect(maritalStatusOptions) {
-                    if (state.maritalStatusId == null && maritalStatusOptions.isNotEmpty()) {
-                        val first = maritalStatusOptions.first()
-                        onIntent(
-                            HealthProfileIntent.UpdatePersonal(
-                                state.copy(
-                                    maritalStatusId = first.id,
-                                    maritalStatusLabel = first.label
-                                )
-                            )
-                        )
-                    }
-                }
-            }
+            // Marital Status — Clickable field opening HealthBottomSheet
+            StyledTextField(
+                value = selectedMaritalLabel,
+                onValueChange = {},
+                label = stringResource(Res.string.health_personal_marital_status),
+                placeholder = stringResource(Res.string.choose),
+                trailingIcon = Icons.Default.KeyboardArrowDown,
+                readOnly = true,
+                onClick = { showMaritalBottomSheet = true }
+            )
 
             StyledTextField(
                 value = state.job,
@@ -173,6 +146,42 @@ fun SelfDeclarationPersonalScreen(
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
+
+    if (showMaritalBottomSheet) {
+        val bottomSheetItems = maritalStatusOptions.map { option ->
+            BottomSheetItem(
+                id = option.id,
+                title = option.label,
+                isSelected = option.id == state.maritalStatusId
+            )
+        }
+
+        HealthBottomSheet(
+            config = BottomSheetConfig(
+                title = stringResource(Res.string.health_personal_marital_status),
+                subtitle = "در قسمت زیر می‌توانید وضعیت تأهل خود را انتخاب کنید",
+                type = BottomSheetType.MARITAL_STATUS,
+                singleSelection = true,
+                items = bottomSheetItems
+            ),
+            onDismissRequest = { showMaritalBottomSheet = false },
+            onSubmit = { result ->
+                val selectedId = result.selectedItemIds.firstOrNull()
+                val selectedOption = maritalStatusOptions.firstOrNull { it.id == selectedId }
+                if (selectedOption != null) {
+                    onIntent(
+                        HealthProfileIntent.UpdatePersonal(
+                            state.copy(
+                                maritalStatusId = selectedOption.id,
+                                maritalStatusLabel = selectedOption.label
+                            )
+                        )
+                    )
+                }
+                showMaritalBottomSheet = false
+            }
+        )
+    }
 }
 
 @PreviewRtlTheme
@@ -186,10 +195,11 @@ fun SelfDeclarationPersonalScreenPreview() {
                 LookupItemPR(1, "مجرد"),
                 LookupItemPR(2, "متأهل"),
                 LookupItemPR(3, "مطلقه"),
-                LookupItemPR(4, "بیوه")
+                LookupItemPR(4, "همسر فوت شده")
             ),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

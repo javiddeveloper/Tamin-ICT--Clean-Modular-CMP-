@@ -49,13 +49,14 @@
     <string name="health_personal_desc">لطفاً وضعیت تاهل و شغل خود را به همراه اطلاعات تابعیت وارد کنید.</string>
     <string name="health_personal_marital_status">وضعیت تأهل</string>
     <string name="health_marital_single">مجرد</string>
+    <string name="choose">انتخاب کنید</string>
     <string name="health_marital_married">متأهل</string>
     <string name="health_marital_divorced">مطلقه</string>
     <string name="health_marital_widowed">همسر فوت شده</string>
     <string name="health_personal_job_label">شغل / نوع فعالیت</string>
     <string name="health_personal_job_placeholder">مثلاً کارمند، آزاد و...</string>
     <string name="health_personal_citizenship_label">تابعیت</string>
-    <string name="health_personal_citizenship_placeholder">وارد کنید</string>
+    <string name="health_personal_citizenship_placeholder">مثلا ایران</string>
     <string name="health_personal_nationality_label">ملیت</string>
     <string name="health_personal_nationality_placeholder">مثلاً ایرانی</string>
 </resources>

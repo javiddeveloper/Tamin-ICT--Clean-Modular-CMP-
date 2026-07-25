@@ -179,7 +179,7 @@ internal class HealthRemoteDataSourceImpl(
 
     override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? {
         return try {
-            apiService.getMaritalStatus().extractData()
+            apiService.getMaritalStatus()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
