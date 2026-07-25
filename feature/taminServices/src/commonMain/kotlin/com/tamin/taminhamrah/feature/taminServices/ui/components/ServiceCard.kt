@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,6 +37,7 @@ fun ServiceCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isDark = isSystemInDarkTheme()
     val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
         service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
         service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
@@ -61,16 +61,12 @@ fun ServiceCard(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(16.dp)
                 )
                 .clip(RoundedCornerShape(16.dp))
                 .background(color = MaterialTheme.colorScheme.surface)
-                .clickable(
-                    enabled = true,
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) { onClick() }
+                .clickable(enabled = !isDisabled) { onClick() }
                 .padding(Spacing.lg)
                 .alpha(cardAlpha),
             verticalAlignment = Alignment.CenterVertically
@@ -78,20 +74,32 @@ fun ServiceCard(
 
             Box(
                 modifier = Modifier
-                    .size(IconSize.large)
+                    .size(IconSize.xlarge)
                     .shadow(
                         elevation = shadowElevation,
                         shape = RoundedCornerShape(CornerRadius.xl),
-                        clip = false
+                        clip = false,
+                        ambientColor = if (isDark) Color.Black else MaterialTheme.colorScheme.primary,
+                        spotColor = if (isDark) Color.Black else MaterialTheme.colorScheme.primary,
                     )
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
                                 MaterialTheme.colorScheme.surface,
-                                MaterialTheme.colorScheme.primaryContainer
+                                if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                             ),
-                            start = Offset(0f, 0f),
-                            end = Offset(1f, 1f)
+                            start = Offset.Zero,
+                            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                        ),
+                        shape = RoundedCornerShape(CornerRadius.xl)
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = if (isDark) 0.15f else 0.9f),
+                                Color.White.copy(alpha = if (isDark) 0.02f else 0.1f)
+                            )
                         ),
                         shape = RoundedCornerShape(CornerRadius.xl)
                     ),
@@ -103,8 +111,8 @@ fun ServiceCard(
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                                    Color.White.copy(alpha = if (isDark) 0.05f else 0.6f),
+                                    Color.Transparent
                                 )
                             ),
                             shape = RoundedCornerShape(CornerRadius.xl)
@@ -114,7 +122,9 @@ fun ServiceCard(
                     imageVector = getIconForName(service.icon),
                     contentDescription = service.name,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(IconSize.medium)
+                    modifier = Modifier
+                        .size(IconSize.large)
+                        .padding(Spacing.sm)
                 )
             }
 
@@ -124,7 +134,7 @@ fun ServiceCard(
                 text = service.name ?: "",
                 style = MaterialTheme.typography.titleSmall.copy(
                     color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Right,
                 ),
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

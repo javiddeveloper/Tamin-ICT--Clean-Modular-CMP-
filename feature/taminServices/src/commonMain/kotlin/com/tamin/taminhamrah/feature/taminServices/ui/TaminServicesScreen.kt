@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,7 +95,7 @@ fun TaminServicesScreen(
             .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(
             bottom = 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        )
+        ),
     ) {
 
         item {
@@ -117,10 +118,10 @@ fun TaminServicesScreen(
                         )
                     )
                     .padding(
-                        top = Spacing.xl,
+                        top = Spacing.xxl,
                         start = Spacing.xlg,
                         end = Spacing.xlg,
-                        bottom = Spacing.xxl
+                        bottom = Spacing.xlg
                     )
             ) {
                 Text(
@@ -157,11 +158,7 @@ fun TaminServicesScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(Spacing.xl))
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(Spacing.xl))
+            Spacer(modifier = Modifier.height(Spacing.xlg))
         }
 
         item {
