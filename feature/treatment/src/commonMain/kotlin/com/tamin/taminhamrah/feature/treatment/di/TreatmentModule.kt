@@ -7,3 +7,4 @@ import org.koin.dsl.module
 val treatmentModule = module {
     viewModelOf(::TreatmentViewModel)
 }
+

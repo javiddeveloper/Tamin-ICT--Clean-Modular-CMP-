@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
+import com.tamin.taminhamrah.repository.health.HealthRepository
+import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import org.koin.core.module.dsl.bind
@@ -45,4 +47,5 @@ val dataKoinModule = module {
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
+    singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
 }

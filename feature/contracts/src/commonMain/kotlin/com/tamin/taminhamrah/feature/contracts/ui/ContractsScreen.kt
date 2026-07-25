@@ -52,7 +52,6 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsEvent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContractsScreen(
     onBackClicked: () -> Unit,

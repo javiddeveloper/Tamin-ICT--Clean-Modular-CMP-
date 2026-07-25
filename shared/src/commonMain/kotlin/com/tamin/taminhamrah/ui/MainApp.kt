@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.contract.MainEvent
@@ -41,6 +42,7 @@ fun MainApp(
     TaminHamrahTheme(
         darkTheme = darkTheme
     ) {
+        AppToastHost {
         CompositionLocalProvider(
             LocalThemeRevealController provides revealController
         ) {
@@ -63,5 +65,7 @@ fun MainApp(
                 }
             }
         }
+            }
+
     }
 }

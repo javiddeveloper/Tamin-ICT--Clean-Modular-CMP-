@@ -18,7 +18,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EdictScreen(
     onBack: () -> Unit,

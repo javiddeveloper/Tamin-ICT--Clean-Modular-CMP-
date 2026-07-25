@@ -13,7 +13,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.contract.P
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PensionInquiryScreen(
     viewModel: PensionInquiryViewModel = koinViewModel(),
@@ -30,7 +29,6 @@ fun PensionInquiryScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PensionInquiryContent(
     state: PensionInquiryUiState,

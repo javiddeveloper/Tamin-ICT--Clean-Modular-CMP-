@@ -79,6 +79,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
@@ -87,7 +88,9 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptional
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
-import com.tamin.taminhamrah.feature.treatment.treatmentScreen
+import com.tamin.taminhamrah.feature.treatment.treatmentGraph
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -104,6 +107,11 @@ import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.Lifecycle
+import androidx.compose.runtime.getValue
+import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.ic_home_menu
@@ -137,7 +145,7 @@ internal fun TaminHamrahNavGraph(
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
     val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
-    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute>() == true
+    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
@@ -173,7 +181,7 @@ internal fun TaminHamrahNavGraph(
             isSelected = isTreatmentSelected,
             icon = Res.drawable.ic_treatment_menu,
             onClick = {
-                navController.navigate(TreatmentRoute) {
+                navController.navigate(TreatmentRoute.Main) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -224,7 +232,10 @@ internal fun TaminHamrahNavGraph(
                             )
                         )
                 ) {
-                    FloatingGlassNavigationBar(hazeState = hazeState) {
+                    FloatingGlassNavigationBar(
+                        hazeState = hazeState,
+                        isBlurEnabled = isBottomBarVisible
+                    ) {
 
                         navigationItems.forEach { navigationItem ->
 
@@ -279,7 +290,7 @@ internal fun TaminHamrahNavGraph(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
-                .hazeSource(state = hazeState)
+                .safeHazeSource(state = hazeState, isEnabled = isBottomBarVisible)
         ) {
             NavHost(
                 navController = navController,
@@ -344,7 +355,17 @@ internal fun TaminHamrahNavGraph(
                     )
                 }
 
-                treatmentScreen()
+                treatmentGraph(
+                    navController = navController,
+                    onNavigateToHealthProfile = { nationalCode ->
+                        navController.navigateToHealthProfile(nationalCode)
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+
+                healthProfileScreen(
+                    onBack = { navController.popBackStack() }
+                )
 
                 profileGraph(
                     navController = navController,

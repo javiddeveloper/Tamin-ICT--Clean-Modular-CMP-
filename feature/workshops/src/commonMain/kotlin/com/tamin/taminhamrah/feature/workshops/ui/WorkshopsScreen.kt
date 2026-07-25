@@ -37,13 +37,17 @@ import androidx.compose.runtime.setValue
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkshopsScreen(
     viewModel: WorkshopsViewModel = koinViewModel(),
     navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> },
     navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> }
+    navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> },
+    navigateToManagementDebit: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopMembers: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopStackholders: (String, String) -> Unit = { _, _ -> },
+    navigateToWorkshopRecentlyAddedMembers: (String, String) -> Unit = { _, _ -> },
+    navigateToObjectionableDebit: (String, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -68,6 +72,9 @@ fun WorkshopsScreen(
                     workshopStatus = workshopStatus.takeIf { it.isNotBlank() }
                 )
             )
+        },
+        onTestDownloadPdfClick = {
+            viewModel.sendIntent(WorkshopsIntent.TestDownloadPdf)
         },
         onWorkshopClick = { wId, bCode ->
             selectedWorkshop = wId to bCode
@@ -113,6 +120,60 @@ fun WorkshopsScreen(
                         }
                         .padding(16.dp)
                 )
+                Text(
+                    text = "اعتراض به بدهی",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToObjectionableDebit(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "نام نویسی غیرحضوری بیمه شده",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "رسیدگی به بدهی ماده ۱۶",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToManagementDebit(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "کارکنان",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToWorkshopMembers(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "ذینفعان",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedWorkshop = null
+                            navigateToWorkshopStackholders(wId, bCode)
+                        }
+                        .padding(16.dp)
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -129,6 +190,7 @@ fun WorkshopsContent(
     workshopStatus: String,
     onWorkshopStatusChange: (String) -> Unit,
     onLoadClick: () -> Unit,
+    onTestDownloadPdfClick: () -> Unit,
     onWorkshopClick: (String, String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -164,6 +226,15 @@ fun WorkshopsContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("ارسال و دریافت اطلاعات")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onTestDownloadPdfClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("تست دریافت PDF")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -293,6 +364,7 @@ private fun WorkshopsContentPreview() {
             workshopStatus = "",
             onWorkshopStatusChange = {},
             onLoadClick = {},
+            onTestDownloadPdfClick = {},
             onWorkshopClick = { _, _ -> }
         )
     }
