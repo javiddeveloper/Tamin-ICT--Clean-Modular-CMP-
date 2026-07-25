@@ -44,6 +44,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.RecordGroupHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.TimelineFilterBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChipRow
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
@@ -270,10 +271,9 @@ fun MedicalRecordsScreen(
         viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
     }
 
-    // Prices cost one request per record, so they are only fetched once a cost bound is set and
-    // only for records that do not already have one.
-    LaunchedEffect(searchCriteria, state.prescriptionList) {
-        if (!searchCriteria.filtersOnAmount) return@LaunchedEffect
+    // «سهم شما» is not in the list response, so it comes from the price endpoint — one request per
+    // record, only for records whose price is not already cached. Also feeds the cost filter.
+    LaunchedEffect(state.prescriptionList) {
         val missing = state.prescriptionList
             .map { it.noteHeadEprescID }
             .filter { it !in state.recordPrices }
@@ -323,10 +323,12 @@ fun MedicalRecordsScreen(
 fun HandleRecordsEvents(
     events: Flow<PrescriptionsEvent>,
     snackbarHostState: SnackbarHostState,
+    onPdfReady: (PdfDownloadPR, String) -> Unit = { _, _ -> },
 ) {
     events.collectWithLifecycleAware {
         when (it) {
             is PrescriptionsEvent.ShowToast -> snackbarHostState.showSnackbar(it.message)
+            is PrescriptionsEvent.PdfReady -> onPdfReady(it.pdf, it.fileName)
         }
     }
 }
@@ -461,6 +463,7 @@ fun MedicalRecordsContent(
 
                 else -> RecordTimeline(
                     records = state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) },
+                    prices = state.recordPrices,
                     onRecordSelected = onRecordSelected,
                 )
             }
@@ -502,6 +505,7 @@ fun MedicalRecordsContent(
 @Composable
 private fun RecordTimeline(
     records: List<ElectronicPrescriptionPR>,
+    prices: Map<String, ElectronicPrescriptionPricePR>,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
 ) {
     val groups = remember(records) { records.groupBy { it.prescDate.toJalaliMonthLabel() } }
@@ -519,10 +523,10 @@ private fun RecordTimeline(
                     date = record.prescDate.toJalaliDateLabel(),
                     title = "دکتر ${record.docName}",
                     subtitle = record.location.ifBlank { record.specDesc },
-                    // The list endpoint carries no per-record amount — the old app's response has
-                    // no payment field either — so the share reads as unknown until the detail's
-                    // price lookup runs. Never show another number here: the label says «سهم شما».
-                    shareAmount = UNKNOWN_AMOUNT,
+                    // The list endpoint carries no amount, so «سهم شما» comes from the per-record
+                    // price lookup; it reads as unknown until that arrives. Old app: the insured's
+                    // share is headSsoPayment (headInsuPayment is the organization's share).
+                    shareAmount = prices[record.noteHeadEprescID]?.headSsoPayment?.toLongOrNull()?.toPriceFormat() ?: UNKNOWN_AMOUNT,
                     accentColor = accent.content,
                     accentContainerColor = accent.container,
                     categoryIcon = accent.icon,
@@ -540,9 +544,9 @@ private fun RecordsTotals(prices: List<ElectronicPrescriptionPricePR>) {
     if (prices.isEmpty()) return
     CostTotalsBar(
         insuredShareLabel = "سهم بیمه‌شده",
-        insuredShareAmount = prices.totalOf { it.headInsuPayment },
+        insuredShareAmount = prices.totalOf { it.headSsoPayment },
         organizationShareLabel = "سهم سازمان",
-        organizationShareAmount = prices.totalOf { it.headSsoPayment },
+        organizationShareAmount = prices.totalOf { it.headInsuPayment },
         totalLabel = "جمع کل",
         totalAmount = prices.totalOf { it.requestPrice },
     )
