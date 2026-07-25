@@ -63,6 +63,10 @@ data class TaminColors(
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
     val aiAssistantGradient: Brush,
+    val grey900 : Color,
+
+    val hawkesBlue : Color,
+    val chipBg: Color
 )
 
 val LightTaminColors = TaminColors(
@@ -87,12 +91,37 @@ val LightTaminColors = TaminColors(
     dangerText = TaminLightError,
     teal = Secondary700,
     bgIconProfile = TaminLightSurface,
-    iconGradientPrimary = Brush.verticalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
-    iconGradientSecondary = Brush.verticalGradient(listOf(IconGradientPurpleStart, IconGradientPurpleEnd)),
-    iconGradientNeutral = Brush.verticalGradient(listOf(IconGradientGrayStart, IconGradientGrayEnd)),
+    iconGradientPrimary = Brush.verticalGradient(
+        listOf(
+            IconGradientBlueStart,
+            IconGradientBlueEnd
+        )
+    ),
+    iconGradientSecondary = Brush.verticalGradient(
+        listOf(
+            IconGradientPurpleStart,
+            IconGradientPurpleEnd
+        )
+    ),
+    iconGradientNeutral = Brush.verticalGradient(
+        listOf(
+            IconGradientGrayStart,
+            IconGradientGrayEnd
+        )
+    ),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
-    iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
-    iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
+    iconGlassShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.40f),
+            Color.White.copy(alpha = 0.0f)
+        )
+    ),
+    iconGlassBorder = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.60f),
+            Color.White.copy(alpha = 0.05f)
+        )
+    ),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8CFFFFFF),
     glassA2 = Color(0x52FFFFFF),
@@ -112,6 +141,9 @@ val LightTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    hawkesBlue = Color(0xFFDCE7FB),
+    chipBg = Color(0xFFEFF6FF),
+    grey900 = Color(0xFFE2E8F0),
 )
 
 val DarkTaminColors = TaminColors(
@@ -162,4 +194,7 @@ val DarkTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    grey900 = Color(0xFFE2E8F0),
+    hawkesBlue = Color(0xFFDCE7FB),
+    chipBg = Color(0x293B82F6)
 )

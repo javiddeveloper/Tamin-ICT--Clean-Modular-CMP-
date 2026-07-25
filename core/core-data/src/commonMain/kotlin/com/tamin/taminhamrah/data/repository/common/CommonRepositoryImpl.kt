@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -74,5 +75,15 @@ class CommonRepositoryImpl(
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    override fun getRoles(): Flow<List<RoleDN>> = flow {
+        emit(
+            listOf(
+                RoleDN(1, "بیمه شده"),
+                RoleDN(2, "مستمری بگیر"),
+                RoleDN(3, "کارفرما")
+            )
+        )
     }
 }
