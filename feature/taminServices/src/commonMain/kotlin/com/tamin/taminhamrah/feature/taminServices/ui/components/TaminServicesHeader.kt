@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 
 @Composable
 fun TaminServicesHeader(
@@ -59,3 +60,16 @@ private fun TaminServicesHeaderPreview() {
         )
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun TaminServicesHeaderPreviewDark() {
+    TaminHamrahTheme(darkTheme = true) {
+        TaminServicesHeader(
+            title = "خدمات بیمه‌شدگان",
+            badgeText = "۲۴ خدمت",
+            modifier = Modifier.padding(Spacing.lg)
+        )
+    }
+}
+

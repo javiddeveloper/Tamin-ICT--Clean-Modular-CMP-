@@ -168,6 +168,6 @@ val DarkTaminColors = TaminColors(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
 
-    hawkesBlue = Color(0xFFDCE7FB),
+    hawkesBlue = TaminDarkOuterBorder,
     chipBg = Color(0x293B82F6)
 )
