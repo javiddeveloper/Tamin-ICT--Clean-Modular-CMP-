@@ -6,7 +6,6 @@ import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.TreatmentTestData
-import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
@@ -136,18 +135,26 @@ class PrescriptionsViewModelTest {
     }
 
     @Test
-    fun testDownloadPdf_emitsPdfReadyEvent() = runTest(testDispatcher) {
-        viewModel.events.test {
+    fun testDownloadPdf_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
+        viewModel.uiState.test {
+            awaitItem() // initial
             viewModel.sendIntent(PrescriptionsIntent.DownloadPdf("presc1"))
-            assertTrue(awaitItem() is PrescriptionsEvent.PdfReady)
+            var state = awaitItem()
+            while (state.viewerPdf == null) state = awaitItem()
+            assertNotNull(state.viewerPdf)
+            assertTrue(state.showPdfDialog)
         }
     }
 
     @Test
-    fun testDownloadLabResult_emitsPdfReadyEvent() = runTest(testDispatcher) {
-        viewModel.events.test {
+    fun testDownloadLabResult_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
+        viewModel.uiState.test {
+            awaitItem() // initial
             viewModel.sendIntent(PrescriptionsIntent.DownloadLabResult(patientID = "0", noteHeadEprescID = "100"))
-            assertTrue(awaitItem() is PrescriptionsEvent.PdfReady)
+            var state = awaitItem()
+            while (state.viewerPdf == null) state = awaitItem()
+            assertNotNull(state.viewerPdf)
+            assertTrue(state.showPdfDialog)
         }
     }
 }

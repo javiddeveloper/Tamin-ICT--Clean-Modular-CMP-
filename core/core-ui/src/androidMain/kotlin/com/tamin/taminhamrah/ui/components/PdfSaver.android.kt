@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.ui.components
 
 import android.Manifest
-import android.R
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -16,7 +15,6 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -36,20 +34,6 @@ import java.io.File
 actual fun rememberPdfSaver(): PdfSaver {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val permissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-
-    // Ask for notification permission (API 33+) when the viewer opens, so the "downloaded"
-    // notification can actually show. The file saves regardless of the answer.
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
     return remember(context, scope) { AndroidPdfSaver(context, scope) }
 }
 
@@ -63,7 +47,7 @@ private class AndroidPdfSaver(
 
     override fun save(fileName: String, bytes: ByteArray) {
         if (bytes.isEmpty()) return
-        scope.launch @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS) {
+        scope.launch {
             val uri = withContext(Dispatchers.IO) { write(fileName, bytes) } ?: return@launch
             notify(fileName, uri)
         }
@@ -93,11 +77,18 @@ private class AndroidPdfSaver(
     private fun saveToAppFiles(fileName: String, bytes: ByteArray): Uri {
         val dir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "").apply { mkdirs() }
         val file = File(dir, fileName).apply { writeBytes(bytes) }
-        return FileProvider.getUriForFile(context, "${context.packageName}.file provider", file)
+        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    @Suppress("MissingPermission")
     private fun notify(fileName: String, uri: Uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(
@@ -115,13 +106,17 @@ private class AndroidPdfSaver(
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.stat_sys_download_done)
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
             .setContentTitle(fileName)
             .setContentText("دانلود انجام شد")
             .setContentIntent(contentIntent)
             .setAutoCancel(true)
             .build()
-        // No-ops silently on API 33+ if POST_NOTIFICATIONS was not granted; the file is still saved.
-        NotificationManagerCompat.from(context).notify(fileName.hashCode(), notification)
+
+        try {
+            NotificationManagerCompat.from(context).notify(fileName.hashCode(), notification)
+        } catch (_: SecurityException) {
+            // Silently ignore if permission was revoked or missing
+        }
     }
 }

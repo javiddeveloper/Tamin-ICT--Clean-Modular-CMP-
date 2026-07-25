@@ -179,7 +179,12 @@ class PrescriptionsViewModel(
         is PartialState.PrescriptionsLoaded -> currentState.copy(isLoading = false, prescriptionList = partialState.list)
         is PartialState.PrescriptionDetailsLoaded -> currentState.copy(isLoading = false, prescriptionDetailList = partialState.list)
         is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list)
-        is PartialState.PdfLoaded -> currentState.copy(isLoading = false, viewerPdf = partialState.pdf, showPdfDialog = true)
+        is PartialState.PdfLoaded -> currentState.copy(
+            isLoading = false,
+            viewerPdf = partialState.pdf,
+            viewerFileName = partialState.fileName,
+            showPdfDialog = true,
+        )
         is PartialState.TogglePdfDialog -> currentState.copy(showPdfDialog = partialState.show)
         is PartialState.PrescriptionSelected -> currentState.copy(selectedNoteHeadId = partialState.noteHeadID)
         is PartialState.RecordPricesLoaded -> currentState.copy(

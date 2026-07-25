@@ -28,12 +28,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,12 +39,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollUiState
 import com.tamin.taminhamrah.model.pension.PayRollPR
-import com.tamin.taminhamrah.ui.components.PdfDocumentView
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -69,7 +64,6 @@ import taminx.core.core_ui.payroll_sum_pay
 import taminx.core.core_ui.payroll_title
 import taminx.core.core_ui.payroll_type
 import taminx.core.core_ui.payroll_year
-import taminx.core.core_ui.pdf_viewer_title
 
 @Composable
 fun PayRollScreen(
@@ -132,9 +126,10 @@ fun PayRollScreen(
     }
 
     if (state.showPdfDialog && state.payRollPDF != null) {
-        PayRollPdfDialog(
-            pdfData = state.payRollPDF!!,
-            onDismiss = { viewModel.sendIntent(PayRollIntent.TogglePdfDialog(false)) }
+        TaminPdfViewer(
+            pdf = state.payRollPDF,
+            fileName = "payroll_${state.selectedPensionerId ?: "document"}.pdf",
+            onDismiss = { viewModel.sendIntent(PayRollIntent.TogglePdfDialog(false)) },
         )
     }
 }
@@ -254,35 +249,6 @@ fun PayRollDetailCard(item: PayRollPR) {
             Text(text = stringResource(Res.string.payroll_year, item.hisYear))
             Text(text = stringResource(Res.string.payroll_month, item.hisMon))
             Text(text = stringResource(Res.string.payroll_type, item.clpType))
-        }
-    }
-}
-
-@Composable
-fun PayRollPdfDialog(
-    pdfData: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR,
-    onDismiss: () -> Unit
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = { Text(stringResource(Res.string.pdf_viewer_title)) },
-                    actions = {
-                        TextButton(onClick = onDismiss) {
-                            Text(stringResource(Res.string.btn_close))
-                        }
-                    }
-                )
-                // core-ui drains the channel and renders; the feature never touches ktor.
-                PdfDocumentView(pdf = pdfData, modifier = Modifier.fillMaxSize())
-            }
         }
     }
 }

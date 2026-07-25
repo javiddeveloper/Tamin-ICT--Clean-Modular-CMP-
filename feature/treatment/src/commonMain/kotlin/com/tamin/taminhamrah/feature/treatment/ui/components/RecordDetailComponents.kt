@@ -124,9 +124,9 @@ fun PrescriptionItemCard(
             ) {
                 if (centerName.isNotBlank()) DetailRow(label = "داروخانه/پاراکلینیک", value = centerName)
                 if (actionDate.isNotBlank()) DetailRow(label = "تاریخ اقدام", value = actionDate)
-                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = "$itemTotal ریال")
-                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = "$patientShare ریال")
-                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = "$organizationShare ریال")
+                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = if (itemTotal.endsWith("ریال")) itemTotal else "$itemTotal ریال")
+                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = if (patientShare.endsWith("ریال")) patientShare else "$patientShare ریال")
+                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = if (organizationShare.endsWith("ریال")) organizationShare else "$organizationShare ریال")
             }
         }
     }
@@ -238,25 +238,18 @@ fun CostBreakdownCard(
             color = colors.textPrimary,
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
-        DetailRow(label = "جمع کل", value = total)
+        DetailRow(label = "جمع کل", value = if (total.endsWith("ریال")) total else "$total ریال")
         DetailRow(
             label = "سهم سازمان",
-            value = organizationShare,
+            value = if (organizationShare.endsWith("ریال")) organizationShare else "$organizationShare ریال",
             valueColor = colors.blueText,
         )
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
         DetailRow(
             label = "سهم شما",
-            value = insuredShare,
+            value = if (insuredShare.endsWith("ریال")) insuredShare else "$insuredShare ریال",
             valueColor = colors.greenText,
             valueStyle = MaterialTheme.typography.titleLarge,
-        )
-        Text(
-            text = "ریال",
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textMuted,
-            textAlign = TextAlign.End,
-            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

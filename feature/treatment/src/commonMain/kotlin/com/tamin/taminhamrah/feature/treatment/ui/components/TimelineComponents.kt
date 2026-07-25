@@ -150,14 +150,9 @@ private fun MedicalRecordFooter(shareAmount: String) {
                 color = colors.textMuted,
             )
             NumericText(
-                text = shareAmount,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.textPrimary,
-            )
-            Text(
-                text = "ریال",
+                text = if (shareAmount.endsWith("ریال")) shareAmount else "$shareAmount ریال",
                 style = MaterialTheme.typography.labelMedium,
-                color = colors.textMuted,
+                color = colors.textPrimary,
             )
         }
         Row(

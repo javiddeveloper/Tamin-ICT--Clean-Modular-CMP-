@@ -44,7 +44,6 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.RecordGroupHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.TimelineFilterBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChipRow
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
@@ -323,12 +322,10 @@ fun MedicalRecordsScreen(
 fun HandleRecordsEvents(
     events: Flow<PrescriptionsEvent>,
     snackbarHostState: SnackbarHostState,
-    onPdfReady: (PdfDownloadPR, String) -> Unit = { _, _ -> },
 ) {
     events.collectWithLifecycleAware {
         when (it) {
             is PrescriptionsEvent.ShowToast -> snackbarHostState.showSnackbar(it.message)
-            is PrescriptionsEvent.PdfReady -> onPdfReady(it.pdf, it.fileName)
         }
     }
 }

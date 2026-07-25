@@ -10,24 +10,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
@@ -36,14 +29,12 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.PdfDocumentView
-import com.tamin.taminhamrah.ui.components.rememberPdfDownloader
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -54,7 +45,6 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_download
 
 /** Clearance so the last card is not hidden behind the pinned action bar. */
@@ -90,11 +80,9 @@ fun RecordDetailScreen(
         )
     }
 
-    val pdfDownloader = rememberPdfDownloader()
     HandleRecordsEvents(
         events = viewModel.events,
         snackbarHostState = snackbarHostState,
-        onPdfReady = { pdf, fileName -> pdfDownloader.download(fileName, pdf) },
     )
 
     RecordDetailContent(
@@ -237,40 +225,11 @@ fun RecordDetailContent(
     }
 
     if (state.showPdfDialog && state.viewerPdf != null) {
-        PdfViewerDialog(pdfData = state.viewerPdf, onDismiss = onDismissPdf)
-    }
-}
-
-/**
- * Full-screen PDF preview. The downloaded bytes are drawn by the shared multiplatform
- * [PdfDocumentView] (Android PdfRenderer / iOS PDFKit); a missing file shows a short notice.
- */
-@Composable
-fun PdfViewerDialog(
-    pdfData: PdfDownloadPR,
-    onDismiss: () -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Surface(modifier = Modifier.fillMaxSize(), color = colors.bgPage) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TaminTopAppBar(
-                    title = "نمایش نسخه",
-                    navigationIcon = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_cross),
-                            contentDescription = "بستن",
-                            onClick = onDismiss,
-                        )
-                    },
-                )
-                // core-ui drains the channel and renders; the feature never touches ktor.
-                PdfDocumentView(pdf = pdfData, modifier = Modifier.fillMaxSize())
-            }
-        }
+        TaminPdfViewer(
+            pdf = state.viewerPdf,
+            fileName = state.viewerFileName,
+            onDismiss = onDismissPdf,
+        )
     }
 }
 
