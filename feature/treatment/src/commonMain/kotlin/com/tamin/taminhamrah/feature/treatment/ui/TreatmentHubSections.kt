@@ -273,7 +273,6 @@ internal fun TreatmentQuickAccess(
     healthProfileCompleted: Boolean?,
     onOpenMedicalRecords: () -> Unit,
     onOpenHealthProfile: () -> Unit,
-    onOpenCenters: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -340,7 +339,7 @@ internal fun TreatmentQuickAccess(
                         leadingIconBackgroundColor = colors.greenBg,
                         leadingIconTintColor = colors.teal,
                     ),
-                    onClick = onOpenCenters,
+                    onClick = {},
                 ),
             ),
         )
@@ -351,12 +350,10 @@ internal fun TreatmentQuickAccess(
 @Composable
 internal fun TreatmentCategories(
     onOpenPrescriptions: () -> Unit,
-    onOpenMedicalApprovals: () -> Unit,
-    onOpenMiscClaims: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
     Row(
-        modifier = Modifier.padding(horizontal = Spacing.page),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.page),
         horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
         CategoryTile(
@@ -372,7 +369,7 @@ internal fun TreatmentCategories(
             icon = vectorResource(Res.drawable.ic_tamin_medical_approvals),
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            onClick = onOpenMedicalApprovals,
+            onClick = {},
             modifier = Modifier.weight(1f),
         )
         CategoryTile(
@@ -380,7 +377,7 @@ internal fun TreatmentCategories(
             icon = vectorResource(Res.drawable.ic_tamin_misc_claims),
             iconTint = colors.orangeText,
             iconBackground = Brush.linearGradient(listOf(colors.orangeBg, colors.orangeBg)),
-            onClick = onOpenMiscClaims,
+            onClick = {},
             modifier = Modifier.weight(1f),
         )
     }

@@ -52,11 +52,7 @@ fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel(),
     onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
-    onOpenCenters: () -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
-    onOpenMedicalApprovals: () -> Unit = {},
-    onOpenMiscClaims: () -> Unit = {},
-    onSearch: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -81,11 +77,7 @@ fun TreatmentScreen(
             onIntent = viewModel::sendIntent,
             onOpenMedicalRecords = onOpenMedicalRecords,
             onOpenHealthProfile = onOpenHealthProfile,
-            onOpenCenters = onOpenCenters,
             onOpenPrescriptions = onOpenPrescriptions,
-            onOpenMedicalApprovals = onOpenMedicalApprovals,
-            onOpenMiscClaims = onOpenMiscClaims,
-            onSearch = onSearch,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
@@ -127,11 +119,7 @@ fun TreatmentContent(
     modifier: Modifier = Modifier,
     onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
-    onOpenCenters: () -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
-    onOpenMedicalApprovals: () -> Unit = {},
-    onOpenMiscClaims: () -> Unit = {},
-    onSearch: () -> Unit = {},
 ) {
     val patients = remember(state) { state.toPatientList() }
     var entitlementReason by remember { mutableStateOf<String?>(null) }
@@ -151,7 +139,7 @@ fun TreatmentContent(
             .background(LocalTaminColors.current.bgPage)
             .verticalScroll(scrollState),
     ) {
-        TreatmentHubHeader(onSearch = onSearch)
+        TreatmentHubHeader()
         // The whole body shifts up together, so the overlap does not leave a gap below.
         Column(modifier = Modifier.offset(y = -TreatmentDimens.cardOverlap)) {
             PatientCarousel(
@@ -170,13 +158,10 @@ fun TreatmentContent(
                 // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
                 // which patient card is in view. No-op until the main code is known.
                 onOpenHealthProfile = { state.mainUserNationalCode?.let(onOpenHealthProfile) },
-                onOpenCenters = onOpenCenters,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
                 onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
-                onOpenMedicalApprovals = onOpenMedicalApprovals,
-                onOpenMiscClaims = onOpenMiscClaims,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCostSummary(
@@ -196,7 +181,7 @@ fun TreatmentContent(
 }
 
 @Composable
-private fun TreatmentHubHeader(onSearch: () -> Unit) {
+private fun TreatmentHubHeader() {
     TaminTopAppBar(
         title = "درمان",
         centerTitle = false,
@@ -205,8 +190,6 @@ private fun TreatmentHubHeader(onSearch: () -> Unit) {
         // step between the two bands.
         bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
     )
-
-
 }
 
 /**

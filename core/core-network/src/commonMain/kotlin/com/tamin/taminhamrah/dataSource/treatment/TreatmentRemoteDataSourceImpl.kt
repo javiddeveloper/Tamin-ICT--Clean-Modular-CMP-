@@ -13,6 +13,9 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import io.ktor.client.statement.HttpStatement
+import io.ktor.client.statement.readRawBytes
+import io.ktor.utils.io.ByteReadChannel
 
 internal class TreatmentRemoteDataSourceImpl(
     private val apiService: TreatmentApiService,
@@ -101,8 +104,7 @@ internal class TreatmentRemoteDataSourceImpl(
 
     override suspend fun getPrescriptionPdfFile(prescriptionID: String): PdfDownloadDTO {
         return try {
-            val response = apiService.getPrescriptionPdfFile(prescriptionID)
-            PdfDownloadDTO(pdf = InputStreamDTO(pdf = response.body()))
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = apiService.getPrescriptionPdfFile(prescriptionID).readPdfChannel()))
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -114,10 +116,10 @@ internal class TreatmentRemoteDataSourceImpl(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): PdfDownloadDTO {
         return try {
-            val response = apiService.downloadLabResultPdf(
+            val statement = apiService.downloadLabResultPdf(
                 patientID ?: "", noteHeadEprescID ?: "", currentUserNationalCode ?: ""
             )
-            PdfDownloadDTO(pdf = InputStreamDTO(pdf = response.body()))
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.readPdfChannel()))
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -125,3 +127,11 @@ internal class TreatmentRemoteDataSourceImpl(
         }
     }
 }
+
+/**
+ * Reads the whole PDF body while the response is still open, then hands back a fresh in-memory
+ * channel. `HttpStatement.body<ByteReadChannel>()` returns a channel that is already finalized —
+ * draining it later yields nothing — so the bytes are pulled inside `execute` and re-wrapped.
+ */
+private suspend fun HttpStatement.readPdfChannel(): ByteReadChannel =
+    ByteReadChannel(execute { it.readRawBytes() })
