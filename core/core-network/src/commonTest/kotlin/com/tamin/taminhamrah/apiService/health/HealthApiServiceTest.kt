@@ -358,7 +358,7 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `getMaritalStatus should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse("[]")
+        val jsonResponse = "[]"
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val response = apiService.getMaritalStatus()
