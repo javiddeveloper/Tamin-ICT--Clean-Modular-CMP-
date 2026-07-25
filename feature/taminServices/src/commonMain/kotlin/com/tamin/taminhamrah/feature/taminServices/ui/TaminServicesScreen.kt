@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.ui
 
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.rememberSplineBasedDecay
@@ -15,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.*
-import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +23,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.ui.contract.*
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -36,6 +39,7 @@ import com.tamin.taminhamrah.feature.taminServices.ui.components.TaminServicesHe
 import com.tamin.taminhamrah.ui.theme.*
 import kotlinx.coroutines.flow.Flow
 
+private val HeaderSnapAnimationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
 @Composable
 fun TaminServicesRoute(
     viewModel: TamminServicesViewModel,
@@ -43,7 +47,7 @@ fun TaminServicesRoute(
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(TaminServicesIntent.OnSearchQueryChanged(""))
@@ -58,7 +62,7 @@ fun TaminServicesRoute(
 
     TaminServicesScreen(
         state = uiState,
-        onIntent = viewModel::sendIntent,
+        onIntent = { intent -> viewModel.sendIntent(intent) },
     )
 }
 
@@ -100,10 +104,13 @@ fun TaminServicesScreen(
 ) {
     val scrollState = rememberTaminServicesScrollState()
     val motionState = rememberTaminServicesMotionState(scrollState)
+    val headerShape = remember {
+        RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l)
+    }
 
     val decaySpec = rememberSplineBasedDecay<Float>()
-    val snapFlingBehavior = snapFlingBehavior(
-        snapLayoutInfoProvider = object : SnapLayoutInfoProvider {
+    val snapLayoutInfoProvider = remember(scrollState) {
+        object : SnapLayoutInfoProvider {
             override fun calculateSnapOffset(velocity: Float): Float {
                 val lazyListState = scrollState.lazyListState
                 if (lazyListState.firstVisibleItemIndex == 0) {
@@ -120,11 +127,17 @@ fun TaminServicesScreen(
                 }
                 return 0f
             }
-        },
-        decayAnimationSpec = decaySpec,
-        snapAnimationSpec = spring(stiffness = Spring.StiffnessLow)
-    )
+        }
+    }
 
+    val snapFlingBehavior = snapFlingBehavior(
+        snapLayoutInfoProvider = snapLayoutInfoProvider,
+        decayAnimationSpec = decaySpec,
+        snapAnimationSpec = HeaderSnapAnimationSpec
+    )
+    val chunkedServices = remember(state.filteredServices) {
+        state.filteredServices.chunked(2)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -135,23 +148,16 @@ fun TaminServicesScreen(
                 .fillMaxWidth()
                 .shadow(
                     elevation = Elevation.lg,
-                    shape = RoundedCornerShape(
-                        bottomStart = CornerRadius.x2l,
-                        bottomEnd = CornerRadius.x2l
-                    ),
+                    shape = headerShape,
                     clip = false
                 )
                 .background(
                     color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(
-                        bottomStart = CornerRadius.x2l,
-                        bottomEnd = CornerRadius.x2l
-                    )
+                    shape = headerShape
                 )
-                .padding(
-                    top = motionState.headerTopPadding,
-                    start = Spacing.xlg,
-                    end = Spacing.xlg,
+                .collapsibleHeaderPadding(
+                    top = { motionState.headerTopPadding },
+                    horizontal = Spacing.xlg,
                     bottom = Spacing.xlg
                 )
         ) {
@@ -247,7 +253,6 @@ fun TaminServicesScreen(
                     )
                 }
             } else {
-                val chunkedServices = state.filteredServices.chunked(2)
                 items(
                     chunkedServices,
                     key = { chunk -> chunk.firstOrNull()?.id ?: 0 }
@@ -278,6 +283,39 @@ fun TaminServicesScreen(
                 Spacer(modifier = Modifier.height(Spacing.xl))
             }
         }
+    }
+}
+
+private fun Modifier.collapsibleHeaderPadding(
+    top: () -> Dp,
+    horizontal: Dp,
+    bottom: Dp,
+): Modifier = this.layout { measurable, constraints ->
+    val topPx = top().roundToPx()
+    val horizontalPx = horizontal.roundToPx()
+    val bottomPx = bottom.roundToPx()
+
+    val horizontalTotal = horizontalPx * 2
+    val verticalTotal = topPx + bottomPx
+
+    val loosenedConstraints = Constraints(
+        minWidth = (constraints.minWidth - horizontalTotal).coerceAtLeast(0),
+        maxWidth = if (constraints.hasBoundedWidth) {
+            (constraints.maxWidth - horizontalTotal).coerceAtLeast(0)
+        } else constraints.maxWidth,
+        minHeight = (constraints.minHeight - verticalTotal).coerceAtLeast(0),
+        maxHeight = if (constraints.hasBoundedHeight) {
+            (constraints.maxHeight - verticalTotal).coerceAtLeast(0)
+        } else constraints.maxHeight
+    )
+
+    val placeable = measurable.measure(loosenedConstraints)
+
+    val width = (placeable.width + horizontalTotal).coerceIn(constraints.minWidth, constraints.maxWidth)
+    val height = (placeable.height + verticalTotal).coerceIn(constraints.minHeight, constraints.maxHeight)
+
+    layout(width, height) {
+        placeable.placeRelative(horizontalPx, topPx)
     }
 }
 
