@@ -8,6 +8,7 @@ val TaminHamrahShapes = Shapes(
     small = RoundedCornerShape(CornerRadius.sm),
     medium = RoundedCornerShape(CornerRadius.md),
     large = RoundedCornerShape(CornerRadius.lg),
+    extraLarge = RoundedCornerShape(CornerRadius.chip),
 )
 
 object ListShapes {
@@ -36,6 +37,7 @@ object Spacing {
 
     val page = 18.dp
     val cardGap = 11.dp
+    val tabSelector = 6.dp
 }
 
 object CornerRadius {

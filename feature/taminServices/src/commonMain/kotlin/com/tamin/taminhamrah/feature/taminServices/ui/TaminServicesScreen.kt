@@ -102,7 +102,7 @@ fun TaminServicesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(
-                        elevation = Elevation.xs,
+                        elevation = Elevation.lg,
                         shape = RoundedCornerShape(
                             bottomStart = CornerRadius.x2l,
                             bottomEnd = CornerRadius.x2l
@@ -125,7 +125,7 @@ fun TaminServicesScreen(
             ) {
                 Text(
                     text = "خدمات",
-                    style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                    style = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = Spacing.md)
@@ -136,7 +136,7 @@ fun TaminServicesScreen(
                 CustomSearchBar(
                     query = state.searchQuery,
                     onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
-                    placeHolder = "جستجو در میان خدمات ..."
+                    placeHolder = "جست‌وجو در میان خدمات ..."
                 )
             }
         }
