@@ -39,11 +39,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HealthProfileScreen(
     viewModel: HealthProfileViewModel = koinViewModel(),
-    selfDecViewModel: SelfDeclarationViewModel = koinViewModel(),
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    nationalCode : String
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val selfDecState by selfDecViewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile)
@@ -51,15 +50,14 @@ fun HealthProfileScreen(
 
     HandleHealthProfileEvents(
         events = viewModel.events,
-        selfDecEvents = selfDecViewModel.events,
         onBackClicked = onBackClicked
     )
 
     HealthProfileMainContent(
         state = uiState,
-        selfDecState = selfDecState,
+        selfDecState = uiState.selfDeclaration,
         onIntent = viewModel::sendIntent,
-        onSelfDecIntent = selfDecViewModel::sendIntent,
+        onSelfDecIntent = viewModel::sendIntent,
         onBackClicked = onBackClicked
     )
 }
@@ -67,20 +65,12 @@ fun HealthProfileScreen(
 @Composable
 fun HandleHealthProfileEvents(
     events: Flow<HealthProfileEvent>,
-    selfDecEvents: Flow<SelfDeclarationEvent>,
     onBackClicked: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware { event ->
         when (event) {
             HealthProfileEvent.NavigateBack -> {
-                scope.launch { onBackClicked() }
-            }
-        }
-    }
-    selfDecEvents.collectWithLifecycleAware { event ->
-        when (event) {
-            SelfDeclarationEvent.NavigateBack -> {
                 scope.launch { onBackClicked() }
             }
         }
@@ -115,7 +105,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.IDENTITY -> {
                     SelfDeclarationIdentityScreen(
-                        state = selfDecState,
+                        state = selfDecState.identity,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO))
@@ -124,7 +114,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.PERSONAL -> {
                     SelfDeclarationPersonalScreen(
-                        state = selfDecState,
+                        state = selfDecState.personal,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
@@ -133,7 +123,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.CONTACT -> {
                     SelfDeclarationContactScreen(
-                        state = selfDecState,
+                        state = selfDecState.contact,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL))
@@ -142,7 +132,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.EMERGENCY -> {
                     SelfDeclarationEmergencyScreen(
-                        state = selfDecState,
+                        state = selfDecState.emergency,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.CONTACT))
@@ -151,7 +141,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.PHYSICAL -> {
                     SelfDeclarationPhysicalScreen(
-                        state = selfDecState,
+                        state = selfDecState.physical,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
@@ -160,7 +150,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.DISEASES -> {
                     SelfDeclarationDiseasesScreen(
-                        state = selfDecState,
+                        state = selfDecState.diseases,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
@@ -169,7 +159,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.FAMILY -> {
                     SelfDeclarationFamilyScreen(
-                        state = selfDecState,
+                        state = selfDecState.family,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.DISEASES))
@@ -178,7 +168,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.BLOOD -> {
                     SelfDeclarationBloodScreen(
-                        state = selfDecState,
+                        state = selfDecState.bloodGroup,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.FAMILY))
@@ -187,7 +177,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.LIFESTYLE -> {
                     SelfDeclarationLifestyleScreen(
-                        state = selfDecState,
+                        state = selfDecState.lifestyle,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.BLOOD))
@@ -196,7 +186,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.ALLERGY -> {
                     SelfDeclarationAllergyScreen(
-                        state = selfDecState,
+                        state = selfDecState.allergy,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
@@ -212,6 +202,7 @@ fun HealthProfileMainContent(
                         }
                     )
                 }
+
                 SelfDeclarationStep.SUCCESS -> {
                     SelfDeclarationSuccessScreen(
                         onFinish = { enterProfile ->

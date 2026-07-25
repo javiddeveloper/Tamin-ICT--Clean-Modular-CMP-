@@ -9,9 +9,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PersonalStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationPersonalScreen(
-    state: SelfDeclarationUiState,
+    state: PersonalStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -85,21 +85,21 @@ fun SelfDeclarationPersonalScreen(
                     options = maritalOptions,
                     selectedIndex = if (maritalIndex >= 0) maritalIndex else 0,
                     onOptionSelected = { idx ->
-                        onIntent(SelfDeclarationIntent.UpdateState { copy(maritalStatus = maritalOptions[idx]) })
+                        onIntent(SelfDeclarationIntent.UpdatePersonal(state.copy(maritalStatus = maritalOptions[idx])))
                     }
                 )
             }
             // Initialize if empty
             LaunchedEffect(state.maritalStatus) {
                 if (state.maritalStatus.isEmpty()) {
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(maritalStatus = "مجرد") })
+                    onIntent(SelfDeclarationIntent.UpdatePersonal(state.copy(maritalStatus = "مجرد")))
                 }
             }
 
             StyledTextField(
                 value = state.job,
                 onValueChange = { jobStr ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(job = jobStr) })
+                    onIntent(SelfDeclarationIntent.UpdatePersonal(state.copy(job = jobStr)))
                 },
                 label = "شغل / نوع فعالیت",
                 placeholder = "مثلاً کارمند، آزاد و..."
@@ -108,7 +108,7 @@ fun SelfDeclarationPersonalScreen(
             StyledTextField(
                 value = state.citizenship,
                 onValueChange = { cit ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(citizenship = cit) })
+                    onIntent(SelfDeclarationIntent.UpdatePersonal(state.copy(citizenship = cit)))
                 },
                 label = "تابعیت",
                 placeholder = "وارد کنید"
@@ -117,7 +117,7 @@ fun SelfDeclarationPersonalScreen(
             StyledTextField(
                 value = state.nationality,
                 onValueChange = { nat ->
-                    onIntent(SelfDeclarationIntent.UpdateState { copy(nationality = nat) })
+                    onIntent(SelfDeclarationIntent.UpdatePersonal(state.copy(nationality = nat)))
                 },
                 label = "ملیت",
                 placeholder = "مثلاً ایرانی"
@@ -133,9 +133,10 @@ fun SelfDeclarationPersonalScreen(
 fun SelfDeclarationPersonalScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationPersonalScreen(
-            state = SelfDeclarationUiState(maritalStatus = "مجرد", job = "برنامه‌نویس"),
+            state = PersonalStepState(maritalStatus = "مجرد", job = "برنامه‌نویس"),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+

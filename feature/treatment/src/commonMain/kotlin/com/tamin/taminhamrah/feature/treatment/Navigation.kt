@@ -6,9 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
-import com.tamin.taminhamrah.feature.treatment.ui.healthProfile.HealthProfileScreen
 import kotlinx.serialization.Serializable
 
 /**
@@ -28,10 +26,6 @@ sealed interface TreatmentRoute {
     /** The dashboard hub. */
     @Serializable
     data object Main : TreatmentRoute
-
-    /** Health profile ("پروندهٔ سلامت") for the main insured person. */
-    @Serializable
-    data class HealthProfile(val nationalCode: String) : TreatmentRoute
 }
 
 fun NavController.navigateToTreatment(navOptions: NavOptions? = null) {
@@ -44,23 +38,15 @@ fun NavController.navigateToTreatment(builder: NavOptionsBuilder.() -> Unit) {
 
 fun NavGraphBuilder.treatmentGraph(
     navController: NavController,
+    onNavigateToHealthProfile: (nationalCode: String) -> Unit,
     onBack: () -> Unit,
 ) {
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
         composable<TreatmentRoute.Main> {
             TreatmentScreen(
-                onOpenHealthProfile = { nationalCode ->
-                    navController.navigate(TreatmentRoute.HealthProfile(nationalCode))
-                },
-            )
-        }
-
-        composable<TreatmentRoute.HealthProfile> { backStackEntry ->
-            val route = backStackEntry.toRoute<TreatmentRoute.HealthProfile>()
-            HealthProfileScreen(
-                nationalCode = route.nationalCode,
-                onBack = onBack,
+                onOpenHealthProfile = onNavigateToHealthProfile,
             )
         }
     }
 }
+

@@ -13,9 +13,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.AllergyStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientDrugAllergyMock
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SelfDeclarationAllergyScreen(
-    state: SelfDeclarationUiState,
+    state: AllergyStepState,
     onIntent: (SelfDeclarationIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -109,9 +109,9 @@ fun SelfDeclarationAllergyScreen(
                         title = allergy.drugName,
                         description = allergy.allergyComments,
                         onDelete = {
-                            onIntent(SelfDeclarationIntent.UpdateState {
-                                copy(allergies = allergies.filterIndexed { i, _ -> i != idx })
-                            })
+                            onIntent(SelfDeclarationIntent.UpdateAllergy(
+                                state.copy(allergies = state.allergies.filterIndexed { i, _ -> i != idx })
+                            ))
                         }
                     )
                 }
@@ -175,9 +175,9 @@ fun SelfDeclarationAllergyScreen(
                                             drugName = drugList[selectedDrugIndex],
                                             allergyComments = allergyDesc.ifEmpty { "فاقد توضیحات عارضه" }
                                         )
-                                        onIntent(SelfDeclarationIntent.UpdateState {
-                                            copy(allergies = allergies + allergy)
-                                        })
+                                        onIntent(SelfDeclarationIntent.UpdateAllergy(
+                                            state.copy(allergies = state.allergies + allergy)
+                                        ))
                                     }
                                     showAddDialog = false
                                 },
@@ -215,7 +215,7 @@ fun SelfDeclarationAllergyScreen(
 fun SelfDeclarationAllergyScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationAllergyScreen(
-            state = SelfDeclarationUiState(
+            state = AllergyStepState(
                 allergies = listOf(
                     PatientDrugAllergyMock(1, "پنی‌سیلین", "راش پوستی")
                 )
@@ -225,3 +225,4 @@ fun SelfDeclarationAllergyScreenPreview() {
         )
     }
 }
+

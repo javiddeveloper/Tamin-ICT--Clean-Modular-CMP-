@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.clip
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -59,25 +61,25 @@ fun SelfDeclarationGateContent(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(taminColors.bgPage)
     ) {
-        // 1. Static Blue Header (drawn behind the top portion)
+        // 1. Static Blue Hero Shape (extended under top bar with rounded bottom corners)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 .background(taminColors.heroGradient)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(bottom = 30.dp)
-            ) {
-                // Top Bar using custom TaminTopAppBar
+        )
+
+        // 2. Main Content Scaffold
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
                 TaminTopAppBar(
                     title = {
                         TaminText(
@@ -98,18 +100,14 @@ fun SelfDeclarationGateContent(
                     },
                     onNavigationClick = onBackClicked,
                     backgroundColor = Color.Transparent,
-                    contentColor = Color.White
+                    contentColor = Color.White,
+                    modifier = Modifier.statusBarsPadding()
                 )
-            }
-        }
-
-        // 2. Content Scaffold
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
+            },
             bottomBar = {
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
+                    primaryIconPainter = painterResource(Res.drawable.ic_health_gate_button),
                     onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
@@ -119,162 +117,137 @@ fun SelfDeclarationGateContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 18.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Space for TopAppBar
-                Spacer(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .height(56.dp)
-                )
-
-                // Scrollable Cards List
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                )
-                {
+                // 1. Info Card "پرونده سلامت من"
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                    border = BorderStroke(1.dp, taminColors.border),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scrollState)
-                            .padding(horizontal = 18.dp)
-                            .padding(bottom = 18.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        // 1. Info Card "پرونده سلامت من"
-                        Card(
+                        // Shield Icon
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .offset(y = (-10).dp),
-                            shape = RoundedCornerShape(22.dp),
-                            colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-                            border = BorderStroke(1.dp, taminColors.border),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 22.dp, vertical = 26.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                // Shield Icon
-                                Box(
-                                    modifier = Modifier
-                                        .size(84.dp)
-                                        .background(taminColors.blueBg, RoundedCornerShape(26.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Security,
-                                        contentDescription = null,
-                                        tint = taminColors.blueText,
-                                        modifier = Modifier.size(46.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                TaminText(
-                                    text = stringResource(Res.string.health_gate_heading),
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        fontSize = 19.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = taminColors.textPrimary
-                                    )
-                                )
-
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                TaminText(
-                                    text = stringResource(Res.string.health_gate_desc),
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 13.5.sp,
-                                        color = taminColors.textTertiary,
-                                        lineHeight = 26.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                )
-                            }
-                        }
-
-                        // 2. Lock / Access Denied Notice
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(taminColors.orangeBg, RoundedCornerShape(16.dp))
-                                .border(
-                                    1.dp,
-                                    taminColors.orangeText.copy(alpha = 0.3f),
-                                    RoundedCornerShape(16.dp)
-                                )
-                                .padding(14.dp),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.Top
+                                .size(84.dp)
+                                .background(taminColors.blueBg, RoundedCornerShape(26.dp)),
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Lock,
+                                painter = painterResource(Res.drawable.ic_health_gate_shield),
                                 contentDescription = null,
-                                tint = taminColors.orangeText,
-                                modifier = Modifier
-                                    .size(22.dp)
-                                    .padding(top = 1.dp)
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(46.dp)
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                TaminText(
-                                    text = stringResource(Res.string.health_gate_locked_title),
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontSize = 13.5.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = taminColors.orangeText
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(3.dp))
-                                TaminText(
-                                    text = stringResource(Res.string.health_gate_locked_desc),
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 12.5.sp,
-                                        color = taminColors.orangeText.copy(alpha = 0.8f),
-                                        lineHeight = 22.sp
-                                    )
-                                )
-                            }
                         }
 
-                        // 3. Step indicators list
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-                            border = BorderStroke(1.dp, taminColors.border)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                            ) {
-                                StepIndicatorRow(
-                                    stepNumber = "۱",
-                                    title = stringResource(Res.string.health_gate_step1),
-                                    isLast = false
-                                )
-                                StepIndicatorRow(
-                                    stepNumber = "۲",
-                                    title = stringResource(Res.string.health_gate_step2),
-                                    isLast = false
-                                )
-                                StepIndicatorRow(
-                                    stepNumber = "۳",
-                                    title = stringResource(Res.string.health_gate_step3),
-                                    isLast = true
-                                )
-                            }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        TaminText(
+                            text = stringResource(Res.string.health_gate_heading),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = taminColors.textPrimary
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        TaminText(
+                            text = stringResource(Res.string.health_gate_desc),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 13.5.sp,
+                                color = taminColors.textTertiary,
+                                lineHeight = 26.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        )
                     }
                 }
-            }
 
+                // 2. Lock / Access Denied Notice
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(taminColors.orangeBg, RoundedCornerShape(16.dp))
+                        .border(
+                            1.dp,
+                            taminColors.orangeText.copy(alpha = 0.3f),
+                            RoundedCornerShape(16.dp)
+                        )
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_health_gate_lock),
+                        contentDescription = null,
+                        tint = taminColors.orangeText,
+                        modifier = Modifier
+                            .size(22.dp)
+                            .padding(top = 1.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        TaminText(
+                            text = stringResource(Res.string.health_gate_locked_title),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = taminColors.orangeText
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        TaminText(
+                            text = stringResource(Res.string.health_gate_locked_desc),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 12.5.sp,
+                                color = taminColors.orangeText.copy(alpha = 0.8f),
+                                lineHeight = 22.sp
+                            )
+                        )
+                    }
+                }
+
+                // 3. Step indicators list
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                    border = BorderStroke(1.dp, taminColors.border)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        StepIndicatorRow(
+                            stepNumber = "۱",
+                            title = stringResource(Res.string.health_gate_step1),
+                            isLast = false
+                        )
+                        StepIndicatorRow(
+                            stepNumber = "۲",
+                            title = stringResource(Res.string.health_gate_step2),
+                            isLast = false
+                        )
+                        StepIndicatorRow(
+                            stepNumber = "۳",
+                            title = stringResource(Res.string.health_gate_step3),
+                            isLast = true
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }

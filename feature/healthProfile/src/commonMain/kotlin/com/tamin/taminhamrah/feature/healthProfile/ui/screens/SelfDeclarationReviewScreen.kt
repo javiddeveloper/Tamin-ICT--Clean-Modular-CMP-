@@ -14,6 +14,13 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PersonalStepState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.ContactStepState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.EmergencyStepState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PhysicalStepState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.BloodGroupStepState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.LifestyleStepState
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.AllergyStepState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -72,8 +79,8 @@ fun SelfDeclarationReviewScreen(
                 title = "اطلاعات هویتی",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) }
             ) {
-                IdentityRow(label = "نام بیمار:", value = "${state.patientName} ${state.patientFamily}")
-                IdentityRow(label = "کد ملی / شماره بیمه:", value = state.insuranceNumber)
+                IdentityRow(label = "نام بیمار:", value = "${state.identity.patientName} ${state.identity.patientFamily}")
+                IdentityRow(label = "کد ملی / شماره بیمه:", value = state.identity.insuranceNumber)
             }
 
             // Personal
@@ -81,8 +88,8 @@ fun SelfDeclarationReviewScreen(
                 title = "اطلاعات تکمیلی فردی",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PERSONAL)) }
             ) {
-                IdentityRow(label = "وضعیت تاهل:", value = state.maritalStatus.ifEmpty { "نامشخص" })
-                IdentityRow(label = "شغل فعلی:", value = state.job.ifEmpty { "نامشخص" })
+                IdentityRow(label = "وضعیت تاهل:", value = state.personal.maritalStatus.ifEmpty { "نامشخص" })
+                IdentityRow(label = "شغل فعلی:", value = state.personal.job.ifEmpty { "نامشخص" })
             }
 
             // Contact
@@ -90,8 +97,8 @@ fun SelfDeclarationReviewScreen(
                 title = "تماس و سکونت",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.CONTACT)) }
             ) {
-                IdentityRow(label = "شماره همراه:", value = state.mobile)
-                IdentityRow(label = "شهر / استان:", value = "${state.city} / ${state.province}".replace(" / ", "").ifEmpty { "نامشخص" })
+                IdentityRow(label = "شماره همراه:", value = state.contact.mobile)
+                IdentityRow(label = "شهر / استان:", value = "${state.contact.city} / ${state.contact.province}".replace(" / ", "").ifEmpty { "نامشخص" })
             }
 
             // Emergency
@@ -99,8 +106,8 @@ fun SelfDeclarationReviewScreen(
                 title = "تماس اضطراری",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.EMERGENCY)) }
             ) {
-                IdentityRow(label = "مخاطب اضطراری:", value = "${state.emergencyName} ${state.emergencyFamily}".trim().ifEmpty { "نامشخص" })
-                IdentityRow(label = "نسبت:", value = state.emergencyRelation.ifEmpty { "نامشخص" })
+                IdentityRow(label = "مخاطب اضطراری:", value = "${state.emergency.emergencyName} ${state.emergency.emergencyFamily}".trim().ifEmpty { "نامشخص" })
+                IdentityRow(label = "نسبت:", value = state.emergency.emergencyRelation.ifEmpty { "نامشخص" })
             }
 
             // Height and Weight
@@ -108,8 +115,8 @@ fun SelfDeclarationReviewScreen(
                 title = "قد و وزن",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.PHYSICAL)) }
             ) {
-                IdentityRow(label = "قد:", value = "${state.height} سانتی‌متر")
-                IdentityRow(label = "وزن:", value = "${state.weight} کیلوگرم")
+                IdentityRow(label = "قد:", value = "${state.physical.height} سانتی‌متر")
+                IdentityRow(label = "وزن:", value = "${state.physical.weight} کیلوگرم")
             }
 
             // Blood
@@ -117,7 +124,7 @@ fun SelfDeclarationReviewScreen(
                 title = "گروه خونی",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.BLOOD)) }
             ) {
-                val group = if (state.isBloodGroupUnknown) "نامشخص" else "${state.selectedBloodGroupLetter ?: ""}${state.selectedBloodGroupRh ?: ""}"
+                val group = if (state.bloodGroup.isBloodGroupUnknown) "نامشخص" else "${state.bloodGroup.selectedBloodGroupLetter ?: ""}${state.bloodGroup.selectedBloodGroupRh ?: ""}"
                 IdentityRow(label = "گروه خونی:", value = group.ifEmpty { "نامشخص" })
             }
 
@@ -126,8 +133,8 @@ fun SelfDeclarationReviewScreen(
                 title = "سبک زندگی",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE)) }
             ) {
-                IdentityRow(label = "مصرف سیگار / دخانیات:", value = if (state.isSmoking == true) "بله (${state.smokingPattern ?: ""})" else "خیر")
-                IdentityRow(label = "فعالیت ورزشی:", value = if (state.isExercising == true) "بله (${state.exerciseFrequency ?: ""})" else "خیر")
+                IdentityRow(label = "مصرف سیگار / دخانیات:", value = if (state.lifestyle.isSmoking == true) "بله (${state.lifestyle.smokingPattern ?: ""})" else "خیر")
+                IdentityRow(label = "فعالیت ورزشی:", value = if (state.lifestyle.isExercising == true) "بله (${state.lifestyle.exerciseFrequency ?: ""})" else "خیر")
             }
 
             // Allergies
@@ -135,7 +142,7 @@ fun SelfDeclarationReviewScreen(
                 title = "حساسیت‌های دارویی",
                 onEdit = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.ALLERGY)) }
             ) {
-                val allergyStr = state.allergies.joinToString { it.drugName }
+                val allergyStr = state.allergy.allergies.joinToString { it.drugName }
                 IdentityRow(label = "داروهای آلرژیک:", value = allergyStr.ifEmpty { "ندارد" })
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
@@ -188,20 +195,15 @@ fun SelfDeclarationReviewScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationReviewScreen(
             state = SelfDeclarationUiState(
-                maritalStatus = "متاهل",
-                job = "کارمند",
-                city = "تهران",
-                province = "تهران",
-                address = "میدان ونک",
-                emergencyName = "محمد",
-                emergencyRelation = "پدر",
-                height = 180,
-                weight = 80,
-                selectedBloodGroupLetter = "AB",
-                selectedBloodGroupRh = "+"
+                personal = PersonalStepState(maritalStatus = "متاهل", job = "کارمند"),
+                contact = ContactStepState(city = "تهران", province = "تهران", address = "میدان ونک"),
+                emergency = EmergencyStepState(emergencyName = "محمد", emergencyRelation = "پدر"),
+                physical = PhysicalStepState(height = 180, weight = 80),
+                bloodGroup = BloodGroupStepState(selectedBloodGroupLetter = "AB", selectedBloodGroupRh = "+")
             ),
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
+
