@@ -112,9 +112,13 @@ class HealthProfileViewModel(
             .catch { }
             .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
 
+        emit(PartialState.ProvincesLoading(true))
         getAllProvincesUseCase()
-            .catch { }
-            .collect { emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() })) }
+            .catch { emit(PartialState.ProvincesLoading(false)) }
+            .collect {
+                emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() }))
+                emit(PartialState.ProvincesLoading(false))
+            }
 
         getBloodGroupsUseCase()
             .catch { }
@@ -137,9 +141,13 @@ class HealthProfileViewModel(
 
     // Triggered when user selects a province in Step 3
     private fun handleLoadCities(provinceId: Int): Flow<PartialState> = flow {
+        emit(PartialState.CitiesLoading(true))
         getProvinceCitiesUseCase(provinceId)
-            .catch { }
-            .collect { emit(PartialState.CitiesLoaded(it.map { c -> c.toPresentation() })) }
+            .catch { emit(PartialState.CitiesLoading(false)) }
+            .collect {
+                emit(PartialState.CitiesLoaded(it.map { c -> c.toPresentation() }))
+                emit(PartialState.CitiesLoading(false))
+            }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -246,8 +254,10 @@ class HealthProfileViewModel(
         partialState: PartialState
     ): HealthProfileUiState = when (partialState) {
 
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
-        is PartialState.Error   -> currentState.copy(isLoading = false, error = partialState.message)
+        is PartialState.Loading          -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.ProvincesLoading -> currentState.copy(isProvincesLoading = partialState.isLoading)
+        is PartialState.CitiesLoading    -> currentState.copy(isCitiesLoading = partialState.isLoading)
+        is PartialState.Error            -> currentState.copy(isLoading = false, error = partialState.message)
 
         // ── Remote patient data ───────────────────────────────────────────────
         is PartialState.GeneralLoaded -> {
@@ -321,8 +331,8 @@ class HealthProfileViewModel(
 
         // ── Lookup lists ──────────────────────────────────────────────────────
         is PartialState.MaritalStatusLoaded -> currentState.copy(maritalStatusOptions = partialState.options)
-        is PartialState.ProvincesLoaded     -> currentState.copy(provinceOptions = partialState.options)
-        is PartialState.CitiesLoaded        -> currentState.copy(cityOptions = partialState.options)
+        is PartialState.ProvincesLoaded     -> currentState.copy(provinceOptions = partialState.options, isProvincesLoading = false)
+        is PartialState.CitiesLoaded        -> currentState.copy(cityOptions = partialState.options, isCitiesLoading = false)
         is PartialState.BloodGroupsLoaded   -> currentState.copy(bloodGroupOptions = partialState.options)
         is PartialState.SmokingStatusLoaded -> currentState.copy(smokingStatusOptions = partialState.options)
         is PartialState.IllnessGroupsLoaded -> currentState.copy(illnessGroups = partialState.groups)
