@@ -32,21 +32,19 @@ fun PatientGeneralDN.toPresentation(): PatientGeneralPR = PatientGeneralPR(
     patientBirthDate = patientBirthDate ?: "",
     patientMobile = patientMobile ?: "",
     patientAddress = patientAddress ?: "",
-    // BloodGroup, height, weight, emergency are not in PatientGeneralDN —
-    // they come from UpdatePatientDN after a save. Use safe defaults.
-    patientBloodGroupCode = null,
-    patientBloodGroup = "",
-    patientHeight = 0.0,
-    patientWeight = 0.0,
-    patientBMI = 0.0,
-    emergencyName = "",
-    emergencyFamily = "",
-    emergencyMobile = "",
-    emergencyRelation = "",
-    emergencyRelationshipCode = null,
-    insuranceNumber = "",
-    insuranceType = "",
-    lastVisitDate = ""
+    patientBloodGroupCode = patientBloodGroupCode,
+    patientBloodGroup = patientBloodGroup ?: "",
+    patientHeight = patientHeight?.toDoubleOrNull() ?: 0.0,
+    patientWeight = patientWeight?.toDoubleOrNull() ?: 0.0,
+    patientBMI = patientBMI?.toDoubleOrNull() ?: 0.0,
+    emergencyName = emergencyName ?: "",
+    emergencyFamily = emergencyFamily ?: "",
+    emergencyMobile = emergencyMobile ?: "",
+    emergencyRelation = emergencyRelation ?: "",
+    emergencyRelationshipCode = emergencyRelationshipCode,
+    insuranceNumber = patientInsurance ?: "",
+    insuranceType = patientInsurance ?: "",
+    lastVisitDate = lastVisitDate ?: ""
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
