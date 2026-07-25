@@ -22,8 +22,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
@@ -32,6 +34,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconGradientBlueEnd
+import com.tamin.taminhamrah.ui.theme.IconGradientBlueStart
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -276,6 +280,124 @@ fun TaminPrimaryButton(
             )
         }
         Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
+    }
+}
+
+@Composable
+fun TaminOutlinedButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
+    height: Dp = PRIMARY_BUTTON_HEIGHT,
+    borderWidth: Dp = 1.dp,
+    borderColor: Color = LocalTaminColors.current.border,
+    containerColor: Color = Color.Transparent,
+    contentColor: Color = LocalTaminColors.current.textPrimary,
+    disabledBorderColor: Color = LocalTaminColors.current.border.copy(alpha = 0.5f),
+    disabledContainerColor: Color = Color.Transparent,
+    disabledContentColor: Color = LocalTaminColors.current.textMuted,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+) {
+    val currentBorderColor = if (enabled) borderColor else disabledBorderColor
+    val currentContainerColor = if (enabled) containerColor else disabledContainerColor
+    val currentContentColor = if (enabled) contentColor else disabledContentColor
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .clip(shape)
+            .background(currentContainerColor)
+            .border(borderWidth, currentBorderColor, shape)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(
+            Spacing.sm,
+            Alignment.CenterHorizontally,
+        ),
+    ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = currentContentColor,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+
+        Text(
+            text = text,
+            style = textStyle,
+        )
+    }
+}
+
+@Composable
+fun TaminFilledButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
+    height: Dp = PRIMARY_BUTTON_HEIGHT,
+    background: Brush = Brush.linearGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    disabledBackgroundColor: Color = LocalTaminColors.current.grey900,
+    contentColor: Color = Color.White,
+    disabledContentColor: Color = Color.White.copy(alpha = 0.7f),
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+) {
+    val shadowColor = Color(0x47173D7E)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .shadow(
+                elevation = 22.dp,
+                shape = shape,
+                spotColor = shadowColor,
+                ambientColor = shadowColor,
+            )
+            .clip(shape)
+            .background(
+                if (enabled) background else Brush.linearGradient(
+                    listOf(
+                        disabledBackgroundColor,
+                        disabledBackgroundColor
+                    )
+                )
+            )
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(
+            Spacing.sm,
+            Alignment.CenterHorizontally,
+        ),
+    ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (enabled) contentColor else disabledContentColor,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+
+        Text(
+            text = text,
+            style = textStyle,
+            color = if (enabled) contentColor else disabledContentColor,
+        )
     }
 }
 
