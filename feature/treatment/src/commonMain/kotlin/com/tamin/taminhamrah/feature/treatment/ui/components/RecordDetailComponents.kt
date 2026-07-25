@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.LabeledBlock
 import com.tamin.taminhamrah.ui.components.StatTile
@@ -124,9 +123,9 @@ fun PrescriptionItemCard(
             ) {
                 if (centerName.isNotBlank()) DetailRow(label = "داروخانه/پاراکلینیک", value = centerName)
                 if (actionDate.isNotBlank()) DetailRow(label = "تاریخ اقدام", value = actionDate)
-                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = if (itemTotal.endsWith("ریال")) itemTotal else "$itemTotal ریال")
-                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = if (patientShare.endsWith("ریال")) patientShare else "$patientShare ریال")
-                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = if (organizationShare.endsWith("ریال")) organizationShare else "$organizationShare ریال")
+                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = itemTotal, unit = "ریال")
+                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = patientShare, unit = "ریال")
+                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = organizationShare, unit = "ریال")
             }
         }
     }
@@ -238,16 +237,18 @@ fun CostBreakdownCard(
             color = colors.textPrimary,
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
-        DetailRow(label = "جمع کل", value = if (total.endsWith("ریال")) total else "$total ریال")
+        DetailRow(label = "جمع کل", value = total, unit = "ریال")
         DetailRow(
             label = "سهم سازمان",
-            value = if (organizationShare.endsWith("ریال")) organizationShare else "$organizationShare ریال",
+            value = organizationShare,
+            unit = "ریال",
             valueColor = colors.blueText,
         )
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
         DetailRow(
             label = "سهم شما",
-            value = if (insuredShare.endsWith("ریال")) insuredShare else "$insuredShare ریال",
+            value = insuredShare,
+            unit = "ریال",
             valueColor = colors.greenText,
             valueStyle = MaterialTheme.typography.titleLarge,
         )

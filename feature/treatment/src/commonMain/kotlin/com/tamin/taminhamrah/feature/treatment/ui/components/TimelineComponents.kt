@@ -149,11 +149,23 @@ private fun MedicalRecordFooter(shareAmount: String) {
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textMuted,
             )
-            NumericText(
-                text = if (shareAmount.endsWith("ریال")) shareAmount else "$shareAmount ریال",
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.textPrimary,
-            )
+            // Number and unit are separate so «ریال» stays left of the digits: in this RTL row the
+            // number is the right child, «ریال» the left one.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+            ) {
+                NumericText(
+                    text = shareAmount,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.textPrimary,
+                )
+                Text(
+                    text = "ریال",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.textPrimary,
+                )
+            }
         }
         Row(
             modifier = Modifier
