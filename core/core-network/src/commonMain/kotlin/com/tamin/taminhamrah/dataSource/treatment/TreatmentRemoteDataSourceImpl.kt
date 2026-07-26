@@ -5,17 +5,15 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDTO
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDTO
-import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import io.ktor.client.statement.HttpStatement
-import io.ktor.client.statement.readRawBytes
-import io.ktor.utils.io.ByteReadChannel
+import com.tamin.taminhamrah.tools.readPdfChannel
 
 internal class TreatmentRemoteDataSourceImpl(
     private val apiService: TreatmentApiService,
@@ -127,11 +125,3 @@ internal class TreatmentRemoteDataSourceImpl(
         }
     }
 }
-
-/**
- * Reads the whole PDF body while the response is still open, then hands back a fresh in-memory
- * channel. `HttpStatement.body<ByteReadChannel>()` returns a channel that is already finalized —
- * draining it later yields nothing — so the bytes are pulled inside `execute` and re-wrapped.
- */
-private suspend fun HttpStatement.readPdfChannel(): ByteReadChannel =
-    ByteReadChannel(execute { it.readRawBytes() })
