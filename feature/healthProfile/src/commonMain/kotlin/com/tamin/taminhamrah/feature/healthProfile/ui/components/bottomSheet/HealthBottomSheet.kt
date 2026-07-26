@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -165,55 +166,82 @@ fun HealthBottomSheet(
                 config.items
             }
 
-            if (config.type.showSearch) {
-                LazyColumn(
+            if (config.isLoading) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(filteredItems) { item ->
-                        val isSelected = selectedIds.contains(item.id)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                                    if (config.singleSelection) {
-                                        selectedIds.clear()
-                                        selectedIds.add(item.id)
-                                    } else {
-                                        if (isSelected) selectedIds.remove(item.id)
-                                        else selectedIds.add(item.id)
+                    CircularProgressIndicator(
+                        color = LocalTaminColors.current.blueText,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            } else if (config.type.showSearch) {
+                if (filteredItems.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TaminText(
+                            text = "موردی یافت نشد",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalTaminColors.current.textTertiary
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                    ) {
+                        items(filteredItems) { item ->
+                            val isSelected = selectedIds.contains(item.id)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                                        if (config.singleSelection) {
+                                            selectedIds.clear()
+                                            selectedIds.add(item.id)
+                                        } else {
+                                            if (isSelected) selectedIds.remove(item.id)
+                                            else selectedIds.add(item.id)
+                                        }
                                     }
+                                    .padding(vertical = Spacing.sm),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Filled.CheckCircle,
+                                        contentDescription = null,
+                                        tint = LocalTaminColors.current.blueText,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                } else {
+                                    Spacer(modifier = Modifier.size(24.dp))
                                 }
-                                .padding(vertical = Spacing.sm),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Filled.CheckCircle,
-                                    contentDescription = null,
-                                    tint = LocalTaminColors.current.blueText,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            } else {
-                                Spacer(modifier = Modifier.size(24.dp))
-                            }
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                TaminText(
-                                    text = item.title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = LocalTaminColors.current.textPrimary
-                                )
-                                Spacer(modifier = Modifier.width(Spacing.sm))
-                                Icon(
-                                    imageVector = Icons.Outlined.LocationOn,
-                                    contentDescription = null,
-                                    tint = LocalTaminColors.current.textSecondary,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    TaminText(
+                                        text = item.title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = LocalTaminColors.current.textPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(Spacing.sm))
+                                    Icon(
+                                        imageVector = Icons.Outlined.LocationOn,
+                                        contentDescription = null,
+                                        tint = LocalTaminColors.current.textSecondary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             }
                         }
                     }

@@ -12,7 +12,8 @@ data class BottomSheetConfig(
     val items: List<BottomSheetItem> = emptyList(),
     val singleSelection: Boolean = false,
     val showWarning: Boolean = false,
-    val warningText: String? = null
+    val warningText: String? = null,
+    val isLoading: Boolean = false
 )
 
 data class BottomSheetItem(

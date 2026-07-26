@@ -126,6 +126,10 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.CONTACT -> {
                     SelfDeclarationContactScreen(
                         state = selfDecState.contact,
+                        provinceOptions = state.provinceOptions,
+                        cityOptions = state.cityOptions,
+                        isProvincesLoading = state.isProvincesLoading,
+                        isCitiesLoading = state.isCitiesLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PERSONAL))

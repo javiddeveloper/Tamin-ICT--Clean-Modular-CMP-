@@ -159,6 +159,8 @@ data class SelfDeclarationUiState(
 
 data class HealthProfileUiState(
     val isLoading: Boolean = false,
+    val isProvincesLoading: Boolean = false,
+    val isCitiesLoading: Boolean = false,
     val error: String? = null,
 
     // ── Patient data (loaded from API) ────────────────────────────────────────
@@ -181,6 +183,8 @@ data class HealthProfileUiState(
     sealed interface PartialState {
         // ── Loading / Error ───────────────────────────────────────────────────
         data class Loading(val isLoading: Boolean) : PartialState
+        data class ProvincesLoading(val isLoading: Boolean) : PartialState
+        data class CitiesLoading(val isLoading: Boolean) : PartialState
         data class Error(val message: String) : PartialState
 
         // ── Remote data loaded ────────────────────────────────────────────────
