@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.fake
 
+import com.tamin.taminhamrah.model.health.ActFrequencyDN
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
 import com.tamin.taminhamrah.model.health.BloodGroupDN
@@ -115,6 +116,11 @@ class FakeHealthRepository : HealthRepository {
     }
 
     override suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(emptyList())
+    }
+
+    override suspend fun getActFrequencies(): Flow<List<ActFrequencyDN>> = flow {
         if (shouldThrowError) throw error
         emit(emptyList())
     }
