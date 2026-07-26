@@ -12,19 +12,23 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -130,13 +134,13 @@ fun ServiceCard(
 
             Spacer(modifier = Modifier.width(Spacing.sm))
 
-            Text(
+            AutoResizeText(
                 text = service.name ?: "",
                 style = MaterialTheme.typography.titleSmall.copy(
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Right,
                 ),
-                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.xxs)
@@ -159,6 +163,37 @@ fun ServiceCard(
             )
         }
     }
+}
+
+@Composable
+private fun AutoResizeText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    maxLines: Int = Int.MAX_VALUE,
+    minFontSize: TextUnit = 8.sp,
+) {
+    var resizedTextStyle by remember(text) { mutableStateOf(style) }
+    var readyToDraw by remember(text) { mutableStateOf(false) }
+
+    Text(
+        text = text,
+        modifier = modifier.drawWithContent {
+            if (readyToDraw) drawContent()
+        },
+        style = resizedTextStyle,
+        softWrap = true,
+        maxLines = maxLines,
+        onTextLayout = { result ->
+            if (result.didOverflowHeight && resizedTextStyle.fontSize > minFontSize) {
+                resizedTextStyle = resizedTextStyle.copy(
+                    fontSize = resizedTextStyle.fontSize * 0.95f
+                )
+            } else {
+                readyToDraw = true
+            }
+        }
+    )
 }
 
 internal fun getIconForName(name: String?): ImageVector {
