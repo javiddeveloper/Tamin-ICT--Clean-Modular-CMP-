@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.util.formatDecimal
 
 /**
  * A beautiful, premium BMI Gauge Meter component.
@@ -151,7 +152,7 @@ fun BmiMeter(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TaminText(
-                    text = String.format("%.1f", bmi),
+                    text = bmi.toDouble().formatDecimal(1),
                     fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = taminColors.textPrimary,
