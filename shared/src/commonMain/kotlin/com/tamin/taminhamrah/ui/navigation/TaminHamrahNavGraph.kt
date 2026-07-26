@@ -1,19 +1,25 @@
 package com.tamin.taminhamrah.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.*
-import androidx.compose.animation.*
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,6 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -50,9 +59,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
-import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
+import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -72,16 +82,12 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificat
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.workshops.WorkshopsRoute
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
@@ -89,29 +95,23 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentI
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
-import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
-import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
-import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
-import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
-import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
+import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
+import com.tamin.taminhamrah.ui.blur.safeHazeSource
+import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.currentStateAsState
-import androidx.lifecycle.Lifecycle
-import androidx.compose.runtime.getValue
-import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.ic_home_menu
@@ -148,7 +148,6 @@ internal fun TaminHamrahNavGraph(
     val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
-
 
     val navigationItems = listOf(
         NavigationTab(
@@ -209,13 +208,13 @@ internal fun TaminHamrahNavGraph(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = isBottomBarVisible,
-                enter = androidx.compose.animation.slideInVertically(
+                enter = slideInVertically(
                     initialOffsetY = { it },
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
                 ),
-                exit = androidx.compose.animation.slideOutVertically(
+                exit = slideOutVertically(
                     targetOffsetY = { it },
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
                 )
@@ -326,7 +325,8 @@ internal fun TaminHamrahNavGraph(
                             navController.navigateToCalculatePension()
                         },
                         onNavigateToPrescription = {
-                            navController.navigateToPrescription()
+                            // No code passed; MedicalRecordsScreen falls back to the main insured person.
+                            navController.navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
                         },
                         onNavigateToDeservedTreatment = {
                             navController.navigateToDeservedTreatment()
@@ -357,10 +357,10 @@ internal fun TaminHamrahNavGraph(
 
                 treatmentGraph(
                     navController = navController,
+                    onBack = { navController.popBackStack() },
                     onNavigateToHealthProfile = { nationalCode ->
                         navController.navigateToHealthProfile(nationalCode)
                     },
-                    onBack = { navController.popBackStack() }
                 )
 
                 healthProfileScreen(
@@ -419,7 +419,7 @@ internal fun TaminHamrahNavGraph(
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
             }
 
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
                     animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
@@ -479,16 +479,6 @@ internal fun TaminHamrahNavGraph(
                 )
             }
         )
-    }
-}
-
-@Composable
-fun SampleScreen(title: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = title)
     }
 }
 
@@ -781,5 +771,3 @@ private fun Handleevents(
         }
     }
 }
-
-

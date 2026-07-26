@@ -23,11 +23,11 @@ interface TreatmentDao {
     @Insert
     suspend fun insertElectronicPrescriptions(items: List<ElectronicPrescriptionEntity>)
 
-    @Query("DELETE FROM electronic_prescriptions WHERE patientNationalCode = :patientNationalCode")
-    suspend fun clearElectronicPrescriptions(patientNationalCode: String)
+    @Query("DELETE FROM electronic_prescriptions WHERE patientNationalCode = :patientNationalCode AND (:prescType = '6' OR prescType = :prescType)")
+    suspend fun clearElectronicPrescriptions(patientNationalCode: String, prescType: String)
 
-    @Query("SELECT * FROM electronic_prescriptions WHERE patientNationalCode = :patientNationalCode")
-    fun getElectronicPrescriptions(patientNationalCode: String): Flow<List<ElectronicPrescriptionEntity>>
+    @Query("SELECT * FROM electronic_prescriptions WHERE patientNationalCode = :patientNationalCode AND (:prescType = '6' OR prescType = :prescType)")
+    fun getElectronicPrescriptions(patientNationalCode: String, prescType: String): Flow<List<ElectronicPrescriptionEntity>>
 
     // --- Electronic Prescription Detail ---
     @Insert
