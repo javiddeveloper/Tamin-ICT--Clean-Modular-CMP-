@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -30,8 +30,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
  * Components for the contracted-centres screen: the search field that lives in the teal
  * header, and the result row for one hospital, pharmacy, lab or clinic.
  */
-
-private val CENTER_BADGE_SIZE = 44.dp
 
 /**
  * One contracted center: a type-colored icon badge, the center's name and category,
@@ -60,7 +58,7 @@ fun MedicalCenterCard(
     ) {
         Box(
             modifier = Modifier
-                .size(CENTER_BADGE_SIZE)
+                .size(TreatmentDimens.centerBadgeSize)
                 .background(
                     accentContainerColor,
                     RoundedCornerShape(CornerRadius.listRow),

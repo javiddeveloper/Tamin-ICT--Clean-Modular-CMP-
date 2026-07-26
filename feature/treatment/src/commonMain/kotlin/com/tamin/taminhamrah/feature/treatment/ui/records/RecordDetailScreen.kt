@@ -49,9 +49,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_download
-
-/** Clearance so the last card is not hidden behind the pinned action bar. */
-private val BOTTOM_BAR_CLEARANCE = 100.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
 private const val UNKNOWN_VALUE = "—"
@@ -207,7 +205,7 @@ fun RecordDetailContent(
                     }
                 }
 
-                Box(modifier = Modifier.height(BOTTOM_BAR_CLEARANCE))
+                Box(modifier = Modifier.height(TreatmentDimens.bottomBarClearance))
             }
 
             price?.let {

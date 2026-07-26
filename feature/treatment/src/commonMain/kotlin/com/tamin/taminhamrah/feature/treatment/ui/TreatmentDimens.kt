@@ -8,6 +8,9 @@ import androidx.compose.ui.unit.dp
  * sizes) live in core-ui's theme; these are layout numbers that only the treatment screens need.
  */
 internal object TreatmentDimens {
+    /** Header collapse scroll distance. */
+    val headerCollapseDistance = 96.dp
+
     /** How far the insured-person carousel rides up into the hub header. */
     val cardOverlap = 40.dp
 
@@ -19,8 +22,20 @@ internal object TreatmentDimens {
     val coverageBadgeIconSize = 10.dp
     val brandTickSize = 24.dp
     val brandTickIconSize = 13.dp
+    val cardLoadingHeight = 160.dp
     const val cardDecorAlpha = 0.07f
     const val cardPeekFraction = 0.87f
+
+    // Category tiles & badges
+    val categoryTileIconSize = 40.dp
+    val centerBadgeSize = 44.dp
+    val accentBarWidth = 4.dp
+
+    // Bottom sheet & clearance
+    val bottomBarClearance = 100.dp
+    val sheetHandleWidth = 36.dp
+    val sheetHandleHeight = 4.dp
+    val sheetCornerRadius = 28.dp
 
     // The full-page phone frame used only by @Preview.
     val pageWidth = 412.dp

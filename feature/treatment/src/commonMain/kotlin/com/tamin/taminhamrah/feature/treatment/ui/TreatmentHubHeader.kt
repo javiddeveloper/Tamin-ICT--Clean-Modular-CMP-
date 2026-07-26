@@ -19,14 +19,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlin.math.roundToInt
-
-/** Drag distance over which the insured-person card folds all the way into the header. */
-internal val HeaderCollapseDistance = 96.dp
 
 /**
  * Drives the treatment hub's collapsing header the way a CollapsingToolbar does: a
@@ -90,7 +86,7 @@ class TreatmentHeaderCollapse(private val maxCollapsePx: Float) {
 
 @Composable
 internal fun rememberTreatmentHeaderCollapse(): TreatmentHeaderCollapse {
-    val maxCollapsePx = with(LocalDensity.current) { HeaderCollapseDistance.toPx() }
+    val maxCollapsePx = with(LocalDensity.current) { TreatmentDimens.headerCollapseDistance.toPx() }
     return remember(maxCollapsePx) { TreatmentHeaderCollapse(maxCollapsePx) }
 }
 

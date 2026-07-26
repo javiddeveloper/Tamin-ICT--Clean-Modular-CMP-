@@ -74,8 +74,6 @@ import kotlinx.collections.immutable.persistentListOf
  * stays a readable description of the screen's shape rather than its every detail.
  */
 
-private val CARD_LOADING_HEIGHT = 160.dp
-
 /** Shown in place of an amount that has not loaded, so a blank never reads as zero. */
 private const val UNKNOWN_AMOUNT = "۶۵٬۹۱۰"
 
@@ -95,7 +93,7 @@ internal fun PatientCarousel(
         state.isLoading && patients.isEmpty() -> Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(CARD_LOADING_HEIGHT)
+                .height(TreatmentDimens.cardLoadingHeight)
                 .taminSurface(CornerRadius.card)
                 .shimmer(),
         )
@@ -152,7 +150,7 @@ private fun PatientPlaceholderCard(
                 color = if (isError) colors.dangerBorder else colors.border,
                 shape = RoundedCornerShape(CornerRadius.card),
             )
-            .height(CARD_LOADING_HEIGHT),
+            .height(TreatmentDimens.cardLoadingHeight),
         contentAlignment = Alignment.Center,
     ) {
         Column(

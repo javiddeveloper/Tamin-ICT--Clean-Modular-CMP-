@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -89,18 +90,17 @@ fun RecordSearchSheet(
             lazyListState.animateScrollToItem(index)
         }
     }
-
-    ModalBottomSheet(
+        ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = colors.bgSurface,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = RoundedCornerShape(topStart = TreatmentDimens.sheetCornerRadius, topEnd = TreatmentDimens.sheetCornerRadius),
         dragHandle = {
             Box(
                 modifier = Modifier
                     .padding(top = Spacing.sm, bottom = Spacing.xs)
-                    .width(36.dp)
-                    .height(4.dp)
+                    .width(TreatmentDimens.sheetHandleWidth)
+                    .height(TreatmentDimens.sheetHandleHeight)
                     .background(colors.border, CircleShape),
             )
         },
