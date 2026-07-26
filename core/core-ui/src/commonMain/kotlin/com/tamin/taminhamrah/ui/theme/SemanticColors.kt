@@ -66,7 +66,9 @@ data class TaminColors(
     val grey900 : Color,
 
     val hawkesBlue : Color,
-    val chipBg: Color
+    val chipBg: Color,
+    val warning: Color,
+    val fuchsiaBlue: Color
 )
 
 val LightTaminColors = TaminColors(
@@ -144,6 +146,8 @@ val LightTaminColors = TaminColors(
     hawkesBlue = Color(0xFFDCE7FB),
     chipBg = Color(0xFFEFF6FF),
     grey900 = Color(0xFFE2E8F0),
+    warning = Color(0xFFC97E0A),
+    fuchsiaBlue = Color(0xFF7C4BC0),
 )
 
 val DarkTaminColors = TaminColors(
@@ -221,5 +225,7 @@ val DarkTaminColors = TaminColors(
     ),
     grey900 = Color(0xFFE2E8F0),
     hawkesBlue = Color(0xFFDCE7FB),
-    chipBg = Color(0x293B82F6)
+    chipBg = Color(0x293B82F6),
+    warning = Color(0xFFFBBF24),
+    fuchsiaBlue = Color(0xFFB79AEE)
 )

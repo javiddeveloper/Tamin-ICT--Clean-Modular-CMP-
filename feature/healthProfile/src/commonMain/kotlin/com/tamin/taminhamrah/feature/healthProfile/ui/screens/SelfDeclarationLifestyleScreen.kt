@@ -28,6 +28,7 @@ import org.jetbrains.compose.resources.painterResource
 import taminx.feature.healthprofile.generated.resources.Res
 import taminx.feature.healthprofile.generated.resources.ic_health_addiction
 import taminx.feature.healthprofile.generated.resources.ic_health_alcohol
+import taminx.feature.healthprofile.generated.resources.ic_health_exercise
 import taminx.feature.healthprofile.generated.resources.ic_health_tobacco
 
 @Composable
@@ -96,8 +97,9 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_tobacco),
-                        backgroundColor = LocalTaminColors.current.orangeBg,
+                        backgroundColor = LocalTaminColors.current.warning.copy(alpha = 0.13f),
                         contentDescription = null,
+                        tintColor = LocalTaminColors.current.warning
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -126,8 +128,9 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_addiction),
-                        backgroundColor = LocalTaminColors.current.orangeBg,
+                        backgroundColor = LocalTaminColors.current.dangerText.copy(alpha = 0.13f),
                         contentDescription = null,
+                        tintColor = LocalTaminColors.current.dangerText
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -157,8 +160,9 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_alcohol),
-                        backgroundColor = LocalTaminColors.current.orangeBg,
+                        backgroundColor = LocalTaminColors.current.fuchsiaBlue.copy(alpha = 0.13f),
                         contentDescription = null,
+                        tintColor = LocalTaminColors.current.fuchsiaBlue
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -187,9 +191,10 @@ fun SelfDeclarationLifestyleScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
-                        painter = painterResource(Res.drawable.ic_health_alcohol),
-                        backgroundColor = LocalTaminColors.current.orangeBg,
+                        painter = painterResource(Res.drawable.ic_health_exercise),
+                        backgroundColor = LocalTaminColors.current.greenText.copy(alpha = 0.13f),
                         contentDescription = null,
+                        tintColor = LocalTaminColors.current.greenText
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(

@@ -22,6 +22,7 @@ fun IconBox(
     backgroundColor: Color,
     cornerRadius: Dp = 8.dp,
     contentDescription: String? = null,
+    tintColor: Color
 ) {
     Box(
         modifier = modifier
@@ -33,6 +34,7 @@ fun IconBox(
         Icon(
             painter = painter,
             contentDescription = contentDescription,
+            tint = tintColor
         )
     }
 }
