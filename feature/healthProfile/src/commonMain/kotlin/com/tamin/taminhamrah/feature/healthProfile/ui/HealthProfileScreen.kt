@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.BackHandler
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
@@ -32,6 +33,22 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.util.formatDecimal
 import org.koin.compose.viewmodel.koinViewModel
+
+private fun SelfDeclarationStep.previousStep(): SelfDeclarationStep? = when (this) {
+    SelfDeclarationStep.INTRO -> SelfDeclarationStep.GATE
+    SelfDeclarationStep.IDENTITY -> SelfDeclarationStep.INTRO
+    SelfDeclarationStep.PERSONAL -> SelfDeclarationStep.IDENTITY
+    SelfDeclarationStep.CONTACT -> SelfDeclarationStep.PERSONAL
+    SelfDeclarationStep.EMERGENCY -> SelfDeclarationStep.CONTACT
+    SelfDeclarationStep.PHYSICAL -> SelfDeclarationStep.EMERGENCY
+    SelfDeclarationStep.DISEASES -> SelfDeclarationStep.PHYSICAL
+    SelfDeclarationStep.FAMILY -> SelfDeclarationStep.DISEASES
+    SelfDeclarationStep.BLOOD -> SelfDeclarationStep.FAMILY
+    SelfDeclarationStep.LIFESTYLE -> SelfDeclarationStep.BLOOD
+    SelfDeclarationStep.ALLERGY -> SelfDeclarationStep.LIFESTYLE
+    SelfDeclarationStep.REVIEW -> SelfDeclarationStep.ALLERGY
+    else -> null
+}
 
 @Composable
 fun HealthProfileScreen(
@@ -87,6 +104,15 @@ fun HealthProfileMainContent(
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val previousStep = selfDecState.currentStep.previousStep()
+    BackHandler {
+        if (previousStep != null) {
+            onSelfDecIntent(HealthProfileIntent.ChangeStep(previousStep))
+        } else {
+            onBackClicked()
+        }
+    }
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         ProvideTextStyle(value = MaterialTheme.typography.bodyMedium) {
             when (selfDecState.currentStep) {

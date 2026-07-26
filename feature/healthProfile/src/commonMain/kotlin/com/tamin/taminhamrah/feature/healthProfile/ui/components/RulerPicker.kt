@@ -22,8 +22,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,11 +55,11 @@ fun RulerPicker(
 ) {
     val taminColors = LocalTaminColors.current
     val coroutineScope = rememberCoroutineScope()
-    
+
     // Ticks configuration
     val tickSpacingPx = 24f // spacing between ticks in pixels
     val totalTicks = range.last - range.first
-    
+
     // We maintain a float offset representing the scroll position
     // Center of screen represents the current value
     val scrollOffset = remember { Animatable((value - range.first) * tickSpacingPx) }
@@ -116,9 +115,9 @@ fun RulerPicker(
                 lineHeight = 44.sp,
                 modifier = Modifier.alignByBaseline()
             )
-            
+
             Spacer(modifier = Modifier.width(4.dp))
-            
+
             TaminText(
                 text = unit,
                 style = MaterialTheme.typography.bodySmall.copy(
@@ -154,7 +153,7 @@ fun RulerPicker(
         }
 
         // Ruler view area
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
@@ -180,15 +179,20 @@ fun RulerPicker(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            val density = LocalDensity.current
+            val viewWidthPx = with(density) { maxWidth.toPx() }
+            val midXPx = viewWidthPx / 2f
+            val bufferPx = with(density) { 48.dp.toPx() }
+            val centerVal = scrollOffset.value
+
+            // 1. Draw Ruler Ticks & Center Active Pointer
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val centerVal = scrollOffset.value
                 val viewWidth = size.width
                 val viewHeight = size.height
                 val midX = viewWidth / 2f
-                
-                // Draw Ticks
-                val startTickIndex = ((centerVal - midX) / tickSpacingPx).toInt().coerceAtLeast(0)
-                val endTickIndex = ((centerVal + midX) / tickSpacingPx).toInt().coerceAtMost(totalTicks)
+
+                val startTickIndex = ((centerVal - midX - bufferPx) / tickSpacingPx).toInt().coerceAtLeast(0)
+                val endTickIndex = ((centerVal + midX + bufferPx) / tickSpacingPx).toInt().coerceAtMost(totalTicks)
 
                 for (i in startTickIndex..endTickIndex) {
                     val tickValue = range.first + i
@@ -202,7 +206,7 @@ fun RulerPicker(
                         isHalf -> 24f
                         else -> 14f
                     }
-                    
+
                     val tickThickness = if (isMajor) 2f else 1f
                     val tickColor = if (isMajor) taminColors.textSecondary.copy(alpha = 0.6f) else taminColors.textMuted.copy(alpha = 0.4f)
 
@@ -213,31 +217,8 @@ fun RulerPicker(
                         end = Offset(tickX, tickHeight),
                         strokeWidth = tickThickness
                     )
-
-                    // Draw labels under major ticks (handled in absolute text layers below)
                 }
 
-                // 2. Draw Side Fade Gradients (for glass/premium look)
-                drawRect(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(taminColors.bgSurface, Color.Transparent),
-                        startX = 0f,
-                        endX = 54.dp.toPx()
-                    ),
-                    topLeft = Offset(0f, 0f),
-                    size = Size(54.dp.toPx(), viewHeight)
-                )
-                drawRect(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(Color.Transparent, taminColors.bgSurface),
-                        startX = viewWidth - 54.dp.toPx(),
-                        endX = viewWidth
-                    ),
-                    topLeft = Offset(viewWidth - 54.dp.toPx(), 0f),
-                    size = Size(54.dp.toPx(), viewHeight)
-                )
-
-                // 3. Draw Center Active Pointer (Arrow + Vertical line)
                 // Main pointer vertical line
                 drawLine(
                     color = accentColor,
@@ -256,24 +237,18 @@ fun RulerPicker(
                 drawPath(path = path, color = accentColor)
             }
 
-            // Draw major labels as absolute positioned text layers to align easily
-            val centerVal = scrollOffset.value
-            val tickSpacing = tickSpacingPx
-            val midX = 206.dp // approximate half size of a typical layout
-            
-            Box(modifier = Modifier.fillMaxSize()) {
-                val startTickIndex = ((centerVal - 500f) / tickSpacing).toInt().coerceAtLeast(0)
-                val endTickIndex = ((centerVal + 500f) / tickSpacing).toInt().coerceAtMost(totalTicks)
+            // 2. Draw Major Labels (aligned dynamically with density conversion)
+            val startTickIndex = ((centerVal - midXPx - bufferPx) / tickSpacingPx).toInt().coerceAtLeast(0)
+            val endTickIndex = ((centerVal + midXPx + bufferPx) / tickSpacingPx).toInt().coerceAtMost(totalTicks)
 
-                for (i in startTickIndex..endTickIndex step 5) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                for (i in startTickIndex..endTickIndex) {
                     val tickValue = range.first + i
                     if (tickValue % 10 == 0) {
-                        // Position text above center offset
-                        val offsetFromCenter = (i * tickSpacing) - centerVal
-                        // We map offset relative to screen width in compose layout
-                        // It is easier to use simple absolute layout modifiers
+                        val offsetFromCenterPx = (i * tickSpacingPx) - centerVal
+                        val offsetFromCenterDp = with(density) { offsetFromCenterPx.toDp() }
                         val isCurrent = tickValue == value
-                        
+
                         TaminText(
                             text = tickValue.toString(),
                             fontSize = 10.sp,
@@ -281,11 +256,37 @@ fun RulerPicker(
                             color = if (isCurrent) accentColor else taminColors.textMuted,
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .offset(x = (offsetFromCenter / 2.7f).dp, y = 42.dp), // scale offset to match dp/px scale
+                                .absoluteOffset(x = offsetFromCenterDp, y = 42.dp),
                             textAlign = TextAlign.Center
                         )
                     }
                 }
+            }
+
+            // 3. Draw Side Fade Gradients OVER both Ticks and Text
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val viewWidth = size.width
+                val viewHeight = size.height
+                val fadeWidthPx = 54.dp.toPx()
+
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(taminColors.bgSurface, Color.Transparent),
+                        startX = 0f,
+                        endX = fadeWidthPx
+                    ),
+                    topLeft = Offset(0f, 0f),
+                    size = Size(fadeWidthPx, viewHeight)
+                )
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(Color.Transparent, taminColors.bgSurface),
+                        startX = viewWidth - fadeWidthPx,
+                        endX = viewWidth
+                    ),
+                    topLeft = Offset(viewWidth - fadeWidthPx, 0f),
+                    size = Size(fadeWidthPx, viewHeight)
+                )
             }
         }
     }
