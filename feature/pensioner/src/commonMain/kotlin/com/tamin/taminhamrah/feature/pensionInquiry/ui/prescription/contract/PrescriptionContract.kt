@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.contract
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class PrescriptionUiState(
     val isLoading: Boolean = false,
     val error: String? = null
