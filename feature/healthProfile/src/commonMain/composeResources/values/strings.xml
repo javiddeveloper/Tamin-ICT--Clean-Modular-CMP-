@@ -85,4 +85,14 @@
     <string name="health_contact_postcode_placeholder">۱۲۳۴۵۶۷۸۹۰</string>
     <string name="health_contact_postcode_error">کد پستی باید 10 رقم باشد</string>
     <string name="health_contact_map_button">انتخاب موقعیت روی نقشه (جهت ثبت آدرس دقیق)</string>
+
+    <!-- Emergency Screen Strings -->
+    <string name="health_emergency_title">تماس اضطراری</string>
+    <string name="health_emergency_desc">اطلاعات یکی از نزدیکان خود را وارد کنید تا در مواقع اضطراری با وی تماس گرفته شود.</string>
+    <string name="health_emergency_name_label">نام مخاطب اضطراری</string>
+    <string name="health_placeholder_enter">وارد کنید</string>
+    <string name="health_emergency_relation_label">نسبت با شما</string>
+    <string name="health_emergency_relation_placeholder">مثلاً همسر، پدر، خواهر و...</string>
+    <string name="health_emergency_mobile_label">شماره تلفن همراه اضطراری</string>
 </resources>
+
