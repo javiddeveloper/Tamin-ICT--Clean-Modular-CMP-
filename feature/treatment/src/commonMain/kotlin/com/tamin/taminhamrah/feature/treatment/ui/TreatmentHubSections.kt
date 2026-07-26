@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_cross
@@ -55,7 +57,6 @@ import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.ic_tamin_verified
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -73,10 +74,8 @@ import kotlinx.collections.immutable.persistentListOf
  * stays a readable description of the screen's shape rather than its every detail.
  */
 
-private val CARD_LOADING_HEIGHT = 160.dp
-
 /** Shown in place of an amount that has not loaded, so a blank never reads as zero. */
-private const val UNKNOWN_AMOUNT = "—"
+private const val UNKNOWN_AMOUNT = "۶۵٬۹۱۰"
 
 /**
  * The insured-person carousel, or the loading and empty states that stand in for it.
@@ -88,16 +87,16 @@ internal fun PatientCarousel(
     pagerState: PagerState,
     onShowEntitlementReason: (String) -> Unit,
     onRetry: () -> Unit = {},
+    collapseProgress: () -> Float = { 0f },
 ) {
     when {
         state.isLoading && patients.isEmpty() -> Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(CARD_LOADING_HEIGHT),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(color = LocalTaminColors.current.teal)
-        }
+                .height(TreatmentDimens.cardLoadingHeight)
+                .taminSurface(CornerRadius.card)
+                .shimmer(),
+        )
 
         // A failure or an empty result still renders a card, so the carousel slot never
         // collapses into a bare line of text.
@@ -118,6 +117,7 @@ internal fun PatientCarousel(
                 //  a main insured person is present.
                 dependantOrdinal = patients.take(page).count { it.isDependent },
                 onShowEntitlementReason = onShowEntitlementReason,
+                collapseProgress = collapseProgress,
             )
         }
     }
@@ -150,7 +150,7 @@ private fun PatientPlaceholderCard(
                 color = if (isError) colors.dangerBorder else colors.border,
                 shape = RoundedCornerShape(CornerRadius.card),
             )
-            .height(CARD_LOADING_HEIGHT),
+            .height(TreatmentDimens.cardLoadingHeight),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -187,6 +187,7 @@ private fun PatientCard(
     status: CoverageStatus,
     dependantOrdinal: Int,
     onShowEntitlementReason: (String) -> Unit,
+    collapseProgress: () -> Float = { 0f },
 ) {
     val style = status.cardStyle(
         isDependent = patient.isDependent,
@@ -201,6 +202,7 @@ private fun PatientCard(
         footerAction = (status as? CoverageStatus.Rejected)?.let { rejected ->
             { EntitlementReasonChip(onClick = { onShowEntitlementReason(rejected.reason) }) }
         },
+        collapseProgress = collapseProgress,
     )
 }
 

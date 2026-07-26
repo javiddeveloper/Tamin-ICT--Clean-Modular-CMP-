@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -46,9 +49,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_download
-
-/** Clearance so the last card is not hidden behind the pinned action bar. */
-private val BOTTOM_BAR_CLEARANCE = 100.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
 private const val UNKNOWN_VALUE = "—"
@@ -163,10 +164,7 @@ fun RecordDetailContent(
                 )
 
                 when {
-                    state.isLoading -> Box(
-                        modifier = Modifier.fillMaxSize().padding(Spacing.page),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator(color = colors.teal) }
+                    state.isLoading -> RecordDetailShimmerSkeleton()
 
                     // A failed lookup offers a retry; a genuinely empty prescription does not.
                     state.error != null -> ErrorStateView(
@@ -207,7 +205,7 @@ fun RecordDetailContent(
                     }
                 }
 
-                Box(modifier = Modifier.height(BOTTOM_BAR_CLEARANCE))
+                Box(modifier = Modifier.height(TreatmentDimens.bottomBarClearance))
             }
 
             price?.let {
@@ -230,6 +228,33 @@ fun RecordDetailContent(
             fileName = state.viewerFileName,
             onDismiss = onDismissPdf,
         )
+    }
+}
+
+@Composable
+private fun RecordDetailShimmerSkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Spacing.page),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .taminSurface(CornerRadius.card)
+                .shimmer(),
+        )
+        repeat(3) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .taminSurface(CornerRadius.cardCompact)
+                    .shimmer(),
+            )
+        }
     }
 }
 

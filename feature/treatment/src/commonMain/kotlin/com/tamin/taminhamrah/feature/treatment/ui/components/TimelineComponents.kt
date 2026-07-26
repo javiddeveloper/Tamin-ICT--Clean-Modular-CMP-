@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.treatment.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Spacer
@@ -58,13 +56,13 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+
 /**
  * Components for the medical-records timeline: the record card and its date-group
  * header, the category filter strip, the in-header filter bar, and the pinned cost
  * totals footer.
  */
-
-private val ACCENT_BAR_WIDTH = 4.dp
 
 /**
  * One entry in the medical-records timeline. The accent stripe on the leading edge and
@@ -131,7 +129,7 @@ fun MedicalRecordCard(
  * the app's right-to-left layout, the left side if it is ever rendered left-to-right.
  */
 private fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
-    val barWidth = ACCENT_BAR_WIDTH.toPx()
+    val barWidth = TreatmentDimens.accentBarWidth.toPx()
     val x = if (layoutDirection == LayoutDirection.Rtl) size.width - barWidth else 0f
     drawRect(
         color = color,

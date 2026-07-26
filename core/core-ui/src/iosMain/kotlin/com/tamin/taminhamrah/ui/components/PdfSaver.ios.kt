@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import platform.Foundation.NSData
 import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSDownloadsDirectory
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
@@ -46,15 +48,24 @@ private class IosPdfSaver(private val scope: CoroutineScope) : PdfSaver {
         }
     }
 
-    /** Writes the PDF into the app's Documents directory, where the Files app can reach it. */
+    /** Writes the PDF into a TaminICT directory in Downloads or Documents directory. */
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     private fun saveToDocuments(fileName: String, bytes: ByteArray): Boolean {
-        val documents = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
-            .firstOrNull() as? String ?: return false
+        val baseDir = (NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, true).firstOrNull()
+            ?: NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstOrNull()) as? String
+            ?: return false
+        val taminDir = "$baseDir/TaminICT"
+        val fileManager = NSFileManager.defaultManager
+        fileManager.createDirectoryAtPath(
+            path = taminDir,
+            withIntermediateDirectories = true,
+            attributes = null,
+            error = null,
+        )
         val data = bytes.usePinned {
             NSData.create(bytes = it.addressOf(0), length = bytes.size.convert())
         }
-        return data.writeToFile("$documents/$fileName", atomically = true)
+        return data.writeToFile("$taminDir/$fileName", atomically = true)
     }
 
     private fun notify(fileName: String) {
