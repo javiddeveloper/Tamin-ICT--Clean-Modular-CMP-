@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.health
 
+import com.tamin.taminhamrah.model.health.ActFrequencyDTO
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeDTO
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequestDTO
 import com.tamin.taminhamrah.model.health.AllergicDrugsDTO
@@ -46,6 +47,7 @@ interface HealthRemoteDataSource {
     suspend fun getBloodGroups(): List<BloodGroupDTO>?
     suspend fun getMaritalStatus(): List<MaritalStatusDTO>?
     suspend fun getSmokingStatus(): List<SmokingStatusDTO>?
+    suspend fun getActFrequencies(): List<ActFrequencyDTO>?
 
     // --- Illnesses ---
     suspend fun getSelfDeclarableIllnesses(): DeclarableIllnessesDTO?

@@ -174,6 +174,11 @@ data class SmokingStatusDN(
     val value: String?
 )
 
+data class ActFrequencyDN(
+    val key: Int?,
+    val value: String?
+)
+
 // --- Illness ---
 
 data class IllnessItemDN(

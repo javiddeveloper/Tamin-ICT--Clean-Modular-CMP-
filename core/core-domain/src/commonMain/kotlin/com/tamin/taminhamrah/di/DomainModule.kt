@@ -92,6 +92,7 @@ import com.tamin.taminhamrah.useCases.health.AddSelfDeclarativeUseCase
 import com.tamin.taminhamrah.useCases.health.UpdateSelfDeclarativeUseCase
 import com.tamin.taminhamrah.useCases.health.SyncIllnessSelfDeclarativesUseCase
 import com.tamin.taminhamrah.useCases.health.SyncDrugAllergiesUseCase
+import com.tamin.taminhamrah.useCases.health.GetActFrequenciesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -207,5 +208,6 @@ val domainModule = module {
     factoryOf(::UpdateSelfDeclarativeUseCase)
     factoryOf(::SyncIllnessSelfDeclarativesUseCase)
     factoryOf(::SyncDrugAllergiesUseCase)
+    factoryOf(::GetActFrequenciesUseCase)
 }
 

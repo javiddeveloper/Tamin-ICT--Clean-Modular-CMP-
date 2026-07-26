@@ -168,12 +168,37 @@ val DarkTaminColors = TaminColors(
     dangerText = TaminDarkError,
     teal = Secondary500,
     bgIconProfile = TaminLightSurface,
-    iconGradientPrimary = Brush.verticalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
-    iconGradientSecondary = Brush.verticalGradient(listOf(IconGradientPurpleStart, IconGradientPurpleEnd)),
-    iconGradientNeutral = Brush.verticalGradient(listOf(IconGradientGrayStart, IconGradientGrayEnd)),
+    iconGradientPrimary = Brush.verticalGradient(
+        listOf(
+            IconGradientBlueStart,
+            IconGradientBlueEnd
+        )
+    ),
+    iconGradientSecondary = Brush.verticalGradient(
+        listOf(
+            IconGradientPurpleStart,
+            IconGradientPurpleEnd
+        )
+    ),
+    iconGradientNeutral = Brush.verticalGradient(
+        listOf(
+            IconGradientGrayStart,
+            IconGradientGrayEnd
+        )
+    ),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
-    iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
-    iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
+    iconGlassShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.40f),
+            Color.White.copy(alpha = 0.0f)
+        )
+    ),
+    iconGlassBorder = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.60f),
+            Color.White.copy(alpha = 0.05f)
+        )
+    ),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8C1E293B),
     glassA2 = Color(0x47111827),

@@ -24,6 +24,7 @@ class HealthProfileViewModel(
     private val getBloodGroupsUseCase: GetBloodGroupsUseCase,
     private val getMaritalStatusUseCase: GetMaritalStatusUseCase,
     private val getSmokingStatusUseCase: GetSmokingStatusUseCase,
+    private val getActFrequenciesUseCase: GetActFrequenciesUseCase,
     private val getSelfDeclarableIllnessesByGroupUseCase: GetSelfDeclarableIllnessesByGroupUseCase,
     private val getAllDrugsUseCase: GetAllDrugsUseCase
 ) : BaseViewModel<HealthProfileUiState, PartialState, HealthProfileEvent, HealthProfileIntent>(
@@ -100,6 +101,10 @@ class HealthProfileViewModel(
         getSmokingStatusUseCase()
             .catch { }
             .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
+
+        getActFrequenciesUseCase()
+            .catch { }
+            .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
 
         getSelfDeclarableIllnessesByGroupUseCase()
             .catch { }
@@ -337,6 +342,7 @@ class HealthProfileViewModel(
         is PartialState.CitiesLoaded        -> currentState.copy(cityOptions = partialState.options, isCitiesLoading = false)
         is PartialState.BloodGroupsLoaded   -> currentState.copy(bloodGroupOptions = partialState.options)
         is PartialState.SmokingStatusLoaded -> currentState.copy(smokingStatusOptions = partialState.options)
+        is PartialState.ActFrequenciesLoaded -> currentState.copy(actFrequencyOptions = partialState.options)
         is PartialState.IllnessGroupsLoaded -> currentState.copy(illnessGroups = partialState.groups)
         is PartialState.DrugsLoaded         -> currentState.copy(drugOptions = partialState.options)
 
