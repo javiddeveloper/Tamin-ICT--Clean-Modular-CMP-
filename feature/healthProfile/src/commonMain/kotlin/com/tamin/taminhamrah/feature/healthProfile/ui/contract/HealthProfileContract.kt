@@ -105,11 +105,10 @@ data class FamilyStepState(
 )
 
 // Step 8: Blood Group
-// selectedBloodGroupId is sent to API (from bloodGroupOptions); letter/rh are local display helpers
+// selectedBloodGroupId is sent to API (from bloodGroupOptions); letter is a local display helper if needed
 data class BloodGroupStepState(
     val selectedBloodGroupId: Int? = null,
     val selectedBloodGroupLetter: String? = null,
-    val selectedBloodGroupRh: String? = null,
     val isBloodGroupUnknown: Boolean = false
 )
 

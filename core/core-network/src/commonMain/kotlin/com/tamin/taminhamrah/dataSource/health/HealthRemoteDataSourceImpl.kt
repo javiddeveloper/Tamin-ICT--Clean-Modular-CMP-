@@ -169,7 +169,7 @@ internal class HealthRemoteDataSourceImpl(
 
     override suspend fun getBloodGroups(): List<BloodGroupDTO>? {
         return try {
-            apiService.getBloodGroups().extractData()
+            apiService.getBloodGroups()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

@@ -39,23 +39,20 @@ import kotlin.math.sin
 fun BloodDropletGraphic(
     modifier: Modifier = Modifier,
     selectedLetter: String?,
-    selectedRh: String?,
     isUnknown: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
-    
+
     // Determine the text display
     val displayText = when {
         isUnknown -> "?"
-        selectedLetter != null && selectedRh != null -> "$selectedLetter$selectedRh"
-        selectedLetter != null -> selectedLetter
+        selectedLetter != null  -> selectedLetter
         else -> "?"
     }
 
     // Determine the fill target percentage
     val fillTarget = when {
         isUnknown -> 0.75f
-        selectedLetter != null && selectedRh != null -> 1.0f
         selectedLetter != null -> 0.5f
         else -> 0.0f
     }
@@ -72,7 +69,7 @@ fun BloodDropletGraphic(
 
     // Glow transition animation
     val infiniteTransition = rememberInfiniteTransition(label = "pulseGlow")
-    
+
     val glowScale by infiniteTransition.animateFloat(
         initialValue = 0.85f,
         targetValue = 1.15f,
@@ -82,7 +79,7 @@ fun BloodDropletGraphic(
         ),
         label = "glowScale"
     )
-    
+
     val glowOpacity by infiniteTransition.animateFloat(
         initialValue = 0.25f,
         targetValue = 0.65f,
@@ -300,11 +297,10 @@ fun BloodDropletGraphic(
         // 8. Text Label Display
         val labelColor = when {
             isUnknown -> taminColors.textPrimary
-            selectedLetter != null && selectedRh != null -> Color.White
             selectedLetter != null -> taminColors.textPrimary
             else -> taminColors.textMuted
         }
-        
+
         TaminText(
             text = displayText,
             style = MaterialTheme.typography.titleLarge.copy(
@@ -331,28 +327,24 @@ private fun BloodDropletGraphicPreview() {
                 TaminText("No Selection", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = null,
-                    selectedRh = null
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TaminText("Letter Only (A)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = "A",
-                    selectedRh = null
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TaminText("Complete (O+)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = "O",
-                    selectedRh = "+"
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TaminText("Unknown (?)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onBackground)
                 BloodDropletGraphic(
                     selectedLetter = null,
-                    selectedRh = null,
                     isUnknown = true
                 )
             }

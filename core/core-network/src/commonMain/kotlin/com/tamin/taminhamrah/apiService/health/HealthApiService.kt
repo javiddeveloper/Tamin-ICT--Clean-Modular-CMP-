@@ -163,5 +163,5 @@ internal interface HealthApiService {
     suspend fun getSmokingStatus(): List<SmokingStatusDTO>
 
     @GET("UIServices/Lookup/GetBloodGroups")
-    suspend fun getBloodGroups(): BaseDTO<List<BloodGroupDTO>>
+    suspend fun getBloodGroups(): List<BloodGroupDTO>
 }

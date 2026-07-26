@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -114,12 +113,20 @@ fun HealthProfileMainContent(
                     )
                 }
                 SelfDeclarationStep.PERSONAL -> {
-                    SelfDeclarationPersonalScreen(
+                /*    SelfDeclarationPersonalScreen(
                         state = selfDecState.personal,
                         maritalStatusOptions = state.maritalStatusOptions,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
+                        }
+                    )*/
+                    SelfDeclarationBloodScreen(
+                        state = selfDecState.bloodGroup,
+                        bloodGroupOptions = state.bloodGroupOptions,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
                         }
                     )
                 }
@@ -175,10 +182,11 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.BLOOD -> {
                     SelfDeclarationBloodScreen(
                         state = selfDecState.bloodGroup,
+                        bloodGroupOptions = state.bloodGroupOptions,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
-                        }
+                        },
                     )
                 }
                 SelfDeclarationStep.LIFESTYLE -> {
