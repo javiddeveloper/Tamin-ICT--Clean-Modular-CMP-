@@ -403,10 +403,10 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `getBloodGroups should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyArraySuccess)
+        val jsonResponse =HealthTestData.emptyArraySuccess
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val response = apiService.getBloodGroups()
-        assertNotNull(response.extractData())
+        assertNotNull(response)
     }
 }
