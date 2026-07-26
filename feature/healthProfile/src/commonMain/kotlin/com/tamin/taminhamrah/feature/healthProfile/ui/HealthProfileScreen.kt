@@ -105,13 +105,11 @@ fun HealthProfileMainContent(
                     )
                 }
                 SelfDeclarationStep.IDENTITY -> {
-                    SelfDeclarationLifestyleScreen(
-                        state = state.selfDeclaration.lifestyle,
-                        smokingStatusOptions = state.smokingStatusOptions,
-                        actFrequencyOptions = state.actFrequencyOptions,
-                        onIntent = onIntent,
+                    SelfDeclarationIdentityScreen(
+                        state = selfDecState.identity,
+                        onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO))
                         }
                     )
                 }
