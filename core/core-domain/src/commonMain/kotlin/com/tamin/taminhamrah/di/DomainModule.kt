@@ -70,7 +70,12 @@ import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
+import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientSelfDeclarativeUseCase
@@ -158,9 +163,15 @@ val domainModule = module {
     factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetRolesUseCase)
 
+
     // Treatment UseCases
     factoryOf(::GetDeservedTreatmentUseCase)
+    factoryOf(::GetElectronicPrescriptionListUseCase)
+    factoryOf(::GetElectronicPrescriptionDetailUseCase)
+    factoryOf(::GetElectronicPrescriptionPriceUseCase)
     factoryOf(::GetDependantUnderEighteenUseCase)
+    factoryOf(::GetPrescriptionPdfFileUseCase)
+    factoryOf(::DownloadLabResultPdfUseCase)
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetJobTitleUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)

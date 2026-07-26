@@ -3,4 +3,5 @@
     <cache-path name="dataset_exports" path="dataset_exports/" />
     <cache-path name="qr_codes" path="qr_codes/" />
     <cache-path name="backups" path="backups/" />
+    <external-files-path name="pdf_downloads" path="Download/" />
 </paths>

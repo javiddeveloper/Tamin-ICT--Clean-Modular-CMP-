@@ -33,20 +33,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
-import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
-import com.tamin.taminhamrah.ui.theme.TaminTeal500
-import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberStart
@@ -59,7 +54,14 @@ import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
 import com.tamin.taminhamrah.ui.theme.TaminCardTealEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
+import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
+import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminTeal500
+import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_check
 
 /**
  * Components for the treatment hub landing screen: the insured-person card carousel,
@@ -69,17 +71,6 @@ import com.tamin.taminhamrah.util.toPersianDigits
  * None of these depend on a domain model — they take display strings and lambdas, so
  * they stay decoupled from whatever shape the treatment entities settle on.
  */
-
-private val COVERAGE_BADGE_SIZE = 16.dp
-
-private val COVERAGE_BADGE_ICON_SIZE = 10.dp
-
-private val BRAND_TICK_SIZE = 24.dp
-
-private val BRAND_TICK_ICON_SIZE = 13.dp
-
-private const val CARD_DECOR_ALPHA = 0.07f
-private const val CARD_PEEK_FRACTION = 0.87f
 
 /** The main insured person's card: teal fading into brand blue. */
 private val MainInsuredCardStops = listOf(TaminCardTealStart, TaminCardTealMid, TaminCardTealEnd)
@@ -106,6 +97,10 @@ fun insuranceCardGradient(isDependent: Boolean, dependantOrdinal: Int = 0): Brus
     }
     return Brush.linearGradient(stops)
 }
+
+/** The prominent teal gradient behind the "سوابق درمانی من" quick-access card. */
+@Composable
+fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
 
 /**
  * The electronic health-insurance card for one insured person: organization branding,
@@ -169,7 +164,7 @@ fun CoverageBadge(
 ) {
     Box(
         modifier = modifier
-            .size(COVERAGE_BADGE_SIZE)
+            .size(TreatmentDimens.coverageBadgeSize)
             .background(containerColor, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
@@ -177,7 +172,7 @@ fun CoverageBadge(
             imageVector = icon,
             contentDescription = null,
             tint = contentColor,
-            modifier = Modifier.size(COVERAGE_BADGE_ICON_SIZE),
+            modifier = Modifier.size(TreatmentDimens.coverageBadgeIconSize),
         )
     }
 }
@@ -185,7 +180,7 @@ fun CoverageBadge(
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
-    val decor = Color.White.copy(alpha = CARD_DECOR_ALPHA)
+    val decor = Color.White.copy(alpha = TreatmentDimens.cardDecorAlpha)
     drawOval(
         color = decor,
         topLeft = Offset(-size.width * 0.15f, size.height * 0.55f),
@@ -234,15 +229,15 @@ private fun InsuranceCardBrandRow(initial: String) {
         }
         Box(
             modifier = Modifier
-                .size(BRAND_TICK_SIZE)
+                .size(TreatmentDimens.brandTickSize)
                 .background(Color.White.copy(alpha = 0.13f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = TaminIcons.Check,
+                imageVector = vectorResource(Res.drawable.ic_tamin_check),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(BRAND_TICK_ICON_SIZE),
+                modifier = Modifier.size(TreatmentDimens.brandTickIconSize),
             )
         }
     }
@@ -287,9 +282,9 @@ fun InsuranceCardCarousel(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Each card occupies CARD_PEEK_FRACTION of the viewport and stays centred,
+            // Each card occupies TreatmentDimens.cardPeekFraction of the viewport and stays centred,
             // so the neighboring cards peek evenly on both edges.
-            val sidePadding = maxWidth * (1 - CARD_PEEK_FRACTION) / 2
+            val sidePadding = maxWidth * (1 - TreatmentDimens.cardPeekFraction) / 2
             HorizontalPager(
                 state = pagerState,
                 contentPadding = PaddingValues(horizontal = sidePadding),
@@ -334,117 +329,6 @@ private fun PageIndicator(
                     ),
             )
         }
-    }
-}
-
-/**
- * The quick-access card's wash, sweeping right to left: deep teal under the title on the
- * start edge, brightening toward the end edge.
- *
- * The design writes this as `135deg, #2FB9BC → #0E7C82`, but a CSS angle is absolute and
- * ignores direction, so reading its stop order literally mirrors the card under RTL.
- */
-@Composable
-fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
-
-/**
- * The prominent gradient entry point at the top of the quick-access group —
- * "سوابق درمانی من".
- */
-@Composable
-fun QuickAccessCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    trailingIcon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    background: Brush = quickAccessGradient(),
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.card))
-            .background(background)
-            .clickable(onClick = onClick)
-            .padding(Spacing.page),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-    ) {
-        IconTile(
-            icon = icon,
-            tint = Color.White,
-            background = Brush.linearGradient(
-                listOf(Color.White.copy(alpha = 0.18f), Color.White.copy(alpha = 0.1f)),
-            ),
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.8f),
-            )
-        }
-        Icon(
-            imageVector = trailingIcon,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(IconSize.medium),
-        )
-    }
-}
-
-/**
- * Surface-level row card used for the secondary hub destinations — health profile,
- * contracted centers — with an optional status pill before the chevron.
- */
-@Composable
-fun TreatmentNavigationCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    iconTint: Color,
-    iconBackground: Brush,
-    trailingIcon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    status: @Composable (() -> Unit)? = null,
-) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
-            .clickable(onClick = onClick)
-            .padding(Spacing.lg),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-    ) {
-        IconTile(icon = icon, tint = iconTint, background = iconBackground)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.textPrimary,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textMuted,
-            )
-        }
-        status?.invoke()
-        Icon(
-            imageVector = trailingIcon,
-            contentDescription = null,
-            tint = colors.chevron,
-            modifier = Modifier.size(IconSize.medium),
-        )
     }
 }
 
