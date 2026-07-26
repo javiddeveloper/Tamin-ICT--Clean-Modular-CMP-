@@ -41,11 +41,11 @@ private fun SelfDeclarationStep.previousStep(): SelfDeclarationStep? = when (thi
     SelfDeclarationStep.CONTACT -> SelfDeclarationStep.PERSONAL
     SelfDeclarationStep.EMERGENCY -> SelfDeclarationStep.CONTACT
     SelfDeclarationStep.PHYSICAL -> SelfDeclarationStep.EMERGENCY
-    SelfDeclarationStep.DISEASES -> SelfDeclarationStep.PHYSICAL
-    SelfDeclarationStep.FAMILY -> SelfDeclarationStep.DISEASES
-    SelfDeclarationStep.BLOOD -> SelfDeclarationStep.FAMILY
+    SelfDeclarationStep.BLOOD -> SelfDeclarationStep.PHYSICAL
     SelfDeclarationStep.LIFESTYLE -> SelfDeclarationStep.BLOOD
-    SelfDeclarationStep.ALLERGY -> SelfDeclarationStep.LIFESTYLE
+    SelfDeclarationStep.DISEASES -> SelfDeclarationStep.LIFESTYLE
+    SelfDeclarationStep.FAMILY -> SelfDeclarationStep.DISEASES
+    SelfDeclarationStep.ALLERGY -> SelfDeclarationStep.FAMILY
     SelfDeclarationStep.REVIEW -> SelfDeclarationStep.ALLERGY
     else -> null
 }
@@ -180,30 +180,12 @@ fun HealthProfileMainContent(
                         }
                     )
                 }
-                SelfDeclarationStep.DISEASES -> {
-                    SelfDeclarationDiseasesScreen(
-                        state = selfDecState.diseases,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
-                        }
-                    )
-                }
-                SelfDeclarationStep.FAMILY -> {
-                    SelfDeclarationFamilyScreen(
-                        state = selfDecState.family,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES))
-                        }
-                    )
-                }
                 SelfDeclarationStep.BLOOD -> {
                     SelfDeclarationBloodScreen(
                         state = selfDecState.bloodGroup,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
                         }
                     )
                 }
@@ -218,12 +200,30 @@ fun HealthProfileMainContent(
                         }
                     )
                 }
+                SelfDeclarationStep.DISEASES -> {
+                    SelfDeclarationDiseasesScreen(
+                        state = selfDecState.diseases,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
+                        }
+                    )
+                }
+                SelfDeclarationStep.FAMILY -> {
+                    SelfDeclarationFamilyScreen(
+                        state = selfDecState.family,
+                        onIntent = onSelfDecIntent,
+                        onBackClicked = {
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES))
+                        }
+                    )
+                }
                 SelfDeclarationStep.ALLERGY -> {
                     SelfDeclarationAllergyScreen(
                         state = selfDecState.allergy,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
                         }
                     )
                 }

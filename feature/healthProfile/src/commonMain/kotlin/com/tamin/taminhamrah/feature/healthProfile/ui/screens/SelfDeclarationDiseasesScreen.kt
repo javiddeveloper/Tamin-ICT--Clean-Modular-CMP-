@@ -32,7 +32,7 @@ fun SelfDeclarationDiseasesScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                currentStep = 6,
+                currentStep = 8,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
             )

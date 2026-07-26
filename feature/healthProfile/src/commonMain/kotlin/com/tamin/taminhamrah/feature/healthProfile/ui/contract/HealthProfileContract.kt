@@ -18,10 +18,10 @@ enum class SelfDeclarationStep {
     CONTACT,    // Step 3
     EMERGENCY,  // Step 4
     PHYSICAL,   // Step 5
-    DISEASES,   // Step 6
-    FAMILY,     // Step 7
-    BLOOD,      // Step 8
-    LIFESTYLE,  // Step 9
+    BLOOD,      // Step 6
+    LIFESTYLE,  // Step 7
+    DISEASES,   // Step 8
+    FAMILY,     // Step 9
     ALLERGY,    // Step 10
     REVIEW,
     SUCCESS,
