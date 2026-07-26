@@ -76,7 +76,7 @@ import kotlinx.collections.immutable.persistentListOf
 private val CARD_LOADING_HEIGHT = 160.dp
 
 /** Shown in place of an amount that has not loaded, so a blank never reads as zero. */
-private const val UNKNOWN_AMOUNT = "—"
+private const val UNKNOWN_AMOUNT = "۶۵٬۹۱۰"
 
 /**
  * The insured-person carousel, or the loading and empty states that stand in for it.

@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
-import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -70,6 +68,7 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_ejtemaei_logo
 
 /**
  * Components for the treatment hub landing screen: the insured-person card carousel,
@@ -140,7 +139,7 @@ fun InsuranceCard(
             content = {
                 // 0 brand row — fades out in place.
                 Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
-                    InsuranceCardBrandRow(initial = holderName.take(1))
+                    InsuranceCardBrandRow()
                 }
                 // 1 name — travels up into the compact bar and shrinks as it goes.
                 Text(
@@ -205,8 +204,9 @@ fun InsuranceCard(
             val badgeExpTop = footerTop + (footer.height - badge.height) / 2
             val expandedH = footerTop + footer.height
 
-            // Collapsed slots — a compact bar of tick + name + code.
-            val barH = maxOf(badge.height, name.height, number.height) + 2 * md
+            // Collapsed slots — a compact bar of tick + name + code (slightly larger).
+            val colPad = Spacing.lg.roundToPx()
+            val barH = maxOf(badge.height, name.height, number.height) + colPad + md
             val badgeColTop = (barH - badge.height) / 2
             val nameColStart = pad + badge.width + sm
             val nameColTop = (barH - name.height) / 2
@@ -222,7 +222,7 @@ fun InsuranceCard(
                 brand.placeRelative(pad, pad)
                 label.placeRelative(pad, labelExpTop)
                 footer.placeRelative(0, footerTop)
-                // Travelling pieces glide from their expanded slot to their bar slot.
+                // Traveling pieces glide from their expanded slot to their bar slot.
                 name.placeRelative(lerp(pad, nameColStart, t), lerp(nameExpTop, nameColTop, t))
                 number.placeRelative(lerp(pad, numberColStart, t), lerp(numberExpTop, numberColTop, t))
                 badge.placeRelative(lerp(pad, pad, t), lerp(badgeExpTop, badgeColTop, t))
@@ -231,10 +231,10 @@ fun InsuranceCard(
     }
 }
 
-private val CardCollapseEasing = CubicBezierEasing(0.25f, 0.1f, 0.25f, 1f)
+private val CardCollapseEasing = FastOutSlowInEasing
 
 /** How far the holder name shrinks by the time the card is a compact bar. */
-private const val NameCollapsedScale = 0.82f
+private const val NameCollapsedScale = 0.88f
 
 /** Full until the fold's midpoint, then gone — the vanishing pieces clear before the bar forms. */
 private fun fadeOutAlpha(progress: Float): Float = (1f - progress * 2f).coerceIn(0f, 1f)
@@ -282,7 +282,7 @@ private fun Modifier.cardDecoration(): Modifier = drawBehind {
 }
 
 @Composable
-private fun InsuranceCardBrandRow(initial: String) {
+private fun InsuranceCardBrandRow() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -290,17 +290,18 @@ private fun InsuranceCardBrandRow(initial: String) {
     ) {
         Box(
             modifier = Modifier
-                .size(30.dp)
+                .size(34.dp)
                 .background(
                     Color.White.copy(alpha = 0.13f),
                     RoundedCornerShape(CornerRadius.avatarTile),
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = initial,
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.White,
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_ejtemaei_logo),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(28.dp),
             )
         }
         Column(modifier = Modifier.weight(1f)) {

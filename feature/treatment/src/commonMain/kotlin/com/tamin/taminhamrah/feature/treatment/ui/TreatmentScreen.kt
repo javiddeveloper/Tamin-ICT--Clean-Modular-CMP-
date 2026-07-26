@@ -21,12 +21,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
@@ -137,32 +142,34 @@ fun TreatmentContent(
     // only inside the title/card morph layout/draw lambdas, so the fold never recomposes the hub.
     val collapse = rememberTreatmentHeaderCollapse()
     val headerProgress = remember(collapse) { { collapse.progress } }
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(LocalTaminColors.current.bgPage),
     ) {
-        // The header sits in flow above the body; as its card folds, the body rises to meet it.
-        TreatmentHubHeader(progress = headerProgress) {
-            PatientCarousel(
-                state = state,
-                patients = patients,
-                pagerState = pagerState,
-                onShowEntitlementReason = { entitlementReason = it },
-                onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
-                collapseProgress = headerProgress,
-            )
-        }
-
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
+                .fillMaxSize()
                 // The body's drag first folds the header, then scrolls the sections.
                 .nestedScroll(collapse.nestedScrollConnection)
                 .verticalScroll(scrollState),
         ) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .layout { measurable, constraints ->
+                        val h = headerHeightPx
+                        val placeable = measurable.measure(
+                            Constraints.fixed(constraints.maxWidth, h.coerceAtLeast(0))
+                        )
+                        layout(placeable.width, placeable.height) {
+                            placeable.place(0, 0)
+                        }
+                    },
+            )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
@@ -184,6 +191,23 @@ fun TreatmentContent(
             )
             // Clears the floating navigation bar, as the pre-collapse layout did.
             Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
+        }
+
+        // The header floats on top so that as content scrolls up, it passes underneath the header.
+        TreatmentHubHeader(
+            progress = headerProgress,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { headerHeightPx = it.height },
+        ) {
+            PatientCarousel(
+                state = state,
+                patients = patients,
+                pagerState = pagerState,
+                onShowEntitlementReason = { entitlementReason = it },
+                onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
+                collapseProgress = headerProgress,
+            )
         }
     }
 

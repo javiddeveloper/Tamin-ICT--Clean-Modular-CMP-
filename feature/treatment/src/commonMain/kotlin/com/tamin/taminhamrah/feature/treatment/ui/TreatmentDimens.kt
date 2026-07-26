@@ -11,6 +11,9 @@ internal object TreatmentDimens {
     /** How far the insured-person carousel rides up into the hub header. */
     val cardOverlap = 40.dp
 
+    /** How far the collapsed card rides up into the hub header so the header line bisects it. */
+    val collapsedCardOverlap = 26.dp
+
     // Insured-person card carousel.
     val coverageBadgeSize = 16.dp
     val coverageBadgeIconSize = 10.dp
