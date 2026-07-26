@@ -13,10 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tamin.taminhamrah.feature.healthProfile.components.bottomsheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.components.bottomsheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.components.bottomsheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.components.bottomsheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.ContactStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
@@ -27,6 +23,10 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 
 @Composable
 fun SelfDeclarationContactScreen(
