@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.layout
@@ -98,9 +97,7 @@ internal fun TreatmentHubHeader(
             title = "درمان",
             centerTitle = false,
             // Deep enough for the card to ride up into the color band below the title.
-            bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
-            // The title fades away as the card folds up to take its place.
-            titleModifier = Modifier.graphicsLayer { alpha = 1f - progress() },
+            bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl
         )
         Box(
             modifier = Modifier
