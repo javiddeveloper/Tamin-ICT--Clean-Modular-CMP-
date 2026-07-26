@@ -47,6 +47,7 @@ import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.AutoResizeText
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
@@ -450,13 +451,16 @@ fun CategoryTile(
             size = 40.dp,
             cornerRadius = CornerRadius.lg,
         )
-        Text(
+        AutoResizeText(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textPrimary,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = colors.textPrimary,
+                textAlign = TextAlign.Center,
+            ),
+            maxLines = 1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xxs),
         )
     }
 }
