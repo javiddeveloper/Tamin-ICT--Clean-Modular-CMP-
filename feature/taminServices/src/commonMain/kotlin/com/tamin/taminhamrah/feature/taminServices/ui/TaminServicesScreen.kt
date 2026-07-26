@@ -1,17 +1,25 @@
 package com.tamin.taminhamrah.feature.taminServices.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
 import kotlin.math.abs
+import kotlin.math.min
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
@@ -37,9 +45,15 @@ import com.tamin.taminhamrah.feature.taminServices.ui.components.ServiceCard
 import com.tamin.taminhamrah.feature.taminServices.ui.components.TabSelector
 import com.tamin.taminhamrah.feature.taminServices.ui.components.TaminServicesHeader
 import com.tamin.taminhamrah.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Duration.Companion.milliseconds
 
 private val HeaderSnapAnimationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
+private const val StaggerStepMs = 50L
+private const val StaggerMaxSteps = 8
+private const val ItemEnterDurationMs = 320
+
 @Composable
 fun TaminServicesRoute(
     viewModel: TamminServicesViewModel,
@@ -104,6 +118,7 @@ fun TaminServicesScreen(
 ) {
     val scrollState = rememberTaminServicesScrollState()
     val motionState = rememberTaminServicesMotionState(scrollState)
+    val animatedKeys = remember(state.selectedTab, state.searchQuery) { mutableSetOf<String>() }
     val headerShape = remember {
         RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l)
     }
@@ -253,13 +268,41 @@ fun TaminServicesScreen(
                     )
                 }
             } else {
-                items(
+                itemsIndexed(
                     chunkedServices,
-                    key = { chunk -> chunk.firstOrNull()?.id ?: 0 }
-                ) { rowItems ->
+                    key = { _, chunk -> "${state.selectedTab?.roleId}_${chunk.firstOrNull()?.id ?: 0}" }
+                ) { rowIndex, rowItems ->
+
+                    val rowKey = "${state.selectedTab?.roleId}_${rowItems.firstOrNull()?.id ?: rowIndex}"
+                    val isAlreadyAnimated = remember(rowKey) { animatedKeys.contains(rowKey) }
+                    var visible by remember(rowKey) { mutableStateOf(isAlreadyAnimated) }
+
+                    LaunchedEffect(rowKey) {
+                        if (!isAlreadyAnimated) {
+                            delay((min(rowIndex, StaggerMaxSteps) * StaggerStepMs).milliseconds)
+                            visible = true
+                            animatedKeys.add(rowKey)
+                        }
+                    }
+
+                    val alpha by animateFloatAsState(
+                        targetValue = if (visible) 1f else 0f,
+                        animationSpec = tween(durationMillis = ItemEnterDurationMs, easing = FastOutSlowInEasing),
+                        label = "ItemEntranceAlpha"
+                    )
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateItem(
+                                fadeInSpec = null,
+                                fadeOutSpec = tween(100),
+                                placementSpec = spring(stiffness = Spring.StiffnessLow)
+                            )
+                            .graphicsLayer {
+                                this.alpha = alpha
+                                this.translationY = (1f - alpha) * 50f
+                            }
                             .padding(horizontal = Spacing.xlg, vertical = Spacing.sm),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {

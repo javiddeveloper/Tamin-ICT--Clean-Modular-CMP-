@@ -46,7 +46,7 @@ fun ServiceCard(
         service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
         service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
 
-    val cardAlpha = if (isDisabled) 0.5f else 1.0f
+    val cardAlpha = if (isDisabled) 0.2f else 1.0f
     val shadowElevation = if (isDisabled) Elevation.none else Elevation.md
 
     val showRedDot = service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
