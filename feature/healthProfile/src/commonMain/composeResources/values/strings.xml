@@ -59,4 +59,30 @@
     <string name="health_personal_citizenship_placeholder">مثلا ایران</string>
     <string name="health_personal_nationality_label">ملیت</string>
     <string name="health_personal_nationality_placeholder">مثلاً ایرانی</string>
+
+    <!-- Contact Screen Strings -->
+    <string name="health_contact_title">اطلاعات تماس و سکونت</string>
+    <string name="health_contact_desc">اطلاعات تماس جهت ارتباط‌های بعدی و موارد اضطراری استفاده خواهد شد.</string>
+    <string name="health_contact_mobile_label">شماره تلفن همراه</string>
+    <string name="health_contact_mobile_placeholder">۰۹۱۲۳۴۵۶۷۸۹</string>
+    <string name="health_contact_mobile_error">شماره تلفن همراه باید 11 رقم باشد</string>
+    <string name="health_contact_landline_label">تلفن ثابت (به همراه کد استان)</string>
+    <string name="health_contact_landline_placeholder">۰۲۱۲۲۳۳۴۴۵۵</string>
+    <string name="health_contact_landline_error">شماره تلفن ثابت باید 11 رقم باشد</string>
+    <string name="health_contact_province_label">استان</string>
+    <string name="health_contact_province_placeholder">انتخاب استان</string>
+    <string name="health_contact_province_bs_title">انتخاب استان</string>
+    <string name="health_contact_province_bs_subtitle">استان مورد نظر خود را انتخاب کنید</string>
+    <string name="health_contact_province_bs_search_hint">جستجوی استان...</string>
+    <string name="health_contact_city_label">شهر</string>
+    <string name="health_contact_city_placeholder">انتخاب شهر</string>
+    <string name="health_contact_city_bs_title">انتخاب شهر</string>
+    <string name="health_contact_city_bs_subtitle">شهر مورد نظر خود را انتخاب کنید</string>
+    <string name="health_contact_city_bs_search_hint">جستجوی شهر...</string>
+    <string name="health_contact_address_label">نشانی کامل محل سکونت</string>
+    <string name="health_contact_address_placeholder">خیابان، کوچه، پلاک، واحد</string>
+    <string name="health_contact_postcode_label">کد پستی ۱۰ رقمی</string>
+    <string name="health_contact_postcode_placeholder">۱۲۳۴۵۶۷۸۹۰</string>
+    <string name="health_contact_postcode_error">کد پستی باید 10 رقم باشد</string>
+    <string name="health_contact_map_button">انتخاب موقعیت روی نقشه (جهت ثبت آدرس دقیق)</string>
 </resources>

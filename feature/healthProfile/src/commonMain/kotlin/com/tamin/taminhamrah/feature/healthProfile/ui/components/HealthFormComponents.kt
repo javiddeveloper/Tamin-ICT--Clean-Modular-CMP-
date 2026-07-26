@@ -189,7 +189,8 @@ fun StyledTextField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -220,7 +221,10 @@ fun StyledTextField(
                     .height(50.dp)
                     .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
                     .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
-                    .onFocusChanged { isFocused = it.isFocused }
+                    .onFocusChanged { focusState ->
+                        isFocused = focusState.isFocused
+                        onFocusChanged?.invoke(focusState.isFocused)
+                    }
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -11,22 +12,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.ContactStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
+import com.tamin.taminhamrah.util.ValidationUtils
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 @Composable
 fun SelfDeclarationContactScreen(
@@ -44,8 +49,21 @@ fun SelfDeclarationContactScreen(
     var showProvinceBottomSheet by remember { mutableStateOf(false) }
     var showCityBottomSheet by remember { mutableStateOf(false) }
 
-    val isNextEnabled = state.mobile.length >= 10 && state.cityLabel.isNotEmpty() && state.provinceLabel.isNotEmpty() && state.address.isNotEmpty()
+    var mobileHasFocused by remember { mutableStateOf(false) }
+    var mobileTouched by remember { mutableStateOf(false) }
 
+    var landlineHasFocused by remember { mutableStateOf(false) }
+    var landlineTouched by remember { mutableStateOf(false) }
+
+    var postcodeHasFocused by remember { mutableStateOf(false) }
+    var postcodeTouched by remember { mutableStateOf(false) }
+
+    val isMobileValid = ValidationUtils.isPhoneNumberValid(state.mobile)
+    val isLandlineValid = ValidationUtils.isLandlineValid(state.landline)
+    val isPostcodeValid = ValidationUtils.isPostcodeValid(state.postcode)
+
+    val isNextEnabled = isMobileValid && isLandlineValid && isPostcodeValid &&
+            state.cityLabel.isNotEmpty() && state.provinceLabel.isNotEmpty() && state.address.isNotEmpty()
 
     // If province is set but cityOptions are not yet loaded, load cities
     LaunchedEffect(state.provinceId) {
@@ -66,10 +84,10 @@ fun SelfDeclarationContactScreen(
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی",
+                primaryText = stringResource(Res.string.health_btn_next_step),
                 primaryEnabled = isNextEnabled,
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY)) },
-                secondaryText = "مرحلهٔ قبلی",
+                secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -85,7 +103,7 @@ fun SelfDeclarationContactScreen(
         ) {
 
             TaminText(
-                text = "اطلاعات تماس و سکونت",
+                text = stringResource(Res.string.health_contact_title),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
                     color = taminColors.textPrimary
@@ -93,37 +111,61 @@ fun SelfDeclarationContactScreen(
             )
 
             TaminText(
-                text = "اطلاعات تماس جهت ارتباط‌های بعدی و موارد اضطراری استفاده خواهد شد.",
+                text = stringResource(Res.string.health_contact_desc),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = taminColors.textTertiary,
                     lineHeight = 22.sp
                 )
             )
 
+            val showMobileError = mobileTouched && !isMobileValid
             StyledTextField(
                 value = state.mobile,
                 onValueChange = { mob ->
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(mobile = mob)))
+                    val filtered = ValidationUtils.validatePhoneNumber(mob)
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(mobile = filtered)))
                 },
-                label = "شماره تلفن همراه",
-                placeholder = "۰۹۱۲۳۴۵۶۷۸۹"
+                label = stringResource(Res.string.health_contact_mobile_label),
+                placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
+                isValid = if (showMobileError) false else null,
+                errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                onFocusChanged = { isFocused ->
+                    if (isFocused) {
+                        mobileHasFocused = true
+                    } else if (mobileHasFocused) {
+                        mobileTouched = true
+                    }
+                }
             )
 
+            val showLandlineError = landlineTouched && state.landline.length != 11
             StyledTextField(
                 value = state.landline,
                 onValueChange = { land ->
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(landline = land)))
+                    val filtered = ValidationUtils.validateLandline(land)
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(landline = filtered)))
                 },
-                label = "تلفن ثابت (به همراه کد استان)",
-                placeholder = "۰۲۱۲۲۳۳۴۴۵۵"
+                label = stringResource(Res.string.health_contact_landline_label),
+                placeholder = stringResource(Res.string.health_contact_landline_placeholder),
+                isValid = if (showLandlineError) false else null,
+                errorText = if (showLandlineError) stringResource(Res.string.health_contact_landline_error) else null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                onFocusChanged = { isFocused ->
+                    if (isFocused) {
+                        landlineHasFocused = true
+                    } else if (landlineHasFocused) {
+                        landlineTouched = true
+                    }
+                }
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
                     StyledSelectField(
                         value = state.provinceLabel,
-                        label = "استان",
-                        placeholder = "انتخاب استان",
+                        label = stringResource(Res.string.health_contact_province_label),
+                        placeholder = stringResource(Res.string.health_contact_province_placeholder),
                         isLoading = isProvincesLoading,
                         onClick = { showProvinceBottomSheet = true }
                     )
@@ -131,8 +173,8 @@ fun SelfDeclarationContactScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     StyledSelectField(
                         value = state.cityLabel,
-                        label = "شهر",
-                        placeholder = "انتخاب شهر",
+                        label = stringResource(Res.string.health_contact_city_label),
+                        placeholder = stringResource(Res.string.health_contact_city_placeholder),
                         isLoading = isCitiesLoading,
                         onClick = {
                             if (state.provinceId == null) {
@@ -153,18 +195,30 @@ fun SelfDeclarationContactScreen(
                 onValueChange = { addr ->
                     onIntent(HealthProfileIntent.UpdateContact(state.copy(address = addr)))
                 },
-                label = "نشانی کامل محل سکونت",
-                placeholder = "خیابان، کوچه، پلاک، واحد",
+                label = stringResource(Res.string.health_contact_address_label),
+                placeholder = stringResource(Res.string.health_contact_address_placeholder),
                 singleLine = false
             )
 
+            val showPostcodeError = postcodeTouched && state.postcode.length != 10
             StyledTextField(
                 value = state.postcode,
                 onValueChange = { post ->
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(postcode = post)))
+                    val filtered = ValidationUtils.validatePostcode(post)
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(postcode = filtered)))
                 },
-                label = "کد پستی ۱۰ رقمی",
-                placeholder = "۱۲۳۴۵۶۷۸۹۰"
+                label = stringResource(Res.string.health_contact_postcode_label),
+                placeholder = stringResource(Res.string.health_contact_postcode_placeholder),
+                isValid = if (showPostcodeError) false else null,
+                errorText = if (showPostcodeError) stringResource(Res.string.health_contact_postcode_error) else null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onFocusChanged = { isFocused ->
+                    if (isFocused) {
+                        postcodeHasFocused = true
+                    } else if (postcodeHasFocused) {
+                        postcodeTouched = true
+                    }
+                }
             )
 
             OutlinedButton(
@@ -182,7 +236,11 @@ fun SelfDeclarationContactScreen(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                TaminText("انتخاب موقعیت روی نقشه (جهت ثبت آدرس دقیق)", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                TaminText(
+                    text = stringResource(Res.string.health_contact_map_button),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
@@ -191,11 +249,11 @@ fun SelfDeclarationContactScreen(
     if (showProvinceBottomSheet) {
         HealthBottomSheet(
             config = BottomSheetConfig(
-                title = "انتخاب استان",
-                subtitle = "استان مورد نظر خود را انتخاب کنید",
+                title = stringResource(Res.string.health_contact_province_bs_title),
+                subtitle = stringResource(Res.string.health_contact_province_bs_subtitle),
                 type = BottomSheetType.PROVINCE,
                 showSearchInput = true,
-                searchInputHint = "جستجوی استان...",
+                searchInputHint = stringResource(Res.string.health_contact_province_bs_search_hint),
                 singleSelection = true,
                 isLoading = isProvincesLoading,
                 items = provinceOptions.map {
@@ -233,11 +291,11 @@ fun SelfDeclarationContactScreen(
     if (showCityBottomSheet) {
         HealthBottomSheet(
             config = BottomSheetConfig(
-                title = "انتخاب شهر",
-                subtitle = "شهر مورد نظر خود را انتخاب کنید",
+                title = stringResource(Res.string.health_contact_city_bs_title),
+                subtitle = stringResource(Res.string.health_contact_city_bs_subtitle),
                 type = BottomSheetType.CITY,
                 showSearchInput = true,
-                searchInputHint = "جستجوی شهر...",
+                searchInputHint = stringResource(Res.string.health_contact_city_bs_search_hint),
                 singleSelection = true,
                 isLoading = isCitiesLoading,
                 items = cityOptions.map {
