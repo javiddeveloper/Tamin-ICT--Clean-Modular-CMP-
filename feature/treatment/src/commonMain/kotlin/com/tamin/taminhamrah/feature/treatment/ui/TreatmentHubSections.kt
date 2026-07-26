@@ -88,6 +88,7 @@ internal fun PatientCarousel(
     pagerState: PagerState,
     onShowEntitlementReason: (String) -> Unit,
     onRetry: () -> Unit = {},
+    collapseProgress: () -> Float = { 0f },
 ) {
     when {
         state.isLoading && patients.isEmpty() -> Box(
@@ -118,6 +119,7 @@ internal fun PatientCarousel(
                 //  a main insured person is present.
                 dependantOrdinal = patients.take(page).count { it.isDependent },
                 onShowEntitlementReason = onShowEntitlementReason,
+                collapseProgress = collapseProgress,
             )
         }
     }
@@ -187,6 +189,7 @@ private fun PatientCard(
     status: CoverageStatus,
     dependantOrdinal: Int,
     onShowEntitlementReason: (String) -> Unit,
+    collapseProgress: () -> Float = { 0f },
 ) {
     val style = status.cardStyle(
         isDependent = patient.isDependent,
@@ -201,6 +204,7 @@ private fun PatientCard(
         footerAction = (status as? CoverageStatus.Rejected)?.let { rejected ->
             { EntitlementReasonChip(onClick = { onShowEntitlementReason(rejected.reason) }) }
         },
+        collapseProgress = collapseProgress,
     )
 }
 

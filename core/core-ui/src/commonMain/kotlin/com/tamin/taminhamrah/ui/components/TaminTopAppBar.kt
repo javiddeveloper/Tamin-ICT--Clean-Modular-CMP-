@@ -57,6 +57,7 @@ fun TaminTopAppBar(
     centerTitle: Boolean = true,
     background: Brush = taminTopAppBarGradient(),
     bottomPadding: Dp = Spacing.page,
+    titleModifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     Column(
@@ -100,7 +101,8 @@ fun TaminTopAppBar(
                 textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = Spacing.sm),
+                    .padding(horizontal = Spacing.sm)
+                    .then(titleModifier),
             )
             if (centerTitle || action != null) {
                 HeaderSlot { action?.invoke() }

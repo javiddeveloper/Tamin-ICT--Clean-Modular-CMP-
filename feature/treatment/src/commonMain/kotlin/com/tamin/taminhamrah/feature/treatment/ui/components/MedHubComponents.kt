@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,10 +30,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -115,41 +123,121 @@ fun InsuranceCard(
     background: Brush = insuranceCardGradient(isDependent = false),
     coverageBadge: @Composable (() -> Unit)? = null,
     footerAction: @Composable (() -> Unit)? = null,
+    // 0 shows the full card; as it runs to 1 the card cross-fades into a compact
+    // tick + name + national-code bar and shrinks to that height. Read only inside
+    // layout/draw lambdas, so the morph never recomposes the card.
+    collapseProgress: () -> Float = { 0f },
 ) {
-    Column(
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.cardCompact))
             .background(background)
             .cardDecoration(),
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            InsuranceCardBrandRow(initial = holderName.take(1))
-            Spacer(modifier = Modifier.height(Spacing.md))
-            Text(
-                text = holderName,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
-            )
-            Spacer(modifier = Modifier.height(Spacing.xs))
-            Text(
-                text = "کد ملی",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.75f),
-            )
-            NumericText(
-                text = nationalId.toPersianDigits(),
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White,
-            )
+        Layout(
+            content = {
+                // 0 brand row — fades out in place.
+                Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
+                    InsuranceCardBrandRow(initial = holderName.take(1))
+                }
+                // 1 name — travels up into the compact bar and shrinks as it goes.
+                Text(
+                    text = holderName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.graphicsLayer {
+                        val s = lerp(1f, NameCollapsedScale, CardCollapseEasing.transform(collapseProgress()))
+                        scaleX = s
+                        scaleY = s
+                        // Anchor the shrink to the name's start edge so it stays put in the bar.
+                        transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+                    },
+                )
+                // 2 "کد ملی" label — fades out in place.
+                Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
+                    Text(
+                        text = "کد ملی",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.75f),
+                    )
+                }
+                // 3 national code — travels up beside the name.
+                NumericText(
+                    text = nationalId.toPersianDigits(),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White,
+                )
+                // 4 coverage tick — travels up to lead the bar.
+                Box { coverageBadge?.invoke() }
+                // 5 coverage footer — fades out in place.
+                Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
+                    InsuranceCardFooter(
+                        coverageLabel = coverageLabel,
+                        badge = coverageBadge,
+                        action = footerAction,
+                    )
+                }
+            },
+        ) { measurables, constraints ->
+            val width = constraints.maxWidth
+            val pad = Spacing.lg.roundToPx()
+            val md = Spacing.md.roundToPx()
+            val xs = Spacing.xs.roundToPx()
+            val sm = Spacing.sm.roundToPx()
+            val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
+
+            val brand = measurables[0].measure(innerC)
+            val name = measurables[1].measure(innerC)
+            val label = measurables[2].measure(innerC)
+            val number = measurables[3].measure(innerC)
+            val badge = measurables[4].measure(Constraints())
+            val footer = measurables[5].measure(Constraints.fixedWidth(width))
+
+            // Expanded slots (start-offset from the start edge, top from the card top).
+            val nameExpTop = pad + brand.height + md
+            val labelExpTop = nameExpTop + name.height + xs
+            val numberExpTop = labelExpTop + label.height
+            val footerTop = numberExpTop + number.height + pad
+            val badgeExpTop = footerTop + (footer.height - badge.height) / 2
+            val expandedH = footerTop + footer.height
+
+            // Collapsed slots — a compact bar of tick + name + code.
+            val barH = maxOf(badge.height, name.height, number.height) + 2 * md
+            val badgeColTop = (barH - badge.height) / 2
+            val nameColStart = pad + badge.width + sm
+            val nameColTop = (barH - name.height) / 2
+            // The name shrinks in the bar, so the code sits just past its scaled width.
+            val numberColStart = nameColStart + (name.width * NameCollapsedScale).toInt() + sm
+            val numberColTop = (barH - number.height) / 2
+
+            val t = CardCollapseEasing.transform(collapseProgress())
+            val height = lerp(expandedH, barH, t)
+
+            layout(width, height) {
+                // Fading pieces stay at their expanded spots (and clip as the card shrinks).
+                brand.placeRelative(pad, pad)
+                label.placeRelative(pad, labelExpTop)
+                footer.placeRelative(0, footerTop)
+                // Travelling pieces glide from their expanded slot to their bar slot.
+                name.placeRelative(lerp(pad, nameColStart, t), lerp(nameExpTop, nameColTop, t))
+                number.placeRelative(lerp(pad, numberColStart, t), lerp(numberExpTop, numberColTop, t))
+                badge.placeRelative(lerp(pad, pad, t), lerp(badgeExpTop, badgeColTop, t))
+            }
         }
-        InsuranceCardFooter(
-            coverageLabel = coverageLabel,
-            badge = coverageBadge,
-            action = footerAction,
-        )
     }
 }
+
+private val CardCollapseEasing = CubicBezierEasing(0.25f, 0.1f, 0.25f, 1f)
+
+/** How far the holder name shrinks by the time the card is a compact bar. */
+private const val NameCollapsedScale = 0.82f
+
+/** Full until the fold's midpoint, then gone — the vanishing pieces clear before the bar forms. */
+private fun fadeOutAlpha(progress: Float): Float = (1f - progress * 2f).coerceIn(0f, 1f)
 
 /**
  * The small round glyph beside the coverage line — a tick when treatment support is

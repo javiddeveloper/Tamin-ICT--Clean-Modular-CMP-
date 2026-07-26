@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
@@ -37,7 +38,6 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
@@ -133,22 +133,36 @@ fun TreatmentContent(
         onIntent = onIntent,
     )
 
+    // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
+    // only inside the title/card morph layout/draw lambdas, so the fold never recomposes the hub.
+    val collapse = rememberTreatmentHeaderCollapse()
+    val headerProgress = remember(collapse) { { collapse.progress } }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalTaminColors.current.bgPage)
-            .verticalScroll(scrollState),
+            .background(LocalTaminColors.current.bgPage),
     ) {
-        TreatmentHubHeader()
-        // The whole body shifts up together, so the overlap does not leave a gap below.
-        Column(modifier = Modifier.offset(y = -TreatmentDimens.cardOverlap)) {
+        // The header sits in flow above the body; as its card folds, the body rises to meet it.
+        TreatmentHubHeader(progress = headerProgress) {
             PatientCarousel(
                 state = state,
                 patients = patients,
                 pagerState = pagerState,
                 onShowEntitlementReason = { entitlementReason = it },
                 onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
+                collapseProgress = headerProgress,
             )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                // The body's drag first folds the header, then scrolls the sections.
+                .nestedScroll(collapse.nestedScrollConnection)
+                .verticalScroll(scrollState),
+        ) {
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
@@ -168,6 +182,7 @@ fun TreatmentContent(
                 insuredShare = state.insuredShareTotal,
                 organizationShare = state.organizationShareTotal,
             )
+            // Clears the floating navigation bar, as the pre-collapse layout did.
             Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
         }
     }
@@ -178,18 +193,6 @@ fun TreatmentContent(
             onDismiss = { entitlementReason = null },
         )
     }
-}
-
-@Composable
-private fun TreatmentHubHeader() {
-    TaminTopAppBar(
-        title = "درمان",
-        centerTitle = false,
-        // Runs deep enough for the carousel to ride up into it. The gradient and the
-        // status-bar fill are left at their defaults, which is what puts the visible
-        // step between the two bands.
-        bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
-    )
 }
 
 /**
