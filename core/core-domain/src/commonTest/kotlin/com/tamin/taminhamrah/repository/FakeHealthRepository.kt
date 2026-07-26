@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.repository
 
+import com.tamin.taminhamrah.model.health.ActFrequencyDN
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
 import com.tamin.taminhamrah.model.health.BloodGroupDN
@@ -47,6 +48,7 @@ class FakeHealthRepository : HealthRepository {
     var getBloodGroupsResult: List<BloodGroupDN> = emptyList()
     var getMaritalStatusResult: List<MaritalStatusDN> = emptyList()
     var getSmokingStatusResult: List<SmokingStatusDN> = emptyList()
+    var getActFrequenciesResult: List<ActFrequencyDN> = emptyList()
     var getSelfDeclarableIllnessesResult: List<IllnessItemDN> = emptyList()
     var getSelfDeclarableIllnessesByGroupResult: List<SelfDeclarableIllnessGroupDN> = emptyList()
     var getAllDrugsResult: List<DrugItemDN> = emptyList()
@@ -116,6 +118,11 @@ class FakeHealthRepository : HealthRepository {
     override suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>> = flow {
         if (shouldThrowError) throw error
         emit(getSmokingStatusResult)
+    }
+
+    override suspend fun getActFrequencies(): Flow<List<ActFrequencyDN>> = flow{
+        if (shouldThrowError) throw error
+        emit(getActFrequenciesResult)
     }
 
     override suspend fun getSelfDeclarableIllnesses(): Flow<List<IllnessItemDN>> = flow {

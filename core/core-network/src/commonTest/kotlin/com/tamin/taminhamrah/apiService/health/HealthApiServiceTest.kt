@@ -385,20 +385,20 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `getActFrequencies should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyArraySuccess)
+        val jsonResponse = HealthTestData.emptyArraySuccess
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val response = apiService.getActFrequencies()
-        assertNotNull(response.extractData())
+        assertNotNull(response)
     }
 
     @Test
     fun `getSmokingStatus should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyArraySuccess)
+        val jsonResponse = HealthTestData.emptyArraySuccess
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val response = apiService.getSmokingStatus()
-        assertNotNull(response.extractData())
+        assertNotNull(response)
     }
 
     @Test

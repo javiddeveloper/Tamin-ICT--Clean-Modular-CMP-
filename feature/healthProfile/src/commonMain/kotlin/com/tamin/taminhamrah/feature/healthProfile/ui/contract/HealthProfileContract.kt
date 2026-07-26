@@ -119,11 +119,18 @@ data class LifestyleStepState(
     val isSmoking: Boolean? = null,
     val smokingStatusId: Int? = null,
     val smokingPattern: String? = null,
+
+    val hasAddiction: Boolean? = null,
+    val substanceStatusId: Int? = null,
+    val substancePattern: String? = null,
+
     val isDrinking: Boolean? = null,
+    val drinkingStatusId: Int? = null,
     val drinkingPattern: String? = null,
+
     val isExercising: Boolean? = null,
-    val exerciseFrequency: String? = null,
-    val hasAddiction: Boolean? = null
+    val exerciseStatusId: Int? = null,
+    val exerciseFrequency: String? = null
 )
 
 // Step 10: Drug Allergies — real PR type, no more mock
@@ -174,6 +181,7 @@ data class HealthProfileUiState(
     val cityOptions: List<LookupItemPR> = emptyList(),            // Step 3 (filtered by selected province)
     val bloodGroupOptions: List<LookupItemPR> = emptyList(),      // Step 8
     val smokingStatusOptions: List<LookupItemPR> = emptyList(),   // Step 9
+    val actFrequencyOptions: List<LookupItemPR> = emptyList(),    // Step 9 (Addiction, Alcohol, Exercise)
     val illnessGroups: List<IllnessGroupPR> = emptyList(),        // Steps 6 + 7
     val drugOptions: List<LookupItemPR> = emptyList(),            // Step 10 dialog picker
 
@@ -198,6 +206,7 @@ data class HealthProfileUiState(
         data class CitiesLoaded(val options: List<LookupItemPR>) : PartialState
         data class BloodGroupsLoaded(val options: List<LookupItemPR>) : PartialState
         data class SmokingStatusLoaded(val options: List<LookupItemPR>) : PartialState
+        data class ActFrequenciesLoaded(val options: List<LookupItemPR>) : PartialState
         data class IllnessGroupsLoaded(val groups: List<IllnessGroupPR>) : PartialState
         data class DrugsLoaded(val options: List<LookupItemPR>) : PartialState
 

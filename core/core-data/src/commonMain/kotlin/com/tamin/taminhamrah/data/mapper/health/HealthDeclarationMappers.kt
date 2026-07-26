@@ -161,6 +161,8 @@ fun MaritalStatusDTO.toDomain() = MaritalStatusDN(key = key, value = value)
 
 fun SmokingStatusDTO.toDomain() = SmokingStatusDN(key = key, value = value)
 
+fun ActFrequencyDTO.toDomain() = ActFrequencyDN(key = key, value = value)
+
 // --- Illnesses ---
 
 fun IllnessItemDTO.toDomain() = IllnessItemDN(illnessID = illnessID, illnessDesc = illnessDesc)
