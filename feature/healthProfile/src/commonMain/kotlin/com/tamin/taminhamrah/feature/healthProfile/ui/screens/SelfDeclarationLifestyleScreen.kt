@@ -2,25 +2,22 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.LifestyleStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -91,12 +88,12 @@ fun SelfDeclarationLifestyleScreen(
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // Smoking
+            // ── Smoking ──────────────────────────────────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_tobacco),
                         backgroundColor = LocalTaminColors.current.orangeBg,
@@ -121,12 +118,12 @@ fun SelfDeclarationLifestyleScreen(
                 )
             }
 
-            // Addiction
+            // ── Addiction ────────────────────────────────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_addiction),
                         backgroundColor = LocalTaminColors.current.orangeBg,
@@ -149,14 +146,15 @@ fun SelfDeclarationLifestyleScreen(
                         if (isYes) showAddictionBottomSheet = true
                     }
                 )
+
             }
 
-            // Alcohol
+            // ── Alcohol (hardcoded LifeStyleStatus) ─────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_alcohol),
                         backgroundColor = LocalTaminColors.current.orangeBg,
@@ -179,14 +177,15 @@ fun SelfDeclarationLifestyleScreen(
                         if (isYes) showAlcoholBottomSheet = true
                     }
                 )
+
             }
 
-            // Exercise
+            // ── Exercise (hardcoded LifeStyleStatus) ────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_alcohol),
                         backgroundColor = LocalTaminColors.current.orangeBg,
@@ -210,6 +209,7 @@ fun SelfDeclarationLifestyleScreen(
                     }
                 )
             }
+
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
@@ -232,6 +232,7 @@ fun SelfDeclarationLifestyleScreen(
                         state.copy(
                             smokingStatusId = result.selectedItemIds.firstOrNull(),
                             smokingPattern = result.description
+                                ?: smokingStatusOptions.find { it.id == result.selectedItemIds.firstOrNull() }?.label
                         )
                     )
                 )
@@ -248,16 +249,17 @@ fun SelfDeclarationLifestyleScreen(
                 type = BottomSheetType.DRUG_ADDICTION,
                 singleSelection = true,
                 items = actFrequencyOptions.map {
-                    BottomSheetItem(id = it.id, title = it.label) // Not saving id to state currently based on UI contract
+                    BottomSheetItem(id = it.id, title = it.label, isSelected = state.substanceStatusId == it.id)
                 }
             ),
             onDismissRequest = { showAddictionBottomSheet = false },
             onSubmit = { result ->
-                // API just takes boolean for substance usage right now, but UI shows description
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
-                            // Not mapping frequency ID yet as it's not in LifestyleStepState, but we map description to patterns if we want, but actually there is no addictionPattern. We'll skip saving the freq id or use description if added. Wait, API requires substanceUseDesc? Yes, it's null in ViewModel currently. We can just dismiss.
+                            substanceStatusId = result.selectedItemIds.firstOrNull(),
+                            substancePattern = result.description
+                                ?: actFrequencyOptions.find { it.id == result.selectedItemIds.firstOrNull() }?.label
                         )
                     )
                 )
@@ -273,16 +275,19 @@ fun SelfDeclarationLifestyleScreen(
                 subtitle = "جزئیات مربوط به مصرف الکل را وارد کنید",
                 type = BottomSheetType.ALCOHOL_ADDICTION,
                 singleSelection = true,
-                items = actFrequencyOptions.map {
-                    BottomSheetItem(id = it.id, title = it.label)
+                items = LifeStyleStatus.entries.map {
+                    BottomSheetItem(id = it.id, title = it.title, isSelected = state.drinkingStatusId == it.id)
                 }
             ),
             onDismissRequest = { showAlcoholBottomSheet = false },
             onSubmit = { result ->
+                val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
-                            drinkingPattern = result.description ?: actFrequencyOptions.find { it.id == result.selectedItemIds.firstOrNull() }?.label
+                            drinkingStatusId = selectedId,
+                            drinkingPattern = result.description
+                                ?: LifeStyleStatus.fromStyleId(selectedId)?.title
                         )
                     )
                 )
@@ -298,16 +303,19 @@ fun SelfDeclarationLifestyleScreen(
                 subtitle = "جزئیات مربوط به ورزش را وارد کنید",
                 type = BottomSheetType.EXERCISE,
                 singleSelection = true,
-                items = actFrequencyOptions.map {
-                    BottomSheetItem(id = it.id, title = it.label)
+                items = LifeStyleStatus.entries.map {
+                    BottomSheetItem(id = it.id, title = it.title, isSelected = state.exerciseStatusId == it.id)
                 }
             ),
             onDismissRequest = { showExerciseBottomSheet = false },
             onSubmit = { result ->
+                val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
-                            exerciseFrequency = result.description ?: actFrequencyOptions.find { it.id == result.selectedItemIds.firstOrNull() }?.label
+                            exerciseStatusId = selectedId,
+                            exerciseFrequency = result.description
+                                ?: LifeStyleStatus.fromStyleId(selectedId)?.title
                         )
                     )
                 )
@@ -331,4 +339,3 @@ fun SelfDeclarationLifestyleScreenPreview() {
         )
     }
 }
-

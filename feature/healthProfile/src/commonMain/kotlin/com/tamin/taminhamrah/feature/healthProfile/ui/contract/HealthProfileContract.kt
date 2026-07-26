@@ -119,11 +119,18 @@ data class LifestyleStepState(
     val isSmoking: Boolean? = null,
     val smokingStatusId: Int? = null,
     val smokingPattern: String? = null,
+
+    val hasAddiction: Boolean? = null,
+    val substanceStatusId: Int? = null,
+    val substancePattern: String? = null,
+
     val isDrinking: Boolean? = null,
+    val drinkingStatusId: Int? = null,
     val drinkingPattern: String? = null,
+
     val isExercising: Boolean? = null,
-    val exerciseFrequency: String? = null,
-    val hasAddiction: Boolean? = null
+    val exerciseStatusId: Int? = null,
+    val exerciseFrequency: String? = null
 )
 
 // Step 10: Drug Allergies — real PR type, no more mock
