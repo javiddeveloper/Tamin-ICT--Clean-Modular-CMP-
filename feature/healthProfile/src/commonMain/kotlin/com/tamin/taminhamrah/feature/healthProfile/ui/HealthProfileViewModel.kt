@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.useCases.health.*
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,7 @@ class HealthProfileViewModel(
     private val getBloodGroupsUseCase: GetBloodGroupsUseCase,
     private val getMaritalStatusUseCase: GetMaritalStatusUseCase,
     private val getSmokingStatusUseCase: GetSmokingStatusUseCase,
+    private val getActFrequenciesUseCase: GetActFrequenciesUseCase,
     private val getSelfDeclarableIllnessesByGroupUseCase: GetSelfDeclarableIllnessesByGroupUseCase,
     private val getAllDrugsUseCase: GetAllDrugsUseCase
 ) : BaseViewModel<HealthProfileUiState, PartialState, HealthProfileEvent, HealthProfileIntent>(
@@ -100,6 +102,10 @@ class HealthProfileViewModel(
         getSmokingStatusUseCase()
             .catch { }
             .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
+
+        getActFrequenciesUseCase()
+            .catch { }
+            .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
 
         getSelfDeclarableIllnessesByGroupUseCase()
             .catch { }
@@ -228,13 +234,13 @@ class HealthProfileViewModel(
             val lifestyleReq = AddSelfDeclarativeRequest(
                 natCode          = currentPatientNatCode,
                 patientID        = currentPatientId,
-                smoking          = if (selfDecState.lifestyle.isSmoking == true) selfDecState.lifestyle.smokingStatusId ?: 1 else 0,
+                smoking          = if (selfDecState.lifestyle.isSmoking == true) selfDecState.lifestyle.smokingStatusId ?: 0 else 0,
                 smokeDesc        = selfDecState.lifestyle.smokingPattern,
-                alcoholUse       = if (selfDecState.lifestyle.isDrinking == true) 1 else 0,
+                alcoholUse       = if (selfDecState.lifestyle.isDrinking == true) selfDecState.lifestyle.drinkingStatusId ?: 0 else LifeStyleStatus.NEVER.id,
                 alcoholUseDesc   = selfDecState.lifestyle.drinkingPattern,
-                substanceUse     = if (selfDecState.lifestyle.hasAddiction == true) 1 else 0,
-                substanceUseDesc = null,
-                exerciseFrequency = if (selfDecState.lifestyle.isExercising == true) 1 else 0,
+                substanceUse     = if (selfDecState.lifestyle.hasAddiction == true) selfDecState.lifestyle.substanceStatusId ?: 0 else LifeStyleStatus.NEVER.id,
+                substanceUseDesc = selfDecState.lifestyle.substancePattern,
+                exerciseFrequency = if (selfDecState.lifestyle.isExercising == true) selfDecState.lifestyle.exerciseStatusId ?: 0 else LifeStyleStatus.NEVER.id,
                 exerciseDesc     = selfDecState.lifestyle.exerciseFrequency
             )
             addSelfDeclarativeUseCase(lifestyleReq)
@@ -300,22 +306,34 @@ class HealthProfileViewModel(
             )
         }
 
-        is PartialState.LifestyleLoaded -> {
+
+            is PartialState.LifestyleLoaded -> {
             val info = partialState.info
-            val sd   = currentState.selfDeclaration
+            val sd = currentState.selfDeclaration
+
+            fun isActive(code: Int?) =
+                code != null && LifeStyleStatus.fromStyleId(code) != LifeStyleStatus.NEVER
+
             currentState.copy(
-                isLoading    = false,
+                isLoading = false,
                 lifestyleInfo = info,
                 selfDeclaration = sd.copy(
                     lifestyle = sd.lifestyle.copy(
-                        isSmoking       = (info.smokingStatus ?: 0) > 0,
+                        isSmoking = (info.smokingStatus ?: 0) > 0,
                         smokingStatusId = info.smokingStatus,
-                        smokingPattern  = info.smokingDesc.takeIf { it.isNotBlank() },
-                        isDrinking      = (info.alcoholUsage ?: 0) > 0,
+                        smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() },
+
+                        hasAddiction = isActive(info.substanceUsage),
+                        substanceStatusId = info.substanceUsage,
+                        substancePattern = info.substanceDesc.takeIf { it.isNotBlank() },
+
+                        isDrinking = isActive(info.alcoholUsage),
+                        drinkingStatusId = info.alcoholUsage,
                         drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() },
-                        isExercising    = (info.exerciseFreq ?: 0) > 0,
-                        exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() },
-                        hasAddiction    = (info.substanceUsage ?: 0) > 0
+
+                        isExercising = isActive(info.exerciseFreq),
+                        exerciseStatusId = info.exerciseFreq,
+                        exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() }
                     )
                 )
             )
@@ -337,6 +355,7 @@ class HealthProfileViewModel(
         is PartialState.CitiesLoaded        -> currentState.copy(cityOptions = partialState.options, isCitiesLoading = false)
         is PartialState.BloodGroupsLoaded   -> currentState.copy(bloodGroupOptions = partialState.options)
         is PartialState.SmokingStatusLoaded -> currentState.copy(smokingStatusOptions = partialState.options)
+        is PartialState.ActFrequenciesLoaded -> currentState.copy(actFrequencyOptions = partialState.options)
         is PartialState.IllnessGroupsLoaded -> currentState.copy(illnessGroups = partialState.groups)
         is PartialState.DrugsLoaded         -> currentState.copy(drugOptions = partialState.options)
 

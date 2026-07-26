@@ -157,10 +157,10 @@ internal interface HealthApiService {
     suspend fun getIllnessGroups(): BaseDTO<List<IllnessGroupDTO>>
 
     @GET("UIServices/Lookup/GetActFrequencies")
-    suspend fun getActFrequencies(): BaseDTO<List<ActFrequencyDTO>>
+    suspend fun getActFrequencies(): List<ActFrequencyDTO>
 
     @GET("UIServices/Lookup/GetSmokingStatus")
-    suspend fun getSmokingStatus(): BaseDTO<List<SmokingStatusDTO>>
+    suspend fun getSmokingStatus(): List<SmokingStatusDTO>
 
     @GET("UIServices/Lookup/GetBloodGroups")
     suspend fun getBloodGroups(): BaseDTO<List<BloodGroupDTO>>

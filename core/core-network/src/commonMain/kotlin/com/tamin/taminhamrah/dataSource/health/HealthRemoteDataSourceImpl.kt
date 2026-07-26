@@ -32,6 +32,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import co.touchlab.kermit.Logger
+import com.tamin.taminhamrah.model.health.ActFrequencyDTO
 
 internal class HealthRemoteDataSourceImpl(
     private val apiService: HealthApiService,
@@ -190,11 +191,22 @@ internal class HealthRemoteDataSourceImpl(
 
     override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? {
         return try {
-            apiService.getSmokingStatus().extractData()
+            apiService.getSmokingStatus()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
             Logger.e("HealthDS") { "getSmokingStatus failed: ${e::class.simpleName} - ${e.message}" }
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getActFrequencies(): List<ActFrequencyDTO>? {
+        return try {
+            apiService.getActFrequencies()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            Logger.e("HealthDS") { "getActFrequencies failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }

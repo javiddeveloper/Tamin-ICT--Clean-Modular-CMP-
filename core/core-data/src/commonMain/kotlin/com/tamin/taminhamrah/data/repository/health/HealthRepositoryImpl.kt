@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.data.mapper.health.toDomain
 import com.tamin.taminhamrah.data.mapper.health.toDTO
 import com.tamin.taminhamrah.data.mapper.health.toEntity
 import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
+import com.tamin.taminhamrah.model.health.ActFrequencyDN
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
 import com.tamin.taminhamrah.model.health.BloodGroupDN
@@ -189,6 +190,12 @@ internal class HealthRepositoryImpl(
 
     override suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>> = flow {
         val remote = healthRemoteDataSource.getSmokingStatus()?.map { it.toDomain() } ?: emptyList()
+        Logger.d("getSmokingStatus" , remote.toString())
+        emit(remote)
+    }
+
+    override suspend fun getActFrequencies(): Flow<List<ActFrequencyDN>> = flow {
+        val remote = healthRemoteDataSource.getActFrequencies()?.map { it.toDomain() } ?: emptyList()
         emit(remote)
     }
 

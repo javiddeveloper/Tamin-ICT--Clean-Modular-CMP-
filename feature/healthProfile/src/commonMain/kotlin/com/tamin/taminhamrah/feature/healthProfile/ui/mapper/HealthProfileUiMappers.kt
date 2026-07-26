@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.health.ProvinceItemDN
 import com.tamin.taminhamrah.model.health.ProvinceCityItemDN
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessGroupDN
 import com.tamin.taminhamrah.model.health.SmokingStatusDN
+import com.tamin.taminhamrah.model.health.ActFrequencyDN
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Patient General
@@ -92,6 +93,11 @@ fun MaritalStatusDN.toPresentation(): LookupItemPR = LookupItemPR(
 )
 
 fun SmokingStatusDN.toPresentation(): LookupItemPR = LookupItemPR(
+    id = key ?: 0,
+    label = value ?: ""
+)
+
+fun ActFrequencyDN.toPresentation(): LookupItemPR = LookupItemPR(
     id = key ?: 0,
     label = value ?: ""
 )

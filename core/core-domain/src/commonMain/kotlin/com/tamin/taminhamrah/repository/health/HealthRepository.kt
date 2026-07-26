@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.health.ProvinceItemDN
 import com.tamin.taminhamrah.model.health.ProvinceCityItemDN
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessGroupDN
 import com.tamin.taminhamrah.model.health.SmokingStatusDN
+import com.tamin.taminhamrah.model.health.ActFrequencyDN
 import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequest
 import com.tamin.taminhamrah.model.health.SyncIllnessSelfDeclarativesRequest
 import com.tamin.taminhamrah.model.health.SyncResultDN
@@ -45,6 +46,7 @@ interface HealthRepository {
     suspend fun getBloodGroups(): Flow<List<BloodGroupDN>>
     suspend fun getMaritalStatus(): Flow<List<MaritalStatusDN>>
     suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>>
+    suspend fun getActFrequencies(): Flow<List<ActFrequencyDN>>
 
     // --- Illnesses ---
     suspend fun getSelfDeclarableIllnesses(): Flow<List<IllnessItemDN>>
