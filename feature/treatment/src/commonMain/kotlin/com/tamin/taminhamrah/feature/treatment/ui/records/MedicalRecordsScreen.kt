@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -442,6 +444,8 @@ fun MedicalRecordsContent(
             )
 
             when {
+                state.isLoading && state.prescriptionList.isEmpty() -> RecordsShimmerSkeleton()
+
                 // A failed request and a genuinely empty result read very differently, so they
                 // get different states. Both recover the same way: pull to refresh.
                 state.error != null -> RecordsErrorState(message = state.error)
@@ -568,6 +572,26 @@ private fun recordAccent(prescType: String): RecordAccent {
             RecordAccent(colors.greenText, colors.greenBg, vectorResource(Res.drawable.ic_tamin_medical_centers))
         else ->
             RecordAccent(colors.teal, colors.greenBg, vectorResource(Res.drawable.ic_tamin_prescriptions))
+    }
+}
+
+@Composable
+private fun RecordsShimmerSkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page),
+        verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
+    ) {
+        repeat(4) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .taminSurface(CornerRadius.cardCompact)
+                    .shimmer(),
+            )
+        }
     }
 }
 

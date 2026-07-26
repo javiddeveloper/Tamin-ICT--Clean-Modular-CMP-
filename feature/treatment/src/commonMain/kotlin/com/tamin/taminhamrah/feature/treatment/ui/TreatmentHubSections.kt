@@ -14,7 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_cross
@@ -55,7 +57,6 @@ import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.ic_tamin_verified
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -94,11 +95,10 @@ internal fun PatientCarousel(
         state.isLoading && patients.isEmpty() -> Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(CARD_LOADING_HEIGHT),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(color = LocalTaminColors.current.teal)
-        }
+                .height(CARD_LOADING_HEIGHT)
+                .taminSurface(CornerRadius.card)
+                .shimmer(),
+        )
 
         // A failure or an empty result still renders a card, so the carousel slot never
         // collapses into a bare line of text.
