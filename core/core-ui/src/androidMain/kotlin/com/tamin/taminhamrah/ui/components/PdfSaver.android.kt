@@ -12,11 +12,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +61,7 @@ private class AndroidPdfSaver(
         val pending = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, fileName)
             put(MediaStore.Downloads.MIME_TYPE, MIME_PDF)
+            put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/TaminICT")
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
         val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
@@ -75,7 +73,7 @@ private class AndroidPdfSaver(
 
     /** Pre-29 fallback: app-specific external files (no storage permission), shared via FileProvider. */
     private fun saveToAppFiles(fileName: String, bytes: ByteArray): Uri {
-        val dir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "").apply { mkdirs() }
+        val dir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "TaminICT").apply { mkdirs() }
         val file = File(dir, fileName).apply { writeBytes(bytes) }
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
