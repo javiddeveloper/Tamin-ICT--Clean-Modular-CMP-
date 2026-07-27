@@ -95,6 +95,7 @@ fun SelfDeclarationDiseasesScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
+                title = "سوالات سلامت",
                 currentStep = 8,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -118,14 +119,6 @@ fun SelfDeclarationDiseasesScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            TaminText(
-                text = "سابقهٔ بیماری‌های فردی",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                )
-            )
 
             InfoBanner(
                 message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
