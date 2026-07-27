@@ -69,6 +69,9 @@
     <string name="health_contact_landline_label">تلفن ثابت (به همراه کد استان)</string>
     <string name="health_contact_landline_placeholder">۰۲۱۲۲۳۳۴۴۵۵</string>
     <string name="health_contact_landline_error">شماره تلفن ثابت باید 11 رقم باشد</string>
+    <string name="health_contact_email_label">پست الکترونیکی (ایمیل)</string>
+    <string name="health_contact_email_placeholder">example@email.com</string>
+    <string name="health_contact_email_error">فرمت ایمیل وارد شده معتبر نیست</string>
     <string name="health_contact_province_label">استان</string>
     <string name="health_contact_province_placeholder">انتخاب استان</string>
     <string name="health_contact_province_bs_title">انتخاب استان</string>

@@ -37,7 +37,8 @@ fun SelfDeclarationPhysicalScreen(
             HealthTopAppBar(
                 currentStep = 5,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                title = "پرسش‌های سلامت"
             )
         },
         bottomBar = {

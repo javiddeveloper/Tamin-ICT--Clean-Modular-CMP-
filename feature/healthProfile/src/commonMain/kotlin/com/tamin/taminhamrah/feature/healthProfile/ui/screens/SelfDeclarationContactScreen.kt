@@ -32,7 +32,9 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
-
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 @Composable
 fun SelfDeclarationContactScreen(
     state: ContactStepState,
@@ -52,18 +54,17 @@ fun SelfDeclarationContactScreen(
     var mobileHasFocused by remember { mutableStateOf(false) }
     var mobileTouched by remember { mutableStateOf(false) }
 
-    var landlineHasFocused by remember { mutableStateOf(false) }
-    var landlineTouched by remember { mutableStateOf(false) }
+    var emailHasFocused by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
 
     var postcodeHasFocused by remember { mutableStateOf(false) }
     var postcodeTouched by remember { mutableStateOf(false) }
 
     val isMobileValid = ValidationUtils.isPhoneNumberValid(state.mobile)
-    val isLandlineValid = ValidationUtils.isLandlineValid(state.landline)
+    val isEmailValid = ValidationUtils.isEmailValid(state.email)
     val isPostcodeValid = ValidationUtils.isPostcodeValid(state.postcode)
 
-    val isNextEnabled = isMobileValid && isLandlineValid && isPostcodeValid &&
-            state.cityLabel.isNotEmpty() && state.provinceLabel.isNotEmpty() && state.address.isNotEmpty()
+    val isNextEnabled = isMobileValid && isEmailValid && isPostcodeValid
 
     // If province is set but cityOptions are not yet loaded, load cities
     LaunchedEffect(state.provinceId) {
@@ -79,7 +80,8 @@ fun SelfDeclarationContactScreen(
             HealthTopAppBar(
                 currentStep = 3,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                title = stringResource(Res.string.health_contact_desc)
             )
         },
         bottomBar = {
@@ -101,15 +103,6 @@ fun SelfDeclarationContactScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            TaminText(
-                text = stringResource(Res.string.health_contact_title),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                )
-            )
-
             TaminText(
                 text = stringResource(Res.string.health_contact_desc),
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -130,6 +123,7 @@ fun SelfDeclarationContactScreen(
                 isValid = if (showMobileError) false else null,
                 errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                isRequired = true,
                 onFocusChanged = { isFocused ->
                     if (isFocused) {
                         mobileHasFocused = true
@@ -139,23 +133,22 @@ fun SelfDeclarationContactScreen(
                 }
             )
 
-            val showLandlineError = landlineTouched && state.landline.length != 11
+            val showEmailError = emailTouched && !isEmailValid
             StyledTextField(
-                value = state.landline,
-                onValueChange = { land ->
-                    val filtered = ValidationUtils.validateLandline(land)
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(landline = filtered)))
+                value = state.email,
+                onValueChange = { email ->
+                    onIntent(HealthProfileIntent.UpdateContact(state.copy(email = email)))
                 },
-                label = stringResource(Res.string.health_contact_landline_label),
-                placeholder = stringResource(Res.string.health_contact_landline_placeholder),
-                isValid = if (showLandlineError) false else null,
-                errorText = if (showLandlineError) stringResource(Res.string.health_contact_landline_error) else null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                label = stringResource(Res.string.health_contact_email_label),
+                placeholder = stringResource(Res.string.health_contact_email_placeholder),
+                isValid = if (showEmailError) false else null,
+                errorText = if (showEmailError) stringResource(Res.string.health_contact_email_error) else null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 onFocusChanged = { isFocused ->
                     if (isFocused) {
-                        landlineHasFocused = true
-                    } else if (landlineHasFocused) {
-                        landlineTouched = true
+                        emailHasFocused = true
+                    } else if (emailHasFocused) {
+                        emailTouched = true
                     }
                 }
             )
@@ -328,6 +321,8 @@ fun SelfDeclarationContactScreen(
     }
 }
 
+
+
 @Composable
 private fun StyledSelectField(
     value: String,
@@ -336,13 +331,23 @@ private fun StyledSelectField(
     onClick: () -> Unit,
     isLoading: Boolean = false,
     enabled: Boolean = true,
+    isRequired: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
 
+    val annotatedLabel = buildAnnotatedString {
+        append(label)
+        if (isRequired) {
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         TaminText(
-            text = label,
+            text = annotatedLabel,
             fontSize = 12.5.sp,
             fontWeight = FontWeight.Bold,
             color = taminColors.textTertiary,

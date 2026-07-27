@@ -46,4 +46,13 @@ object ValidationUtils {
     fun isPostcodeValid(postcode: String): Boolean {
         return postcode.isEmpty() || postcode.length == 10
     }
+
+    /**
+     * Returns true if email is empty or matches a valid email pattern.
+     */
+    fun isEmailValid(email: String): Boolean {
+        if (email.isBlank()) return true
+        val emailRegex = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+        return emailRegex.matches(email.trim())
+    }
 }

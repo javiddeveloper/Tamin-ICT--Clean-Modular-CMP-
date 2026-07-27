@@ -322,7 +322,6 @@ private fun RulerPickerPreview() {
                 onValueChange = { weight = it },
                 range = 40..150,
                 unit = "کیلوگرم",
-                accentColor = LocalTaminColors.current.teal
             )
         }
     }

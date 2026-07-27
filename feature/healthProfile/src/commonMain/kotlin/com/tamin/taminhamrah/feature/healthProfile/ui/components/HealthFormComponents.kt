@@ -5,8 +5,9 @@ import com.tamin.taminhamrah.ui.components.TaminText
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-
-
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -172,6 +173,8 @@ fun InteractiveChoiceChips(
     }
 }
 
+
+
 /**
  * Custom stylized text input with validation ticks, prefix icons, and error states.
  */
@@ -189,6 +192,7 @@ fun StyledTextField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
+    isRequired: Boolean = false,
     onClick: (() -> Unit)? = null,
     onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
@@ -205,10 +209,19 @@ fun StyledTextField(
     val leadingIconColor = if (isFocused) taminColors.blueText else taminColors.textMuted
     val trailingIconColor = if (isFocused) taminColors.blueText else taminColors.textSecondary
 
+    val annotatedLabel = buildAnnotatedString {
+        append(label)
+        if (isRequired) {
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
+            }
+        }
+    }
+
     Box(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TaminText(
-                text = label,
+                text = annotatedLabel,
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = taminColors.textTertiary,
