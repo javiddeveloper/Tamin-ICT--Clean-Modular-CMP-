@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractLetter
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractRh
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
@@ -309,8 +311,8 @@ class HealthProfileViewModel(
                     ),
                     bloodGroup = sd.bloodGroup.copy(
                         selectedBloodGroupId = info.patientBloodGroupCode,
-                        selectedBloodGroupLetter = info.patientBloodGroup,
-                        selectedBloodGroupRh = info.patientBloodGroup
+                        selectedBloodGroupLetter = extractLetter(info.patientBloodGroup),
+                        selectedBloodGroupRh = extractRh(info.patientBloodGroup)
                     )
                 )
             )

@@ -4,10 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +23,8 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.bloodGroupLetters
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.findBloodGroupId
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
@@ -39,6 +38,9 @@ fun SelfDeclarationBloodScreen(
     val scrollState = rememberScrollState()
 
     val rhFactors = listOf("+", "-")
+
+    val bloodGroupLetters = remember(bloodGroupOptions) { bloodGroupLetters(bloodGroupOptions) }
+    val chipsAlpha = if (state.isBloodGroupUnknown) 0.5f else 1f
 
     val isNextEnabled = state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null && state.selectedBloodGroupRh != null)
 
@@ -121,29 +123,20 @@ fun SelfDeclarationBloodScreen(
                 modifier = Modifier.align(Alignment.Start)
             )
 
-            val chipsAlpha = if (state.isBloodGroupUnknown) 0.5f else 1f
-
-            InteractiveChoiceChips(
+            BloodGroupChipsRow(
+                letters = bloodGroupLetters,
+                selectedLetter = state.selectedBloodGroupLetter,
+                enabled = !state.isBloodGroupUnknown,
                 modifier = Modifier.alpha(chipsAlpha),
-                options = bloodGroupOptions.map { it.label },
-                selectedIndices = state.selectedBloodGroupId?.let { id ->
-                    val idx = bloodGroupOptions.indexOfFirst { it.id == id }
-                    if (idx >= 0) setOf(idx) else emptySet()
-                } ?: emptySet(),
-                onSelectionChanged = { idxs ->
-                    if (!state.isBloodGroupUnknown) {
-                        val letter = idxs.lastOrNull()?.let { bloodGroupOptions[it] }
-                        val newUnknown = !state.isBloodGroupUnknown
-                        onIntent(
-                            HealthProfileIntent.UpdateBloodGroup(
-                                state.copy(
-                                    selectedBloodGroupRh = if (newUnknown) null else state.selectedBloodGroupRh,
-                                    selectedBloodGroupId = letter?.id,
-                                    selectedBloodGroupLetter = letter?.label
-                                )
+                onLetterSelected = { letter ->
+                    onIntent(
+                        HealthProfileIntent.UpdateBloodGroup(
+                            state.copy(
+                                selectedBloodGroupLetter = letter,
+                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, letter, state.selectedBloodGroupRh)
                             )
                         )
-                    }
+                    )
                 }
             )
 
@@ -163,7 +156,8 @@ fun SelfDeclarationBloodScreen(
                     onIntent(
                         HealthProfileIntent.UpdateBloodGroup(
                             state.copy(
-                                selectedBloodGroupRh = rh
+                                selectedBloodGroupRh = rh,
+                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, state.selectedBloodGroupLetter, rh)
                             )
                         )
                     )
