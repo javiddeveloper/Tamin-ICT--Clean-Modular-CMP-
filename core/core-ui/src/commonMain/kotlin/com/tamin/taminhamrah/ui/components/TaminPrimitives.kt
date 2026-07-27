@@ -220,6 +220,8 @@ fun DetailRow(
     valueColor: Color = LocalTaminColors.current.textPrimary,
     valueStyle: TextStyle = MaterialTheme.typography.titleSmall,
     numeric: Boolean = true,
+    /** A unit (e.g. "ریال") drawn to the left of the numeric [value], regardless of RTL. */
+    unit: String? = null,
 ) {
     Row(
         modifier = modifier
@@ -233,10 +235,19 @@ fun DetailRow(
             style = MaterialTheme.typography.bodySmall,
             color = LocalTaminColors.current.textMuted,
         )
-        if (numeric) {
-            NumericText(text = value, style = valueStyle, color = valueColor)
-        } else {
-            Text(text = value, style = valueStyle, color = valueColor)
+        when {
+            // Number and unit are separate children so the unit stays physically left of the digits:
+            // in the RTL row the number is the right child, the unit the left one.
+            unit != null -> Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+            ) {
+                NumericText(text = value, style = valueStyle, color = valueColor)
+                Text(text = unit, style = valueStyle, color = valueColor)
+            }
+
+            numeric -> NumericText(text = value, style = valueStyle, color = valueColor)
+            else -> Text(text = value, style = valueStyle, color = valueColor)
         }
     }
 }
@@ -271,6 +282,7 @@ fun TaminPrimaryButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
+        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -279,7 +291,6 @@ fun TaminPrimaryButton(
                 modifier = Modifier.size(IconSize.medium),
             )
         }
-        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
     }
 }
 

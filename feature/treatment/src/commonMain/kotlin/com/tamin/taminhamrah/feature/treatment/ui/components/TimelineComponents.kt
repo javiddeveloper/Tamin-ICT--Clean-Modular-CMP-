@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.treatment.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,12 +10,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_calendar
+import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.ic_tamin_user
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.rotate
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,13 +56,13 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+
 /**
  * Components for the medical-records timeline: the record card and its date-group
  * header, the category filter strip, the in-header filter bar, and the pinned cost
  * totals footer.
  */
-
-private val ACCENT_BAR_WIDTH = 4.dp
 
 /**
  * One entry in the medical-records timeline. The accent stripe on the leading edge and
@@ -104,7 +118,8 @@ fun MedicalRecordCard(
             style = MaterialTheme.typography.bodySmall,
             color = colors.textTertiary,
         )
-        TaminDivider(modifier = Modifier.padding(top = Spacing.sm))
+        TaminDivider(modifier = Modifier.padding(top = Spacing.md))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         MedicalRecordFooter(shareAmount = shareAmount)
     }
 }
@@ -114,7 +129,7 @@ fun MedicalRecordCard(
  * the app's right-to-left layout, the left side if it is ever rendered left-to-right.
  */
 private fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
-    val barWidth = ACCENT_BAR_WIDTH.toPx()
+    val barWidth = TreatmentDimens.accentBarWidth.toPx()
     val x = if (layoutDirection == LayoutDirection.Rtl) size.width - barWidth else 0f
     drawRect(
         color = color,
@@ -140,27 +155,43 @@ private fun MedicalRecordFooter(shareAmount: String) {
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textMuted,
             )
-            NumericText(
-                text = shareAmount,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.textPrimary,
-            )
-            Text(
-                text = "ریال",
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.textMuted,
-            )
+            // Number and unit are separate so «ریال» stays left of the digits: in this RTL row the
+            // number is the right child, «ریال» the left one.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+            ) {
+                NumericText(
+                    text = shareAmount,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.textPrimary,
+                )
+                Text(
+                    text = "ریال",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.textPrimary,
+                )
+            }
         }
-        Box(
+        Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(CornerRadius.chip))
                 .background(colors.medicalGradient)
                 .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
                 text = "جزئیات",
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
+            )
+            // Points toward the detail screen; autoMirrored, so it sits on the left in RTL.
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.small),
             )
         }
     }
@@ -193,11 +224,9 @@ fun TreatmentFilterChip(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(if (selected) colors.teal else colors.bgSurface)
-            .border(
-                width = 1.dp,
-                color = if (selected) Color.Transparent else colors.border,
-                shape = CircleShape,
+            .then(
+                if (selected) Modifier.background(colors.medicalGradient)
+                else Modifier.background(colors.bgSurface).border(1.dp, colors.border, CircleShape)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
@@ -205,12 +234,12 @@ fun TreatmentFilterChip(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else colors.textTertiary,
+            color = if (selected) Color.White else colors.textSecondary,
         )
     }
 }
 
-/** Horizontally scrollable strip of category filters above the timeline. */
+/** Horizontally scrollable strip of category filters above the timeline with auto-scrolling. */
 @Composable
 fun TreatmentFilterChipRow(
     categories: List<String>,
@@ -218,18 +247,32 @@ fun TreatmentFilterChipRow(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex in categories.indices) {
+            lazyListState.animateScrollToItem(selectedIndex)
+        }
+    }
+
+    LazyRow(
+        state = lazyListState,
         modifier = modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        categories.forEachIndexed { index, label ->
+        itemsIndexed(categories) { index, label ->
             TreatmentFilterChip(
                 label = label,
                 selected = index == selectedIndex,
-                onClick = { onSelect(index) },
+                onClick = {
+                    onSelect(index)
+                    coroutineScope.launch {
+                        lazyListState.animateScrollToItem(index)
+                    }
+                },
             )
         }
     }
@@ -249,6 +292,9 @@ fun TimelineFilterBar(
     onDateClick: () -> Unit,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
+    // Which chooser is open, so its chevron can point the other way.
+    personExpanded: Boolean = false,
+    dateExpanded: Boolean = false,
 ) {
     Row(
         modifier = modifier
@@ -259,15 +305,19 @@ fun TimelineFilterBar(
     ) {
         FilterTrigger(
             label = personLabel,
+            leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
             trailingIcon = dropdownIcon,
             onClick = onPersonClick,
             modifier = Modifier.weight(1f),
+            expanded = personExpanded,
         )
         FilterTrigger(
             label = dateLabel,
+            leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
             trailingIcon = dropdownIcon,
             onClick = onDateClick,
             modifier = Modifier.weight(1f),
+            expanded = dateExpanded,
         )
         Box(
             modifier = Modifier
@@ -294,7 +344,15 @@ private fun FilterTrigger(
     trailingIcon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    leadingIcon: ImageVector? = null,
+    expanded: Boolean = false,
 ) {
+    // The chevron points down when closed and up when open, animated so the flip reads as one
+    // control rather than two icons swapping.
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) CHEVRON_ROTATION_EXPANDED else CHEVRON_ROTATION_COLLAPSED,
+        label = "filterChevron",
+    )
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
@@ -307,8 +365,16 @@ private fun FilterTrigger(
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
+        if (leadingIcon != null) {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
@@ -321,10 +387,16 @@ private fun FilterTrigger(
             imageVector = trailingIcon,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(IconSize.small),
+            modifier = Modifier
+                .size(IconSize.small)
+                .rotate(chevronRotation),
         )
     }
 }
+
+/** The supplied chevron points back/right, so closed rotates it down and open rotates it up. */
+private const val CHEVRON_ROTATION_COLLAPSED = 90f
+private const val CHEVRON_ROTATION_EXPANDED = -90f
 
 /**
  * Pinned footer summarizing the filtered timeline: the insured person's share, the

@@ -1,11 +1,11 @@
 package com.tamin.taminhamrah.feature.treatment.fake
 
-import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
-import com.tamin.taminhamrah.model.health.PatientGeneralDN
-import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
-import com.tamin.taminhamrah.model.health.PatientHospitalizationsDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 
 /**
  * Central factory of sample domain models for the treatment dashboard ViewModel tests.
@@ -53,46 +53,30 @@ object TreatmentTestData {
         id = 1L
     )
 
-    fun patientGeneral(natCode: String = MAIN_NATIONAL_CODE) = PatientGeneralDN(
-        ptientID = 1,
-        patientName = "Seyed",
-        patientFamily = "Mirfazli",
-        patientNatCode = natCode,
-        patientAge = "70",
-        patientGender = "مرد",
-        patientBirthDate = "13280407",
-        patientMobile = null,
-        patientAddress = null,
-        patientFather = null
+    fun prescription() = ElectronicPrescriptionDN(
+        id = "1", docId = "doc1", docName = "Doctor", flagSata = "1",
+        location = "Location", noteHeadEprescID = 100L, patientID = "patient1",
+        patientName = "Patient", prescDate = "14020101", prescName = "Prescription",
+        specDesc = "Specialty", prescType = "1", trackingCode = 200L
     )
 
-    fun selfDeclarative(patientID: Int = 1) = PatientSelfDeclarativeDN(
-        alcoholDesc = null,
-        alcoholUsage = null,
-        alcoholUsageTitle = null,
-        exerciseDesc = null,
-        exerciseFreq = null,
-        exerciseFreqTitle = null,
-        lastUpdateDate = null,
-        objectID = patientID,
-        smokingDesc = null,
-        smokingStatus = null,
-        smokingStatusTitle = null,
-        substanceDesc = null,
-        substanceUsage = null,
-        substanceUsageTitle = null
+    fun prescriptionDetail() = ElectronicPrescriptionDetailDN(
+        sumPriceItem = 1000L, ssoPayment = 800L, insurancePayment = 200L,
+        serviceQuantity = 1, noteHeadEprescID = 100L, serverCode = "srvCode",
+        serverName = "srvName", serviceName = "serviceName", drugInst = "instruction",
+        registerDate = "14020101", drugInstruction = "drugInstruction",
+        deliveredNo = 1, drugAmount = "10"
     )
 
-    fun drugAllergy() = DrugItemAllergiesDN(
-        allergyComments = "Comments", drugId = 1, drugName = "Drug"
+    fun prescriptionPrice() = ElectronicPrescriptionPriceDN(
+        headInsuPayment = 1000L, headSsoPayment = 800L,
+        noteHeadEprescID = 100L, requestPrice = 1800L
     )
 
-    fun hospitalization() = PatientHospitalizationsDN(
-        admId = 1, admSource = null, admType = null, comments = null, docID = null,
-        docSpeciality = null, doctorName = "Dr", finalDiagCode = null, finalDiagDesc = "Diag",
-        firstDiagCode = null, firstDiagDesc = null, healthcareProvider = "Hospital",
-        hospitalizedDays = 3, hospitalizedEndDate = "14020105", hospitalizedStartDate = "14020102",
-        outcomeDesc = null, referDocId = null, referDocName = null, referDocSpeciality = null,
-        referHealthcareProvider = null
-    )
+    /**
+     * A downloaded-PDF domain result. The underlying stream is left null because the
+     * feature test classpath does not expose ktor's ByteReadChannel; the ViewModels only
+     * map this into a presentation marker, so a null stream is sufficient for assertions.
+     */
+    fun pdf() = PdfDownloadDN(pdf = null)
 }

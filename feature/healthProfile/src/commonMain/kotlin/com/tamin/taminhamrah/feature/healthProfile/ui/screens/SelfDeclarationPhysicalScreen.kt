@@ -43,7 +43,7 @@ fun SelfDeclarationPhysicalScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
-                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )

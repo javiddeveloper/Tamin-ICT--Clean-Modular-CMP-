@@ -66,7 +66,9 @@ data class TaminColors(
     val grey900 : Color,
 
     val hawkesBlue : Color,
-    val chipBg: Color
+    val chipBg: Color,
+    val warning: Color,
+    val fuchsiaBlue: Color
 )
 
 val LightTaminColors = TaminColors(
@@ -78,7 +80,7 @@ val LightTaminColors = TaminColors(
     textPrimary = TaminLightTextDefault,
     textSecondary = TaminLightTextSecondary,
     textTertiary = Gray400,
-    textMuted = Gray400,
+    textMuted = TaminLightTextMuted,
     chevron = Gray300,
     greenBg = Secondary50,
     greenText = TaminLightSuccess,
@@ -144,6 +146,8 @@ val LightTaminColors = TaminColors(
     hawkesBlue = Color(0xFFDCE7FB),
     chipBg = Color(0xFFEFF6FF),
     grey900 = Color(0xFFE2E8F0),
+    warning = Color(0xFFC97E0A),
+    fuchsiaBlue = Color(0xFF7C4BC0),
 )
 
 val DarkTaminColors = TaminColors(
@@ -168,12 +172,37 @@ val DarkTaminColors = TaminColors(
     dangerText = TaminDarkError,
     teal = Secondary500,
     bgIconProfile = TaminLightSurface,
-    iconGradientPrimary = Brush.verticalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
-    iconGradientSecondary = Brush.verticalGradient(listOf(IconGradientPurpleStart, IconGradientPurpleEnd)),
-    iconGradientNeutral = Brush.verticalGradient(listOf(IconGradientGrayStart, IconGradientGrayEnd)),
+    iconGradientPrimary = Brush.verticalGradient(
+        listOf(
+            IconGradientBlueStart,
+            IconGradientBlueEnd
+        )
+    ),
+    iconGradientSecondary = Brush.verticalGradient(
+        listOf(
+            IconGradientPurpleStart,
+            IconGradientPurpleEnd
+        )
+    ),
+    iconGradientNeutral = Brush.verticalGradient(
+        listOf(
+            IconGradientGrayStart,
+            IconGradientGrayEnd
+        )
+    ),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
-    iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
-    iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
+    iconGlassShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.40f),
+            Color.White.copy(alpha = 0.0f)
+        )
+    ),
+    iconGlassBorder = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.60f),
+            Color.White.copy(alpha = 0.05f)
+        )
+    ),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8C1E293B),
     glassA2 = Color(0x47111827),
@@ -196,5 +225,7 @@ val DarkTaminColors = TaminColors(
     ),
     grey900 = Color(0xFFE2E8F0),
     hawkesBlue = Color(0xFFDCE7FB),
-    chipBg = Color(0x293B82F6)
+    chipBg = Color(0x293B82F6),
+    warning = Color(0xFFFBBF24),
+    fuchsiaBlue = Color(0xFFB79AEE)
 )
