@@ -40,7 +40,6 @@ fun SelfDeclarationPersonalScreen(
 
     var showMaritalBottomSheet by remember { mutableStateOf(false) }
 
-    val isNextEnabled = state.maritalStatusId != null && state.job.isNotEmpty()
 
     val selectedMaritalLabel = state.maritalStatusLabel.ifEmpty {
         maritalStatusOptions.firstOrNull { it.id == state.maritalStatusId }?.label ?: ""
@@ -58,7 +57,6 @@ fun SelfDeclarationPersonalScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = stringResource(Res.string.health_btn_next_step),
-                primaryEnabled = isNextEnabled,
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.CONTACT)) },
                 secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
