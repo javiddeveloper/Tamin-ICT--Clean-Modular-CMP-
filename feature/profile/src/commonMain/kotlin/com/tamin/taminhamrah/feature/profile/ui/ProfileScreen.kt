@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.lerp as dpLerp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -56,6 +57,8 @@ import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import kotlin.math.abs
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -67,6 +70,11 @@ import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.LocalThemeRevealController
 import com.tamin.taminhamrah.ui.components.ValidationStatusCard
+import com.tamin.taminhamrah.ui.motion.motionFade
+import com.tamin.taminhamrah.ui.motion.motionParallax
+import com.tamin.taminhamrah.ui.motion.motionScale
+import com.tamin.taminhamrah.ui.motion.ScrollMotionState
+import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
@@ -125,9 +133,17 @@ fun ProfileScreen(
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val hazeState = remember { HazeState(initialBlurEnabled = true) }
+    val lazyListState = rememberLazyListState()
+    val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+    var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
 
     LaunchedEffect(userId) {
         viewModel.sendIntent(ProfileIntent.LoadProfile(userId))
+    }
+
+    LaunchedEffect(motionState, lazyListState) {
+        motionState.observeLazyListState(lazyListState)
     }
 
     HandleProfileEvents(
@@ -138,13 +154,14 @@ fun ProfileScreen(
         onBackClicked = onBackClicked
     )
 
-    val onIntent = remember(viewModel) {
-        { intent: ProfileIntent -> viewModel.sendIntent(intent) }
-    }
-
     ProfileContent(
         state = uiState,
-        onIntent = onIntent,
+        hazeState = hazeState,
+        lazyListState = lazyListState,
+        motionState = motionState,
+        themeButtonCenter = themeButtonCenter,
+        onThemeButtonCenterChange = { themeButtonCenter = it },
+        onIntent = viewModel::sendIntent,
     )
 }
 
@@ -185,21 +202,28 @@ fun HandleProfileEvents(
 fun ProfileContent(
     modifier: Modifier = Modifier,
     state: ProfileUiState,
+    hazeState: HazeState,
+    lazyListState: LazyListState,
+    motionState: ScrollMotionState,
+    themeButtonCenter: Offset,
+    onThemeButtonCenterChange: (Offset) -> Unit,
     onIntent: (ProfileIntent) -> Unit,
 ) {
-    val density = LocalDensity.current
     val taminColors = LocalTaminColors.current
-    val hazeState = remember { HazeState(initialBlurEnabled = true) }
-    val scrollState = rememberProfileScrollState()
+    val headerProgress = motionState.progress
+    val revealController = LocalThemeRevealController.current
+    val isDark = taminColors == DarkTaminColors
     val decaySpec = rememberSplineBasedDecay<Float>()
-    val snapFlingBehavior = remember(scrollState, decaySpec) {
+    val topBarGradient = remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
+    val defaultBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.border) }
+    val dangerBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.dangerBorder) }
+    val snapFlingBehavior = remember(lazyListState, decaySpec) {
         snapFlingBehavior(
             snapLayoutInfoProvider = object : SnapLayoutInfoProvider {
                 override fun calculateSnapOffset(velocity: Float): Float {
-                    val lazyListState = scrollState.lazyListState
                     if (lazyListState.firstVisibleItemIndex == 0) {
                         val currentOffset = lazyListState.firstVisibleItemScrollOffset.toFloat()
-                        val maxScrollPx = scrollState.maxScrollPx
+                        val maxScrollPx = motionState.maxMotionDistancePx
                         if (currentOffset > 0 && currentOffset < maxScrollPx) {
                             val targetOffset = if (abs(velocity) > 500f) {
                                 if (velocity > 0) maxScrollPx else 0f
@@ -214,228 +238,6 @@ fun ProfileContent(
             },
             decayAnimationSpec = decaySpec,
             snapAnimationSpec = spring(stiffness = Spring.StiffnessLow)
-        )
-    }
-    val progress = scrollState.progress
-    val motionState = ProfileMotionState(progress)
-    val revealController = LocalThemeRevealController.current
-    var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
-    val isDark = taminColors == DarkTaminColors
-    val topBarGradient = remember(isDark) {
-        Brush.horizontalGradient(taminColors.profileGradientStops)
-    }
-    val defaultBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.border) }
-    val dangerBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.dangerBorder) }
-    val identityInfoTitle = stringResource(Res.string.profile_identity_info)
-    val identityInfoIcon = painterResource(Res.drawable.ic_identity)
-    val dependentsTitle = stringResource(Res.string.profile_dependents)
-    val dependentsIcon = painterResource(Res.drawable.ic_person)
-    val dependentsBadgeText = stringResource(Res.string.profile_dependents_badge_test)
-    val activeRelationTitle = stringResource(Res.string.profile_active_relation)
-    val activeRelationIcon = painterResource(Res.drawable.ic_communication)
-    val electronicFileTitle = stringResource(Res.string.profile_electronic_file)
-    val electronicFileIcon = painterResource(Res.drawable.ic_request)
-    val bankAccountTitle = stringResource(Res.string.profile_bank_account)
-    val bankAccountIcon = painterResource(Res.drawable.ic_number)
-    val changeMobileTitle = stringResource(Res.string.profile_change_mobile)
-    val changeMobileIcon = painterResource(Res.drawable.ic_mobile)
-    val personalInfoSectionTitle = stringResource(Res.string.profile_personal_info)
-    val personalInfoItems: ImmutableList<ListItemData> = remember(taminColors, onIntent) {
-        persistentListOf(
-            ListItemData(
-                title = identityInfoTitle,
-                leadingIconPainter = identityInfoIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.IDENTITY_INFO)) }
-            ),
-            ListItemData(
-                title = dependentsTitle,
-                leadingIconPainter = dependentsIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
-                ),
-                badge = ListItemBadge(
-                    text = dependentsBadgeText,
-                    backgroundColor = taminColors.blueBg,
-                    textColor = taminColors.blueText
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.LoadSubDominants) }
-            ),
-            ListItemData(
-                title = activeRelationTitle,
-                leadingIconPainter = activeRelationIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ACTIVE_RELATION)) }
-            ),
-            ListItemData(
-                title = electronicFileTitle,
-                leadingIconPainter = electronicFileIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ELECTRONIC_FILE)) }
-            ),
-            ListItemData(
-                title = bankAccountTitle,
-                leadingIconPainter = bankAccountIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
-            ),
-            ListItemData(
-                title = changeMobileTitle,
-                leadingIconPainter = changeMobileIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
-            )
-        )
-    }
-    val requestsTitle = stringResource(Res.string.profile_requests)
-    val requestsIcon = painterResource(Res.drawable.ic_request)
-    val personalInboxTitle = stringResource(Res.string.profile_personal_inbox)
-    val personalInboxIcon = painterResource(Res.drawable.ic_inbox)
-    val cartableSectionTitle = stringResource(Res.string.profile_cartable)
-    val cartableItems: ImmutableList<ListItemData> = remember(taminColors, onIntent) {
-        persistentListOf(
-            ListItemData(
-                title = requestsTitle,
-                leadingIconPainter = requestsIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.REQUESTS)) }
-            ),
-            ListItemData(
-                title = personalInboxTitle,
-                leadingIconPainter = personalInboxIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
-            )
-        )
-    }
-    val securityTitle = stringResource(Res.string.profile_security)
-    val securityIcon = painterResource(Res.drawable.ic_privacy)
-    val settingsTitle = stringResource(Res.string.profile_settings)
-    val settingsIcon = painterResource(Res.drawable.ic_setting)
-    val securitySettingsSectionTitle = stringResource(Res.string.profile_security_settings)
-    val securityItems: ImmutableList<ListItemData> = remember(taminColors, onIntent) {
-        persistentListOf(
-            ListItemData(
-                title = securityTitle,
-                leadingIconPainter = securityIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientNeutral
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SECURITY)) }
-            ),
-            ListItemData(
-                title = settingsTitle,
-                leadingIconPainter = settingsIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientNeutral
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SETTINGS)) }
-            )
-        )
-    }
-    val supportTitle = stringResource(Res.string.profile_support)
-    val supportIcon = painterResource(Res.drawable.ic_support)
-    val contactMeTitle = stringResource(Res.string.profile_contact_me)
-    val contactMeIcon = painterResource(Res.drawable.ic_send)
-    val shareTitle = stringResource(Res.string.profile_share)
-    val shareIcon = painterResource(Res.drawable.ic_share)
-    val versionHistoryTitle = stringResource(Res.string.profile_version_history)
-    val versionHistoryIcon = painterResource(Res.drawable.ic_history)
-    val supportSectionTitle = stringResource(Res.string.profile_support_section)
-    val supportItems: ImmutableList<ListItemData> = remember(taminColors, onIntent) {
-        persistentListOf(
-            ListItemData(
-                title = supportTitle,
-                leadingIconPainter = supportIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SUPPORT)) }
-            ),
-            ListItemData(
-                title = contactMeTitle,
-                leadingIconPainter = contactMeIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CONTACT_ME)) }
-            ),
-            ListItemData(
-                title = shareTitle,
-                leadingIconPainter = shareIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SHARE)) }
-            ),
-            ListItemData(
-                title = versionHistoryTitle,
-                leadingIconPainter = versionHistoryIcon,
-                colors = ListItemColors(
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
-                ),
-                showArrow = true,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.VERSION_HISTORY)) }
-            )
-        )
-    }
-    val logoutTitle = stringResource(Res.string.profile_logout)
-    val logoutIcon = painterResource(Res.drawable.ic_exit)
-    val logoutItems: ImmutableList<ListItemData> = remember(taminColors, onIntent) {
-        persistentListOf(
-            ListItemData(
-                title = logoutTitle,
-                leadingIconPainter = logoutIcon,
-                colors = ListItemColors(
-                    titleColor = taminColors.dangerText,
-                    leadingIconBackgroundColor = taminColors.dangerBg,
-                    leadingIconTintColor = taminColors.bgIconProfile,
-                    leadingIconBackgroundGradient = taminColors.iconGradientDanger
-                ),
-                showArrow = false,
-                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT)) }
-            )
         )
     }
 
@@ -458,7 +260,7 @@ fun ProfileContent(
                                             coords.size.width / 2f,
                                             coords.size.height / 2f
                                         )
-                                    themeButtonCenter = centerInRoot
+                                    onThemeButtonCenterChange(centerInRoot)
                                 }
                             ) {
                                 TaminTopAppBarButton(
@@ -478,7 +280,7 @@ fun ProfileContent(
                             }
                         },
                         background = topBarGradient,
-                        bottomPadding = motionState.topBarBottomPadding
+                        bottomPadding = dpLerp(Spacing.xxxl, Spacing.sm, headerProgress)
                     ) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
@@ -486,24 +288,23 @@ fun ProfileContent(
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Color.White,
                                 modifier = Modifier
-                                    .graphicsLayer {
-                                        alpha = motionState.titleAlpha
-                                        translationY = with(density) { motionState.titleTranslationY.toPx() }
-                                    }
                                     .align(Alignment.TopStart)
                                     .offset(y = (-32).dp)
+                                    .motionFade(motionState, startProgress = 0.2f, endProgress = 0.7f)
+                                    .motionParallax(motionState, parallaxDistance = 20.dp)
                             )
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = motionState.rowTopPadding)
+                                    .padding(top = dpLerp(Spacing.xl, Spacing.none, headerProgress))
                                     .padding(horizontal = Spacing.sm)
-                                    .graphicsLayer {
-                                        translationY = with(density) { motionState.rowTranslationY.toPx() }
-                                        scaleX = motionState.avatarScale
-                                        scaleY = motionState.avatarScale
+                                    .motionParallax(motionState, parallaxDistance = 45.dp)
+                                    .motionScale(
+                                        state = motionState,
+                                        minScale = 0.8f,
+                                        maxScale = 1f,
                                         transformOrigin = TransformOrigin(1f, 0.5f)
-                                    },
+                                    ),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
@@ -525,9 +326,9 @@ fun ProfileContent(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(motionState.topBarContentSpacerHeight))
+                        Spacer(modifier = Modifier.height(dpLerp(Spacing.sm, Spacing.none, headerProgress)))
                     }
-                    Spacer(modifier = Modifier.height(motionState.extraSpacerHeight))
+                    Spacer(modifier = Modifier.height(dpLerp(Spacing.xxxl, 35.dp, headerProgress)))
                 }
                 ValidationStatusCard(
                     hazeState = hazeState,
@@ -543,7 +344,7 @@ fun ProfileContent(
         }
     ) { innerPadding ->
         LazyColumn(
-            state = scrollState.lazyListState,
+            state = lazyListState,
             flingBehavior = snapFlingBehavior,
             modifier = Modifier
                 .fillMaxSize()
@@ -557,37 +358,186 @@ fun ProfileContent(
         ) {
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
-                    SectionHeaderTitle(title = personalInfoSectionTitle)
+                    SectionHeaderTitle(title = stringResource(Res.string.profile_personal_info))
                     ListGroupView(
                         containerBorder = defaultBorder,
-                        items = personalInfoItems
+                        items = persistentListOf(
+                            ListItemData(
+                                title = stringResource(Res.string.profile_identity_info),
+                                leadingIconPainter = painterResource(Res.drawable.ic_identity),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.IDENTITY_INFO)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_dependents),
+                                leadingIconPainter = painterResource(Res.drawable.ic_person),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
+                                badge = ListItemBadge(
+                                    text = stringResource(Res.string.profile_dependents_badge_test),
+                                    backgroundColor = taminColors.blueBg,
+                                    textColor = taminColors.blueText
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.LoadSubDominants) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_active_relation),
+                                leadingIconPainter = painterResource(Res.drawable.ic_communication),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ACTIVE_RELATION)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_electronic_file),
+                                leadingIconPainter = painterResource(Res.drawable.ic_request),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ELECTRONIC_FILE)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_bank_account),
+                                leadingIconPainter = painterResource(Res.drawable.ic_number),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_change_mobile),
+                                leadingIconPainter = painterResource(Res.drawable.ic_mobile),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientPrimary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
+                            )
+                        )
                     )
                 }
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
-                    SectionHeaderTitle(title = cartableSectionTitle)
+                    SectionHeaderTitle(title = stringResource(Res.string.profile_cartable))
                     ListGroupView(
                         containerBorder = defaultBorder,
-                        items = cartableItems
+                        items = persistentListOf(
+                            ListItemData(
+                                title = stringResource(Res.string.profile_requests),
+                                leadingIconPainter = painterResource(Res.drawable.ic_request),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.REQUESTS)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_personal_inbox),
+                                leadingIconPainter = painterResource(Res.drawable.ic_inbox),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
+                            )
+                        )
                     )
                 }
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
-                    SectionHeaderTitle(title = securitySettingsSectionTitle)
+                    SectionHeaderTitle(title = stringResource(Res.string.profile_security_settings))
                     ListGroupView(
                         containerBorder = defaultBorder,
-                        items = securityItems
+                        items = persistentListOf(
+                            ListItemData(
+                                title = stringResource(Res.string.profile_security),
+                                leadingIconPainter = painterResource(Res.drawable.ic_privacy),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SECURITY)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_settings),
+                                leadingIconPainter = painterResource(Res.drawable.ic_setting),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SETTINGS)) }
+                            )
+                        )
                     )
                 }
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
-                    SectionHeaderTitle(title = supportSectionTitle)
+                    SectionHeaderTitle(title = stringResource(Res.string.profile_support_section))
                     ListGroupView(
                         containerBorder = defaultBorder,
-                        items = supportItems
+                        items = persistentListOf(
+                            ListItemData(
+                                title = stringResource(Res.string.profile_support),
+                                leadingIconPainter = painterResource(Res.drawable.ic_support),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SUPPORT)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_contact_me),
+                                leadingIconPainter = painterResource(Res.drawable.ic_send),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CONTACT_ME)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_share),
+                                leadingIconPainter = painterResource(Res.drawable.ic_share),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SHARE)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_version_history),
+                                leadingIconPainter = painterResource(Res.drawable.ic_history),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.VERSION_HISTORY)) }
+                            )
+                        )
                     )
                 }
             }
@@ -595,11 +545,23 @@ fun ProfileContent(
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
                     ListGroupView(
                         containerBorder = dangerBorder,
-                        items = logoutItems
+                        items = persistentListOf(
+                            ListItemData(
+                                title = stringResource(Res.string.profile_logout),
+                                leadingIconPainter = painterResource(Res.drawable.ic_exit),
+                                colors = ListItemColors(
+                                    titleColor = taminColors.dangerText,
+                                    leadingIconBackgroundColor = taminColors.dangerBg,
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientDanger
+                                ),
+                                showArrow = false,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT)) }
+                            )
+                        )
                     )
                 }
             }
-
             item {
                 Spacer(modifier = Modifier.height(Spacing.xl))
             }
@@ -611,11 +573,21 @@ fun ProfileContent(
 @Composable
 private fun ProfileScreenPreview() {
     PreviewRtlThemeContent {
+        val hazeState = remember { HazeState(initialBlurEnabled = true) }
+        val lazyListState = rememberLazyListState()
+        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+        var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
+
         ProfileContent(
             state = ProfileUiState(
                 userId = "1234567890",
                 isLoading = false,
             ),
+            hazeState = hazeState,
+            lazyListState = lazyListState,
+            motionState = motionState,
+            themeButtonCenter = themeButtonCenter,
+            onThemeButtonCenterChange = { themeButtonCenter = it },
             onIntent = {}
         )
     }
@@ -625,12 +597,23 @@ private fun ProfileScreenPreview() {
 @Composable
 private fun ProfileScreenPreviewDark() {
     TaminHamrahTheme(darkTheme = true) {
+        val hazeState = remember { HazeState(initialBlurEnabled = true) }
+        val lazyListState = rememberLazyListState()
+        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+        var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
+
         ProfileContent(
             state = ProfileUiState(
                 userId = "1234567890",
                 isLoading = false,
             ),
+            hazeState = hazeState,
+            lazyListState = lazyListState,
+            motionState = motionState,
+            themeButtonCenter = themeButtonCenter,
+            onThemeButtonCenterChange = { themeButtonCenter = it },
             onIntent = {}
         )
     }
 }
+
