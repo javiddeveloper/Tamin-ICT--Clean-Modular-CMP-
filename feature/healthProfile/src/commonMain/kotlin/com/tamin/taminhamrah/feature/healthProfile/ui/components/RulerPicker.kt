@@ -85,21 +85,21 @@ fun RulerPicker(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.padding(bottom = 12.dp)
         ) {
-            // Decrement Button
+            // Increment Button
             IconButton(
                 onClick = {
-                    if (value > range.first) {
-                        onValueChange(value - 1)
+                    if (value < range.last) {
+                        onValueChange(value + 1)
                     }
                 },
                 modifier = Modifier
                     .size(38.dp)
-                    .background(taminColors.divider, CircleShape)
+                    .background(accentColor.copy(alpha = 0.15f), CircleShape)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = "کاهش",
-                    tint = taminColors.textSecondary,
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "افزایش",
+                    tint = accentColor,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -132,21 +132,22 @@ fun RulerPicker(
 
             Spacer(modifier = Modifier.width(24.dp))
 
-            // Increment Button
+
+            // Decrement Button
             IconButton(
                 onClick = {
-                    if (value < range.last) {
-                        onValueChange(value + 1)
+                    if (value > range.first) {
+                        onValueChange(value - 1)
                     }
                 },
                 modifier = Modifier
                     .size(38.dp)
-                    .background(accentColor.copy(alpha = 0.15f), CircleShape)
+                    .background(taminColors.divider, CircleShape)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "افزایش",
-                    tint = accentColor,
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = "کاهش",
+                    tint = taminColors.textSecondary,
                     modifier = Modifier.size(18.dp)
                 )
             }
