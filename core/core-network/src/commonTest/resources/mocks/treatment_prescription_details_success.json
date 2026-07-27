@@ -1,0 +1,32 @@
+[
+  {
+    "sumPriceItem": 150000,
+    "ssoPayment": 120000,
+    "insuPayment": 30000,
+    "srvQty": 30,
+    "noteHeadEprescID": 10001,
+    "wsSrvCode": "S1",
+    "userName": "خدمت ۱",
+    "serviceName": "قرص آسپیرین 80 میلی‌گرم",
+    "drugInst": "D1",
+    "regdate": "1402/05/10",
+    "drugInstruction": "روزی یک عدد بعد از غذا",
+    "deliveredNo": 30,
+    "drugAmnt": "80mg"
+  },
+  {
+    "sumPriceItem": 200000,
+    "ssoPayment": 160000,
+    "insuPayment": 40000,
+    "srvQty": 10,
+    "noteHeadEprescID": 10001,
+    "wsSrvCode": "S2",
+    "userName": "خدمت ۲",
+    "serviceName": "کپسول آموکسی‌سیلین",
+    "drugInst": "D2",
+    "regdate": "1402/05/10",
+    "drugInstruction": "هر ۸ ساعت یک عدد",
+    "deliveredNo": 10,
+    "drugAmnt": "500mg"
+  }
+]

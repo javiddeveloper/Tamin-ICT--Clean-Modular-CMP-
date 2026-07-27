@@ -100,7 +100,7 @@ fun TaminTopAppBar(
                 textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = Spacing.sm),
+                    .padding(horizontal = Spacing.sm)
             )
             if (centerTitle || action != null) {
                 HeaderSlot { action?.invoke() }

@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.LabeledBlock
 import com.tamin.taminhamrah.ui.components.StatTile
@@ -65,6 +64,13 @@ fun PrescriptionItemCard(
     prescribedCount: String,
     receivedCount: String,
     modifier: Modifier = Modifier,
+    // Optional, from the old app's per-item detail: dispensing center, action date and the cost
+    // split. Old app labels: سهم بیمار = ssoPayment, سهم سازمان = insurancePayment, جمع کل = sumPriceItem.
+    centerName: String = "",
+    actionDate: String = "",
+    itemTotal: String = "",
+    patientShare: String = "",
+    organizationShare: String = "",
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -102,6 +108,25 @@ fun PrescriptionItemCard(
                 contentColor = colors.greenText,
                 modifier = Modifier.weight(1f),
             )
+        }
+
+        // The old app's remaining per-item fields, each shown only when present.
+        if (centerName.isNotBlank() || actionDate.isNotBlank() || itemTotal.isNotBlank() ||
+            patientShare.isNotBlank() || organizationShare.isNotBlank()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colors.bgPage, RoundedCornerShape(CornerRadius.chip))
+                    .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                if (centerName.isNotBlank()) DetailRow(label = "داروخانه/پاراکلینیک", value = centerName)
+                if (actionDate.isNotBlank()) DetailRow(label = "تاریخ اقدام", value = actionDate)
+                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = itemTotal, unit = "ریال")
+                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = patientShare, unit = "ریال")
+                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = organizationShare, unit = "ریال")
+            }
         }
     }
 }
@@ -212,25 +237,20 @@ fun CostBreakdownCard(
             color = colors.textPrimary,
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
-        DetailRow(label = "جمع کل", value = total)
+        DetailRow(label = "جمع کل", value = total, unit = "ریال")
         DetailRow(
             label = "سهم سازمان",
             value = organizationShare,
+            unit = "ریال",
             valueColor = colors.blueText,
         )
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
         DetailRow(
             label = "سهم شما",
             value = insuredShare,
+            unit = "ریال",
             valueColor = colors.greenText,
             valueStyle = MaterialTheme.typography.titleLarge,
-        )
-        Text(
-            text = "ریال",
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textMuted,
-            textAlign = TextAlign.End,
-            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

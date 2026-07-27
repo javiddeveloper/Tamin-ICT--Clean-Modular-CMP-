@@ -1,7 +1,9 @@
 package com.tamin.taminhamrah.feature.treatment.ui.model
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 
+@Immutable
 data class PatientItem(
     val nationalId: String,
     val fullName: String,
@@ -9,7 +11,15 @@ data class PatientItem(
     val relation: String? = null,
     val brhName: String? = null,
     val insuranceType: String? = null
-)
+) {
+    /** Label for the records patient filter: the insured reads as «خودم», dependants as «رابطه - نام». */
+    val filterLabel: String
+        get() = when {
+            !isDependent -> "خودم"
+            relation.isNullOrEmpty() -> fullName
+            else -> "$relation - $fullName"
+        }
+}
 
 private const val FALLBACK_MAIN_INSURED_NAME = "بیمه‌شده اصلی"
 private const val DEPENDANT_RELATION = "تحت تکفل"

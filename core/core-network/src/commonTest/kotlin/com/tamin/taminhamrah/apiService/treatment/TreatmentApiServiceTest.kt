@@ -26,16 +26,26 @@ class TreatmentApiServiceTest {
     private lateinit var interceptedUrl: String
     private lateinit var interceptedMethod: String
     private lateinit var responseContent: String
+    private var responseBytes: ByteArray? = null
 
     private fun createApiService(): TreatmentApiService {
         val mockEngine = MockEngine { request ->
             interceptedUrl = request.url.toString()
             interceptedMethod = request.method.value
-            respond(
-                content = responseContent,
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            )
+            val response = responseBytes
+            if (response != null) {
+                respond(
+                    content = response,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, ContentType.Application.OctetStream.toString())
+                )
+            } else {
+                respond(
+                    content = responseContent,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                )
+            }
         }
 
         val httpClient = HttpClient(mockEngine) {
@@ -63,6 +73,7 @@ class TreatmentApiServiceTest {
         interceptedUrl = ""
         interceptedMethod = ""
         responseContent = ""
+        responseBytes = null
     }
 
     @Test
@@ -84,6 +95,77 @@ class TreatmentApiServiceTest {
     }
 
     @Test
+    fun testGetElectronicPrescriptionList() = runTest {
+        responseContent = ApiTestUtils.createJsonResponse(TreatmentTestData.prescriptionsSuccess)
+        val apiService = createApiService()
+        val result = apiService.getElectronicPrescriptionList(
+            requestTypeId = "1",
+            nationalCode = "6319889391",
+            dependantUserNationalCode = "0987654321",
+            startDate = "14020101",
+            endDate = "14020130",
+            parameters = emptyMap()
+        )
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/patient-history/6319889391/0987654321/1/14020101/14020130", interceptedUrl)
+        val data = result.extractData()
+        assertNotNull(data)
+        assertEquals(2, data.list?.size)
+        val firstItem = data.list?.firstOrNull()
+        assertNotNull(firstItem)
+        assertEquals("1", firstItem.id)
+        assertEquals("1001", firstItem.docId)
+        assertEquals("علی علوی", firstItem.docName)
+    }
+
+    @Test
+    fun testGetElectronicPrescriptionDetail() = runTest {
+        responseContent = ApiTestUtils.createJsonResponse(TreatmentTestData.prescriptionDetailsSuccess)
+        val apiService = createApiService()
+        val result = apiService.getElectronicPrescriptionDetail(
+            noteHeadID = "100",
+            nationalCode = "6319889391",
+            childNationalCode = "0987654321",
+            flagSata = "SATA",
+            type = "Type",
+            parameters = emptyMap()
+        )
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/patient-history/detail/100/6319889391/0987654321/Type/SATA", interceptedUrl)
+        val data = result.extractData()
+        assertNotNull(data)
+        assertEquals(2, data.list?.size)
+        val firstItem = data.list?.firstOrNull()
+        assertNotNull(firstItem)
+        assertEquals(150000L, firstItem.sumPriceItem)
+        assertEquals("قرص آسپیرین 80 میلی‌گرم", firstItem.serviceName)
+    }
+
+    @Test
+    fun testGetElectronicPrescriptionPrice() = runTest {
+        responseContent = ApiTestUtils.createJsonResponse(TreatmentTestData.prescriptionPriceSuccess)
+        val apiService = createApiService()
+        val result = apiService.getElectronicPrescriptionPrice(
+            noteHeadID = "100",
+            nationalCode = "6319889391",
+            parameters = emptyMap()
+        )
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/patient-history/price/100/6319889391", interceptedUrl)
+        val data = result.extractData()
+        assertNotNull(data)
+        assertEquals(1, data.list?.size)
+        val firstItem = data.list?.firstOrNull()
+        assertNotNull(firstItem)
+        assertEquals(450000L, firstItem.requestPrice)
+        assertEquals(380000L, firstItem.headSsoPayment)
+        assertEquals(70000L, firstItem.headInsuPayment)
+    }
+
+    @Test
     fun testGetDependantUnderEighteen() = runTest {
         responseContent = ApiTestUtils.createJsonResponse(TreatmentTestData.dependantsSuccess)
         val apiService = createApiService()
@@ -101,5 +183,29 @@ class TreatmentApiServiceTest {
         assertNotNull(firstItem)
         assertEquals("سارا", firstItem.relationWithTamin?.personal?.firstName)
         assertEquals("0987654321", firstItem.relationWithTamin?.personal?.nationalId)
+    }
+
+    @Test
+    fun testGetPrescriptionPdfFile() = runTest {
+        val pdfBytes = byteArrayOf(1, 2, 3)
+        responseBytes = pdfBytes
+        val apiService = createApiService()
+        val executed = apiService.getPrescriptionPdfFile("100").execute()
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/patient-history/reports-prescription-PDF/100", interceptedUrl)
+        assertEquals(200, executed.status.value)
+    }
+
+    @Test
+    fun testDownloadLabResultPdf() = runTest {
+        val pdfBytes = byteArrayOf(4, 5, 6)
+        responseBytes = pdfBytes
+        val apiService = createApiService()
+        val executed = apiService.downloadLabResultPdf("patient1", "100", "6319889391").execute()
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/patient-history/lab-result-PDF/patient1/100/6319889391", interceptedUrl)
+        assertEquals(200, executed.status.value)
     }
 }
