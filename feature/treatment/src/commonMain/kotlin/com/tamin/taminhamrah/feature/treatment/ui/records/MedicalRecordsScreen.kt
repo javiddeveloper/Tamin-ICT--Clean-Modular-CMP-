@@ -77,6 +77,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -100,6 +101,10 @@ private enum class RecordFilter { PATIENT, PERIOD }
 private fun RecordFilter?.toggle(target: RecordFilter): RecordFilter? =
     if (this == target) null else target
 
+/** The period chooser's rows, built once — the presets never change at runtime. */
+private val RecordPeriodOptions: ImmutableList<Pair<RecordPeriod, String>> =
+    RecordPeriod.entries.map { it to it.label }.toImmutableList()
+
 /**
  * The full-width filter chooser that drops below the bar.
  *
@@ -109,7 +114,7 @@ private fun RecordFilter?.toggle(target: RecordFilter): RecordFilter? =
  */
 @Composable
 private fun <T> RecordFilterPanel(
-    options: List<Pair<T, String>>,
+    options: ImmutableList<Pair<T, String>>,
     isSelected: (T) -> Boolean,
     onSelect: (T) -> Unit,
 ) {
@@ -457,7 +462,9 @@ fun MedicalRecordsContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item(key = "categories") {
                 TreatmentFilterChipRow(
-                    categories = RecordTab.chips.map { it.label },
+                    // Resolved once on the enum, not mapped here: a fresh list per recomposition
+                    // is a changed argument, and the row would redraw on every list update.
+                    categories = RecordTab.chipLabels,
                     selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
                     onSelect = { onTabSelected(RecordTab.chips[it]) },
                 )
@@ -496,9 +503,12 @@ fun MedicalRecordsContent(
             Scrim(onDismiss = { openFilter = null })
             when (filter) {
                 RecordFilter.PATIENT -> RecordFilterPanel(
-                    options = patients
-                        .map { it.nationalId to it.filterLabel }
-                        .ifEmpty { listOf(selectedPatient to SELF_LABEL) },
+                    options = remember(patients, selectedPatient) {
+                        patients
+                            .map { it.nationalId to it.filterLabel }
+                            .ifEmpty { listOf(selectedPatient to SELF_LABEL) }
+                            .toImmutableList()
+                    },
                     isSelected = { it == selectedPatient },
                     onSelect = {
                         onPatientSelected(it)
@@ -507,7 +517,7 @@ fun MedicalRecordsContent(
                 )
 
                 RecordFilter.PERIOD -> RecordFilterPanel(
-                    options = RecordPeriod.entries.map { it to it.label },
+                    options = RecordPeriodOptions,
                     isSelected = { it == selectedPeriod },
                     onSelect = { period ->
                         openFilter = null
