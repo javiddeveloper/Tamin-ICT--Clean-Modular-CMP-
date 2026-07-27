@@ -210,7 +210,6 @@ fun ProfileContent(
     onIntent: (ProfileIntent) -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
-    val headerProgress = motionState.progress
     val revealController = LocalThemeRevealController.current
     val isDark = taminColors == DarkTaminColors
     val decaySpec = rememberSplineBasedDecay<Float>()
@@ -244,6 +243,7 @@ fun ProfileContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
+            val headerProgress = motionState.progress
             Box {
                 Column(
                     modifier = Modifier.hazeSource(state = hazeState)
