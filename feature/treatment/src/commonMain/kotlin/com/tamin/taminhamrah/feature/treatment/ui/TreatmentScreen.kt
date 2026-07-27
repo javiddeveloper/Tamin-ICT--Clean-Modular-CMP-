@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,14 +23,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Constraints
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
@@ -39,12 +37,17 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.feature.treatment.ui.model.toCardItems
 import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
+import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -126,24 +129,32 @@ fun TreatmentContent(
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
 ) {
-    val patients = remember(state) { state.toPatientList() }
+    // Keyed on the data the cards are built from, not on the whole state: selecting a patient
+    // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
+    val patients = remember(state.mainUserNationalCode, state.deservedList, state.dependantList) {
+        state.toPatientList()
+    }
+    val cards = remember(patients, state.deservedList) { patients.toCardItems(state.deservedList) }
     var entitlementReason by remember { mutableStateOf<String?>(null) }
-    val pagerState = rememberPagerState(pageCount = { patients.size })
+    val pagerState = rememberPagerState(pageCount = { cards.size })
     val scrollState = rememberScrollState()
 
     SyncPagerWithSelection(
-        state = state,
+        selectedNationalCode = state.selectedNationalCode,
         patients = patients,
         pagerState = pagerState,
         onIntent = onIntent,
     )
 
     // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
-    // only inside the title/card morph layout/draw lambdas, so the fold never recomposes the hub.
-    val collapse = rememberTreatmentHeaderCollapse()
+    // only inside the card morph's layout/draw lambdas, so the fold never recomposes the hub.
+    val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
     val headerProgress = remember(collapse) { { collapse.progress } }
     var headerHeightPx by remember { mutableIntStateOf(0) }
-    val density = LocalDensity.current
+
+    // Hoisted so the section lambdas below capture one string rather than the whole state —
+    // capturing `state` would make them a new instance on every load and defeat skipping.
+    val mainUserNationalCode = state.mainUserNationalCode
 
     Box(
         modifier = modifier
@@ -153,23 +164,13 @@ fun TreatmentContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // The body's drag first folds the header, then scrolls the sections.
+                // The body's drag first folds the header, then scrolls the sections, and only what
+                // neither wanted reaches the rubber band — so the fold always wins over the bounce.
                 .nestedScroll(collapse.nestedScrollConnection)
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
         ) {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .layout { measurable, constraints ->
-                        val h = headerHeightPx
-                        val placeable = measurable.measure(
-                            Constraints.fixed(constraints.maxWidth, h.coerceAtLeast(0))
-                        )
-                        layout(placeable.width, placeable.height) {
-                            placeable.place(0, 0)
-                        }
-                    },
-            )
+            // Stands in for the floating header, which is measured rather than fixed.
+            Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
@@ -178,7 +179,7 @@ fun TreatmentContent(
                 onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) },
                 // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
                 // which patient card is in view. No-op until the main code is known.
-                onOpenHealthProfile = { state.mainUserNationalCode?.let(onOpenHealthProfile) },
+                onOpenHealthProfile = { mainUserNationalCode?.let(onOpenHealthProfile) },
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
@@ -201,8 +202,9 @@ fun TreatmentContent(
                 .onSizeChanged { headerHeightPx = it.height },
         ) {
             PatientCarousel(
-                state = state,
-                patients = patients,
+                cards = cards,
+                isLoading = state.isLoading,
+                error = state.error,
                 pagerState = pagerState,
                 onShowEntitlementReason = { entitlementReason = it },
                 onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
@@ -225,22 +227,27 @@ fun TreatmentContent(
  */
 @Composable
 private fun SyncPagerWithSelection(
-    state: TreatmentUiState,
-    patients: List<PatientItem>,
+    selectedNationalCode: String?,
+    patients: ImmutableList<PatientItem>,
     pagerState: PagerState,
     onIntent: (TreatmentIntent) -> Unit,
 ) {
-    LaunchedEffect(state.selectedNationalCode, patients) {
-        val index = patients.indexOfFirst { it.nationalId == state.selectedNationalCode }
+    LaunchedEffect(selectedNationalCode, patients) {
+        val index = patients.indexOfFirst { it.nationalId == selectedNationalCode }
         if (index >= 0 && pagerState.currentPage != index) {
             pagerState.scrollToPage(index)
         }
     }
 
-    LaunchedEffect(pagerState.currentPage, patients) {
-        val selected = patients.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
-        if (selected.nationalId != state.selectedNationalCode) {
-            onIntent(TreatmentIntent.SelectPatient(selected.nationalId, selected.fullName))
+    // The page is watched through a snapshot flow rather than an effect key, so a swipe does not
+    // recompose anything on the way to reporting the new selection.
+    val currentSelection by rememberUpdatedState(selectedNationalCode)
+    LaunchedEffect(patients) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            val selected = patients.getOrNull(page) ?: return@collect
+            if (selected.nationalId != currentSelection) {
+                onIntent(TreatmentIntent.SelectPatient(selected.nationalId, selected.fullName))
+            }
         }
     }
 }
