@@ -78,8 +78,8 @@ data class EmergencyStepState(
 
 // Step 5: Physical Stats
 data class PhysicalStepState(
-    val height: Int = 0,
-    val weight: Int = 0
+    val height: Int? = null,
+    val weight: Int? = null
 )
 
 // Step 6: Health Questions (Diseases) — illness IDs come from IllnessGroupPR

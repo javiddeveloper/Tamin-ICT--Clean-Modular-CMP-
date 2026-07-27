@@ -113,8 +113,8 @@ fun SelfDeclarationReviewScreen(
                 title = "قد و وزن",
                 onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL)) }
             ) {
-                IdentityRow(label = "قد:", value = "${state.physical.height} سانتی‌متر")
-                IdentityRow(label = "وزن:", value = "${state.physical.weight} کیلوگرم")
+                IdentityRow(label = "قد:", value = state.physical.height?.let { "$it سانتی‌متر" } ?: "ثبت نشده")
+                IdentityRow(label = "وزن:", value = state.physical.weight?.let { "$it کیلوگرم" } ?: "ثبت نشده")
             }
 
             // Blood

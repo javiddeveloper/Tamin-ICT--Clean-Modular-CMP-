@@ -18,6 +18,8 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 @Composable
 fun SelfDeclarationPhysicalScreen(
@@ -28,9 +30,11 @@ fun SelfDeclarationPhysicalScreen(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-    // Calculate BMI
-    val heightInMeters = state.height / 100f
-    val bmiValue = if (heightInMeters > 0) state.weight / (heightInMeters * heightInMeters) else 0f
+    // Calculate BMI if both height and weight are provided
+    val bmiValue: Float? = if (state.height != null && state.weight != null && state.height > 0) {
+        val heightInMeters = state.height / 100f
+        state.weight / (heightInMeters * heightInMeters)
+    } else null
 
     Scaffold(
         topBar = {
@@ -38,14 +42,14 @@ fun SelfDeclarationPhysicalScreen(
                 currentStep = 5,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
-                title = "قد و وزن"
+                title = stringResource(Res.string.health_physical_title)
             )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی",
+                primaryText = stringResource(Res.string.health_btn_next_step),
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD)) },
-                secondaryText = "مرحلهٔ قبلی",
+                secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -60,18 +64,8 @@ fun SelfDeclarationPhysicalScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-//            TaminText(
-//                text = "قد و وزن",
-//                style = MaterialTheme.typography.titleLarge.copy(
-//                    fontWeight = FontWeight.ExtraBold,
-//                    color = taminColors.textPrimary
-//                ),
-//                modifier = Modifier.align(Alignment.Start)
-//            )
-
             TaminText(
-                text = "برای تنظیم دقیق قد و وزن خود، خط کش‌ها را بکشید یا از دکمه‌های کناری استفاده کنید.",
+                text = stringResource(Res.string.health_physical_desc),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = taminColors.textTertiary,
                     lineHeight = 22.sp
@@ -80,7 +74,7 @@ fun SelfDeclarationPhysicalScreen(
             )
 
             TaminText(
-                text = "قد (سانتی‌متر)",
+                text = stringResource(Res.string.health_physical_height_label),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textPrimary,
                 modifier = Modifier.align(Alignment.Start)
@@ -92,13 +86,14 @@ fun SelfDeclarationPhysicalScreen(
                     onIntent(HealthProfileIntent.UpdatePhysical(state.copy(height = h)))
                 },
                 range = 120..220,
-                unit = "سانتی‌متر"
+                unit = stringResource(Res.string.health_physical_unit_cm),
+                defaultPoint = 170
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             TaminText(
-                text = "وزن (کیلوگرم)",
+                text = stringResource(Res.string.health_physical_weight_label),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textPrimary,
                 modifier = Modifier.align(Alignment.Start)
@@ -110,7 +105,8 @@ fun SelfDeclarationPhysicalScreen(
                     onIntent(HealthProfileIntent.UpdatePhysical(state.copy(weight = w)))
                 },
                 range = 40..150,
-                unit = "کیلوگرم",
+                unit = stringResource(Res.string.health_physical_unit_kg),
+                defaultPoint = 70
             )
 
             Spacer(modifier = Modifier.height(12.dp))

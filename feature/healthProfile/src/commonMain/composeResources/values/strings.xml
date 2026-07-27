@@ -97,5 +97,30 @@
     <string name="health_emergency_relation_label">نسبت با شما</string>
     <string name="health_emergency_relation_placeholder">مثلاً همسر، پدر، خواهر و...</string>
     <string name="health_emergency_mobile_label">شماره تلفن همراه اضطراری</string>
+    <!-- Physical Screen Strings -->
+    <string name="health_physical_title">قد و وزن</string>
+    <string name="health_physical_desc">برای تنظیم دقیق قد و وزن خود، خط کش‌ها را بکشید یا از دکمه‌های کناری استفاده کنید.</string>
+    <string name="health_physical_height_label">قد (سانتی‌متر)</string>
+    <string name="health_physical_unit_cm">سانتی‌متر</string>
+    <string name="health_physical_weight_label">وزن (کیلوگرم)</string>
+    <string name="health_physical_unit_kg">کیلوگرم</string>
+    <string name="health_physical_unselected_value">--</string>
+
+    <!-- RulerPicker Strings -->
+    <string name="health_ruler_increase">افزایش</string>
+    <string name="health_ruler_decrease">کاهش</string>
+
+    <!-- BMI Meter Strings -->
+    <string name="health_bmi_title">شاخص تودهٔ بدنی (BMI)</string>
+    <string name="health_bmi_unselected_category">ثبت نشده</string>
+    <string name="health_bmi_empty_advice">برای محاسبهٔ شاخص تودهٔ بدنی (BMI)، لطفاً قد و وزن خود را وارد کنید.</string>
+    <string name="health_bmi_underweight_category">کمبود وزن</string>
+    <string name="health_bmi_underweight_advice">شما کمبود وزن دارید. تغذیه مناسب و متعادل توصیه می‌شود.</string>
+    <string name="health_bmi_normal_category">وزن طبیعی</string>
+    <string name="health_bmi_normal_advice">وزن شما طبیعی است. برای حفظ شیوه زندگی فعال و وزن مناسب تلاش کنید.</string>
+    <string name="health_bmi_overweight_category">اضافه وزن</string>
+    <string name="health_bmi_overweight_advice">شما دچار اضافه وزن خفیف هستید. افزایش فعالیت بدنی و کنترل کالری توصیه می‌شود.</string>
+    <string name="health_bmi_obese_category">چاقی شدید</string>
+    <string name="health_bmi_obese_advice">شاخص توده بدنی نشان‌دهنده چاقی است. مشاوره با متخصص تغذیه پیشنهاد می‌شود.</string>
 </resources>
 
