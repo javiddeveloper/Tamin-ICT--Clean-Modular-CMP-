@@ -182,6 +182,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.BLOOD -> {
                     SelfDeclarationBloodScreen(
                         state = selfDecState.bloodGroup,
+                        bloodGroupOptions = state.bloodGroupOptions,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))

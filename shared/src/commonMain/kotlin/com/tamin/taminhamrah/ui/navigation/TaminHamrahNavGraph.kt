@@ -105,7 +105,10 @@ import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import com.tamin.taminhamrah.feature.history.navigateToHistory
+import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -311,61 +314,6 @@ internal fun TaminHamrahNavGraph(
             ) {
                 composable<Route.Home> {
                     HomeScreen(
-//                        onNavigateToHistory = {
-//                            navController.navigate(HistoryRoute)
-//                        },
-//                        onNavigateToContracts = {
-//                            navController.navigateToContracts()
-//                        },
-//                        onNavigateToWorkshops = {
-//                            navController.navigateToWorkshops()
-//                        },
-//                        onNavigateToStudentInsuranceContract = {
-//                            navController.navigateToStudentInsuranceContract()
-//                        },
-//                        onNavigateToFreelanceInsuranceContract = {
-//                            navController.navigateToFreelanceInsuranceContract()
-//                        },
-//                        onNavigateToOptionalInsuranceContract = {
-//                            navController.navigateToOptionalInsuranceContract()
-//                        },
-//                        onNavigateToHousewifeInsuranceContract = {
-//                            navController.navigateToHousewifeInsuranceContract()
-//                        },
-//                        onNavigateToPensionInquiry = {
-//                            navController.navigateToPensionInquiry()
-//                        },
-//                        onNavigateToCalculatePension = {
-//                            navController.navigateToCalculatePension()
-//                        },
-//                        onNavigateToPrescription = {
-//                            // No code passed; MedicalRecordsScreen falls back to the main insured person.
-//                            navController.navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
-//                        },
-//                        onNavigateToDeservedTreatment = {
-//                            navController.navigateToDeservedTreatment()
-//                        },
-//                        onNavigateToPayRoll = {
-//                            navController.navigateToPayRoll()
-//                        },
-//                        onNavigateToEdict = {
-//                            navController.navigateToEdict()
-//                        },
-//                        onNavigateToIssuanceCertificate = {
-//                            navController.navigateToIssuanceCertificate()
-//                        },
-//                        onNavigateToDeferredInstallment = {
-//                            navController.navigateToDeferredInstallment()
-//                        },
-//                        onNavigateToGirlSurvivor = {
-//                            navController.navigateToGirlSurvivor()
-//                        },
-//                        onNavigateToPensionSurvivor = {
-//                            navController.navigateToPensionSurvivor()
-//                        },
-//                        onNavigateToDisabilityPension = {
-//                            navController.navigateToDisabilityPension()
-//                        },
                         onNavigateToService = { flag -> navController.navigateToFeature(flag) },
                         onNavigateToWeb = { url -> openUrl(url) },
                     )
@@ -692,68 +640,6 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text(stringResource(Res.string.retry))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Handleevents(
-    viewModel: HomeViewModel,
-    onNavigateToHistory: () -> Unit,
-    onNavigateToWorkshops: () -> Unit,
-    onNavigateToContracts: () -> Unit,
-    onNavigateToStudentInsuranceContract: () -> Unit,
-    onNavigateToFreelanceInsuranceContract: () -> Unit,
-    onNavigateToOptionalInsuranceContract: () -> Unit,
-    onNavigateToHousewifeInsuranceContract: () -> Unit,
-    onNavigateToPensionInquiry: () -> Unit,
-    onNavigateToCalculatePension: () -> Unit,
-    onNavigateToPrescription: () -> Unit,
-    onNavigateToDeservedTreatment: () -> Unit,
-    onNavigateToPayRoll: () -> Unit,
-    onNavigateToEdict: () -> Unit,
-    onNavigateToIssuanceCertificate: () -> Unit,
-    onNavigateToDeferredInstallment: () -> Unit,
-    onNavigateToGirlSurvivor: () -> Unit,
-    onNavigateToPensionSurvivor: () -> Unit,
-    onNavigateToDisabilityPension: () -> Unit
-) {
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is HomeEvent.NavigateToService -> {
-                    when (event.flag) {
-                        FeatureFlag.MERGE_HISTORY -> onNavigateToHistory()
-                        FeatureFlag.WORKSHOPS -> onNavigateToWorkshops()
-                        FeatureFlag.CONTRACTS -> onNavigateToContracts()
-                        FeatureFlag.STUDENT_INSURANCE -> onNavigateToStudentInsuranceContract()
-                        FeatureFlag.FREELANCE_INSURANCE -> onNavigateToFreelanceInsuranceContract()
-                        FeatureFlag.OPTIONAL_INSURANCE -> onNavigateToOptionalInsuranceContract()
-                        FeatureFlag.HOUSEWIFE_INSURANCE -> onNavigateToHousewifeInsuranceContract()
-                        FeatureFlag.PENSION_INQUIRY -> onNavigateToPensionInquiry()
-                        FeatureFlag.CALCULATE_WAGE_PENSION -> onNavigateToCalculatePension()
-                        FeatureFlag.PRESCRIPTION -> onNavigateToPrescription()
-                        FeatureFlag.DESERVED_TREATMENT_101 -> onNavigateToDeservedTreatment()
-                        FeatureFlag.PAY_ROLL -> onNavigateToPayRoll()
-                        FeatureFlag.EDICT_PENSIONER -> onNavigateToEdict()
-                        FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> onNavigateToIssuanceCertificate()
-                        FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> onNavigateToDeferredInstallment()
-                        FeatureFlag.GIRL_SURVIVOR -> onNavigateToGirlSurvivor()
-                        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> onNavigateToPensionSurvivor()
-                        FeatureFlag.DISABILITY_PENSION -> onNavigateToDisabilityPension()
-                        else -> { /* Handle other flags if needed */
-                        }
-                    }
-                }
-
-                is HomeEvent.NavigateToWeb -> {
-                    openUrl(event.url)
-                }
-
-                is HomeEvent.ShowMessage -> {
-                    // In a real app, we'd use a SnackbarHostState
                 }
             }
         }

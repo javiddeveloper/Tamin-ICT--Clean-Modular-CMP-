@@ -5,8 +5,11 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractLetter
+import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractRh
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.useCases.health.*
+import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -69,7 +72,14 @@ class HealthProfileViewModel(
             is HealthProfileIntent.UpdatePhysical   -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
             is HealthProfileIntent.UpdateDiseases   -> flow { emit(PartialState.DiseasesUpdated(intent.diseases)) }
             is HealthProfileIntent.UpdateFamily     -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
-            is HealthProfileIntent.UpdateBloodGroup -> flow { emit(PartialState.BloodGroupUpdated(intent.bloodGroup)) }
+            is HealthProfileIntent.UpdateBloodGroup -> flow {
+                Logger.d("BloodGroupUpdate", "User updated blood group")
+                Logger.d("BloodGroupUpdate", "selectedBloodGroupId: ${intent.bloodGroup.selectedBloodGroupId}")
+                Logger.d("BloodGroupUpdate", "selectedBloodGroupLetter: ${intent.bloodGroup.selectedBloodGroupLetter}")
+                Logger.d("BloodGroupUpdate", "selectedBloodGroupRh: ${intent.bloodGroup.selectedBloodGroupRh}")
+                Logger.d("BloodGroupUpdate", "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}")
+                emit(PartialState.BloodGroupUpdated(intent.bloodGroup))
+            }
             is HealthProfileIntent.UpdateLifestyle  -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
             is HealthProfileIntent.UpdateAllergy    -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
         }
@@ -300,7 +310,9 @@ class HealthProfileViewModel(
                         weight = info.patientWeight.toInt()
                     ),
                     bloodGroup = sd.bloodGroup.copy(
-                        selectedBloodGroupId = info.patientBloodGroupCode
+                        selectedBloodGroupId = info.patientBloodGroupCode,
+                        selectedBloodGroupLetter = extractLetter(info.patientBloodGroup),
+                        selectedBloodGroupRh = extractRh(info.patientBloodGroup)
                     )
                 )
             )
