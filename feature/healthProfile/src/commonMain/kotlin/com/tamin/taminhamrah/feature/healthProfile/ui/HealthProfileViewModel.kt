@@ -211,6 +211,7 @@ class HealthProfileViewModel(
 
             // B. Sync diseases + family history
             val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
+            selfDecState.diseases.riskFactorIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
             selfDecState.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
             selfDecState.diseases.mentalIllnessIds.forEach  { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
             selfDecState.diseases.cancerIds.forEach         { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }

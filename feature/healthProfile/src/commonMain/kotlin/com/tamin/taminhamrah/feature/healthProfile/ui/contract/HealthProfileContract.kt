@@ -84,9 +84,7 @@ data class PhysicalStepState(
 
 // Step 6: Health Questions (Diseases) — illness IDs come from IllnessGroupPR
 data class DiseasesStepState(
-    val hasHighBloodSugar: Boolean? = null,
-    val hasHighBloodPressure: Boolean? = null,
-    val hasHighCholesterol: Boolean? = null,
+    val riskFactorIds: Set<Int> = emptySet(),
     val hasChronicDisease: Boolean? = null,
     val chronicDiseaseIds: Set<Int> = emptySet(),
     val hasMentalIllness: Boolean? = null,

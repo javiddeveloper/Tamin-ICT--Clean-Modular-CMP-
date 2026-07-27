@@ -63,7 +63,7 @@ data class SelfDeclarableIllnessesByGroupDTO(
 data class SelfDeclarableIllnessGroupDTO(
     @SerialName("groupId") val groupId: Int? = null,
     @SerialName("groupTitle") val groupTitle: String? = null,
-    @SerialName("forFamily") val forFamily: Boolean? = null,
+    @SerialName("forFamilly") val forFamily: Boolean? = null,
     @SerialName("illnessList") val illnessList: List<IllnessItemDTO>? = null
 )
 

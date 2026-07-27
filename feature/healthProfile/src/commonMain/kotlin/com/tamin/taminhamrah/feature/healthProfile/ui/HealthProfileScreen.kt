@@ -130,11 +130,12 @@ fun HealthProfileMainContent(
                     )
                 }
                 SelfDeclarationStep.IDENTITY -> {
-                    SelfDeclarationIdentityScreen(
-                        state = selfDecState.identity,
+                    SelfDeclarationDiseasesScreen(
+                        state = selfDecState.diseases,
+                        illnessGroups = state.illnessGroups,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO))
+                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
                         }
                     )
                 }
@@ -203,6 +204,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.DISEASES -> {
                     SelfDeclarationDiseasesScreen(
                         state = selfDecState.diseases,
+                        illnessGroups = state.illnessGroups,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))

@@ -99,7 +99,6 @@ fun SelfDeclarationLifestyleScreen(
                         painter = painterResource(Res.drawable.ic_health_tobacco),
                         backgroundColor = LocalTaminColors.current.warning.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.warning
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -130,7 +129,6 @@ fun SelfDeclarationLifestyleScreen(
                         painter = painterResource(Res.drawable.ic_health_addiction),
                         backgroundColor = LocalTaminColors.current.dangerText.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.dangerText
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -162,7 +160,6 @@ fun SelfDeclarationLifestyleScreen(
                         painter = painterResource(Res.drawable.ic_health_alcohol),
                         backgroundColor = LocalTaminColors.current.fuchsiaBlue.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.fuchsiaBlue
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -194,7 +191,6 @@ fun SelfDeclarationLifestyleScreen(
                         painter = painterResource(Res.drawable.ic_health_exercise),
                         backgroundColor = LocalTaminColors.current.greenText.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.greenText
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
