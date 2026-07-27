@@ -105,12 +105,7 @@ import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import com.tamin.taminhamrah.feature.history.navigateToHistory
-import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
-import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -247,8 +242,11 @@ internal fun TaminHamrahNavGraph(
                             )
                         )
                 ) {
+                    val selectedIndex = remember(currentTab) { navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0) }
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
+                        selectedIndex = selectedIndex,
+                        itemCount = navigationItems.size,
                         isBlurEnabled = isBottomBarVisible
                     ) {
 
@@ -313,61 +311,61 @@ internal fun TaminHamrahNavGraph(
             ) {
                 composable<Route.Home> {
                     HomeScreen(
-                        onNavigateToHistory = {
-                            navController.navigate(HistoryRoute)
-                        },
-                        onNavigateToContracts = {
-                            navController.navigateToContracts()
-                        },
-                        onNavigateToWorkshops = {
-                            navController.navigateToWorkshops()
-                        },
-                        onNavigateToStudentInsuranceContract = {
-                            navController.navigateToStudentInsuranceContract()
-                        },
-                        onNavigateToFreelanceInsuranceContract = {
-                            navController.navigateToFreelanceInsuranceContract()
-                        },
-                        onNavigateToOptionalInsuranceContract = {
-                            navController.navigateToOptionalInsuranceContract()
-                        },
-                        onNavigateToHousewifeInsuranceContract = {
-                            navController.navigateToHousewifeInsuranceContract()
-                        },
-                        onNavigateToPensionInquiry = {
-                            navController.navigateToPensionInquiry()
-                        },
-                        onNavigateToCalculatePension = {
-                            navController.navigateToCalculatePension()
-                        },
-                        onNavigateToPrescription = {
-                            // No code passed; MedicalRecordsScreen falls back to the main insured person.
-                            navController.navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
-                        },
-                        onNavigateToDeservedTreatment = {
-                            navController.navigateToDeservedTreatment()
-                        },
-                        onNavigateToPayRoll = {
-                            navController.navigateToPayRoll()
-                        },
-                        onNavigateToEdict = {
-                            navController.navigateToEdict()
-                        },
-                        onNavigateToIssuanceCertificate = {
-                            navController.navigateToIssuanceCertificate()
-                        },
-                        onNavigateToDeferredInstallment = {
-                            navController.navigateToDeferredInstallment()
-                        },
-                        onNavigateToGirlSurvivor = {
-                            navController.navigateToGirlSurvivor()
-                        },
-                        onNavigateToPensionSurvivor = {
-                            navController.navigateToPensionSurvivor()
-                        },
-                        onNavigateToDisabilityPension = {
-                            navController.navigateToDisabilityPension()
-                        },
+//                        onNavigateToHistory = {
+//                            navController.navigate(HistoryRoute)
+//                        },
+//                        onNavigateToContracts = {
+//                            navController.navigateToContracts()
+//                        },
+//                        onNavigateToWorkshops = {
+//                            navController.navigateToWorkshops()
+//                        },
+//                        onNavigateToStudentInsuranceContract = {
+//                            navController.navigateToStudentInsuranceContract()
+//                        },
+//                        onNavigateToFreelanceInsuranceContract = {
+//                            navController.navigateToFreelanceInsuranceContract()
+//                        },
+//                        onNavigateToOptionalInsuranceContract = {
+//                            navController.navigateToOptionalInsuranceContract()
+//                        },
+//                        onNavigateToHousewifeInsuranceContract = {
+//                            navController.navigateToHousewifeInsuranceContract()
+//                        },
+//                        onNavigateToPensionInquiry = {
+//                            navController.navigateToPensionInquiry()
+//                        },
+//                        onNavigateToCalculatePension = {
+//                            navController.navigateToCalculatePension()
+//                        },
+//                        onNavigateToPrescription = {
+//                            // No code passed; MedicalRecordsScreen falls back to the main insured person.
+//                            navController.navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
+//                        },
+//                        onNavigateToDeservedTreatment = {
+//                            navController.navigateToDeservedTreatment()
+//                        },
+//                        onNavigateToPayRoll = {
+//                            navController.navigateToPayRoll()
+//                        },
+//                        onNavigateToEdict = {
+//                            navController.navigateToEdict()
+//                        },
+//                        onNavigateToIssuanceCertificate = {
+//                            navController.navigateToIssuanceCertificate()
+//                        },
+//                        onNavigateToDeferredInstallment = {
+//                            navController.navigateToDeferredInstallment()
+//                        },
+//                        onNavigateToGirlSurvivor = {
+//                            navController.navigateToGirlSurvivor()
+//                        },
+//                        onNavigateToPensionSurvivor = {
+//                            navController.navigateToPensionSurvivor()
+//                        },
+//                        onNavigateToDisabilityPension = {
+//                            navController.navigateToDisabilityPension()
+//                        },
                         onNavigateToService = { flag -> navController.navigateToFeature(flag) },
                         onNavigateToWeb = { url -> openUrl(url) },
                     )
