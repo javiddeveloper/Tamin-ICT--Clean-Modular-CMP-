@@ -2,9 +2,13 @@ package com.tamin.taminhamrah.feature.treatment.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.treatment.fake.FakeCityProvinceRepository
+import com.tamin.taminhamrah.feature.treatment.fake.FakeFeatureManager
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
@@ -17,7 +21,9 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 /**
@@ -34,11 +40,13 @@ class TreatmentViewModelTest {
     private lateinit var repository: FakeTreatmentRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var viewModel: TreatmentViewModel
+    private lateinit var featureManager: FakeFeatureManager
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeTreatmentRepository()
+        featureManager = FakeFeatureManager()
         userRepository = FakeUserRepository()
         viewModel = buildViewModel()
     }
@@ -51,7 +59,8 @@ class TreatmentViewModelTest {
     private fun buildViewModel() = TreatmentViewModel(
         getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
         getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
-        identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository())
+        identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository()),
+        featureManager = featureManager
     )
 
     @Test
@@ -91,6 +100,7 @@ class TreatmentViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
 
     @Test
     fun testInitTreatmentFlow_emitsMainUserNationalCodeImmediately() = runTest(testDispatcher) {
@@ -146,4 +156,32 @@ class TreatmentViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun openRecords_whenFeatureEnabled_emitsNavigation() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Enabled
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE))
+            val event = assertIs<TreatmentEvent.NavigateToRecords>(awaitItem())
+            assertEquals(RecordTab.MEDICINE, event.tab)
+        }
+    }
+
+    @Test
+    fun openRecords_whenFeatureDisabled_explainsInsteadOfNavigating() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Disabled("سرویس غیرفعال است")
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE))
+            // The gate must say why rather than silently doing nothing.
+            val event = assertIs<TreatmentEvent.ShowMessage>(awaitItem())
+            assertEquals("سرویس غیرفعال است", event.message)
+        }
+    }
+
 }

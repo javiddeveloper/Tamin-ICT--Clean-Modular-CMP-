@@ -14,6 +14,6 @@ class TreatmentMocksTest {
         assertEquals("رضا احمدی", TreatmentMocks.patientMain.fullName)
         assertEquals(1, TreatmentMocks.mainUiState.deservedList.size)
         assertEquals("رضا احمدی", TreatmentMocks.deservedTreatment.fullName)
-        assertEquals("پنی‌سیلین", TreatmentMocks.drugAllergy.drugName)
+        assertEquals("TRK123456", TreatmentMocks.prescription.trackingCode)
     }
 }

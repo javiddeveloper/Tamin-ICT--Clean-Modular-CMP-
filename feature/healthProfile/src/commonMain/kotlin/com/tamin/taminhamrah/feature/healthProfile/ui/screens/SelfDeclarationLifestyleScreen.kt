@@ -52,7 +52,7 @@ fun SelfDeclarationLifestyleScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                currentStep = 9,
+                currentStep = 7,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
             )
@@ -60,7 +60,7 @@ fun SelfDeclarationLifestyleScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "مرحلهٔ بعدی",
-                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES)) },
                 secondaryText = "مرحلهٔ قبلی",
                 onSecondaryClick = onBackClicked
             )

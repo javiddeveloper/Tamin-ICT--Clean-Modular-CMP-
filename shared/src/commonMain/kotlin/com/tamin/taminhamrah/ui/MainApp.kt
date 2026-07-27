@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.RequestNotificationPermissionOnLogin
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.openUrl
@@ -45,6 +46,7 @@ fun MainApp(
             // over the dark theme's. A screen that puts a dark header behind the status bar
             // can override this for as long as it is shown.
             StatusBarIcons(darkIcons = !darkTheme)
+            RequestNotificationPermissionOnLogin(isLoggedIn = uiState.isLoggedIn)
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     TaminHamrahNavGraph(

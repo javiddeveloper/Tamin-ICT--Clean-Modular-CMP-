@@ -55,7 +55,7 @@ fun SelfDeclarationBloodScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                currentStep = 8,
+                currentStep = 6,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
             )
