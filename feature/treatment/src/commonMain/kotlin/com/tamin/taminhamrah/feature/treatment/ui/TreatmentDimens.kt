@@ -24,7 +24,16 @@ internal object TreatmentDimens {
     val brandTickIconSize = 13.dp
     val cardLoadingHeight = 160.dp
     const val cardDecorAlpha = 0.07f
+
+    /** A card's share of the carousel viewport; the rest is the neighbours peeking. */
     const val cardPeekFraction = 0.87f
+
+    // Brand tile on the insurance card (the organization's mark, top of the card).
+    val brandTileSize = 34.dp
+    val brandTileIconSize = 28.dp
+
+    /** Breathing room above and below the collapsed bar's contents. */
+    val cardBarPadding = 28.dp
 
     // Category tiles & badges
     val categoryTileIconSize = 40.dp

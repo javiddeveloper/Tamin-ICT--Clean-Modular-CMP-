@@ -8,16 +8,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.shimmer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -74,6 +76,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -251,7 +254,15 @@ fun MedicalRecordsScreen(
             treatmentViewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
         }
     }
-    val patients = remember(treatmentState) { treatmentState.toPatientList() }
+    // Keyed on the data the list is built from, not the whole state: a selection or a cost total
+    // arriving must not rebuild it and invalidate everything the patient chip feeds.
+    val patients = remember(
+        treatmentState.mainUserNationalCode,
+        treatmentState.deservedList,
+        treatmentState.dependantList,
+    ) {
+        treatmentState.toPatientList()
+    }
 
     // A shortcut opens this with no code; fall back to whoever the dashboard has selected.
     val effectiveNationalCode = nationalCode.ifBlank {
@@ -335,7 +346,7 @@ fun HandleRecordsEvents(
 @Composable
 fun MedicalRecordsContent(
     state: PrescriptionsUiState,
-    patients: List<PatientItem>,
+    patients: ImmutableList<PatientItem>,
     selectedPatient: String,
     selectedPeriod: RecordPeriod,
     customRange: Pair<String, String>?,
@@ -359,6 +370,15 @@ fun MedicalRecordsContent(
     var rangeStart by remember { mutableStateOf<String?>(null) }
 
     val currentPatient = patients.firstOrNull { it.nationalId == selectedPatient }
+
+    // The search runs over the whole list, so it is done once per input change rather than on
+    // every recomposition — and once, not twice, since the empty check reads the same result.
+    val visibleRecords = remember(state.prescriptionList, searchCriteria, state.recordPrices) {
+        state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) }
+    }
+    val recordGroups = remember(visibleRecords) {
+        visibleRecords.groupBy { it.prescDate.toJalaliMonthLabel() }
+    }
 
     if (showSearchSheet) {
         RecordSearchSheet(
@@ -432,38 +452,37 @@ fun MedicalRecordsContent(
             onRefresh = onRetry,
             modifier = Modifier.fillMaxSize(),
         ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-        ) {
-            TreatmentFilterChipRow(
-                categories = RecordTab.chips.map { it.label },
-                selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
-                onSelect = { onTabSelected(RecordTab.chips[it]) },
-            )
+        // Lazy: a long history composes only the cards on screen, and a price arriving redraws
+        // just the rows that show it.
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item(key = "categories") {
+                TreatmentFilterChipRow(
+                    categories = RecordTab.chips.map { it.label },
+                    selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
+                    onSelect = { onTabSelected(RecordTab.chips[it]) },
+                )
+            }
 
             when {
-                state.isLoading && state.prescriptionList.isEmpty() -> RecordsShimmerSkeleton()
+                state.isLoading && state.prescriptionList.isEmpty() ->
+                    item { RecordsShimmerSkeleton() }
 
                 // A failed request and a genuinely empty result read very differently, so they
                 // get different states. Both recover the same way: pull to refresh.
-                state.error != null -> RecordsErrorState(message = state.error)
+                state.error != null -> item { RecordsErrorState(message = state.error) }
 
-                state.prescriptionList.none { searchCriteria.matches(it, state.recordPrices) } -> TaminEmptyState(
-                    message = if (searchCriteria.nameQuery.isNotBlank()) {
-                        "موردی با «${searchCriteria.nameQuery}» یافت نشد."
-                    } else {
-                        "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است."
-                    },
-                )
+                visibleRecords.isEmpty() -> item {
+                    TaminEmptyState(
+                        message = if (searchCriteria.nameQuery.isNotBlank()) {
+                            "موردی با «${searchCriteria.nameQuery}» یافت نشد."
+                        } else {
+                            "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است."
+                        },
+                    )
+                }
 
-                state.prescriptionList.isEmpty() -> TaminEmptyState(
-                    message = "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است.",
-                )
-
-                else -> RecordTimeline(
-                    records = state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) },
+                else -> recordTimeline(
+                    groups = recordGroups,
                     prices = state.recordPrices,
                     onRecordSelected = onRecordSelected,
                 )
@@ -503,39 +522,39 @@ fun MedicalRecordsContent(
 }
 
 /** Records grouped under their Jalali month, as the design shows. */
-@Composable
-private fun RecordTimeline(
-    records: List<ElectronicPrescriptionPR>,
+private fun LazyListScope.recordTimeline(
+    groups: Map<String, List<ElectronicPrescriptionPR>>,
     prices: Map<String, ElectronicPrescriptionPricePR>,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
 ) {
-    val groups = remember(records) { records.groupBy { it.prescDate.toJalaliMonthLabel() } }
-
     groups.forEach { (monthLabel, monthRecords) ->
-        RecordGroupHeader(text = monthLabel)
-        Column(
-            modifier = Modifier.padding(horizontal = Spacing.page),
-            verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-        ) {
-            monthRecords.forEach { record ->
-                val accent = recordAccent(record.prescType)
-                MedicalRecordCard(
-                    category = record.prescType.toCategoryLabel(),
-                    date = record.prescDate.toJalaliDateLabel(),
-                    title = "دکتر ${record.docName}",
-                    subtitle = record.location.ifBlank { record.specDesc },
-                    // The list endpoint carries no amount, so «سهم شما» comes from the per-record
-                    // price lookup; it reads as unknown until that arrives. Old app: the insured's
-                    // share is headSsoPayment (headInsuPayment is the organization's share).
-                    shareAmount = prices[record.noteHeadEprescID]?.headSsoPayment?.toLongOrNull()?.toPriceFormat() ?: UNKNOWN_AMOUNT,
-                    accentColor = accent.content,
-                    accentContainerColor = accent.container,
-                    categoryIcon = accent.icon,
-                    onClick = { onRecordSelected(record) },
-                )
-            }
+        item(key = monthLabel) { RecordGroupHeader(text = monthLabel) }
+
+        // Deliberately unkeyed: a merged «همه» query could in principle repeat a record id, and a
+        // duplicate key is a crash — position is identity enough for a list that reloads wholesale.
+        itemsIndexed(monthRecords) { index, record ->
+            val accent = recordAccent(record.prescType)
+            MedicalRecordCard(
+                category = record.prescType.toCategoryLabel(),
+                date = record.prescDate.toJalaliDateLabel(),
+                title = "دکتر ${record.docName}",
+                subtitle = record.location.ifBlank { record.specDesc },
+                // The list endpoint carries no amount, so «سهم شما» comes from the per-record
+                // price lookup; it reads as unknown until that arrives. Old app: the insured's
+                // share is headSsoPayment (headInsuPayment is the organization's share).
+                shareAmount = prices[record.noteHeadEprescID]?.headSsoPayment?.toLongOrNull()?.toPriceFormat() ?: UNKNOWN_AMOUNT,
+                accentColor = accent.content,
+                accentContainerColor = accent.container,
+                categoryIcon = accent.icon,
+                onClick = { onRecordSelected(record) },
+                // Gap between cards only, as the group's spacedBy arrangement gave before.
+                modifier = Modifier
+                    .padding(horizontal = Spacing.page)
+                    .padding(bottom = if (index == monthRecords.lastIndex) 0.dp else Spacing.cardGap),
+            )
         }
-        Box(modifier = Modifier.height(Spacing.sm))
+
+        item(key = "$monthLabel-gap") { Spacer(modifier = Modifier.height(Spacing.sm)) }
     }
 }
 
