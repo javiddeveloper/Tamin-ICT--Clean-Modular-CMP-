@@ -80,7 +80,7 @@ val LightTaminColors = TaminColors(
     textPrimary = TaminLightTextDefault,
     textSecondary = TaminLightTextSecondary,
     textTertiary = Gray400,
-    textMuted = Gray400,
+    textMuted = TaminLightTextMuted,
     chevron = Gray300,
     greenBg = Secondary50,
     greenText = TaminLightSuccess,
@@ -228,4 +228,7 @@ val DarkTaminColors = TaminColors(
     chipBg = Color(0x293B82F6),
     warning = Color(0xFFFBBF24),
     fuchsiaBlue = Color(0xFFB79AEE)
+
+    hawkesBlue = TaminDarkOuterBorder,
+    chipBg = Color(0x293B82F6)
 )
