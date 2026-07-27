@@ -372,6 +372,43 @@ fun InfoBanner(
     }
 }
 
+
+@Composable
+fun WarningBanner(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(taminColors.orangeBg, RoundedCornerShape(13.dp))
+            .border(1.dp, taminColors.blueText.copy(alpha = 0.2f), RoundedCornerShape(13.dp))
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = "قفل",
+            tint = taminColors.warning,
+            modifier = Modifier
+                .size(18.dp)
+                .align(Alignment.Top)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        TaminText(
+            text = message,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Medium,
+            color = taminColors.warning,
+            lineHeight = 18.sp,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
 /**
  * A beautiful dashed bordered button for adding dynamically managed items.
  */
@@ -671,6 +708,9 @@ private fun HealthFormComponentsPreview() {
 
             TaminText("Info Banner", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             InfoBanner(message = "این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح با پشتیبانی تماس بگیرید.")
+
+            TaminText("Warning Banner", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            WarningBanner(message = "این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح با پشتیبانی تماس بگیرید.")
 
             TaminText("Dashed Add Button", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             DashedAddButton(

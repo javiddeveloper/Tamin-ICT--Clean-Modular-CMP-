@@ -38,7 +38,7 @@ fun SelfDeclarationPhysicalScreen(
                 currentStep = 5,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
-                title = "پرسش‌های سلامت"
+                title = "قد و وزن"
             )
         },
         bottomBar = {
@@ -61,14 +61,14 @@ fun SelfDeclarationPhysicalScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            TaminText(
-                text = "قد و وزن",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                ),
-                modifier = Modifier.align(Alignment.Start)
-            )
+//            TaminText(
+//                text = "قد و وزن",
+//                style = MaterialTheme.typography.titleLarge.copy(
+//                    fontWeight = FontWeight.ExtraBold,
+//                    color = taminColors.textPrimary
+//                ),
+//                modifier = Modifier.align(Alignment.Start)
+//            )
 
             TaminText(
                 text = "برای تنظیم دقیق قد و وزن خود، خط کش‌ها را بکشید یا از دکمه‌های کناری استفاده کنید.",
@@ -111,7 +111,6 @@ fun SelfDeclarationPhysicalScreen(
                 },
                 range = 40..150,
                 unit = "کیلوگرم",
-                accentColor = taminColors.teal
             )
 
             Spacer(modifier = Modifier.height(12.dp))

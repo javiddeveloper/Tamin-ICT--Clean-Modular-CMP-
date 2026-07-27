@@ -68,21 +68,8 @@ fun SelfDeclarationEmergencyScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            TaminText(
-                text = stringResource(Res.string.health_emergency_title),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                )
-            )
-
-            TaminText(
-                text = stringResource(Res.string.health_emergency_desc),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textTertiary,
-                    lineHeight = 22.sp
-                )
+            WarningBanner(
+                message = stringResource(Res.string.health_emergency_desc),
             )
 
             StyledTextField(

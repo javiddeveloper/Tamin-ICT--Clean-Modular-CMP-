@@ -81,7 +81,7 @@ fun SelfDeclarationContactScreen(
                 currentStep = 3,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
-                title = stringResource(Res.string.health_contact_desc)
+                title = stringResource(Res.string.health_contact_title)
             )
         },
         bottomBar = {
