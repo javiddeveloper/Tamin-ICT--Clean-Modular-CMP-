@@ -20,8 +20,17 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
+import com.tamin.taminhamrah.ui.components.IconBox
+import org.jetbrains.compose.resources.painterResource
+import taminx.feature.healthprofile.generated.resources.Res
+import taminx.feature.healthprofile.generated.resources.ic_health_pill
+import taminx.feature.healthprofile.generated.resources.ic_health_tobacco
 
 @Composable
 fun SelfDeclarationAllergyScreen(
@@ -32,9 +41,8 @@ fun SelfDeclarationAllergyScreen(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showBottomsheet by remember { mutableStateOf(false) }
 
-    // Dialog state
     var selectedDrugIndex by remember { mutableStateOf(-1) }
     var allergyDesc by remember { mutableStateOf("") }
     val drugList = listOf("پنی‌سیلین", "استامینوفن", "آسپیرین", "ایبوپروفن", "آموکسی‌سیلین", "سفکسیم", "سفالکسین", "مترونیدازول")
@@ -42,6 +50,7 @@ fun SelfDeclarationAllergyScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
+                title = "حساسیت‌ دارویی",
                 currentStep = 10,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -66,16 +75,22 @@ fun SelfDeclarationAllergyScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            TaminText(
-                text = "حساسیت‌های دارویی",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconBox(
+                    painter = painterResource(Res.drawable.ic_health_pill),
+                    backgroundColor = taminColors.greenBg,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TaminText(
+                    "انتخاب دارو",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = taminColors.textPrimary
                 )
-            )
+            }
 
             TaminText(
-                text = "در این قسمت می‌توانید داروهایی که به آن‌ها حساسیت دارید را با ذکر جزئیات یا عوارض ایجاد شده اضافه کنید.",
+                text = "در این قسمت می\u200Cتوانید داروهایی که به آن\u200Cها حساسیت دارید را اضافه کنید.",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = taminColors.textTertiary,
                     lineHeight = 22.sp
@@ -87,7 +102,7 @@ fun SelfDeclarationAllergyScreen(
                 onClick = {
                     selectedDrugIndex = -1
                     allergyDesc = ""
-                    showAddDialog = true
+                    showBottomsheet = true
                 }
             )
 
@@ -122,94 +137,42 @@ fun SelfDeclarationAllergyScreen(
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
 
-        // Add Allergy Dialog
-        if (showAddDialog) {
-            Dialog(onDismissRequest = { showAddDialog = false }) {
-                Card(
-                    shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-                    border = BorderStroke(1.dp, taminColors.border),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(22.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        TaminText(
-                            text = "انتخاب داروی حساسیت",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = taminColors.textPrimary
+        if (showBottomsheet) {
+            HealthBottomSheet(
+                config = BottomSheetConfig(
+                    title = "انتخاب دارو",
+                    subtitle = "دارویی که به آن حساسیت دارید را انتخاب کنید.",
+                    description = "",
+                    type = BottomSheetType.CUSTOM,
+                    singleSelection = true,
+                    submitText = "افزودن",
+                    cancelText = "انصراف",
+                    items = drugList.mapIndexed { index, drug ->
+                        BottomSheetItem(
+                            id = index,
+                            title = drug,
+                            isSelected = index == selectedDrugIndex
                         )
-
-                        TaminText(
-                            text = "دارویی که به آن حساسیت دارید را انتخاب کنید:",
-                            fontSize = 12.sp,
-                            color = taminColors.textTertiary
-                        )
-
-                        InteractiveChoiceChips(
-                            options = drugList,
-                            selectedIndices = if (selectedDrugIndex >= 0) setOf(selectedDrugIndex) else emptySet(),
-                            onSelectionChanged = { idxs ->
-                                selectedDrugIndex = idxs.firstOrNull() ?: -1
-                            }
-                        )
-
-                        StyledTextField(
-                            value = allergyDesc,
-                            onValueChange = { allergyDesc = it },
-                            label = "توضیحات عارضه یا حساسیت",
-                            placeholder = "مثلاً خارش، تنگی نفس و..."
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Button(
-                                onClick = {
-                                    if (selectedDrugIndex >= 0) {
-                                        //todo
-                                        val allergy = DrugAllergyItemPR(
-                                            drugId = selectedDrugIndex,
-                                            drugName = drugList[selectedDrugIndex],
-                                            allergyComments = allergyDesc.ifEmpty { "فاقد توضیحات عارضه" }
-                                        )
-                                        onIntent(HealthProfileIntent.UpdateAllergy(
-                                            state.copy(allergies = state.allergies + allergy)
-                                        )
-                                        )
-                                    }
-                                    showAddDialog = false
-                                },
-                                modifier = Modifier.weight(1f),
-                                enabled = selectedDrugIndex >= 0,
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = taminColors.blueText,
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                TaminText("افزودن", fontWeight = FontWeight.Bold)
-                            }
-
-                            OutlinedButton(
-                                onClick = { showAddDialog = false },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, taminColors.border),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = taminColors.textTertiary)
-                            ) {
-                                TaminText("انصراف", fontWeight = FontWeight.Bold)
-                            }
-                        }
                     }
+                ),
+                onDismissRequest = { showBottomsheet = false },
+                onSubmit = { result ->
+                    val selectedId = result.selectedItemIds.firstOrNull()
+                    if (selectedId != null) {
+                        val allergy = DrugAllergyItemPR(
+                            drugId = selectedId,
+                            drugName = drugList[selectedId],
+                            allergyComments = result.description?.takeIf { it.isNotBlank() } ?: "فاقد توضیحات عارضه"
+                        )
+                        onIntent(
+                            HealthProfileIntent.UpdateAllergy(
+                                state.copy(allergies = state.allergies + allergy)
+                            )
+                        )
+                    }
+                    showBottomsheet = false
                 }
-            }
+            )
         }
     }
 }

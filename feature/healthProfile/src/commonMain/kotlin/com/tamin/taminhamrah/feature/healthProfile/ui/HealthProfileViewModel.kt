@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
 class HealthProfileViewModel(
@@ -154,13 +155,15 @@ class HealthProfileViewModel(
                     if (safeNatCode.isNotBlank() && safePatientId != 0) {
                         // 3. Lifestyle / self-declarative
                         getPatientSelfDeclarativeUseCase(safeNatCode, safePatientId)
-                            .catch { /* non-fatal */ }
-                            .collect { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
+                            .catch { }
+                            .firstOrNull()
+                            ?.let { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
 
                         // 4. Drug allergies
                         getPatientDrugAllergiesUseCase(safeNatCode, safePatientId)
-                            .catch { /* non-fatal */ }
-                            .collect { emit(PartialState.AllergiesLoaded(it.map { d -> d.toPresentation() })) }
+                            .catch { }
+                            .firstOrNull()
+                            ?.let { list -> emit(PartialState.AllergiesLoaded(list.map { d -> d.toPresentation() })) }
                     }
                 }
         }
