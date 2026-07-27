@@ -9,8 +9,8 @@ private val BLOOD_GROUP_LETTER_ORDER = listOf("O", "AB", "B", "A") // matches de
 fun LookupItemPR.isUnknownBloodGroup(): Boolean =
     label.contains("نامشخص") || label.contains("نمی دانم") || label.contains("نمیدانم")
 
-fun extractLetter(label: String): String =
-    label.removeSuffix("+").removeSuffix("-")
+fun extractLetter(label: String?): String? =
+    label?.removeSuffix("+")?.removeSuffix("-")
 
 fun extractRh(label: String): String? = when {
     label.endsWith("+") -> "+"

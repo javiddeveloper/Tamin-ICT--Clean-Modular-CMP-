@@ -203,6 +203,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.DISEASES -> {
                     SelfDeclarationDiseasesScreen(
                         state = selfDecState.diseases,
+                        illnessGroups = state.illnessGroups,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))

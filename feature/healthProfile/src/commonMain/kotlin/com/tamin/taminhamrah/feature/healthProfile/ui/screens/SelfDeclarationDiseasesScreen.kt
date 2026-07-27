@@ -1,26 +1,65 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.InfoBanner
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.InteractiveChoiceChips
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.SegmentedControl
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.DiseasesStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.IllnessGroupPR
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.ui.components.CustomChip
+import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.util.Logger
+import org.jetbrains.compose.resources.painterResource
+import taminx.feature.healthprofile.generated.resources.Res
+import taminx.feature.healthprofile.generated.resources.ic_health_cancer
+import taminx.feature.healthprofile.generated.resources.ic_health_disease
+import taminx.feature.healthprofile.generated.resources.ic_health_high_risk
+import taminx.feature.healthprofile.generated.resources.ic_health_mental
 
 @Composable
 fun SelfDeclarationDiseasesScreen(
     state: DiseasesStepState,
+    illnessGroups: List<IllnessGroupPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -29,9 +68,34 @@ fun SelfDeclarationDiseasesScreen(
 
     val optionsYesNo = listOf("خیر", "بله")
 
+    // Filter the groups for this screen (forFamily == false)
+    val group1 = illnessGroups.find { it.groupId == 1 && !it.forFamily }
+    val group2 = illnessGroups.find { it.groupId == 2 && !it.forFamily }
+    val group3 = illnessGroups.find { it.groupId == 3 && !it.forFamily }
+    val group4 = illnessGroups.find { it.groupId == 4 && !it.forFamily }
+
+    // Bottom sheet visibility states
+    var showGroup2Sheet by remember { mutableStateOf(false) }
+    var showGroup3Sheet by remember { mutableStateOf(false) }
+    var showGroup4Sheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        Logger.d(
+            "DiseasesScreen",
+            """
+        Initial State Loaded:
+        riskFactorIds: ${state.riskFactorIds}
+        hasChronicDisease: ${state.hasChronicDisease}, chronicDiseaseIds: ${state.chronicDiseaseIds}
+        hasMentalIllness: ${state.hasMentalIllness}, mentalIllnessIds: ${state.mentalIllnessIds}
+        hasCancer: ${state.hasCancer}, cancerIds: ${state.cancerIds}
+        """.trimIndent()
+        )
+    }
+
     Scaffold(
         topBar = {
             HealthTopAppBar(
+                title = "سوالات سلامت",
                 currentStep = 8,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -56,146 +120,273 @@ fun SelfDeclarationDiseasesScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            TaminText(
-                text = "سابقهٔ بیماری‌های فردی",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                )
+            InfoBanner(
+                message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
+                modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // High parameters
-            TaminText(
-                text = "آیا سابقهٔ بالا بودن هر یک از موارد زیر را دارید؟",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.textPrimary
-            )
+            // Group 1: Risk Factors
+            if (group1 != null) {
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TaminText("قند خون بالا", style = MaterialTheme.typography.bodyMedium, color = taminColors.textPrimary)
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = if (state.hasHighBloodSugar == true) 1 else 0,
-                    onOptionSelected = { idx ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasHighBloodSugar = idx == 1)))
-                    }
-                )
-            }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconBox(
+                        painter = painterResource(Res.drawable.ic_health_high_risk),
+                        backgroundColor = LocalTaminColors.current.greenText.copy(alpha = 0.2f),
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TaminText(
+                        text = "آیا سابقهٔ بالا بودن هر یک از موارد زیر را دارید؟",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = taminColors.textPrimary
+                    )
+                }
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TaminText("فشار خون بالا", style = MaterialTheme.typography.bodyMedium, color = taminColors.textPrimary)
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = if (state.hasHighBloodPressure == true) 1 else 0,
-                    onOptionSelected = { idx ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasHighBloodPressure = idx == 1)))
-                    }
-                )
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TaminText("چربی خون یا کلسترول بالا", style = MaterialTheme.typography.bodyMedium, color = taminColors.textPrimary)
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = if (state.hasHighCholesterol == true) 1 else 0,
-                    onOptionSelected = { idx ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasHighCholesterol = idx == 1)))
-                    }
-                )
-            }
-
-            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
-
-            // Chronic illness
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TaminText("سابقهٔ ابتلا به بیماری‌های مزمن؟", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = taminColors.textPrimary)
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = if (state.hasChronicDisease == true) 1 else 0,
-                    onOptionSelected = { idx ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasChronicDisease = idx == 1)))
-                    }
-                )
-            }
-
-            if (state.hasChronicDisease == true) {
-                val chronicOptions = listOf("قلبی و عروقی", "مغزی", "ریوی (آسم، تنگی نفس، COPD)", "دستگاه گوارش", "تیرویید", "روماتیسمی", "سایر")
-                TaminText("نوع بیماری خود را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
                 InteractiveChoiceChips(
-                    options = chronicOptions,
-                    selectedIndices = state.chronicDiseaseIds,
+                    options = group1.illnesses.map { it.label },
+                    selectedIndices = group1.illnesses.mapIndexedNotNull { index, item ->
+                        if (state.riskFactorIds.contains(item.id)) index else null
+                    }.toSet(),
                     onSelectionChanged = { indices ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(chronicDiseaseIds = indices)))
+                        val selectedIds = indices.map { group1.illnesses[it].id }.toSet()
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(riskFactorIds = selectedIds)))
                     }
                 )
             }
 
-            // Mental Illness
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TaminText("سابقهٔ بیماری‌های اعصاب و روان؟", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = taminColors.textPrimary)
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = if (state.hasMentalIllness == true) 1 else 0,
-                    onOptionSelected = { idx ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasMentalIllness = idx == 1)))
+            // Group 2: Chronic illness
+            if (group2 != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_disease),
+                            backgroundColor = LocalTaminColors.current.hawkesBlue.copy(alpha = 0.6f),
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            "آیا سابقه ابتلا به بیماری دارید؟",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
+
                     }
-                )
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = if (state.hasChronicDisease == true) 1 else 0,
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 1
+                            onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasChronicDisease = isYes)))
+                            if (isYes) showGroup2Sheet = true
+                        }
+                    )
+                }
+
+                if (state.hasChronicDisease == true && state.chronicDiseaseIds.isNotEmpty()) {
+                    val selectedItems =
+                        group2.illnesses.filter { state.chronicDiseaseIds.contains(it.id) }
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showGroup2Sheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedItems.forEach { item ->
+                            CustomChip(
+                                text = item.label,
+                                containerColor = LocalTaminColors.current.hawkesBlue.copy(alpha = 0.6f),
+                                textColor = taminColors.textPrimary
+                            )
+                        }
+                    }
+                }
             }
 
-            if (state.hasMentalIllness == true) {
-                val mentalOptions = listOf("افسردگی", "اضطراب", "وسواس فکری", "سایر")
-                TaminText("نوع عارضه را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
-                InteractiveChoiceChips(
-                    options = mentalOptions,
-                    selectedIndices = state.mentalIllnessIds,
-                    onSelectionChanged = { indices ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(mentalIllnessIds = indices)))
+            // Group 3: Mental Illness
+            if (group3 != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_mental),
+                            backgroundColor = LocalTaminColors.current.fuchsiaBlue.copy(alpha = 0.13f),
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            "آیا بیماری اعصاب و روان دارید؟",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
                     }
-                )
+
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = if (state.hasMentalIllness == true) 1 else 0,
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 1
+                            onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasMentalIllness = isYes)))
+                            if (isYes) showGroup3Sheet = true
+                        }
+                    )
+                }
+
+                if (state.hasMentalIllness == true && state.mentalIllnessIds.isNotEmpty()) {
+                    val selectedItems =
+                        group3.illnesses.filter { state.mentalIllnessIds.contains(it.id) }
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showGroup3Sheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedItems.forEach { item ->
+                            CustomChip(
+                                text = item.label,
+                                containerColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
+                                textColor = taminColors.textPrimary
+                            )
+                        }
+                    }
+                }
             }
 
-            // Cancer
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TaminText("سابقهٔ ابتلا به سرطان؟", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = taminColors.textPrimary)
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = if (state.hasCancer == true) 1 else 0,
-                    onOptionSelected = { idx ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasCancer = idx == 1)))
+            // Group 4: Cancer
+            if (group4 != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_cancer),
+                            backgroundColor = LocalTaminColors.current.dangerText.copy(alpha = 0.13f),
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            "آیا سابقه ابتلا به سرطان دارید؟",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
                     }
-                )
+
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = if (state.hasCancer == true) 1 else 0,
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 1
+                            onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasCancer = isYes)))
+                            if (isYes) showGroup4Sheet = true
+                        }
+                    )
+                }
+
+                if (state.hasCancer == true && state.cancerIds.isNotEmpty()) {
+                    val selectedItems = group4.illnesses.filter { state.cancerIds.contains(it.id) }
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showGroup4Sheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedItems.forEach { item ->
+                            CustomChip(
+                                text = item.label,
+                                containerColor = taminColors.dangerText.copy(alpha = 0.13f),
+                                textColor = taminColors.textPrimary
+                            )
+                        }
+                    }
+                }
             }
 
-            if (state.hasCancer == true) {
-                val cancerOptions = listOf("سرطان خون", "سرطان ریه", "سرطان پستان", "سرطان دستگاه گوارش", "سرطان پروستات", "سرطان رحم و تخمدان", "سرطان پوست", "سرطان تیرویید", "سایر")
-                TaminText("نوع سرطان را انتخاب کنید:", fontSize = 12.sp, color = taminColors.textTertiary)
-                InteractiveChoiceChips(
-                    options = cancerOptions,
-                    selectedIndices = state.cancerIds,
-                    onSelectionChanged = { indices ->
-                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(cancerIds = indices)))
-                    }
-                )
-            }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+        }
+    }
+
+    // Bottom Sheets
+    group2?.let { g ->
+        if (showGroup2Sheet) {
+            HealthBottomSheet(
+                config = BottomSheetConfig(
+                    title = g.groupTitle,
+                    subtitle = "نوع بیماری خود را انتخاب کنید:",
+                    type = BottomSheetType.fromGroupId(g.groupId) ?: BottomSheetType.CUSTOM,
+                    singleSelection = false,
+                    items = g.illnesses.map {
+                        BottomSheetItem(
+                            id = it.id,
+                            title = it.label,
+                            isSelected = state.chronicDiseaseIds.contains(it.id)
+                        )
+                    }
+                ),
+                onDismissRequest = { showGroup2Sheet = false },
+                onSubmit = { result ->
+                    onIntent(HealthProfileIntent.UpdateDiseases(state.copy(chronicDiseaseIds = result.selectedItemIds.toSet())))
+                    showGroup2Sheet = false
+                }
+            )
+        }
+    }
+
+    group3?.let { g ->
+        if (showGroup3Sheet) {
+            HealthBottomSheet(
+                config = BottomSheetConfig(
+                    title = g.groupTitle,
+                    subtitle = "نوع عارضه را انتخاب کنید:",
+                    type = BottomSheetType.fromGroupId(g.groupId) ?: BottomSheetType.CUSTOM,
+                    singleSelection = false,
+                    items = g.illnesses.map {
+                        BottomSheetItem(
+                            id = it.id,
+                            title = it.label,
+                            isSelected = state.mentalIllnessIds.contains(it.id)
+                        )
+                    }
+                ),
+                onDismissRequest = { showGroup3Sheet = false },
+                onSubmit = { result ->
+                    onIntent(HealthProfileIntent.UpdateDiseases(state.copy(mentalIllnessIds = result.selectedItemIds.toSet())))
+                    showGroup3Sheet = false
+                }
+            )
+        }
+    }
+
+    group4?.let { g ->
+        if (showGroup4Sheet) {
+            HealthBottomSheet(
+                config = BottomSheetConfig(
+                    title = g.groupTitle,
+                    subtitle = "نوع سرطان را انتخاب کنید:",
+                    type = BottomSheetType.fromGroupId(g.groupId) ?: BottomSheetType.CUSTOM,
+                    singleSelection = false,
+                    items = g.illnesses.map {
+                        BottomSheetItem(
+                            id = it.id,
+                            title = it.label,
+                            isSelected = state.cancerIds.contains(it.id)
+                        )
+                    }
+                ),
+                onDismissRequest = { showGroup4Sheet = false },
+                onSubmit = { result ->
+                    onIntent(HealthProfileIntent.UpdateDiseases(state.copy(cancerIds = result.selectedItemIds.toSet())))
+                    showGroup4Sheet = false
+                }
+            )
         }
     }
 }
@@ -204,12 +395,52 @@ fun SelfDeclarationDiseasesScreen(
 @Preview
 @Composable
 fun SelfDeclarationDiseasesScreenPreview() {
+    val mockIllnesses = listOf(
+        LookupItemPR(1, "قند خون بالا"),
+        LookupItemPR(2, "فشار خون بالا"),
+        LookupItemPR(
+            3,
+            "چربی خون یا کلسترول بالا"
+        )
+    )
+
+    val mockGroups = listOf(
+        IllnessGroupPR(
+            groupId = 1,
+            groupTitle = "سابقه (رسیک فاکتور)",
+            forFamily = false,
+            illnesses = mockIllnesses
+        ),
+        IllnessGroupPR(
+            groupId = 2,
+            groupTitle = "سابقه ابتلا به بیماری",
+            forFamily = false,
+            illnesses = mockIllnesses
+        ),
+        IllnessGroupPR(
+            groupId = 3,
+            groupTitle = "بیماری اعصاب و روان",
+            forFamily = false,
+            illnesses = mockIllnesses
+        ),
+        IllnessGroupPR(
+            groupId = 4,
+            groupTitle = "سابقه ابتلا به سرطان",
+            forFamily = false,
+            illnesses = mockIllnesses
+        )
+    )
+
     PreviewRtlThemeContent {
         SelfDeclarationDiseasesScreen(
-            state = DiseasesStepState(hasChronicDisease = true, chronicDiseaseIds = setOf(0, 2)),
+            state = DiseasesStepState(
+                riskFactorIds = setOf(1),
+                hasChronicDisease = true,
+                chronicDiseaseIds = setOf(2)
+            ),
+            illnessGroups = mockGroups,
             onIntent = {},
             onBackClicked = {}
         )
     }
 }
-
