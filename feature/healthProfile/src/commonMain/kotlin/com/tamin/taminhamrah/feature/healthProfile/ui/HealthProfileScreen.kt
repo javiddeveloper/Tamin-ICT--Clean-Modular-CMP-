@@ -187,8 +187,6 @@ fun HealthProfileMainContent(
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
                         }
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
-                        },
                     )
                 }
                 SelfDeclarationStep.LIFESTYLE -> {
