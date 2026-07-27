@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.CustomChip
 import org.jetbrains.compose.resources.painterResource
 import taminx.feature.healthprofile.generated.resources.Res
 import taminx.feature.healthprofile.generated.resources.ic_health_addiction
@@ -52,6 +53,7 @@ fun SelfDeclarationLifestyleScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
+                title = "سبک زندگی",
                 currentStep = 7,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -76,14 +78,6 @@ fun SelfDeclarationLifestyleScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            TaminText(
-                text = "سبک زندگی",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                )
-            )
-
             InfoBanner(
                 message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
                 modifier = Modifier.padding(bottom = 6.dp)
@@ -97,9 +91,8 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_tobacco),
-                        backgroundColor = LocalTaminColors.current.warning.copy(alpha = 0.13f),
+                        backgroundColor = taminColors.warning.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.warning
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -118,6 +111,16 @@ fun SelfDeclarationLifestyleScreen(
                         if (isYes) showSmokingBottomSheet = true
                     }
                 )
+
+                if (state.isSmoking == true && state.smokingPattern != null) {
+                    CustomChip(
+                        text = state.smokingPattern,
+                        containerColor = taminColors.warning.copy(alpha = 0.13f),
+                        textColor = taminColors.textPrimary,
+                        modifier = Modifier
+                            .clickable { showSmokingBottomSheet = true }
+                    )
+                }
             }
 
             // ── Addiction ────────────────────────────────────────────────────
@@ -128,9 +131,8 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_addiction),
-                        backgroundColor = LocalTaminColors.current.dangerText.copy(alpha = 0.13f),
+                        backgroundColor = taminColors.dangerText.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.dangerText
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -150,6 +152,16 @@ fun SelfDeclarationLifestyleScreen(
                     }
                 )
 
+                if (state.hasAddiction == true && state.substancePattern != null) {
+                    CustomChip(
+                        text = state.substancePattern,
+                        containerColor = taminColors.dangerText.copy(alpha = 0.13f),
+                        textColor = taminColors.textPrimary,
+                        modifier = Modifier
+                            .clickable { showAddictionBottomSheet = true }
+                    )
+                }
+
             }
 
             // ── Alcohol (hardcoded LifeStyleStatus) ─────────────────────────
@@ -160,9 +172,8 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_alcohol),
-                        backgroundColor = LocalTaminColors.current.fuchsiaBlue.copy(alpha = 0.13f),
+                        backgroundColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.fuchsiaBlue
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -182,6 +193,16 @@ fun SelfDeclarationLifestyleScreen(
                     }
                 )
 
+                if (state.isDrinking == true && state.drinkingPattern != null) {
+                    CustomChip(
+                        text = state.drinkingPattern,
+                        containerColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
+                        textColor = taminColors.textPrimary,
+                        modifier = Modifier
+                            .clickable { showAlcoholBottomSheet = true }
+                    )
+                }
+
             }
 
             // ── Exercise (hardcoded LifeStyleStatus) ────────────────────────
@@ -192,9 +213,8 @@ fun SelfDeclarationLifestyleScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
                         painter = painterResource(Res.drawable.ic_health_exercise),
-                        backgroundColor = LocalTaminColors.current.greenText.copy(alpha = 0.13f),
+                        backgroundColor = taminColors.greenText.copy(alpha = 0.13f),
                         contentDescription = null,
-                        tintColor = LocalTaminColors.current.greenText
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
@@ -213,6 +233,16 @@ fun SelfDeclarationLifestyleScreen(
                         if (isYes) showExerciseBottomSheet = true
                     }
                 )
+
+                if (state.isExercising == true && state.exerciseFrequency != null) {
+                    CustomChip(
+                        text = state.exerciseFrequency,
+                        containerColor = taminColors.greenText.copy(alpha = 0.13f),
+                        textColor = taminColors.textPrimary,
+                        modifier = Modifier
+                            .clickable { showExerciseBottomSheet = true }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))

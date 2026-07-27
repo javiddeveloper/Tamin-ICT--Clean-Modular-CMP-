@@ -125,7 +125,7 @@ fun InteractiveChoiceChips(
     selectedIndices: Set<Int>,
     onSelectionChanged: (Set<Int>) -> Unit,
     activeColor: Color = LocalTaminColors.current.blueText,
-    activeBgColor: Color = LocalTaminColors.current.blueBg
+    activeBgColor: Color = LocalTaminColors.current.blueBg,
 ) {
     val taminColors = LocalTaminColors.current
 

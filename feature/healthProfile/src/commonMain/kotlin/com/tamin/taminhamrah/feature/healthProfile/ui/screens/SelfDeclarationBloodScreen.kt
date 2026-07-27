@@ -37,8 +37,6 @@ fun SelfDeclarationBloodScreen(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-    val rhFactors = listOf("+", "-")
-
     val bloodGroupLetters = remember(bloodGroupOptions) { bloodGroupLetters(bloodGroupOptions) }
     val chipsAlpha = if (state.isBloodGroupUnknown) 0.5f else 1f
 
@@ -55,6 +53,7 @@ fun SelfDeclarationBloodScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
+                title = "گروه خونی",
                 currentStep = 6,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -80,15 +79,6 @@ fun SelfDeclarationBloodScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            TaminText(
-                text = "گروه خونی",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                ),
-                modifier = Modifier.align(Alignment.Start)
-            )
 
             // Blood Droplet Graphic
             BloodDropletGraphic(

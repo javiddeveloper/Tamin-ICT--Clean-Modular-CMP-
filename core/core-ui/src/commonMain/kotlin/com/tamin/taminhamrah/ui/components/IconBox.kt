@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -22,7 +23,6 @@ fun IconBox(
     backgroundColor: Color,
     cornerRadius: Dp = 8.dp,
     contentDescription: String? = null,
-    tintColor: Color
 ) {
     Box(
         modifier = modifier
@@ -31,10 +31,9 @@ fun IconBox(
             .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
+        Image(
             painter = painter,
             contentDescription = contentDescription,
-            tint = tintColor
         )
     }
 }
