@@ -318,8 +318,8 @@ class HealthProfileViewModel(
                         emergencyMobile  = info.emergencyMobile
                     ),
                     physical = sd.physical.copy(
-                        height = info.patientHeight.toInt(),
-                        weight = info.patientWeight.toInt()
+                        height = if (info.patientHeight > 0) info.patientHeight.toInt() else null,
+                        weight = if (info.patientWeight > 0) info.patientWeight.toInt() else null
                     ),
                     bloodGroup = sd.bloodGroup.copy(
                         selectedBloodGroupId = info.patientBloodGroupCode,
