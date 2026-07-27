@@ -125,7 +125,6 @@ fun InteractiveChoiceChips(
     onSelectionChanged: (Set<Int>) -> Unit,
     activeColor: Color = LocalTaminColors.current.blueText,
     activeBgColor: Color = LocalTaminColors.current.blueBg,
-    chipBackgroundColor:Color? = Color.Transparent
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -138,7 +137,7 @@ fun InteractiveChoiceChips(
     ) {
         options.forEachIndexed { index, label ->
             val isSelected = selectedIndices.contains(index)
-            val chipBgColor = if (isSelected) activeBgColor else chipBackgroundColor ?: Color.Transparent
+            val chipBgColor = if (isSelected) activeBgColor else Color.Transparent
             val chipBorderColor = if (isSelected) activeColor else taminColors.border
             val chipTextColor = if (isSelected) activeColor else taminColors.textPrimary
 

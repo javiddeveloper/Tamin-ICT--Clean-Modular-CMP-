@@ -17,12 +17,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +48,7 @@ import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.util.Logger
 import org.jetbrains.compose.resources.painterResource
 import taminx.feature.healthprofile.generated.resources.Res
 import taminx.feature.healthprofile.generated.resources.ic_health_cancer
@@ -75,6 +78,19 @@ fun SelfDeclarationDiseasesScreen(
     var showGroup2Sheet by remember { mutableStateOf(false) }
     var showGroup3Sheet by remember { mutableStateOf(false) }
     var showGroup4Sheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        Logger.d(
+            "DiseasesScreen",
+            """
+        Initial State Loaded:
+        riskFactorIds: ${state.riskFactorIds}
+        hasChronicDisease: ${state.hasChronicDisease}, chronicDiseaseIds: ${state.chronicDiseaseIds}
+        hasMentalIllness: ${state.hasMentalIllness}, mentalIllnessIds: ${state.mentalIllnessIds}
+        hasCancer: ${state.hasCancer}, cancerIds: ${state.cancerIds}
+        """.trimIndent()
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -134,7 +150,6 @@ fun SelfDeclarationDiseasesScreen(
                 }
 
                 InteractiveChoiceChips(
-                    chipBackgroundColor = taminColors.bgIconProfile,
                     options = group1.illnesses.map { it.label },
                     selectedIndices = group1.illnesses.mapIndexedNotNull { index, item ->
                         if (state.riskFactorIds.contains(item.id)) index else null
@@ -178,7 +193,8 @@ fun SelfDeclarationDiseasesScreen(
                 }
 
                 if (state.hasChronicDisease == true && state.chronicDiseaseIds.isNotEmpty()) {
-                    val selectedItems = group2.illnesses.filter { state.chronicDiseaseIds.contains(it.id) }
+                    val selectedItems =
+                        group2.illnesses.filter { state.chronicDiseaseIds.contains(it.id) }
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -230,7 +246,8 @@ fun SelfDeclarationDiseasesScreen(
                 }
 
                 if (state.hasMentalIllness == true && state.mentalIllnessIds.isNotEmpty()) {
-                    val selectedItems = group3.illnesses.filter { state.mentalIllnessIds.contains(it.id) }
+                    val selectedItems =
+                        group3.illnesses.filter { state.mentalIllnessIds.contains(it.id) }
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -386,8 +403,8 @@ fun SelfDeclarationDiseasesScreen(
 @Composable
 fun SelfDeclarationDiseasesScreenPreview() {
     val mockIllnesses = listOf(
-       LookupItemPR(1, "قند خون بالا"),
-       LookupItemPR(2, "فشار خون بالا"),
+        LookupItemPR(1, "قند خون بالا"),
+        LookupItemPR(2, "فشار خون بالا"),
         LookupItemPR(
             3,
             "چربی خون یا کلسترول بالا"

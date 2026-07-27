@@ -70,7 +70,18 @@ class HealthProfileViewModel(
             is HealthProfileIntent.UpdateContact    -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
             is HealthProfileIntent.UpdateEmergency  -> flow { emit(PartialState.EmergencyUpdated(intent.emergency)) }
             is HealthProfileIntent.UpdatePhysical   -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
-            is HealthProfileIntent.UpdateDiseases   -> flow { emit(PartialState.DiseasesUpdated(intent.diseases)) }
+            is HealthProfileIntent.UpdateDiseases   -> flow {
+                val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
+                intent.diseases.riskFactorIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+                intent.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+                intent.diseases.mentalIllnessIds.forEach  { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+                intent.diseases.cancerIds.forEach         { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+
+                Logger.d("DiseasesUpdate", "User updated diseases section")
+                Logger.d("DiseasesUpdate", "New Request Payload Preview: $illnessList")
+
+                emit(PartialState.DiseasesUpdated(intent.diseases))
+            }
             is HealthProfileIntent.UpdateFamily     -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
             is HealthProfileIntent.UpdateBloodGroup -> flow {
                 Logger.d("BloodGroupUpdate", "User updated blood group")
