@@ -74,6 +74,7 @@ class HealthProfileViewModel(
                 Logger.d("BloodGroupUpdate", "User updated blood group")
                 Logger.d("BloodGroupUpdate", "selectedBloodGroupId: ${intent.bloodGroup.selectedBloodGroupId}")
                 Logger.d("BloodGroupUpdate", "selectedBloodGroupLetter: ${intent.bloodGroup.selectedBloodGroupLetter}")
+                Logger.d("BloodGroupUpdate", "selectedBloodGroupRh: ${intent.bloodGroup.selectedBloodGroupRh}")
                 Logger.d("BloodGroupUpdate", "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}")
                 emit(PartialState.BloodGroupUpdated(intent.bloodGroup))
             }
@@ -308,7 +309,8 @@ class HealthProfileViewModel(
                     ),
                     bloodGroup = sd.bloodGroup.copy(
                         selectedBloodGroupId = info.patientBloodGroupCode,
-                        selectedBloodGroupLetter = info.patientBloodGroup
+                        selectedBloodGroupLetter = info.patientBloodGroup,
+                        selectedBloodGroupRh = info.patientBloodGroup
                     )
                 )
             )

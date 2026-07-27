@@ -109,6 +109,8 @@ data class FamilyStepState(
 data class BloodGroupStepState(
     val selectedBloodGroupId: Int? = null,
     val selectedBloodGroupLetter: String? = null,
+
+    val selectedBloodGroupRh: String? = null,
     val isBloodGroupUnknown: Boolean = false
 )
 

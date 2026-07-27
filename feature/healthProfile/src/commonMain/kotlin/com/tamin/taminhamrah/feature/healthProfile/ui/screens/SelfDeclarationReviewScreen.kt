@@ -122,7 +122,7 @@ fun SelfDeclarationReviewScreen(
                 title = "گروه خونی",
                 onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD)) }
             ) {
-                val group = if (state.bloodGroup.isBloodGroupUnknown) "نامشخص" else state.bloodGroup.selectedBloodGroupLetter ?: ""
+                val group = if (state.bloodGroup.isBloodGroupUnknown) "نامشخص" else "${state.bloodGroup.selectedBloodGroupLetter ?: ""}${state.bloodGroup.selectedBloodGroupRh ?: ""}"
                 IdentityRow(label = "گروه خونی:", value = group.ifEmpty { "نامشخص" })
             }
 
@@ -197,7 +197,7 @@ fun SelfDeclarationReviewScreenPreview() {
                 contact = ContactStepState(cityLabel = "تهران", provinceLabel = "تهران", address = "میدان ونک"),
                 emergency = EmergencyStepState(emergencyName = "محمد", emergencyRelation = "پدر"),
                 physical = PhysicalStepState(height = 180, weight = 80),
-                bloodGroup = BloodGroupStepState(selectedBloodGroupLetter = "AB+")
+                bloodGroup = BloodGroupStepState(selectedBloodGroupLetter = "AB", selectedBloodGroupRh = "+")
             ),
             onIntent = {},
             onBackClicked = {}

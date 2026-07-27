@@ -3,6 +3,11 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +26,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 fun SelfDeclarationBloodScreen(
@@ -32,13 +38,15 @@ fun SelfDeclarationBloodScreen(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-    val isNextEnabled =
-        state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null)
+    val rhFactors = listOf("+", "-")
+
+    val isNextEnabled = state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null && state.selectedBloodGroupRh != null)
 
     LaunchedEffect(Unit) {
         com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "Screen opened. Initial state:")
         com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupId: ${state.selectedBloodGroupId}")
         com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupLetter: ${state.selectedBloodGroupLetter}")
+        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupRh: ${state.selectedBloodGroupRh}")
         com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "isBloodGroupUnknown: ${state.isBloodGroupUnknown}")
     }
 
@@ -83,8 +91,9 @@ fun SelfDeclarationBloodScreen(
             // Blood Droplet Graphic
             BloodDropletGraphic(
                 selectedLetter = state.selectedBloodGroupLetter,
+                selectedRh = state.selectedBloodGroupRh,
                 isUnknown = state.isBloodGroupUnknown,
-                modifier = Modifier.padding(vertical = 12.dp)
+                modifier = Modifier.padding(vertical = 12.dp),
             )
 
             TaminText(
@@ -124,9 +133,11 @@ fun SelfDeclarationBloodScreen(
                 onSelectionChanged = { idxs ->
                     if (!state.isBloodGroupUnknown) {
                         val letter = idxs.lastOrNull()?.let { bloodGroupOptions[it] }
+                        val newUnknown = !state.isBloodGroupUnknown
                         onIntent(
                             HealthProfileIntent.UpdateBloodGroup(
                                 state.copy(
+                                    selectedBloodGroupRh = if (newUnknown) null else state.selectedBloodGroupRh,
                                     selectedBloodGroupId = letter?.id,
                                     selectedBloodGroupLetter = letter?.label
                                 )
@@ -138,48 +149,80 @@ fun SelfDeclarationBloodScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            TaminText(
+                text = "فاکتور Rh",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = taminColors.textTertiary,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            RhFactor(
+                selectedRh = state.selectedBloodGroupRh,
+                enabled = !state.isBloodGroupUnknown,
+                onRhSelected = { rh ->
+                    onIntent(
+                        HealthProfileIntent.UpdateBloodGroup(
+                            state.copy(
+                                selectedBloodGroupRh = rh
+                            )
+                        )
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(taminColors.bgSurface)
-                    .border(1.dp, taminColors.border, RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(Spacing.xxl))
+                    .background(if (state.isBloodGroupUnknown) taminColors.blueBg else taminColors.bgSurface)
+                    .border(
+                        width = 1.dp,
+                        color = if (state.isBloodGroupUnknown) {
+                            taminColors.blueText
+                        } else {
+                            taminColors.border
+                        },
+                        shape = RoundedCornerShape(Spacing.xxl)
+                    )
                     .clickable {
                         val newUnknown = !state.isBloodGroupUnknown
-                        val newId = if (newUnknown) bloodGroupOptions.find { it.label.contains("نامشخص") || it.label.contains("نمی دانم") || it.label.contains("نمیدانم") }?.id else null
+
+                        val newId = if (newUnknown) {
+                            bloodGroupOptions.find {
+                                it.label.contains("نامشخص") ||
+                                    it.label.contains("نمی دانم") ||
+                                    it.label.contains("نمیدانم")
+                            }?.id
+                        } else {
+                            null
+                        }
+
                         onIntent(
                             HealthProfileIntent.UpdateBloodGroup(
                                 state.copy(
                                     isBloodGroupUnknown = newUnknown,
+                                    selectedBloodGroupRh = if (newUnknown) null else state.selectedBloodGroupRh,
                                     selectedBloodGroupLetter = if (newUnknown) null else state.selectedBloodGroupLetter,
                                     selectedBloodGroupId = newId
                                 )
                             )
                         )
-                    },
-                verticalAlignment = Alignment.CenterVertically
+                    }
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Checkbox(
-                    checked = state.isBloodGroupUnknown,
-                    onCheckedChange = { chk ->
-                        val newId = if (chk) bloodGroupOptions.find { it.label.contains("نامشخص") || it.label.contains("نمی دانم") || it.label.contains("نمیدانم") }?.id else null
-                        onIntent(
-                            HealthProfileIntent.UpdateBloodGroup(
-                                state.copy(
-                                    isBloodGroupUnknown = chk,
-                                    selectedBloodGroupLetter = if (chk) null else state.selectedBloodGroupLetter,
-                                    selectedBloodGroupId = newId
-                                )
-                            )
-                        )
-                    },
-                    colors = CheckboxDefaults.colors(checkedColor = taminColors.blueText)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
                 TaminText(
+                    modifier = Modifier.padding(start = 4.dp),
                     text = "گروه خونی خود را نمی‌دانم",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = taminColors.textPrimary
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.textSecondary,
+                )
+                Icon(
+                    imageVector = Icons.Outlined.Cancel,
+                    contentDescription = null,
+                    tint = taminColors.dangerText.copy(alpha = 0.8f)
                 )
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
@@ -193,7 +236,7 @@ fun SelfDeclarationBloodScreen(
 fun SelfDeclarationBloodScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationBloodScreen(
-            state = BloodGroupStepState(selectedBloodGroupLetter = "O+"),
+            state = BloodGroupStepState(selectedBloodGroupLetter = "O", selectedBloodGroupRh = "-"),
             onIntent = {},
             onBackClicked = {},
             bloodGroupOptions = emptyList()
