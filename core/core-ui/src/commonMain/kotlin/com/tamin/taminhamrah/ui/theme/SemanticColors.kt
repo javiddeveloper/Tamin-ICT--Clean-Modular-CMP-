@@ -228,7 +228,4 @@ val DarkTaminColors = TaminColors(
     chipBg = Color(0x293B82F6),
     warning = Color(0xFFFBBF24),
     fuchsiaBlue = Color(0xFFB79AEE)
-
-    hawkesBlue = TaminDarkOuterBorder,
-    chipBg = Color(0x293B82F6)
 )
