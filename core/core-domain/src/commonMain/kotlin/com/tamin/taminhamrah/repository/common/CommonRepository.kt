@@ -14,4 +14,5 @@ interface CommonRepository {
     fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>>
     fun getRegistrationDeclarationForm(): Flow<ByteArray>
     fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?>
+    fun getRoles(): Flow<List<com.tamin.taminhamrah.model.common.RoleDN>>
 }

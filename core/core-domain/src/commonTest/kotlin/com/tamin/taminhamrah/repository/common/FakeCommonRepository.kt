@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository.common
 
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -15,6 +16,8 @@ class FakeCommonRepository : CommonRepository {
     var getBeneficiaryError: Throwable = RuntimeException("Error")
     var mainMenuResult: List<MainServiceDN> = emptyList()
     var getMainMenuError: Throwable = RuntimeException("Menu Error")
+    var rolesResult: List<RoleDN> = emptyList()
+    var getRolesError: Throwable = RuntimeException("Roles Error")
     var jobTitleResult: JobTitleListDN? = null
     var registrationDeclarationFormResult: ByteArray = byteArrayOf()
     var registrationDeclarationFormError: Throwable = RuntimeException("PDF Error")
@@ -45,5 +48,12 @@ class FakeCommonRepository : CommonRepository {
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
         if (shouldThrowError) throw getBeneficiaryError
         emit(jobTitleResult)
+    }
+
+    override fun getRoles(): Flow<List<RoleDN>> = flow {
+        if (shouldThrowError) {
+            throw getRolesError
+        }
+        emit(rolesResult)
     }
 }

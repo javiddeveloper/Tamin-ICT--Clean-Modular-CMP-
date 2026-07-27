@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -160,6 +161,7 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
     factoryOf(::SendRetirementDocumentUseCase)
+    factoryOf(::GetRolesUseCase)
 
 
     // Treatment UseCases
