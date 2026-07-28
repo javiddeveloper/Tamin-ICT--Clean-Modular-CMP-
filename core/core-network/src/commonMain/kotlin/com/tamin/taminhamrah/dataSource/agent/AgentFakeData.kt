@@ -6,12 +6,12 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """{
     "status": "DONE",
     "message": null,
     "result": {
-        "session_id": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
+        "sessionId": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
         "lastEntity": "doctorName:ali , proficiency:heart, nezam:123456",
         "entities": [
             {
                 "key": "dastmozd_infos_per_year",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -25,7 +25,7 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """{
             },
             {
                 "key": "occurrence_report",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -41,7 +41,7 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """{
             },
             {
                 "key": "edit_profile",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -51,7 +51,7 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """{
             },
             {
                 "key": "edit_address",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -69,12 +69,12 @@ internal const val FAKE_AGENT_RESPONSE = """{
     "status": "DONE",
     "message": null,
     "result": {
-        "session_id": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
+        "sessionId": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
         "lastEntity": "doctorName:ali , proficiency:heart, nezam:123456",
         "entities": [
             {
                 "key": "dastmozd_infos_per_year",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -88,7 +88,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos_salary",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -102,7 +102,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos_sum_total",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -116,7 +116,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -127,7 +127,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -141,7 +141,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -154,7 +154,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -167,7 +167,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -178,7 +178,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "history_job_infos",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -191,7 +191,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "history_job_infos_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -202,7 +202,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "calcIllness",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -216,7 +216,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "calcIllness",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -229,7 +229,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "calcIllness",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -242,7 +242,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "repIllness_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -253,7 +253,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "repIllness",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -264,7 +264,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozd_infos_calcIllness_pensioner",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -278,7 +278,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "eligible_amount_pension",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -289,7 +289,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "average_dastmozd_infos",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -302,7 +302,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "pension_inquiry_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -313,7 +313,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "tcr_price_certificate",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -324,7 +324,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "pension_inquiry_all",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -335,7 +335,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "hokm_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -349,7 +349,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "hokm",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -362,7 +362,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -375,7 +375,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -386,7 +386,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -399,7 +399,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -412,7 +412,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -426,7 +426,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -440,7 +440,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -453,7 +453,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -466,7 +466,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "get_dependent",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -479,7 +479,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -496,7 +496,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -511,7 +511,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -527,7 +527,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -543,7 +543,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -558,7 +558,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -574,7 +574,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "fish",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -590,7 +590,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "patient_history",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -604,7 +604,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "patient_history",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -618,7 +618,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "patient_history_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -632,7 +632,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "booklet_req",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -643,7 +643,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "history_services_last",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -654,7 +654,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "history_services",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -668,7 +668,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "last_tracking_code",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -680,7 +680,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "tracking_code",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -694,7 +694,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "tracking_code",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -707,7 +707,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "tracking_code",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -720,7 +720,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "tracking_code",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -732,7 +732,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "last_tracking_code",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": [
@@ -745,7 +745,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "appoinmet",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": [
                     ]
@@ -779,7 +779,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "appoinmet",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -789,7 +789,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "dastmozdinfos_last_pay",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -799,7 +799,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "law",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "itemType": 1,
                     "filter": []
@@ -829,7 +829,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "general_response",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -875,7 +875,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "message_response",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -890,7 +890,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "profile_info",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -900,7 +900,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "edit_mobile",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -916,7 +916,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "add_account_number",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -932,7 +932,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "appoinmet",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": [
                     ]
@@ -988,7 +988,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "message",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1017,7 +1017,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "register_contract",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1060,7 +1060,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "funeral_allowance",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1070,7 +1070,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "short_term_orthosis",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1080,7 +1080,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "extend_education",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": [
                         "educationCode:1234567890"
@@ -1092,7 +1092,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "pregnancy_pay",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1102,7 +1102,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": " workers_payment",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1112,7 +1112,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "confirmation_medical_authorities",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1122,7 +1122,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "complete_info_of_real_workshop",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1132,7 +1132,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "pension_survivor",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1142,7 +1142,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "disability_pension",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1152,7 +1152,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "deferred_installment_certificate",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1162,7 +1162,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "wedding_present",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1172,7 +1172,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "occurrence_report",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1188,7 +1188,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "edit_profile",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1198,7 +1198,7 @@ internal const val FAKE_AGENT_RESPONSE = """{
             },
             {
                 "key": "edit_address",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {
                     "filter": []
                 },
@@ -1230,12 +1230,12 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
     "status": "DONE",
     "message": null,
     "result": {
-        "session_id": "showcase-session",
+        "sessionId": "showcase-session",
         "lastEntity": null,
         "entities": [
             {
                 "key": "showcase",
-                "step_number": 1,
+                "stepNumber": 1,
                 "payload": {"type": "rich_text", "title": "کسری ۹۰ همتی تامین اجتماعی", "text": "مدیرعامل سازمان تامین اجتماعی از ناترازی ۹۰ همتی منابع و بدهی ۷۵۰ همتی دولت به این سازمان خبر داد و به شمار ۲۹۰ هزار نفری متقاضیان بیمه بیکاری اشاره کرد.", "footnote": "منبع: دنیای اقتصاد — ۱۴۰۵/۰۴/۲۲"},
                 "data": null,
                 "message": "گزارش وضعیت مالی",
@@ -1243,7 +1243,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 2,
+                "stepNumber": 2,
                 "payload": {"type": "text", "text": "مصارف ماهانه سازمان حدود ۲۱۰ همت است، در حالی که وصول حق بیمه ماهانه کمتر از ۱۲۰ همت گزارش شده است."},
                 "data": null,
                 "message": "توضیح تکمیلی",
@@ -1251,7 +1251,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 3,
+                "stepNumber": 3,
                 "payload": {"type": "image", "image": "https://cdn.donya-e-eqtesad.com/thumbnail/lxq0x0mNjWDN/QHn8O9nsSzT8qCU7RegsN6Pbb5v74eEtbKeSOh05RaYNq9kWHVLNyUt7TZyzEhnm/0d50adf9ZjoxMzU1NDQ5MC5qcGd8ZnVpOjE2MjY0NTIxfGw6ZmF8djoxfHdpOjU2Nw+copy.jpg", "caption": "نشست خبری مدیرعامل سازمان تامین اجتماعی"},
                 "data": null,
                 "message": "تصویر خبر",
@@ -1259,7 +1259,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 4,
+                "stepNumber": 4,
                 "payload": {"type": "key_value", "title": "ارقام کلیدی گزارش", "items": [{"key": "کسری ماهانه", "value": "۹۰ همت"}, {"key": "مصارف ماهانه", "value": "۲۱۰ همت"}, {"key": "وصول حق بیمه", "value": "کمتر از ۱۲۰ همت"}, {"key": "بدهی دولت", "value": "۷۵۰ همت"}]},
                 "data": null,
                 "message": "ارقام کلیدی",
@@ -1267,7 +1267,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 5,
+                "stepNumber": 5,
                 "payload": {"type": "table", "title": "ترکیب بدهی‌ها به سازمان", "columns": ["عنوان", "مبلغ", "سهم"], "rows": [["بدهی دولت", "۷۵۰ همت", "۷۹٪"], ["بدهی کارفرمایان", "۲۰۰ همت", "۲۱٪"], ["جمع کل", "۹۵۰ همت", "۱۰۰٪"]]},
                 "data": null,
                 "message": "جدول بدهی‌ها",
@@ -1275,7 +1275,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 6,
+                "stepNumber": 6,
                 "payload": {"type": "table", "title": "آمار پوشش بیمه‌ای", "columns": ["شاخص", "۱۴۰۲", "۱۴۰۳", "۱۴۰۴", "۱۴۰۵", "روند"], "rows": [["بیمه‌شدگان (میلیون)", "۴۴", "۴۵", "۴۶", "۴۷", "صعودی"], ["مستمری‌بگیران (میلیون)", "۴.۶", "۴.۸", "۵.۰", "۵.۲", "صعودی"], ["نسبت پشتیبانی", "۹.۵", "۹.۳", "۹.۱", "۹.۰", "نزولی"]]},
                 "data": null,
                 "message": "جدول عریض",
@@ -1283,7 +1283,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 7,
+                "stepNumber": 7,
                 "payload": {"type": "chart", "title": "منابع و مصارف ماهانه", "kind": "bar", "labels": ["مصارف", "وصولی", "کسری"], "series": "ماهانه", "values": [210, 120, 90], "unit": "همت"},
                 "data": null,
                 "message": "نمودار منابع و مصارف",
@@ -1291,7 +1291,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 8,
+                "stepNumber": 8,
                 "payload": {"type": "chart", "title": "ترکیب بدهی‌ها", "kind": "line", "labels": ["کارفرمایان", "دولت"], "series": "بدهی", "values": [200, 750], "unit": "همت"},
                 "data": null,
                 "message": "روند بدهی",
@@ -1299,7 +1299,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 9,
+                "stepNumber": 9,
                 "payload": {"type": "video", "video": "https://caspian27.cdn.asset.aparat.com/aparat-video/7551fc70a1e2efbe0a54cb3371b29ba272389328-480p.mp4?wmsAuthSign=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjdjM2IzODlkZDAzNGFhNDA0MzEyY2NkMzgzYzlhMGM5IiwiZXhwIjoxNzg1MjcyMjk0LCJpc3MiOiJTYWJhIElkZWEgR1NJRyJ9.bU1IoSMLqmxzxvOdHwUINjlSF81xFdC1yaNpTZyJY-Q", "thumbnail": "https://static.cdn.asset.aparat.com/avt/72389328-3124-l__6255.jpg?width=900&quality=90&secret=zUQZBEhejLAPA-WoOQ0g3Q", "duration": "266000", "caption": "آموزش پرداخت بیمه اختیاری و آزاد تامین اجتماعی با گوشی موبایل"},
                 "data": null,
                 "message": "گزارش تصویری",
@@ -1307,7 +1307,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 10,
+                "stepNumber": 10,
                 "payload": {"type": "voice", "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", "duration": "372000", "caption": "خلاصه صوتی گزارش", "waveform": [2000, 6500, 12000, 18000, 9000, 4200, 15000, 22000, 17000, 8000, 3000, 11000, 19000, 26000, 21000, 12000, 5000, 9500, 16000, 7000]},
                 "data": null,
                 "message": "خلاصه صوتی",
@@ -1315,7 +1315,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 11,
+                "stepNumber": 11,
                 "payload": {"type": "deep_link", "title": "مشاهده اطلاعات کارگاه", "destination": "workshops"},
                 "data": null,
                 "message": "دسترسی به سرویس",
@@ -1323,7 +1323,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 12,
+                "stepNumber": 12,
                 "payload": {"type": "web_link", "title": "متن کامل گزارش", "url": "https://donya-e-eqtesad.com/4281737"},
                 "data": null,
                 "message": "متن کامل خبر",
@@ -1331,7 +1331,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 13,
+                "stepNumber": 13,
                 "payload": {"type": "processing", "steps": ["بررسی درخواست", "دریافت آمار", "آماده‌سازی پاسخ"], "active": "2", "completed": "true"},
                 "data": null,
                 "message": "مراحل پردازش",
@@ -1339,7 +1339,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 14,
+                "stepNumber": 14,
                 "payload": {"type": "error", "text": "دریافت آمار لحظه‌ای ممکن نشد."},
                 "data": null,
                 "message": "نمونه خطا",
@@ -1347,7 +1347,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             },
             {
                 "key": "showcase",
-                "step_number": 15,
+                "stepNumber": 15,
                 "payload": {"type": "suggestions", "prompts": ["بدهی دولت به تامین اجتماعی چقدر است؟", "چند نفر مستمری‌بگیر هستند؟", "شرایط بیمه بیکاری چیست؟"]},
                 "data": null,
                 "message": "پیشنهادها",
