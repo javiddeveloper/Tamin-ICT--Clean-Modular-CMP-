@@ -38,6 +38,21 @@ class AgentFakeDataTest {
     }
 
     @Test
+    fun `showcase fixture decodes and asks for one bubble variant per entity`() {
+        val data = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_SHOWCASE_RESPONSE)
+
+        val entities = assertNotNull(data.result?.entities)
+        assertTrue(entities.all { it.key == "showcase" }, "every entity drives the showcase")
+
+        // Each entity must request a distinct variant, otherwise the demo repeats itself.
+        val variants = entities.map { entity ->
+            entity.payload.toString().substringAfter("variant:").substringBefore('"')
+        }
+        assertEquals(variants.size, variants.toSet().size, "variants must be unique: $variants")
+        assertTrue(variants.size >= 10, "expected the full bubble tour, got ${variants.size}")
+    }
+
+    @Test
     fun `short fake response decodes`() {
         val data = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_ONE_RESPONSE)
 
@@ -53,8 +68,8 @@ class AgentFakeDataTest {
 
         val entities = assertNotNull(response.data?.result?.entities, "entities must be present")
         assertTrue(
-            entities.size > 50,
-            "the fake source must serve the complete fixture, got ${entities.size}"
+            entities.all { it.key == "showcase" },
+            "the fake source currently serves the showcase fixture"
         )
     }
 }

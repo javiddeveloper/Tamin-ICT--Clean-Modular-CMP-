@@ -109,6 +109,9 @@ enum class AgentActionKey(val key: String) {
     DISABILITY_PENSION("disability_pension"),
     REGISTER_CONTRACT("register_contract"),
 
+    /** Demo-only: drives the showcase fixture that renders one of each bubble type. */
+    SHOWCASE("showcase"),
+
     UNKNOWN("unknown");
 
     companion object {

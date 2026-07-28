@@ -58,10 +58,11 @@ internal class AgentRemoteDataSourceFakeImpl(
 
     override suspend fun trackRequest(requestId: String): PollingResponseDTO {
         delay(1000)
-        // Parse the inner PollingDataDTO from the JSON file and wrap it in PollingResponseDTO.
-        // FAKE_AGENT_RESPONSE is the complete fixture (every supported action); switch to
-        // FAKE_AGENT_ONE_RESPONSE for the short 4-entity variant.
-        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_RESPONSE)
+        // Fixtures, pick one:
+        //   FAKE_AGENT_SHOWCASE_RESPONSE — one of every bubble type, arriving one by one
+        //   FAKE_AGENT_RESPONSE          — every supported action key
+        //   FAKE_AGENT_ONE_RESPONSE      — short 4-entity smoke test
+        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_SHOWCASE_RESPONSE)
         return PollingResponseDTO(
             status = 200,
             family = "SUCCESSFUL",

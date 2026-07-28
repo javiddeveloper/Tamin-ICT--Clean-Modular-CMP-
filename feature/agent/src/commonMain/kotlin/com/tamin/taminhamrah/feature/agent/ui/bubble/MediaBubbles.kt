@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -72,6 +74,57 @@ fun RichTextBubble(
     }
 }
 
+/** An image attachment with an optional caption underneath. */
+@Composable
+fun ImageBubble(
+    content: ChatBubbleContent.Image,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+    Column(modifier = modifier.width(240.dp)) {
+        SubcomposeAsyncImage(
+            model = content.source,
+            contentDescription = content.caption,
+            contentScale = ContentScale.Crop,
+            loading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                )
+            },
+            error = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "تصویر بارگذاری نشد",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = taminColors.textMuted
+                    )
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+                .clip(RoundedCornerShape(12.dp))
+        )
+        content.caption?.takeIf { it.isNotBlank() }?.let { caption ->
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = caption,
+                style = MaterialTheme.typography.labelSmall,
+                color = taminColors.textMuted
+            )
+        }
+    }
+}
+
 /** A video attachment: thumbnail with a play affordance, plus optional caption. */
 @Composable
 fun VideoBubble(
@@ -90,6 +143,14 @@ fun VideoBubble(
                 .clickable { onPlay(content.source) },
             contentAlignment = Alignment.Center
         ) {
+            content.thumbnailUrl?.let { thumb ->
+                SubcomposeAsyncImage(
+                    model = thumb,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize()
+                )
+            }
             Box(
                 modifier = Modifier
                     .size(48.dp)

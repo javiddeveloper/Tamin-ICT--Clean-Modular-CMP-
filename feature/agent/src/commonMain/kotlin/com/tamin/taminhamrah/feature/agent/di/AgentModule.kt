@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.feature.agent.service.impl.MedicalEntitlementAgentS
 import com.tamin.taminhamrah.feature.agent.service.impl.PayRollAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.PensionInquiryAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.ProfileAgentService
+import com.tamin.taminhamrah.feature.agent.service.impl.ShowcaseAgentService
 import com.tamin.taminhamrah.feature.agent.ui.AgentViewModel
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
@@ -63,4 +64,6 @@ val agentModule = module {
     singleOf(::JobHistoryAgentService) { bind<AgentServiceUseCase>() }
     singleOf(::AverageWageAgentService) { bind<AgentServiceUseCase>() }
     singleOf(::DeepLinkAgentService) { bind<AgentServiceUseCase>() }
+    // Demo-only, paired with the showcase fixture; remove with AgentActionKey.SHOWCASE.
+    singleOf(::ShowcaseAgentService) { bind<AgentServiceUseCase>() }
 }

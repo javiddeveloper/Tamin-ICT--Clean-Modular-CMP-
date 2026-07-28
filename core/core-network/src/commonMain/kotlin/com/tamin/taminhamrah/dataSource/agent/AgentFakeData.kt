@@ -1210,3 +1210,126 @@ internal const val FAKE_AGENT_RESPONSE = """{
     }
 }
 """
+
+/**
+ * Renders one of every bubble type, one entity at a time, so the whole chat surface can
+ * be exercised without a backend. Sample figures and imagery come from a public news
+ * item about the organisation's finances so the demo looks realistic.
+ */
+internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
+    "id": "showcase-request",
+    "eta": 1,
+    "status": "DONE",
+    "message": null,
+    "result": {
+        "session_id": "showcase-session",
+        "lastEntity": null,
+        "entities": [
+            {
+                "key": "showcase",
+                "step_number": 1,
+                "payload": { "filter": ["variant:rich_text"] },
+                "data": null,
+                "message": "گزارش وضعیت مالی سازمان",
+                "message_id": "showcase-rich_text"
+            },
+            {
+                "key": "showcase",
+                "step_number": 2,
+                "payload": { "filter": ["variant:text"] },
+                "data": null,
+                "message": "توضیح تکمیلی",
+                "message_id": "showcase-text"
+            },
+            {
+                "key": "showcase",
+                "step_number": 3,
+                "payload": { "filter": ["variant:key_value"] },
+                "data": null,
+                "message": "ارقام کلیدی",
+                "message_id": "showcase-key_value"
+            },
+            {
+                "key": "showcase",
+                "step_number": 4,
+                "payload": { "filter": ["variant:chart"] },
+                "data": null,
+                "message": "نمودار منابع و مصارف",
+                "message_id": "showcase-chart"
+            },
+            {
+                "key": "showcase",
+                "step_number": 5,
+                "payload": { "filter": ["variant:chart_line"] },
+                "data": null,
+                "message": "روند بدهی‌ها",
+                "message_id": "showcase-chart_line"
+            },
+            {
+                "key": "showcase",
+                "step_number": 6,
+                "payload": { "filter": ["variant:image"] },
+                "data": null,
+                "message": "تصویر نشست خبری",
+                "message_id": "showcase-image"
+            },
+            {
+                "key": "showcase",
+                "step_number": 7,
+                "payload": { "filter": ["variant:video"] },
+                "data": null,
+                "message": "گزارش تصویری",
+                "message_id": "showcase-video"
+            },
+            {
+                "key": "showcase",
+                "step_number": 8,
+                "payload": { "filter": ["variant:voice"] },
+                "data": null,
+                "message": "خلاصه صوتی",
+                "message_id": "showcase-voice"
+            },
+            {
+                "key": "showcase",
+                "step_number": 9,
+                "payload": { "filter": ["variant:deep_link"] },
+                "data": null,
+                "message": "دسترسی به سرویس",
+                "message_id": "showcase-deep_link"
+            },
+            {
+                "key": "showcase",
+                "step_number": 10,
+                "payload": { "filter": ["variant:web_link"] },
+                "data": null,
+                "message": "متن کامل گزارش",
+                "message_id": "showcase-web_link"
+            },
+            {
+                "key": "showcase",
+                "step_number": 11,
+                "payload": { "filter": ["variant:processing"] },
+                "data": null,
+                "message": "مراحل پردازش",
+                "message_id": "showcase-processing"
+            },
+            {
+                "key": "showcase",
+                "step_number": 12,
+                "payload": { "filter": ["variant:error"] },
+                "data": null,
+                "message": "نمونه خطا",
+                "message_id": "showcase-error"
+            },
+            {
+                "key": "showcase",
+                "step_number": 13,
+                "payload": { "filter": ["variant:suggestions"] },
+                "data": null,
+                "message": "پیشنهادها",
+                "message_id": "showcase-suggestions"
+            }
+        ]
+    }
+}
+"""

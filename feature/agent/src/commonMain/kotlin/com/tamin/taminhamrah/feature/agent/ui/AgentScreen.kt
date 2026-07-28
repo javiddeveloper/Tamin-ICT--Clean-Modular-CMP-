@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
+import com.tamin.taminhamrah.feature.agent.ui.bubble.ImageBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.RichTextBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.VideoBubble
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentEvent
@@ -1231,7 +1232,8 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.Image -> {
-            Text("🖼 تصویر: ${content.caption ?: "بدون توضیح"}", color = MaterialTheme.colorScheme.primary)
+            onAnimationFinished()
+            ImageBubble(content)
         }
 
         is ChatBubbleContent.Chart -> {
