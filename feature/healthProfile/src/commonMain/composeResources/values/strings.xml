@@ -122,5 +122,32 @@
     <string name="health_bmi_overweight_advice">شما دچار اضافه وزن خفیف هستید. افزایش فعالیت بدنی و کنترل کالری توصیه می‌شود.</string>
     <string name="health_bmi_obese_category">چاقی شدید</string>
     <string name="health_bmi_obese_advice">شاخص توده بدنی نشان‌دهنده چاقی است. مشاوره با متخصص تغذیه پیشنهاد می‌شود.</string>
+
+    <!-- Shared Yes / No Options -->
+    <string name="health_option_no">خیر</string>
+    <string name="health_option_yes">بله</string>
+
+    <!-- Family Screen Strings -->
+    <string name="health_family_title">سلامتی خانواده درجه یک</string>
+    <string name="health_family_desc">آیا در اعضای درجه یک خانواده (پدر، مادر، خواهر، برادر) سابقهٔ ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="health_family_diabetes">قند خون بالا (دیابت)</string>
+    <string name="health_family_bp">فشار خون بالا</string>
+    <string name="health_family_cholesterol">چربی خون یا کلسترول بالا</string>
+    <string name="health_family_cancer_question">سابقهٔ ابتلا به سرطان در خانواده؟</string>
+    <string name="health_family_cancer_type_label">نوع سرطان در خانواده</string>
+    <string name="health_family_cancer_select_placeholder">انتخاب نوع سرطان</string>
+    <string name="health_family_cancer_bs_title">انتخاب نوع سرطان</string>
+    <string name="health_family_cancer_bs_subtitle">نوع یا انواع سرطان در اعضای درجه یک خانواده را انتخاب کنید:</string>
+
+    <!-- Default Cancer Types -->
+    <string name="health_cancer_leukemia">سرطان خون</string>
+    <string name="health_cancer_lung">سرطان ریه</string>
+    <string name="health_cancer_breast">سرطان پستان</string>
+    <string name="health_cancer_gi">سرطان دستگاه گوارش</string>
+    <string name="health_cancer_prostate">سرطان پروستات</string>
+    <string name="health_cancer_cervical">سرطان رحم و تخمدان</string>
+    <string name="health_cancer_skin">سرطان پوست</string>
+    <string name="health_cancer_thyroid">سرطان تیرویید</string>
+    <string name="health_cancer_other">سایر</string>
 </resources>
 

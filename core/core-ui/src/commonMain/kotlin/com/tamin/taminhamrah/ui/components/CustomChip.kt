@@ -39,7 +39,7 @@ fun CustomChip(
                 }
             )
             .background(containerColor, shape)
-            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         contentAlignment = Alignment.Center
     ) {
         Text(

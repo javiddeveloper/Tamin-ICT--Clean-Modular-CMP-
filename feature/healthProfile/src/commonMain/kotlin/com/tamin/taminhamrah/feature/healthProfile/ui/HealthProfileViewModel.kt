@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
@@ -81,6 +82,47 @@ class HealthProfileViewModel(
                 Logger.d("DiseasesUpdate", "New Request Payload Preview: $illnessList")
 
                 emit(PartialState.DiseasesUpdated(intent.diseases))
+            }
+            is HealthProfileIntent.OpenDiseaseBottomSheet -> flow {
+                val currentDiseases = uiState.value.selfDeclaration.diseases
+                emit(PartialState.DiseasesUpdated(currentDiseases.copy(activeBottomSheet = intent.type)))
+            }
+            is HealthProfileIntent.CloseDiseaseBottomSheet -> flow {
+                val currentDiseases = uiState.value.selfDeclaration.diseases
+                emit(PartialState.DiseasesUpdated(currentDiseases.copy(activeBottomSheet = null)))
+            }
+            is HealthProfileIntent.SetDiseaseAnswer -> flow {
+                val currentDiseases = uiState.value.selfDeclaration.diseases
+                val updatedDiseases = when (intent.type) {
+                    BottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(
+                        hasChronicDisease = intent.isYes,
+                        chronicDiseaseIds = if (!intent.isYes) emptySet() else currentDiseases.chronicDiseaseIds,
+                        activeBottomSheet = if (intent.isYes) BottomSheetType.ILLNESS_HISTORY else null
+                    )
+                    BottomSheetType.MENTAL -> currentDiseases.copy(
+                        hasMentalIllness = intent.isYes,
+                        mentalIllnessIds = if (!intent.isYes) emptySet() else currentDiseases.mentalIllnessIds,
+                        activeBottomSheet = if (intent.isYes) BottomSheetType.MENTAL else null
+                    )
+                    BottomSheetType.CANCER -> currentDiseases.copy(
+                        hasCancer = intent.isYes,
+                        cancerIds = if (!intent.isYes) emptySet() else currentDiseases.cancerIds,
+                        activeBottomSheet = if (intent.isYes) BottomSheetType.CANCER else null
+                    )
+                    else -> currentDiseases
+                }
+                emit(PartialState.DiseasesUpdated(updatedDiseases))
+            }
+            is HealthProfileIntent.UpdateDiseaseSelections -> flow {
+                val currentDiseases = uiState.value.selfDeclaration.diseases
+                val updatedDiseases = when (intent.type) {
+                    BottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(chronicDiseaseIds = intent.selectedIds)
+                    BottomSheetType.MENTAL          -> currentDiseases.copy(mentalIllnessIds = intent.selectedIds)
+                    BottomSheetType.CANCER          -> currentDiseases.copy(cancerIds = intent.selectedIds)
+                    BottomSheetType.RISK_FACTOR     -> currentDiseases.copy(riskFactorIds = intent.selectedIds)
+                    else                            -> currentDiseases
+                }
+                emit(PartialState.DiseasesUpdated(updatedDiseases))
             }
             is HealthProfileIntent.UpdateFamily     -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
             is HealthProfileIntent.UpdateBloodGroup -> flow {
@@ -226,6 +268,7 @@ class HealthProfileViewModel(
             selfDecState.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
             selfDecState.diseases.mentalIllnessIds.forEach  { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
             selfDecState.diseases.cancerIds.forEach         { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.family.familyDiseaseIds.forEach    { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
             selfDecState.family.familyCancerIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
 
             if (illnessList.isNotEmpty()) {
