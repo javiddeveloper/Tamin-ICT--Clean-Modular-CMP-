@@ -136,7 +136,7 @@ val LightTaminColors = TaminColors(
     tabbarBorder = Color(0xD9FFFFFF),
     tabbarShine = Color(0x80FFFFFF),
     tabActiveBg = Color(0x1A1F4FA3),
-    heroGradient = Brush.linearGradient(listOf(Primary900, Primary700)),
+    heroGradient = Brush.linearGradient(listOf(Primary700,Primary900 )),
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
     // Same stops as the quick-access card; the bar just sweeps the other way.
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),

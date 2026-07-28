@@ -58,8 +58,8 @@ fun SelfDeclarationDiseasesScreen(
     val scrollState = rememberScrollState()
 
     val optionsYesNo = listOf(
-        stringResource(Res.string.health_option_no),
-        stringResource(Res.string.health_option_yes)
+        stringResource(Res.string.health_option_yes),
+        stringResource(Res.string.health_option_no)
     )
 
     // Filter groups via Enum type mapping
@@ -164,9 +164,9 @@ fun SelfDeclarationDiseasesScreen(
                     }
                     SegmentedControl(
                         options = optionsYesNo,
-                        selectedIndex = if (state.hasChronicDisease == true) 1 else 0,
+                        selectedIndex = if (state.hasChronicDisease == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.ILLNESS_HISTORY, idx == 1))
+                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.ILLNESS_HISTORY, idx == 0))
                         }
                     )
                 }
@@ -213,9 +213,9 @@ fun SelfDeclarationDiseasesScreen(
 
                     SegmentedControl(
                         options = optionsYesNo,
-                        selectedIndex = if (state.hasMentalIllness == true) 1 else 0,
+                        selectedIndex = if (state.hasMentalIllness == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.MENTAL, idx == 1))
+                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.MENTAL, idx == 0))
                         }
                     )
                 }
@@ -262,9 +262,9 @@ fun SelfDeclarationDiseasesScreen(
 
                     SegmentedControl(
                         options = optionsYesNo,
-                        selectedIndex = if (state.hasCancer == true) 1 else 0,
+                        selectedIndex = if (state.hasCancer == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.CANCER, idx == 1))
+                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.CANCER, idx == 0))
                         }
                     )
                 }
