@@ -123,5 +123,71 @@
     <string name="health_bmi_overweight_advice">شما دچار اضافه وزن خفیف هستید. افزایش فعالیت بدنی و کنترل کالری توصیه می‌شود.</string>
     <string name="health_bmi_obese_category">چاقی شدید</string>
     <string name="health_bmi_obese_advice">شاخص توده بدنی نشان‌دهنده چاقی است. مشاوره با متخصص تغذیه پیشنهاد می‌شود.</string>
+
+    <!-- Shared Yes / No Options -->
+    <string name="health_option_no">خیر</string>
+    <string name="health_option_yes">بله</string>
+
+    <!-- Family Screen Strings -->
+    <string name="health_family_title">سلامتی خانواده درجه یک</string>
+    <string name="health_family_desc">آیا در اعضای درجه یک خانواده (پدر، مادر، خواهر، برادر) سابقهٔ ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="health_family_diabetes">قند خون بالا (دیابت)</string>
+    <string name="health_family_bp">فشار خون بالا</string>
+    <string name="health_family_cholesterol">چربی خون یا کلسترول بالا</string>
+    <string name="health_family_cancer_question">سابقهٔ ابتلا به سرطان در خانواده؟</string>
+    <string name="health_family_cancer_type_label">نوع سرطان در خانواده</string>
+    <string name="health_family_cancer_select_placeholder">انتخاب نوع سرطان</string>
+    <string name="health_family_cancer_bs_title">انتخاب نوع سرطان</string>
+    <string name="health_family_cancer_bs_subtitle">نوع یا انواع سرطان در اعضای درجه یک خانواده را انتخاب کنید:</string>
+
+    <!-- Default Cancer Types -->
+    <string name="health_cancer_leukemia">سرطان خون</string>
+    <string name="health_cancer_lung">سرطان ریه</string>
+    <string name="health_cancer_breast">سرطان پستان</string>
+    <string name="health_cancer_gi">سرطان دستگاه گوارش</string>
+    <string name="health_cancer_prostate">سرطان پروستات</string>
+    <string name="health_cancer_cervical">سرطان رحم و تخمدان</string>
+    <string name="health_cancer_skin">سرطان پوست</string>
+    <string name="health_cancer_thyroid">سرطان تیرویید</string>
+    <string name="health_cancer_other">سایر</string>
+
+    <!-- Shared Confidentiality Notice -->
+    <string name="health_confidential_notice">فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.</string>
+
+    <!-- Diseases Screen Strings -->
+    <string name="health_diseases_title">سوالات سلامت</string>
+    <string name="health_bs_chronic_subtitle">نوع بیماری خود را انتخاب کنید:</string>
+    <string name="health_bs_mental_subtitle">نوع عارضه را انتخاب کنید:</string>
+    <string name="health_bs_cancer_subtitle">نوع سرطان را انتخاب کنید:</string>
+    <string name="health_bs_submit">ثبت</string>
+
+    <!-- Lifestyle Screen Strings -->
+    <string name="health_lifestyle_title">سبک زندگی</string>
+    <string name="health_lifestyle_smoking_question">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="health_lifestyle_smoking_bs_subtitle">الگوی مصرف خود را انتخاب کنید</string>
+    <string name="health_lifestyle_addiction_question">آیا اعتیاد دارید؟</string>
+    <string name="health_lifestyle_addiction_bs_subtitle">الگوی مصرف خود را انتخاب کنید</string>
+    <string name="health_lifestyle_alcohol_question">آیا الکل مصرف دارید؟</string>
+    <string name="health_lifestyle_alcohol_bs_subtitle">جزئیات مربوط به مصرف الکل را وارد کنید</string>
+    <string name="health_lifestyle_exercise_question">آیا ورزش می‌کنید؟</string>
+    <string name="health_lifestyle_exercise_bs_subtitle">جزئیات مربوط به ورزش را وارد کنید</string>
+
+    <!-- Bottom Sheet Types -->
+    <string name="health_type_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
+    <string name="health_type_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
+    <string name="health_type_mental">آیا بیماری اعصاب و روان دارید؟</string>
+    <string name="health_type_cancer">ایا سابقه ابتلا به سرطان دارید ؟</string>
+    <string name="health_type_family_diseases">آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="health_type_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
+    <string name="health_type_province">استان</string>
+    <string name="health_type_city">شهر</string>
+    <string name="health_type_blood_group">گروه خونی</string>
+    <string name="health_type_smoking">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="health_type_drug_addiction">آیا اعتیاد دارید؟</string>
+    <string name="health_type_alcohol">آیا الکل مصرف دارید؟</string>
+    <string name="health_type_exercise">آیا ورزش می‌کنید؟</string>
+    <string name="health_type_marital_status">وضعیت تاهل</string>
+    <string name="health_type_emergency_contact">تماس اضطراری</string>
 </resources>
+
 
