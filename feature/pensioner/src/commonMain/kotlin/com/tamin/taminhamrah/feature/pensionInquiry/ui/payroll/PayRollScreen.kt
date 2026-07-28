@@ -72,6 +72,10 @@ fun PayRollScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    // Opening the viewer no longer means a download has happened: it decides for itself whether
+    // the payroll still needs fetching, so the tap only says "show it".
+    var showPdf by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -103,7 +107,8 @@ fun PayRollScreen(
                     item {
                         PayRollForm(
                             state = state,
-                            onIntent = viewModel::sendIntent
+                            onIntent = viewModel::sendIntent,
+                            onShowPdf = { showPdf = true },
                         )
                     }
 
@@ -125,19 +130,37 @@ fun PayRollScreen(
         }
     }
 
-    if (state.showPdfDialog && state.payRollPDF != null) {
+    if (showPdf) {
         TaminPdfViewer(
+            fileName = payRollFileName(state),
             pdf = state.payRollPDF,
-            fileName = "payroll_${state.selectedPensionerId ?: "document"}.pdf",
-            onDismiss = { viewModel.sendIntent(PayRollIntent.TogglePdfDialog(false)) },
+            downloadFailed = state.viewerDownloadFailed,
+            onRequestDownload = { viewModel.sendIntent(PayRollIntent.LoadPayRollPDF) },
+            onDismiss = {
+                showPdf = false
+                viewModel.sendIntent(PayRollIntent.DismissPdfViewer)
+            },
         )
     }
+}
+
+/**
+ * Names the saved file after the query that produced it, not just the pensioner: two periods are
+ * two different payrolls, and the viewer treats one name as one document.
+ */
+private fun payRollFileName(state: PayRollUiState): String {
+    val query = listOf(state.selectedPensionerId.orEmpty(), state.startDate, state.paymentType)
+        .joinToString("_") { part -> part.filter { it.isLetterOrDigit() } }
+        .trim('_')
+        .ifBlank { "document" }
+    return "payroll_$query.pdf"
 }
 
 @Composable
 fun PayRollForm(
     state: PayRollUiState,
-    onIntent: (PayRollIntent) -> Unit
+    onIntent: (PayRollIntent) -> Unit,
+    onShowPdf: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -220,7 +243,7 @@ fun PayRollForm(
                 }
 
                 Button(
-                    onClick = { onIntent(PayRollIntent.LoadPayRollPDF) },
+                    onClick = onShowPdf,
                     enabled = !state.selectedPensionerId.isNullOrEmpty(),
                     modifier = Modifier.weight(1f)
                 ) {

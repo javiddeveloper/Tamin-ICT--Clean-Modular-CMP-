@@ -1,18 +1,27 @@
 package com.tamin.taminhamrah.feature.treatment.ui.contract
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 
+/** Immutable by construction: the reducer only ever `copy`s, and no collection here is mutated. */
+@Immutable
 data class PrescriptionsUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val prescriptionList: List<ElectronicPrescriptionPR> = emptyList(),
     val prescriptionDetailList: List<ElectronicPrescriptionDetailPR> = emptyList(),
     val prescriptionPriceList: List<ElectronicPrescriptionPricePR> = emptyList(),
+    /**
+     * The fetched PDF waiting to be shown, or null when none has been asked for.
+     *
+     * Cleared as each download starts: the payload is a single-use stream, so a stale one would
+     * render as an empty file. Which viewer is open, and under what name it is saved, is the
+     * screen's business — it may not need a download at all if the device already has the file.
+     */
     val viewerPdf: PdfDownloadPR? = null,
-    /** Suggested save name for [viewerPdf], shown/used by the PDF viewer's download. */
-    val viewerFileName: String = "",
-    val showPdfDialog: Boolean = false,
+    /** The last requested export could not be fetched, so the viewer can stop waiting for it. */
+    val viewerDownloadFailed: Boolean = false,
     val selectedNoteHeadId: String? = null,
 
     /**
@@ -32,8 +41,8 @@ data class PrescriptionsUiState(
         data class PrescriptionsLoaded(val list: List<ElectronicPrescriptionPR>) : PartialState()
         data class PrescriptionDetailsLoaded(val list: List<ElectronicPrescriptionDetailPR>) : PartialState()
         data class PrescriptionPricesLoaded(val list: List<ElectronicPrescriptionPricePR>) : PartialState()
-        data class PdfLoaded(val pdf: PdfDownloadPR, val fileName: String) : PartialState()
-        data class TogglePdfDialog(val show: Boolean) : PartialState()
+        data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState()
+        data object ViewerDownloadFailed : PartialState()
         data class PrescriptionSelected(val noteHeadID: String) : PartialState()
         data class RecordPricesLoaded(val prices: Map<String, ElectronicPrescriptionPricePR>) : PartialState()
         data class LoadingPrices(val isLoading: Boolean) : PartialState()
@@ -66,7 +75,9 @@ sealed class PrescriptionsIntent {
     data object ClearSelectedPrescription : PrescriptionsIntent()
     data class DownloadPdf(val prescriptionID: String) : PrescriptionsIntent()
     data class DownloadLabResult(val patientID: String?, val noteHeadEprescID: String?) : PrescriptionsIntent()
-    data class TogglePdfDialog(val show: Boolean) : PrescriptionsIntent()
+
+    /** The viewer was closed; drops the fetched PDF so a re-open never shows a drained stream. */
+    data object DismissPdfViewer : PrescriptionsIntent()
 
     /** Fetches the amount for each record, so the advanced search can filter on cost. */
     data class LoadRecordPrices(val noteHeadIds: List<String>, val nationalCode: String) :

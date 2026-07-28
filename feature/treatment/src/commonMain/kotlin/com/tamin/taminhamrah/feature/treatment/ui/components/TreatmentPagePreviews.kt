@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+import kotlinx.collections.immutable.persistentListOf
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.SectionLabel
@@ -155,7 +156,7 @@ private fun HubCarousel(modifier: Modifier = Modifier) {
 @Composable
 private fun HubCategories() {
     val colors = LocalTaminColors.current
-    val categories = listOf(
+    val categories = persistentListOf(
         Triple("نسخه‌های الکترونیک", colors.blueText, vectorResource(Res.drawable.ic_tamin_prescriptions)),
         Triple("تاییدیه‌های پزشکی", colors.teal, vectorResource(Res.drawable.ic_tamin_medical_approvals)),
         Triple("خسارت متفرقه", colors.orangeText, vectorResource(Res.drawable.ic_tamin_misc_claims)),
@@ -240,7 +241,7 @@ private fun MedicalRecordsPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             RecordsHeader()
             TreatmentFilterChipRow(
-                categories = listOf("همه", "دارو", "ویزیت", "پاراکلینیک", "بستری"),
+                categories = persistentListOf("همه", "دارو", "ویزیت", "پاراکلینیک", "خدمات پزشکی"),
                 selectedIndex = 0,
                 onSelect = {},
             )
@@ -483,7 +484,7 @@ private fun MedicalCentresPagePreview() {
                 )
             }
             TreatmentFilterChipRow(
-                categories = listOf("همه", "بیمارستان", "داروخانه", "آزمایشگاه", "درمانگاه"),
+                categories = persistentListOf("همه", "بیمارستان", "داروخانه", "آزمایشگاه", "درمانگاه"),
                 selectedIndex = 0,
                 onSelect = {},
             )
@@ -539,7 +540,7 @@ private fun MedicalCentresEmptyPagePreview() {
                 )
             }
             TreatmentFilterChipRow(
-                categories = listOf("همه", "بیمارستان", "داروخانه", "آزمایشگاه"),
+                categories = persistentListOf("همه", "بیمارستان", "داروخانه", "آزمایشگاه"),
                 selectedIndex = 1,
                 onSelect = {},
             )

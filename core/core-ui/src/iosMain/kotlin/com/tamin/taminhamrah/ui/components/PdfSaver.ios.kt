@@ -3,15 +3,16 @@ package com.tamin.taminhamrah.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.usePinned
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import platform.posix.memcpy
 import platform.Foundation.NSData
+import platform.Foundation.dataWithContentsOfFile
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSDownloadsDirectory
 import platform.Foundation.NSFileManager
@@ -28,7 +29,6 @@ import platform.UserNotifications.UNUserNotificationCenter
 
 @Composable
 actual fun rememberPdfSaver(): PdfSaver {
-    val scope = rememberCoroutineScope()
     // Ask for local-notification permission when the viewer opens; the file saves regardless.
     LaunchedEffect(Unit) {
         UNUserNotificationCenter.currentNotificationCenter()
@@ -36,42 +36,67 @@ actual fun rememberPdfSaver(): PdfSaver {
                 UNAuthorizationOptionAlert or UNAuthorizationOptionSound,
             ) { _, _ -> }
     }
-    return remember(scope) { IosPdfSaver(scope) }
+    return remember { IosPdfSaver() }
 }
 
-private class IosPdfSaver(private val scope: CoroutineScope) : PdfSaver {
+private const val DOWNLOAD_SUBDIR = "TaminICT"
 
-    override fun save(fileName: String, bytes: ByteArray) {
-        if (bytes.isEmpty()) return
-        scope.launch {
-            if (saveToDocuments(fileName, bytes)) notify(fileName)
+private class IosPdfSaver : PdfSaver {
+
+    @OptIn(ExperimentalForeignApi::class)
+    override suspend fun load(fileName: String): ByteArray? = withContext(Dispatchers.Default) {
+        val path = filePath(fileName) ?: return@withContext null
+        val data = NSData.dataWithContentsOfFile(path) ?: return@withContext null
+        val size = data.length.toInt()
+        if (size == 0) return@withContext null
+        ByteArray(size).also { bytes ->
+            bytes.usePinned { memcpy(it.addressOf(0), data.bytes, data.length) }
         }
     }
 
-    /** Writes the PDF into a TaminICT directory in Downloads or Documents directory. */
-    @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-    private fun saveToDocuments(fileName: String, bytes: ByteArray): Boolean {
-        val baseDir = (NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, true).firstOrNull()
-            ?: NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstOrNull()) as? String
-            ?: return false
-        val taminDir = "$baseDir/TaminICT"
-        val fileManager = NSFileManager.defaultManager
-        fileManager.createDirectoryAtPath(
+    override suspend fun save(fileName: String, bytes: ByteArray) {
+        if (bytes.isEmpty()) return
+        val message = withContext(Dispatchers.Default) {
+            val path = filePath(fileName) ?: return@withContext null
+            when {
+                // An earlier download is kept as it is rather than written over.
+                NSFileManager.defaultManager.fileExistsAtPath(path) -> ALREADY_DOWNLOADED_MESSAGE
+                write(path, bytes) -> DOWNLOAD_DONE_MESSAGE
+                else -> null
+            }
+        }
+        notify(fileName, message ?: return)
+    }
+
+    /** Where the PDF lives: a TaminICT directory under Downloads, or Documents if there is none. */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun filePath(fileName: String): String? {
+        val baseDir = (
+            NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, true).firstOrNull()
+                ?: NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstOrNull()
+            ) as? String ?: return null
+        val taminDir = "$baseDir/$DOWNLOAD_SUBDIR"
+        NSFileManager.defaultManager.createDirectoryAtPath(
             path = taminDir,
             withIntermediateDirectories = true,
             attributes = null,
             error = null,
         )
+        return "$taminDir/$fileName"
+    }
+
+    @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+    private fun write(path: String, bytes: ByteArray): Boolean {
         val data = bytes.usePinned {
             NSData.create(bytes = it.addressOf(0), length = bytes.size.convert())
         }
-        return data.writeToFile("$taminDir/$fileName", atomically = true)
+        return data.writeToFile(path, atomically = true)
     }
 
-    private fun notify(fileName: String) {
+    private fun notify(fileName: String, message: String) {
         val content = UNMutableNotificationContent().apply {
             setTitle(fileName)
-            setBody("دانلود انجام شد")
+            setBody(message)
         }
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
             timeInterval = 1.0,

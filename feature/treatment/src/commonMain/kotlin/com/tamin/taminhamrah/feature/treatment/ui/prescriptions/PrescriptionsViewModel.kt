@@ -40,7 +40,7 @@ class PrescriptionsViewModel(
             is PrescriptionsIntent.ClearSelectedPrescription -> flow { emit(PartialState.PrescriptionCleared) }
             is PrescriptionsIntent.DownloadPdf -> downloadPdf(intent)
             is PrescriptionsIntent.DownloadLabResult -> downloadLabResult(intent)
-            is PrescriptionsIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
+            is PrescriptionsIntent.DismissPdfViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
             is PrescriptionsIntent.LoadRecordPrices -> loadRecordPrices(intent)
         }
     }
@@ -142,30 +142,37 @@ class PrescriptionsViewModel(
             emit(PartialState.LoadingPrices(false))
         }
 
+    /**
+     * Fetches the prescription PDF. Only reached when the viewer finds no copy already on the
+     * device, so an export the person has downloaded before costs no request at all.
+     */
     private fun downloadPdf(intent: PrescriptionsIntent.DownloadPdf): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
+        emit(PartialState.ViewerPdfChanged(null))
         try {
-            // Opens the viewer, which renders the PDF and saves it to the device with a notification.
             getPrescriptionPdfFileUseCase(intent.prescriptionID).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation(), "prescription_${intent.prescriptionID}.pdf"))
+                emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
+            emit(PartialState.ViewerDownloadFailed)
         }
     }
 
     private fun downloadLabResult(intent: PrescriptionsIntent.DownloadLabResult): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
+        emit(PartialState.ViewerPdfChanged(null))
         val patientID = intent.patientID ?: ""
         val noteHeadEprescID = intent.noteHeadEprescID ?: ""
         val currentUserNationalCode = getLoggedNationalCode()
 
         try {
             downloadLabResultPdfUseCase(patientID, noteHeadEprescID, currentUserNationalCode).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation(), "lab_result_$noteHeadEprescID.pdf"))
+                emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
+            emit(PartialState.ViewerDownloadFailed)
         }
     }
 
@@ -179,13 +186,15 @@ class PrescriptionsViewModel(
         is PartialState.PrescriptionsLoaded -> currentState.copy(isLoading = false, prescriptionList = partialState.list)
         is PartialState.PrescriptionDetailsLoaded -> currentState.copy(isLoading = false, prescriptionDetailList = partialState.list)
         is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list)
-        is PartialState.PdfLoaded -> currentState.copy(
+        is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,
             viewerPdf = partialState.pdf,
-            viewerFileName = partialState.fileName,
-            showPdfDialog = true,
+            viewerDownloadFailed = false,
         )
-        is PartialState.TogglePdfDialog -> currentState.copy(showPdfDialog = partialState.show)
+        is PartialState.ViewerDownloadFailed -> currentState.copy(
+            isLoading = false,
+            viewerDownloadFailed = true,
+        )
         is PartialState.PrescriptionSelected -> currentState.copy(selectedNoteHeadId = partialState.noteHeadID)
         is PartialState.RecordPricesLoaded -> currentState.copy(
             recordPrices = currentState.recordPrices + partialState.prices,
