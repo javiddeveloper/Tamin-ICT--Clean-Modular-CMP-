@@ -28,6 +28,9 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 /**
  * Static Top Bar for Health Profile screens with status bar inset padding.
@@ -86,32 +89,60 @@ fun HealthTopAppBar(
  *
  * @param currentStep The current step index (1-based).
  * @param totalSteps The total number of steps.
+ * @param showStepText Whether to display step text on top of the progress bar.
  */
 @Composable
 fun HealthProgressBar(
     modifier: Modifier = Modifier,
     currentStep: Int,
-    totalSteps: Int = 9
+    totalSteps: Int = 9,
+    showStepText: Boolean = true
 ) {
     val taminColors = LocalTaminColors.current
 
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        for (i in 1..totalSteps) {
-            val isActive = i <= currentStep
-            val segmentColor = if (isActive) taminColors.blueText else taminColors.border
+        if (showStepText) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TaminText(
+                    text = stringResource(
+                        Res.string.health_step_format,
+                        currentStep.toString().toPersianDigits(),
+                        totalSteps.toString().toPersianDigits()
+                    ),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.blueText
+                    )
+                )
+            }
+        }
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .background(segmentColor, RoundedCornerShape(100.dp))
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            for (i in 1..totalSteps) {
+                val isActive = i <= currentStep
+                val segmentColor = if (isActive) taminColors.blueText else taminColors.border
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(4.dp)
+                        .background(segmentColor, RoundedCornerShape(100.dp))
+                )
+            }
         }
     }
 }

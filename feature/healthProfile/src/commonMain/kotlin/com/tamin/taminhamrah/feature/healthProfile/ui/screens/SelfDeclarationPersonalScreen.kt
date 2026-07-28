@@ -72,22 +72,6 @@ fun SelfDeclarationPersonalScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header Step Count
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TaminText(
-                    text = stringResource(Res.string.health_step_2_of_10),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = taminColors.blueText
-                    )
-                )
-            }
-
             TaminText(
                 text = stringResource(Res.string.health_personal_heading),
                 style = MaterialTheme.typography.titleLarge.copy(
