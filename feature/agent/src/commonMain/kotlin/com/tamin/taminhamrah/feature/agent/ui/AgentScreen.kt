@@ -48,6 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
+import com.tamin.taminhamrah.feature.agent.ui.bubble.RichTextBubble
+import com.tamin.taminhamrah.feature.agent.ui.bubble.VideoBubble
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentEvent
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentIntent
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentProcessingState
@@ -986,8 +989,9 @@ private fun ChatBubbleItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
         ) {
+            // Full-width bubbles: system notes and data views draw their own container.
             val isProcessingOrEmbedded = item.content is ChatBubbleContent.ProcessingSteps ||
-                                         item.content is ChatBubbleContent.EmbeddedModel
+                                         item.content is ChatBubbleContent.DataView
 
             when {
                 // Voice draws its own container (with waveform + progress), so it must
@@ -1082,13 +1086,13 @@ private fun BubbleContentRenderer(
         is ChatBubbleContent.Voice -> {
             onAnimationFinished()
             VoiceChatBubble(
-                filePath = content.path,
+                filePath = content.source,
                 durationMs = content.durationMs ?: 0L,
                 isPlaying = isVoicePlaying,
                 positionMs = voicePositionMs,
                 amplitudes = content.amplitudes,
                 isUser = isUser,
-                onToggle = { onIntent(AgentIntent.ToggleVoicePlayback(itemId, content.path)) },
+                onToggle = { onIntent(AgentIntent.ToggleVoicePlayback(itemId, content.source)) },
                 onSeek = { onIntent(AgentIntent.SeekVoicePlayback(itemId, it)) }
             )
         }
@@ -1231,15 +1235,26 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.Chart -> {
-            Text("📊 نمودار آماری", color = MaterialTheme.colorScheme.primary)
+            onAnimationFinished()
+            ChartBubble(content)
+        }
+
+        is ChatBubbleContent.RichText -> {
+            onAnimationFinished()
+            RichTextBubble(content = content, contentColor = contentColor)
+        }
+
+        is ChatBubbleContent.Video -> {
+            onAnimationFinished()
+            val navigate = LocalAgentNavigator.current
+            VideoBubble(content = content, onPlay = { navigate(it) })
         }
 
         is ChatBubbleContent.DynamicForm -> {
+            onAnimationFinished()
+            // Rendered once the generative-form handlers land; until then the schema is
+            // carried through untouched so nothing is lost.
             Text("📝 فرم پویا", color = MaterialTheme.colorScheme.primary)
-        }
-
-        is ChatBubbleContent.EmbeddedModel -> {
-            Text("🧩 کامپوننت سفارشی", color = MaterialTheme.colorScheme.primary)
         }
 
         is ChatBubbleContent.ServiceError -> {

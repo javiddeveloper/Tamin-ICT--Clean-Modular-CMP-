@@ -64,11 +64,11 @@ class DastmozdInfosAgentServiceTest {
         assertEquals("This is a test message", keyValueBubble.title)
         
         // Assert some key values
-        val amountPair = keyValueBubble.items.find { it.first == "مبلغ دستمزد فروردین" }
-        assertEquals("1000", amountPair?.second)
+        val amountPair = keyValueBubble.items.find { it.key == "مبلغ دستمزد فروردین" }
+        assertEquals("1000", amountPair?.value)
         
-        val companyPair = keyValueBubble.items.find { it.first == "نام کارگاه" }
-        assertEquals("Test Company", companyPair?.second)
+        val companyPair = keyValueBubble.items.find { it.key == "نام کارگاه" }
+        assertEquals("Test Company", companyPair?.value)
     }
     
     @Test

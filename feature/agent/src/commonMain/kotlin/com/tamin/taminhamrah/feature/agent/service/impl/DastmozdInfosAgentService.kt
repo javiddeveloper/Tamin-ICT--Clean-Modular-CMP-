@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 
@@ -116,7 +117,7 @@ class DastmozdInfosAgentService(
             bubbles.add(
                 ChatBubbleContent.KeyValue(
                     title = msg?.takeIf { it.isNotBlank() } ?: "اطلاعات دستمزد",
-                    items = allDetails
+                    items = allDetails.toKeyValueRows()
                 )
             )
 

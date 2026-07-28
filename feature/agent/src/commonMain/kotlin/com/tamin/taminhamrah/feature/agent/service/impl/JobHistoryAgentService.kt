@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
 import com.tamin.taminhamrah.feature.agent.service.base.orDash
 import com.tamin.taminhamrah.model.agent.AgentActionKey
@@ -53,7 +54,7 @@ class JobHistoryAgentService(
                     add(
                         ChatBubbleContent.KeyValue(
                             title = params.message?.takeIf { it.isNotBlank() } ?: "سوابق شغلی",
-                            items = rows
+                            items = rows.toKeyValueRows()
                         )
                     )
                 }

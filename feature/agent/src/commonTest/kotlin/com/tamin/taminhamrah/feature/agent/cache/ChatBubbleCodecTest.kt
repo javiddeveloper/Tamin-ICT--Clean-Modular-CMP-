@@ -1,6 +1,9 @@
 package com.tamin.taminhamrah.feature.agent.cache
 
+import com.tamin.taminhamrah.feature.agent.service.base.ChartKind
+import com.tamin.taminhamrah.feature.agent.service.base.ChartSeries
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,7 +34,7 @@ class ChatBubbleCodecTest {
     fun `key value keeps its title and pair order`() {
         val original = ChatBubbleContent.KeyValue(
             title = "اطلاعات دستمزد",
-            items = listOf("سال سابقه" to "۱۴۰۳", "نام کارگاه" to "توسعه فن افزار")
+            items = listOf("سال سابقه" to "۱۴۰۳", "نام کارگاه" to "توسعه فن افزار").toKeyValueRows()
         )
 
         val restored = roundTrip(original)
@@ -43,7 +46,7 @@ class ChatBubbleCodecTest {
 
     @Test
     fun `key value with a null title round trips`() {
-        val restored = roundTrip(ChatBubbleContent.KeyValue(null, listOf("a" to "b")))
+        val restored = roundTrip(ChatBubbleContent.KeyValue(null, listOf("a" to "b").toKeyValueRows()))
 
         assertIs<ChatBubbleContent.KeyValue>(restored)
         assertNull(restored.title)
@@ -60,7 +63,7 @@ class ChatBubbleCodecTest {
     @Test
     fun `voice keeps path duration and waveform`() {
         val original = ChatBubbleContent.Voice(
-            path = "/data/voice_1.m4a",
+            source = "/data/voice_1.m4a",
             durationMs = 4200L,
             amplitudes = listOf(10, 900, 32000)
         )
@@ -68,7 +71,7 @@ class ChatBubbleCodecTest {
         val restored = roundTrip(original)
 
         assertIs<ChatBubbleContent.Voice>(restored)
-        assertEquals("/data/voice_1.m4a", restored.path)
+        assertEquals("/data/voice_1.m4a", restored.source)
         assertEquals(4200L, restored.durationMs)
         assertEquals(listOf(10, 900, 32000), restored.amplitudes)
     }
@@ -120,11 +123,56 @@ class ChatBubbleCodecTest {
     }
 
     @Test
-    fun `bubbles carrying arbitrary models are not cached`() {
-        // These hold `Any` and cannot be serialized — encode must decline rather than throw.
-        assertNull(ChatBubbleCodec.encode(ChatBubbleContent.EmbeddedModel(Any())))
-        assertNull(ChatBubbleCodec.encode(ChatBubbleContent.Chart(Any())))
-        assertNull(ChatBubbleCodec.encode(ChatBubbleContent.DynamicForm(Any())))
+    fun `rich text keeps its header body and footnote`() {
+        val restored = roundTrip(
+            ChatBubbleContent.RichText("سابقه شما", "متن اصلی", "توضیح")
+        )
+
+        assertIs<ChatBubbleContent.RichText>(restored)
+        assertEquals("سابقه شما", restored.header)
+        assertEquals("متن اصلی", restored.body)
+        assertEquals("توضیح", restored.footnote)
+    }
+
+    @Test
+    fun `video keeps its source thumbnail and duration`() {
+        val restored = roundTrip(
+            ChatBubbleContent.Video("https://x/v.mp4", "https://x/t.jpg", 9000L, "کلیپ")
+        )
+
+        assertIs<ChatBubbleContent.Video>(restored)
+        assertEquals("https://x/v.mp4", restored.source)
+        assertEquals("https://x/t.jpg", restored.thumbnailUrl)
+        assertEquals(9000L, restored.durationMs)
+    }
+
+    @Test
+    fun `chart survives as plain data so a reopened chat still draws it`() {
+        val restored = roundTrip(
+            ChatBubbleContent.Chart(
+                title = "دستمزد",
+                kind = ChartKind.LINE,
+                labels = listOf("فروردین", "اردیبهشت"),
+                series = listOf(ChartSeries("۱۴۰۳", listOf(10.0, 20.0))),
+                valueUnit = "ریال"
+            )
+        )
+
+        assertIs<ChatBubbleContent.Chart>(restored)
+        assertEquals(ChartKind.LINE, restored.kind)
+        assertEquals(listOf(10.0, 20.0), restored.series.single().values)
+        assertEquals("ریال", restored.valueUnit)
+    }
+
+    @Test
+    fun `every bubble type reports a stable serial name`() {
+        // Serial names are written to the database, so a rename silently orphans old rows.
+        assertEquals("text", ChatBubbleCodec.contentTypeOf(ChatBubbleContent.Text("x")))
+        assertEquals("rich_text", ChatBubbleCodec.contentTypeOf(ChatBubbleContent.RichText("h", "b")))
+        assertEquals("voice", ChatBubbleCodec.contentTypeOf(ChatBubbleContent.Voice("p")))
+        assertEquals("video", ChatBubbleCodec.contentTypeOf(ChatBubbleContent.Video("v")))
+        assertEquals("image", ChatBubbleCodec.contentTypeOf(ChatBubbleContent.Image("i")))
+        assertEquals("chart", ChatBubbleCodec.contentTypeOf(ChatBubbleContent.Chart()))
     }
 
     @Test

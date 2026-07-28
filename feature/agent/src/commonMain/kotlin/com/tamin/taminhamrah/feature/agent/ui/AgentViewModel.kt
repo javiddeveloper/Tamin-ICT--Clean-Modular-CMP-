@@ -564,7 +564,7 @@ class AgentViewModel(
                     status = status,
                     contentType = type,
                     contentJson = payload,
-                    voicePath = (item.content as? ChatBubbleContent.Voice)?.path,
+                    voicePath = (item.content as? ChatBubbleContent.Voice)?.source,
                     timestamp = currentTimeMillis(),
                     messageOrder = order
                 )
@@ -643,7 +643,7 @@ class AgentViewModel(
             id = UUID.randomUUID().toString(),
             sender = ChatSender.User,
             content = ChatBubbleContent.Voice(
-                path = preview.filePath,
+                source = preview.filePath,
                 durationMs = preview.durationMs.toLong(),
                 amplitudes = preview.amplitudes
             )
