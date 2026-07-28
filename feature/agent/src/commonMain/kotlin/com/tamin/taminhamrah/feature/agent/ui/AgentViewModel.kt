@@ -755,7 +755,17 @@ class AgentViewModel(
         playbackCoordinator.claim(owner)
         if (loadedAudioPath != filePath) {
             loadedAudioPath = filePath
-            voicePlayer.load(filePath, onReady = { voicePlayer.playPause() })
+            voicePlayer.load(
+                filePath = filePath,
+                onReady = { voicePlayer.playPause() },
+                onError = { message ->
+                    // Playback failures were silent, so a clip that would not open just
+                    // looked like a dead button.
+                    loadedAudioPath = null
+                    playbackCoordinator.release(owner)
+                    sendEvent(AgentEvent.ShowError(message))
+                }
+            )
         } else {
             voicePlayer.playPause()
         }

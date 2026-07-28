@@ -124,9 +124,11 @@ private class AndroidVoicePlayer : VoicePlayer {
                 stopPositionUpdates()
                 onComplete()
             }
-            setOnErrorListener { _, _, _ ->
+            setOnErrorListener { _, what, extra ->
+                // The player is now in its error state, where every accessor throws.
+                // Tear it down before anything else can touch it.
                 release()
-                onError("خطا در پخش صدا")
+                onError("پخش این فایل صوتی ممکن نشد. ($what:$extra)")
                 true
             }
             runCatching {
@@ -142,25 +144,29 @@ private class AndroidVoicePlayer : VoicePlayer {
 
     override fun playPause() {
         val mp = player ?: return
-        if (mp.isPlaying) {
-            mp.pause()
-            _isPlaying.value = false
-            stopPositionUpdates()
-        } else {
-            mp.start()
-            _isPlaying.value = true
-            startPositionUpdates()
+        // Every MediaPlayer accessor throws IllegalStateException once the player has
+        // errored or been released, so nothing here may touch it unguarded.
+        val playing = mp.isPlayingOrFalse()
+        val changed = runCatching {
+            if (playing) mp.pause() else mp.start()
+        }.isSuccess
+
+        if (!changed) {
+            release()
+            return
         }
+        _isPlaying.value = !playing
+        if (playing) stopPositionUpdates() else startPositionUpdates()
     }
 
     override fun seekTo(ms: Int) {
-        player?.seekTo(ms)
+        runCatching { player?.seekTo(ms) }
         _positionMs.value = ms
     }
 
     override fun stop() {
         runCatching { player?.pause() }
-        player?.seekTo(0)
+        runCatching { player?.seekTo(0) }
         _positionMs.value = 0
         _isPlaying.value = false
         stopPositionUpdates()
@@ -170,8 +176,11 @@ private class AndroidVoicePlayer : VoicePlayer {
         stopPositionUpdates()
         scope?.cancel()
         scope = null
-        runCatching { player?.release() }
+        // Drop the reference first: the polling coroutine may not have observed the
+        // cancellation yet, and a released player would throw the moment it looks.
+        val released = player
         player = null
+        runCatching { released?.release() }
         _isPlaying.value = false
         _positionMs.value = 0
         _durationMs.value = 0
@@ -180,12 +189,18 @@ private class AndroidVoicePlayer : VoicePlayer {
     private fun startPositionUpdates() {
         positionJob?.cancel()
         positionJob = scope?.launch {
-            while (isActive && player?.isPlaying == true) {
-                _positionMs.value = runCatching { player?.currentPosition ?: 0 }.getOrDefault(0)
+            while (isActive) {
+                val mp = player ?: break
+                if (!mp.isPlayingOrFalse()) break
+                _positionMs.value = runCatching { mp.currentPosition }.getOrDefault(0)
                 delay(POSITION_POLL_MS)
             }
         }
     }
+
+    /** `isPlaying` throws in the error/released state; treat that as "not playing". */
+    private fun MediaPlayer.isPlayingOrFalse(): Boolean =
+        runCatching { isPlaying }.getOrDefault(false)
 
     private fun stopPositionUpdates() {
         positionJob?.cancel()
