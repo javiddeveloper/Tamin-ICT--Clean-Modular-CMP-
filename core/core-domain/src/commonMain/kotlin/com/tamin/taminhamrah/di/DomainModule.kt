@@ -40,6 +40,8 @@ import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
+import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
+import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -69,7 +71,12 @@ import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionDetailUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
+import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientSelfDeclarativeUseCase
@@ -185,10 +192,17 @@ val domainModule = module {
     factoryOf(::UpdateAgentSessionUseCase)
 
     factoryOf(::SendRetirementDocumentUseCase)
+    factoryOf(::GetRolesUseCase)
+
 
     // Treatment UseCases
     factoryOf(::GetDeservedTreatmentUseCase)
+    factoryOf(::GetElectronicPrescriptionListUseCase)
+    factoryOf(::GetElectronicPrescriptionDetailUseCase)
+    factoryOf(::GetElectronicPrescriptionPriceUseCase)
     factoryOf(::GetDependantUnderEighteenUseCase)
+    factoryOf(::GetPrescriptionPdfFileUseCase)
+    factoryOf(::DownloadLabResultPdfUseCase)
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetJobTitleUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
@@ -209,4 +223,5 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+    factoryOf(::SetThemeUseCase)
 }

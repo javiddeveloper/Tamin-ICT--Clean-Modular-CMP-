@@ -1,40 +1,69 @@
 package com.tamin.taminhamrah.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.shimmer
 
 @Composable
 fun UserAvatar(
     model: String?,
+    size: Dp = IconSize.xxlarge,
     modifier: Modifier = Modifier,
-    size: Dp = 100.dp,
-    borderWidth: Dp = 1.dp,
-    borderColor: Color = MaterialTheme.colorScheme.primary,
-    backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant
+    isLoading: Boolean = false,
 ) {
+    val shape = RoundedCornerShape(CornerRadius.card)
+    val taminColors = LocalTaminColors.current
     Box(
         modifier = modifier
             .size(size)
-            .clip(CircleShape)
-            .background(backgroundColor)
-            .border(borderWidth, borderColor, CircleShape),
-        contentAlignment = Alignment.Center
+            .clip(shape)
+            .border(1.dp, taminColors.bgIconProfile, shape),
+        contentAlignment = Alignment.Center,
     ) {
-        LoadAsyncImage(
-            model = model,
-            modifier = Modifier.fillMaxSize()
+        if (isLoading) {
+            Box(modifier = Modifier.matchParentSize().shimmer())
+        } else {
+            LoadAsyncImage(
+                model = model,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+
+@PreviewRtlTheme
+@Composable
+private fun UserAvatarLight() {
+    PreviewRtlThemeContent(darkTheme = false) {
+        UserAvatar(
+            model = null,
         )
     }
 }
+
+
+@PreviewRtlTheme
+@Composable
+private fun UserAvatarDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        UserAvatar(
+            model = null,
+        )
+    }
+}
+

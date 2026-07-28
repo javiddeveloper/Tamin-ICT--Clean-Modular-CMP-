@@ -19,22 +19,29 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import kotlinx.collections.immutable.persistentListOf
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.icons.TaminIcons
-import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.components.IconTile
-import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_medical_approvals
+import taminx.core.core_ui.ic_tamin_misc_claims
+import taminx.core.core_ui.ic_tamin_prescriptions
+import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.ic_tamin_verified
 
 /**
  * Previews for the treatment component library.
@@ -64,7 +71,7 @@ private fun InsuranceCardPreview() {
             holderName = "علی رضایی",
             nationalId = "0079542318",
             coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
-            coverageBadge = { CoverageBadge(icon = TaminIcons.Verified) },
+            coverageBadge = { CoverageBadge(icon = vectorResource(Res.drawable.ic_tamin_verified)) },
         )
     }
 }
@@ -83,7 +90,7 @@ private fun InsuranceCardCarouselPreview() {
                     holderName = people[page],
                     nationalId = "007954231$page",
                     coverageLabel = "وضعیت حمایت‌های درمانی: برخوردار هستید",
-                    coverageBadge = { CoverageBadge(icon = TaminIcons.Verified) },
+                    coverageBadge = { CoverageBadge(icon = vectorResource(Res.drawable.ic_tamin_verified)) },
                     background = insuranceCardGradient(
                         isDependent = page > 0,
                         dependantOrdinal = page - 1,
@@ -94,46 +101,7 @@ private fun InsuranceCardCarouselPreview() {
     }
 }
 
-@PreviewRtlTheme
-@Composable
-private fun HubCardsPreview() {
-    PreviewSurface {
-        val colors = LocalTaminColors.current
-        SectionLabel(text = "دسترسی سریع")
-        QuickAccessCard(
-            title = "سوابق درمانی من",
-            subtitle = "تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش",
-            icon = TaminIcons.MedicalRecords,
-            trailingIcon = TaminIcons.ChevronForward,
-            onClick = {},
-        )
-        TreatmentNavigationCard(
-            title = "پروندهٔ سلامت من",
-            subtitle = "خوداظهاری سلامت و اطلاعات پزشکی",
-            icon = TaminIcons.HealthProfile,
-            iconTint = colors.blueText,
-            iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
-            trailingIcon = TaminIcons.ChevronForward,
-            onClick = {},
-            status = {
-                StatusPill(
-                    text = "تکمیل نشده",
-                    containerColor = colors.orangeBg,
-                    contentColor = colors.orangeText,
-                )
-            },
-        )
-        TreatmentNavigationCard(
-            title = "مراکز درمانی طرف قرارداد",
-            subtitle = "جست‌وجوی بیمارستان و داروخانه",
-            icon = TaminIcons.MedicalCenters,
-            iconTint = colors.teal,
-            iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            trailingIcon = TaminIcons.ChevronForward,
-            onClick = {},
-        )
-    }
-}
+
 
 @PreviewRtlTheme
 @Composable
@@ -145,9 +113,9 @@ private fun CategoryGridPreview() {
             horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
         ) {
             listOf(
-                Triple("نسخه‌های الکترونیک", colors.blueText, TaminIcons.Prescriptions),
-                Triple("تاییدیه‌های پزشکی", colors.teal, TaminIcons.MedicalApprovals),
-                Triple("خسارت متفرقه", colors.orangeText, TaminIcons.MiscClaims),
+                Triple("نسخه‌های الکترونیک", colors.blueText, vectorResource(Res.drawable.ic_tamin_prescriptions)),
+                Triple("تاییدیه‌های پزشکی", colors.teal, vectorResource(Res.drawable.ic_tamin_medical_approvals)),
+                Triple("خسارت متفرقه", colors.orangeText, vectorResource(Res.drawable.ic_tamin_misc_claims)),
             ).forEach { (label, tint, glyph) ->
                 CategoryTile(
                     label = label,
@@ -211,7 +179,7 @@ private fun TimelineChromePreview() {
                 title = "سوابق درمانی",
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = TaminIcons.ChevronBack,
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = "برگشت",
                         onClick = {},
                     )
@@ -221,14 +189,14 @@ private fun TimelineChromePreview() {
                     personLabel = "علی رضایی",
                     dateLabel = "۶ ماه اخیر",
                     dropdownIcon = Icons.Filled.KeyboardArrowDown,
-                    searchIcon = TaminIcons.Search,
+                    searchIcon = vectorResource(Res.drawable.ic_tamin_search),
                     onPersonClick = {},
                     onDateClick = {},
                     onSearchClick = {},
                 )
             }
             TreatmentFilterChipRow(
-                categories = listOf("همه", "دارو", "ویزیت", "پاراکلینیک"),
+                categories = persistentListOf("همه", "دارو", "ویزیت", "پاراکلینیک", "خدمات پزشکی"),
                 selectedIndex = 0,
                 onSelect = {},
             )
@@ -336,7 +304,7 @@ private fun MedicalCentersPreview() {
                 title = "مراکز طرف قرارداد",
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = TaminIcons.ChevronBack,
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = "برگشت",
                         onClick = {},
                     )
@@ -346,7 +314,7 @@ private fun MedicalCentersPreview() {
                     value = "",
                     onValueChange = {},
                     placeholder = "جست‌وجوی نام مرکز، بیمارستان یا داروخانه",
-                    searchIcon = TaminIcons.Search,
+                    searchIcon = vectorResource(Res.drawable.ic_tamin_search),
                     modifier = Modifier.padding(top = Spacing.lg),
                 )
             }

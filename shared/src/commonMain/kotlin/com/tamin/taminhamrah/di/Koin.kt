@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.core.datastore.di.datastoreModule
 import com.tamin.taminhamrah.data.di.dataKoinModule
 import com.tamin.taminhamrah.feature.history.di.historyModule
 import com.tamin.taminhamrah.feature.contracts.di.contractsModule
+import com.tamin.taminhamrah.feature.taminServices.di.TaminServicesModule
 import com.tamin.taminhamrah.feature.cartable.di.cartableModule
 import com.tamin.taminhamrah.feature.pensionInquiry.di.pensionInquiryModule
 import com.tamin.taminhamrah.feature.agent.di.agentModule
@@ -35,6 +36,7 @@ val sharedModules: List<Module>
         cartableModule,
         historyModule,
         contractsModule,
+        TaminServicesModule,
         workshopsModule,
         studentInsuranceContractModule,
         com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule,

@@ -80,6 +80,7 @@ class PayRollViewModel(
                     return@flow
                 }
                 emit(PartialState.Loading(true))
+                emit(PartialState.ViewerPdfChanged(null))
                 try {
                     val filters = listOf(
                         ApiFilterDN(FilterProperty.PENSIONER_ID, pensionerId, FilterOperator.EQUAL),
@@ -87,15 +88,15 @@ class PayRollViewModel(
                         ApiFilterDN(FilterProperty.PAYMENT_TYPE, state.paymentType, FilterOperator.EQUAL)
                     )
                     getPensionerPayRollPDFUseCase(filters).collect { pdf ->
-                        emit(PartialState.PayRollPDFLoaded(pdf.toPresentation()))
-                        emit(PartialState.TogglePdfDialog(true))
+                        emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
                     }
                 } catch (e: Exception) {
                     emit(PartialState.Error(e.message))
+                    emit(PartialState.ViewerDownloadFailed)
                 }
             }
-            is PayRollIntent.TogglePdfDialog -> {
-                emit(PartialState.TogglePdfDialog(intent.show))
+            is PayRollIntent.DismissPdfViewer -> {
+                emit(PartialState.ViewerPdfChanged(null))
             }
         }
     }
@@ -123,12 +124,14 @@ class PayRollViewModel(
             isLoading = false,
             payRollList = partialState.payRoll
         )
-        is PartialState.PayRollPDFLoaded -> currentState.copy(
+        is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,
-            payRollPDF = partialState.pdf
+            payRollPDF = partialState.pdf,
+            viewerDownloadFailed = false
         )
-        is PartialState.TogglePdfDialog -> currentState.copy(
-            showPdfDialog = partialState.show
+        is PartialState.ViewerDownloadFailed -> currentState.copy(
+            isLoading = false,
+            viewerDownloadFailed = true
         )
     }
 

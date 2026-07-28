@@ -77,7 +77,6 @@ val remoteModule = module {
     single<TreatmentRemoteDataSource> {
         TreatmentRemoteDataSourceImpl(
             apiService = get(),
-            queryBuilder = get(),
             errorParser = get()
         )
     }

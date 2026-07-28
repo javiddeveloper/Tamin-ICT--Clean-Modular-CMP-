@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.RequestNotificationPermissionOnLogin
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.openUrl
@@ -41,10 +43,8 @@ fun MainApp(
         darkTheme = darkTheme
     ) {
         AppToastHost {
-            // App-wide default: dark icons over the light theme's pale surfaces, light ones
-            // over the dark theme's. A screen that puts a dark header behind the status bar
-            // can override this for as long as it is shown.
             StatusBarIcons(darkIcons = !darkTheme)
+            RequestNotificationPermissionOnLogin(isLoggedIn = uiState.isLoggedIn)
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     TaminHamrahNavGraph(
@@ -59,6 +59,5 @@ fun MainApp(
                 }
             }
         }
-
     }
 }

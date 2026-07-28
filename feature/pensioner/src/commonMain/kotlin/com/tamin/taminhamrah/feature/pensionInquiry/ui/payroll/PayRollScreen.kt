@@ -1,26 +1,69 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollUiState
 import com.tamin.taminhamrah.model.pension.PayRollPR
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import taminx.core.core_ui.*
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.btn_close
+import taminx.core.core_ui.btn_load_payroll
+import taminx.core.core_ui.btn_show_payroll_pdf
+import taminx.core.core_ui.error_empty_pensioner_id
+import taminx.core.core_ui.error_generic
+import taminx.core.core_ui.payroll_desc
+import taminx.core.core_ui.payroll_header
+import taminx.core.core_ui.payroll_month
+import taminx.core.core_ui.payroll_payment_type_label
+import taminx.core.core_ui.payroll_payment_type_placeholder
+import taminx.core.core_ui.payroll_pensioner_id_label
+import taminx.core.core_ui.payroll_start_date_label
+import taminx.core.core_ui.payroll_start_date_placeholder
+import taminx.core.core_ui.payroll_sum_amount
+import taminx.core.core_ui.payroll_sum_pay
+import taminx.core.core_ui.payroll_title
+import taminx.core.core_ui.payroll_type
+import taminx.core.core_ui.payroll_year
 
 @Composable
 fun PayRollScreen(
@@ -28,6 +71,10 @@ fun PayRollScreen(
     viewModel: PayRollViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    // Opening the viewer no longer means a download has happened: it decides for itself whether
+    // the payroll still needs fetching, so the tap only says "show it".
+    var showPdf by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -60,7 +107,8 @@ fun PayRollScreen(
                     item {
                         PayRollForm(
                             state = state,
-                            onIntent = viewModel::sendIntent
+                            onIntent = viewModel::sendIntent,
+                            onShowPdf = { showPdf = true },
                         )
                     }
 
@@ -82,18 +130,37 @@ fun PayRollScreen(
         }
     }
 
-    if (state.showPdfDialog && state.payRollPDF != null) {
-        PayRollPdfDialog(
-            pdfData = state.payRollPDF!!,
-            onDismiss = { viewModel.sendIntent(PayRollIntent.TogglePdfDialog(false)) }
+    if (showPdf) {
+        TaminPdfViewer(
+            fileName = payRollFileName(state),
+            pdf = state.payRollPDF,
+            downloadFailed = state.viewerDownloadFailed,
+            onRequestDownload = { viewModel.sendIntent(PayRollIntent.LoadPayRollPDF) },
+            onDismiss = {
+                showPdf = false
+                viewModel.sendIntent(PayRollIntent.DismissPdfViewer)
+            },
         )
     }
+}
+
+/**
+ * Names the saved file after the query that produced it, not just the pensioner: two periods are
+ * two different payrolls, and the viewer treats one name as one document.
+ */
+private fun payRollFileName(state: PayRollUiState): String {
+    val query = listOf(state.selectedPensionerId.orEmpty(), state.startDate, state.paymentType)
+        .joinToString("_") { part -> part.filter { it.isLetterOrDigit() } }
+        .trim('_')
+        .ifBlank { "document" }
+    return "payroll_$query.pdf"
 }
 
 @Composable
 fun PayRollForm(
     state: PayRollUiState,
-    onIntent: (PayRollIntent) -> Unit
+    onIntent: (PayRollIntent) -> Unit,
+    onShowPdf: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -176,7 +243,7 @@ fun PayRollForm(
                 }
 
                 Button(
-                    onClick = { onIntent(PayRollIntent.LoadPayRollPDF) },
+                    onClick = onShowPdf,
                     enabled = !state.selectedPensionerId.isNullOrEmpty(),
                     modifier = Modifier.weight(1f)
                 ) {
@@ -199,56 +266,12 @@ fun PayRollDetailCard(item: PayRollPR) {
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            Text(text = stringResource(Res.string.payroll_desc, item.tprDesc ?: ""))
-            Text(text = stringResource(Res.string.payroll_sum_amount, item.sumAmount ?: ""))
-            Text(text = stringResource(Res.string.payroll_sum_pay, item.sumPay ?: ""))
-            Text(text = stringResource(Res.string.payroll_year, item.hisYear ?: ""))
-            Text(text = stringResource(Res.string.payroll_month, item.hisMon ?: ""))
-            Text(text = stringResource(Res.string.payroll_type, item.clpType ?: ""))
-        }
-    }
-}
-
-@Composable
-fun PayRollPdfDialog(
-    pdfData: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR,
-    onDismiss: () -> Unit
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = { Text(stringResource(Res.string.pdf_viewer_title)) },
-                    actions = {
-                        TextButton(onClick = onDismiss) {
-                            Text(stringResource(Res.string.btn_close))
-                        }
-                    }
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(Res.string.pdf_loaded_successfully),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(Res.string.pdf_ready_rendering),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-            }
+            Text(text = stringResource(Res.string.payroll_desc, item.tprDesc))
+            Text(text = stringResource(Res.string.payroll_sum_amount, item.sumAmount))
+            Text(text = stringResource(Res.string.payroll_sum_pay, item.sumPay))
+            Text(text = stringResource(Res.string.payroll_year, item.hisYear))
+            Text(text = stringResource(Res.string.payroll_month, item.hisMon))
+            Text(text = stringResource(Res.string.payroll_type, item.clpType))
         }
     }
 }

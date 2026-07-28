@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,52 +9,84 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_sun
+import taminx.core.core_ui.ic_moon
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.UserAvatar
+import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.lerp as dpLerp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.rememberSplineBasedDecay
+
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
-import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
+import com.tamin.taminhamrah.ui.LocalThemeRevealController
+import com.tamin.taminhamrah.ui.components.ValidationStatusCard
+import com.tamin.taminhamrah.ui.motion.motionFade
+import com.tamin.taminhamrah.ui.motion.motionParallax
+import com.tamin.taminhamrah.ui.motion.motionScale
+import com.tamin.taminhamrah.ui.motion.ScrollMotionState
+import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
+import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_identity
 import taminx.core.core_ui.ic_person
 import taminx.core.core_ui.ic_communication
@@ -68,7 +101,6 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_history
 import taminx.core.core_ui.ic_exit
-import taminx.core.core_ui.ic_tamin_logo
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable
@@ -85,6 +117,7 @@ import taminx.core.core_ui.profile_requests
 import taminx.core.core_ui.profile_security
 import taminx.core.core_ui.profile_security_settings
 import taminx.core.core_ui.profile_settings
+import taminx.core.core_ui.profile_title
 import taminx.core.core_ui.profile_share
 import taminx.core.core_ui.profile_support
 import taminx.core.core_ui.profile_support_section
@@ -100,9 +133,17 @@ fun ProfileScreen(
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val hazeState = remember { HazeState(initialBlurEnabled = true) }
+    val lazyListState = rememberLazyListState()
+    val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+    var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
 
     LaunchedEffect(userId) {
         viewModel.sendIntent(ProfileIntent.LoadProfile(userId))
+    }
+
+    LaunchedEffect(motionState, lazyListState) {
+        motionState.observeLazyListState(lazyListState)
     }
 
     HandleProfileEvents(
@@ -115,6 +156,11 @@ fun ProfileScreen(
 
     ProfileContent(
         state = uiState,
+        hazeState = hazeState,
+        lazyListState = lazyListState,
+        motionState = motionState,
+        themeButtonCenter = themeButtonCenter,
+        onThemeButtonCenterChange = { themeButtonCenter = it },
         onIntent = viewModel::sendIntent,
     )
 }
@@ -127,32 +173,22 @@ fun HandleProfileEvents(
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware {
         when (it) {
             ProfileEvent.NavigateBack -> {
-                scope.launch {
-                    onBackClicked()
-                }
+                onBackClicked()
             }
 
             ProfileEvent.NavigateToSettings -> {
-                // For now, let's assume destinationId for settings is 100 or something,
-                // or we can handle it differently.
-                scope.launch {
-                    // onNavigateToRouteById(100)
-                }
+                // onNavigateToRouteById(100)
             }
 
             ProfileEvent.NavigateToIdentity -> {
-                scope.launch {
-                    onNavigateToIdentity()
-                }
+                onNavigateToIdentity()
             }
+
             is ProfileEvent.OpenUrl -> {
-                scope.launch {
-                    onOpenUrl(it.url)
-                }
+                onOpenUrl(it.url)
             }
 
             is ProfileEvent.ShowToast -> {
@@ -166,51 +202,147 @@ fun HandleProfileEvents(
 fun ProfileContent(
     modifier: Modifier = Modifier,
     state: ProfileUiState,
+    hazeState: HazeState,
+    lazyListState: LazyListState,
+    motionState: ScrollMotionState,
+    themeButtonCenter: Offset,
+    onThemeButtonCenterChange: (Offset) -> Unit,
     onIntent: (ProfileIntent) -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
-    Scaffold(modifier = modifier) { paddingValues ->
+    val revealController = LocalThemeRevealController.current
+    val isDark = taminColors == DarkTaminColors
+    val decaySpec = rememberSplineBasedDecay<Float>()
+    val topBarGradient = remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
+    val defaultBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.border) }
+    val dangerBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.dangerBorder) }
+    val snapFlingBehavior = rememberMotionSnapFlingBehavior(
+        lazyListState = lazyListState,
+        motionState = motionState,
+        decayAnimationSpec = decaySpec
+    )
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            val headerProgress = motionState.progress
+            Box {
+                Column(
+                    modifier = Modifier.hazeSource(state = hazeState)
+                ) {
+                    TaminTopAppBar(
+                        modifier = Modifier,
+                        title = "",
+                        centerTitle = false,
+                        action = {
+                            Box(
+                                modifier = Modifier.onGloballyPositioned { coords ->
+                                    val centerInRoot = coords.positionInRoot() +
+                                        Offset(
+                                            coords.size.width / 2f,
+                                            coords.size.height / 2f
+                                        )
+                                    onThemeButtonCenterChange(centerInRoot)
+                                }
+                            ) {
+                                TaminTopAppBarButton(
+                                    icon = vectorResource(if (isDark) Res.drawable.ic_moon else Res.drawable.ic_sun),
+                                    contentDescription = null,
+                                    onClick = {
+                                        if (revealController != null) {
+                                            revealController.trigger(origin = themeButtonCenter) {
+                                                onIntent(ProfileIntent.ToggleTheme(!isDark))
+                                            }
+                                        } else {
+                                            onIntent(ProfileIntent.ToggleTheme(!isDark))
+                                        }
+                                    },
+                                    bordered = true
+                                )
+                            }
+                        },
+                        background = topBarGradient,
+                        bottomPadding = dpLerp(Spacing.xxxl, Spacing.sm, headerProgress)
+                    ) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = stringResource(Res.string.profile_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .offset(y = (-32).dp)
+                                    .motionFade(motionState, startProgress = 0.2f, endProgress = 0.7f)
+                                    .motionParallax(motionState, parallaxDistance = 20.dp)
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = dpLerp(Spacing.xl, Spacing.none, headerProgress))
+                                    .padding(horizontal = Spacing.sm)
+                                    .motionParallax(motionState, parallaxDistance = 45.dp)
+                                    .motionScale(
+                                        state = motionState,
+                                        minScale = 0.8f,
+                                        maxScale = 1f,
+                                        transformOrigin = TransformOrigin(1f, 0.5f)
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                UserAvatar(
+                                    model = state.profileImage,
+                                    isLoading = state.isProfileImageLoading
+                                )
+                                Column {
+                                    Text(
+                                        text = state.identityInfo?.fullName ?: "تست تست تست",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = taminColors.txtNameProfile
+                                    )
+                                    Text(
+                                        text = state.identityInfo?.nationalId ?: "22222222",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = taminColors.txtNatProfile
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(dpLerp(Spacing.sm, Spacing.none, headerProgress)))
+                    }
+                    Spacer(modifier = Modifier.height(dpLerp(Spacing.xxxl, 35.dp, headerProgress)))
+                }
+                ValidationStatusCard(
+                    hazeState = hazeState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = Spacing.lg),
+                    title = "نام نویسی شده تست",
+                    subtitle = "حساب شما تأیید و فعال است تست",
+                    badgeText = "معتبر تست ",
+                    isValid = true
+                )
+            }
+        }
+    ) { innerPadding ->
         LazyColumn(
+            state = lazyListState,
+            flingBehavior = snapFlingBehavior,
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(innerPadding),
             contentPadding = PaddingValues(
+                top = Spacing.lg,
                 bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 80.dp
             ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Spacing.xl),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    UserAvatar(
-                        model = state.profileImage,
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.md))
-
-                    if (!state.userId.isNullOrEmpty()) {
-                        val identity = state.identityInfo
-                        val relation = state.taminRelation
-                        if (identity != null && relation != null) {
-                            Text(
-                                text = "${identity.fullName} - ${identity.cityOfBirthName} - ${relation.brhAdress}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-
-            // اطلاعات شخصی
-            item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
                     SectionHeaderTitle(title = stringResource(Res.string.profile_personal_info))
                     ListGroupView(
-                        containerBorder = BorderStroke(1.dp, taminColors.border),
+                        containerBorder = defaultBorder,
                         items = persistentListOf(
                             ListItemData(
                                 title = stringResource(Res.string.profile_identity_info),
@@ -281,17 +413,11 @@ fun ProfileContent(
                     )
                 }
             }
-
-
-            item {
-                HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
-            }
-            // کارتابل
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
                     SectionHeaderTitle(title = stringResource(Res.string.profile_cartable))
                     ListGroupView(
-                        containerBorder = BorderStroke(1.dp, taminColors.border),
+                        containerBorder = defaultBorder,
                         items = persistentListOf(
                             ListItemData(
                                 title = stringResource(Res.string.profile_requests),
@@ -317,13 +443,11 @@ fun ProfileContent(
                     )
                 }
             }
-
-            // امنیت و تنظیمات
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
                     SectionHeaderTitle(title = stringResource(Res.string.profile_security_settings))
                     ListGroupView(
-                        containerBorder = BorderStroke(1.dp, taminColors.border),
+                        containerBorder = defaultBorder,
                         items = persistentListOf(
                             ListItemData(
                                 title = stringResource(Res.string.profile_security),
@@ -349,13 +473,11 @@ fun ProfileContent(
                     )
                 }
             }
-
-            // پشتیبانی
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
                     SectionHeaderTitle(title = stringResource(Res.string.profile_support_section))
                     ListGroupView(
-                        containerBorder = BorderStroke(1.dp, taminColors.border),
+                        containerBorder = defaultBorder,
                         items = persistentListOf(
                             ListItemData(
                                 title = stringResource(Res.string.profile_support),
@@ -401,12 +523,10 @@ fun ProfileContent(
                     )
                 }
             }
-
-            // خروج از حساب کاربری
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
                     ListGroupView(
-                        containerBorder = BorderStroke(1.dp, taminColors.dangerBorder),
+                        containerBorder = dangerBorder,
                         items = persistentListOf(
                             ListItemData(
                                 title = stringResource(Res.string.profile_logout),
@@ -424,7 +544,6 @@ fun ProfileContent(
                     )
                 }
             }
-
             item {
                 Spacer(modifier = Modifier.height(Spacing.xl))
             }
@@ -432,18 +551,25 @@ fun ProfileContent(
     }
 }
 
-
-
-
 @PreviewRtlTheme
 @Composable
 private fun ProfileScreenPreview() {
     PreviewRtlThemeContent {
+        val hazeState = remember { HazeState(initialBlurEnabled = true) }
+        val lazyListState = rememberLazyListState()
+        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+        var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
+
         ProfileContent(
             state = ProfileUiState(
                 userId = "1234567890",
                 isLoading = false,
             ),
+            hazeState = hazeState,
+            lazyListState = lazyListState,
+            motionState = motionState,
+            themeButtonCenter = themeButtonCenter,
+            onThemeButtonCenterChange = { themeButtonCenter = it },
             onIntent = {}
         )
     }
@@ -453,12 +579,23 @@ private fun ProfileScreenPreview() {
 @Composable
 private fun ProfileScreenPreviewDark() {
     TaminHamrahTheme(darkTheme = true) {
+        val hazeState = remember { HazeState(initialBlurEnabled = true) }
+        val lazyListState = rememberLazyListState()
+        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+        var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
+
         ProfileContent(
             state = ProfileUiState(
                 userId = "1234567890",
                 isLoading = false,
             ),
+            hazeState = hazeState,
+            lazyListState = lazyListState,
+            motionState = motionState,
+            themeButtonCenter = themeButtonCenter,
+            onThemeButtonCenterChange = { themeButtonCenter = it },
             onIntent = {}
         )
     }
 }
+

@@ -1,46 +1,55 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.feature.treatment.ui.model.toCardItems
 import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.icons.TaminIcons
-import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
+import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
-
-/** How far the insured-person carousel rides up into the teal header. */
-private val CARD_OVERLAP = 40.dp
 
 /**
  * Treatment hub: the insured person's electronic health-insurance cards, the quick-access
@@ -49,13 +58,9 @@ private val CARD_OVERLAP = 40.dp
 @Composable
 fun TreatmentScreen(
     viewModel: TreatmentViewModel = koinViewModel(),
-    onOpenMedicalRecords: () -> Unit = {},
+    onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
-    onOpenCenters: () -> Unit = {},
-    onOpenPrescriptions: () -> Unit = {},
-    onOpenMedicalApprovals: () -> Unit = {},
-    onOpenMiscClaims: () -> Unit = {},
-    onSearch: () -> Unit = {},
+    onOpenPrescriptions: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -64,26 +69,53 @@ fun TreatmentScreen(
         viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
     }
 
-    HandleTreatmentEvents(events = viewModel.events)
-
-    TreatmentContent(
-        state = uiState,
-        onIntent = viewModel::sendIntent,
-        onOpenMedicalRecords = onOpenMedicalRecords,
-        onOpenHealthProfile = onOpenHealthProfile,
-        onOpenCenters = onOpenCenters,
-        onOpenPrescriptions = onOpenPrescriptions,
-        onOpenMedicalApprovals = onOpenMedicalApprovals,
-        onOpenMiscClaims = onOpenMiscClaims,
-        onSearch = onSearch,
+    val snackbarHostState = remember { SnackbarHostState() }
+    HandleTreatmentEvents(
+        events = viewModel.events,
+        snackbarHostState = snackbarHostState,
+        onNavigateToRecords = { nationalCode, tab ->
+            if (tab == RecordTab.MEDICINE) onOpenPrescriptions(nationalCode)
+            else onOpenMedicalRecords(nationalCode)
+        },
     )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        TreatmentContent(
+            state = uiState,
+            onIntent = viewModel::sendIntent,
+            onOpenMedicalRecords = onOpenMedicalRecords,
+            onOpenHealthProfile = onOpenHealthProfile,
+            onOpenPrescriptions = onOpenPrescriptions,
+        )
+        // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
 }
 
 @Composable
-fun HandleTreatmentEvents(events: Flow<TreatmentEvent>) {
+fun HandleTreatmentEvents(
+    events: Flow<TreatmentEvent>,
+    snackbarHostState: SnackbarHostState,
+    onNavigateToRecords: (String, RecordTab) -> Unit,
+) {
     events.collectWithLifecycleAware {
         when (it) {
-            is TreatmentEvent.ShowMessage -> Unit // TODO: surface via snackbar/toast
+            // Navigation is an event because the feature flag decides it, not the tap.
+            is TreatmentEvent.NavigateToRecords -> onNavigateToRecords(it.nationalCode, it.tab)
+
+            // A gated feature explains itself here; a silent gate would look like a dead button.
+            is TreatmentEvent.ShowMessage -> snackbarHostState.showSnackbar(
+                message = it.message,
+                withDismissAction = it.type == TreatmentMessageType.OPERATION_FAILED,
+                duration = if (it.type == TreatmentMessageType.OPERATION_FAILED) {
+                    SnackbarDuration.Long
+                } else {
+                    SnackbarDuration.Short
+                },
+            )
         }
     }
 }
@@ -93,61 +125,91 @@ fun TreatmentContent(
     state: TreatmentUiState,
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenMedicalRecords: () -> Unit = {},
+    onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
-    onOpenCenters: () -> Unit = {},
-    onOpenPrescriptions: () -> Unit = {},
-    onOpenMedicalApprovals: () -> Unit = {},
-    onOpenMiscClaims: () -> Unit = {},
-    onSearch: () -> Unit = {},
+    onOpenPrescriptions: (String) -> Unit = {},
 ) {
-    val patients = remember(state) { state.toPatientList() }
+    // Keyed on the data the cards are built from, not on the whole state: selecting a patient
+    // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
+    val patients = remember(state.mainUserNationalCode, state.deservedList, state.dependantList) {
+        state.toPatientList()
+    }
+    val cards = remember(patients, state.deservedList) { patients.toCardItems(state.deservedList) }
     var entitlementReason by remember { mutableStateOf<String?>(null) }
-    val pagerState = rememberPagerState(pageCount = { patients.size })
+    val pagerState = rememberPagerState(pageCount = { cards.size })
+    val scrollState = rememberScrollState()
 
     SyncPagerWithSelection(
-        state = state,
+        selectedNationalCode = state.selectedNationalCode,
         patients = patients,
         pagerState = pagerState,
         onIntent = onIntent,
     )
 
-    Column(
+    // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
+    // only inside the card morph's layout/draw lambdas, so the fold never recomposes the hub.
+    val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
+    val headerProgress = remember(collapse) { { collapse.progress } }
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+
+    // Hoisted so the section lambdas below capture one string rather than the whole state —
+    // capturing `state` would make them a new instance on every load and defeat skipping.
+    val mainUserNationalCode = state.mainUserNationalCode
+
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalTaminColors.current.bgPage)
-            .verticalScroll(rememberScrollState()),
+            .background(LocalTaminColors.current.bgPage),
     ) {
-        TreatmentHubHeader(onSearch = onSearch)
-        // The whole body shifts up together, so the overlap does not leave a gap below.
-        Column(modifier = Modifier.offset(y = -CARD_OVERLAP)) {
-            PatientCarousel(
-                state = state,
-                patients = patients,
-                pagerState = pagerState,
-                onShowEntitlementReason = { entitlementReason = it },
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                // The body's drag first folds the header, then scrolls the sections, and only what
+                // neither wanted reaches the rubber band — so the fold always wins over the bounce.
+                .nestedScroll(collapse.nestedScrollConnection)
+                .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
+        ) {
+            // Stands in for the floating header, which is measured rather than fixed.
+            Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
-                onOpenMedicalRecords = onOpenMedicalRecords,
+                // Records are feature-flag gated, so the tap fires an intent; the emitted
+                // NavigateToRecords event carries the selected patient's national code.
+                onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) },
                 // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
                 // which patient card is in view. No-op until the main code is known.
-                onOpenHealthProfile = { state.mainUserNationalCode?.let(onOpenHealthProfile) },
-                onOpenCenters = onOpenCenters,
+                onOpenHealthProfile = { mainUserNationalCode?.let(onOpenHealthProfile) },
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
-                onOpenPrescriptions = onOpenPrescriptions,
-                onOpenMedicalApprovals = onOpenMedicalApprovals,
-                onOpenMiscClaims = onOpenMiscClaims,
+                onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCostSummary(
                 insuredShare = state.insuredShareTotal,
                 organizationShare = state.organizationShareTotal,
             )
-            Spacer(modifier = Modifier.height(Spacing.xxl + CARD_OVERLAP))
+            // Clears the floating navigation bar, as the pre-collapse layout did.
+            Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
+        }
+
+        // The header floats on top so that as content scrolls up, it passes underneath the header.
+        TreatmentHubHeader(
+            progress = headerProgress,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { headerHeightPx = it.height },
+        ) {
+            PatientCarousel(
+                cards = cards,
+                isLoading = state.isLoading,
+                error = state.error,
+                pagerState = pagerState,
+                onShowEntitlementReason = { entitlementReason = it },
+                onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
+                collapseProgress = headerProgress,
+            )
         }
     }
 
@@ -159,50 +221,33 @@ fun TreatmentContent(
     }
 }
 
-@Composable
-private fun TreatmentHubHeader(onSearch: () -> Unit) {
-    TaminTopAppBar(
-        title = "درمان",
-        centerTitle = false,
-        action = {
-            TaminTopAppBarButton(
-                icon = TaminIcons.Search,
-                contentDescription = "جست‌وجو",
-                onClick = onSearch,
-                bordered = true,
-            )
-        },
-        // Runs deep enough for the carousel to ride up into it. The gradient and the
-        // status-bar fill are left at their defaults, which is what puts the visible
-        // step between the two bands.
-        bottomPadding = CARD_OVERLAP + Spacing.xl,
-    )
-
-
-}
-
 /**
  * Keeps the pager and the selected national code in step in both directions: a restored
  * selection scrolls the pager, and a swipe reports the new selection back.
  */
 @Composable
 private fun SyncPagerWithSelection(
-    state: TreatmentUiState,
-    patients: List<PatientItem>,
+    selectedNationalCode: String?,
+    patients: ImmutableList<PatientItem>,
     pagerState: PagerState,
     onIntent: (TreatmentIntent) -> Unit,
 ) {
-    LaunchedEffect(state.selectedNationalCode, patients) {
-        val index = patients.indexOfFirst { it.nationalId == state.selectedNationalCode }
+    LaunchedEffect(selectedNationalCode, patients) {
+        val index = patients.indexOfFirst { it.nationalId == selectedNationalCode }
         if (index >= 0 && pagerState.currentPage != index) {
             pagerState.scrollToPage(index)
         }
     }
 
-    LaunchedEffect(pagerState.currentPage, patients) {
-        val selected = patients.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
-        if (selected.nationalId != state.selectedNationalCode) {
-            onIntent(TreatmentIntent.SelectPatient(selected.nationalId, selected.fullName))
+    // The page is watched through a snapshot flow rather than an effect key, so a swipe does not
+    // recompose anything on the way to reporting the new selection.
+    val currentSelection by rememberUpdatedState(selectedNationalCode)
+    LaunchedEffect(patients) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            val selected = patients.getOrNull(page) ?: return@collect
+            if (selected.nationalId != currentSelection) {
+                onIntent(TreatmentIntent.SelectPatient(selected.nationalId, selected.fullName))
+            }
         }
     }
 }
