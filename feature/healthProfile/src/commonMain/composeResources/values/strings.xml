@@ -149,5 +149,44 @@
     <string name="health_cancer_skin">سرطان پوست</string>
     <string name="health_cancer_thyroid">سرطان تیرویید</string>
     <string name="health_cancer_other">سایر</string>
+
+    <!-- Shared Confidentiality Notice -->
+    <string name="health_confidential_notice">فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.</string>
+
+    <!-- Diseases Screen Strings -->
+    <string name="health_diseases_title">سوالات سلامت</string>
+    <string name="health_bs_chronic_subtitle">نوع بیماری خود را انتخاب کنید:</string>
+    <string name="health_bs_mental_subtitle">نوع عارضه را انتخاب کنید:</string>
+    <string name="health_bs_cancer_subtitle">نوع سرطان را انتخاب کنید:</string>
+    <string name="health_bs_submit">ثبت</string>
+
+    <!-- Lifestyle Screen Strings -->
+    <string name="health_lifestyle_title">سبک زندگی</string>
+    <string name="health_lifestyle_smoking_question">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="health_lifestyle_smoking_bs_subtitle">الگوی مصرف خود را انتخاب کنید</string>
+    <string name="health_lifestyle_addiction_question">آیا اعتیاد دارید؟</string>
+    <string name="health_lifestyle_addiction_bs_subtitle">الگوی مصرف خود را انتخاب کنید</string>
+    <string name="health_lifestyle_alcohol_question">آیا الکل مصرف دارید؟</string>
+    <string name="health_lifestyle_alcohol_bs_subtitle">جزئیات مربوط به مصرف الکل را وارد کنید</string>
+    <string name="health_lifestyle_exercise_question">آیا ورزش می‌کنید؟</string>
+    <string name="health_lifestyle_exercise_bs_subtitle">جزئیات مربوط به ورزش را وارد کنید</string>
+
+    <!-- Bottom Sheet Types -->
+    <string name="health_type_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
+    <string name="health_type_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
+    <string name="health_type_mental">آیا بیماری اعصاب و روان دارید؟</string>
+    <string name="health_type_cancer">ایا سابقه ابتلا به سرطان دارید ؟</string>
+    <string name="health_type_family_diseases">آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="health_type_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
+    <string name="health_type_province">استان</string>
+    <string name="health_type_city">شهر</string>
+    <string name="health_type_blood_group">گروه خونی</string>
+    <string name="health_type_smoking">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="health_type_drug_addiction">آیا اعتیاد دارید؟</string>
+    <string name="health_type_alcohol">آیا الکل مصرف دارید؟</string>
+    <string name="health_type_exercise">آیا ورزش می‌کنید؟</string>
+    <string name="health_type_marital_status">وضعیت تاهل</string>
+    <string name="health_type_emergency_contact">تماس اضطراری</string>
 </resources>
+
 

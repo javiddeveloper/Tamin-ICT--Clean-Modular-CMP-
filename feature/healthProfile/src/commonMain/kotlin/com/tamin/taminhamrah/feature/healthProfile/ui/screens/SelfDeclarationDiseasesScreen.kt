@@ -44,11 +44,8 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.Logger
 import org.jetbrains.compose.resources.painterResource
-import taminx.feature.healthprofile.generated.resources.Res
-import taminx.feature.healthprofile.generated.resources.ic_health_cancer
-import taminx.feature.healthprofile.generated.resources.ic_health_disease
-import taminx.feature.healthprofile.generated.resources.ic_health_high_risk
-import taminx.feature.healthprofile.generated.resources.ic_health_mental
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 @Composable
 fun SelfDeclarationDiseasesScreen(
@@ -60,7 +57,10 @@ fun SelfDeclarationDiseasesScreen(
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
-    val optionsYesNo = listOf("خیر", "بله")
+    val optionsYesNo = listOf(
+        stringResource(Res.string.health_option_no),
+        stringResource(Res.string.health_option_yes)
+    )
 
     // Filter groups via Enum type mapping
     val riskFactorGroup = illnessGroups.findGroup(BottomSheetType.RISK_FACTOR)
@@ -85,7 +85,7 @@ fun SelfDeclarationDiseasesScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                title = "سوالات سلامت",
+                title = stringResource(Res.string.health_diseases_title),
                 currentStep = 8,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -93,9 +93,9 @@ fun SelfDeclarationDiseasesScreen(
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی",
+                primaryText = stringResource(Res.string.health_btn_next_step),
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY)) },
-                secondaryText = "مرحلهٔ قبلی",
+                secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -111,7 +111,7 @@ fun SelfDeclarationDiseasesScreen(
         ) {
 
             InfoBanner(
-                message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
+                message = stringResource(Res.string.health_confidential_notice),
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 

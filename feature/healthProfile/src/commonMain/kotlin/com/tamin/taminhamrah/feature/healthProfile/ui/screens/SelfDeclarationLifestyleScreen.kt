@@ -26,11 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.CustomChip
 import org.jetbrains.compose.resources.painterResource
-import taminx.feature.healthprofile.generated.resources.Res
-import taminx.feature.healthprofile.generated.resources.ic_health_addiction
-import taminx.feature.healthprofile.generated.resources.ic_health_alcohol
-import taminx.feature.healthprofile.generated.resources.ic_health_exercise
-import taminx.feature.healthprofile.generated.resources.ic_health_tobacco
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 @Composable
 fun SelfDeclarationLifestyleScreen(
@@ -48,12 +45,15 @@ fun SelfDeclarationLifestyleScreen(
     var showAlcoholBottomSheet by remember { mutableStateOf(false) }
     var showExerciseBottomSheet by remember { mutableStateOf(false) }
 
-    val optionsYesNo = listOf("خیر", "بله")
+    val optionsYesNo = listOf(
+        stringResource(Res.string.health_option_no),
+        stringResource(Res.string.health_option_yes)
+    )
 
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                title = "سبک زندگی",
+                title = stringResource(Res.string.health_lifestyle_title),
                 currentStep = 7,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -61,9 +61,9 @@ fun SelfDeclarationLifestyleScreen(
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی",
+                primaryText = stringResource(Res.string.health_btn_next_step),
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES)) },
-                secondaryText = "مرحلهٔ قبلی",
+                secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -79,7 +79,7 @@ fun SelfDeclarationLifestyleScreen(
         ) {
 
             InfoBanner(
-                message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
+                message = stringResource(Res.string.health_confidential_notice),
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 
@@ -96,7 +96,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        "آیا از دخانیات استفاده می\u200Cکنید؟",
+                        text = stringResource(Res.string.health_lifestyle_smoking_question),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -136,7 +136,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        "آیا اعتیاد دارید؟",
+                        text = stringResource(Res.string.health_lifestyle_addiction_question),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -164,7 +164,7 @@ fun SelfDeclarationLifestyleScreen(
 
             }
 
-            // ── Alcohol (hardcoded LifeStyleStatus) ─────────────────────────
+            // ── Alcohol ──────────────────────────────────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -177,7 +177,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        "آیا الکل مصرف دارید؟",
+                        text = stringResource(Res.string.health_lifestyle_alcohol_question),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -205,7 +205,7 @@ fun SelfDeclarationLifestyleScreen(
 
             }
 
-            // ── Exercise (hardcoded LifeStyleStatus) ────────────────────────
+            // ── Exercise ─────────────────────────────────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -218,7 +218,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        "آیا ورزش می\u200Cکنید؟",
+                        text = stringResource(Res.string.health_lifestyle_exercise_question),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -253,7 +253,7 @@ fun SelfDeclarationLifestyleScreen(
         HealthBottomSheet(
             config = BottomSheetConfig(
                 title = BottomSheetType.SMOKING_ADDICTION.title ?: "",
-                subtitle = "الگوی مصرف خود را انتخاب کنید",
+                subtitle = stringResource(Res.string.health_lifestyle_smoking_bs_subtitle),
                 type = BottomSheetType.SMOKING_ADDICTION,
                 singleSelection = true,
                 items = smokingStatusOptions.map {
@@ -280,7 +280,7 @@ fun SelfDeclarationLifestyleScreen(
         HealthBottomSheet(
             config = BottomSheetConfig(
                 title = BottomSheetType.DRUG_ADDICTION.title ?: "",
-                subtitle = "الگوی مصرف خود را انتخاب کنید",
+                subtitle = stringResource(Res.string.health_lifestyle_addiction_bs_subtitle),
                 type = BottomSheetType.DRUG_ADDICTION,
                 singleSelection = true,
                 items = actFrequencyOptions.map {
@@ -307,7 +307,7 @@ fun SelfDeclarationLifestyleScreen(
         HealthBottomSheet(
             config = BottomSheetConfig(
                 title = BottomSheetType.ALCOHOL_ADDICTION.title ?: "",
-                subtitle = "جزئیات مربوط به مصرف الکل را وارد کنید",
+                subtitle = stringResource(Res.string.health_lifestyle_alcohol_bs_subtitle),
                 type = BottomSheetType.ALCOHOL_ADDICTION,
                 singleSelection = true,
                 items = LifeStyleStatus.entries.map {
@@ -335,7 +335,7 @@ fun SelfDeclarationLifestyleScreen(
         HealthBottomSheet(
             config = BottomSheetConfig(
                 title = BottomSheetType.EXERCISE.title ?: "",
-                subtitle = "جزئیات مربوط به ورزش را وارد کنید",
+                subtitle = stringResource(Res.string.health_lifestyle_exercise_bs_subtitle),
                 type = BottomSheetType.EXERCISE,
                 singleSelection = true,
                 items = LifeStyleStatus.entries.map {
