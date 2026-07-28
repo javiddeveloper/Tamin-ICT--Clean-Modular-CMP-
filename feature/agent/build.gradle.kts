@@ -25,6 +25,11 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
 
+        androidMain.dependencies {
+            implementation(libs.media3.exoplayer)
+            implementation(libs.media3.ui)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)

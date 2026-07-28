@@ -15,11 +15,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -125,59 +130,94 @@ fun ImageBubble(
     }
 }
 
-/** A video attachment: thumbnail with a play affordance, plus optional caption. */
+/**
+ * A video attachment.
+ *
+ * Starts as a poster frame so the list stays cheap to scroll — a player per bubble would
+ * hold a decoder open for every clip in the conversation. Tapping play swaps in the real
+ * player inline; the expand button opens the same clip fullscreen.
+ */
 @Composable
 fun VideoBubble(
     content: ChatBubbleContent.Video,
-    onPlay: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
+    var isPlayingInline by remember { mutableStateOf(false) }
+    var isFullscreen by remember { mutableStateOf(false) }
+
     Column(modifier = modifier.width(240.dp)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(140.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                .clickable { onPlay(content.source) },
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
             contentAlignment = Alignment.Center
         ) {
-            content.thumbnailUrl?.let { thumb ->
-                SubcomposeAsyncImage(
-                    model = thumb,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
+            if (isPlayingInline) {
+                VideoPlayer(
+                    url = content.source,
+                    autoPlay = true,
                     modifier = Modifier.matchParentSize()
                 )
+            } else {
+                content.thumbnailUrl?.let { thumb ->
+                    SubcomposeAsyncImage(
+                        model = thumb,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.matchParentSize()
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable { isPlayingInline = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = "پخش ویدیو",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                content.durationMs?.let { duration ->
+                    Text(
+                        text = formatDuration(duration),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
             }
+
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .align(Alignment.TopStart)
+                    .padding(6.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(Color.Black.copy(alpha = 0.45f))
+                    .clickable { isFullscreen = true },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.PlayArrow,
-                    contentDescription = "پخش ویدیو",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-            content.durationMs?.let { duration ->
-                Text(
-                    text = formatDuration(duration),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color.Black.copy(alpha = 0.55f))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                    Icons.Default.Fullscreen,
+                    contentDescription = "تمام‌صفحه",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
+
         content.caption?.takeIf { it.isNotBlank() }?.let { caption ->
             Spacer(Modifier.height(6.dp))
             Text(
@@ -186,6 +226,13 @@ fun VideoBubble(
                 color = taminColors.textMuted
             )
         }
+    }
+
+    if (isFullscreen) {
+        FullscreenVideoDialog(
+            url = content.source,
+            onDismiss = { isFullscreen = false }
+        )
     }
 }
 

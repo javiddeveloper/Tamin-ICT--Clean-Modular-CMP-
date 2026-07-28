@@ -1296,7 +1296,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             {
                 "key": "showcase",
                 "step_number": 9,
-                "payload": {"type": "video", "video": "https://www.tamin.ir/video/sample.mp4", "thumbnail": "https://cdn.donya-e-eqtesad.com/thumbnail/lxq0x0mNjWDN/QHn8O9nsSzT8qCU7RegsN6Pbb5v74eEtbKeSOh05RaYNq9kWHVLNyUt7TZyzEhnm/0d50adf9ZjoxMzU1NDQ5MC5qcGd8ZnVpOjE2MjY0NTIxfGw6ZmF8djoxfHdpOjU2Nw+copy.jpg", "duration": "96000", "caption": "گزارش تصویری نشست خبری"},
+                "payload": {"type": "video", "video": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", "thumbnail": "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg", "duration": "596000", "caption": "گزارش تصویری نشست خبری"},
                 "data": null,
                 "message": "گزارش تصویری",
                 "message_id": "showcase-9"
@@ -1304,7 +1304,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             {
                 "key": "showcase",
                 "step_number": 10,
-                "payload": {"type": "voice", "audio": "https://www.tamin.ir/audio/sample.m4a", "duration": "18000", "caption": "خلاصه صوتی گزارش", "waveform": [2000, 6500, 12000, 18000, 9000, 4200, 15000, 22000, 17000, 8000, 3000, 11000, 19000, 26000, 21000, 12000, 5000, 9500, 16000, 7000]},
+                "payload": {"type": "voice", "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", "duration": "372000", "caption": "خلاصه صوتی گزارش", "waveform": [2000, 6500, 12000, 18000, 9000, 4200, 15000, 22000, 17000, 8000, 3000, 11000, 19000, 26000, 21000, 12000, 5000, 9500, 16000, 7000]},
                 "data": null,
                 "message": "خلاصه صوتی",
                 "message_id": "showcase-10"

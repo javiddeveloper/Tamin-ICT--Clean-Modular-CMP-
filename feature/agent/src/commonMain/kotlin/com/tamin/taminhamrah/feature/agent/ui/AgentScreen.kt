@@ -1254,8 +1254,7 @@ private fun BubbleContentRenderer(
 
         is ChatBubbleContent.Video -> {
             onAnimationFinished()
-            val navigate = LocalAgentNavigator.current
-            VideoBubble(content = content, onPlay = { navigate(it) })
+            VideoBubble(content = content)
         }
 
         is ChatBubbleContent.DynamicForm -> {
