@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
 class HealthProfileViewModel(
@@ -89,7 +90,20 @@ class HealthProfileViewModel(
             }
             is HealthProfileIntent.CloseDiseaseBottomSheet -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
-                emit(PartialState.DiseasesUpdated(currentDiseases.copy(activeBottomSheet = null)))
+                val type = currentDiseases.activeBottomSheet
+                val reverted = when (type) {
+                    BottomSheetType.ILLNESS_HISTORY ->
+                        if (currentDiseases.chronicDiseaseIds.isEmpty()) currentDiseases.copy(hasChronicDisease = false)
+                        else currentDiseases
+                    BottomSheetType.MENTAL ->
+                        if (currentDiseases.mentalIllnessIds.isEmpty()) currentDiseases.copy(hasMentalIllness = false)
+                        else currentDiseases
+                    BottomSheetType.CANCER ->
+                        if (currentDiseases.cancerIds.isEmpty()) currentDiseases.copy(hasCancer = false)
+                        else currentDiseases
+                    else -> currentDiseases
+                }
+                emit(PartialState.DiseasesUpdated(reverted.copy(activeBottomSheet = null)))
             }
             is HealthProfileIntent.SetDiseaseAnswer -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
@@ -116,11 +130,20 @@ class HealthProfileViewModel(
             is HealthProfileIntent.UpdateDiseaseSelections -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val updatedDiseases = when (intent.type) {
-                    BottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(chronicDiseaseIds = intent.selectedIds)
-                    BottomSheetType.MENTAL          -> currentDiseases.copy(mentalIllnessIds = intent.selectedIds)
-                    BottomSheetType.CANCER          -> currentDiseases.copy(cancerIds = intent.selectedIds)
-                    BottomSheetType.RISK_FACTOR     -> currentDiseases.copy(riskFactorIds = intent.selectedIds)
-                    else                            -> currentDiseases
+                    BottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(
+                        chronicDiseaseIds = intent.selectedIds,
+                        hasChronicDisease = intent.selectedIds.isNotEmpty()
+                    )
+                    BottomSheetType.MENTAL -> currentDiseases.copy(
+                        mentalIllnessIds = intent.selectedIds,
+                        hasMentalIllness = intent.selectedIds.isNotEmpty()
+                    )
+                    BottomSheetType.CANCER -> currentDiseases.copy(
+                        cancerIds = intent.selectedIds,
+                        hasCancer = intent.selectedIds.isNotEmpty()
+                    )
+                    BottomSheetType.RISK_FACTOR -> currentDiseases.copy(riskFactorIds = intent.selectedIds)
+                    else -> currentDiseases
                 }
                 emit(PartialState.DiseasesUpdated(updatedDiseases))
             }
@@ -133,7 +156,16 @@ class HealthProfileViewModel(
                 Logger.d("BloodGroupUpdate", "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}")
                 emit(PartialState.BloodGroupUpdated(intent.bloodGroup))
             }
-            is HealthProfileIntent.UpdateLifestyle  -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
+            is HealthProfileIntent.UpdateLifestyle  -> flow {
+                Logger.d("LifestyleUpdate", "User updated lifestyle section")
+                Logger.d("LifestyleUpdate", """
+                    isSmoking: ${intent.lifestyle.isSmoking}, smokingStatusId: ${intent.lifestyle.smokingStatusId}, smokingPattern: ${intent.lifestyle.smokingPattern}
+                    hasAddiction: ${intent.lifestyle.hasAddiction}, substanceStatusId: ${intent.lifestyle.substanceStatusId}, substancePattern: ${intent.lifestyle.substancePattern}
+                    isDrinking: ${intent.lifestyle.isDrinking}, drinkingStatusId: ${intent.lifestyle.drinkingStatusId}, drinkingPattern: ${intent.lifestyle.drinkingPattern}
+                    isExercising: ${intent.lifestyle.isExercising}, exerciseStatusId: ${intent.lifestyle.exerciseStatusId}, exerciseFrequency: ${intent.lifestyle.exerciseFrequency}
+                """.trimIndent())
+                emit(PartialState.LifestyleUpdated(intent.lifestyle))
+            }
             is HealthProfileIntent.UpdateAllergy    -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
         }
     }
@@ -196,13 +228,15 @@ class HealthProfileViewModel(
                     if (safeNatCode.isNotBlank() && safePatientId != 0) {
                         // 3. Lifestyle / self-declarative
                         getPatientSelfDeclarativeUseCase(safeNatCode, safePatientId)
-                            .catch { /* non-fatal */ }
-                            .collect { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
+                            .catch { }
+                            .firstOrNull()
+                            ?.let { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
 
                         // 4. Drug allergies
                         getPatientDrugAllergiesUseCase(safeNatCode, safePatientId)
-                            .catch { /* non-fatal */ }
-                            .collect { emit(PartialState.AllergiesLoaded(it.map { d -> d.toPresentation() })) }
+                            .catch { }
+                            .firstOrNull()
+                            ?.let { list -> emit(PartialState.AllergiesLoaded(list.map { d -> d.toPresentation() })) }
                     }
                 }
         }
@@ -336,6 +370,10 @@ class HealthProfileViewModel(
         is PartialState.GeneralLoaded -> {
             val info = partialState.info
             val sd   = currentState.selfDeclaration
+
+            val hasLocalBloodGroupEdit =
+                sd.bloodGroup.selectedBloodGroupId != null || sd.bloodGroup.isBloodGroupUnknown
+
             currentState.copy(
                 isLoading   = false,
                 generalInfo = info,
@@ -364,44 +402,60 @@ class HealthProfileViewModel(
                         height = if (info.patientHeight > 0) info.patientHeight.toInt() else null,
                         weight = if (info.patientWeight > 0) info.patientWeight.toInt() else null
                     ),
-                    bloodGroup = sd.bloodGroup.copy(
-                        selectedBloodGroupId = info.patientBloodGroupCode,
-                        selectedBloodGroupLetter = extractLetter(info.patientBloodGroup),
-                        selectedBloodGroupRh = extractRh(info.patientBloodGroup)
-                    )
+                    bloodGroup = if (hasLocalBloodGroupEdit) {
+                        sd.bloodGroup
+                    } else {
+                        sd.bloodGroup.copy(
+                            selectedBloodGroupId = info.patientBloodGroupCode,
+                            selectedBloodGroupLetter = extractLetter(info.patientBloodGroup),
+                            selectedBloodGroupRh = extractRh(info.patientBloodGroup)
+                        )
+                    }
                 )
             )
         }
 
 
-            is PartialState.LifestyleLoaded -> {
+        is PartialState.LifestyleLoaded -> {
             val info = partialState.info
             val sd = currentState.selfDeclaration
 
             fun isActive(code: Int?) =
                 code != null && LifeStyleStatus.fromStyleId(code) != LifeStyleStatus.NEVER
 
+            val hasLocalLifestyleEdit = with(sd.lifestyle) {
+                isSmoking != null || hasAddiction != null || isDrinking != null || isExercising != null
+            }
+
             currentState.copy(
                 isLoading = false,
                 lifestyleInfo = info,
                 selfDeclaration = sd.copy(
-                    lifestyle = sd.lifestyle.copy(
-                        isSmoking = (info.smokingStatus ?: 0) > 0,
-                        smokingStatusId = info.smokingStatus,
-                        smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() },
+                    lifestyle = if (hasLocalLifestyleEdit) {
+                        sd.lifestyle
+                    } else {
+                        sd.lifestyle.copy(
+                            isSmoking = (info.smokingStatus ?: 0) > 0,
+                            smokingStatusId = info.smokingStatus,
+                            smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() }
+                                ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label,
 
-                        hasAddiction = isActive(info.substanceUsage),
-                        substanceStatusId = info.substanceUsage,
-                        substancePattern = info.substanceDesc.takeIf { it.isNotBlank() },
+                            hasAddiction = isActive(info.substanceUsage),
+                            substanceStatusId = info.substanceUsage,
+                            substancePattern = info.substanceDesc.takeIf { it.isNotBlank() }
+                                ?: currentState.actFrequencyOptions.find { it.id == info.substanceUsage }?.label,
 
-                        isDrinking = isActive(info.alcoholUsage),
-                        drinkingStatusId = info.alcoholUsage,
-                        drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() },
+                            isDrinking = isActive(info.alcoholUsage),
+                            drinkingStatusId = info.alcoholUsage,
+                            drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() }
+                                ?: LifeStyleStatus.fromStyleId(info.alcoholUsage)?.title,
 
-                        isExercising = isActive(info.exerciseFreq),
-                        exerciseStatusId = info.exerciseFreq,
-                        exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() }
-                    )
+                            isExercising = isActive(info.exerciseFreq),
+                            exerciseStatusId = info.exerciseFreq,
+                            exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() }
+                                ?: LifeStyleStatus.fromStyleId(info.exerciseFreq)?.title
+                        )
+                    }
                 )
             )
         }
@@ -410,9 +464,15 @@ class HealthProfileViewModel(
             val list = partialState.list
             val sd   = currentState.selfDeclaration
             currentState.copy(
-                isLoading    = false,
+                isLoading = false,
                 drugAllergies = list,
-                selfDeclaration = sd.copy(allergy = sd.allergy.copy(allergies = list))
+                selfDeclaration = sd.copy(
+                    allergy = if (sd.allergy.allergies.isNotEmpty()) {
+                        sd.allergy
+                    } else {
+                        sd.allergy.copy(allergies = list)
+                    }
+                )
             )
         }
 

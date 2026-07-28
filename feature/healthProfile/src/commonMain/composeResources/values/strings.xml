@@ -172,6 +172,27 @@
     <string name="health_lifestyle_exercise_question">آیا ورزش می‌کنید؟</string>
     <string name="health_lifestyle_exercise_bs_subtitle">جزئیات مربوط به ورزش را وارد کنید</string>
 
+    <!-- Allergy Screen-->
+    <string name="health_allergy_title">حساسیت‌ دارویی</string>
+    <string name="health_allergy_final_check">مرحلهٔ بعدی (بررسی نهایی)</string>
+    <string name="health_allergy_description">در این قسمت می‌توانید داروهایی که به آن‌ها حساسیت دارید را اضافه کنید.</string>
+    <string name="health_allergy_add_new_allergy">افزودن حساسیت دارویی جدید</string>
+    <string name="health_allergy_no_allergy_registered">هیچ حساسیت دارویی ثبت نشده است.</string>
+    <string name="health_allergy_choose_drug">انتخاب دارو</string>
+    <string name="health_allergy_choose_your_allergy">دارویی که به آن حساسیت دارید را انتخاب کنید.</string>
+    <string name="health_allergy_add">افزودن</string>
+    <string name="health_allergy_unknows">نامشخص</string>
+    <string name="health_allergy_no_description_for_allergy">فاقد توضیحات عارضه</string>
+
+    <!-- BloodGroup Screen-->
+    <string name="health_blood_choose_your_blood_group">گروه خونی‌تان را انتخاب کنید</string>
+    <string name="health_blood_choose_your_blood_group_first">ابتدا گروه خونی را انتخاب کنید</string>
+    <string name="health_blood_blood_group_type">نوع گروه خونی</string>
+    <string name="health_blood_rh_factor">فاکتور Rh</string>
+    <string name="health_blood_i_dont_know_my_blood_group">"گروه خونی خود را نمی‌دانم"</string>
+
+
+
     <!-- Bottom Sheet Types -->
     <string name="health_type_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
     <string name="health_type_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
@@ -188,6 +209,9 @@
     <string name="health_type_exercise">آیا ورزش می‌کنید؟</string>
     <string name="health_type_marital_status">وضعیت تاهل</string>
     <string name="health_type_emergency_contact">تماس اضطراری</string>
+
+    <string name="i_dont_know">نمی دانم</string>
+    <string name="i_dont_knoww">نمیدانم</string>
 </resources>
 
 

@@ -169,7 +169,9 @@ data class LifestyleStepState(
 
 // Step 10: Drug Allergies — real PR type, no more mock
 data class AllergyStepState(
-    val allergies: List<DrugAllergyItemPR> = emptyList()
+    val allergies: List<DrugAllergyItemPR> = emptyList(),
+    val selectedDrugId: Int? = null,
+    val allergyDesc: String = ""
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
