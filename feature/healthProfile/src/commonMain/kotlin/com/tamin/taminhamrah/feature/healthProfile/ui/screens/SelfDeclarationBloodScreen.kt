@@ -26,6 +26,19 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.bloodGroupLetters
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.findBloodGroupId
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.Res
+import taminx.feature.healthprofile.generated.resources.health_allergy_unknows
+import taminx.feature.healthprofile.generated.resources.health_blood_blood_group_type
+import taminx.feature.healthprofile.generated.resources.health_blood_choose_your_blood_group
+import taminx.feature.healthprofile.generated.resources.health_blood_choose_your_blood_group_first
+import taminx.feature.healthprofile.generated.resources.health_blood_i_dont_know_my_blood_group
+import taminx.feature.healthprofile.generated.resources.health_blood_rh_factor
+import taminx.feature.healthprofile.generated.resources.health_btn_next_step
+import taminx.feature.healthprofile.generated.resources.health_btn_prev_step
+import taminx.feature.healthprofile.generated.resources.health_type_blood_group
+import taminx.feature.healthprofile.generated.resources.i_dont_know
+import taminx.feature.healthprofile.generated.resources.i_dont_knoww
 
 @Composable
 fun SelfDeclarationBloodScreen(
@@ -42,6 +55,10 @@ fun SelfDeclarationBloodScreen(
 
     val isNextEnabled = state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null && state.selectedBloodGroupRh != null)
 
+    val unknownText = stringResource(Res.string.health_allergy_unknows)
+    val dontKnowText = stringResource(Res.string.i_dont_know)
+    val dontKnowTextt = stringResource(Res.string.i_dont_knoww)
+
     LaunchedEffect(Unit) {
         com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "Screen opened. Initial state:")
         com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupId: ${state.selectedBloodGroupId}")
@@ -53,7 +70,7 @@ fun SelfDeclarationBloodScreen(
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                title = "گروه خونی",
+                title = stringResource(Res.string.health_type_blood_group),
                 currentStep = 6,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -61,10 +78,10 @@ fun SelfDeclarationBloodScreen(
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی",
+                primaryText = stringResource(Res.string.health_btn_next_step),
                 primaryEnabled = isNextEnabled,
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE)) },
-                secondaryText = "مرحلهٔ قبلی",
+                secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -89,7 +106,7 @@ fun SelfDeclarationBloodScreen(
             )
 
             TaminText(
-                text = "گروه خونی\u200Cتان را انتخاب کنید",
+                text = stringResource(Res.string.health_blood_choose_your_blood_group),
                 style = MaterialTheme.typography.titleLarge.copy(
                     color = taminColors.textPrimary
                 ),
@@ -97,7 +114,7 @@ fun SelfDeclarationBloodScreen(
             )
 
             TaminText(
-                text = "ابتدا گروه خونی را انتخاب کنید",
+                text = stringResource(Res.string.health_blood_choose_your_blood_group_first),
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = taminColors.textSecondary
                 ),
@@ -107,7 +124,7 @@ fun SelfDeclarationBloodScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             TaminText(
-                text = "نوع گروه خونی",
+                text = stringResource(Res.string.health_blood_blood_group_type),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textTertiary,
                 modifier = Modifier.align(Alignment.Start)
@@ -133,7 +150,7 @@ fun SelfDeclarationBloodScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             TaminText(
-                text = "فاکتور Rh",
+                text = stringResource(Res.string.health_blood_rh_factor),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textTertiary,
                 modifier = Modifier.align(Alignment.Start)
@@ -174,9 +191,9 @@ fun SelfDeclarationBloodScreen(
 
                         val newId = if (newUnknown) {
                             bloodGroupOptions.find {
-                                it.label.contains("نامشخص") ||
-                                    it.label.contains("نمی دانم") ||
-                                    it.label.contains("نمیدانم")
+                                it.label.contains(unknownText) ||
+                                    it.label.contains(dontKnowText) ||
+                                    it.label.contains(dontKnowTextt)
                             }?.id
                         } else {
                             null
@@ -199,7 +216,7 @@ fun SelfDeclarationBloodScreen(
             ) {
                 TaminText(
                     modifier = Modifier.padding(start = 4.dp),
-                    text = "گروه خونی خود را نمی‌دانم",
+                    text = stringResource(Res.string.health_blood_i_dont_know_my_blood_group),
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
                 )

@@ -64,9 +64,9 @@ fun SelfDeclarationDiseasesScreen(
 
     // Filter groups via Enum type mapping
     val riskFactorGroup = illnessGroups.findGroup(BottomSheetType.RISK_FACTOR)
-    val chronicGroup    = illnessGroups.findGroup(BottomSheetType.ILLNESS_HISTORY)
-    val mentalGroup     = illnessGroups.findGroup(BottomSheetType.MENTAL)
-    val cancerGroup     = illnessGroups.findGroup(BottomSheetType.CANCER)
+    val chronicGroup = illnessGroups.findGroup(BottomSheetType.ILLNESS_HISTORY)
+    val mentalGroup = illnessGroups.findGroup(BottomSheetType.MENTAL)
+    val cancerGroup = illnessGroups.findGroup(BottomSheetType.CANCER)
 
     LaunchedEffect(Unit) {
         Logger.d(
@@ -138,7 +138,12 @@ fun SelfDeclarationDiseasesScreen(
                     }.toSet(),
                     onSelectionChanged = { indices ->
                         val selectedIds = indices.map { group.illnesses[it].id }.toSet()
-                        onIntent(HealthProfileIntent.UpdateDiseaseSelections(BottomSheetType.RISK_FACTOR, selectedIds))
+                        onIntent(
+                            HealthProfileIntent.UpdateDiseaseSelections(
+                                BottomSheetType.RISK_FACTOR,
+                                selectedIds
+                            )
+                        )
                     }
                 )
             }
@@ -172,11 +177,18 @@ fun SelfDeclarationDiseasesScreen(
                 }
 
                 if (state.hasChronicDisease == true && state.chronicDiseaseIds.isNotEmpty()) {
-                    val selectedItems = group.illnesses.filter { state.chronicDiseaseIds.contains(it.id) }
+                    val selectedItems =
+                        group.illnesses.filter { state.chronicDiseaseIds.contains(it.id) }
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onIntent(HealthProfileIntent.OpenDiseaseBottomSheet(BottomSheetType.ILLNESS_HISTORY)) },
+                            .clickable {
+                                onIntent(
+                                    HealthProfileIntent.OpenDiseaseBottomSheet(
+                                        BottomSheetType.ILLNESS_HISTORY
+                                    )
+                                )
+                            },
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -221,11 +233,18 @@ fun SelfDeclarationDiseasesScreen(
                 }
 
                 if (state.hasMentalIllness == true && state.mentalIllnessIds.isNotEmpty()) {
-                    val selectedItems = group.illnesses.filter { state.mentalIllnessIds.contains(it.id) }
+                    val selectedItems =
+                        group.illnesses.filter { state.mentalIllnessIds.contains(it.id) }
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onIntent(HealthProfileIntent.OpenDiseaseBottomSheet(BottomSheetType.MENTAL)) },
+                            .clickable {
+                                onIntent(
+                                    HealthProfileIntent.OpenDiseaseBottomSheet(
+                                        BottomSheetType.MENTAL
+                                    )
+                                )
+                            },
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -274,7 +293,13 @@ fun SelfDeclarationDiseasesScreen(
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onIntent(HealthProfileIntent.OpenDiseaseBottomSheet(BottomSheetType.CANCER)) },
+                            .clickable {
+                                onIntent(
+                                    HealthProfileIntent.OpenDiseaseBottomSheet(
+                                        BottomSheetType.CANCER
+                                    )
+                                )
+                            },
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -301,7 +326,12 @@ fun SelfDeclarationDiseasesScreen(
                 config = config,
                 onDismissRequest = { onIntent(HealthProfileIntent.CloseDiseaseBottomSheet) },
                 onSubmit = { result ->
-                    onIntent(HealthProfileIntent.UpdateDiseaseSelections(type, result.selectedItemIds.toSet()))
+                    onIntent(
+                        HealthProfileIntent.UpdateDiseaseSelections(
+                            type,
+                            result.selectedItemIds.toSet()
+                        )
+                    )
                     onIntent(HealthProfileIntent.CloseDiseaseBottomSheet)
                 }
             )
