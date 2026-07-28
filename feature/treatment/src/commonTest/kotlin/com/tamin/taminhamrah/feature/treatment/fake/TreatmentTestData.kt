@@ -3,18 +3,13 @@ package com.tamin.taminhamrah.feature.treatment.fake
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
-import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
-
-/**
- * Central factory of sample domain models for the treatment dashboard + costs
- * ViewModel tests.
-
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 
 /**
- * Central factory of sample domain models for the treatment dashboard ViewModel tests.
+ * Central factory of sample domain models for the treatment dashboard and costs ViewModel tests.
  *
  * Keeping fixtures in one place (instead of inlined per fake/test) keeps the test
  * doubles small and lets every dashboard test share consistent, realistic data.
@@ -69,6 +64,7 @@ object TreatmentTestData {
         releaseDate = "14020102", repId = 1, serviceDate = "14020101",
         status = "Status", statusDesc = "Description", payStatusDesc = "PayDescription",
         returnReason = "None"
+    )
 
     fun prescription() = ElectronicPrescriptionDN(
         id = "1", docId = "doc1", docName = "Doctor", flagSata = "1",

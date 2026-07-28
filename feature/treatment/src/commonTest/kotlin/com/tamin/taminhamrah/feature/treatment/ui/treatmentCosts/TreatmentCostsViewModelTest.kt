@@ -18,7 +18,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TreatmentCostsViewModelTest {
@@ -75,7 +75,7 @@ class TreatmentCostsViewModelTest {
     }
 
     @Test
-    fun testDownloadPdf_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
+    fun testDownloadPdf_setsViewerPdf() = runTest(testDispatcher) {
         viewModel.uiState.test {
             awaitItem() // initial
             viewModel.sendIntent(CostsIntent.DownloadPdf("1"))
@@ -84,7 +84,12 @@ class TreatmentCostsViewModelTest {
             while (state.viewerPdf == null) state = awaitItem()
 
             assertNotNull(state.viewerPdf)
-            assertTrue(state.showPdfDialog)
+
+            // Closing drops it: the payload is a single-use stream, so keeping it would make the
+            // next open render an empty file.
+            viewModel.sendIntent(CostsIntent.DismissPdfViewer)
+            while (state.viewerPdf != null) state = awaitItem()
+            assertNull(state.viewerPdf)
         }
     }
 

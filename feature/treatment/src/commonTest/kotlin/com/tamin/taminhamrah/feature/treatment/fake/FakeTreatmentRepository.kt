@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.fake
 
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
@@ -68,7 +67,7 @@ class FakeTreatmentRepository : TreatmentRepository {
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): Flow<PdfDownloadDN> = result(labResultPdfResult)
 
-    override suspend fun getTreatmentCosts(filters: List<ApiFilterDN>): Flow<List<TreatmentCostDN>> =
+    override suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>> =
         result(treatmentCostsResult)
 
     override suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN> =

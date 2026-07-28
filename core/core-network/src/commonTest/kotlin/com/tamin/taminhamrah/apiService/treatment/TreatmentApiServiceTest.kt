@@ -212,10 +212,10 @@ class TreatmentApiServiceTest {
 
         assertEquals("GET", interceptedMethod)
         assertEquals("https://eservices.tamin.ir/api/health/tcr-price-certificate/report/1", interceptedUrl)
-        assertEquals(200, executed.status.value)
-    }
+        assertEquals(200, executed.status.value)          // ← was missing
+    }                                                      // ← was missing
 
-    @Test
+    @Test                                                  // ← was missing
     fun testGetPrescriptionPdfFile() = runTest {
         val pdfBytes = byteArrayOf(1, 2, 3)
         responseBytes = pdfBytes
@@ -236,9 +236,9 @@ class TreatmentApiServiceTest {
         assertEquals("GET", interceptedMethod)
         assertEquals("https://eservices.tamin.ir/api/health/tcr-price-certificate/announcement/1", interceptedUrl)
         assertEquals("SUCCESS", result.extractData())
-    }
+    }                                                      // ← was missing
 
-    @Test
+    @Test                                                  // ← was missing
     fun testDownloadLabResultPdf() = runTest {
         val pdfBytes = byteArrayOf(4, 5, 6)
         responseBytes = pdfBytes

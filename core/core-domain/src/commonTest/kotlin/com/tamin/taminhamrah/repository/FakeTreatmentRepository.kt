@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.repository
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -70,7 +69,7 @@ class FakeTreatmentRepository : TreatmentRepository {
         emit(downloadLabResultPdfResult)
     }
 
-    override suspend fun getTreatmentCosts(filters: List<ApiFilterDN>): Flow<List<TreatmentCostDN>> = flow {
+    override suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>> = flow {
         if (shouldThrowError) throw error
         emit(getTreatmentCostsResult)
     }

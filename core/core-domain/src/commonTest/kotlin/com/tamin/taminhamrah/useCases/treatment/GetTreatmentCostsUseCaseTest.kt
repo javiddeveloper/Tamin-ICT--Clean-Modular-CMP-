@@ -37,7 +37,7 @@ class GetTreatmentCostsUseCaseTest : BaseUseCaseTest() {
         )
         repository.getTreatmentCostsResult = expected
 
-        useCase(emptyList()).test {
+        useCase().test {
             assertEquals(expected, awaitItem())
             awaitComplete()
         }
@@ -49,7 +49,7 @@ class GetTreatmentCostsUseCaseTest : BaseUseCaseTest() {
         repository.shouldThrowError = true
         repository.error = expectedException
 
-        useCase(emptyList()).test {
+        useCase().test {
             val actualException = awaitError()
             assertEquals(expectedException.message, actualException.message)
         }
@@ -59,7 +59,7 @@ class GetTreatmentCostsUseCaseTest : BaseUseCaseTest() {
     fun `invoke should emit empty list when no treatment costs exist`() = runTest {
         repository.getTreatmentCostsResult = emptyList()
 
-        useCase(emptyList()).test {
+        useCase().test {
             assertEquals(emptyList<TreatmentCostDN>(), awaitItem())
             awaitComplete()
         }

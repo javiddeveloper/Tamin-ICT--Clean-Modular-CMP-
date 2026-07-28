@@ -2,24 +2,11 @@ package com.tamin.taminhamrah.repository.treatment
 
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 
 interface TreatmentRepository {
     suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>>
 
-    suspend fun getDependantUnderEighteen(
-        nationalCode: String,
-        filters: List<ApiFilterDN> = emptyList()
-    ): Flow<List<DependantUserUnderEighteenDN>>
-
-    suspend fun getTreatmentCosts(
-        filters: List<ApiFilterDN> = emptyList()
-    ): Flow<List<TreatmentCostDN>>
-
-    suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN>
-
-    suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String>
     /**
      * [patientNationalCode] is the person whose records are wanted — pass [nationalCode] itself for
      * the insured, or a dependant's code. The impl encodes "self" as the endpoint expects.
@@ -60,4 +47,15 @@ interface TreatmentRepository {
         noteHeadEprescID: String?,
         currentUserNationalCode: String?
     ): Flow<PdfDownloadDN>
+
+    /**
+     * The «خسارت متفرقه» certificates. Paging and filters are decided in the implementation, as
+     * with every other treatment list — the use case only asks for them.
+     */
+    suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>>
+
+    suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN>
+
+    /** Queues the certificate for the person's inbox; emits the service's acknowledgement. */
+    suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String>
 }

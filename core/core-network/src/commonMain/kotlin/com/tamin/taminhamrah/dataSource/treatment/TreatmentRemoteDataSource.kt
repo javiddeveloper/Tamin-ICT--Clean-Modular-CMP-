@@ -51,4 +51,3 @@ interface TreatmentRemoteDataSource {
     /** Queues the certificate for the person's inbox; returns the service's acknowledgement. */
     suspend fun sendToInboxTreatmentCosts(repId: String): String
 }
-}

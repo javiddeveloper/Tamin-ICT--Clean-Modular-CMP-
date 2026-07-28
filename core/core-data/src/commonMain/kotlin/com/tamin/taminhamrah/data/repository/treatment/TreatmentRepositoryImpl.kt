@@ -20,7 +20,8 @@ import kotlinx.coroutines.flow.map
 
 internal class TreatmentRepositoryImpl(
     private val treatmentRemoteDataSource: TreatmentRemoteDataSource,
-    private val treatmentDao: TreatmentDao
+    private val treatmentDao: TreatmentDao,
+    private val queryBuilder: ApiQueryBuilder
 ) : TreatmentRepository {
 
     /**
@@ -51,10 +52,6 @@ internal class TreatmentRepositoryImpl(
         }
         emitAll(treatmentDao.getDeservedTreatment(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
-
-    override suspend fun getDependantUnderEighteen(
-        nationalCode: String,
-        filters: List<ApiFilterDN>
 
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String,
@@ -154,11 +151,7 @@ internal class TreatmentRepositoryImpl(
         try {
             val result = treatmentRemoteDataSource.getDependantUnderEighteen(
                 nationalCode,
-
-                ApiQueryParamDN(filters = filters)
-
                 treatmentQuery()
-
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
             treatmentDao.clearDependantsUnderEighteen(nationalCode)
@@ -168,37 +161,6 @@ internal class TreatmentRepositoryImpl(
         }
         emitAll(treatmentDao.getDependantsUnderEighteen(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
-
-    override suspend fun getTreatmentCosts(
-        filters: List<ApiFilterDN>
-    ): Flow<List<TreatmentCostDN>> = flow {
-        val localTreatmentCosts = treatmentDao.getTreatmentCosts().first()
-        if (localTreatmentCosts.isNotEmpty()) {
-            emit(localTreatmentCosts.map { it.toDomain() })
-        }
-        try {
-            val result = treatmentRemoteDataSource.getTreatmentCosts(
-                ApiQueryParamDN(filters = filters)
-            )
-            val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearTreatmentCosts()
-            treatmentDao.insertTreatmentCosts(remote.map { it.toEntity() })
-        } catch (e: Exception) {
-            if (localTreatmentCosts.isEmpty()) throw e
-        }
-        emitAll(treatmentDao.getTreatmentCosts().map { list -> list.map { it.toDomain() } })
-    }.distinctUntilChanged()
-
-    override suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN> = flow {
-        val result = treatmentRemoteDataSource.getTreatmentCostsPDF(repId)
-        emit(result.toDomain())
-    }
-
-    override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> = flow {
-        val result = treatmentRemoteDataSource.sendToInboxTreatmentCosts(repId)
-        emit(result)
-    }
-}
 
     override suspend fun getPrescriptionPdfFile(prescriptionID: String): Flow<PdfDownloadDN> = flow {
         val result = treatmentRemoteDataSource.getPrescriptionPdfFile(prescriptionID)
@@ -210,6 +172,32 @@ internal class TreatmentRepositoryImpl(
     ): Flow<PdfDownloadDN> = flow {
         val result = treatmentRemoteDataSource.downloadLabResultPdf(patientID, noteHeadEprescID, currentUserNationalCode)
         emit(result.toDomain())
+    }
+
+    override suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>> = flow {
+        // Local-first like every other treatment list here: show what is cached, refresh from the
+        // service, then keep emitting from the database so the screen has one source of truth.
+        val localTreatmentCosts = treatmentDao.getTreatmentCosts().first()
+        if (localTreatmentCosts.isNotEmpty()) {
+            emit(localTreatmentCosts.map { it.toDomain() })
+        }
+        try {
+            val result = treatmentRemoteDataSource.getTreatmentCosts(treatmentQuery())
+            val remote = result?.list?.map { it.toDomain() } ?: emptyList()
+            treatmentDao.clearTreatmentCosts()
+            treatmentDao.insertTreatmentCosts(remote.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localTreatmentCosts.isEmpty()) throw e
+        }
+        emitAll(treatmentDao.getTreatmentCosts().map { list -> list.map { it.toDomain() } })
+    }.distinctUntilChanged()
+
+    override suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN> = flow {
+        emit(treatmentRemoteDataSource.getTreatmentCostsPDF(repId).toDomain())
+    }
+
+    override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> = flow {
+        emit(treatmentRemoteDataSource.sendToInboxTreatmentCosts(repId))
     }
 }
 
@@ -233,4 +221,3 @@ private const val FLAG_SATA_ABSENT = "null"
  */
 private const val TREATMENT_PAGE_SIZE = 100
 private const val PRESCRIPTION_DETAIL_PAGE_SIZE = 50
-

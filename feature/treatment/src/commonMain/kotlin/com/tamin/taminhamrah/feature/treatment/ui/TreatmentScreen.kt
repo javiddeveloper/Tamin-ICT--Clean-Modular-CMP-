@@ -61,6 +61,7 @@ fun TreatmentScreen(
     onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -86,6 +87,7 @@ fun TreatmentScreen(
             onOpenMedicalRecords = onOpenMedicalRecords,
             onOpenHealthProfile = onOpenHealthProfile,
             onOpenPrescriptions = onOpenPrescriptions,
+            onOpenMiscClaims = onOpenMiscClaims,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
@@ -128,6 +130,7 @@ fun TreatmentContent(
     onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
 ) {
     // Keyed on the data the cards are built from, not on the whole state: selecting a patient
     // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
@@ -184,6 +187,8 @@ fun TreatmentContent(
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
                 onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
+                // Not feature-flag gated like the records, so the tap navigates straight away.
+                onOpenMiscClaims = onOpenMiscClaims,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCostSummary(

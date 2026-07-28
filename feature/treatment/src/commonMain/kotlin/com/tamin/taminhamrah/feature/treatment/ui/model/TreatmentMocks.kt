@@ -67,6 +67,7 @@ object TreatmentMocks {
         releaseDate = "1402/04/21",
         status = "1",
         returnReason = ""
+    )
 
     val prescription = ElectronicPrescriptionPR(
         id = "1",
@@ -121,14 +122,16 @@ object TreatmentMocks {
         mainUserNationalCode = "1234567890",
         selectedNationalCode = "1234567890",
         selectedPatientName = "رضا احمدی",
-        activeFlow = TreatmentFlow.MAIN
-    )
-
-    val costsUiState = CostsUiState(
-        treatmentCostList = listOf(treatmentCost, treatmentCost.copy(healthcenterName = "آزمایشگاه نیلو", payPrice = "1200000"))
         insuredShareTotal = 65_910L,
         organizationShareTotal = 153_790L,
         healthProfileCompleted = true
+    )
+
+    val costsUiState = CostsUiState(
+        treatmentCostList = listOf(
+            treatmentCost,
+            treatmentCost.copy(healthcenterName = "آزمایشگاه نیلو", payPrice = "1200000"),
+        )
     )
 
     val prescriptionsUiState = PrescriptionsUiState(

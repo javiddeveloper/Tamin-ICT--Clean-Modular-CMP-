@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsUiState.PartialState
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
@@ -26,7 +27,7 @@ class TreatmentCostsViewModel(
             is CostsIntent.LoadList -> loadList()
             is CostsIntent.DownloadPdf -> downloadPdf(intent)
             is CostsIntent.SendToInbox -> sendToInbox(intent)
-            is CostsIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
+            is CostsIntent.DismissPdfViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
         }
     }
 
@@ -38,18 +39,24 @@ class TreatmentCostsViewModel(
                 emit(PartialState.TreatmentCostsLoaded(list.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
+    /**
+     * Fetches the certificate PDF. Only reached when the viewer finds no copy already on the
+     * device, so one the person has downloaded before costs no request at all.
+     */
     private fun downloadPdf(intent: CostsIntent.DownloadPdf): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
+        emit(PartialState.ViewerPdfChanged(null))
         try {
             getTreatmentCostsPDFUseCase(intent.repId).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation()))
+                emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.toSingleLineMessage()))
+            emit(PartialState.ViewerDownloadFailed)
         }
     }
 
@@ -60,7 +67,7 @@ class TreatmentCostsViewModel(
                 emit(PartialState.SendToInboxDone(response))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
@@ -72,8 +79,15 @@ class TreatmentCostsViewModel(
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.TreatmentCostsLoaded -> currentState.copy(isLoading = false, treatmentCostList = partialState.list)
-        is PartialState.PdfLoaded -> currentState.copy(isLoading = false, viewerPdf = partialState.pdf, showPdfDialog = true)
-        is PartialState.TogglePdfDialog -> currentState.copy(showPdfDialog = partialState.show)
+        is PartialState.ViewerPdfChanged -> currentState.copy(
+            isLoading = false,
+            viewerPdf = partialState.pdf,
+            viewerDownloadFailed = false,
+        )
+        is PartialState.ViewerDownloadFailed -> currentState.copy(
+            isLoading = false,
+            viewerDownloadFailed = true,
+        )
         is PartialState.SendToInboxDone -> currentState.copy(isLoading = false, sendToInboxResult = partialState.response)
     }
 
