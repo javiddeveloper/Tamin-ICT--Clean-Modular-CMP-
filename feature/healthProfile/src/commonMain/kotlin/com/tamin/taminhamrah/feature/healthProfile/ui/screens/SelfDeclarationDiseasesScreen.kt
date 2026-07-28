@@ -179,7 +179,14 @@ fun SelfDeclarationDiseasesScreen(
                         selectedIndex = if (state.hasChronicDisease == true) 1 else 0,
                         onOptionSelected = { idx ->
                             val isYes = idx == 1
-                            onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasChronicDisease = isYes)))
+                            onIntent(
+                                HealthProfileIntent.UpdateDiseases(
+                                    state.copy(
+                                        hasChronicDisease = isYes,
+                                        chronicDiseaseIds = if (isYes) state.chronicDiseaseIds else emptySet()
+                                    )
+                                )
+                            )
                             if (isYes) showGroup2Sheet = true
                         }
                     )
@@ -232,7 +239,14 @@ fun SelfDeclarationDiseasesScreen(
                         selectedIndex = if (state.hasMentalIllness == true) 1 else 0,
                         onOptionSelected = { idx ->
                             val isYes = idx == 1
-                            onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasMentalIllness = isYes)))
+                            onIntent(
+                                HealthProfileIntent.UpdateDiseases(
+                                    state.copy(
+                                        hasMentalIllness = isYes,
+                                        mentalIllnessIds = if (isYes) state.mentalIllnessIds else emptySet()
+                                    )
+                                )
+                            )
                             if (isYes) showGroup3Sheet = true
                         }
                     )
@@ -284,7 +298,14 @@ fun SelfDeclarationDiseasesScreen(
                         selectedIndex = if (state.hasCancer == true) 1 else 0,
                         onOptionSelected = { idx ->
                             val isYes = idx == 1
-                            onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasCancer = isYes)))
+                            onIntent(
+                                HealthProfileIntent.UpdateDiseases(
+                                    state.copy(
+                                        hasCancer = isYes,
+                                        cancerIds = if (isYes) state.cancerIds else emptySet()
+                                    )
+                                )
+                            )
                             if (isYes) showGroup4Sheet = true
                         }
                     )
@@ -331,7 +352,12 @@ fun SelfDeclarationDiseasesScreen(
                         )
                     }
                 ),
-                onDismissRequest = { showGroup2Sheet = false },
+                onDismissRequest = {
+                    if (state.chronicDiseaseIds.isEmpty()) {
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasChronicDisease = false)))
+                    }
+                    showGroup2Sheet = false
+                },
                 onSubmit = { result ->
                     onIntent(HealthProfileIntent.UpdateDiseases(state.copy(chronicDiseaseIds = result.selectedItemIds.toSet())))
                     showGroup2Sheet = false
@@ -356,7 +382,12 @@ fun SelfDeclarationDiseasesScreen(
                         )
                     }
                 ),
-                onDismissRequest = { showGroup3Sheet = false },
+                onDismissRequest = {
+                    if (state.mentalIllnessIds.isEmpty()) {
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasMentalIllness = false)))
+                    }
+                    showGroup3Sheet = false
+                },
                 onSubmit = { result ->
                     onIntent(HealthProfileIntent.UpdateDiseases(state.copy(mentalIllnessIds = result.selectedItemIds.toSet())))
                     showGroup3Sheet = false
@@ -381,7 +412,12 @@ fun SelfDeclarationDiseasesScreen(
                         )
                     }
                 ),
-                onDismissRequest = { showGroup4Sheet = false },
+                onDismissRequest = {
+                    if (state.cancerIds.isEmpty()) {
+                        onIntent(HealthProfileIntent.UpdateDiseases(state.copy(hasCancer = false)))
+                    }
+                    showGroup4Sheet = false
+                },
                 onSubmit = { result ->
                     onIntent(HealthProfileIntent.UpdateDiseases(state.copy(cancerIds = result.selectedItemIds.toSet())))
                     showGroup4Sheet = false

@@ -92,7 +92,16 @@ class HealthProfileViewModel(
                 Logger.d("BloodGroupUpdate", "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}")
                 emit(PartialState.BloodGroupUpdated(intent.bloodGroup))
             }
-            is HealthProfileIntent.UpdateLifestyle  -> flow { emit(PartialState.LifestyleUpdated(intent.lifestyle)) }
+            is HealthProfileIntent.UpdateLifestyle  -> flow {
+                Logger.d("LifestyleUpdate", "User updated lifestyle section")
+                Logger.d("LifestyleUpdate", """
+                    isSmoking: ${intent.lifestyle.isSmoking}, smokingStatusId: ${intent.lifestyle.smokingStatusId}, smokingPattern: ${intent.lifestyle.smokingPattern}
+                    hasAddiction: ${intent.lifestyle.hasAddiction}, substanceStatusId: ${intent.lifestyle.substanceStatusId}, substancePattern: ${intent.lifestyle.substancePattern}
+                    isDrinking: ${intent.lifestyle.isDrinking}, drinkingStatusId: ${intent.lifestyle.drinkingStatusId}, drinkingPattern: ${intent.lifestyle.drinkingPattern}
+                    isExercising: ${intent.lifestyle.isExercising}, exerciseStatusId: ${intent.lifestyle.exerciseStatusId}, exerciseFrequency: ${intent.lifestyle.exerciseFrequency}
+                """.trimIndent())
+                emit(PartialState.LifestyleUpdated(intent.lifestyle))
+            }
             is HealthProfileIntent.UpdateAllergy    -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
         }
     }

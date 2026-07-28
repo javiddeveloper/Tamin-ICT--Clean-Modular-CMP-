@@ -340,6 +340,7 @@ fun HealthBottomSheet(
                 }
             } else {
                 TaminFilledButton(
+                    enabled = selectedIds.isNotEmpty(),
                     text = config.submitText,
                     onClick = {
                         onSubmit(

@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.util.Logger
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.CustomChip
 import org.jetbrains.compose.resources.painterResource
@@ -49,6 +50,19 @@ fun SelfDeclarationLifestyleScreen(
     var showExerciseBottomSheet by remember { mutableStateOf(false) }
 
     val optionsYesNo = listOf("خیر", "بله")
+
+    LaunchedEffect(Unit) {
+        Logger.d(
+            "LifestyleScreen",
+            """
+        Initial State Loaded:
+        isSmoking: ${state.isSmoking}, smokingStatusId: ${state.smokingStatusId}, smokingPattern: ${state.smokingPattern}
+        hasAddiction: ${state.hasAddiction}, substanceStatusId: ${state.substanceStatusId}, substancePattern: ${state.substancePattern}
+        isDrinking: ${state.isDrinking}, drinkingStatusId: ${state.drinkingStatusId}, drinkingPattern: ${state.drinkingPattern}
+        isExercising: ${state.isExercising}, exerciseStatusId: ${state.exerciseStatusId}, exerciseFrequency: ${state.exerciseFrequency}
+        """.trimIndent()
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -107,7 +121,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.isSmoking == true) 1 else 0,
                     onOptionSelected = { idx ->
                         val isYes = idx == 1
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    isSmoking = isYes,
+                                    smokingStatusId = if (isYes) state.smokingStatusId else null,
+                                    smokingPattern = if (isYes) state.smokingPattern else null
+                                )
+                            )
+                        )
                         if (isYes) showSmokingBottomSheet = true
                     }
                 )
@@ -147,7 +169,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.hasAddiction == true) 1 else 0,
                     onOptionSelected = { idx ->
                         val isYes = idx == 1
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    hasAddiction = isYes,
+                                    substanceStatusId = if (isYes) state.substanceStatusId else null,
+                                    substancePattern = if (isYes) state.substancePattern else null
+                                )
+                            )
+                        )
                         if (isYes) showAddictionBottomSheet = true
                     }
                 )
@@ -188,7 +218,16 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.isDrinking == true) 1 else 0,
                     onOptionSelected = { idx ->
                         val isYes = idx == 1
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    isDrinking = isYes,
+                                    drinkingStatusId = if (isYes) state.drinkingStatusId else null,
+                                    drinkingPattern = if (isYes) state.drinkingPattern else null,
+
+                                )
+                            )
+                        )
                         if (isYes) showAlcoholBottomSheet = true
                     }
                 )
@@ -257,10 +296,18 @@ fun SelfDeclarationLifestyleScreen(
                 type = BottomSheetType.SMOKING_ADDICTION,
                 singleSelection = true,
                 items = smokingStatusOptions.map {
-                    BottomSheetItem(id = it.id, title = it.label, isSelected = state.smokingStatusId == it.id)
+                    BottomSheetItem(
+                        id = it.id,
+                        title = it.label,
+                        isSelected = state.smokingStatusId == it.id
+                    )
                 }
             ),
-            onDismissRequest = { showSmokingBottomSheet = false },
+            onDismissRequest = {
+                if (state.smokingStatusId == null) {
+                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = false)))
+                }
+                showSmokingBottomSheet = false },
             onSubmit = { result ->
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
@@ -284,10 +331,18 @@ fun SelfDeclarationLifestyleScreen(
                 type = BottomSheetType.DRUG_ADDICTION,
                 singleSelection = true,
                 items = actFrequencyOptions.map {
-                    BottomSheetItem(id = it.id, title = it.label, isSelected = state.substanceStatusId == it.id)
+                    BottomSheetItem(
+                        id = it.id,
+                        title = it.label,
+                        isSelected = state.substanceStatusId == it.id
+                    )
                 }
             ),
-            onDismissRequest = { showAddictionBottomSheet = false },
+            onDismissRequest = {
+                if (state.substanceStatusId == null) {
+                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = false)))
+                }
+                showAddictionBottomSheet = false },
             onSubmit = { result ->
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
@@ -311,10 +366,18 @@ fun SelfDeclarationLifestyleScreen(
                 type = BottomSheetType.ALCOHOL_ADDICTION,
                 singleSelection = true,
                 items = LifeStyleStatus.entries.map {
-                    BottomSheetItem(id = it.id, title = it.title, isSelected = state.drinkingStatusId == it.id)
+                    BottomSheetItem(
+                        id = it.id,
+                        title = it.title,
+                        isSelected = state.drinkingStatusId == it.id
+                    )
                 }
             ),
-            onDismissRequest = { showAlcoholBottomSheet = false },
+            onDismissRequest = {
+                if (state.drinkingStatusId == null) {
+                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = false)))
+                }
+                showAlcoholBottomSheet = false },
             onSubmit = { result ->
                 val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
@@ -339,10 +402,18 @@ fun SelfDeclarationLifestyleScreen(
                 type = BottomSheetType.EXERCISE,
                 singleSelection = true,
                 items = LifeStyleStatus.entries.map {
-                    BottomSheetItem(id = it.id, title = it.title, isSelected = state.exerciseStatusId == it.id)
+                    BottomSheetItem(
+                        id = it.id,
+                        title = it.title,
+                        isSelected = state.exerciseStatusId == it.id
+                    )
                 }
             ),
-            onDismissRequest = { showExerciseBottomSheet = false },
+            onDismissRequest = {
+                if (state.exerciseStatusId == null) {
+                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = false)))
+                }
+                showExerciseBottomSheet = false },
             onSubmit = { result ->
                 val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
