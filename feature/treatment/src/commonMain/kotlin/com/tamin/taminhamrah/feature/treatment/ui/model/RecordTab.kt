@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui.model
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
 /**
@@ -18,7 +20,7 @@ private const val TYPE_MEDICAL_SERVICE = "5"
  * [requestTypeIds] is what the endpoint is queried with. It is a list because [ALL] has no
  * server-side value — the endpoint filters one type at a time — so «همه» fans out across the real
  * categories and the results are merged client-side. Every other tab holds a single type.
- * داروخانه (`0`) is not a tab: it only ever labelled a record, never filtered.
+ * داروخانه (`0`) is not a tab: it only ever labeled a record, never filtered.
  */
 @Serializable
 enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
@@ -41,7 +43,14 @@ enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
         /** The default landing tab: «همه». */
         val Default: RecordTab = ALL
 
-        val chips: List<RecordTab> = entries
+        val chips: ImmutableList<RecordTab> = entries.toImmutableList()
+
+        /**
+         * The chips' labels, resolved once. The filter row is redrawn on every list update, and
+         * mapping them per recomposition would hand it a new list each time — which is the one
+         * thing that stops it skipping.
+         */
+        val chipLabels: ImmutableList<String> = chips.map { it.label }.toImmutableList()
 
         val medicalServiceTypeId: String = TYPE_MEDICAL_SERVICE
         val pharmacyTypeId: String = TYPE_PHARMACY

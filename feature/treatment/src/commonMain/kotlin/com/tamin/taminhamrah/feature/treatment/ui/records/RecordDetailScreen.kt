@@ -20,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,21 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
 private const val UNKNOWN_VALUE = "—"
+
+/**
+ * The exports this screen can show. Each names its own file, which is what lets the viewer
+ * recognize one it has downloaded before and skip the request entirely.
+ */
+private enum class PdfExport {
+    PRESCRIPTION,
+    LAB_RESULT,
+    ;
+
+    fun fileName(noteHeadId: String): String = when (this) {
+        PRESCRIPTION -> "prescription_$noteHeadId.pdf"
+        LAB_RESULT -> "lab_result_$noteHeadId.pdf"
+    }
+}
 
 /**
  * One medical record: the prescribed items, the cost breakdown, and the PDF exports.
@@ -103,7 +120,7 @@ fun RecordDetailScreen(
                 ?: "0"
             viewModel.sendIntent(PrescriptionsIntent.DownloadLabResult(patientId, noteHeadId))
         },
-        onDismissPdf = { viewModel.sendIntent(PrescriptionsIntent.TogglePdfDialog(false)) },
+        onDismissPdf = { viewModel.sendIntent(PrescriptionsIntent.DismissPdfViewer) },
         onRetry = {
             viewModel.sendIntent(
                 PrescriptionsIntent.SelectPrescription(noteHeadId, nationalCode, type, flagSata),
@@ -131,6 +148,10 @@ fun RecordDetailContent(
     val record = state.prescriptionList.firstOrNull { it.noteHeadEprescID == noteHeadId }
     val price = state.prescriptionPriceList.firstOrNull()
 
+    // Which export is on screen. Opening the viewer no longer means a download has happened: it
+    // decides for itself whether the file needs fetching, so the tap only says which one to show.
+    var showing by remember { mutableStateOf<PdfExport?>(null) }
+
     Scaffold(
         modifier = modifier,
         containerColor = colors.bgPage,
@@ -152,12 +173,12 @@ fun RecordDetailContent(
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
                                 contentDescription = "دریافت نسخهٔ الکترونیک",
-                                onClick = onDownloadPdf,
+                                onClick = { showing = PdfExport.PRESCRIPTION },
                             )
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
                                 contentDescription = "دریافت جواب آزمایش",
-                                onClick = onDownloadLabResult,
+                                onClick = { showing = PdfExport.LAB_RESULT },
                             )
                         }
                     },
@@ -222,11 +243,21 @@ fun RecordDetailContent(
         }
     }
 
-    if (state.showPdfDialog && state.viewerPdf != null) {
+    showing?.let { export ->
         TaminPdfViewer(
+            fileName = export.fileName(noteHeadId),
             pdf = state.viewerPdf,
-            fileName = state.viewerFileName,
-            onDismiss = onDismissPdf,
+            downloadFailed = state.viewerDownloadFailed,
+            onRequestDownload = {
+                when (export) {
+                    PdfExport.PRESCRIPTION -> onDownloadPdf()
+                    PdfExport.LAB_RESULT -> onDownloadLabResult()
+                }
+            },
+            onDismiss = {
+                showing = null
+                onDismissPdf()
+            },
         )
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import kotlinx.collections.immutable.persistentListOf
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.IconTile
@@ -195,7 +196,7 @@ private fun TimelineChromePreview() {
                 )
             }
             TreatmentFilterChipRow(
-                categories = listOf("همه", "دارو", "ویزیت", "پاراکلینیک"),
+                categories = persistentListOf("همه", "دارو", "ویزیت", "پاراکلینیک", "خدمات پزشکی"),
                 selectedIndex = 0,
                 onSelect = {},
             )

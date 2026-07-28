@@ -57,6 +57,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * Components for the medical-records timeline: the record card and its date-group
@@ -242,7 +243,7 @@ fun TreatmentFilterChip(
 /** Horizontally scrollable strip of category filters above the timeline with auto-scrolling. */
 @Composable
 fun TreatmentFilterChipRow(
-    categories: List<String>,
+    categories: ImmutableList<String>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
