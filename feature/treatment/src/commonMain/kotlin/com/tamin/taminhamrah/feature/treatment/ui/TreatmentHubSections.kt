@@ -37,10 +37,10 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
 import com.tamin.taminhamrah.feature.treatment.ui.components.insuranceCardGradient
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
-import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
-import com.tamin.taminhamrah.feature.treatment.ui.model.coverageStatusOf
+import kotlinx.collections.immutable.ImmutableList
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
@@ -79,18 +79,22 @@ private const val UNKNOWN_AMOUNT = "۶۵٬۹۱۰"
 
 /**
  * The insured-person carousel, or the loading and empty states that stand in for it.
+ *
+ * Takes the resolved [cards] and the two flags it actually draws rather than the hub's state, so
+ * that loading a total or reporting a selection leaves it untouched.
  */
 @Composable
 internal fun PatientCarousel(
-    state: TreatmentUiState,
-    patients: List<PatientItem>,
+    cards: ImmutableList<PatientCardItem>,
+    isLoading: Boolean,
+    error: String?,
     pagerState: PagerState,
     onShowEntitlementReason: (String) -> Unit,
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
 ) {
     when {
-        state.isLoading && patients.isEmpty() -> Box(
+        isLoading && cards.isEmpty() -> Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(TreatmentDimens.cardLoadingHeight)
@@ -100,22 +104,21 @@ internal fun PatientCarousel(
 
         // A failure or an empty result still renders a card, so the carousel slot never
         // collapses into a bare line of text.
-        patients.isEmpty() -> PatientPlaceholderCard(
-            message = state.error ?: "بیمه‌شده‌ای برای نمایش وجود ندارد",
-            isError = state.error != null,
+        cards.isEmpty() -> PatientPlaceholderCard(
+            message = error ?: "بیمه‌شده‌ای برای نمایش وجود ندارد",
+            isError = error != null,
             onRetry = onRetry,
         )
 
         else -> InsuranceCardCarousel(
-            pageCount = patients.size,
+            pageCount = cards.size,
             pagerState = pagerState,
         ) { page ->
+            val card = cards[page]
             PatientCard(
-                patient = patients[page],
-                status = coverageStatusOf(patients[page], state.deservedList),
-                // Position among dependants only, so each keeps its own color whether
-                //  a main insured person is present.
-                dependantOrdinal = patients.take(page).count { it.isDependent },
+                patient = card.patient,
+                status = card.coverage,
+                dependantOrdinal = card.dependantOrdinal,
                 onShowEntitlementReason = onShowEntitlementReason,
                 collapseProgress = collapseProgress,
             )
