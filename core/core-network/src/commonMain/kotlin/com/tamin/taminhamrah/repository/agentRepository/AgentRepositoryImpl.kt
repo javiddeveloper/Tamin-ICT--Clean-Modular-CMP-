@@ -36,9 +36,9 @@ class AgentRepositoryImpl(
     override fun sendPrompt(request: AgentRequest): Flow<AgentPollingState> = flow {
         // 1. Initial request submission
         val initialResponse = if (request.isLawPrompt) {
-            remoteDataSource.sendLawPrompt(request.toDTO())
+            remoteDataSource.sendLawPrompt(request.toDTO(), request.voiceBytes, request.voiceFileName)
         } else {
-            remoteDataSource.sendServicePrompt(request.toDTO())
+            remoteDataSource.sendServicePrompt(request.toDTO(), request.voiceBytes, request.voiceFileName)
         }
 
         val requestId = initialResponse.data?.id

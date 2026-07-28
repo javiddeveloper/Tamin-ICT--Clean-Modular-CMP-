@@ -15,7 +15,12 @@ data class AgentServiceParams(
     val payload: JsonElement?,
     val rawData: JsonElement?,
     val message: String?,
-    val sessionContext: AgentSessionContext
+    val sessionContext: AgentSessionContext,
+    /**
+     * The concrete action the AI requested. A handler can support several keys
+     * (e.g. `_ALL` and `_LAST` variants), so it needs to know which one triggered it.
+     */
+    val requestedKey: AgentActionKey? = null
 )
 
 /**
@@ -78,7 +83,9 @@ sealed class ChatBubbleContent {
     /** Voice message (can be a local file path from the user or a remote URL from AI) */
     data class Voice(
         val path: String,
-        val durationMs: Long? = null
+        val durationMs: Long? = null,
+        /** Amplitude samples captured while recording, for rendering the bubble waveform. */
+        val amplitudes: List<Int> = emptyList()
     ) : ChatBubbleContent()
 
     /** Image response */

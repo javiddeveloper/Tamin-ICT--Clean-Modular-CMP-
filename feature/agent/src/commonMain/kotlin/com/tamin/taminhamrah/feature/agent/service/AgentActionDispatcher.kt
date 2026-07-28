@@ -87,7 +87,8 @@ class AgentActionDispatcher(
                     payload = entity.payload,
                     rawData = entity.data,
                     message = entity.message,
-                    sessionContext = context
+                    sessionContext = context,
+                    requestedKey = entity.action
                 )
             )
 

@@ -38,11 +38,17 @@ class FakeAgentRemoteDataSource : AgentRemoteDataSource {
     var checkChatAllowedResult: ChatAllowedDTO = ChatAllowedDTO()
     var cancelRequestResult: CancelResponseDTO = CancelResponseDTO()
 
-    override suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO =
-        sendServicePromptResult
+    override suspend fun sendServicePrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO = sendServicePromptResult
 
-    override suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO =
-        sendLawPromptResult
+    override suspend fun sendLawPrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO = sendLawPromptResult
 
     override suspend fun trackRequest(requestId: String): PollingResponseDTO =
         trackRequestResult
@@ -88,10 +94,16 @@ class AgentRepositoryImplTest {
         val fake = FakeAgentRemoteDataSource()
         // Override to throw
         val failingFake = object : AgentRemoteDataSource {
-            override suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO =
-                throw RuntimeException("Network error")
-            override suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO =
-                throw RuntimeException("Network error")
+            override suspend fun sendServicePrompt(
+                request: AgentRequestDTO,
+                voiceBytes: ByteArray?,
+                voiceFileName: String?
+            ): PollingResponseDTO = throw RuntimeException("Network error")
+            override suspend fun sendLawPrompt(
+                request: AgentRequestDTO,
+                voiceBytes: ByteArray?,
+                voiceFileName: String?
+            ): PollingResponseDTO = throw RuntimeException("Network error")
             override suspend fun trackRequest(requestId: String): PollingResponseDTO =
                 PollingResponseDTO()
             override suspend fun checkChatAllowed(): ChatAllowedDTO = ChatAllowedDTO()

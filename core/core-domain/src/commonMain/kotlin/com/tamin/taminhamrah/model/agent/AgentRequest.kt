@@ -14,5 +14,9 @@ data class AgentRequest(
     val sessionId: String? = null,
     val lastEntity: String? = null,
     val chatToken: String? = null,
-    val isLawPrompt: Boolean = false
+    val isLawPrompt: Boolean = false,
+    /** Raw bytes of a voice recording to upload as a multipart "file" part (null for text). */
+    val voiceBytes: ByteArray? = null,
+    /** File name for the uploaded voice part, e.g. "voice.m4a". */
+    val voiceFileName: String? = null
 )

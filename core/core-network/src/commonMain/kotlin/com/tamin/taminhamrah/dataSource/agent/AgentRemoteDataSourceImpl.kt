@@ -34,20 +34,37 @@ internal class AgentRemoteDataSourceImpl(
         }
     }
 
-    private fun createMultipartRequest(request: AgentRequestDTO): MultiPartFormDataContent {
+    private fun createMultipartRequest(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray? = null,
+        voiceFileName: String? = null
+    ): MultiPartFormDataContent {
         val requestJson = json.encodeToString(request)
         return MultiPartFormDataContent(
             formData {
                 append("data", requestJson, Headers.build {
                     append(HttpHeaders.ContentType, "application/json; charset=UTF-8")
                 })
+                // Optional voice recording — mirrors old_Android's `file` part on the
+                // same search/service and search/rule endpoints.
+                if (voiceBytes != null && voiceBytes.isNotEmpty()) {
+                    val name = voiceFileName ?: "voice.m4a"
+                    append("file", voiceBytes, Headers.build {
+                        append(HttpHeaders.ContentType, "audio/mp4")
+                        append(HttpHeaders.ContentDisposition, "filename=\"$name\"")
+                    })
+                }
             }
         )
     }
 
-    override suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO {
+    override suspend fun sendServicePrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO {
         return try {
-            agentApiService.sendServicePrompt(createMultipartRequest(request))
+            agentApiService.sendServicePrompt(createMultipartRequest(request, voiceBytes, voiceFileName))
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -57,9 +74,13 @@ internal class AgentRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO {
+    override suspend fun sendLawPrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO {
         return try {
-            agentApiService.sendLawPrompt(createMultipartRequest(request))
+            agentApiService.sendLawPrompt(createMultipartRequest(request, voiceBytes, voiceFileName))
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

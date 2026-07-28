@@ -2,6 +2,10 @@ package com.tamin.taminhamrah.feature.agent.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.feature.agent.audio.VoicePlayer
+import com.tamin.taminhamrah.feature.agent.audio.VoiceRecorder
+import com.tamin.taminhamrah.feature.agent.audio.deleteFile
+import com.tamin.taminhamrah.feature.agent.audio.readFileBytes
 import com.tamin.taminhamrah.feature.agent.service.AgentActionDispatcher
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentSessionContext
@@ -13,6 +17,11 @@ import com.tamin.taminhamrah.feature.agent.ui.contract.AgentUiState
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentUiState.PartialState
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatItem
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
+import com.tamin.taminhamrah.feature.agent.ui.contract.VoicePreviewState
+import com.tamin.taminhamrah.feature.agent.ui.contract.VoiceRecordingState
+import com.tamin.taminhamrah.feature.agent.ui.contract.VOICE_AMPLITUDE_INTERVAL_MS
+import com.tamin.taminhamrah.feature.agent.ui.contract.VOICE_MAX_DURATION_MS
+import com.tamin.taminhamrah.feature.agent.ui.contract.VOICE_NEAR_LIMIT_MS
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.agent.AgentPollingState
 import com.tamin.taminhamrah.model.agent.AgentRequest
@@ -20,10 +29,30 @@ import com.tamin.taminhamrah.model.agent.AiEntityDN
 import com.tamin.taminhamrah.model.agent.toFeatureFlag
 import com.tamin.taminhamrah.model.agent.toProcessingStepTitle
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.feature.agent.cache.ChatBubbleCodec
+import com.tamin.taminhamrah.model.agent.AgentCachedMessageDN
+import com.tamin.taminhamrah.model.agent.AgentSessionDN
+import com.tamin.taminhamrah.model.agent.CachedSender
+import com.tamin.taminhamrah.model.agent.CachedStatus
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
+import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
+import com.tamin.taminhamrah.useCases.agent.PruneEmptyAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionsUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
+import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transformWhile
 import java.util.UUID
 
 /**
@@ -43,13 +72,40 @@ class AgentViewModel(
     private val sendAgentPromptUseCase: SendAgentPromptUseCase,
     private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
     private val actionDispatcher: AgentActionDispatcher,
-    private val featureManager: FeatureManager
+    private val featureManager: FeatureManager,
+    private val voiceRecorder: VoiceRecorder,
+    private val voicePlayer: VoicePlayer,
+    private val getCurrentUserNationalCodeUseCase: GetCurrentUserNationalCodeUseCase,
+    private val pruneEmptyAgentSessionUseCase: PruneEmptyAgentSessionUseCase,
+    private val getAgentSessionsUseCase: GetAgentSessionsUseCase,
+    private val getAgentSessionUseCase: GetAgentSessionUseCase,
+    private val deleteAgentSessionUseCase: DeleteAgentSessionUseCase,
+    private val startAgentSessionUseCase: StartAgentSessionUseCase,
+    private val saveCachedMessageUseCase: SaveCachedMessageUseCase,
+    private val getCachedMessagesUseCase: GetCachedMessagesUseCase,
+    private val deletePendingAgentMessagesUseCase: DeletePendingAgentMessagesUseCase,
+    private val updateAgentSessionUseCase: UpdateAgentSessionUseCase
 ) : BaseViewModel<AgentUiState, PartialState, AgentEvent, AgentIntent>(
     initialState = AgentUiState()
 ) {
 
     /** Session context shared across pipeline steps */
     private val sessionContext = AgentSessionContext()
+
+    /** Local conversation id used for cache rows — distinct from the server session id. */
+    private var cacheSessionId: String? = null
+
+    /** National code scoping cached conversations; resolved lazily once per VM. */
+    private var cachedNationalCode: String? = null
+
+    /** Bubbles whose reveal animation already played, so recycling never replays it. */
+    private val completedTypingIds = mutableSetOf<String>()
+
+    /** Flips to false to signal the recording loop to finish (from StopVoiceRecording). */
+    private val isRecordingActive = MutableStateFlow(false)
+
+    /** Path currently loaded in [voicePlayer] — preview or a chat bubble. */
+    private var loadedAudioPath: String? = null
 
     override fun handleIntent(intent: AgentIntent): Flow<PartialState> = when (intent) {
         is AgentIntent.CheckPermission         -> handleCheckPermission()
@@ -61,6 +117,28 @@ class AgentViewModel(
             emit(PartialState.InputModeChanged(intent.mode))
         }
         is AgentIntent.ExecuteServiceAction    -> handleServiceAction(intent.actionKey, intent.payload)
+        is AgentIntent.OnTypingFinished        -> handleTypingFinished(intent.itemId)
+        is AgentIntent.OpenChatHistory         -> handleOpenHistory()
+        is AgentIntent.CloseChatHistory        -> flow {
+            emit(PartialState.HistoryVisibilityChanged(false))
+        }
+        is AgentIntent.LoadChatSession         -> handleLoadSession(intent.sessionId)
+        is AgentIntent.DeleteChatSession       -> handleDeleteSession(intent.sessionId)
+        is AgentIntent.RenameChatSession       -> handleRenameSession(intent.sessionId, intent.title)
+        is AgentIntent.StartVoiceRecording     -> handleStartVoiceRecording()
+        is AgentIntent.StopVoiceRecording      -> flow { isRecordingActive.value = false }
+        is AgentIntent.DeleteVoiceRecording    -> handleDeleteVoiceRecording()
+        is AgentIntent.SendVoiceRecording      -> handleSendVoiceRecording()
+        is AgentIntent.TogglePreviewPlayback   -> handleTogglePreviewPlayback()
+        is AgentIntent.SeekPreview             -> flow {
+            voicePlayer.seekTo(intent.ms)
+            uiState.value.voicePreview?.let { emit(PartialState.VoicePreviewUpdated(it.copy(positionMs = intent.ms))) }
+        }
+        is AgentIntent.ToggleVoicePlayback     -> handleToggleVoicePlayback(intent.itemId, intent.filePath)
+        is AgentIntent.SeekVoicePlayback       -> flow {
+            voicePlayer.seekTo(intent.ms)
+            emit(PartialState.VoicePlaybackUpdated(intent.itemId, intent.ms))
+        }
     }
 
     // ─── Intent Handlers ──────────────────────────────────────────────────────
@@ -85,26 +163,46 @@ class AgentViewModel(
         val result = checkChatAllowedUseCase()
         result.fold(
             onSuccess = { data ->
+                emit(PartialState.OfflineChanged(false))
                 if (data.canStartChat) {
                     emit(PartialState.ChatAllowedReceived(chatToken = data.chatToken))
                 } else {
+                    // A real "no" from the server — this one does block the screen.
                     emit(PartialState.NotAllowed(data.errorMessage))
                 }
             },
             onFailure = {
-                emit(PartialState.NotAllowed("Unable to connect to the service."))
+                // Unreachable service is not the same as being denied: keep the chat open
+                // on the cached conversation and only block sending.
+                emit(PartialState.OfflineChanged(true))
             }
         )
         emit(PartialState.CheckingPermission(false))
+
+        // ── Step 3: Open on an empty conversation ─────────────────────────────
+        // Earlier chats are reachable from the history sheet, not auto-restored.
+        if (uiState.value.activeSessionId == null) {
+            startEmptySession().forEach { emit(it) }
+        }
     }
 
-    private fun handleSendPrompt(message: String, isRetry: Boolean = false): Flow<PartialState> = flow {
+    private fun handleSendPrompt(
+        message: String,
+        isRetry: Boolean = false,
+        voiceBytes: ByteArray? = null,
+        voiceFileName: String? = null,
+        addUserBubble: Boolean = true
+    ): Flow<PartialState> = flow {
         val currentState = uiState.value
         if (currentState.isGenerating) return@flow
+        if (currentState.isOffline) {
+            sendEvent(AgentEvent.ShowError("برای گفتگو با دستیار به اینترنت نیاز دارید."))
+            return@flow
+        }
 
         emit(PartialState.Loading(true))
 
-        if (!isRetry) {
+        if (!isRetry && addUserBubble) {
             // Append the user's message to the chat
             val userItem = ChatItem(
                 id = UUID.randomUUID().toString(),
@@ -112,6 +210,7 @@ class AgentViewModel(
                 content = ChatBubbleContent.Text(message)
             )
             emit(PartialState.NewChatItems(listOf(userItem)))
+            cacheBubble(userItem)
             sendEvent(AgentEvent.ScrollToBottom)
         }
 
@@ -119,7 +218,9 @@ class AgentViewModel(
             prompt = message,
             sessionId = currentState.sessionId,
             lastEntity = currentState.lastEntity,
-            chatToken = currentState.chatToken
+            chatToken = currentState.chatToken,
+            voiceBytes = voiceBytes,
+            voiceFileName = voiceFileName
         )
 
         sendAgentPromptUseCase(request).collect { pollingState ->
@@ -152,6 +253,10 @@ class AgentViewModel(
                         sessionId = response.sessionId,
                         lastEntity = response.lastEntity
                     ))
+                    // Persist the context so a resumed conversation keeps its thread.
+                    cacheSessionId?.let { id ->
+                        runCatching { updateAgentSessionUseCase.lastEntity(id, response.lastEntity) }
+                    }
 
                     // Determine the pipeline steps with friendly Persian names
                     val serviceSteps = response.entities.mapNotNull { it.action.toProcessingStepTitle() }.distinct()
@@ -210,6 +315,7 @@ class AgentViewModel(
                     // --- Phase 3: Emit all result bubbles sequentially ---
                     allResultItems.forEach { item ->
                         emit(PartialState.NewChatItems(listOf(item)))
+                        cacheBubble(item)
                         sendEvent(AgentEvent.ScrollToBottom)
                         
                         // Calculate how long this bubble takes to animate
@@ -264,15 +370,29 @@ class AgentViewModel(
         val lastUserMessage = uiState.value.chatItems.lastOrNull { it.sender == ChatSender.User }
         val textMessage = (lastUserMessage?.content as? ChatBubbleContent.Text)?.message
         if (!textMessage.isNullOrBlank()) {
-            return handleSendPrompt(textMessage, isRetry = true)
+            return flow {
+                // Drop the failed answer from the cache first, so retrying does not
+                // leave a duplicate reply behind (old_Android: deletePendingAiMessages).
+                cacheSessionId?.let { id ->
+                    runCatching { deletePendingAgentMessagesUseCase(id) }
+                }
+                emitAll(handleSendPrompt(textMessage, isRetry = true))
+            }
         }
         return flow { }
     }
 
     private fun handleStartNewSession(): Flow<PartialState> = flow {
         sessionContext.clear()
+        completedTypingIds.clear()
         emit(PartialState.SessionUpdated(sessionId = null, lastEntity = null))
-        emit(PartialState.NewChatItems(emptyList()))
+        emit(PartialState.ChatItemsReplaced(emptyList()))
+        emit(PartialState.HistoryVisibilityChanged(false))
+        // Open a brand-new conversation; the previous one stays in history if it was used.
+        resolveNationalCode()?.let { code ->
+            runCatching { pruneEmptyAgentSessionUseCase(code) }
+            emit(PartialState.ActiveSessionChanged(startFreshSession(code)))
+        }
         emit(PartialState.CheckingPermission(false))
     }
 
@@ -304,6 +424,317 @@ class AgentViewModel(
             sendEvent(AgentEvent.ScrollToBottom)
         }
         emit(PartialState.Loading(false))
+    }
+
+    /**
+     * Marks a bubble's reveal animation as done.
+     *
+     * The flag lives in state (not in the composable) because a LazyColumn disposes rows
+     * that scroll out of view; composable-local "already animated" state is lost on
+     * recycle and the typewriter would replay on old messages. Ported from old_Android's
+     * `completedTypingIds` / `markTypingComplete`.
+     */
+    private fun handleTypingFinished(itemId: String): Flow<PartialState> = flow {
+        if (!completedTypingIds.add(itemId)) return@flow
+        val item = uiState.value.chatItems.firstOrNull { it.id == itemId } ?: return@flow
+        if (!item.isTypingAnimating) return@flow
+        emit(PartialState.UpdateChatItem(item.copy(isTypingAnimating = false)))
+    }
+
+    // ─── Conversation cache ───────────────────────────────────────────────────
+
+    /**
+     * Opens the assistant on an empty conversation, like old_Android did on startup.
+     *
+     * Earlier conversations are not auto-restored — they stay reachable from the history
+     * sheet. A previous session that was opened but never used is pruned first so the
+     * history does not fill up with empty chats.
+     */
+    private suspend fun startEmptySession(): List<PartialState> {
+        val nationalCode = resolveNationalCode() ?: return emptyList()
+        runCatching { pruneEmptyAgentSessionUseCase(nationalCode) }
+        val id = startFreshSession(nationalCode)
+        return listOf(PartialState.ActiveSessionChanged(id))
+    }
+
+    /** Creates a new conversation row and makes it the active one. @return its id. */
+    private suspend fun startFreshSession(nationalCode: String): String {
+        val id = UUID.randomUUID().toString()
+        val now = currentTimeMillis()
+        cacheSessionId = id
+        runCatching {
+            startAgentSessionUseCase(
+                AgentSessionDN(
+                    id = id,
+                    title = DEFAULT_SESSION_TITLE,
+                    userNationalCode = nationalCode,
+                    createdAt = now,
+                    lastMessageAt = now
+                )
+            )
+        }
+        return id
+    }
+
+    // ─── History sheet ────────────────────────────────────────────────────────
+
+    private fun handleOpenHistory(): Flow<PartialState> = flow {
+        emit(PartialState.HistoryVisibilityChanged(true))
+        emitAll(loadSessions())
+    }
+
+    /** Re-reads the saved conversation list; used on open and after delete/rename. */
+    private fun loadSessions(): Flow<PartialState> = flow {
+        val nationalCode = resolveNationalCode() ?: return@flow
+        val sessions = runCatching { getAgentSessionsUseCase(nationalCode) }
+            .getOrDefault(emptyList())
+            // Hide the empty chat the user is sitting in — it is not history yet.
+            .filter { it.messageCount > 0 || it.id != cacheSessionId }
+        emit(PartialState.SessionsLoaded(sessions))
+    }
+
+    /**
+     * Opens a saved conversation. Bubbles are rebuilt with `isTypingAnimating = false`
+     * so old content does not replay the typewriter.
+     */
+    private fun handleLoadSession(sessionId: String): Flow<PartialState> = flow {
+        val cached = runCatching { getCachedMessagesUseCase(sessionId) }.getOrDefault(emptyList())
+        val items = cached.mapNotNull { row ->
+            val content = ChatBubbleCodec.decode(row.contentType, row.contentJson)
+                ?: return@mapNotNull null
+            ChatItem(
+                id = row.id,
+                sender = if (row.sender == CachedSender.USER) ChatSender.User else ChatSender.Agent,
+                content = content,
+                isTypingAnimating = false
+            )
+        }
+
+        // Prune the empty chat we are leaving behind, then switch over.
+        resolveNationalCode()?.let { runCatching { pruneEmptyAgentSessionUseCase(it) } }
+        cacheSessionId = sessionId
+        sessionContext.clear()
+        completedTypingIds.clear()
+
+        val session = runCatching { getAgentSessionUseCase(sessionId) }.getOrNull()
+        emit(PartialState.ChatItemsReplaced(items))
+        // Restore the server conversation context so the reopened chat keeps its thread.
+        emit(PartialState.SessionUpdated(sessionId = null, lastEntity = session?.lastEntity))
+        emit(PartialState.ActiveSessionChanged(sessionId))
+        emit(PartialState.HistoryVisibilityChanged(false))
+        sendEvent(AgentEvent.ScrollToBottom)
+    }
+
+    private fun handleDeleteSession(sessionId: String): Flow<PartialState> = flow {
+        runCatching { deleteAgentSessionUseCase(sessionId) }
+        // Deleting the conversation on screen leaves the user on a fresh empty one.
+        if (sessionId == cacheSessionId) {
+            emit(PartialState.ChatItemsReplaced(emptyList()))
+            emit(PartialState.SessionUpdated(sessionId = null, lastEntity = null))
+            resolveNationalCode()?.let { code ->
+                emit(PartialState.ActiveSessionChanged(startFreshSession(code)))
+            }
+        }
+        emitAll(loadSessions())
+    }
+
+    private fun handleRenameSession(sessionId: String, title: String): Flow<PartialState> = flow {
+        val trimmed = title.trim()
+        if (trimmed.isEmpty()) return@flow
+        runCatching {
+            updateAgentSessionUseCase.title(sessionId, trimmed.take(SESSION_TITLE_MAX_LENGTH))
+        }
+        emitAll(loadSessions())
+    }
+
+    /** Persists one bubble. Silently skips types the codec cannot serialize. */
+    private suspend fun cacheBubble(
+        item: ChatItem,
+        status: CachedStatus = CachedStatus.SUCCESS
+    ) {
+        val sessionId = cacheSessionId ?: return
+        val (type, payload) = ChatBubbleCodec.encode(item.content) ?: return
+        runCatching {
+            val order = saveCachedMessageUseCase.nextOrder(sessionId)
+            saveCachedMessageUseCase(
+                AgentCachedMessageDN(
+                    id = item.id,
+                    sessionId = sessionId,
+                    sender = if (item.sender == ChatSender.User) CachedSender.USER else CachedSender.AGENT,
+                    status = status,
+                    contentType = type,
+                    contentJson = payload,
+                    voicePath = (item.content as? ChatBubbleContent.Voice)?.path,
+                    timestamp = currentTimeMillis(),
+                    messageOrder = order
+                )
+            )
+            // The first user message names the conversation, like old_Android did.
+            if (item.sender == ChatSender.User) {
+                (item.content as? ChatBubbleContent.Text)?.message
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { title ->
+                        updateAgentSessionUseCase.title(sessionId, title.take(SESSION_TITLE_MAX_LENGTH))
+                    }
+            }
+        }
+    }
+
+    private suspend fun resolveNationalCode(): String? {
+        cachedNationalCode?.let { return it }
+        val code = runCatching { getCurrentUserNationalCodeUseCase() }.getOrNull()
+        return code?.takeIf { it.isNotBlank() }?.also { cachedNationalCode = it }
+    }
+
+    // ─── Voice ────────────────────────────────────────────────────────────────
+
+    /** Records with a live amplitude/timer stream, auto-stopping at [VOICE_MAX_DURATION_MS]. */
+    private fun handleStartVoiceRecording(): Flow<PartialState> = flow {
+        if (uiState.value.isGenerating || isRecordingActive.value) return@flow
+        voicePlayer.stop()
+        val path = voiceRecorder.newRecordingPath()
+        voiceRecorder.start(path)
+        isRecordingActive.value = true
+
+        val amps = mutableListOf<Int>()
+        var elapsed = 0L
+        while (isRecordingActive.value && elapsed < VOICE_MAX_DURATION_MS) {
+            amps.add(voiceRecorder.amplitude.value)
+            emit(
+                PartialState.VoiceRecordingUpdated(
+                    VoiceRecordingState(
+                        amplitudes = amps.toList(),
+                        elapsedMs = elapsed,
+                        isNearLimit = elapsed >= VOICE_MAX_DURATION_MS - VOICE_NEAR_LIMIT_MS
+                    )
+                )
+            )
+            kotlinx.coroutines.delay(VOICE_AMPLITUDE_INTERVAL_MS)
+            elapsed += VOICE_AMPLITUDE_INTERVAL_MS
+        }
+
+        voiceRecorder.stop()
+        isRecordingActive.value = false
+        val durationMs = elapsed.coerceAtMost(VOICE_MAX_DURATION_MS).toInt()
+        loadedAudioPath = null
+        emit(PartialState.VoiceRecordingUpdated(null))
+        emit(
+            PartialState.VoicePreviewUpdated(
+                VoicePreviewState(filePath = path, durationMs = durationMs, amplitudes = amps.toList())
+            )
+        )
+    }
+
+    private fun handleDeleteVoiceRecording(): Flow<PartialState> = flow {
+        isRecordingActive.value = false
+        voicePlayer.stop()
+        uiState.value.voicePreview?.filePath?.let { deleteFile(it) }
+        loadedAudioPath = null
+        emit(PartialState.VoiceRecordingUpdated(null))
+        emit(PartialState.VoicePreviewUpdated(null))
+    }
+
+    private fun handleSendVoiceRecording(): Flow<PartialState> = flow {
+        val preview = uiState.value.voicePreview ?: return@flow
+        voicePlayer.stop()
+        loadedAudioPath = null
+
+        val userItem = ChatItem(
+            id = UUID.randomUUID().toString(),
+            sender = ChatSender.User,
+            content = ChatBubbleContent.Voice(
+                path = preview.filePath,
+                durationMs = preview.durationMs.toLong(),
+                amplitudes = preview.amplitudes
+            )
+        )
+        emit(PartialState.VoicePreviewUpdated(null))
+        emit(PartialState.NewChatItems(listOf(userItem)))
+        cacheBubble(userItem)
+        sendEvent(AgentEvent.ScrollToBottom)
+
+        val bytes = readFileBytes(preview.filePath)
+        val fileName = preview.filePath.substringAfterLast('/')
+        emitAll(
+            handleSendPrompt(
+                message = "",
+                voiceBytes = bytes,
+                voiceFileName = fileName,
+                addUserBubble = false
+            )
+        )
+    }
+
+    private fun handleTogglePreviewPlayback(): Flow<PartialState> {
+        val preview = uiState.value.voicePreview ?: return emptyFlow()
+        // Currently playing → pause; the running stream below observes it and stops.
+        if (voicePlayer.isPlaying.value) {
+            voicePlayer.playPause()
+            return emptyFlow()
+        }
+        return flow {
+            startPlayback(preview.filePath)
+            emitAll(
+                streamPlayback { playing, pos, dur ->
+                    uiState.value.voicePreview?.let {
+                        PartialState.VoicePreviewUpdated(
+                            it.copy(
+                                isPlaying = playing,
+                                positionMs = pos,
+                                durationMs = if (dur > 0) dur else it.durationMs
+                            )
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    private fun handleToggleVoicePlayback(itemId: String, filePath: String): Flow<PartialState> {
+        if (uiState.value.playingVoiceId == itemId && voicePlayer.isPlaying.value) {
+            voicePlayer.playPause()
+            return emptyFlow()
+        }
+        return flow {
+            startPlayback(filePath)
+            emitAll(
+                streamPlayback { playing, pos, _ ->
+                    PartialState.VoicePlaybackUpdated(if (playing) itemId else null, pos)
+                }
+            )
+        }
+    }
+
+    /** Loads (if needed) and starts playback of [filePath] on the shared player. */
+    private fun startPlayback(filePath: String) {
+        if (loadedAudioPath != filePath) {
+            loadedAudioPath = filePath
+            voicePlayer.load(filePath, onReady = { voicePlayer.playPause() })
+        } else {
+            voicePlayer.playPause()
+        }
+    }
+
+    /**
+     * Streams the player's state through [map] until playback has started and then
+     * stopped (pause or completion), guaranteeing the flow terminates — one active
+     * streamer at a time.
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun streamPlayback(
+        map: (playing: Boolean, positionMs: Int, durationMs: Int) -> PartialState?
+    ): Flow<PartialState> {
+        var started = false
+        return combine(
+            voicePlayer.isPlaying,
+            voicePlayer.positionMs,
+            voicePlayer.durationMs
+        ) { playing, pos, dur -> Triple(playing, pos, dur) }
+            .transformWhile { (playing, pos, dur) ->
+                if (playing) started = true
+                map(playing, pos, dur)?.let { emit(it) }
+                !started || playing
+            }
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -389,8 +820,51 @@ class AgentViewModel(
 
         is PartialState.Error ->
             currentState.copy(isGenerating = false)
+
+        is PartialState.VoiceRecordingUpdated ->
+            currentState.copy(voiceRecording = partialState.state)
+
+        is PartialState.VoicePreviewUpdated ->
+            currentState.copy(voicePreview = partialState.state)
+
+        is PartialState.OfflineChanged ->
+            currentState.copy(isOffline = partialState.isOffline)
+
+        is PartialState.SessionsLoaded ->
+            currentState.copy(sessions = partialState.sessions)
+
+        is PartialState.HistoryVisibilityChanged ->
+            currentState.copy(isHistoryVisible = partialState.isVisible)
+
+        is PartialState.ActiveSessionChanged ->
+            currentState.copy(activeSessionId = partialState.sessionId)
+
+        is PartialState.ChatItemsReplaced ->
+            currentState.copy(chatItems = partialState.items)
+
+        is PartialState.VoicePlaybackUpdated ->
+            currentState.copy(
+                playingVoiceId = partialState.itemId,
+                voicePlaybackPositionMs = partialState.positionMs
+            )
     }
 
     override fun createErrorState(message: String): PartialState =
         PartialState.Error(message)
+
+    override fun onCleared() {
+        isRecordingActive.value = false
+        voiceRecorder.stop()
+        voicePlayer.release()
+        super.onCleared()
+    }
+
+    private companion object {
+        const val DEFAULT_SESSION_TITLE = "گفتگوی جدید"
+        const val SESSION_TITLE_MAX_LENGTH = 60
+    }
 }
+
+/** Wall-clock millis; kotlinx-datetime keeps this multiplatform. */
+private fun currentTimeMillis(): Long =
+    kotlinx.datetime.Clock.System.now().toEpochMilliseconds()

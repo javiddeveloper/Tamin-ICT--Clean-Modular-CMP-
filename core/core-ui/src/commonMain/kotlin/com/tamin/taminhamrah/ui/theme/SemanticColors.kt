@@ -63,6 +63,9 @@ data class TaminColors(
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
     val aiAssistantGradient: Brush,
+    // Solid tint derived from the AI-assistant gradient family — used for blur tints
+    // and fallbacks where a single color (not a Brush) is required.
+    val aiAssistantTint: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -112,6 +115,7 @@ val LightTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    aiAssistantTint = TaminPurple900,
 )
 
 val DarkTaminColors = TaminColors(
@@ -162,4 +166,5 @@ val DarkTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    aiAssistantTint = TaminPurple900,
 )

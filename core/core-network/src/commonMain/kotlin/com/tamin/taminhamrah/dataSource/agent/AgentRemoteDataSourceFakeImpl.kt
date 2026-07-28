@@ -28,7 +28,11 @@ internal class AgentRemoteDataSourceFakeImpl(
         )
     }
 
-    override suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO {
+    override suspend fun sendServicePrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO {
         delay(800)
         return PollingResponseDTO(
             status = 200,
@@ -44,14 +48,20 @@ internal class AgentRemoteDataSourceFakeImpl(
         )
     }
 
-    override suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO {
-        return sendServicePrompt(request)
+    override suspend fun sendLawPrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO {
+        return sendServicePrompt(request, voiceBytes, voiceFileName)
     }
 
     override suspend fun trackRequest(requestId: String): PollingResponseDTO {
         delay(1000)
-        // Parse the inner PollingDataDTO from the JSON file and wrap it in PollingResponseDTO
-        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_ONE_RESPONSE)
+        // Parse the inner PollingDataDTO from the JSON file and wrap it in PollingResponseDTO.
+        // FAKE_AGENT_RESPONSE is the complete fixture (every supported action); switch to
+        // FAKE_AGENT_ONE_RESPONSE for the short 4-entity variant.
+        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_RESPONSE)
         return PollingResponseDTO(
             status = 200,
             family = "SUCCESSFUL",

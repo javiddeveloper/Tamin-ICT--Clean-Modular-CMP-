@@ -146,7 +146,13 @@ val remoteModule = module {
     }
 
     single<AgentRemoteDataSource> {
-        // Switch to AgentRemoteDataSourceImpl when the real API is ready
+        // Fake agent responses while the real API is being finished.
+        // Swap to the AgentRemoteDataSourceImpl below to hit the live service:
+        //   AgentRemoteDataSourceImpl(
+        //       agentApiService = get(named("agentApiService")),
+        //       errorParser = get(),
+        //       json = get()
+        //   )
         com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl(
             json = get()
         )

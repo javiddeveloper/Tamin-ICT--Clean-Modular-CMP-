@@ -18,6 +18,11 @@ kotlin {
             implementation(project(":core:core-network"))
         }
 
+        androidMain.dependencies {
+            // Microphone permission launcher (rememberLauncherForActivityResult).
+            implementation(libs.androidx.activity.compose)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)

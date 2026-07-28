@@ -87,12 +87,15 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewif
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.agent.AgentDestination
 import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TileMode
+import com.tamin.taminhamrah.ui.blur.AppBarScrim
+import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
@@ -119,6 +122,7 @@ import kotlinx.coroutines.flow.map
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.ic_home_menu
@@ -246,14 +250,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.6f)
-                                )
-                            )
-                        )
+                        .background(brush = AppBarScrim.bottomGradient)
                 ) {
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
@@ -434,7 +431,20 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
 
-                agentScreen()
+                // Maps the assistant's destination ids to real routes. Ids come from
+                // AgentDestination; anything unmapped is ignored rather than crashing.
+                agentScreen(
+                    onNavigateToDestination = { destination ->
+                        when (destination) {
+                            AgentDestination.DISABILITY_PENSION -> navController.navigateToDisabilityPension()
+                            AgentDestination.DEFERRED_INSTALLMENT -> navController.navigateToDeferredInstallment()
+                            AgentDestination.CONTRACTS -> navController.navigateToContracts()
+                            AgentDestination.WORKSHOPS -> navController.navigateToWorkshops()
+                            AgentDestination.PRESCRIPTION -> navController.navigateToPrescription()
+                            else -> Unit
+                        }
+                    }
+                )
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }
@@ -449,19 +459,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Black.copy(alpha = 0.35f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                )
+                TopBarScrim()
             }
 
             if (isLoading) {

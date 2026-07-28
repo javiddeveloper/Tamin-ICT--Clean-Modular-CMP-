@@ -8,8 +8,16 @@ import com.tamin.taminhamrah.model.agent.PollingResponseDTO
 
 interface AgentRemoteDataSource {
     suspend fun checkChatAllowed(): ChatAllowedDTO
-    suspend fun sendServicePrompt(request: AgentRequestDTO): PollingResponseDTO
-    suspend fun sendLawPrompt(request: AgentRequestDTO): PollingResponseDTO
+    suspend fun sendServicePrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray? = null,
+        voiceFileName: String? = null
+    ): PollingResponseDTO
+    suspend fun sendLawPrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray? = null,
+        voiceFileName: String? = null
+    ): PollingResponseDTO
     suspend fun trackRequest(requestId: String): PollingResponseDTO
     suspend fun cancelRequest(requestId: String): CancelResponseDTO
 }
