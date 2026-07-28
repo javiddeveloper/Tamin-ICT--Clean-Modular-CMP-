@@ -29,7 +29,8 @@ import taminx.feature.healthprofile.generated.resources.*
 fun SelfDeclarationIdentityScreen(
     state: IdentityStepState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -52,170 +53,214 @@ fun SelfDeclarationIdentityScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Info Notice Banner (Non-editable notice with lock icon)
-            Row(
+        if (isLoading) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(taminColors.blueBg, RoundedCornerShape(14.dp))
-                    .border(1.dp, taminColors.blueText.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
-                    .padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
             ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_health_identity_lock),
-                    contentDescription = null,
-                    tint = taminColors.blueText,
-                    modifier = Modifier.size(20.dp)
-                )
-                TaminText(
-                    text = stringResource(Res.string.health_identity_notice),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.5.sp,
-                        color = taminColors.blueText,
-                        lineHeight = 20.sp
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
+                IdentityShimmerSkeleton()
             }
-
-            // Main Patient Profile Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-                border = BorderStroke(1.dp, taminColors.border)
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Info Notice Banner (Non-editable notice with lock icon)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(taminColors.blueBg, RoundedCornerShape(14.dp))
+                        .border(
+                            1.dp,
+                            taminColors.blueText.copy(alpha = 0.2f),
+                            RoundedCornerShape(14.dp)
+                        )
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // Avatar Icon
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(taminColors.blueBg, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_health_identity_avatar),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    TaminText(
-                        text = "${state.patientName} ${state.patientFamily}".trim(),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = taminColors.textPrimary
-                        )
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_health_identity_lock),
+                        contentDescription = null,
+                        tint = taminColors.blueText,
+                        modifier = Modifier.size(20.dp)
                     )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
                     TaminText(
-                        text = if (state.insuranceNumber.isNotBlank()) "${stringResource(Res.string.health_identity_insurance_number_prefix)} ${state.insuranceNumber}" else "",
+                        text = stringResource(Res.string.health_identity_notice),
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 13.sp,
-                            color = taminColors.textTertiary
-                        )
+                            fontSize = 12.5.sp,
+                            color = taminColors.blueText,
+                            lineHeight = 20.sp
+                        ),
+                        modifier = Modifier.weight(1f)
                     )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-                    HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // 2-Column Info Grid:
-                    // In RTL layout direction:
-                    // - First Column (starts on RIGHT): First Name, Father Name, Birth Date
-                    // - Second Column (starts on LEFT): Last Name, Gender, Insurance Number
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_first_name), value = state.patientName)
-                            IdentityGridItem(label = stringResource(Res.string.health_label_father_name), value = state.patientFather)
-                            IdentityGridItem(label = stringResource(Res.string.health_label_birth_date), value = state.patientBirthDate)
-                        }
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_last_name), value = state.patientFamily)
-                            IdentityGridItem(label = stringResource(Res.string.health_label_gender), value = state.patientGender)
-                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_number), value = state.insuranceNumber)
-                        }
-                    }
                 }
-            }
 
-            // Insurance Info Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-                border = BorderStroke(1.dp, taminColors.border)
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                // Main Patient Profile Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                    border = BorderStroke(1.dp, taminColors.border)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_health_identity_heart),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        // Avatar Icon
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(taminColors.blueBg, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_health_identity_avatar),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
                         TaminText(
-                            text = stringResource(Res.string.health_identity_insurance_card_title),
+                            text = "${state.patientName} ${state.patientFamily}".trim(),
                             style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 15.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = taminColors.textPrimary
                             )
                         )
-                    }
 
-                    HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    // In RTL layout direction:
-                    // - First Column (RIGHT): Insurance Type
-                    // - Second Column (LEFT): Last Visit Date
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_insurance_type), value = state.insuranceType)
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            IdentityGridItem(label = stringResource(Res.string.health_label_last_visit), value = state.lastVisitDate)
+                        TaminText(
+                            text = if (state.insuranceNumber.isNotBlank()) "${stringResource(Res.string.health_identity_insurance_number_prefix)} ${state.insuranceNumber}" else "",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 13.sp,
+                                color = taminColors.textTertiary
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                        HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // 2-Column Info Grid:
+                        // In RTL layout direction:
+                        // - First Column (starts on RIGHT): First Name, Father Name, Birth Date
+                        // - Second Column (starts on LEFT): Last Name, Gender, Insurance Number
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_first_name),
+                                    value = state.patientName
+                                )
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_father_name),
+                                    value = state.patientFather
+                                )
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_birth_date),
+                                    value = state.patientBirthDate
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_last_name),
+                                    value = state.patientFamily
+                                )
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_gender),
+                                    value = state.patientGender
+                                )
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_insurance_number),
+                                    value = state.insuranceNumber
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+                // Insurance Info Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                    border = BorderStroke(1.dp, taminColors.border)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_health_identity_heart),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            TaminText(
+                                text = stringResource(Res.string.health_identity_insurance_card_title),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = taminColors.textPrimary
+                                )
+                            )
+                        }
+
+                        HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+
+                        // In RTL layout direction:
+                        // - First Column (RIGHT): Insurance Type
+                        // - Second Column (LEFT): Last Visit Date
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_insurance_type),
+                                    value = state.insuranceType
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                IdentityGridItem(
+                                    label = stringResource(Res.string.health_label_last_visit),
+                                    value = state.lastVisitDate
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 }
-
 @Composable
 fun IdentityRow(label: String, value: String) {
     val taminColors = LocalTaminColors.current

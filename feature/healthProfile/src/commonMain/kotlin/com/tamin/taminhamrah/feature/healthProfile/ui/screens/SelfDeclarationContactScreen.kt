@@ -40,6 +40,7 @@ fun SelfDeclarationContactScreen(
     state: ContactStepState,
     provinceOptions: List<LookupItemPR> = emptyList(),
     cityOptions: List<LookupItemPR> = emptyList(),
+    isLoading: Boolean = false,
     isProvincesLoading: Boolean = false,
     isCitiesLoading: Boolean = false,
     onIntent: (HealthProfileIntent) -> Unit,
@@ -94,234 +95,244 @@ fun SelfDeclarationContactScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            TaminText(
-                text = stringResource(Res.string.health_contact_desc),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textTertiary,
-                    lineHeight = 22.sp
-                )
-            )
-
-            val showMobileError = mobileTouched && !isMobileValid
-            StyledTextField(
-                value = state.mobile,
-                onValueChange = { mob ->
-                    val filtered = ValidationUtils.validatePhoneNumber(mob)
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(mobile = filtered)))
-                },
-                label = stringResource(Res.string.health_contact_mobile_label),
-                placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
-                isValid = if (showMobileError) false else null,
-                errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                isRequired = true,
-                onFocusChanged = { isFocused ->
-                    if (isFocused) {
-                        mobileHasFocused = true
-                    } else if (mobileHasFocused) {
-                        mobileTouched = true
-                    }
-                }
-            )
-
-            val showEmailError = emailTouched && !isEmailValid
-            StyledTextField(
-                value = state.email,
-                onValueChange = { email ->
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(email = email)))
-                },
-                label = stringResource(Res.string.health_contact_email_label),
-                placeholder = stringResource(Res.string.health_contact_email_placeholder),
-                isValid = if (showEmailError) false else null,
-                errorText = if (showEmailError) stringResource(Res.string.health_contact_email_error) else null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                onFocusChanged = { isFocused ->
-                    if (isFocused) {
-                        emailHasFocused = true
-                    } else if (emailHasFocused) {
-                        emailTouched = true
-                    }
-                }
-            )
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.weight(1f)) {
-                    StyledSelectField(
-                        value = state.provinceLabel,
-                        label = stringResource(Res.string.health_contact_province_label),
-                        placeholder = stringResource(Res.string.health_contact_province_placeholder),
-                        isLoading = isProvincesLoading,
-                        onClick = { showProvinceBottomSheet = true }
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    StyledSelectField(
-                        value = state.cityLabel,
-                        label = stringResource(Res.string.health_contact_city_label),
-                        placeholder = stringResource(Res.string.health_contact_city_placeholder),
-                        isLoading = isCitiesLoading,
-                        onClick = {
-                            if (state.provinceId == null) {
-                                showProvinceBottomSheet = true
-                            } else {
-                                if (cityOptions.isEmpty() && !isCitiesLoading) {
-                                    onIntent(HealthProfileIntent.LoadCitiesForProvince(state.provinceId))
-                                }
-                                showCityBottomSheet = true
-                            }
-                        }
-                    )
-                }
-            }
-
-            StyledTextField(
-                value = state.address,
-                onValueChange = { addr ->
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(address = addr)))
-                },
-                label = stringResource(Res.string.health_contact_address_label),
-                placeholder = stringResource(Res.string.health_contact_address_placeholder),
-                singleLine = false
-            )
-
-            val showPostcodeError = postcodeTouched && state.postcode.length != 10
-            StyledTextField(
-                value = state.postcode,
-                onValueChange = { post ->
-                    val filtered = ValidationUtils.validatePostcode(post)
-                    onIntent(HealthProfileIntent.UpdateContact(state.copy(postcode = filtered)))
-                },
-                label = stringResource(Res.string.health_contact_postcode_label),
-                placeholder = stringResource(Res.string.health_contact_postcode_placeholder),
-                isValid = if (showPostcodeError) false else null,
-                errorText = if (showPostcodeError) stringResource(Res.string.health_contact_postcode_error) else null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onFocusChanged = { isFocused ->
-                    if (isFocused) {
-                        postcodeHasFocused = true
-                    } else if (postcodeHasFocused) {
-                        postcodeTouched = true
-                    }
-                }
-            )
-
-            OutlinedButton(
-                onClick = { /* Open map dialog */ },
+        if (isLoading) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = taminColors.blueText),
-                border = BorderStroke(1.dp, taminColors.blueText)
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
             ) {
-                Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                TaminText(
-                    text = stringResource(Res.string.health_contact_map_button),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                FormFieldsShimmerSkeleton(fieldCount = 6)
             }
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                TaminText(
+                    text = stringResource(Res.string.health_contact_desc),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = taminColors.textTertiary,
+                        lineHeight = 22.sp
+                    )
+                )
+
+                val showMobileError = mobileTouched && !isMobileValid
+                StyledTextField(
+                    value = state.mobile,
+                    onValueChange = { mob ->
+                        val filtered = ValidationUtils.validatePhoneNumber(mob)
+                        onIntent(HealthProfileIntent.UpdateContact(state.copy(mobile = filtered)))
+                    },
+                    label = stringResource(Res.string.health_contact_mobile_label),
+                    placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
+                    isValid = if (showMobileError) false else null,
+                    errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            mobileHasFocused = true
+                        } else if (mobileHasFocused) {
+                            mobileTouched = true
+                        }
+                    }
+                )
+
+                val showEmailError = emailTouched && !isEmailValid
+                StyledTextField(
+                    value = state.email,
+                    onValueChange = { email ->
+                        onIntent(HealthProfileIntent.UpdateContact(state.copy(email = email)))
+                    },
+                    label = stringResource(Res.string.health_contact_email_label),
+                    placeholder = stringResource(Res.string.health_contact_email_placeholder),
+                    isValid = if (showEmailError) false else null,
+                    errorText = if (showEmailError) stringResource(Res.string.health_contact_email_error) else null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            emailHasFocused = true
+                        } else if (emailHasFocused) {
+                            emailTouched = true
+                        }
+                    }
+                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        StyledSelectField(
+                            value = state.provinceLabel,
+                            label = stringResource(Res.string.health_contact_province_label),
+                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
+                            isLoading = isProvincesLoading,
+                            onClick = { showProvinceBottomSheet = true }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        StyledSelectField(
+                            value = state.cityLabel,
+                            label = stringResource(Res.string.health_contact_city_label),
+                            placeholder = stringResource(Res.string.health_contact_city_placeholder),
+                            isLoading = isCitiesLoading,
+                            onClick = {
+                                if (state.provinceId == null) {
+                                    showProvinceBottomSheet = true
+                                } else {
+                                    if (cityOptions.isEmpty() && !isCitiesLoading) {
+                                        onIntent(HealthProfileIntent.LoadCitiesForProvince(state.provinceId))
+                                    }
+                                    showCityBottomSheet = true
+                                }
+                            }
+                        )
+                    }
+                }
+
+                StyledTextField(
+                    value = state.address,
+                    onValueChange = { addr ->
+                        onIntent(HealthProfileIntent.UpdateContact(state.copy(address = addr)))
+                    },
+                    label = stringResource(Res.string.health_contact_address_label),
+                    placeholder = stringResource(Res.string.health_contact_address_placeholder),
+                    singleLine = false
+                )
+
+                val showPostcodeError = postcodeTouched && state.postcode.length != 10
+                StyledTextField(
+                    value = state.postcode,
+                    onValueChange = { post ->
+                        val filtered = ValidationUtils.validatePostcode(post)
+                        onIntent(HealthProfileIntent.UpdateContact(state.copy(postcode = filtered)))
+                    },
+                    label = stringResource(Res.string.health_contact_postcode_label),
+                    placeholder = stringResource(Res.string.health_contact_postcode_placeholder),
+                    isValid = if (showPostcodeError) false else null,
+                    errorText = if (showPostcodeError) stringResource(Res.string.health_contact_postcode_error) else null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            postcodeHasFocused = true
+                        } else if (postcodeHasFocused) {
+                            postcodeTouched = true
+                        }
+                    }
+                )
+
+                OutlinedButton(
+                    onClick = { /* Open map dialog */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = taminColors.blueText),
+                    border = BorderStroke(1.dp, taminColors.blueText)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TaminText(
+                        text = stringResource(Res.string.health_contact_map_button),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
+        }
+
+        if (showProvinceBottomSheet) {
+            HealthBottomSheet(
+                config = BottomSheetConfig(
+                    title = stringResource(Res.string.health_contact_province_bs_title),
+                    subtitle = stringResource(Res.string.health_contact_province_bs_subtitle),
+                    type = BottomSheetType.PROVINCE,
+                    showSearchInput = true,
+                    searchInputHint = stringResource(Res.string.health_contact_province_bs_search_hint),
+                    singleSelection = true,
+                    isLoading = isProvincesLoading,
+                    items = provinceOptions.map {
+                        BottomSheetItem(
+                            id = it.id,
+                            title = it.label,
+                            isSelected = it.id == state.provinceId
+                        )
+                    }
+                ),
+                onDismissRequest = { showProvinceBottomSheet = false },
+                onSubmit = { result ->
+                    val selectedId = result.selectedItemIds.firstOrNull()
+                    if (selectedId != null) {
+                        val selectedOption = provinceOptions.firstOrNull { it.id == selectedId }
+                        selectedOption?.let { prov ->
+                            onIntent(
+                                HealthProfileIntent.UpdateContact(
+                                    state.copy(
+                                        provinceId = prov.id,
+                                        provinceLabel = prov.label,
+                                        cityId = null,
+                                        cityLabel = ""
+                                    )
+                                )
+                            )
+                            onIntent(HealthProfileIntent.LoadCitiesForProvince(prov.id))
+                        }
+                    }
+                    showProvinceBottomSheet = false
+                }
+            )
+        }
+
+        if (showCityBottomSheet) {
+            HealthBottomSheet(
+                config = BottomSheetConfig(
+                    title = stringResource(Res.string.health_contact_city_bs_title),
+                    subtitle = stringResource(Res.string.health_contact_city_bs_subtitle),
+                    type = BottomSheetType.CITY,
+                    showSearchInput = true,
+                    searchInputHint = stringResource(Res.string.health_contact_city_bs_search_hint),
+                    singleSelection = true,
+                    isLoading = isCitiesLoading,
+                    items = cityOptions.map {
+                        BottomSheetItem(
+                            id = it.id,
+                            title = it.label,
+                            isSelected = it.id == state.cityId
+                        )
+                    }
+                ),
+                onDismissRequest = { showCityBottomSheet = false },
+                onSubmit = { result ->
+                    val selectedId = result.selectedItemIds.firstOrNull()
+                    if (selectedId != null) {
+                        val selectedOption = cityOptions.firstOrNull { it.id == selectedId }
+                        selectedOption?.let { city ->
+                            onIntent(
+                                HealthProfileIntent.UpdateContact(
+                                    state.copy(
+                                        cityId = city.id,
+                                        cityLabel = city.label
+                                    )
+                                )
+                            )
+                        }
+                    }
+                    showCityBottomSheet = false
+                }
+            )
         }
     }
 
-    if (showProvinceBottomSheet) {
-        HealthBottomSheet(
-            config = BottomSheetConfig(
-                title = stringResource(Res.string.health_contact_province_bs_title),
-                subtitle = stringResource(Res.string.health_contact_province_bs_subtitle),
-                type = BottomSheetType.PROVINCE,
-                showSearchInput = true,
-                searchInputHint = stringResource(Res.string.health_contact_province_bs_search_hint),
-                singleSelection = true,
-                isLoading = isProvincesLoading,
-                items = provinceOptions.map {
-                    BottomSheetItem(
-                        id = it.id,
-                        title = it.label,
-                        isSelected = it.id == state.provinceId
-                    )
-                }
-            ),
-            onDismissRequest = { showProvinceBottomSheet = false },
-            onSubmit = { result ->
-                val selectedId = result.selectedItemIds.firstOrNull()
-                if (selectedId != null) {
-                    val selectedOption = provinceOptions.firstOrNull { it.id == selectedId }
-                    selectedOption?.let { prov ->
-                        onIntent(
-                            HealthProfileIntent.UpdateContact(
-                                state.copy(
-                                    provinceId = prov.id,
-                                    provinceLabel = prov.label,
-                                    cityId = null,
-                                    cityLabel = ""
-                                )
-                            )
-                        )
-                        onIntent(HealthProfileIntent.LoadCitiesForProvince(prov.id))
-                    }
-                }
-                showProvinceBottomSheet = false
-            }
-        )
-    }
-
-    if (showCityBottomSheet) {
-        HealthBottomSheet(
-            config = BottomSheetConfig(
-                title = stringResource(Res.string.health_contact_city_bs_title),
-                subtitle = stringResource(Res.string.health_contact_city_bs_subtitle),
-                type = BottomSheetType.CITY,
-                showSearchInput = true,
-                searchInputHint = stringResource(Res.string.health_contact_city_bs_search_hint),
-                singleSelection = true,
-                isLoading = isCitiesLoading,
-                items = cityOptions.map {
-                    BottomSheetItem(
-                        id = it.id,
-                        title = it.label,
-                        isSelected = it.id == state.cityId
-                    )
-                }
-            ),
-            onDismissRequest = { showCityBottomSheet = false },
-            onSubmit = { result ->
-                val selectedId = result.selectedItemIds.firstOrNull()
-                if (selectedId != null) {
-                    val selectedOption = cityOptions.firstOrNull { it.id == selectedId }
-                    selectedOption?.let { city ->
-                        onIntent(
-                            HealthProfileIntent.UpdateContact(
-                                state.copy(
-                                    cityId = city.id,
-                                    cityLabel = city.label
-                                )
-                            )
-                        )
-                    }
-                }
-                showCityBottomSheet = false
-            }
-        )
-    }
 }
-
-
 
 @Composable
 private fun StyledSelectField(

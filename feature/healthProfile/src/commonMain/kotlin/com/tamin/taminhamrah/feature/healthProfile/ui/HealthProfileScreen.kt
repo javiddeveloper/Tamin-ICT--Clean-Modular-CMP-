@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileShimmerSkeleton
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
@@ -132,6 +133,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.IDENTITY -> {
                     SelfDeclarationIdentityScreen(
                         state = selfDecState.identity,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO))
@@ -142,6 +144,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationPersonalScreen(
                         state = selfDecState.personal,
                         maritalStatusOptions = state.maritalStatusOptions,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
@@ -153,6 +156,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.contact,
                         provinceOptions = state.provinceOptions,
                         cityOptions = state.cityOptions,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         isProvincesLoading = state.isProvincesLoading,
                         isCitiesLoading = state.isCitiesLoading,
                         onIntent = onSelfDecIntent,
@@ -164,6 +168,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.EMERGENCY -> {
                     SelfDeclarationEmergencyScreen(
                         state = selfDecState.emergency,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.CONTACT))
@@ -173,6 +178,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.PHYSICAL -> {
                     SelfDeclarationPhysicalScreen(
                         state = selfDecState.physical,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
@@ -183,6 +189,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationBloodScreen(
                         state = selfDecState.bloodGroup,
                         bloodGroupOptions = state.bloodGroupOptions,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
@@ -194,6 +201,7 @@ fun HealthProfileMainContent(
                         state = state.selfDeclaration.lifestyle,
                         smokingStatusOptions = state.smokingStatusOptions,
                         actFrequencyOptions = state.actFrequencyOptions,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onIntent,
                         onBackClicked = {
                             onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD))
@@ -204,6 +212,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationDiseasesScreen(
                         state = selfDecState.diseases,
                         illnessGroups = state.illnessGroups,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
@@ -214,6 +223,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationFamilyScreen(
                         state = selfDecState.family,
                         illnessGroups = state.illnessGroups,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES))
@@ -224,6 +234,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationAllergyScreen(
                         state = selfDecState.allergy,
                         drugOptions = state.drugOptions,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
@@ -233,6 +244,7 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.REVIEW -> {
                     SelfDeclarationReviewScreen(
                         state = selfDecState,
+                        isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
@@ -267,10 +279,7 @@ fun HealthProfileMainContent(
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
                             if (state.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                                HealthProfileShimmerSkeleton()
                             } else if (!state.error.isNullOrEmpty()) {
                                 Column(
                                     modifier = Modifier

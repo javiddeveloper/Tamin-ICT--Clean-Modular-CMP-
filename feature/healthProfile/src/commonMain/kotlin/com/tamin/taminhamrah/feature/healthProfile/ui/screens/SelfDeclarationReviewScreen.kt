@@ -29,7 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 fun SelfDeclarationReviewScreen(
     state: SelfDeclarationUiState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -47,15 +48,25 @@ fun SelfDeclarationReviewScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                CardsListShimmerSkeleton()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             TaminText(
                 text = "بررسی نهایی پروندهٔ سلامت",
                 style = MaterialTheme.typography.titleLarge.copy(
@@ -144,6 +155,7 @@ fun SelfDeclarationReviewScreen(
                 IdentityRow(label = "داروهای آلرژیک:", value = allergyStr.ifEmpty { "ندارد" })
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 }

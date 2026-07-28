@@ -28,7 +28,8 @@ import taminx.feature.healthprofile.generated.resources.*
 fun SelfDeclarationEmergencyScreen(
     state: EmergencyStepState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -59,15 +60,25 @@ fun SelfDeclarationEmergencyScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                FormFieldsShimmerSkeleton(fieldCount = 4)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             WarningBanner(
                 message = stringResource(Res.string.health_emergency_desc),
             )
@@ -122,7 +133,7 @@ fun SelfDeclarationEmergencyScreen(
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
-}
+}}
 
 @PreviewRtlTheme
 @Preview
