@@ -1212,9 +1212,13 @@ internal const val FAKE_AGENT_RESPONSE = """{
 """
 
 /**
- * Renders one of every bubble type, one entity at a time, so the whole chat surface can
- * be exercised without a backend. Sample figures and imagery come from a public news
- * item about the organisation's finances so the demo looks realistic.
+ * Renders one of every bubble type, one entity at a time, so the whole chat surface
+ * can be exercised without a backend.
+ *
+ * Each entity carries its content in the payload the same way the server would, so
+ * adjusting the demo means editing this fixture — never the service that reads it.
+ * Sample figures and imagery come from a public news item about the organisation's
+ * finances so the demo reads realistically.
  */
 internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
     "id": "showcase-request",
@@ -1228,106 +1232,122 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             {
                 "key": "showcase",
                 "step_number": 1,
-                "payload": { "filter": ["variant:rich_text"] },
+                "payload": {"type": "rich_text", "title": "کسری ۹۰ همتی تامین اجتماعی", "text": "مدیرعامل سازمان تامین اجتماعی از ناترازی ۹۰ همتی منابع و بدهی ۷۵۰ همتی دولت به این سازمان خبر داد و به شمار ۲۹۰ هزار نفری متقاضیان بیمه بیکاری اشاره کرد.", "footnote": "منبع: دنیای اقتصاد — ۱۴۰۵/۰۴/۲۲"},
                 "data": null,
-                "message": "گزارش وضعیت مالی سازمان",
-                "message_id": "showcase-rich_text"
+                "message": "گزارش وضعیت مالی",
+                "message_id": "showcase-1"
             },
             {
                 "key": "showcase",
                 "step_number": 2,
-                "payload": { "filter": ["variant:text"] },
+                "payload": {"type": "text", "text": "مصارف ماهانه سازمان حدود ۲۱۰ همت است، در حالی که وصول حق بیمه ماهانه کمتر از ۱۲۰ همت گزارش شده است."},
                 "data": null,
                 "message": "توضیح تکمیلی",
-                "message_id": "showcase-text"
+                "message_id": "showcase-2"
             },
             {
                 "key": "showcase",
                 "step_number": 3,
-                "payload": { "filter": ["variant:key_value"] },
+                "payload": {"type": "image", "image": "https://cdn.donya-e-eqtesad.com/thumbnail/lxq0x0mNjWDN/QHn8O9nsSzT8qCU7RegsN6Pbb5v74eEtbKeSOh05RaYNq9kWHVLNyUt7TZyzEhnm/0d50adf9ZjoxMzU1NDQ5MC5qcGd8ZnVpOjE2MjY0NTIxfGw6ZmF8djoxfHdpOjU2Nw+copy.jpg", "caption": "نشست خبری مدیرعامل سازمان تامین اجتماعی"},
                 "data": null,
-                "message": "ارقام کلیدی",
-                "message_id": "showcase-key_value"
+                "message": "تصویر خبر",
+                "message_id": "showcase-3"
             },
             {
                 "key": "showcase",
                 "step_number": 4,
-                "payload": { "filter": ["variant:chart"] },
+                "payload": {"type": "key_value", "title": "ارقام کلیدی گزارش", "items": [{"key": "کسری ماهانه", "value": "۹۰ همت"}, {"key": "مصارف ماهانه", "value": "۲۱۰ همت"}, {"key": "وصول حق بیمه", "value": "کمتر از ۱۲۰ همت"}, {"key": "بدهی دولت", "value": "۷۵۰ همت"}]},
                 "data": null,
-                "message": "نمودار منابع و مصارف",
-                "message_id": "showcase-chart"
+                "message": "ارقام کلیدی",
+                "message_id": "showcase-4"
             },
             {
                 "key": "showcase",
                 "step_number": 5,
-                "payload": { "filter": ["variant:chart_line"] },
+                "payload": {"type": "table", "title": "ترکیب بدهی‌ها به سازمان", "columns": ["عنوان", "مبلغ", "سهم"], "rows": [["بدهی دولت", "۷۵۰ همت", "۷۹٪"], ["بدهی کارفرمایان", "۲۰۰ همت", "۲۱٪"], ["جمع کل", "۹۵۰ همت", "۱۰۰٪"]]},
                 "data": null,
-                "message": "روند بدهی‌ها",
-                "message_id": "showcase-chart_line"
+                "message": "جدول بدهی‌ها",
+                "message_id": "showcase-5"
             },
             {
                 "key": "showcase",
                 "step_number": 6,
-                "payload": { "filter": ["variant:image"] },
+                "payload": {"type": "table", "title": "آمار پوشش بیمه‌ای", "columns": ["شاخص", "۱۴۰۲", "۱۴۰۳", "۱۴۰۴", "۱۴۰۵", "روند"], "rows": [["بیمه‌شدگان (میلیون)", "۴۴", "۴۵", "۴۶", "۴۷", "صعودی"], ["مستمری‌بگیران (میلیون)", "۴.۶", "۴.۸", "۵.۰", "۵.۲", "صعودی"], ["نسبت پشتیبانی", "۹.۵", "۹.۳", "۹.۱", "۹.۰", "نزولی"]]},
                 "data": null,
-                "message": "تصویر نشست خبری",
-                "message_id": "showcase-image"
+                "message": "جدول عریض",
+                "message_id": "showcase-6"
             },
             {
                 "key": "showcase",
                 "step_number": 7,
-                "payload": { "filter": ["variant:video"] },
+                "payload": {"type": "chart", "title": "منابع و مصارف ماهانه", "kind": "bar", "labels": ["مصارف", "وصولی", "کسری"], "series": "ماهانه", "values": [210, 120, 90], "unit": "همت"},
                 "data": null,
-                "message": "گزارش تصویری",
-                "message_id": "showcase-video"
+                "message": "نمودار منابع و مصارف",
+                "message_id": "showcase-7"
             },
             {
                 "key": "showcase",
                 "step_number": 8,
-                "payload": { "filter": ["variant:voice"] },
+                "payload": {"type": "chart", "title": "ترکیب بدهی‌ها", "kind": "line", "labels": ["کارفرمایان", "دولت"], "series": "بدهی", "values": [200, 750], "unit": "همت"},
                 "data": null,
-                "message": "خلاصه صوتی",
-                "message_id": "showcase-voice"
+                "message": "روند بدهی",
+                "message_id": "showcase-8"
             },
             {
                 "key": "showcase",
                 "step_number": 9,
-                "payload": { "filter": ["variant:deep_link"] },
+                "payload": {"type": "video", "video": "https://www.tamin.ir/video/sample.mp4", "thumbnail": "https://cdn.donya-e-eqtesad.com/thumbnail/lxq0x0mNjWDN/QHn8O9nsSzT8qCU7RegsN6Pbb5v74eEtbKeSOh05RaYNq9kWHVLNyUt7TZyzEhnm/0d50adf9ZjoxMzU1NDQ5MC5qcGd8ZnVpOjE2MjY0NTIxfGw6ZmF8djoxfHdpOjU2Nw+copy.jpg", "duration": "96000", "caption": "گزارش تصویری نشست خبری"},
                 "data": null,
-                "message": "دسترسی به سرویس",
-                "message_id": "showcase-deep_link"
+                "message": "گزارش تصویری",
+                "message_id": "showcase-9"
             },
             {
                 "key": "showcase",
                 "step_number": 10,
-                "payload": { "filter": ["variant:web_link"] },
+                "payload": {"type": "voice", "audio": "https://www.tamin.ir/audio/sample.m4a", "duration": "18000", "caption": "خلاصه صوتی گزارش", "waveform": [2000, 6500, 12000, 18000, 9000, 4200, 15000, 22000, 17000, 8000, 3000, 11000, 19000, 26000, 21000, 12000, 5000, 9500, 16000, 7000]},
                 "data": null,
-                "message": "متن کامل گزارش",
-                "message_id": "showcase-web_link"
+                "message": "خلاصه صوتی",
+                "message_id": "showcase-10"
             },
             {
                 "key": "showcase",
                 "step_number": 11,
-                "payload": { "filter": ["variant:processing"] },
+                "payload": {"type": "deep_link", "title": "مشاهده اطلاعات کارگاه", "destination": "workshops"},
                 "data": null,
-                "message": "مراحل پردازش",
-                "message_id": "showcase-processing"
+                "message": "دسترسی به سرویس",
+                "message_id": "showcase-11"
             },
             {
                 "key": "showcase",
                 "step_number": 12,
-                "payload": { "filter": ["variant:error"] },
+                "payload": {"type": "web_link", "title": "متن کامل گزارش", "url": "https://donya-e-eqtesad.com/4281737"},
                 "data": null,
-                "message": "نمونه خطا",
-                "message_id": "showcase-error"
+                "message": "متن کامل خبر",
+                "message_id": "showcase-12"
             },
             {
                 "key": "showcase",
                 "step_number": 13,
-                "payload": { "filter": ["variant:suggestions"] },
+                "payload": {"type": "processing", "steps": ["بررسی درخواست", "دریافت آمار", "آماده‌سازی پاسخ"], "active": "2", "completed": "true"},
+                "data": null,
+                "message": "مراحل پردازش",
+                "message_id": "showcase-13"
+            },
+            {
+                "key": "showcase",
+                "step_number": 14,
+                "payload": {"type": "error", "text": "دریافت آمار لحظه‌ای ممکن نشد."},
+                "data": null,
+                "message": "نمونه خطا",
+                "message_id": "showcase-14"
+            },
+            {
+                "key": "showcase",
+                "step_number": 15,
+                "payload": {"type": "suggestions", "prompts": ["بدهی دولت به تامین اجتماعی چقدر است؟", "چند نفر مستمری‌بگیر هستند؟", "شرایط بیمه بیکاری چیست؟"]},
                 "data": null,
                 "message": "پیشنهادها",
-                "message_id": "showcase-suggestions"
+                "message_id": "showcase-15"
             }
         ]
     }

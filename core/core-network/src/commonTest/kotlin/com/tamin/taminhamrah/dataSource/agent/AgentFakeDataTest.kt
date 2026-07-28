@@ -44,12 +44,16 @@ class AgentFakeDataTest {
         val entities = assertNotNull(data.result?.entities)
         assertTrue(entities.all { it.key == "showcase" }, "every entity drives the showcase")
 
-        // Each entity must request a distinct variant, otherwise the demo repeats itself.
-        val variants = entities.map { entity ->
-            entity.payload.toString().substringAfter("variant:").substringBefore('"')
+        // Every entity carries its own content, keyed by the bubble type it drives.
+        val types = entities.mapNotNull { entity ->
+            (entity.payload as? kotlinx.serialization.json.JsonObject)
+                ?.get("type")
+                ?.let { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
         }
-        assertEquals(variants.size, variants.toSet().size, "variants must be unique: $variants")
-        assertTrue(variants.size >= 10, "expected the full bubble tour, got ${variants.size}")
+        assertEquals(entities.size, types.size, "every entity needs a payload type")
+        assertTrue(types.size >= 10, "expected the full bubble tour, got ${types.size}")
+        // The tour must cover the media and data views, not just text.
+        assertTrue(types.containsAll(listOf("rich_text", "image", "table", "chart", "video", "voice")))
     }
 
     @Test

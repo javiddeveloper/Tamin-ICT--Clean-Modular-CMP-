@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ImageBubble
+import com.tamin.taminhamrah.feature.agent.ui.bubble.TableBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.RichTextBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.VideoBubble
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentEvent
@@ -1239,6 +1240,11 @@ private fun BubbleContentRenderer(
         is ChatBubbleContent.Chart -> {
             onAnimationFinished()
             ChartBubble(content)
+        }
+
+        is ChatBubbleContent.Table -> {
+            onAnimationFinished()
+            TableBubble(content)
         }
 
         is ChatBubbleContent.RichText -> {

@@ -6,138 +6,154 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChartKind
 import com.tamin.taminhamrah.feature.agent.service.base.ChartSeries
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.filterValue
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
+import com.tamin.taminhamrah.feature.agent.service.base.KeyValueRow
+import com.tamin.taminhamrah.feature.agent.service.base.TableRow
 import com.tamin.taminhamrah.model.agent.AgentActionKey
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.doubleOrNull
 
 /**
- * Demo service that renders one bubble type per call, so every answer shape can be
- * exercised end to end without a backend.
+ * Builds a bubble from whatever the response describes, one type per entity.
  *
- * The fixture sends one entity per `variant`, which makes them arrive one after another
- * in the chat exactly like a real multi-step answer. Sample content is drawn from a
- * public news item about the organisation's finances purely so the numbers and imagery
- * look realistic.
+ * Everything it renders — titles, body text, image URLs, table rows, chart values —
+ * comes from the entity payload, exactly as it would from a real backend. Nothing is
+ * hardcoded here, so changing the demo means editing the fixture, not this class.
  *
- * Delete this together with [AgentActionKey.SHOWCASE] once the real backend is wired.
+ * The payload shape is one object per bubble, keyed by `type`:
+ * ```json
+ * { "type": "rich_text", "title": "…", "text": "…", "footnote": "…" }
+ * { "type": "image",     "image": "https://…", "caption": "…" }
+ * { "type": "table",     "title": "…", "columns": ["…"], "rows": [["…","…"]] }
+ * { "type": "chart",     "title": "…", "kind": "bar", "labels": [], "values": [] }
+ * ```
  */
 class ShowcaseAgentService : AgentServiceUseCase {
 
     override val supportedKeys: List<AgentActionKey> = listOf(AgentActionKey.SHOWCASE)
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        val bubble = when (params.filterValue("variant")) {
+        val payload = params.payload as? JsonObject
+            ?: return AgentServiceResult.Success(
+                listOf(ChatBubbleContent.Text(params.message.orEmpty()))
+            )
+
+        val bubble = when (payload.string("type")) {
             "rich_text" -> ChatBubbleContent.RichText(
-                header = HEADLINE,
-                body = LEAD,
-                footnote = "منبع: دنیای اقتصاد — ۱۴۰۵/۰۴/۲۲"
+                header = payload.string("title").orEmpty(),
+                body = payload.string("text").orEmpty(),
+                footnote = payload.string("footnote")
             )
 
             "text" -> ChatBubbleContent.Text(
-                "بر پایه این گزارش، مصارف ماهانه سازمان حدود ۲۱۰ همت است در حالی که " +
-                    "وصول حق بیمه ماهانه کمتر از ۱۲۰ همت گزارش شده است."
+                payload.string("text") ?: params.message.orEmpty()
             )
 
             "key_value" -> ChatBubbleContent.KeyValue(
-                title = "ارقام کلیدی گزارش",
-                items = listOf(
-                    "کسری ماهانه" to "۹۰ همت",
-                    "مصارف ماهانه" to "۲۱۰ همت",
-                    "وصول حق بیمه ماهانه" to "کمتر از ۱۲۰ همت",
-                    "بدهی دولت" to "۷۵۰ همت",
-                    "بدهی کارفرمایان" to "۲۰۰ همت",
-                    "بیمه‌شدگان تحت پوشش" to "۴۷ میلیون نفر",
-                    "مستمری‌بگیران" to "۵.۲ میلیون نفر"
-                ).toKeyValueRows()
+                title = payload.string("title"),
+                items = payload.objects("items").map {
+                    KeyValueRow(
+                        key = it.string("key").orEmpty(),
+                        value = it.string("value").orEmpty()
+                    )
+                }
+            )
+
+            "table" -> ChatBubbleContent.Table(
+                title = payload.string("title"),
+                columns = payload.strings("columns"),
+                rows = payload.arrays("rows").map { row ->
+                    TableRow(cells = row.map { (it as? JsonPrimitive)?.content.orEmpty() })
+                }
             )
 
             "chart" -> ChatBubbleContent.Chart(
-                title = "منابع و مصارف ماهانه (همت)",
-                kind = ChartKind.BAR,
-                labels = listOf("مصارف", "وصولی", "کسری"),
-                series = listOf(ChartSeries(name = "ماهانه", values = listOf(210.0, 120.0, 90.0))),
-                valueUnit = "همت"
-            )
-
-            "chart_line" -> ChatBubbleContent.Chart(
-                title = "روند بدهی‌ها (همت)",
-                kind = ChartKind.LINE,
-                labels = listOf("کارفرمایان", "دولت"),
-                series = listOf(ChartSeries(name = "بدهی", values = listOf(200.0, 750.0))),
-                valueUnit = "همت"
+                title = payload.string("title"),
+                kind = when (payload.string("kind")) {
+                    "line" -> ChartKind.LINE
+                    "pie" -> ChartKind.PIE
+                    else -> ChartKind.BAR
+                },
+                labels = payload.strings("labels"),
+                series = listOf(
+                    ChartSeries(
+                        name = payload.string("series"),
+                        values = payload.doubles("values")
+                    )
+                ),
+                valueUnit = payload.string("unit")
             )
 
             "image" -> ChatBubbleContent.Image(
-                source = ARTICLE_IMAGE,
-                caption = "نشست خبری مدیرعامل سازمان تامین اجتماعی"
+                source = payload.string("image").orEmpty(),
+                caption = payload.string("caption")
             )
 
             "video" -> ChatBubbleContent.Video(
-                source = "https://www.tamin.ir/video/sample.mp4",
-                thumbnailUrl = ARTICLE_IMAGE,
-                durationMs = 96_000L,
-                caption = "گزارش تصویری نشست خبری"
+                source = payload.string("video").orEmpty(),
+                thumbnailUrl = payload.string("thumbnail"),
+                durationMs = payload.string("duration")?.toLongOrNull(),
+                caption = payload.string("caption")
             )
 
             "voice" -> ChatBubbleContent.Voice(
-                source = "https://www.tamin.ir/audio/sample.m4a",
-                durationMs = 18_000L,
-                amplitudes = SAMPLE_WAVEFORM,
-                caption = "خلاصه صوتی گزارش"
+                source = payload.string("audio").orEmpty(),
+                durationMs = payload.string("duration")?.toLongOrNull(),
+                amplitudes = payload.doubles("waveform").map { it.toInt() },
+                caption = payload.string("caption")
             )
 
             "deep_link" -> ChatBubbleContent.DeepLink(
-                title = "مشاهده سوابق و دستمزد",
-                destination = "workshops"
+                title = payload.string("title").orEmpty(),
+                destination = payload.string("destination").orEmpty()
             )
 
             "web_link" -> ChatBubbleContent.WebLink(
-                title = "متن کامل گزارش در دنیای اقتصاد",
-                url = ARTICLE_URL
+                title = payload.string("title").orEmpty(),
+                url = payload.string("url").orEmpty()
             )
 
             "processing" -> ChatBubbleContent.ProcessingSteps(
-                steps = listOf("بررسی درخواست", "دریافت آمار", "آماده‌سازی پاسخ"),
-                currentActiveIndex = 2,
-                isCompleted = true
+                steps = payload.strings("steps"),
+                currentActiveIndex = payload.string("active")?.toIntOrNull() ?: 0,
+                isCompleted = payload.string("completed")?.toBooleanStrictOrNull() ?: false
             )
 
             "error" -> ChatBubbleContent.ServiceError(
-                message = "دریافت آمار لحظه‌ای ممکن نشد.",
+                message = payload.string("text").orEmpty(),
                 canRetryPrompt = true,
                 actionKey = AgentActionKey.SHOWCASE
             )
 
-            "suggestions" -> ChatBubbleContent.SuggestedPrompts(
-                prompts = listOf(
-                    "بدهی دولت به تامین اجتماعی چقدر است؟",
-                    "چند نفر مستمری‌بگیر هستند؟",
-                    "شرایط بیمه بیکاری چیست؟"
-                )
-            )
+            "suggestions" -> ChatBubbleContent.SuggestedPrompts(payload.strings("prompts"))
 
-            else -> ChatBubbleContent.Text(params.message ?: "نمونه‌ای برای نمایش انتخاب نشد.")
+            else -> ChatBubbleContent.Text(params.message.orEmpty())
         }
 
         return AgentServiceResult.Success(listOf(bubble))
     }
-
-    private companion object {
-        const val HEADLINE = "کسری ۹۰ همتی تامین اجتماعی"
-        const val LEAD =
-            "مدیرعامل سازمان تامین اجتماعی از ناترازی ۹۰ همتی منابع و بدهی ۷۵۰ همتی دولت " +
-                "به این سازمان خبر داد و به شمار ۲۹۰ هزار نفری متقاضیان بیمه بیکاری اشاره کرد."
-        const val ARTICLE_URL =
-            "https://donya-e-eqtesad.com/بخش-بازار-پول-ارز-116/4281737"
-        const val ARTICLE_IMAGE =
-            "https://cdn.donya-e-eqtesad.com/thumbnail/lxq0x0mNjWDN/" +
-                "QHn8O9nsSzT8qCU7RegsN6Pbb5v74eEtbKeSOh05RaYNq9kWHVLNyUt7TZyzEhnm/" +
-                "0d50adf9ZjoxMzU1NDQ5MC5qcGd8ZnVpOjE2MjY0NTIxfGw6ZmF8djoxfHdpOjU2Nw+copy.jpg"
-
-        /** A hand-shaped waveform so the voice bubble looks like real speech. */
-        val SAMPLE_WAVEFORM = listOf(
-            2000, 6500, 12000, 18000, 9000, 4200, 15000, 22000, 17000, 8000,
-            3000, 11000, 19000, 26000, 21000, 12000, 5000, 9500, 16000, 7000
-        )
-    }
 }
+
+// ─── Payload readers ──────────────────────────────────────────────────────────
+// Small helpers so the builder above reads as a straight mapping. Anything missing or
+// of the wrong shape comes back empty rather than throwing, since fixture and backend
+// payloads both evolve.
+
+private fun JsonObject.string(key: String): String? =
+    (this[key] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() }
+
+private fun JsonObject.strings(key: String): List<String> =
+    (this[key] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.content }
+
+private fun JsonObject.doubles(key: String): List<Double> =
+    (this[key] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.doubleOrNull }
+
+private fun JsonObject.objects(key: String): List<JsonObject> =
+    (this[key] as? JsonArray).orEmpty().mapNotNull { it as? JsonObject }
+
+private fun JsonObject.arrays(key: String): List<JsonArray> =
+    (this[key] as? JsonArray).orEmpty().mapNotNull { it as? JsonArray }
+
+private fun JsonArray?.orEmpty(): List<kotlinx.serialization.json.JsonElement> =
+    this ?: emptyList()

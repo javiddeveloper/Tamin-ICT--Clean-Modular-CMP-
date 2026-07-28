@@ -121,6 +121,19 @@ sealed interface ChatBubbleContent {
         val valueUnit: String? = null
     ) : DataView
 
+    /**
+     * A tabular readout. Unlike [KeyValue] this has real columns, so the renderer can
+     * lay it out responsively — sharing the width when the columns fit, and scrolling
+     * horizontally when they do not.
+     */
+    @Serializable
+    @SerialName("table")
+    data class Table(
+        val title: String? = null,
+        val columns: List<String>,
+        val rows: List<TableRow>
+    ) : DataView
+
     // ── Interactive ──────────────────────────────────────────────────────────
 
     /** Bubbles the user can act on. */
@@ -180,6 +193,10 @@ sealed interface ChatBubbleContent {
 /** One row of a [ChatBubbleContent.KeyValue] readout. */
 @Serializable
 data class KeyValueRow(val key: String, val value: String)
+
+/** One row of a [ChatBubbleContent.Table]; cells line up with the table's columns. */
+@Serializable
+data class TableRow(val cells: List<String>)
 
 /** One plotted series of a [ChatBubbleContent.Chart]. */
 @Serializable
