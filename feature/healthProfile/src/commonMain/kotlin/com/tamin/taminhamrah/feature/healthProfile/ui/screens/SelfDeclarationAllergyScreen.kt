@@ -26,6 +26,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.components.IconBox
 import org.jetbrains.compose.resources.painterResource
 import taminx.feature.healthprofile.generated.resources.Res
@@ -35,6 +36,7 @@ import taminx.feature.healthprofile.generated.resources.ic_health_tobacco
 @Composable
 fun SelfDeclarationAllergyScreen(
     state: AllergyStepState,
+    drugOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -43,9 +45,6 @@ fun SelfDeclarationAllergyScreen(
 
     var showBottomsheet by remember { mutableStateOf(false) }
 
-    var selectedDrugIndex by remember { mutableStateOf(-1) }
-    var allergyDesc by remember { mutableStateOf("") }
-    val drugList = listOf("پنی‌سیلین", "استامینوفن", "آسپیرین", "ایبوپروفن", "آموکسی‌سیلین", "سفکسیم", "سفالکسین", "مترونیدازول")
 
     Scaffold(
         topBar = {
@@ -100,8 +99,10 @@ fun SelfDeclarationAllergyScreen(
             DashedAddButton(
                 label = "افزودن حساسیت دارویی جدید",
                 onClick = {
-                    selectedDrugIndex = -1
-                    allergyDesc = ""
+                    onIntent(HealthProfileIntent.UpdateAllergy(state.copy(
+                        selectedDrugId = null,
+                        allergyDesc = ""
+                    )))
                     showBottomsheet = true
                 }
             )
@@ -147,11 +148,11 @@ fun SelfDeclarationAllergyScreen(
                     singleSelection = true,
                     submitText = "افزودن",
                     cancelText = "انصراف",
-                    items = drugList.mapIndexed { index, drug ->
+                    items = drugOptions.map { drug ->
                         BottomSheetItem(
-                            id = index,
-                            title = drug,
-                            isSelected = index == selectedDrugIndex
+                            id = drug.id,
+                            title = drug.label,
+                            isSelected = drug.id == state.selectedDrugId
                         )
                     }
                 ),
@@ -159,9 +160,10 @@ fun SelfDeclarationAllergyScreen(
                 onSubmit = { result ->
                     val selectedId = result.selectedItemIds.firstOrNull()
                     if (selectedId != null) {
+                        val drugOption = drugOptions.find { it.id == selectedId }
                         val allergy = DrugAllergyItemPR(
                             drugId = selectedId,
-                            drugName = drugList[selectedId],
+                            drugName = drugOption?.label ?: "نامشخص",
                             allergyComments = result.description?.takeIf { it.isNotBlank() } ?: "فاقد توضیحات عارضه"
                         )
                         onIntent(
@@ -184,10 +186,9 @@ fun SelfDeclarationAllergyScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationAllergyScreen(
             state = AllergyStepState(
-                allergies = listOf(
-//                    PatientDrugAllergyMock(1, "پنی‌سیلین", "راش پوستی")
-                )
+                allergies = listOf()
             ),
+            drugOptions = listOf(),
             onIntent = {},
             onBackClicked = {}
         )
