@@ -705,6 +705,50 @@ private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
 }
 
 /**
+ * Follow-up suggestion chips. Tapping one sends it as the next prompt.
+ *
+ * Rendered inside the reply bubble it belongs to, so an answer and its suggestions stay
+ * a single chat item rather than two rows with two timestamps.
+ */
+@Composable
+private fun SuggestedPromptChips(
+    prompts: List<String>,
+    onPromptClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            text = "پیشنهادات:",
+            style = MaterialTheme.typography.labelSmall.copy(color = taminColors.textMuted)
+        )
+        prompts.forEach { prompt ->
+            SuggestionChip(
+                onClick = { onPromptClick(prompt) },
+                label = {
+                    Text(
+                        text = prompt,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                },
+                colors = SuggestionChipDefaults.suggestionChipColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                border = SuggestionChipDefaults.suggestionChipBorder(
+                    enabled = true,
+                    borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                )
+            )
+        }
+    }
+}
+
+/**
  * Shown when the assistant service is unreachable. The cached conversation stays visible
  * behind it — only sending a new prompt is blocked.
  */
@@ -982,6 +1026,15 @@ private fun ChatBubbleItem(
                         Box(modifier = Modifier.padding(vertical = 4.dp)) {
                             renderContent(MaterialTheme.colorScheme.onSurface)
                         }
+                        // Follow-up suggestions belong to this reply, so they render inside
+                        // the same bubble instead of forming their own chat row.
+                        if (item.suggestedPrompts.isNotEmpty() && isAnimationFinished) {
+                            SuggestedPromptChips(
+                                prompts = item.suggestedPrompts,
+                                onPromptClick = { onIntent(AgentIntent.SendTextPrompt(it)) },
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
                         // Footer: only for agent bubbles, not SuggestedPrompts
                         if (item.content !is ChatBubbleContent.SuggestedPrompts && isAnimationFinished) {
                             AgentBubbleFooter()
@@ -1155,34 +1208,14 @@ private fun BubbleContentRenderer(
                     isVisible = true
                 }
             }
-            // No enter animation — chips just appear once ready (avoids the load lag).
+            // Fallback path: suggestions normally ride inside the reply bubble (see
+            // ChatItem.suggestedPrompts) and only land here when they arrive with no
+            // reply to attach to. No enter animation — the chips just appear.
             if (isVisible) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "پیشنهادات:",
-                        style = MaterialTheme.typography.labelSmall.copy(color = taminColors.textMuted)
-                    )
-                    content.prompts.forEach { prompt ->
-                        SuggestionChip(
-                            onClick = { /* onSendPrompt(prompt) */ },
-                            label = {
-                                Text(
-                                    text = prompt,
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                            },
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            border = SuggestionChipDefaults.suggestionChipBorder(
-                                enabled = true,
-                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                            )
-                        )
-                    }
-                }
+                SuggestedPromptChips(
+                    prompts = content.prompts,
+                    onPromptClick = { onIntent(AgentIntent.SendTextPrompt(it)) }
+                )
             }
         }
 

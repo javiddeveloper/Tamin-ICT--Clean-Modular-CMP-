@@ -137,7 +137,12 @@ data class ChatItem(
     val id: String,
     val sender: ChatSender,
     val content: ChatBubbleContent,
-    val isTypingAnimating: Boolean = false
+    val isTypingAnimating: Boolean = false,
+    /**
+     * Follow-up suggestions belonging to this reply. They render inside the same bubble
+     * rather than as their own chat row, so one answer stays one item in the list.
+     */
+    val suggestedPrompts: List<String> = emptyList()
 )
 
 enum class ChatSender { User, Agent }

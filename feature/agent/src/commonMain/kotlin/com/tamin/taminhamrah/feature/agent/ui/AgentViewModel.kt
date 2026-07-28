@@ -313,7 +313,7 @@ class AgentViewModel(
                     kotlinx.coroutines.delay(400L)
 
                     // --- Phase 3: Emit all result bubbles sequentially ---
-                    allResultItems.forEach { item ->
+                    allResultItems.foldSuggestionsIntoReplies().forEach { item ->
                         emit(PartialState.NewChatItems(listOf(item)))
                         cacheBubble(item)
                         sendEvent(AgentEvent.ScrollToBottom)
@@ -419,7 +419,7 @@ class AgentViewModel(
                     content = it,
                     isTypingAnimating = true
                 )
-            }
+            }.foldSuggestionsIntoReplies()
             emit(PartialState.NewChatItems(items))
             sendEvent(AgentEvent.ScrollToBottom)
         }
@@ -508,7 +508,7 @@ class AgentViewModel(
                 content = content,
                 isTypingAnimating = false
             )
-        }
+        }.foldSuggestionsIntoReplies()
 
         // Prune the empty chat we are leaving behind, then switch over.
         resolveNationalCode()?.let { runCatching { pruneEmptyAgentSessionUseCase(it) } }
@@ -735,6 +735,30 @@ class AgentViewModel(
                 map(playing, pos, dur)?.let { emit(it) }
                 !started || playing
             }
+    }
+
+    /**
+     * Folds standalone suggestion bubbles into the reply they belong to.
+     *
+     * The dispatcher appends `SuggestedPrompts` as its own bubble, which would otherwise
+     * become a separate chat row with its own timestamp and action footer. Attaching them
+     * to the preceding agent item keeps one answer as one item. A suggestion arriving with
+     * no reply before it is kept as its own item so nothing is silently dropped.
+     */
+    private fun List<ChatItem>.foldSuggestionsIntoReplies(): List<ChatItem> {
+        val folded = mutableListOf<ChatItem>()
+        forEach { item ->
+            val prompts = (item.content as? ChatBubbleContent.SuggestedPrompts)?.prompts
+            val previous = folded.lastOrNull()
+            if (prompts != null && previous != null && previous.sender == ChatSender.Agent) {
+                folded[folded.lastIndex] = previous.copy(
+                    suggestedPrompts = previous.suggestedPrompts + prompts
+                )
+            } else {
+                folded.add(item)
+            }
+        }
+        return folded
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

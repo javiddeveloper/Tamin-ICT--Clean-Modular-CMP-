@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.agent.service.FakeFeatureManager
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceRegistry
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentIntent
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentUiState
+import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
@@ -249,6 +250,50 @@ class AgentViewModelTest {
         runCurrent()
 
         assertEquals(InputMode.Voice, viewModel.uiState.value.inputMode)
+    }
+
+    @Test
+    fun `suggestions ride inside the reply instead of becoming their own chat row`() = runTest {
+        viewModel = createViewModel()
+        viewModel.sendIntent(AgentIntent.CheckPermission)
+        advanceUntilIdle()
+        // An entity whose data carries prompt_items: the dispatcher appends them as a
+        // separate SuggestedPrompts bubble, which must be folded into the reply.
+        val data = kotlinx.serialization.json.Json.parseToJsonElement(
+            """[{"item_type":"prompt_item","prompt":"سابقه من"},
+                {"item_type":"prompt_item","prompt":"حقوق من"}]"""
+        )
+        fakeAgentRepository.sendPromptFlow = flowOf(
+            AgentPollingState.Done(
+                com.tamin.taminhamrah.model.agent.AgentResponseDN(
+                    sessionId = "s",
+                    lastEntity = null,
+                    entities = listOf(
+                        com.tamin.taminhamrah.model.agent.AiEntityDN(
+                            action = com.tamin.taminhamrah.model.agent.AgentActionKey.GENERAL_RESPONSE,
+                            stepNumber = 1,
+                            payload = null,
+                            data = data,
+                            message = "پاسخ",
+                            itemType = null
+                        )
+                    )
+                )
+            )
+        )
+
+        viewModel.sendIntent(AgentIntent.SendTextPrompt("سلام"))
+        advanceUntilIdle()
+
+        val agentItems = viewModel.uiState.value.chatItems.filter { it.sender == ChatSender.Agent }
+        assertEquals(1, agentItems.size, "the reply and its suggestions must be one item")
+        assertEquals(listOf("سابقه من", "حقوق من"), agentItems.single().suggestedPrompts)
+        assertTrue(
+            viewModel.uiState.value.chatItems.none {
+                it.content is com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent.SuggestedPrompts
+            },
+            "no standalone suggestions row should remain"
+        )
     }
 
     // ─── Typing animation ─────────────────────────────────────────────────────
