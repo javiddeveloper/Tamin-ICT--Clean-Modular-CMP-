@@ -32,25 +32,29 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 /**
  * A highly interactive, premium Ruler Picker component.
  * Allows users to choose a value (like height or weight) by dragging the ruler
  * or using increment/decrement buttons.
  *
- * @param value The current value.
+ * @param value The current value (nullable for optional state).
  * @param onValueChange Callback when the value changes.
  * @param range The valid range of integers.
  * @param unit The unit label (e.g. "سانتی‌متر" or "کیلوگرم").
+ * @param defaultPoint Default position on the ruler when value is unselected.
  * @param accentColor The color of the main pointer and active buttons.
  */
 @Composable
 fun RulerPicker(
     modifier: Modifier = Modifier,
-    value: Int,
+    value: Int?,
     onValueChange: (Int) -> Unit,
     range: IntRange,
     unit: String,
+    defaultPoint: Int = range.first + (range.last - range.first) / 2,
     accentColor: Color = LocalTaminColors.current.blueText
 ) {
     val taminColors = LocalTaminColors.current
@@ -60,13 +64,15 @@ fun RulerPicker(
     val tickSpacingPx = 24f // spacing between ticks in pixels
     val totalTicks = range.last - range.first
 
+    val activeValue = value ?: defaultPoint
+
     // We maintain a float offset representing the scroll position
     // Center of screen represents the current value
-    val scrollOffset = remember { Animatable((value - range.first) * tickSpacingPx) }
+    val scrollOffset = remember { Animatable((activeValue - range.first) * tickSpacingPx) }
 
     // Synchronize external value changes (e.g., from buttons)
     LaunchedEffect(value) {
-        val targetOffset = (value - range.first) * tickSpacingPx
+        val targetOffset = (activeValue - range.first) * tickSpacingPx
         if (scrollOffset.value.roundToInt() != targetOffset.roundToInt()) {
             scrollOffset.animateTo(targetOffset)
         }
@@ -88,9 +94,8 @@ fun RulerPicker(
             // Increment Button
             IconButton(
                 onClick = {
-                    if (value < range.last) {
-                        onValueChange(value + 1)
-                    }
+                    val nextVal = if (value == null) defaultPoint else (value + 1).coerceAtMost(range.last)
+                    onValueChange(nextVal)
                 },
                 modifier = Modifier
                     .size(38.dp)
@@ -98,7 +103,7 @@ fun RulerPicker(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "افزایش",
+                    contentDescription = stringResource(Res.string.health_ruler_increase),
                     tint = accentColor,
                     modifier = Modifier.size(18.dp)
                 )
@@ -108,10 +113,10 @@ fun RulerPicker(
 
             // Current Value Display (JetBrains Mono for styling)
             TaminText(
-                text = value.toString(),
+                text = value?.toString() ?: stringResource(Res.string.health_physical_unselected_value),
                 fontSize = 44.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = taminColors.textPrimary,
+                color = if (value != null) taminColors.textPrimary else taminColors.textMuted,
                 lineHeight = 44.sp,
                 modifier = Modifier.alignByBaseline()
             )
@@ -136,9 +141,8 @@ fun RulerPicker(
             // Decrement Button
             IconButton(
                 onClick = {
-                    if (value > range.first) {
-                        onValueChange(value - 1)
-                    }
+                    val prevVal = if (value == null) defaultPoint else (value - 1).coerceAtLeast(range.first)
+                    onValueChange(prevVal)
                 },
                 modifier = Modifier
                     .size(38.dp)
@@ -146,7 +150,7 @@ fun RulerPicker(
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
-                    contentDescription = "کاهش",
+                    contentDescription = stringResource(Res.string.health_ruler_decrease),
                     tint = taminColors.textSecondary,
                     modifier = Modifier.size(18.dp)
                 )

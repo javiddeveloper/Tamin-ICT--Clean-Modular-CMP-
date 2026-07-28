@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -32,48 +31,57 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.formatDecimal
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 /**
  * A beautiful, premium BMI Gauge Meter component.
  * Displays BMI score, category, gradient track indicator, and customized health advice.
  *
- * @param bmi The Body Mass Index value (typically 15.0 to 40.0).
+ * @param bmi The Body Mass Index value (typically 15.0 to 40.0, or null if physical stats are unselected).
  */
 @Composable
 fun BmiMeter(
     modifier: Modifier = Modifier,
-    bmi: Float
+    bmi: Float?
 ) {
     val taminColors = LocalTaminColors.current
 
     // Determine category characteristics
     val (categoryText, categoryBgColor, categoryTextColor, adviceMsg, dotColor) = when {
+        bmi == null -> BmiInfo(
+            category = stringResource(Res.string.health_bmi_unselected_category),
+            bgColor = taminColors.divider,
+            textColor = taminColors.textMuted,
+            advice = stringResource(Res.string.health_bmi_empty_advice),
+            dotColor = taminColors.textMuted
+        )
         bmi < 18.5f -> BmiInfo(
-            category = "کمبود وزن",
+            category = stringResource(Res.string.health_bmi_underweight_category),
             bgColor = taminColors.blueBg,
             textColor = taminColors.blueText,
-            advice = "شما کمبود وزن دارید. تغذیه مناسب و متعادل توصیه می‌شود.",
+            advice = stringResource(Res.string.health_bmi_underweight_advice),
             dotColor = taminColors.blueText
         )
         bmi in 18.5f..24.9f -> BmiInfo(
-            category = "وزن طبیعی",
+            category = stringResource(Res.string.health_bmi_normal_category),
             bgColor = taminColors.greenBg,
             textColor = taminColors.greenText,
-            advice = "وزن شما طبیعی است. برای حفظ شیوه زندگی فعال و وزن مناسب تلاش کنید.",
+            advice = stringResource(Res.string.health_bmi_normal_advice),
             dotColor = taminColors.greenText
         )
         bmi in 25.0f..29.9f -> BmiInfo(
-            category = "اضافه وزن",
+            category = stringResource(Res.string.health_bmi_overweight_category),
             bgColor = taminColors.orangeBg,
             textColor = taminColors.orangeText,
-            advice = "شما دچار اضافه وزن خفیف هستید. افزایش فعالیت بدنی و کنترل کالری توصیه می‌شود.",
+            advice = stringResource(Res.string.health_bmi_overweight_advice),
             dotColor = taminColors.orangeText
         )
         else -> BmiInfo(
-            category = "چاقی شدید",
+            category = stringResource(Res.string.health_bmi_obese_category),
             bgColor = taminColors.dangerBorder.copy(alpha = 0.25f),
             textColor = taminColors.dangerText,
-            advice = "شاخص توده بدنی نشان‌دهنده چاقی است. مشاوره با متخصص تغذیه پیشنهاد می‌شود.",
+            advice = stringResource(Res.string.health_bmi_obese_advice),
             dotColor = taminColors.dangerText
         )
     }
@@ -81,7 +89,7 @@ fun BmiMeter(
     // Gauge track layout calculations (Min 15.0, Max 40.0)
     val gaugeMin = 15.0f
     val gaugeMax = 40.0f
-    val pointerTargetFraction = ((bmi - gaugeMin) / (gaugeMax - gaugeMin)).coerceIn(0f, 1f)
+    val pointerTargetFraction = if (bmi != null) ((bmi - gaugeMin) / (gaugeMax - gaugeMin)).coerceIn(0f, 1f) else 0f
 
     // Smoothly animate pointer movement on gauge track
     val animatedPointerFraction by animateFloatAsState(
@@ -137,7 +145,7 @@ fun BmiMeter(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 TaminText(
-                    text = "شاخص تودهٔ بدنی (BMI)",
+                    text = stringResource(Res.string.health_bmi_title),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
                         fontWeight = FontWeight.Bold,
@@ -152,10 +160,10 @@ fun BmiMeter(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TaminText(
-                    text = bmi.toDouble().formatDecimal(1),
+                    text = bmi?.toDouble()?.formatDecimal(1) ?: stringResource(Res.string.health_physical_unselected_value),
                     fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary,
+                    color = if (bmi != null) taminColors.textPrimary else taminColors.textMuted,
                     lineHeight = 42.sp
                 )
 
@@ -213,36 +221,38 @@ fun BmiMeter(
                         cornerRadius = CornerRadius(100f, 100f)
                     )
 
-                    // Draw Pointer Indicator overlay
-                    val pointerX = w * animatedPointerFraction
-                    val pointerRadius = 7f
+                    // Draw Pointer Indicator overlay if BMI is present
+                    if (bmi != null) {
+                        val pointerX = w * animatedPointerFraction
+                        val pointerRadius = 7f
 
-                    // Outer white ring
-                    drawCircle(
-                        color = Color.White,
-                        radius = pointerRadius + 3f,
-                        center = Offset(pointerX, size.height / 2)
-                    )
-                    // Inner colored center
-                    drawCircle(
-                        color = dotColor,
-                        radius = pointerRadius,
-                        center = Offset(pointerX, size.height / 2)
-                    )
+                        // Outer white ring
+                        drawCircle(
+                            color = Color.White,
+                            radius = pointerRadius + 3f,
+                            center = Offset(pointerX, size.height / 2)
+                        )
+                        // Inner colored center
+                        drawCircle(
+                            color = dotColor,
+                            radius = pointerRadius,
+                            center = Offset(pointerX, size.height / 2)
+                        )
+                    }
                 }
             }
 
-            // Gauge labels (in English/Standard layout)
+            // Gauge labels
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TaminText("کمبود", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                TaminText("طبیعی", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                TaminText("اضافه", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                TaminText("چاقی", style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText(stringResource(Res.string.health_bmi_underweight_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText(stringResource(Res.string.health_bmi_normal_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText(stringResource(Res.string.health_bmi_overweight_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
+                TaminText(stringResource(Res.string.health_bmi_obese_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -297,6 +307,7 @@ private fun BmiMeterPreview() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            BmiMeter(bmi = null) // Unselected
             BmiMeter(bmi = 16.5f) // Underweight
             BmiMeter(bmi = 22.0f) // Normal
             BmiMeter(bmi = 27.5f) // Overweight
