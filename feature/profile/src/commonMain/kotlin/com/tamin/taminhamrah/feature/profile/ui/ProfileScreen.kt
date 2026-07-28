@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -54,12 +53,12 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
+
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
+
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import kotlin.math.abs
+
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -75,6 +74,7 @@ import com.tamin.taminhamrah.ui.motion.motionParallax
 import com.tamin.taminhamrah.ui.motion.motionScale
 import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
+import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
@@ -216,29 +216,11 @@ fun ProfileContent(
     val topBarGradient = remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
     val defaultBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.border) }
     val dangerBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.dangerBorder) }
-    val snapFlingBehavior = remember(lazyListState, decaySpec) {
-        snapFlingBehavior(
-            snapLayoutInfoProvider = object : SnapLayoutInfoProvider {
-                override fun calculateSnapOffset(velocity: Float): Float {
-                    if (lazyListState.firstVisibleItemIndex == 0) {
-                        val currentOffset = lazyListState.firstVisibleItemScrollOffset.toFloat()
-                        val maxScrollPx = motionState.maxMotionDistancePx
-                        if (currentOffset > 0 && currentOffset < maxScrollPx) {
-                            val targetOffset = if (abs(velocity) > 500f) {
-                                if (velocity > 0) maxScrollPx else 0f
-                            } else {
-                                if (currentOffset < maxScrollPx / 2f) 0f else maxScrollPx
-                            }
-                            return targetOffset - currentOffset
-                        }
-                    }
-                    return 0f
-                }
-            },
-            decayAnimationSpec = decaySpec,
-            snapAnimationSpec = spring(stiffness = Spring.StiffnessLow)
-        )
-    }
+    val snapFlingBehavior = rememberMotionSnapFlingBehavior(
+        lazyListState = lazyListState,
+        motionState = motionState,
+        decayAnimationSpec = decaySpec
+    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
