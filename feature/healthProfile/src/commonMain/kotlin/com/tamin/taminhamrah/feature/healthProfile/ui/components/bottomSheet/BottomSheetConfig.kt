@@ -32,6 +32,8 @@ enum class BottomSheetType(
     ILLNESS_HISTORY(groupId = 2, title = "آیا سابقه ابتلا به بیماری دارید؟", isSingleSelect = false),
     MENTAL(groupId = 3, title = "آیا بیماری اعصاب و روان دارید؟", isSingleSelect = false),
     CANCER(groupId = 4, title = "ایا سابقه ابتلا به سرطان دارید ؟", isSingleSelect = false),
+    FAMILY_DISEASES(groupId = 5, title = "آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟", isSingleSelect = false),
+    FAMILY_CANCER(groupId = 6, title = "سابقه ابتلا به سرطان در خانواده", isSingleSelect = false),
     PROVINCE(groupId = 9, title = "استان", isSingleSelect = true, showSearch = true),
     CITY(groupId = 8, title = "شهر", isSingleSelect = true, showSearch = true),
     BLOOD_GROUP(groupId = 101, title = "گروه خونی", isSingleSelect = true),
@@ -55,3 +57,11 @@ data class BottomSheetResult(
     val text: String? = null,
     val description: String? = null
 )
+
+fun List<com.tamin.taminhamrah.feature.healthProfile.ui.model.IllnessGroupPR>.findGroup(
+    type: BottomSheetType,
+    forFamily: Boolean = false
+): com.tamin.taminhamrah.feature.healthProfile.ui.model.IllnessGroupPR? {
+    return find { it.groupId == type.groupId && it.forFamily == forFamily }
+}
+
