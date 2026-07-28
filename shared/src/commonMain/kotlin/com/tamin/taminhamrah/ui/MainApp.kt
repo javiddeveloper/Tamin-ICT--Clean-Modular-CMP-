@@ -39,35 +39,25 @@ fun MainApp(
         DarkThemeConfig.DARK -> true
     }
 
-    val revealController = rememberThemeRevealController()
     TaminHamrahTheme(
         darkTheme = darkTheme
     ) {
         AppToastHost {
-            CompositionLocalProvider(
-                LocalThemeRevealController provides revealController
-            ) {
-                ThemeRevealHost(
-                    controller = revealController
-                ) {
-                    StatusBarIcons(darkIcons = !darkTheme)
-                    RequestNotificationPermissionOnLogin(isLoggedIn = uiState.isLoggedIn)
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            TaminHamrahNavGraph(
-                                isLoggedIn = uiState.isLoggedIn,
-                                isLoading = uiState.isLoading,
-                                onLoginClick = { viewModel.login() }
-                            )
-                        }
+            StatusBarIcons(darkIcons = !darkTheme)
+            RequestNotificationPermissionOnLogin(isLoggedIn = uiState.isLoggedIn)
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    TaminHamrahNavGraph(
+                        isLoggedIn = uiState.isLoggedIn,
+                        isLoading = uiState.isLoading,
+                        onLoginClick = { viewModel.login() }
+                    )
+                }
 
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
         }
-            }
-
     }
 }
