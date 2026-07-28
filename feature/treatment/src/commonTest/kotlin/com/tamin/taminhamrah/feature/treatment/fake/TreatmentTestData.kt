@@ -8,6 +8,16 @@ import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 /**
  * Central factory of sample domain models for the treatment dashboard + costs
  * ViewModel tests.
+
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
+
+/**
+ * Central factory of sample domain models for the treatment dashboard ViewModel tests.
+ *
+ * Keeping fixtures in one place (instead of inlined per fake/test) keeps the test
+ * doubles small and lets every dashboard test share consistent, realistic data.
  */
 object TreatmentTestData {
 
@@ -59,6 +69,25 @@ object TreatmentTestData {
         releaseDate = "14020102", repId = 1, serviceDate = "14020101",
         status = "Status", statusDesc = "Description", payStatusDesc = "PayDescription",
         returnReason = "None"
+
+    fun prescription() = ElectronicPrescriptionDN(
+        id = "1", docId = "doc1", docName = "Doctor", flagSata = "1",
+        location = "Location", noteHeadEprescID = 100L, patientID = "patient1",
+        patientName = "Patient", prescDate = "14020101", prescName = "Prescription",
+        specDesc = "Specialty", prescType = "1", trackingCode = 200L
+    )
+
+    fun prescriptionDetail() = ElectronicPrescriptionDetailDN(
+        sumPriceItem = 1000L, ssoPayment = 800L, insurancePayment = 200L,
+        serviceQuantity = 1, noteHeadEprescID = 100L, serverCode = "srvCode",
+        serverName = "srvName", serviceName = "serviceName", drugInst = "instruction",
+        registerDate = "14020101", drugInstruction = "drugInstruction",
+        deliveredNo = 1, drugAmount = "10"
+    )
+
+    fun prescriptionPrice() = ElectronicPrescriptionPriceDN(
+        headInsuPayment = 1000L, headSsoPayment = 800L,
+        noteHeadEprescID = 100L, requestPrice = 1800L
     )
 
     /**

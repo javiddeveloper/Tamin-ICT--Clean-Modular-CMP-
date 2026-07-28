@@ -47,7 +47,7 @@ kotlin {
 
 dependencies {
     add("kspAndroid", libs.ktorfit.ksp)
-    add("kspIosX64", libs.ktorfit.ksp)
+//    add("kspIosX64", libs.ktorfit.ksp)
     add("kspIosArm64", libs.ktorfit.ksp)
     add("kspIosSimulatorArm64", libs.ktorfit.ksp)
     add("kspCommonMainMetadata", libs.ktorfit.ksp)

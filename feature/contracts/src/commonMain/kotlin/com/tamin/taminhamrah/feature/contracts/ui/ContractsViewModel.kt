@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
+import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -35,14 +36,14 @@ class ContractsViewModel(
 
     private fun handleLoadContracts(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        
+
         val contractIds = listOf(33, 34, 36, 37, 39)
-        
+
         try {
-            val menuItems = getMainMenuUseCase("1.0.0", false).first()
+            val menuItems = getMainMenuUseCase(AppConfig.versionName, false).first()
             val contractOptions = menuItems.filter { it.id in contractIds }
             emit(PartialState.OptionsLoaded(contractOptions))
-            
+
             getContractsUseCase().collect { contracts ->
                 emit(PartialState.ContractsLoaded(contracts.toPresentation()))
             }

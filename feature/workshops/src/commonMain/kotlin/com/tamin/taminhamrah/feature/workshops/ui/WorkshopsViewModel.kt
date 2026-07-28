@@ -7,15 +7,17 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
+import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 class WorkshopsViewModel(
-    private val getAllEmployerAgreementUseCase: GetAllEmployerAgreementByNationalIdUseCase
+    private val getAllEmployerAgreementUseCase: GetAllEmployerAgreementByNationalIdUseCase,
+    private val getRegistrationDeclarationFormUseCase: GetRegistrationDeclarationFormUseCase
 ) : BaseViewModel<WorkshopsUiState, PartialState, WorkshopsEvent, WorkshopsIntent>(
     initialState = WorkshopsUiState()
 ) {
@@ -31,6 +33,20 @@ class WorkshopsViewModel(
                 intent.branchCode,
                 intent.workshopStatus
             )
+            WorkshopsIntent.TestDownloadPdf -> handleTestDownloadPdf()
+        }
+    }
+
+    private fun handleTestDownloadPdf(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        try {
+            getRegistrationDeclarationFormUseCase().collect { response ->
+                sendEvent(WorkshopsEvent.ShowToast(" ${response.size}"))
+            }
+
+            emit(PartialState.Loading(false))
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.message))
         }
     }
 
@@ -55,15 +71,7 @@ class WorkshopsViewModel(
                 filters.add(ApiFilterDN(FilterProperty.WORKSHOP_STATUS_CODE, it, FilterOperator.EQ))
             }
 
-            val queryParam = ApiQueryParamDN(
-                page = 1,
-                start = 0,
-                limit = 100,
-                filters = filters,
-                sorts = emptyList()
-            )
-
-            val response = getAllEmployerAgreementUseCase(query = queryParam)
+            val response = getAllEmployerAgreementUseCase(filters = filters)
             val list = response?.list?.map { it.toPresentation() } ?: emptyList()
             emit(PartialState.WorkshopsLoaded(list))
 

@@ -67,6 +67,44 @@ object TreatmentMocks {
         releaseDate = "1402/04/21",
         status = "1",
         returnReason = ""
+
+    val prescription = ElectronicPrescriptionPR(
+        id = "1",
+        docId = "1001",
+        docName = "علی علوی",
+        flagSata = "0",
+        location = "تهران",
+        noteHeadEprescID = "10001",
+        patientID = "2001",
+        patientName = "رضا احمدی",
+        prescDate = "1402/05/10",
+        prescName = "نسخه دارو",
+        specDesc = "متخصص قلب و عروق",
+        prescType = "دارو",
+        trackingCode = "TRK123456"
+    )
+
+    val prescriptionDetail = ElectronicPrescriptionDetailPR(
+        sumPriceItem = "150000",
+        ssoPayment = "120000",
+        insurancePayment = "30000",
+        serviceQuantity = "30",
+        noteHeadEprescID = "10001",
+        serverCode = "S1",
+        serverName = "خدمت ۱",
+        serviceName = "قرص آسپیرین 80 میلی‌گرم",
+        drugInst = "D1",
+        registerDate = "1402/05/10",
+        drugInstruction = "روزی یک عدد بعد از غذا",
+        deliveredNo = "30",
+        drugAmount = "80mg"
+    )
+
+    val prescriptionPrice = ElectronicPrescriptionPricePR(
+        requestPrice = "450000",
+        headSsoPayment = "380000",
+        headInsuPayment = "70000",
+        noteHeadEprescID = "10001"
     )
 
     val mainUiState = TreatmentUiState(
@@ -88,5 +126,14 @@ object TreatmentMocks {
 
     val costsUiState = CostsUiState(
         treatmentCostList = listOf(treatmentCost, treatmentCost.copy(healthcenterName = "آزمایشگاه نیلو", payPrice = "1200000"))
+        insuredShareTotal = 65_910L,
+        organizationShareTotal = 153_790L,
+        healthProfileCompleted = true
+    )
+
+    val prescriptionsUiState = PrescriptionsUiState(
+        prescriptionList = listOf(prescription, prescription.copy(trackingCode = "TRK654321", docName = "مریم رضایی")),
+        prescriptionDetailList = listOf(prescriptionDetail, prescriptionDetail.copy(serviceName = "کپسول آموکسی‌سیلین")),
+        prescriptionPriceList = listOf(prescriptionPrice)
     )
 }

@@ -5,12 +5,15 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 /**
- * Configurable fake [TreatmentRepository] for the dashboard + costs ViewModel tests.
+ * Configurable fake [TreatmentRepository] for the dashboard ViewModel tests.
  *
  * Defaults emit realistic [TreatmentTestData] so success paths work out of the box;
  * set [shouldThrowError] to drive failure paths. The error is thrown inside the emitted
@@ -23,6 +26,11 @@ class FakeTreatmentRepository : TreatmentRepository {
 
     var deservedResult: List<DeservedTreatmentDN> = listOf(TreatmentTestData.deserved())
     var dependantResult: List<DependantUserUnderEighteenDN> = listOf(TreatmentTestData.dependant())
+    var prescriptionListResult: List<ElectronicPrescriptionDN> = emptyList()
+    var prescriptionDetailResult: List<ElectronicPrescriptionDetailDN> = emptyList()
+    var prescriptionPriceResult: List<ElectronicPrescriptionPriceDN> = emptyList()
+    var prescriptionPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
+    var labResultPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
     var treatmentCostsResult: List<TreatmentCostDN> = emptyList()
     var treatmentCostsPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
     var sendToInboxResult: String = "SUCCESS"
@@ -35,9 +43,30 @@ class FakeTreatmentRepository : TreatmentRepository {
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> =
         result(deservedResult)
 
+    override suspend fun getElectronicPrescriptionList(
+        requestTypeId: String, nationalCode: String, patientNationalCode: String,
+        startDate: String, endDate: String
+    ): Flow<List<ElectronicPrescriptionDN>> = result(prescriptionListResult)
+
+    override suspend fun getElectronicPrescriptionDetail(
+        noteHeadID: String, nationalCode: String, patientNationalCode: String,
+        flagSata: String, type: String
+    ): Flow<List<ElectronicPrescriptionDetailDN>> = result(prescriptionDetailResult)
+
+    override suspend fun getElectronicPrescriptionPrice(
+        noteHeadID: String, nationalCode: String
+    ): Flow<List<ElectronicPrescriptionPriceDN>> = result(prescriptionPriceResult)
+
     override suspend fun getDependantUnderEighteen(
-        nationalCode: String, filters: List<ApiFilterDN>
+        nationalCode: String
     ): Flow<List<DependantUserUnderEighteenDN>> = result(dependantResult)
+
+    override suspend fun getPrescriptionPdfFile(prescriptionID: String): Flow<PdfDownloadDN> =
+        result(prescriptionPdfResult)
+
+    override suspend fun downloadLabResultPdf(
+        patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
+    ): Flow<PdfDownloadDN> = result(labResultPdfResult)
 
     override suspend fun getTreatmentCosts(filters: List<ApiFilterDN>): Flow<List<TreatmentCostDN>> =
         result(treatmentCostsResult)

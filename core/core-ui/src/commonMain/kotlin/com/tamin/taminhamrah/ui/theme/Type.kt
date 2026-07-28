@@ -13,105 +13,93 @@ expect fun applicationFont(): FontFamily
 @Composable
 fun taminHamrahTypography(): Typography {
     val fontFamily = applicationFont()
+    val defaultTypography = Typography()
+
     return Typography(
+        // Display
         displayLarge = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 57.sp,
-            lineHeight = 64.sp,
-            letterSpacing = (-0.25).sp
+            fontWeight = FontWeight(800),
+            fontSize = 34.sp,
+            lineHeight = 40.8.sp,
+            letterSpacing = (-0.5).sp
         ),
-        displayMedium = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 45.sp,
-            lineHeight = 52.sp
-        ),
-        displaySmall = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 36.sp,
-            lineHeight = 44.sp
-        ),
+        displayMedium = defaultTypography.displayMedium.copy(fontFamily = fontFamily),
+        displaySmall = defaultTypography.displaySmall.copy(fontFamily = fontFamily),
+        // H1
         headlineLarge = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            lineHeight = 40.sp
+            fontWeight = FontWeight(800),
+            fontSize = 28.sp,
+            lineHeight = 35.sp,
+            letterSpacing = (-0.3).sp
         ),
+        // H2
         headlineMedium = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
-            lineHeight = 36.sp
+            fontWeight = FontWeight(700),
+            fontSize = 24.sp,
+            lineHeight = 31.2.sp,
+            letterSpacing = (-0.2).sp
         ),
+        // H3
         headlineSmall = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            lineHeight = 32.sp
+            fontWeight = FontWeight(700),
+            fontSize = 20.sp,
+            lineHeight = 27.sp,
+            letterSpacing = 0.sp
         ),
+        // H4
         titleLarge = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            lineHeight = 28.sp
+            fontWeight = FontWeight(700),
+            fontSize = 17.sp,
+            lineHeight = 23.8.sp,
+            letterSpacing = 0.sp
         ),
-        titleMedium = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.15.sp
-        ),
-        titleSmall = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp
-        ),
+        titleMedium = defaultTypography.titleMedium.copy(fontFamily = fontFamily),
+        titleSmall = defaultTypography.titleSmall.copy(fontFamily = fontFamily),
+        // Body Large
         bodyLarge = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight(400),
             fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.5.sp
+            lineHeight = 27.2.sp,
+            letterSpacing = 0.sp
         ),
+        // Body Medium
         bodyMedium = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight(400),
             fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.25.sp
+            lineHeight = 23.8.sp,
+            letterSpacing = 0.sp
         ),
+        // Body Small
         bodySmall = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.4.sp
+            fontWeight = FontWeight(400),
+            fontSize = 13.sp,
+            lineHeight = 20.8.sp,
+            letterSpacing = 0.sp
         ),
+        // Label
         labelLarge = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp
+            fontWeight = FontWeight(700),
+            fontSize = 12.5.sp,
+            lineHeight = 17.5.sp,
+            letterSpacing = 0.2.sp
         ),
+        // Caption
         labelMedium = TextStyle(
             fontFamily = fontFamily,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight(500),
             fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp
+            lineHeight = 18.sp,
+            letterSpacing = 0.sp
         ),
-        labelSmall = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 11.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp
-        )
+        labelSmall = defaultTypography.labelSmall.copy(fontFamily = fontFamily)
     )
 }

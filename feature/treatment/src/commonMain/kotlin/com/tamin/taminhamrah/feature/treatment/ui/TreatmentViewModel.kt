@@ -5,20 +5,31 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState.PartialState
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.mapper.treatment.toPresentation
-import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
+import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.transform
 
 class TreatmentViewModel(
-    private val tokenStoreManager: TokenStoreManager,
     private val getDeservedTreatmentUseCase: GetDeservedTreatmentUseCase,
     private val getDependantUnderEighteenUseCase: GetDependantUnderEighteenUseCase,
-    private val identityInfoUseCase: IdentityInfoUseCase
+    private val identityInfoUseCase: IdentityInfoUseCase,
+    private val featureManager: FeatureManager
 ) : BaseViewModel<TreatmentUiState, PartialState, TreatmentEvent, TreatmentIntent>(
     initialState = TreatmentUiState()
 ) {
@@ -27,24 +38,71 @@ class TreatmentViewModel(
         return when (intent) {
             is TreatmentIntent.InitTreatmentFlow -> initTreatmentFlow()
             is TreatmentIntent.SelectPatient -> flow { emit(PartialState.PatientSelected(intent.nationalCode, intent.fullName)) }
-            is TreatmentIntent.SwitchFlow -> flow { emit(PartialState.FlowSwitched(intent.flow)) }
+            is TreatmentIntent.OpenRecords -> openRecords(intent.tab)
+        }
+    }
+
+    /**
+     * Checks the feature's flag before opening the records screen.
+     *
+     * Mirrors how the home services gate: enabled navigates, disabled explains itself, and
+     * "enabled with error" does both so a degraded service is still reachable.
+     */
+    private fun openRecords(tab: RecordTab): Flow<PartialState> = flow {
+        val nationalCode = uiState.value.selectedNationalCode
+            ?: // Nothing to open for: the carousel has not resolved a patient yet.
+            return@flow
+
+        val status = try {
+            featureManager.getFeatureStatus(FeatureFlag.PRESCRIPTION).first()
+        } catch (e: Exception) {
+            // A flag lookup that fails must not lock the person out of the feature.
+            FeatureStatus.Enabled
+        }
+
+        when (status) {
+            is FeatureStatus.Enabled ->
+                sendEvent(TreatmentEvent.NavigateToRecords(nationalCode, tab))
+
+            is FeatureStatus.EnabledWithError -> {
+                status.message?.let {
+                    sendEvent(TreatmentEvent.ShowMessage(it, TreatmentMessageType.OPERATION_FAILED))
+                }
+                sendEvent(TreatmentEvent.NavigateToRecords(nationalCode, tab))
+            }
+
+            is FeatureStatus.Disabled -> sendEvent(
+                TreatmentEvent.ShowMessage(
+                    status.message ?: ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage(),
+                    TreatmentMessageType.OPERATION_FAILED,
+                ),
+            )
+
+            is FeatureStatus.TemporaryDisabled -> sendEvent(
+                TreatmentEvent.ShowMessage(
+                    status.message ?: ErrorUri.FEATURE_TEMPORARILY_UNAVAILABLE.toSingleLineMessage(),
+                    TreatmentMessageType.OPERATION_FAILED,
+                ),
+            )
+
+            // No in-app screen for a web-hosted service yet; saying so beats opening nothing.
+            is FeatureStatus.WebView -> sendEvent(
+                TreatmentEvent.ShowMessage(
+                    ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage(),
+                    TreatmentMessageType.OPERATION_FAILED
+                ),
+            )
         }
     }
 
     private fun initTreatmentFlow(): Flow<PartialState> = flow {
         emit(PartialState.Reset)
         emit(PartialState.Loading(true))
-        var nationalCode = tokenStoreManager.getUserId() ?: ""
-        if (nationalCode.isEmpty()) {
-            try {
-                val identity = identityInfoUseCase().first()
-                nationalCode = identity.nationalId ?: ""
-                if (nationalCode.isNotEmpty()) {
-                    tokenStoreManager.saveUserId(nationalCode)
-                }
-            } catch (e: Exception) {
-                // Ignore and proceed
-            }
+
+        val nationalCode = try {
+            identityInfoUseCase().first().nationalId ?: ""
+        } catch (e: Exception) {
+            ""
         }
 
         if (nationalCode.isEmpty()) {
@@ -55,29 +113,30 @@ class TreatmentViewModel(
         emit(PartialState.MainUserNationalCodeLoaded(nationalCode))
         emit(PartialState.PatientSelected(nationalCode, "کاربر اصلی"))
 
-        var mainUserFullName = "کاربر اصلی"
-        // Load Deserved Status
-        try {
-            getDeservedTreatmentUseCase(nationalCode).collect { list ->
+        val deservedFlow: Flow<PartialState> = getDeservedTreatmentUseCase(nationalCode)
+            .transform { list ->
                 val presentationList = list.toPresentation()
-                presentationList.firstOrNull()?.let {
-                    mainUserFullName = it.fullName
-                }
+                val fullName = presentationList.firstOrNull()?.fullName ?: "کاربر اصلی"
                 emit(PartialState.DeservedLoaded(presentationList))
-                emit(PartialState.PatientSelected(nationalCode, mainUserFullName))
+                emit(PartialState.PatientSelected(nationalCode, fullName))
             }
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-        }
+            .catch { e ->
+                emit(PartialState.Error(e.toSingleLineMessage()))
+            }
 
-        // Load Dependants under 18 (supplementary; ignore failures)
-        try {
-            getDependantUnderEighteenUseCase(nationalCode).collect { list ->
-                emit(PartialState.DependantsLoaded(list.toPresentation()))
+        val dependantFlow: Flow<PartialState> = getDependantUnderEighteenUseCase(nationalCode)
+            .map { list -> PartialState.DependantsLoaded(list.toPresentation()) }
+            .catch { e ->
+                sendEvent(
+                    TreatmentEvent.ShowMessage(
+                        e.toSingleLineMessage(),
+                        TreatmentMessageType.OPERATION_FAILED
+                    )
+                )
+                emit(PartialState.DependantsLoaded(emptyList()))
             }
-        } catch (e: Exception) {
-            // Ignore dependant load failures; they are non-critical.
-        }
+
+        emitAll(merge(deservedFlow, dependantFlow))
     }
 
     override fun reduceState(
@@ -91,9 +150,8 @@ class TreatmentViewModel(
         is PartialState.DependantsLoaded -> currentState.copy(isLoading = false, dependantList = partialState.list)
 
         // Navigation and sub-flow switches
-        is PartialState.FlowSwitched -> currentState.copy(
-            activeFlow = partialState.flow,
-            error = null
+        is PartialState.HealthProfileStatusLoaded -> currentState.copy(
+            healthProfileCompleted = partialState.isCompleted
         )
         is PartialState.PatientSelected -> currentState.copy(
             selectedNationalCode = partialState.nationalCode,

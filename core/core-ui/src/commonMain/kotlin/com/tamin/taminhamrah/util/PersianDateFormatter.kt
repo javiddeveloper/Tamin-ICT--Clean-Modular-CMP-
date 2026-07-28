@@ -1,8 +1,22 @@
 package com.tamin.taminhamrah.util
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+
+private const val PERSIAN_ZERO = '۰'
+
+/**
+ * Converts the ASCII digits in this string to Persian-Indic digits, leaving every
+ * other character untouched. Shared by the date and price formatters so both render
+ * numerals the same way.
+ */
+fun String.toPersianDigits(): String = map { char ->
+    if (char in '0'..'9') PERSIAN_ZERO + (char - '0') else char
+}.joinToString("")
 
 object PersianDateFormatter {
 
@@ -14,6 +28,111 @@ object PersianDateFormatter {
         return "${jy.toPersianDigits()}/${jm.toTwoDigitPersian()}/${jd.toTwoDigitPersian()}"
     }
 
+    /**
+     * The current year in the Jalali calendar. Used for labeling current-year totals,
+     * which would otherwise need a hardcoded year that silently goes stale.
+     */
+    fun currentJalaliYear(): Int {
+        val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        return gregorianToJalali(dateTime.year, dateTime.monthNumber, dateTime.dayOfMonth).first
+    }
+
+    /** Jalali month names, index 0 = فروردین. */
+    val monthNames: List<String> = listOf(
+        "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+        "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند",
+    )
+
+    /** Today, as a Jalali year/month/day. */
+    fun today(): Triple<Int, Int, Int> {
+        val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        return gregorianToJalali(dateTime.year, dateTime.monthNumber, dateTime.dayOfMonth)
+    }
+
+    /** Days in a Jalali month: 31 for the first six, 30 for the next five, 29/30 for اسفند. */
+    fun daysInMonth(jy: Int, jm: Int): Int = when {
+        jm <= 6 -> 31
+        jm <= 11 -> 30
+        isLeapYear(jy) -> 30
+        else -> 29
+    }
+
+    /**
+     * Which weekday a Jalali month starts on, as 0 = شنبه … 6 = جمعه.
+     *
+     * The grid needs this to indent the first row; kotlinx's [LocalDate.dayOfWeek] is Monday-based,
+     * so it is shifted to put شنبه first.
+     */
+    fun firstWeekdayOfMonth(jy: Int, jm: Int): Int {
+        val (gy, gm, gd) = jalaliToGregorian(jy, jm, 1)
+        val isoDayNumber = LocalDate(gy, gm, gd).dayOfWeek.isoDayNumber
+        return (isoDayNumber + 1) % 7
+    }
+
+    /** Midnight of a Jalali date, in epoch milliseconds, for the date-range endpoints. */
+    fun toEpochMillis(jy: Int, jm: Int, jd: Int): Long {
+        val (gy, gm, gd) = jalaliToGregorian(jy, jm, jd)
+        return LocalDate(gy, gm, gd)
+            .atStartOfDayIn(TimeZone.currentSystemDefault())
+            .toEpochMilliseconds()
+    }
+
+    /** Formats a Jalali date the way the API and the UI both spell it: `1404/02/15`. */
+    fun format(jy: Int, jm: Int, jd: Int): String =
+        "${jy.toPersianDigits()}/${jm.toTwoDigitPersian()}/${jd.toTwoDigitPersian()}"
+
+    /**
+     * Whether اسفند has 30 days, derived from the conversion's own day count rather than a
+     * separate cycle rule: two independent leap rules drift apart, and the one that disagreed put
+     * a 30th of اسفند on the 1st of فروردین.
+     */
+    private fun isLeapYear(jy: Int): Boolean =
+        dayNumber(jy + 1, 1, 1) - dayNumber(jy, 1, 1) == DAYS_IN_LEAP_YEAR
+
+    /** Days elapsed since the Jalali epoch, the quantity [jalaliToGregorian] is built on. */
+    private fun dayNumber(jy: Int, jm: Int, jd: Int): Int {
+        val jy1 = jy - 979
+        val jm1 = jm - 1
+        return 365 * jy1 + (jy1 / 33) * 8 + ((jy1 % 33) + 3) / 4 +
+            (if (jm1 < 6) 31 * jm1 else 186 + 30 * (jm1 - 6)) + (jd - 1)
+    }
+
+    /** Inverse of [gregorianToJalali], using the same day-count arithmetic. */
+    private fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
+        val dayCount = dayNumber(jy, jm, jd)
+        // 78 pairs with the 355660 above; the two directions must agree or a picked date comes
+        // back a day different from what was tapped.
+        var gDayNo = dayCount + 78
+        var gy = 1600 + 400 * (gDayNo / 146097)
+        gDayNo %= 146097
+        var leap = true
+        if (gDayNo >= 36525) {
+            gDayNo--
+            gy += 100 * (gDayNo / 36524)
+            gDayNo %= 36524
+            if (gDayNo >= 365) gDayNo++ else leap = false
+        }
+        gy += 4 * (gDayNo / 1461)
+        gDayNo %= 1461
+        if (gDayNo >= 366) {
+            leap = false
+            gDayNo--
+            gy += gDayNo / 365
+            gDayNo %= 365
+        }
+        val monthLengths = intArrayOf(
+            31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+        )
+        var gm = 0
+        while (gm < 12 && gDayNo >= monthLengths[gm]) {
+            gDayNo -= monthLengths[gm]
+            gm++
+        }
+        return Triple(gy, gm + 1, gDayNo + 1)
+    }
+
     private fun Int.toTwoDigitPersian(): String {
         return toString().padStart(2, '0').toPersianDigits()
     }
@@ -22,28 +141,13 @@ object PersianDateFormatter {
         return toString().toPersianDigits()
     }
 
-    private fun String.toPersianDigits(): String {
-        return map { char ->
-            when (char) {
-                '0' -> '۰'
-                '1' -> '۱'
-                '2' -> '۲'
-                '3' -> '۳'
-                '4' -> '۴'
-                '5' -> '۵'
-                '6' -> '۶'
-                '7' -> '۷'
-                '8' -> '۸'
-                '9' -> '۹'
-                else -> char
-            }
-        }.joinToString("")
-    }
-
     private fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
         val gDaysInMonth = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
         val gy2 = if (gm > 2) gy + 1 else gy
-        var days = 355666 + (365 * gy) + ((gy2 + 3) / 4) - ((gy2 + 99) / 100) + ((gy2 + 399) / 400) + gd + gDaysInMonth[gm - 1]
+        // 355660, not 355666: the larger constant shifted every converted date six days late, so
+        // Nowruz 1404 (2025-03-20) formatted as 1404/01/07. Verified against four known Nowruz
+        // dates in PersianDateFormatterTest.
+        var days = 355660 + (365 * gy) + ((gy2 + 3) / 4) - ((gy2 + 99) / 100) + ((gy2 + 399) / 400) + gd + gDaysInMonth[gm - 1]
         var jy = -1595 + (33 * (days / 12053))
         days %= 12053
         jy += 979 * (days / 36524)
@@ -56,4 +160,6 @@ object PersianDateFormatter {
         val jd = 1 + if (days < 186) days % 31 else (days - 186) % 30
         return Triple(jy, jm, jd)
     }
+
+    private const val DAYS_IN_LEAP_YEAR = 366
 }

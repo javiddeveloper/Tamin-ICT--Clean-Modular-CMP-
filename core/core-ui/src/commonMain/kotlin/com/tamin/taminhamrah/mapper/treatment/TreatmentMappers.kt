@@ -38,6 +38,67 @@ fun List<DeservedTreatmentDN>.toPresentation(): List<DeservedTreatmentPR> {
     return this.map { it.toPresentation() }
 }
 
+fun ElectronicPrescriptionDN.toPresentation(): ElectronicPrescriptionPR {
+    return ElectronicPrescriptionPR(
+        id = id ?: "",
+        docId = docId ?: "",
+        docName = docName ?: "نامشخص",
+        flagSata = flagSata ?: "",
+        location = location ?: "",
+        noteHeadEprescID = noteHeadEprescID?.toString() ?: "",
+        patientID = patientID ?: "",
+        patientName = patientName ?: "نامشخص",
+        prescDate = prescDate ?: "",
+        prescName = prescName ?: "نامشخص",
+        specDesc = specDesc ?: "",
+        prescType = prescType ?: "",
+        trackingCode = trackingCode?.toString() ?: ""
+    )
+}
+
+@JvmName("toPrescriptionPresentation")
+fun List<ElectronicPrescriptionDN>.toPresentation(): List<ElectronicPrescriptionPR> {
+    return this.map { it.toPresentation() }
+}
+
+fun ElectronicPrescriptionDetailDN.toPresentation(): ElectronicPrescriptionDetailPR {
+    return ElectronicPrescriptionDetailPR(
+        sumPriceItem = sumPriceItem?.toString() ?: "0",
+        ssoPayment = ssoPayment?.toString() ?: "0",
+        insurancePayment = insurancePayment?.toString() ?: "0",
+        serviceQuantity = serviceQuantity?.toString() ?: "0",
+        noteHeadEprescID = noteHeadEprescID?.toString() ?: "",
+        serverCode = serverCode ?: "",
+        serverName = serverName ?: "",
+        serviceName = serviceName ?: "نامشخص",
+        drugInst = drugInst ?: "",
+        registerDate = registerDate ?: "",
+        drugInstruction = drugInstruction ?: "",
+        deliveredNo = deliveredNo?.toString() ?: "0",
+        drugAmount = drugAmount ?: ""
+    )
+}
+
+@JvmName("toDetailPresentation")
+fun List<ElectronicPrescriptionDetailDN>.toPresentation(): List<ElectronicPrescriptionDetailPR> {
+    return this.map { it.toPresentation() }
+}
+
+fun ElectronicPrescriptionPriceDN.toPresentation(): ElectronicPrescriptionPricePR {
+    return ElectronicPrescriptionPricePR(
+        headInsuPayment = headInsuPayment?.toString() ?: "0",
+        headSsoPayment = headSsoPayment?.toString() ?: "0",
+        noteHeadEprescID = noteHeadEprescID?.toString() ?: "",
+        requestPrice = requestPrice?.toString() ?: "0"
+    )
+}
+
+@JvmName("toPricePresentation")
+fun List<ElectronicPrescriptionPriceDN>.toPresentation(): List<ElectronicPrescriptionPricePR> {
+    return this.map { it.toPresentation() }
+}
+
+
 fun DependantUserUnderEighteenDN.toPresentation(): DependantUserUnderEighteenPR {
     return DependantUserUnderEighteenPR(
         id = id?.toString() ?: "",
@@ -90,3 +151,4 @@ fun List<TreatmentCostDN>.toPresentation(): List<TreatmentCostPR> {
 
 /** Normalizes a numeric amount string (digits only) to a plain Long string, defaulting to "0". */
 private fun String?.toLongStringOrZero(): String = this?.toLongOrNull()?.toString() ?: "0"
+

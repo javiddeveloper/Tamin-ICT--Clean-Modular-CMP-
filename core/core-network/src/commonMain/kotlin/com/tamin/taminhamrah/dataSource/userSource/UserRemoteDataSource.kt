@@ -28,6 +28,7 @@ interface UserRemoteDataSource {
     suspend fun sendImageRequest(branchCode: String, filter: List<ApiFilterDN>): String
     suspend fun changeMobile(mobile: String): EditMobileResponseDto
     suspend fun verifyChangeMobileCode(request: VerifyMobileRequest): String
+    suspend fun checkUserIsNew(nationalId: String): Boolean
 
     suspend fun getSubDominantsInfo(
         query: ApiQueryParamDN

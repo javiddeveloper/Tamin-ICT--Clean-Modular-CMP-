@@ -28,6 +28,45 @@ data class DeservedTreatmentDN(
     val trackingCode: String?
 )
 
+data class ElectronicPrescriptionDN(
+    val id: String?,
+    val docId: String?,
+    val docName: String?,
+    val flagSata: String?,
+    val location: String?,
+    val noteHeadEprescID: Long?,
+    val patientID: String?,
+    val patientName: String?,
+    val prescDate: String?,
+    val prescName: String?,
+    val specDesc: String?,
+    val prescType: String?,
+    val trackingCode: Long?
+)
+
+data class ElectronicPrescriptionDetailDN(
+    val sumPriceItem: Long?,
+    val ssoPayment: Long?,
+    val insurancePayment: Long?,
+    val serviceQuantity: Int?,
+    val noteHeadEprescID: Long?,
+    val serverCode: String?,
+    val serverName: String?,
+    val serviceName: String?,
+    val drugInst: String?,
+    val registerDate: String?,
+    val drugInstruction: String?,
+    val deliveredNo: Int?,
+    val drugAmount: String?
+)
+
+data class ElectronicPrescriptionPriceDN(
+    val headInsuPayment: Long?,
+    val headSsoPayment: Long?,
+    val noteHeadEprescID: Long?,
+    val requestPrice: Long?
+)
+
 data class DependantUserUnderEighteenDN(
     val firstName: String?,
     val lastName: String?,

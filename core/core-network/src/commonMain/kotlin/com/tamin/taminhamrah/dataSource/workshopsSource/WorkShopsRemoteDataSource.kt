@@ -4,8 +4,13 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 
 interface WorkShopsRemoteDataSource {
     suspend fun getAllEmployerAgreementByNationalId(
@@ -26,4 +31,28 @@ interface WorkShopsRemoteDataSource {
         workshopId: String,
         branchCode: String
     ): WorkshopDebtInquiryDTO?
+
+    suspend fun getWorkshopObjectionableDebitList(
+        workshopNumber: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkShopDebtDTO>?
+
+    suspend fun getWorkshopRecentlyAddedMembers(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopNewMemberDTO>?
+
+    suspend fun getWorkshopsDebtsList(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopsDebtListModelDTO>?
+
+    suspend fun getWorkshopMembers(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopMemberDTO>?
+
+    suspend fun getWorkshopStackHolders(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopStackHolderDTO>?
 }

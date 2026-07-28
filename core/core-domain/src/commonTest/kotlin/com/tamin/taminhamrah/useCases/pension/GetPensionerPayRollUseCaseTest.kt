@@ -30,13 +30,14 @@ class GetPensionerPayRollUseCaseTest : BaseUseCaseTest() {
             hisYear = "1402",
             hisMon = "01"
         )
-        pensionRepository.payRollResult = expectedPayRoll
+        pensionRepository.payRollResult = listOf(expectedPayRoll)
 
         useCase.invoke(emptyList()).test {
             val result = awaitItem()
-            assertEquals(expectedPayRoll.id, result.id)
-            assertEquals(expectedPayRoll.tprDesc, result.tprDesc)
-            assertEquals(expectedPayRoll.sumAmount, result.sumAmount)
+            assertEquals(1, result.size)
+            assertEquals(expectedPayRoll.id, result.first().id)
+            assertEquals(expectedPayRoll.tprDesc, result.first().tprDesc)
+            assertEquals(expectedPayRoll.sumAmount, result.first().sumAmount)
             awaitComplete()
         }
     }

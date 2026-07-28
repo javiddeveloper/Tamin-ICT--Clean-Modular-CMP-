@@ -33,6 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +48,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.EmptyState
 import com.tamin.taminhamrah.feature.treatment.ui.components.SubFlowHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.SuccessStateCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsUiState
+import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -52,6 +56,33 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
+import org.koin.compose.viewmodel.koinViewModel
+
+/**
+ * «خسارت متفرقه» — the miscellaneous-claim certificates for the signed-in person.
+ *
+ * Its own destination in the treatment graph, so the system back button unwinds it; the hub no
+ * longer hosts it through a screen-local flow flag.
+ */
+@Composable
+fun TreatmentCostsScreen(
+    onBack: () -> Unit,
+    viewModel: TreatmentCostsViewModel = koinViewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(CostsIntent.LoadList)
+    }
+
+    TreatmentCostsContent(
+        state = state,
+        onBack = onBack,
+        onSendToInbox = { repId -> viewModel.sendIntent(CostsIntent.SendToInbox(repId)) },
+        onDownloadPdf = { repId -> viewModel.sendIntent(CostsIntent.DownloadPdf(repId)) },
+        onDismissPdf = { viewModel.sendIntent(CostsIntent.TogglePdfDialog(false)) },
+    )
+}
 
 @Composable
 fun TreatmentCostsContent(

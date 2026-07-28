@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.apiService.personal
 
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDTO
 import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -18,6 +20,7 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.Streaming
 import io.ktor.client.statement.HttpStatement
+import kotlinx.serialization.json.JsonElement
 
 interface PersonalApiService {
 
@@ -46,7 +49,7 @@ interface PersonalApiService {
         @Query("code") nationalCode: String,
         @Query("rel") relation: String = "04",
         @Query("pensionerId") pensionerId: String,
-    ): BaseDTO<String?>
+    ): BaseDTO<JsonElement?>
 
     @GET("survivor-request/list")
     suspend fun confirmSurvivorsList(
@@ -57,17 +60,28 @@ interface PersonalApiService {
     suspend fun submitFinalSurvivorPension(
         @Path("requestId") requestId: Int,
         @Body body: SubmitFinalSurvivorPensionRequest
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
 
     @POST("survivor-request")
     suspend fun saveSurvivorInfo(
         @Body body: SaveSurvivorInfoRequest
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
     @Streaming
     @GET("survivor-request/final-report")
     suspend fun getFinalSurvivorPensionPDF(
     ): HttpStatement
+
+    @PUT("documents/{personalId}")
+    suspend fun putInsuredRegistrationDocList(
+        @Path("personalId") personalId: String,
+        @Body body: List<InsuredDocDTO>
+    ): BaseDTO<String?>
+
+    @GET("personals/summary/{requestId}")
+    suspend fun getRequestSummary(
+        @Path("requestId") requestId: String
+    ): BaseDTO<NewInsuredSummaryDTO>
 
 }

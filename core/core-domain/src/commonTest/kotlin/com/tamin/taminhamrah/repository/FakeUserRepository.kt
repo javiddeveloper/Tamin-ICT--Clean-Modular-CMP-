@@ -76,7 +76,7 @@ class FakeUserRepository : UserRepository {
         emit(relationTaminAllResult)
     }
 
-    override suspend fun getElectronicFile(
+    override fun getElectronicFile(
         filters: List<ApiFilterDN>
     ): Flow<List<ElectronicFileDN>> = flow {
         if (shouldThrowError) throw error
@@ -96,5 +96,11 @@ class FakeUserRepository : UserRepository {
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
         if (shouldThrowError) throw error
         userProfileResult?.let { emit(it) }
+    }
+
+    var checkUserIsNewResult: Boolean = false
+    override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {
+        if (shouldThrowError) throw error
+        emit(checkUserIsNewResult)
     }
 }

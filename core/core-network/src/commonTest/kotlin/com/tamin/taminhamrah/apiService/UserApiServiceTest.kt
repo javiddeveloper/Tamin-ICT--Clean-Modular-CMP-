@@ -59,4 +59,19 @@ class UserApiServiceTest : BaseApiTest() {
         assertEquals("Doe", response.data?.lastName)
         assertEquals("1234567890", response.data?.nationalCode)
     }
+    @Test
+    fun `checkUserIsNew should return boolean flag`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserTestData.checkUserIsNewSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.create<UserApiService>()
+
+        val response = apiService.checkUserIsNew("0000000000")
+
+        assertEquals(200, response.status)
+        assertEquals(true, response.data)
+    }
+
 }

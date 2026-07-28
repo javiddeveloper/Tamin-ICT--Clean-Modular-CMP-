@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.UserDao
+import com.tamin.taminhamrah.data.local.dao.HealthDao
 import com.tamin.taminhamrah.data.local.dao.TreatmentDao
 import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
@@ -31,12 +32,19 @@ import com.tamin.taminhamrah.data.local.entity.RecipientEntity
 import com.tamin.taminhamrah.data.local.entity.RegistrationInfoEntity
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.local.entity.TestEntity
+import com.tamin.taminhamrah.data.local.entity.PatientGeneralEntity
+import com.tamin.taminhamrah.data.local.entity.PatientSelfDeclarativeEntity
+import com.tamin.taminhamrah.data.local.entity.DrugAllergyEntity
+import com.tamin.taminhamrah.data.local.entity.HospitalizationEntity
+import com.tamin.taminhamrah.data.local.entity.PatientVisitEntity
+import com.tamin.taminhamrah.data.local.entity.PatientLabEntity
+import com.tamin.taminhamrah.data.local.entity.PatientImagingEntity
 import com.tamin.taminhamrah.data.local.entity.DeservedTreatmentEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionDetailEntity
-import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
 import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.MedicalAuthoritiesEntity
 import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +65,13 @@ import kotlinx.coroutines.IO
         RegistrationInfoEntity::class,
         BranchEntity::class,
         MenuEntity::class,
+        PatientGeneralEntity::class,
+        PatientSelfDeclarativeEntity::class,
+        DrugAllergyEntity::class,
+        HospitalizationEntity::class,
+        PatientVisitEntity::class,
+        PatientLabEntity::class,
+        PatientImagingEntity::class,
         DeservedTreatmentEntity::class,
         ElectronicPrescriptionEntity::class,
         ElectronicPrescriptionDetailEntity::class,
@@ -82,6 +97,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun branchDao(): BranchDao
     abstract fun menuDao(): MenuDao
     abstract fun treatmentDao(): TreatmentDao
+    abstract fun healthDao(): HealthDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

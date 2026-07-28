@@ -2,11 +2,13 @@ package com.tamin.taminhamrah.feature.treatment.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.treatment.fake.FakeCityProvinceRepository
-import com.tamin.taminhamrah.feature.treatment.fake.FakeTokenStoreManager
+import com.tamin.taminhamrah.feature.treatment.fake.FakeFeatureManager
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
-import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentFlow
+import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
@@ -19,7 +21,9 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 /**
@@ -33,16 +37,16 @@ class TreatmentViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var tokenStoreManager: FakeTokenStoreManager
     private lateinit var repository: FakeTreatmentRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var viewModel: TreatmentViewModel
+    private lateinit var featureManager: FakeFeatureManager
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        tokenStoreManager = FakeTokenStoreManager()
         repository = FakeTreatmentRepository()
+        featureManager = FakeFeatureManager()
         userRepository = FakeUserRepository()
         viewModel = buildViewModel()
     }
@@ -53,17 +57,16 @@ class TreatmentViewModelTest {
     }
 
     private fun buildViewModel() = TreatmentViewModel(
-        tokenStoreManager = tokenStoreManager,
         getDeservedTreatmentUseCase = GetDeservedTreatmentUseCase(repository),
         getDependantUnderEighteenUseCase = GetDependantUnderEighteenUseCase(repository),
-        identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository())
+        identityInfoUseCase = IdentityInfoUseCase(userRepository, FakeCityProvinceRepository()),
+        featureManager = featureManager
     )
 
     @Test
     fun testInitTreatmentFlow_loadsDeservedAndDependants() = runTest(testDispatcher) {
         viewModel.uiState.test {
             val initialState = awaitItem()
-            assertEquals(TreatmentFlow.MAIN, initialState.activeFlow)
             assertEquals(null, initialState.selectedNationalCode)
 
             viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
@@ -80,6 +83,7 @@ class TreatmentViewModelTest {
 
             assertEquals(1, state.dependantList.size)
             assertEquals("9876543210", state.dependantList.first().nationalId)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -93,20 +97,10 @@ class TreatmentViewModelTest {
             val state = awaitItem()
             assertEquals("9876543210", state.selectedNationalCode)
             assertEquals("Child Name", state.selectedPatientName)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
-    @Test
-    fun testSwitchFlow_updatesActiveFlowState() = runTest(testDispatcher) {
-        viewModel.uiState.test {
-            awaitItem() // initial state
-
-            viewModel.sendIntent(TreatmentIntent.SwitchFlow(TreatmentFlow.HEALTH_PROFILE))
-
-            val state = awaitItem()
-            assertEquals(TreatmentFlow.HEALTH_PROFILE, state.activeFlow)
-        }
-    }
 
     @Test
     fun testInitTreatmentFlow_emitsMainUserNationalCodeImmediately() = runTest(testDispatcher) {
@@ -121,6 +115,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("1234567890", state.mainUserNationalCode)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -138,12 +133,12 @@ class TreatmentViewModelTest {
             }
             assertNotNull(state.error)
             assertEquals(false, state.isLoading)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun testInitTreatmentFlow_whenNoUserIdAndNoIdentity_emitsUserNotFoundError() = runTest(testDispatcher) {
-        tokenStoreManager = FakeTokenStoreManager(storedUserId = null)
         userRepository = FakeUserRepository().apply {
             identityResult = identityResult.copy(nationalId = null)
         }
@@ -158,6 +153,35 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals("اطلاعات کاربری یافت نشد.", state.error)
+            cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun openRecords_whenFeatureEnabled_emitsNavigation() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Enabled
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE))
+            val event = assertIs<TreatmentEvent.NavigateToRecords>(awaitItem())
+            assertEquals(RecordTab.MEDICINE, event.tab)
+        }
+    }
+
+    @Test
+    fun openRecords_whenFeatureDisabled_explainsInsteadOfNavigating() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Disabled("سرویس غیرفعال است")
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE))
+            // The gate must say why rather than silently doing nothing.
+            val event = assertIs<TreatmentEvent.ShowMessage>(awaitItem())
+            assertEquals("سرویس غیرفعال است", event.message)
+        }
+    }
+
 }
