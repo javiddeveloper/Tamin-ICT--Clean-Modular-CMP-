@@ -12,6 +12,7 @@ import com.russhwolf.settings.serialization.decodeValueOrNull
 import com.russhwolf.settings.serialization.encodeValue
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.model.UserData
+import com.tamin.taminhamrah.repository.UserPreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

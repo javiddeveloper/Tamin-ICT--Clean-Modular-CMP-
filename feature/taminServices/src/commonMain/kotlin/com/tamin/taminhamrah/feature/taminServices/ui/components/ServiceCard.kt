@@ -41,7 +41,8 @@ fun ServiceCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDark = isSystemInDarkTheme()
+    val colors = LocalTaminColors.current
+    val isDark = colors == DarkTaminColors
     val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
         service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
         service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
