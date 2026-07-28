@@ -1219,6 +1219,10 @@ internal const val FAKE_AGENT_RESPONSE = """{
  * adjusting the demo means editing this fixture — never the service that reads it.
  * Sample figures and imagery come from a public news item about the organisation's
  * finances so the demo reads realistically.
+ *
+ * NOTE: the video URL is an Aparat CDN link whose wmsAuthSign token expires within
+ * hours. When the clip stops loading, re-run scripts/refresh_showcase_video.py to pull
+ * a fresh link, or point the entity at any direct mp4.
  */
 internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
     "id": "showcase-request",
@@ -1296,7 +1300,7 @@ internal const val FAKE_AGENT_SHOWCASE_RESPONSE = """{
             {
                 "key": "showcase",
                 "step_number": 9,
-                "payload": {"type": "video", "video": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", "thumbnail": "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg", "duration": "596000", "caption": "گزارش تصویری نشست خبری"},
+                "payload": {"type": "video", "video": "https://caspian27.cdn.asset.aparat.com/aparat-video/7551fc70a1e2efbe0a54cb3371b29ba272389328-480p.mp4?wmsAuthSign=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjdjM2IzODlkZDAzNGFhNDA0MzEyY2NkMzgzYzlhMGM5IiwiZXhwIjoxNzg1MjcyMjk0LCJpc3MiOiJTYWJhIElkZWEgR1NJRyJ9.bU1IoSMLqmxzxvOdHwUINjlSF81xFdC1yaNpTZyJY-Q", "thumbnail": "https://static.cdn.asset.aparat.com/avt/72389328-3124-l__6255.jpg?width=900&quality=90&secret=zUQZBEhejLAPA-WoOQ0g3Q", "duration": "266000", "caption": "آموزش پرداخت بیمه اختیاری و آزاد تامین اجتماعی با گوشی موبایل"},
                 "data": null,
                 "message": "گزارش تصویری",
                 "message_id": "showcase-9"

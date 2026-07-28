@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
@@ -145,6 +148,9 @@ fun VideoBubble(
     val taminColors = LocalTaminColors.current
     var isPlayingInline by remember { mutableStateOf(false) }
     var isFullscreen by remember { mutableStateOf(false) }
+    // Inline playback starts silent: a bubble that shouts audio the moment it scrolls
+    // into view is hostile. Fullscreen opts back in.
+    var isMuted by remember { mutableStateOf(true) }
 
     Column(modifier = modifier.width(240.dp)) {
         Box(
@@ -159,6 +165,7 @@ fun VideoBubble(
                 VideoPlayer(
                     url = content.source,
                     autoPlay = true,
+                    muted = isMuted,
                     modifier = Modifier.matchParentSize()
                 )
             } else {
@@ -199,22 +206,25 @@ fun VideoBubble(
                 }
             }
 
-            Box(
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(6.dp)
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.45f))
-                    .clickable { isFullscreen = true },
-                contentAlignment = Alignment.Center
+                    .padding(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Icon(
-                    Icons.Default.Fullscreen,
+                OverlayIconButton(
+                    icon = Icons.Default.Fullscreen,
                     contentDescription = "تمام‌صفحه",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    onClick = { isFullscreen = true }
                 )
+                if (isPlayingInline) {
+                    OverlayIconButton(
+                        icon = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff
+                               else Icons.AutoMirrored.Filled.VolumeUp,
+                        contentDescription = if (isMuted) "پخش صدا" else "قطع صدا",
+                        onClick = { isMuted = !isMuted }
+                    )
+                }
             }
         }
 
@@ -232,6 +242,30 @@ fun VideoBubble(
         FullscreenVideoDialog(
             url = content.source,
             onDismiss = { isFullscreen = false }
+        )
+    }
+}
+
+/** Small translucent control drawn over a video frame. */
+@Composable
+private fun OverlayIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.45f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(18.dp)
         )
     }
 }

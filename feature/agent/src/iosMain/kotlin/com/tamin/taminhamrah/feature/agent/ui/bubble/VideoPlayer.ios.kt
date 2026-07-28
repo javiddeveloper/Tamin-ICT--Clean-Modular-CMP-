@@ -11,6 +11,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.play
 import platform.AVFoundation.pause
+import platform.AVFoundation.setMuted
 import platform.AVKit.AVPlayerViewController
 import platform.Foundation.NSURL
 import platform.UIKit.UIView
@@ -19,7 +20,8 @@ import platform.UIKit.UIView
 actual fun VideoPlayer(
     url: String,
     modifier: Modifier,
-    autoPlay: Boolean
+    autoPlay: Boolean,
+    muted: Boolean
 ) {
     // Keyed on the url so switching clips rebuilds the controller rather than leaving it
     // bound to the previous item.
@@ -30,7 +32,8 @@ actual fun VideoPlayer(
         }
     }
 
-    DisposableEffect(controller, autoPlay) {
+    DisposableEffect(controller, autoPlay, muted) {
+        controller.player?.muted = muted
         if (autoPlay) controller.player?.play()
         onDispose { controller.player?.pause() }
     }

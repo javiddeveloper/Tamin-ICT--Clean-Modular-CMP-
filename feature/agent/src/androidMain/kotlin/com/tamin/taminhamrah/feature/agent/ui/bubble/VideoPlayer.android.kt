@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.agent.ui.bubble
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,7 +18,8 @@ import androidx.media3.ui.PlayerView
 actual fun VideoPlayer(
     url: String,
     modifier: Modifier,
-    autoPlay: Boolean
+    autoPlay: Boolean,
+    muted: Boolean
 ) {
     val context = LocalContext.current
 
@@ -29,6 +31,10 @@ actual fun VideoPlayer(
             prepare()
             playWhenReady = autoPlay
         }
+    }
+
+    LaunchedEffect(player, muted) {
+        player.volume = if (muted) 0f else 1f
     }
 
     DisposableEffect(player) {
@@ -45,6 +51,12 @@ actual fun VideoPlayer(
                 // second, competing control.
                 setShowNextButton(false)
                 setShowPreviousButton(false)
+                // The bubble sits in a scrolling list, whose parent would otherwise claim
+                // the horizontal drag and leave the seek bar unusable.
+                setOnTouchListener { view, event ->
+                    view.parent?.requestDisallowInterceptTouchEvent(true)
+                    false
+                }
             }
         },
         onRelease = { it.player = null }
