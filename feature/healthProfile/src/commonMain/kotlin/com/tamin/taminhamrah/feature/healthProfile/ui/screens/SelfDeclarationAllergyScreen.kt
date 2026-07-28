@@ -29,7 +29,20 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.components.IconBox
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.Res
+import taminx.feature.healthprofile.generated.resources.health_allergy_add
+import taminx.feature.healthprofile.generated.resources.health_allergy_add_new_allergy
+import taminx.feature.healthprofile.generated.resources.health_allergy_choose_drug
+import taminx.feature.healthprofile.generated.resources.health_allergy_choose_your_allergy
+import taminx.feature.healthprofile.generated.resources.health_allergy_description
+import taminx.feature.healthprofile.generated.resources.health_allergy_final_check
+import taminx.feature.healthprofile.generated.resources.health_allergy_no_allergy_registered
+import taminx.feature.healthprofile.generated.resources.health_allergy_no_description_for_allergy
+import taminx.feature.healthprofile.generated.resources.health_allergy_title
+import taminx.feature.healthprofile.generated.resources.health_allergy_unknows
+import taminx.feature.healthprofile.generated.resources.health_btn_cancel
+import taminx.feature.healthprofile.generated.resources.health_btn_prev_step
 import taminx.feature.healthprofile.generated.resources.ic_health_pill
 import taminx.feature.healthprofile.generated.resources.ic_health_tobacco
 
@@ -45,11 +58,14 @@ fun SelfDeclarationAllergyScreen(
 
     var showBottomsheet by remember { mutableStateOf(false) }
 
+    val unknownDrugText = stringResource(Res.string.health_allergy_unknows)
+    val noDescriptionText = stringResource(Res.string.health_allergy_no_description_for_allergy)
+
 
     Scaffold(
         topBar = {
             HealthTopAppBar(
-                title = "حساسیت‌ دارویی",
+                title = stringResource(Res.string.health_allergy_title),
                 currentStep = 10,
                 totalSteps = 10,
                 onBackClicked = onBackClicked
@@ -57,9 +73,9 @@ fun SelfDeclarationAllergyScreen(
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "مرحلهٔ بعدی (بررسی نهایی)",
+                primaryText = stringResource(Res.string.health_allergy_final_check),
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.REVIEW)) },
-                secondaryText = "مرحلهٔ قبلی",
+                secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
             )
         }
@@ -82,14 +98,14 @@ fun SelfDeclarationAllergyScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 TaminText(
-                    "انتخاب دارو",
+                    stringResource(Res.string.health_allergy_choose_drug),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = taminColors.textPrimary
                 )
             }
 
             TaminText(
-                text = "در این قسمت می\u200Cتوانید داروهایی که به آن\u200Cها حساسیت دارید را اضافه کنید.",
+                text = stringResource(Res.string.health_allergy_description),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = taminColors.textTertiary,
                     lineHeight = 22.sp
@@ -97,12 +113,16 @@ fun SelfDeclarationAllergyScreen(
             )
 
             DashedAddButton(
-                label = "افزودن حساسیت دارویی جدید",
+                label = stringResource(Res.string.health_allergy_add_new_allergy),
                 onClick = {
-                    onIntent(HealthProfileIntent.UpdateAllergy(state.copy(
-                        selectedDrugId = null,
-                        allergyDesc = ""
-                    )))
+                    onIntent(
+                        HealthProfileIntent.UpdateAllergy(
+                            state.copy(
+                                selectedDrugId = null,
+                                allergyDesc = ""
+                            )
+                        )
+                    )
                     showBottomsheet = true
                 }
             )
@@ -117,7 +137,7 @@ fun SelfDeclarationAllergyScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     TaminText(
-                        text = "هیچ حساسیت دارویی ثبت نشده است.",
+                        text = stringResource(Res.string.health_allergy_no_allergy_registered),
                         style = MaterialTheme.typography.bodyMedium,
                         color = taminColors.textMuted
                     )
@@ -128,9 +148,11 @@ fun SelfDeclarationAllergyScreen(
                         title = allergy.drugName,
                         description = allergy.allergyComments,
                         onDelete = {
-                            onIntent(HealthProfileIntent.UpdateAllergy(
-                                state.copy(allergies = state.allergies.filterIndexed { i, _ -> i != idx })
-                            ))
+                            onIntent(
+                                HealthProfileIntent.UpdateAllergy(
+                                    state.copy(allergies = state.allergies.filterIndexed { i, _ -> i != idx })
+                                )
+                            )
                         }
                     )
                 }
@@ -141,13 +163,13 @@ fun SelfDeclarationAllergyScreen(
         if (showBottomsheet) {
             HealthBottomSheet(
                 config = BottomSheetConfig(
-                    title = "انتخاب دارو",
-                    subtitle = "دارویی که به آن حساسیت دارید را انتخاب کنید.",
+                    title = stringResource(Res.string.health_allergy_choose_drug),
+                    subtitle = stringResource(Res.string.health_allergy_choose_your_allergy),
                     description = "",
                     type = BottomSheetType.CUSTOM,
                     singleSelection = true,
-                    submitText = "افزودن",
-                    cancelText = "انصراف",
+                    submitText = stringResource(Res.string.health_allergy_add),
+                    cancelText = stringResource(Res.string.health_btn_cancel),
                     items = drugOptions.map { drug ->
                         BottomSheetItem(
                             id = drug.id,
@@ -163,8 +185,10 @@ fun SelfDeclarationAllergyScreen(
                         val drugOption = drugOptions.find { it.id == selectedId }
                         val allergy = DrugAllergyItemPR(
                             drugId = selectedId,
-                            drugName = drugOption?.label ?: "نامشخص",
-                            allergyComments = result.description?.takeIf { it.isNotBlank() } ?: "فاقد توضیحات عارضه"
+                            drugName = drugOption?.label
+                                ?: unknownDrugText,
+                            allergyComments = result.description?.takeIf { it.isNotBlank() }
+                                ?: noDescriptionText
                         )
                         onIntent(
                             HealthProfileIntent.UpdateAllergy(
