@@ -338,7 +338,7 @@ fun ProfileContent(
                     title = "نام نویسی شده تست",
                     subtitle = "حساب شما تأیید و فعال است تست",
                     badgeText = "معتبر تست ",
-                    isValid = false
+                    isValid = true
                 )
             }
         }
