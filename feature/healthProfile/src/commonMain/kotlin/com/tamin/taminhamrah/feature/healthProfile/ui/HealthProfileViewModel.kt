@@ -372,19 +372,23 @@ class HealthProfileViewModel(
                         sd.lifestyle.copy(
                             isSmoking = (info.smokingStatus ?: 0) > 0,
                             smokingStatusId = info.smokingStatus,
-                            smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() },
+                            smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() }
+                                ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label,
 
                             hasAddiction = isActive(info.substanceUsage),
                             substanceStatusId = info.substanceUsage,
-                            substancePattern = info.substanceDesc.takeIf { it.isNotBlank() },
+                            substancePattern = info.substanceDesc.takeIf { it.isNotBlank() }
+                                ?: currentState.actFrequencyOptions.find { it.id == info.substanceUsage }?.label,
 
                             isDrinking = isActive(info.alcoholUsage),
                             drinkingStatusId = info.alcoholUsage,
-                            drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() },
+                            drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() }
+                                ?: LifeStyleStatus.fromStyleId(info.alcoholUsage)?.title,
 
                             isExercising = isActive(info.exerciseFreq),
                             exerciseStatusId = info.exerciseFreq,
                             exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() }
+                                ?: LifeStyleStatus.fromStyleId(info.exerciseFreq)?.title
                         )
                     }
                 )

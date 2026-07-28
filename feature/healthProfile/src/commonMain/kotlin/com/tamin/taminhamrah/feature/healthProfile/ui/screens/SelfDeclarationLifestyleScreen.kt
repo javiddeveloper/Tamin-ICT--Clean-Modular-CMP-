@@ -97,7 +97,6 @@ fun SelfDeclarationLifestyleScreen(
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // ── Smoking ──────────────────────────────────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -145,7 +144,6 @@ fun SelfDeclarationLifestyleScreen(
                 }
             }
 
-            // ── Addiction ────────────────────────────────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -194,7 +192,6 @@ fun SelfDeclarationLifestyleScreen(
 
             }
 
-            // ── Alcohol (hardcoded LifeStyleStatus) ─────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -225,7 +222,7 @@ fun SelfDeclarationLifestyleScreen(
                                     drinkingStatusId = if (isYes) state.drinkingStatusId else null,
                                     drinkingPattern = if (isYes) state.drinkingPattern else null,
 
-                                )
+                                    )
                             )
                         )
                         if (isYes) showAlcoholBottomSheet = true
@@ -244,7 +241,6 @@ fun SelfDeclarationLifestyleScreen(
 
             }
 
-            // ── Exercise (hardcoded LifeStyleStatus) ────────────────────────
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -268,7 +264,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.isExercising == true) 1 else 0,
                     onOptionSelected = { idx ->
                         val isYes = idx == 1
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    isExercising = isYes,
+                                    exerciseStatusId = if (isYes) state.exerciseStatusId else null,
+                                    exerciseFrequency = if (isYes) state.exerciseFrequency else null,
+                                )
+                            )
+                        )
                         if (isYes) showExerciseBottomSheet = true
                     }
                 )
@@ -307,7 +311,8 @@ fun SelfDeclarationLifestyleScreen(
                 if (state.smokingStatusId == null) {
                     onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = false)))
                 }
-                showSmokingBottomSheet = false },
+                showSmokingBottomSheet = false
+            },
             onSubmit = { result ->
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
@@ -342,7 +347,8 @@ fun SelfDeclarationLifestyleScreen(
                 if (state.substanceStatusId == null) {
                     onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = false)))
                 }
-                showAddictionBottomSheet = false },
+                showAddictionBottomSheet = false
+            },
             onSubmit = { result ->
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
@@ -377,7 +383,8 @@ fun SelfDeclarationLifestyleScreen(
                 if (state.drinkingStatusId == null) {
                     onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = false)))
                 }
-                showAlcoholBottomSheet = false },
+                showAlcoholBottomSheet = false
+            },
             onSubmit = { result ->
                 val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
@@ -413,7 +420,8 @@ fun SelfDeclarationLifestyleScreen(
                 if (state.exerciseStatusId == null) {
                     onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = false)))
                 }
-                showExerciseBottomSheet = false },
+                showExerciseBottomSheet = false
+            },
             onSubmit = { result ->
                 val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
