@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ImageBubble
+import com.tamin.taminhamrah.feature.agent.ui.bubble.PinnedVoicePlayer
 import com.tamin.taminhamrah.feature.agent.ui.bubble.TableBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.RichTextBubble
 import com.tamin.taminhamrah.feature.agent.ui.bubble.VideoBubble
@@ -207,6 +208,11 @@ private fun ChatLayout(
     var inputBarHeightPx by remember { mutableStateOf(0) }
     val topPad = with(density) { topBarHeightPx.toDp() }
     val bottomPad = with(density) { inputBarHeightPx.toDp() }
+    val layoutScope = rememberCoroutineScope()
+    // Jumping back to the message a pinned player belongs to.
+    val scrollToIndex: (Int) -> Unit = { index ->
+        layoutScope.launch { listState.animateScrollToItem(index) }
+    }
 
     Box(
         modifier = Modifier
@@ -261,6 +267,28 @@ private fun ChatLayout(
                     item { TypingIndicatorBubble(processingState = uiState.processingState) }
                 }
             }
+        }
+
+        // ── Pinned voice player: keeps a playing message reachable while scrolling ──
+        uiState.playingVoiceId?.let { playingId ->
+            PinnedVoicePlayer(
+                isPlaying = uiState.isVoicePlaying,
+                positionMs = uiState.voicePlaybackPositionMs,
+                durationMs = uiState.voicePlaybackDurationMs,
+                onTogglePlay = {
+                    uiState.chatItems.firstOrNull { it.id == playingId }
+                        ?.let { it.content as? ChatBubbleContent.Voice }
+                        ?.let { onIntent(AgentIntent.ToggleVoicePlayback(playingId, it.source)) }
+                },
+                onStop = { onIntent(AgentIntent.StopVoicePlayback) },
+                onClick = {
+                    val index = uiState.chatItems.indexOfFirst { it.id == playingId }
+                    if (index >= 0) scrollToIndex(index)
+                },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = topPad + 8.dp, start = 16.dp, end = 16.dp)
+            )
         }
 
         // ── Offline notice: the cached conversation stays readable, sending is off ──

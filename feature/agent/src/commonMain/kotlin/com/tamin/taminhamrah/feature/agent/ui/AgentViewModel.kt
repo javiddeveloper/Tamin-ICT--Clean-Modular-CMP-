@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.agent.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator
 import com.tamin.taminhamrah.feature.agent.audio.VoicePlayer
 import com.tamin.taminhamrah.feature.agent.audio.VoiceRecorder
 import com.tamin.taminhamrah.feature.agent.audio.deleteFile
@@ -46,6 +47,8 @@ import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
 import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -75,6 +78,7 @@ class AgentViewModel(
     private val featureManager: FeatureManager,
     private val voiceRecorder: VoiceRecorder,
     private val voicePlayer: VoicePlayer,
+    private val playbackCoordinator: MediaPlaybackCoordinator,
     private val getCurrentUserNationalCodeUseCase: GetCurrentUserNationalCodeUseCase,
     private val pruneEmptyAgentSessionUseCase: PruneEmptyAgentSessionUseCase,
     private val getAgentSessionsUseCase: GetAgentSessionsUseCase,
@@ -100,6 +104,20 @@ class AgentViewModel(
 
     /** Bubbles whose reveal animation already played, so recycling never replays it. */
     private val completedTypingIds = mutableSetOf<String>()
+
+    init {
+        // A video (or another clip) taking the audio must silence whatever voice is
+        // playing, otherwise the two talk over each other.
+        viewModelScope.launch {
+            playbackCoordinator.activeOwner.collect { owner ->
+                val isVoiceOwner = owner != null &&
+                    (owner.startsWith("voice:"))
+                if (!isVoiceOwner && voicePlayer.isPlaying.value) {
+                    voicePlayer.playPause()
+                }
+            }
+        }
+    }
 
     /** Flips to false to signal the recording loop to finish (from StopVoiceRecording). */
     private val isRecordingActive = MutableStateFlow(false)
@@ -135,9 +153,24 @@ class AgentViewModel(
             uiState.value.voicePreview?.let { emit(PartialState.VoicePreviewUpdated(it.copy(positionMs = intent.ms))) }
         }
         is AgentIntent.ToggleVoicePlayback     -> handleToggleVoicePlayback(intent.itemId, intent.filePath)
+        is AgentIntent.StopVoicePlayback       -> flow {
+            voicePlayer.stop()
+            loadedAudioPath = null
+            uiState.value.playingVoiceId?.let {
+                playbackCoordinator.release(MediaPlaybackCoordinator.voiceOwner(it))
+            }
+            emit(PartialState.VoicePlaybackUpdated(itemId = null, positionMs = 0))
+        }
         is AgentIntent.SeekVoicePlayback       -> flow {
             voicePlayer.seekTo(intent.ms)
-            emit(PartialState.VoicePlaybackUpdated(intent.itemId, intent.ms))
+            emit(
+                PartialState.VoicePlaybackUpdated(
+                    itemId = intent.itemId,
+                    positionMs = intent.ms,
+                    durationMs = uiState.value.voicePlaybackDurationMs,
+                    isPlaying = uiState.value.isVoicePlaying
+                )
+            )
         }
     }
 
@@ -670,10 +703,11 @@ class AgentViewModel(
         // Currently playing → pause; the running stream below observes it and stops.
         if (voicePlayer.isPlaying.value) {
             voicePlayer.playPause()
+            playbackCoordinator.release(MediaPlaybackCoordinator.PREVIEW_OWNER)
             return emptyFlow()
         }
         return flow {
-            startPlayback(preview.filePath)
+            startPlayback(preview.filePath, MediaPlaybackCoordinator.PREVIEW_OWNER)
             emitAll(
                 streamPlayback { playing, pos, dur ->
                     uiState.value.voicePreview?.let {
@@ -691,22 +725,34 @@ class AgentViewModel(
     }
 
     private fun handleToggleVoicePlayback(itemId: String, filePath: String): Flow<PartialState> {
+        val owner = MediaPlaybackCoordinator.voiceOwner(itemId)
         if (uiState.value.playingVoiceId == itemId && voicePlayer.isPlaying.value) {
             voicePlayer.playPause()
+            playbackCoordinator.release(owner)
             return emptyFlow()
         }
         return flow {
-            startPlayback(filePath)
+            startPlayback(filePath, owner)
             emitAll(
-                streamPlayback { playing, pos, _ ->
-                    PartialState.VoicePlaybackUpdated(if (playing) itemId else null, pos)
+                streamPlayback { playing, pos, dur ->
+                    // Keep the id while paused so the pinned player stays on screen and
+                    // can be resumed; it clears when playback actually finishes.
+                    val stillLoaded = playing || pos > 0
+                    PartialState.VoicePlaybackUpdated(
+                        itemId = if (stillLoaded) itemId else null,
+                        positionMs = pos,
+                        durationMs = dur,
+                        isPlaying = playing
+                    )
                 }
             )
         }
     }
 
     /** Loads (if needed) and starts playback of [filePath] on the shared player. */
-    private fun startPlayback(filePath: String) {
+    private fun startPlayback(filePath: String, owner: String) {
+        // Silences any video that is currently playing.
+        playbackCoordinator.claim(owner)
         if (loadedAudioPath != filePath) {
             loadedAudioPath = filePath
             voicePlayer.load(filePath, onReady = { voicePlayer.playPause() })
@@ -869,7 +915,9 @@ class AgentViewModel(
         is PartialState.VoicePlaybackUpdated ->
             currentState.copy(
                 playingVoiceId = partialState.itemId,
-                voicePlaybackPositionMs = partialState.positionMs
+                voicePlaybackPositionMs = partialState.positionMs,
+                voicePlaybackDurationMs = partialState.durationMs,
+                isVoicePlaying = partialState.isPlaying
             )
     }
 

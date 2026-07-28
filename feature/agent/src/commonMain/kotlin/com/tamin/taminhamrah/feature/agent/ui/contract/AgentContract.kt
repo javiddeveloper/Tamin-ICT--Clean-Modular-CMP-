@@ -49,7 +49,11 @@ data class AgentUiState(
     /** Id of the chat voice bubble currently playing (null if none). */
     val playingVoiceId: String? = null,
     /** Playback position (ms) of the currently playing chat voice bubble. */
-    val voicePlaybackPositionMs: Int = 0
+    val voicePlaybackPositionMs: Int = 0,
+    /** Total length (ms) of that clip, for the pinned player's progress. */
+    val voicePlaybackDurationMs: Int = 0,
+    /** Whether that clip is actually sounding, as opposed to paused mid-way. */
+    val isVoicePlaying: Boolean = false
 ) {
     sealed interface PartialState {
         data class Loading(val isGenerating: Boolean) : PartialState
@@ -80,7 +84,12 @@ data class AgentUiState(
         data class Error(val message: String?) : PartialState
         data class VoiceRecordingUpdated(val state: VoiceRecordingState?) : PartialState
         data class VoicePreviewUpdated(val state: VoicePreviewState?) : PartialState
-        data class VoicePlaybackUpdated(val itemId: String?, val positionMs: Int) : PartialState
+        data class VoicePlaybackUpdated(
+            val itemId: String?,
+            val positionMs: Int,
+            val durationMs: Int = 0,
+            val isPlaying: Boolean = false
+        ) : PartialState
     }
 }
 
@@ -204,6 +213,9 @@ sealed interface AgentIntent {
     data class SeekPreview(val ms: Int) : AgentIntent
     /** Play/pause a voice bubble already in the chat list. */
     data class ToggleVoicePlayback(val itemId: String, val filePath: String) : AgentIntent
+    /** Stops voice playback entirely and dismisses the pinned player. */
+    object StopVoicePlayback : AgentIntent
+
     /** Seek within a playing chat voice bubble. */
     data class SeekVoicePlayback(val itemId: String, val ms: Int) : AgentIntent
 }

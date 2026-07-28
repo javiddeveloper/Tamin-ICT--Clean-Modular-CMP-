@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,9 +40,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator
 import com.tamin.taminhamrah.feature.agent.service.base.ChartKind
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.koin.compose.koinInject
 
 /**
  * Renderers for the media and data-view bubble families.
@@ -143,9 +146,12 @@ fun ImageBubble(
 @Composable
 fun VideoBubble(
     content: ChatBubbleContent.Video,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    coordinator: MediaPlaybackCoordinator = koinInject()
 ) {
     val taminColors = LocalTaminColors.current
+    val owner = remember(content.source) { MediaPlaybackCoordinator.videoOwner(content.source) }
+    val activeOwner by coordinator.activeOwner.collectAsState()
     var isPlayingInline by remember { mutableStateOf(false) }
     var isFullscreen by remember { mutableStateOf(false) }
     // Inline playback starts silent: a bubble that shouts audio the moment it scrolls
@@ -166,6 +172,13 @@ fun VideoBubble(
                     url = content.source,
                     autoPlay = true,
                     muted = isMuted,
+                    // A muted clip is not competing for the ear, so it only has to yield
+                    // once the user turns its sound on.
+                    paused = !isMuted && activeOwner != owner,
+                    onPlayingChanged = { playing ->
+                        if (playing && !isMuted) coordinator.claim(owner)
+                        else if (!playing) coordinator.release(owner)
+                    },
                     modifier = Modifier.matchParentSize()
                 )
             } else {
@@ -222,7 +235,10 @@ fun VideoBubble(
                         icon = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff
                                else Icons.AutoMirrored.Filled.VolumeUp,
                         contentDescription = if (isMuted) "پخش صدا" else "قطع صدا",
-                        onClick = { isMuted = !isMuted }
+                        onClick = {
+                            isMuted = !isMuted
+                            if (isMuted) coordinator.release(owner) else coordinator.claim(owner)
+                        }
                     )
                 }
             }

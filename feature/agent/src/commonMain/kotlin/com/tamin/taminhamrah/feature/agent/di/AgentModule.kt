@@ -26,6 +26,9 @@ import org.koin.dsl.module
 
 val agentModule = module {
     // Voice engine — new instances per use (recorder/player hold native resources).
+    // One coordinator per app: it is what keeps voice and video from talking over
+    // each other, so every player must see the same instance.
+    single { com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator() }
     factory { createVoiceRecorder() }
     factory { createVoicePlayer() }
 

@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator
+import org.koin.compose.koinInject
 
 /**
  * Plays a clip fullscreen over the chat.
@@ -31,8 +35,15 @@ import androidx.compose.ui.window.DialogProperties
 @Composable
 fun FullscreenVideoDialog(
     url: String,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    coordinator: MediaPlaybackCoordinator = koinInject()
 ) {
+    val owner = remember(url) { MediaPlaybackCoordinator.videoOwner(url) }
+    // Fullscreen plays with sound, so it takes the audio for as long as it is open.
+    DisposableEffect(owner) {
+        coordinator.claim(owner)
+        onDispose { coordinator.release(owner) }
+    }
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -49,6 +60,7 @@ fun FullscreenVideoDialog(
             VideoPlayer(
                 url = url,
                 autoPlay = true,
+                onPlayingChanged = { if (it) coordinator.claim(owner) },
                 modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.Center)

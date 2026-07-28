@@ -193,6 +193,7 @@ class AgentViewModelTest {
             fakeFeatureManager,
             FakeVoiceRecorder(),
             FakeVoicePlayer(),
+            com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator(),
             { TEST_NATIONAL_CODE },
             com.tamin.taminhamrah.useCases.agent.PruneEmptyAgentSessionUseCase(cache),
             com.tamin.taminhamrah.useCases.agent.GetAgentSessionsUseCase(cache),

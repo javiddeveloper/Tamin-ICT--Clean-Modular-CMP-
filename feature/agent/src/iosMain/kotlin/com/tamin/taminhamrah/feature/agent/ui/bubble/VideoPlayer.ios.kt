@@ -21,7 +21,9 @@ actual fun VideoPlayer(
     url: String,
     modifier: Modifier,
     autoPlay: Boolean,
-    muted: Boolean
+    muted: Boolean,
+    paused: Boolean,
+    onPlayingChanged: (Boolean) -> Unit
 ) {
     // Keyed on the url so switching clips rebuilds the controller rather than leaving it
     // bound to the previous item.
@@ -34,8 +36,23 @@ actual fun VideoPlayer(
 
     DisposableEffect(controller, autoPlay, muted) {
         controller.player?.muted = muted
-        if (autoPlay) controller.player?.play()
-        onDispose { controller.player?.pause() }
+        if (autoPlay) {
+            controller.player?.play()
+            onPlayingChanged(true)
+        }
+        onDispose {
+            controller.player?.pause()
+            onPlayingChanged(false)
+        }
+    }
+
+    // Something else claimed the audio; stop rather than talk over it.
+    DisposableEffect(controller, paused) {
+        if (paused) {
+            controller.player?.pause()
+            onPlayingChanged(false)
+        }
+        onDispose { }
     }
 
     UIKitView(

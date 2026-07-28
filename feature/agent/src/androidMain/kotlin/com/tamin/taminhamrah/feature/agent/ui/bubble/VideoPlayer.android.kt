@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -19,7 +20,9 @@ actual fun VideoPlayer(
     url: String,
     modifier: Modifier,
     autoPlay: Boolean,
-    muted: Boolean
+    muted: Boolean,
+    paused: Boolean,
+    onPlayingChanged: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -35,6 +38,21 @@ actual fun VideoPlayer(
 
     LaunchedEffect(player, muted) {
         player.volume = if (muted) 0f else 1f
+    }
+
+    // Something else claimed the audio; stop rather than talk over it.
+    LaunchedEffect(player, paused) {
+        if (paused && player.isPlaying) player.pause()
+    }
+
+    DisposableEffect(player, onPlayingChanged) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                onPlayingChanged(isPlaying)
+            }
+        }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
     }
 
     DisposableEffect(player) {
