@@ -232,7 +232,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.REVIEW -> {
                     SelfDeclarationReviewScreen(
-                        state = selfDecState,
+                        state = state,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
                             onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
