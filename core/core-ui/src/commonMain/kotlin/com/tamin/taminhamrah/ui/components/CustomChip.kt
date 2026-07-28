@@ -27,7 +27,7 @@ fun CustomChip(
     textColor: Color = MaterialTheme.colorScheme.primary,
     border: BorderStroke? = null,
 ) {
-    val shape = RoundedCornerShape(CornerRadius.lg)
+    val shape = RoundedCornerShape(CornerRadius.max)
 
     Box(
         modifier = modifier

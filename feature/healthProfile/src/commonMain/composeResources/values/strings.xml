@@ -28,6 +28,7 @@
     <string name="health_btn_cancel">انصراف</string>
     <string name="health_step_1_of_10">مرحلهٔ ۱ از ۱۰</string>
     <string name="health_step_2_of_10">مرحلهٔ ۲ از ۱۰</string>
+    <string name="health_step_format">مرحلهٔ %1$s از %2$s</string>
 
     <!-- Identity Screen Strings -->
     <string name="health_identity_title">اطلاعات هویتی</string>
