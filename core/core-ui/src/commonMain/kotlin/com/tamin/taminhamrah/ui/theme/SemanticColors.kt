@@ -223,10 +223,10 @@ val DarkTaminColors = TaminColors(
     ),
 
     hawkesBlue = TaminDarkOuterBorder,
-    chipBg = Color(0x293B82F6)
-)
+    chipBg = Color(0x293B82F6),
     shadowPrimary = Color.Black.copy(alpha = 0.4f),
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
-    )
+)
+
