@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.model.treatment.*
-import com.tamin.taminhamrah.model.health.*
 
 object TreatmentMocks {
     val patientMain = PatientItem(
@@ -41,40 +40,43 @@ object TreatmentMocks {
         trackingCode = ""
     )
 
-    val patientGeneral = PatientGeneralPR(
-        ptientID = 101,
-        patientName = "رضا",
-        patientFamily = "احمدی",
-        patientNatCode = "1234567890",
-        patientAge = "42",
-        patientGender = "مرد",
-        patientBirthDate = "1360/01/15",
-        patientMobile = "09123456789",
-        patientAddress = "تهران، خیابان ولیعصر، کوچه دوم، پلاک ۱۰",
-        patientFather = "محمد"
+    val prescription = ElectronicPrescriptionPR(
+        id = "1",
+        docId = "1001",
+        docName = "علی علوی",
+        flagSata = "0",
+        location = "تهران",
+        noteHeadEprescID = "10001",
+        patientID = "2001",
+        patientName = "رضا احمدی",
+        prescDate = "1402/05/10",
+        prescName = "نسخه دارو",
+        specDesc = "متخصص قلب و عروق",
+        prescType = "دارو",
+        trackingCode = "TRK123456"
     )
 
-    val selfDeclarative = PatientSelfDeclarativePR(
-        alcoholDesc = "",
-        alcoholUsage = 0,
-        alcoholUsageTitle = "عدم مصرف",
-        exerciseDesc = "",
-        exerciseFreq = 3,
-        exerciseFreqTitle = "هفته‌ای سه بار",
-        lastUpdateDate = "1402/03/15",
-        objectID = 101,
-        smokingDesc = "",
-        smokingStatus = 0,
-        smokingStatusTitle = "غیر سیگاری",
-        substanceDesc = "",
-        substanceUsage = 0,
-        substanceUsageTitle = "عدم مصرف"
+    val prescriptionDetail = ElectronicPrescriptionDetailPR(
+        sumPriceItem = "150000",
+        ssoPayment = "120000",
+        insurancePayment = "30000",
+        serviceQuantity = "30",
+        noteHeadEprescID = "10001",
+        serverCode = "S1",
+        serverName = "خدمت ۱",
+        serviceName = "قرص آسپیرین 80 میلی‌گرم",
+        drugInst = "D1",
+        registerDate = "1402/05/10",
+        drugInstruction = "روزی یک عدد بعد از غذا",
+        deliveredNo = "30",
+        drugAmount = "80mg"
     )
 
-    val drugAllergy = DrugItemAllergiesPR(
-        allergyComments = "حساسیت شدید پوستی و تنگی نفس",
-        drugId = 505,
-        drugName = "پنی‌سیلین"
+    val prescriptionPrice = ElectronicPrescriptionPricePR(
+        requestPrice = "450000",
+        headSsoPayment = "380000",
+        headInsuPayment = "70000",
+        noteHeadEprescID = "10001"
     )
 
     val mainUiState = TreatmentUiState(
@@ -94,5 +96,11 @@ object TreatmentMocks {
         insuredShareTotal = 65_910L,
         organizationShareTotal = 153_790L,
         healthProfileCompleted = true
+    )
+
+    val prescriptionsUiState = PrescriptionsUiState(
+        prescriptionList = listOf(prescription, prescription.copy(trackingCode = "TRK654321", docName = "مریم رضایی")),
+        prescriptionDetailList = listOf(prescriptionDetail, prescriptionDetail.copy(serviceName = "کپسول آموکسی‌سیلین")),
+        prescriptionPriceList = listOf(prescriptionPrice)
     )
 }

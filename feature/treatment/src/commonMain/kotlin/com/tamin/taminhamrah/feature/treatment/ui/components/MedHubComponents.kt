@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,9 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -29,24 +28,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.icons.TaminIcons
+import androidx.compose.ui.util.lerp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.AutoResizeText
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
-import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
-import com.tamin.taminhamrah.ui.theme.TaminTeal500
-import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberStart
@@ -59,7 +61,15 @@ import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
 import com.tamin.taminhamrah.ui.theme.TaminCardTealEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
+import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
+import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminTeal500
+import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_ejtemaei_logo
 
 /**
  * Components for the treatment hub landing screen: the insured-person card carousel,
@@ -69,17 +79,6 @@ import com.tamin.taminhamrah.util.toPersianDigits
  * None of these depend on a domain model — they take display strings and lambdas, so
  * they stay decoupled from whatever shape the treatment entities settle on.
  */
-
-private val COVERAGE_BADGE_SIZE = 16.dp
-
-private val COVERAGE_BADGE_ICON_SIZE = 10.dp
-
-private val BRAND_TICK_SIZE = 24.dp
-
-private val BRAND_TICK_ICON_SIZE = 13.dp
-
-private const val CARD_DECOR_ALPHA = 0.07f
-private const val CARD_PEEK_FRACTION = 0.87f
 
 /** The main insured person's card: teal fading into brand blue. */
 private val MainInsuredCardStops = listOf(TaminCardTealStart, TaminCardTealMid, TaminCardTealEnd)
@@ -107,6 +106,10 @@ fun insuranceCardGradient(isDependent: Boolean, dependantOrdinal: Int = 0): Brus
     return Brush.linearGradient(stops)
 }
 
+/** The prominent teal gradient behind the "سوابق درمانی من" quick-access card. */
+@Composable
+fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
+
 /**
  * The electronic health-insurance card for one insured person: organization branding,
  * the holder's name and national ID, and a coverage-status footer.
@@ -120,41 +123,122 @@ fun InsuranceCard(
     background: Brush = insuranceCardGradient(isDependent = false),
     coverageBadge: @Composable (() -> Unit)? = null,
     footerAction: @Composable (() -> Unit)? = null,
+    // 0 shows the full card; as it runs to 1 the card cross-fades into a compact
+    // tick + name + national-code bar and shrinks to that height. Read only inside
+    // layout/draw lambdas, so the morph never recomposes the card.
+    collapseProgress: () -> Float = { 0f },
 ) {
-    Column(
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.cardCompact))
             .background(background)
             .cardDecoration(),
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            InsuranceCardBrandRow(initial = holderName.take(1))
-            Spacer(modifier = Modifier.height(Spacing.md))
-            Text(
-                text = holderName,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
-            )
-            Spacer(modifier = Modifier.height(Spacing.xs))
-            Text(
-                text = "کد ملی",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.75f),
-            )
-            NumericText(
-                text = nationalId.toPersianDigits(),
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White,
-            )
+        Layout(
+            content = {
+                // 0 brand row — fades out in place.
+                Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
+                    InsuranceCardBrandRow()
+                }
+                // 1 name — travels up into the compact bar and shrinks as it goes.
+                Text(
+                    text = holderName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.graphicsLayer {
+                        val s = lerp(1f, NameCollapsedScale, CardCollapseEasing.transform(collapseProgress()))
+                        scaleX = s
+                        scaleY = s
+                        // Anchor the shrink to the name's start edge so it stays put in the bar.
+                        transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+                    },
+                )
+                // 2 "کد ملی" label — fades out in place.
+                Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
+                    Text(
+                        text = "کد ملی",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.75f),
+                    )
+                }
+                // 3 national code — travels up beside the name.
+                NumericText(
+                    text = nationalId.toPersianDigits(),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White,
+                )
+                // 4 coverage tick — travels up to lead the bar.
+                Box { coverageBadge?.invoke() }
+                // 5 coverage footer — fades out in place.
+                Box(Modifier.graphicsLayer { alpha = fadeOutAlpha(collapseProgress()) }) {
+                    InsuranceCardFooter(
+                        coverageLabel = coverageLabel,
+                        badge = coverageBadge,
+                        action = footerAction,
+                    )
+                }
+            },
+        ) { measurables, constraints ->
+            val width = constraints.maxWidth
+            val pad = Spacing.lg.roundToPx()
+            val md = Spacing.md.roundToPx()
+            val xs = Spacing.xs.roundToPx()
+            val sm = Spacing.sm.roundToPx()
+            val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
+
+            val brand = measurables[0].measure(innerC)
+            val name = measurables[1].measure(innerC)
+            val label = measurables[2].measure(innerC)
+            val number = measurables[3].measure(innerC)
+            val badge = measurables[4].measure(Constraints())
+            val footer = measurables[5].measure(Constraints.fixedWidth(width))
+
+            // Expanded slots (start-offset from the start edge, top from the card top).
+            val nameExpTop = pad + brand.height + md
+            val labelExpTop = nameExpTop + name.height + xs
+            val numberExpTop = labelExpTop + label.height
+            val footerTop = numberExpTop + number.height + pad
+            val badgeExpTop = footerTop + (footer.height - badge.height) / 2
+            val expandedH = footerTop + footer.height
+
+            // Collapsed slots — a compact bar of tick + name + code (slightly larger).
+            val colPad = Spacing.lg.roundToPx()
+            val barH = maxOf(badge.height, name.height, number.height) + colPad + md
+            val badgeColTop = (barH - badge.height) / 2
+            val nameColStart = pad + badge.width + sm
+            val nameColTop = (barH - name.height) / 2
+            // The name shrinks in the bar, so the code sits just past its scaled width.
+            val numberColStart = nameColStart + (name.width * NameCollapsedScale).toInt() + sm
+            val numberColTop = (barH - number.height) / 2
+
+            val t = CardCollapseEasing.transform(collapseProgress())
+            val height = lerp(expandedH, barH, t)
+
+            layout(width, height) {
+                // Fading pieces stay at their expanded spots (and clip as the card shrinks).
+                brand.placeRelative(pad, pad)
+                label.placeRelative(pad, labelExpTop)
+                footer.placeRelative(0, footerTop)
+                // Traveling pieces glide from their expanded slot to their bar slot.
+                name.placeRelative(lerp(pad, nameColStart, t), lerp(nameExpTop, nameColTop, t))
+                number.placeRelative(lerp(pad, numberColStart, t), lerp(numberExpTop, numberColTop, t))
+                badge.placeRelative(lerp(pad, pad, t), lerp(badgeExpTop, badgeColTop, t))
+            }
         }
-        InsuranceCardFooter(
-            coverageLabel = coverageLabel,
-            badge = coverageBadge,
-            action = footerAction,
-        )
     }
 }
+
+private val CardCollapseEasing = FastOutSlowInEasing
+
+/** How far the holder name shrinks by the time the card is a compact bar. */
+private const val NameCollapsedScale = 0.88f
+
+/** Full until the fold's midpoint, then gone — the vanishing pieces clear before the bar forms. */
+private fun fadeOutAlpha(progress: Float): Float = (1f - progress * 2f).coerceIn(0f, 1f)
 
 /**
  * The small round glyph beside the coverage line — a tick when treatment support is
@@ -169,7 +253,7 @@ fun CoverageBadge(
 ) {
     Box(
         modifier = modifier
-            .size(COVERAGE_BADGE_SIZE)
+            .size(TreatmentDimens.coverageBadgeSize)
             .background(containerColor, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
@@ -177,7 +261,7 @@ fun CoverageBadge(
             imageVector = icon,
             contentDescription = null,
             tint = contentColor,
-            modifier = Modifier.size(COVERAGE_BADGE_ICON_SIZE),
+            modifier = Modifier.size(TreatmentDimens.coverageBadgeIconSize),
         )
     }
 }
@@ -185,7 +269,7 @@ fun CoverageBadge(
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
-    val decor = Color.White.copy(alpha = CARD_DECOR_ALPHA)
+    val decor = Color.White.copy(alpha = TreatmentDimens.cardDecorAlpha)
     drawOval(
         color = decor,
         topLeft = Offset(-size.width * 0.15f, size.height * 0.55f),
@@ -199,7 +283,7 @@ private fun Modifier.cardDecoration(): Modifier = drawBehind {
 }
 
 @Composable
-private fun InsuranceCardBrandRow(initial: String) {
+private fun InsuranceCardBrandRow() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -207,17 +291,18 @@ private fun InsuranceCardBrandRow(initial: String) {
     ) {
         Box(
             modifier = Modifier
-                .size(30.dp)
+                .size(34.dp)
                 .background(
                     Color.White.copy(alpha = 0.13f),
                     RoundedCornerShape(CornerRadius.avatarTile),
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = initial,
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.White,
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_ejtemaei_logo),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(28.dp),
             )
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -234,15 +319,15 @@ private fun InsuranceCardBrandRow(initial: String) {
         }
         Box(
             modifier = Modifier
-                .size(BRAND_TICK_SIZE)
+                .size(TreatmentDimens.brandTickSize)
                 .background(Color.White.copy(alpha = 0.13f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = TaminIcons.Check,
+                imageVector = vectorResource(Res.drawable.ic_tamin_check),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(BRAND_TICK_ICON_SIZE),
+                modifier = Modifier.size(TreatmentDimens.brandTickIconSize),
             )
         }
     }
@@ -287,9 +372,9 @@ fun InsuranceCardCarousel(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Each card occupies CARD_PEEK_FRACTION of the viewport and stays centred,
+            // Each card occupies TreatmentDimens.cardPeekFraction of the viewport and stays centred,
             // so the neighboring cards peek evenly on both edges.
-            val sidePadding = maxWidth * (1 - CARD_PEEK_FRACTION) / 2
+            val sidePadding = maxWidth * (1 - TreatmentDimens.cardPeekFraction) / 2
             HorizontalPager(
                 state = pagerState,
                 contentPadding = PaddingValues(horizontal = sidePadding),
@@ -338,117 +423,6 @@ private fun PageIndicator(
 }
 
 /**
- * The quick-access card's wash, sweeping right to left: deep teal under the title on the
- * start edge, brightening toward the end edge.
- *
- * The design writes this as `135deg, #2FB9BC → #0E7C82`, but a CSS angle is absolute and
- * ignores direction, so reading its stop order literally mirrors the card under RTL.
- */
-@Composable
-fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
-
-/**
- * The prominent gradient entry point at the top of the quick-access group —
- * "سوابق درمانی من".
- */
-@Composable
-fun QuickAccessCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    trailingIcon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    background: Brush = quickAccessGradient(),
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.card))
-            .background(background)
-            .clickable(onClick = onClick)
-            .padding(Spacing.page),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-    ) {
-        IconTile(
-            icon = icon,
-            tint = Color.White,
-            background = Brush.linearGradient(
-                listOf(Color.White.copy(alpha = 0.18f), Color.White.copy(alpha = 0.1f)),
-            ),
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.8f),
-            )
-        }
-        Icon(
-            imageVector = trailingIcon,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(IconSize.medium),
-        )
-    }
-}
-
-/**
- * Surface-level row card used for the secondary hub destinations — health profile,
- * contracted centers — with an optional status pill before the chevron.
- */
-@Composable
-fun TreatmentNavigationCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    iconTint: Color,
-    iconBackground: Brush,
-    trailingIcon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    status: @Composable (() -> Unit)? = null,
-) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
-            .clickable(onClick = onClick)
-            .padding(Spacing.lg),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
-    ) {
-        IconTile(icon = icon, tint = iconTint, background = iconBackground)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.textPrimary,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textMuted,
-            )
-        }
-        status?.invoke()
-        Icon(
-            imageVector = trailingIcon,
-            contentDescription = null,
-            tint = colors.chevron,
-            modifier = Modifier.size(IconSize.medium),
-        )
-    }
-}
-
-/**
  * One square tile in the hub's three-up service grid — electronic prescriptions,
  * medical confirmations, miscellaneous claims.
  */
@@ -477,13 +451,16 @@ fun CategoryTile(
             size = 40.dp,
             cornerRadius = CornerRadius.lg,
         )
-        Text(
+        AutoResizeText(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textPrimary,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = colors.textPrimary,
+                textAlign = TextAlign.Center,
+            ),
+            maxLines = 1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xxs),
         )
     }
 }
