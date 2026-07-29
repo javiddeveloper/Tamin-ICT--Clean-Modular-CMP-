@@ -46,6 +46,8 @@ fun BmiMeter(
     bmi: Float?
 ) {
     val taminColors = LocalTaminColors.current
+    val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+    val isRtl = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl
 
     // Determine category characteristics
     val (categoryText, categoryBgColor, categoryTextColor, adviceMsg, dotColor) = when {
@@ -79,7 +81,7 @@ fun BmiMeter(
         )
         else -> BmiInfo(
             category = stringResource(Res.string.health_bmi_obese_category),
-            bgColor = taminColors.dangerBorder.copy(alpha = 0.25f),
+            bgColor = taminColors.dangerBg,
             textColor = taminColors.dangerText,
             advice = stringResource(Res.string.health_bmi_obese_advice),
             dotColor = taminColors.dangerText
@@ -103,10 +105,10 @@ fun BmiMeter(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
         border = BorderStroke(1.dp, taminColors.border),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header: Title with Pulse/EKG Line Icon
@@ -147,7 +149,7 @@ fun BmiMeter(
                 TaminText(
                     text = stringResource(Res.string.health_bmi_title),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 13.5.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.textPrimary
                     )
@@ -172,7 +174,7 @@ fun BmiMeter(
                 Box(
                     modifier = Modifier
                         .background(categoryBgColor, RoundedCornerShape(100.dp))
-                        .border(1.5.dp, categoryTextColor.copy(alpha = 0.3f), RoundedCornerShape(100.dp))
+                        .border(1.dp, categoryTextColor.copy(alpha = 0.3f), RoundedCornerShape(100.dp))
                         .padding(horizontal = 14.dp, vertical = 4.dp)
                 ) {
                     TaminText(
@@ -186,30 +188,56 @@ fun BmiMeter(
                 }
             }
 
+            // Gauge labels
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TaminText(stringResource(Res.string.health_bmi_underweight_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, color = taminColors.textSecondary))
+                TaminText(stringResource(Res.string.health_bmi_normal_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, color = taminColors.textSecondary))
+                TaminText(stringResource(Res.string.health_bmi_overweight_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, color = taminColors.textSecondary))
+                TaminText(stringResource(Res.string.health_bmi_obese_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, color = taminColors.textSecondary))
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             // Gradient Gauge Track
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(28.dp),
-                contentAlignment = Alignment.BottomCenter
+                contentAlignment = Alignment.Center
             ) {
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(14.dp)
                 ) {
-                    val trackHeight = 10f
+                    val trackHeight = 14.dp.toPx()
                     val w = size.width
 
-                    // Draw rounded color track representing underweight -> obese
                     // Color transitions: Blue -> Green -> Orange -> Red
+                    // In RTL, Start is Right, so Blue is at Right and Red is at Left.
+                    val gradientColors = if (isRtl) {
+                        listOf(
+                            taminColors.dangerText,
+                            taminColors.orangeText,
+                            taminColors.greenText,
+                            taminColors.blueText
+                        )
+                    } else {
+                        listOf(
+                            taminColors.blueText,
+                            taminColors.greenText,
+                            taminColors.orangeText,
+                            taminColors.dangerText
+                        )
+                    }
+
                     val brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            taminColors.blueText, // Underweight
-                            taminColors.greenText, // Normal
-                            taminColors.orangeText, // Overweight
-                            taminColors.dangerText  // Obese
-                        ),
+                        colors = gradientColors,
                         startX = 0f,
                         endX = w
                     )
@@ -223,36 +251,24 @@ fun BmiMeter(
 
                     // Draw Pointer Indicator overlay if BMI is present
                     if (bmi != null) {
-                        val pointerX = w * animatedPointerFraction
-                        val pointerRadius = 7f
+                        val effectiveFraction = if (isRtl) 1f - animatedPointerFraction else animatedPointerFraction
+                        val pointerX = w * effectiveFraction
+                        val pointerRadius = 9.dp.toPx()
 
-                        // Outer white ring
+                        // Outer ring matching card background
                         drawCircle(
-                            color = Color.White,
-                            radius = pointerRadius + 3f,
+                            color = taminColors.bgSurface,
+                            radius = pointerRadius,
                             center = Offset(pointerX, size.height / 2)
                         )
-                        // Inner colored center
+                        // Inner active category color ring
                         drawCircle(
                             color = dotColor,
-                            radius = pointerRadius,
+                            radius = pointerRadius - 2.5.dp.toPx(),
                             center = Offset(pointerX, size.height / 2)
                         )
                     }
                 }
-            }
-
-            // Gauge labels
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TaminText(stringResource(Res.string.health_bmi_underweight_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                TaminText(stringResource(Res.string.health_bmi_normal_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                TaminText(stringResource(Res.string.health_bmi_overweight_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
-                TaminText(stringResource(Res.string.health_bmi_obese_category), style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.5.sp, color = taminColors.textMuted))
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -278,7 +294,7 @@ fun BmiMeter(
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = taminColors.textTertiary,
+                        color = taminColors.textSecondary,
                         textAlign = TextAlign.Right
                     ),
                     modifier = Modifier.weight(1f)
