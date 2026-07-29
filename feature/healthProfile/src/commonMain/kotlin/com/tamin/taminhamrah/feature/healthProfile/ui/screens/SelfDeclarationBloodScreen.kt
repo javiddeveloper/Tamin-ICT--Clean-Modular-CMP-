@@ -45,7 +45,8 @@ fun SelfDeclarationBloodScreen(
     state: BloodGroupStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    bloodGroupOptions: List<LookupItemPR>
+    bloodGroupOptions: List<LookupItemPR>,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -86,16 +87,26 @@ fun SelfDeclarationBloodScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                BloodShimmerSkeleton()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
             // Blood Droplet Graphic
             BloodDropletGraphic(
@@ -227,6 +238,7 @@ fun SelfDeclarationBloodScreen(
                 )
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 }

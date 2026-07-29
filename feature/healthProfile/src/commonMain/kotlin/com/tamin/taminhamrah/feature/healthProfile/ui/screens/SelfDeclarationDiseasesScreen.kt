@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.CardsListShimmerSkeleton
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.InfoBanner
@@ -52,7 +54,8 @@ fun SelfDeclarationDiseasesScreen(
     state: DiseasesStepState,
     illnessGroups: List<IllnessGroupPR>,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -100,15 +103,25 @@ fun SelfDeclarationDiseasesScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                CardsListShimmerSkeleton()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 
             InfoBanner(
                 message = stringResource(Res.string.health_confidential_notice),
@@ -315,6 +328,7 @@ fun SelfDeclarationDiseasesScreen(
             }
 
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 

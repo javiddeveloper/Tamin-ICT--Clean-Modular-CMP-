@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
@@ -23,6 +24,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationSt
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import org.jetbrains.compose.resources.stringResource
@@ -33,7 +35,8 @@ fun SelfDeclarationPersonalScreen(
     state: PersonalStepState,
     maritalStatusOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -63,69 +66,80 @@ fun SelfDeclarationPersonalScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            TaminText(
-                text = stringResource(Res.string.health_personal_heading),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                FormFieldsShimmerSkeleton(fieldCount = 4)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                TaminText(
+                    text = stringResource(Res.string.health_personal_heading),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = taminColors.textPrimary
+                    )
                 )
-            )
 
-            TaminText(
-                text = stringResource(Res.string.health_personal_desc),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textTertiary,
-                    lineHeight = 22.sp
+                TaminText(
+                    text = stringResource(Res.string.health_personal_desc),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = taminColors.textTertiary,
+                        lineHeight = 22.sp
+                    )
                 )
-            )
 
-            // Marital Status — Clickable field opening HealthBottomSheet
-            StyledTextField(
-                value = selectedMaritalLabel,
-                onValueChange = {},
-                label = stringResource(Res.string.health_personal_marital_status),
-                placeholder = stringResource(Res.string.choose),
-                trailingIcon = Icons.Default.KeyboardArrowDown,
-                readOnly = true,
-                onClick = { showMaritalBottomSheet = true }
-            )
+                // Marital Status — Clickable field opening HealthBottomSheet
+                StyledTextField(
+                    value = selectedMaritalLabel,
+                    onValueChange = {},
+                    label = stringResource(Res.string.health_personal_marital_status),
+                    placeholder = stringResource(Res.string.choose),
+                    trailingIcon = Icons.Default.KeyboardArrowDown,
+                    readOnly = true,
+                    onClick = { showMaritalBottomSheet = true }
+                )
 
-            StyledTextField(
-                value = state.job,
-                onValueChange = { jobStr ->
-                    onIntent(HealthProfileIntent.UpdatePersonal(state.copy(job = jobStr)))
-                },
-                label = stringResource(Res.string.health_personal_job_label),
-                placeholder = stringResource(Res.string.health_personal_job_placeholder)
-            )
+                StyledTextField(
+                    value = state.job,
+                    onValueChange = { jobStr ->
+                        onIntent(HealthProfileIntent.UpdatePersonal(state.copy(job = jobStr)))
+                    },
+                    label = stringResource(Res.string.health_personal_job_label),
+                    placeholder = stringResource(Res.string.health_personal_job_placeholder)
+                )
 
-            StyledTextField(
-                value = state.citizenship,
-                onValueChange = { cit ->
-                    onIntent(HealthProfileIntent.UpdatePersonal(state.copy(citizenship = cit)))
-                },
-                label = stringResource(Res.string.health_personal_citizenship_label),
-                placeholder = stringResource(Res.string.health_personal_citizenship_placeholder)
-            )
+                StyledTextField(
+                    value = state.citizenship,
+                    onValueChange = { cit ->
+                        onIntent(HealthProfileIntent.UpdatePersonal(state.copy(citizenship = cit)))
+                    },
+                    label = stringResource(Res.string.health_personal_citizenship_label),
+                    placeholder = stringResource(Res.string.health_personal_citizenship_placeholder)
+                )
 
-            StyledTextField(
-                value = state.nationality,
-                onValueChange = { nat ->
-                    onIntent(HealthProfileIntent.UpdatePersonal(state.copy(nationality = nat)))
-                },
-                label = stringResource(Res.string.health_personal_nationality_label),
-                placeholder = stringResource(Res.string.health_personal_nationality_placeholder)
-            )
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+                StyledTextField(
+                    value = state.nationality,
+                    onValueChange = { nat ->
+                        onIntent(HealthProfileIntent.UpdatePersonal(state.copy(nationality = nat)))
+                    },
+                    label = stringResource(Res.string.health_personal_nationality_label),
+                    placeholder = stringResource(Res.string.health_personal_nationality_placeholder)
+                )
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 

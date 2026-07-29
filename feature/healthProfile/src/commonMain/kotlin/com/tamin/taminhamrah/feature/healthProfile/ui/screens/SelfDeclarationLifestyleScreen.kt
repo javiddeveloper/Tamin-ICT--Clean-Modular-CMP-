@@ -37,7 +37,8 @@ fun SelfDeclarationLifestyleScreen(
     smokingStatusOptions: List<LookupItemPR>,
     actFrequencyOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -83,15 +84,25 @@ fun SelfDeclarationLifestyleScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                LifestyleShimmerSkeleton()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 
             InfoBanner(
                 message = stringResource(Res.string.health_confidential_notice),
@@ -290,6 +301,7 @@ fun SelfDeclarationLifestyleScreen(
             }
 
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 
