@@ -1,17 +1,17 @@
 package com.tamin.taminhamrah.data.mapper.treatment
 
 import com.tamin.taminhamrah.data.local.entity.DeservedTreatmentEntity
-import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
-import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
-import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
-import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
-import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionDetailEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
+import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
+import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
+import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
+import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 
 // --- Deserved Treatment ---
 fun DeservedTreatmentDN.toEntity(nationalCode: String) = DeservedTreatmentEntity(
