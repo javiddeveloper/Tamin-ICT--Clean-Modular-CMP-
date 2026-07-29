@@ -120,6 +120,7 @@ data class TreatmentCostEntity(
     val status: String?,
     val statusDesc: String?,
     val payStatusDesc: String?,
+    val estimatePayDate: String?,
     val returnReason: String?
 )
 

@@ -21,7 +21,6 @@ data class CostsUiState(
     val viewerPdf: PdfDownloadPR? = null,
     /** The last requested certificate could not be fetched, so the viewer can stop waiting. */
     val viewerDownloadFailed: Boolean = false,
-    val sendToInboxResult: String? = null
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -30,7 +29,6 @@ data class CostsUiState(
         data class TreatmentCostsLoaded(val list: List<TreatmentCostPR>) : PartialState()
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState()
         data object ViewerDownloadFailed : PartialState()
-        data class SendToInboxDone(val response: String) : PartialState()
     }
 }
 

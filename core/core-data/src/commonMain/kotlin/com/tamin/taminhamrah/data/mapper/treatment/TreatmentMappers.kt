@@ -114,6 +114,7 @@ fun TreatmentCostDTO.toDomain() = TreatmentCostDN(
     status = status,
     statusDesc = statusDesc,
     payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
     returnReason = returnReason
 )
 

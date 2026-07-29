@@ -32,7 +32,7 @@ class GetTreatmentCostsUseCaseTest : BaseUseCaseTest() {
                 payType = "Type", province = "Tehran", rahgiriCode = "555",
                 releaseDate = "14020102", repId = 1, serviceDate = "14020101",
                 status = "Status", statusDesc = "Description", payStatusDesc = "PayDescription",
-                returnReason = "None"
+                estimatePayDate = "14020630", returnReason = "None"
             )
         )
         repository.getTreatmentCostsResult = expected
@@ -60,7 +60,7 @@ class GetTreatmentCostsUseCaseTest : BaseUseCaseTest() {
         repository.getTreatmentCostsResult = emptyList()
 
         useCase().test {
-            assertEquals(emptyList<TreatmentCostDN>(), awaitItem())
+            assertEquals(emptyList(), awaitItem())
             awaitComplete()
         }
     }

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.treatment.fake.FakeTreatmentRepository
 import com.tamin.taminhamrah.feature.treatment.fake.TreatmentTestData
+import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsIntent
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
@@ -19,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TreatmentCostsViewModelTest {
@@ -97,14 +99,12 @@ class TreatmentCostsViewModelTest {
     fun testSendToInbox_setsResult() = runTest(testDispatcher) {
         repository.sendToInboxResult = "SUCCESS"
 
-        viewModel.uiState.test {
-            awaitItem() // initial
+        viewModel.events.test {
             viewModel.sendIntent(CostsIntent.SendToInbox("1"))
 
-            var state = awaitItem()
-            while (state.sendToInboxResult == null) state = awaitItem()
-
-            assertEquals("SUCCESS", state.sendToInboxResult)
+            // The service's payload is deliberately not shown; the confirmation is fixed copy.
+            val event = awaitItem()
+            assertTrue(event is CostsEvent.ShowToast)
         }
     }
 }

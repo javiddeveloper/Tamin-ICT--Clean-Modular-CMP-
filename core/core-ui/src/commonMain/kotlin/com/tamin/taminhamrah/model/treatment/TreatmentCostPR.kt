@@ -11,6 +11,7 @@ data class TreatmentCostPR(
     val healthcenterName: String,
     val payPrice: String,
     val payStatusDesc: String,
+    val estimatePayDate: String,
     val rahgiriCode: String,
     val serviceDate: String,
     val statusDesc: String,

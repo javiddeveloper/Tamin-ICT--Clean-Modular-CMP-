@@ -199,6 +199,7 @@ fun TreatmentCostDN.toEntity() = TreatmentCostEntity(
     status = status,
     statusDesc = statusDesc,
     payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
     returnReason = returnReason
 )
 
@@ -228,6 +229,7 @@ fun TreatmentCostEntity.toDomain() = TreatmentCostDN(
     status = status,
     statusDesc = statusDesc,
     payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
     returnReason = returnReason
 )
 

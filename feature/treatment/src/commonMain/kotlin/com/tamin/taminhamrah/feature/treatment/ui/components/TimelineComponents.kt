@@ -129,7 +129,7 @@ fun MedicalRecordCard(
  * Paints the 4dp category stripe down the card's leading edge — the right side under
  * the app's right-to-left layout, the left side if it is ever rendered left-to-right.
  */
-private fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
+internal fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
     val barWidth = TreatmentDimens.accentBarWidth.toPx()
     val x = if (layoutDirection == LayoutDirection.Rtl) size.width - barWidth else 0f
     drawRect(

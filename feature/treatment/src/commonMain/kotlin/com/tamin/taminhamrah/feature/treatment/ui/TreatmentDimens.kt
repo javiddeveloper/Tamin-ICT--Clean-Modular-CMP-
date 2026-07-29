@@ -25,7 +25,7 @@ internal object TreatmentDimens {
     val cardLoadingHeight = 160.dp
     const val cardDecorAlpha = 0.07f
 
-    /** A card's share of the carousel viewport; the rest is the neighbours peeking. */
+    /** A card's share of the carousel viewport; the rest is the neighbors peeking. */
     const val cardPeekFraction = 0.87f
 
     // Brand tile on the insurance card (the organization's mark, top of the card).
@@ -34,6 +34,13 @@ internal object TreatmentDimens {
 
     /** Breathing room above and below the collapsed bar's contents. */
     val cardBarPadding = 28.dp
+
+    // Miscellaneous-claim certificates ("خسارت متفرقه")
+    val certificateSkeletonHeight = 150.dp
+    const val certificateSkeletonRows = 4
+
+    /** A quarter turn: the disclosure chevron points back when closed, down when open. */
+    const val chevronOpenDegrees = -90f
 
     // Category tiles & badges
     val categoryTileIconSize = 40.dp

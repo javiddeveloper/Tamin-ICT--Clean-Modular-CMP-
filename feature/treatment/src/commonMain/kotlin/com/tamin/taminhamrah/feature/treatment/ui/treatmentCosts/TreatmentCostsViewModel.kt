@@ -60,11 +60,19 @@ class TreatmentCostsViewModel(
         }
     }
 
+    /**
+     * Posts the certificate to the person's inbox.
+     *
+     * The outcome is announced as an event, not parked in the state: it happens once and is read
+     * once, and the service's own payload is not something to show — the previous app replaced it
+     * with a fixed confirmation too.
+     */
     private fun sendToInbox(intent: CostsIntent.SendToInbox): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            sendToInboxTreatmentCostsUseCase(intent.repId).collect { response ->
-                emit(PartialState.SendToInboxDone(response))
+            sendToInboxTreatmentCostsUseCase(intent.repId).collect {
+                sendEvent(CostsEvent.ShowToast(SENT_TO_INBOX_MESSAGE))
+                emit(PartialState.Loading(false))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
@@ -88,8 +96,11 @@ class TreatmentCostsViewModel(
             isLoading = false,
             viewerDownloadFailed = true,
         )
-        is PartialState.SendToInboxDone -> currentState.copy(isLoading = false, sendToInboxResult = partialState.response)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
+
+/** The previous app's confirmation, kept word for word. */
+private const val SENT_TO_INBOX_MESSAGE =
+    "گواهی بازپرداخت هزینه های درمانی به صندوق شخصی شما ارسال شد"

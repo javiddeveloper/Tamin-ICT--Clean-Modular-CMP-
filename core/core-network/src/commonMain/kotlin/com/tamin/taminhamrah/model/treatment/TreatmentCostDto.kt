@@ -48,5 +48,6 @@ data class TreatmentCostDTO(
     @SerialName("status") val status: String? = null,
     @SerialName("statusDesc") val statusDesc: String? = null,
     @SerialName("payStatusDesc") val payStatusDesc: String? = null,
+    @SerialName("estimatePayDate") val estimatePayDate: String? = null,
     @SerialName("returnReason") val returnReason: String? = null
 )

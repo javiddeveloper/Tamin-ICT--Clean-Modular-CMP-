@@ -13,7 +13,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
-import com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts.TreatmentCostsScreen
+import com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts.TreatmentCostsRoute
 import kotlinx.serialization.Serializable
 
 /**
@@ -89,7 +89,7 @@ fun NavGraphBuilder.treatmentGraph(
         }
 
         composable<TreatmentRoute.TreatmentCosts> {
-            TreatmentCostsScreen(onBack = onBack)
+            TreatmentCostsRoute(onBackClicked = onBack)
         }
 
         composable<TreatmentRoute.MedicalRecords> { backStackEntry ->

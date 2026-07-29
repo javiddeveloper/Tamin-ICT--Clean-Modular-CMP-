@@ -46,6 +46,7 @@ object TreatmentMocks {
         healthcenterName = "داروخانه شبانه‌روزی مرکزی",
         payPrice = "850000",
         payStatusDesc = "پرداخت شده",
+        estimatePayDate = "1402/06/30",
         rahgiriCode = "REF-98765",
         serviceDate = "1402/04/20",
         statusDesc = "نهایی",
@@ -61,11 +62,11 @@ object TreatmentMocks {
         payNatCode = "1234567890",
         payOtherService = "0",
         payService = "850000",
-        payStatus = "1",
+        payStatus = "4",
         payType = "1",
         province = "تهران",
         releaseDate = "1402/04/21",
-        status = "1",
+        status = "7",
         returnReason = ""
     )
 

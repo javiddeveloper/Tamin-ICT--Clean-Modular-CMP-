@@ -62,7 +62,7 @@ object TreatmentTestData {
         payPrice = "1000", payService = "service", payStatus = "1",
         payType = "Type", province = "Tehran", rahgiriCode = "555",
         releaseDate = "14020102", repId = 1, serviceDate = "14020101",
-        status = "Status", statusDesc = "Description", payStatusDesc = "PayDescription",
+        status = "Status", statusDesc = "Description", payStatusDesc = "PayDescription", estimatePayDate = "14020630",
         returnReason = "None"
     )
 

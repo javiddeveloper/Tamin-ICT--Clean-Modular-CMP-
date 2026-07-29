@@ -121,6 +121,7 @@ fun TreatmentCostDN.toPresentation(): TreatmentCostPR {
         healthcenterName = healthcenterName ?: "نامشخص",
         payPrice = payPrice.toLongStringOrZero(),
         payStatusDesc = payStatusDesc ?: "نامشخص",
+        estimatePayDate = estimatePayDate ?: "-",
         rahgiriCode = rahgiriCode ?: "",
         serviceDate = serviceDate ?: "",
         statusDesc = statusDesc ?: "نامشخص",
