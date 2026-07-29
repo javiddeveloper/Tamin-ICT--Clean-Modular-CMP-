@@ -47,8 +47,8 @@ fun SelfDeclarationLifestyleScreen(
     var showExerciseBottomSheet by remember { mutableStateOf(false) }
 
     val optionsYesNo = listOf(
-        stringResource(Res.string.health_option_no),
-        stringResource(Res.string.health_option_yes)
+        stringResource(Res.string.health_option_yes),
+        stringResource(Res.string.health_option_no)
     )
 
     LaunchedEffect(Unit) {
@@ -118,18 +118,10 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.isSmoking == true) 1 else 0,
+                    selectedIndex = if (state.isSmoking == true) 0 else 1,
                     onOptionSelected = { idx ->
-                        val isYes = idx == 1
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    isSmoking = isYes,
-                                    smokingStatusId = if (isYes) state.smokingStatusId else null,
-                                    smokingPattern = if (isYes) state.smokingPattern else null
-                                )
-                            )
-                        )
+                        val isYes = idx == 0
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = isYes)))
                         if (isYes) showSmokingBottomSheet = true
                     }
                 )
@@ -165,18 +157,10 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.hasAddiction == true) 1 else 0,
+                    selectedIndex = if (state.hasAddiction == true) 0 else 1,
                     onOptionSelected = { idx ->
-                        val isYes = idx == 1
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    hasAddiction = isYes,
-                                    substanceStatusId = if (isYes) state.substanceStatusId else null,
-                                    substancePattern = if (isYes) state.substancePattern else null
-                                )
-                            )
-                        )
+                        val isYes = idx == 0
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = isYes)))
                         if (isYes) showAddictionBottomSheet = true
                     }
                 )
@@ -213,19 +197,10 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.isDrinking == true) 1 else 0,
+                    selectedIndex = if (state.isDrinking == true) 0 else 1,
                     onOptionSelected = { idx ->
-                        val isYes = idx == 1
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    isDrinking = isYes,
-                                    drinkingStatusId = if (isYes) state.drinkingStatusId else null,
-                                    drinkingPattern = if (isYes) state.drinkingPattern else null,
-
-                                    )
-                            )
-                        )
+                        val isYes = idx == 0
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = isYes)))
                         if (isYes) showAlcoholBottomSheet = true
                     }
                 )
@@ -262,18 +237,10 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.isExercising == true) 1 else 0,
+                    selectedIndex = if (state.isExercising == true) 0 else 1,
                     onOptionSelected = { idx ->
-                        val isYes = idx == 1
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    isExercising = isYes,
-                                    exerciseStatusId = if (isYes) state.exerciseStatusId else null,
-                                    exerciseFrequency = if (isYes) state.exerciseFrequency else null,
-                                )
-                            )
-                        )
+                        val isYes = idx == 0
+                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = isYes)))
                         if (isYes) showExerciseBottomSheet = true
                     }
                 )

@@ -27,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -53,8 +54,8 @@ fun SegmentedControl(
     options: List<String>,
     selectedIndex: Int,
     onOptionSelected: (Int) -> Unit,
-    activeColor: Color = LocalTaminColors.current.blueText,
-    activeBgColor: Color = LocalTaminColors.current.bgSurface
+    activeColor: Color = Color.White,
+    activeBgColor: Color = LocalTaminColors.current.blueText
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -62,7 +63,7 @@ fun SegmentedControl(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.divider, RoundedCornerShape(13.dp))
-            .border(1.5.dp, taminColors.border.copy(alpha = 0.5f), RoundedCornerShape(13.dp))
+//            .border(0.5.dp, taminColors.border.copy(alpha = 0.5f), RoundedCornerShape(13.dp))
             .padding(4.dp)
             .height(42.dp)
     ) {
@@ -81,15 +82,20 @@ fun SegmentedControl(
                 .offset(x = indicatorOffset)
                 .width(tabWidth)
                 .fillMaxHeight()
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(10.dp),
+                    spotColor = activeBgColor.copy(alpha = 0.25f),
+                    ambientColor = activeBgColor.copy(alpha = 0.25f)
+                )
                 .background(activeBgColor, RoundedCornerShape(10.dp))
-                .border(1.5.dp, taminColors.border, RoundedCornerShape(10.dp))
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
             options.forEachIndexed { index, label ->
                 val isSelected = index == selectedIndex
                 val textColor by animateColorAsState(
-                    targetValue = if (isSelected) activeColor else taminColors.textTertiary,
+                    targetValue = if (isSelected) activeColor else taminColors.textSecondary,
                     label = "textColor"
                 )
 

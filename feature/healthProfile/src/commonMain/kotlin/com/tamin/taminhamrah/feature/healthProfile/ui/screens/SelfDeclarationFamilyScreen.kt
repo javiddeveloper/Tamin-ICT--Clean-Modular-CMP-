@@ -45,8 +45,8 @@ fun SelfDeclarationFamilyScreen(
     var showCancerSheet by remember { mutableStateOf(false) }
 
     val optionsYesNo = listOf(
-        stringResource(Res.string.health_option_no),
-        stringResource(Res.string.health_option_yes)
+        stringResource(Res.string.health_option_yes),
+        stringResource(Res.string.health_option_no)
     )
 
     // Lookup family groups via Enum mapping (forFamily = true)
@@ -146,9 +146,9 @@ fun SelfDeclarationFamilyScreen(
 
                     SegmentedControl(
                         options = optionsYesNo,
-                        selectedIndex = if (state.familyHasCancer == true) 1 else 0,
+                        selectedIndex = if (state.familyHasCancer == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            val isYes = idx == 1
+                            val isYes = idx == 0
                             onIntent(
                                 HealthProfileIntent.UpdateFamily(
                                     state.copy(
