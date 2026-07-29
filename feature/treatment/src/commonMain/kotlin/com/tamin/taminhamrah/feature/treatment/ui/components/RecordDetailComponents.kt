@@ -22,6 +22,26 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.amount_total
+import taminx.core.core_ui.detail_action_date
+import taminx.core.core_ui.detail_center
+import taminx.core.core_ui.detail_cost_breakdown
+import taminx.core.core_ui.detail_date
+import taminx.core.core_ui.detail_diagnosis
+import taminx.core.core_ui.detail_doctor_note
+import taminx.core.core_ui.detail_dose
+import taminx.core.core_ui.detail_normal_range
+import taminx.core.core_ui.detail_patient_share
+import taminx.core.core_ui.detail_prescribed
+import taminx.core.core_ui.detail_received
+import taminx.core.core_ui.detail_result
+import taminx.core.core_ui.detail_tracking_code
+import taminx.core.core_ui.detail_visit_reason
+import taminx.core.core_ui.share_organization
+import taminx.core.core_ui.share_yours
+import taminx.core.core_ui.unit_rial
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Cards for a single medical record's detail screen. The record type decides which of
@@ -47,9 +67,9 @@ fun RecordSummaryCard(
     ) {
         DetailRow(label = metaLabel, value = metaValue, numeric = false)
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
-        DetailRow(label = "کد رهگیری", value = trackingCode)
+        DetailRow(label = stringResource(Res.string.detail_tracking_code), value = trackingCode)
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
-        DetailRow(label = "تاریخ", value = date)
+        DetailRow(label = stringResource(Res.string.detail_date), value = date)
     }
 }
 
@@ -91,18 +111,18 @@ fun PrescriptionItemCard(
                 .background(colors.bgPage, RoundedCornerShape(CornerRadius.chip))
                 .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         ) {
-            LabeledBlock(label = "دستور مصرف", value = dose)
+            LabeledBlock(label = stringResource(Res.string.detail_dose), value = dose)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             StatTile(
-                label = "تجویزی",
+                label = stringResource(Res.string.detail_prescribed),
                 amount = prescribedCount,
                 containerColor = colors.blueBg,
                 contentColor = colors.blueText,
                 modifier = Modifier.weight(1f),
             )
             StatTile(
-                label = "دریافتی",
+                label = stringResource(Res.string.detail_received),
                 amount = receivedCount,
                 containerColor = colors.greenBg,
                 contentColor = colors.greenText,
@@ -121,11 +141,11 @@ fun PrescriptionItemCard(
                     .padding(horizontal = Spacing.md, vertical = Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
-                if (centerName.isNotBlank()) DetailRow(label = "داروخانه/پاراکلینیک", value = centerName)
-                if (actionDate.isNotBlank()) DetailRow(label = "تاریخ اقدام", value = actionDate)
-                if (itemTotal.isNotBlank()) DetailRow(label = "جمع کل", value = itemTotal, unit = "ریال")
-                if (patientShare.isNotBlank()) DetailRow(label = "سهم بیمار", value = patientShare, unit = "ریال")
-                if (organizationShare.isNotBlank()) DetailRow(label = "سهم سازمان", value = organizationShare, unit = "ریال")
+                if (centerName.isNotBlank()) DetailRow(label = stringResource(Res.string.detail_center), value = centerName)
+                if (actionDate.isNotBlank()) DetailRow(label = stringResource(Res.string.detail_action_date), value = actionDate)
+                if (itemTotal.isNotBlank()) DetailRow(label = stringResource(Res.string.amount_total), value = itemTotal, unit = stringResource(Res.string.unit_rial))
+                if (patientShare.isNotBlank()) DetailRow(label = stringResource(Res.string.detail_patient_share), value = patientShare, unit = stringResource(Res.string.unit_rial))
+                if (organizationShare.isNotBlank()) DetailRow(label = stringResource(Res.string.share_organization), value = organizationShare, unit = stringResource(Res.string.unit_rial))
             }
         }
     }
@@ -146,11 +166,11 @@ fun VisitSummaryCard(
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
-        LabeledBlock(label = "دلیل مراجعه", value = reason)
+        LabeledBlock(label = stringResource(Res.string.detail_visit_reason), value = reason)
         TaminDivider()
-        LabeledBlock(label = "تشخیص", value = diagnosis)
+        LabeledBlock(label = stringResource(Res.string.detail_diagnosis), value = diagnosis)
         TaminDivider()
-        LabeledBlock(label = "یادداشت پزشک", value = note)
+        LabeledBlock(label = stringResource(Res.string.detail_doctor_note), value = note)
     }
 }
 
@@ -194,7 +214,7 @@ fun LabTestCard(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             StatTile(
-                label = "نتیجه",
+                label = stringResource(Res.string.detail_result),
                 amount = result,
                 containerColor = colors.bgPage,
                 contentColor = colors.textPrimary,
@@ -202,7 +222,7 @@ fun LabTestCard(
                 modifier = Modifier.weight(1f),
             )
             StatTile(
-                label = "محدودهٔ طبیعی",
+                label = stringResource(Res.string.detail_normal_range),
                 amount = normalRange,
                 containerColor = colors.bgPage,
                 contentColor = colors.textPrimary,
@@ -232,23 +252,23 @@ fun CostBreakdownCard(
             .padding(Spacing.lg),
     ) {
         Text(
-            text = "تفکیک هزینه",
+            text = stringResource(Res.string.detail_cost_breakdown),
             style = MaterialTheme.typography.labelLarge,
             color = colors.textPrimary,
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
-        DetailRow(label = "جمع کل", value = total, unit = "ریال")
+        DetailRow(label = stringResource(Res.string.amount_total), value = total, unit = stringResource(Res.string.unit_rial))
         DetailRow(
-            label = "سهم سازمان",
+            label = stringResource(Res.string.share_organization),
             value = organizationShare,
-            unit = "ریال",
+            unit = stringResource(Res.string.unit_rial),
             valueColor = colors.blueText,
         )
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
         DetailRow(
-            label = "سهم شما",
+            label = stringResource(Res.string.share_yours),
             value = insuredShare,
-            unit = "ریال",
+            unit = stringResource(Res.string.unit_rial),
             valueColor = colors.greenText,
             valueStyle = MaterialTheme.typography.titleLarge,
         )

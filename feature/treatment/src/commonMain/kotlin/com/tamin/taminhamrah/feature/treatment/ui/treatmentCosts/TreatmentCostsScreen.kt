@@ -28,9 +28,13 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_back
+import taminx.core.core_ui.category_misc_claims
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 
@@ -67,7 +71,7 @@ fun HandleTreatmentCostsEvents(
 ) {
     events.collectWithLifecycleAware {
         when (it) {
-            is CostsEvent.ShowToast -> snackbarHostState.showSnackbar(it.message)
+            is CostsEvent.ShowToast -> snackbarHostState.showSnackbar(getString(it.message))
         }
     }
 }
@@ -96,11 +100,11 @@ fun TreatmentCostsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TaminTopAppBar(
-                title = "خسارت متفرقه",
+                title = stringResource(Res.string.category_misc_claims),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = "بازگشت",
+                        contentDescription = stringResource(Res.string.action_back),
                         onClick = onBackClicked,
                     )
                 },

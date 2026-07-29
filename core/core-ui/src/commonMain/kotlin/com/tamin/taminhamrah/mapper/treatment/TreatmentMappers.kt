@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.mapper.treatment
 
+import com.tamin.taminhamrah.ui.toLongStringOrZero
 import com.tamin.taminhamrah.model.treatment.*
 import kotlin.jvm.JvmName
 
@@ -150,6 +151,4 @@ fun List<TreatmentCostDN>.toPresentation(): List<TreatmentCostPR> {
     return this.map { it.toPresentation() }
 }
 
-/** Normalizes a numeric amount string (digits only) to a plain Long string, defaulting to "0". */
-private fun String?.toLongStringOrZero(): String = this?.toLongOrNull()?.toString() ?: "0"
 

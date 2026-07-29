@@ -55,6 +55,9 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.rememberJalaliMonthNames
+import com.tamin.taminhamrah.feature.treatment.ui.model.rememberRecordTabLabels
+import com.tamin.taminhamrah.feature.treatment.ui.model.toCategoryLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliMonthLabel
@@ -79,9 +82,13 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_back
+import taminx.core.core_ui.amount_total
+import taminx.core.core_ui.error_pull_to_retry
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_cross
@@ -90,9 +97,19 @@ import taminx.core.core_ui.ic_tamin_medical_approvals
 import taminx.core.core_ui.ic_tamin_medical_centers
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.patient_dependant_relation
+import taminx.core.core_ui.patient_main_insured_fallback
+import taminx.core.core_ui.records_date_from
+import taminx.core.core_ui.records_date_to
+import taminx.core.core_ui.records_doctor_named
+import taminx.core.core_ui.records_empty_period
+import taminx.core.core_ui.records_empty_search
+import taminx.core.core_ui.records_self
+import taminx.core.core_ui.records_title
+import taminx.core.core_ui.share_insured
+import taminx.core.core_ui.share_organization
 
 /** Shown on the person chip until the patient list arrives. */
-private const val SELF_LABEL = "خودم"
 
 /** Which filter panel is open over the list; only one shows at a time, or none. */
 private enum class RecordFilter { PATIENT, PERIOD }
@@ -101,9 +118,20 @@ private enum class RecordFilter { PATIENT, PERIOD }
 private fun RecordFilter?.toggle(target: RecordFilter): RecordFilter? =
     if (this == target) null else target
 
-/** The period chooser's rows, built once — the presets never change at runtime. */
-private val RecordPeriodOptions: ImmutableList<Pair<RecordPeriod, String>> =
-    RecordPeriod.entries.map { it to it.label }.toImmutableList()
+/**
+ * The period chooser's rows.
+ *
+ * Keyed on the resolved labels, so the panel gets the same [ImmutableList] instance on every
+ * recomposition — the presets themselves never change at runtime.
+ */
+@Composable
+private fun rememberPeriodOptions(): ImmutableList<Pair<RecordPeriod, String>> {
+    val labels = RecordPeriod.entries.map { stringResource(it.label) }
+    return remember(labels) {
+        RecordPeriod.entries.mapIndexed { index, period -> period to labels[index] }
+            .toImmutableList()
+    }
+}
 
 /**
  * The full-width filter chooser that drops below the bar.
@@ -174,8 +202,9 @@ private fun Scrim(onDismiss: () -> Unit) {
 }
 
 /** The date trigger reads back the chosen custom range instead of the bare "تاریخ دلخواه". */
+@Composable
 private fun periodLabel(period: RecordPeriod, customRange: Pair<String, String>?): String {
-    if (period != RecordPeriod.CUSTOM || customRange == null) return period.label
+    if (period != RecordPeriod.CUSTOM || customRange == null) return stringResource(period.label)
     val from = PersianDateFormatter.formatTimestamp(customRange.first.toLongOrNull())
     val to = PersianDateFormatter.formatTimestamp(customRange.second.toLongOrNull())
     return "$from - $to"
@@ -208,7 +237,7 @@ private fun RecordsErrorState(message: String) {
             textAlign = TextAlign.Center,
         )
         Text(
-            text = "برای تلاش دوباره، صفحه را به پایین بکشید.",
+            text = stringResource(Res.string.error_pull_to_retry),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
             textAlign = TextAlign.Center,
@@ -261,12 +290,19 @@ fun MedicalRecordsScreen(
     }
     // Keyed on the data the list is built from, not the whole state: a selection or a cost total
     // arriving must not rebuild it and invalidate everything the patient chip feeds.
+    // Resolved here because toPatientList runs inside the remember below, where composition —
+    // and so a resource lookup — is not available.
+    val mainInsuredFallback = stringResource(Res.string.patient_main_insured_fallback)
+    val dependantRelation = stringResource(Res.string.patient_dependant_relation)
+
     val patients = remember(
         treatmentState.mainUserNationalCode,
         treatmentState.deservedList,
         treatmentState.dependantList,
+        mainInsuredFallback,
+        dependantRelation,
     ) {
-        treatmentState.toPatientList()
+        treatmentState.toPatientList(mainInsuredFallback, dependantRelation)
     }
 
     // A shortcut opens this with no code; fall back to whoever the dashboard has selected.
@@ -376,13 +412,17 @@ fun MedicalRecordsContent(
 
     val currentPatient = patients.firstOrNull { it.nationalId == selectedPatient }
 
+    // Resolved once, up here, because the blocks below read them from inside a remember.
+    val selfLabel = stringResource(Res.string.records_self)
+    val monthNames = rememberJalaliMonthNames()
+
     // The search runs over the whole list, so it is done once per input change rather than on
     // every recomposition — and once, not twice, since the empty check reads the same result.
     val visibleRecords = remember(state.prescriptionList, searchCriteria, state.recordPrices) {
         state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) }
     }
-    val recordGroups = remember(visibleRecords) {
-        visibleRecords.groupBy { it.prescDate.toJalaliMonthLabel() }
+    val recordGroups = remember(visibleRecords, monthNames) {
+        visibleRecords.groupBy { it.prescDate.toJalaliMonthLabel(monthNames) }
     }
 
     if (showSearchSheet) {
@@ -398,7 +438,7 @@ fun MedicalRecordsContent(
 
     if (pickingRangeStart) {
         TaminJalaliDatePicker(
-            title = "از تاریخ",
+            title = stringResource(Res.string.records_date_from),
             onDismiss = { pickingRangeStart = false },
             onConfirm = { y, m, d ->
                 rangeStart = PersianDateFormatter.toEpochMillis(y, m, d).toString()
@@ -411,7 +451,7 @@ fun MedicalRecordsContent(
     // with only one end of the range, so both are required before the query runs.
     rangeStart?.let { start ->
         TaminJalaliDatePicker(
-            title = "تا تاریخ",
+            title = stringResource(Res.string.records_date_to),
             onDismiss = { rangeStart = null },
             onConfirm = { y, m, d ->
                 onCustomRangePicked(start, PersianDateFormatter.toEpochMillis(y, m, d).toString())
@@ -426,18 +466,18 @@ fun MedicalRecordsContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TaminTopAppBar(
-                title = "سوابق درمانی",
+                title = stringResource(Res.string.records_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = "بازگشت",
+                        contentDescription = stringResource(Res.string.action_back),
                         onClick = onBack,
                     )
                 },
             ) {
                 TimelineFilterBar(
                     // Never blank: the insured person is the default until the list arrives.
-                    personLabel = currentPatient?.filterLabel ?: SELF_LABEL,
+                    personLabel = currentPatient?.filterLabel(selfLabel) ?: selfLabel,
                     dateLabel = periodLabel(selectedPeriod, customRange),
                     dropdownIcon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     searchIcon = vectorResource(Res.drawable.ic_tamin_search),
@@ -462,9 +502,9 @@ fun MedicalRecordsContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item(key = "categories") {
                 TreatmentFilterChipRow(
-                    // Resolved once on the enum, not mapped here: a fresh list per recomposition
+                    // A remember-keyed factory, not a map here: a fresh list per recomposition
                     // is a changed argument, and the row would redraw on every list update.
-                    categories = RecordTab.chipLabels,
+                    categories = rememberRecordTabLabels(),
                     selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
                     onSelect = { onTabSelected(RecordTab.chips[it]) },
                 )
@@ -481,9 +521,9 @@ fun MedicalRecordsContent(
                 visibleRecords.isEmpty() -> item {
                     TaminEmptyState(
                         message = if (searchCriteria.nameQuery.isNotBlank()) {
-                            "موردی با «${searchCriteria.nameQuery}» یافت نشد."
+                            stringResource(Res.string.records_empty_search, searchCriteria.nameQuery)
                         } else {
-                            "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است."
+                            stringResource(Res.string.records_empty_period, stringResource(selectedTab.label))
                         },
                     )
                 }
@@ -503,10 +543,10 @@ fun MedicalRecordsContent(
             Scrim(onDismiss = { openFilter = null })
             when (filter) {
                 RecordFilter.PATIENT -> RecordFilterPanel(
-                    options = remember(patients, selectedPatient) {
+                    options = remember(patients, selectedPatient, selfLabel) {
                         patients
-                            .map { it.nationalId to it.filterLabel }
-                            .ifEmpty { listOf(selectedPatient to SELF_LABEL) }
+                            .map { it.nationalId to it.filterLabel(selfLabel) }
+                            .ifEmpty { listOf(selectedPatient to selfLabel) }
                             .toImmutableList()
                     },
                     isSelected = { it == selectedPatient },
@@ -517,7 +557,7 @@ fun MedicalRecordsContent(
                 )
 
                 RecordFilter.PERIOD -> RecordFilterPanel(
-                    options = RecordPeriodOptions,
+                    options = rememberPeriodOptions(),
                     isSelected = { it == selectedPeriod },
                     onSelect = { period ->
                         openFilter = null
@@ -545,9 +585,12 @@ private fun LazyListScope.recordTimeline(
         itemsIndexed(monthRecords) { index, record ->
             val accent = recordAccent(record.prescType)
             MedicalRecordCard(
-                category = record.prescType.toCategoryLabel(),
+                // An id neither a tab nor the extra labels know shows as-is, rather than blank.
+                category = record.prescType.toCategoryLabel()
+                    ?.let { stringResource(it) }
+                    ?: record.prescType,
                 date = record.prescDate.toJalaliDateLabel(),
-                title = "دکتر ${record.docName}",
+                title = stringResource(Res.string.records_doctor_named, record.docName),
                 subtitle = record.location.ifBlank { record.specDesc },
                 // The list endpoint carries no amount, so «سهم شما» comes from the per-record
                 // price lookup; it reads as unknown until that arrives. Old app: the insured's
@@ -570,14 +613,14 @@ private fun LazyListScope.recordTimeline(
 
 /** Totals pinned under the list; hidden until a price lookup has returned. */
 @Composable
-private fun RecordsTotals(prices: List<ElectronicPrescriptionPricePR>) {
+private fun RecordsTotals(prices: ImmutableList<ElectronicPrescriptionPricePR>) {
     if (prices.isEmpty()) return
     CostTotalsBar(
-        insuredShareLabel = "سهم بیمه‌شده",
+        insuredShareLabel = stringResource(Res.string.share_insured),
         insuredShareAmount = prices.totalOf { it.headSsoPayment },
-        organizationShareLabel = "سهم سازمان",
+        organizationShareLabel = stringResource(Res.string.share_organization),
         organizationShareAmount = prices.totalOf { it.headInsuPayment },
-        totalLabel = "جمع کل",
+        totalLabel = stringResource(Res.string.amount_total),
         totalAmount = prices.totalOf { it.requestPrice },
     )
 }
@@ -643,7 +686,10 @@ fun MedicalRecordsPreview() {
     PreviewRtlThemeContent {
         MedicalRecordsContent(
             state = TreatmentMocks.prescriptionsUiState,
-            patients = TreatmentMocks.mainUiState.toPatientList(),
+            patients = TreatmentMocks.mainUiState.toPatientList(
+                mainInsuredFallback = stringResource(Res.string.patient_main_insured_fallback),
+                dependantRelation = stringResource(Res.string.patient_dependant_relation),
+            ),
             selectedPatient = "1234567890",
             selectedPeriod = RecordPeriod.LAST_SIX_MONTHS,
             customRange = null,
@@ -661,8 +707,3 @@ fun MedicalRecordsPreview() {
     }
 }
 
-/** Turns the endpoint's numeric category into its Persian name; unknown ids show as-is. */
-private fun String.toCategoryLabel(): String =
-    RecordTab.entries.firstOrNull { it != RecordTab.ALL && this in it.requestTypeIds }?.label
-        ?: RecordTab.labelForTypeId(this)
-        ?: this

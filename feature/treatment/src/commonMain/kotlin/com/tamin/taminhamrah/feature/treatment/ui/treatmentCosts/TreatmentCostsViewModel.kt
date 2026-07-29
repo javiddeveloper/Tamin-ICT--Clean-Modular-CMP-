@@ -13,6 +13,8 @@ import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.costs_sent_to_inbox
 
 class TreatmentCostsViewModel(
     private val getTreatmentCostsUseCase: GetTreatmentCostsUseCase,
@@ -71,7 +73,7 @@ class TreatmentCostsViewModel(
         emit(PartialState.Loading(true))
         try {
             sendToInboxTreatmentCostsUseCase(intent.repId).collect {
-                sendEvent(CostsEvent.ShowToast(SENT_TO_INBOX_MESSAGE))
+                sendEvent(CostsEvent.ShowToast(Res.string.costs_sent_to_inbox))
                 emit(PartialState.Loading(false))
             }
         } catch (e: Exception) {
@@ -100,7 +102,3 @@ class TreatmentCostsViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
-
-/** The previous app's confirmation, kept word for word. */
-private const val SENT_TO_INBOX_MESSAGE =
-    "گواهی بازپرداخت هزینه های درمانی به صندوق شخصی شما ارسال شد"

@@ -3,6 +3,17 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.tab_all
+import taminx.core.core_ui.tab_medical_service
+import taminx.core.core_ui.tab_medicine
+import taminx.core.core_ui.tab_paraclinic
+import taminx.core.core_ui.tab_pharmacy
+import taminx.core.core_ui.tab_visit
 
 /**
  * Categories the patient-history endpoint understands, taken from the previous app's
@@ -23,9 +34,9 @@ private const val TYPE_MEDICAL_SERVICE = "5"
  * داروخانه (`0`) is not a tab: it only ever labeled a record, never filtered.
  */
 @Serializable
-enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
+enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>) {
     ALL(
-        label = "همه",
+        label = Res.string.tab_all,
         requestTypeIds = listOf(
             TYPE_MEDICINE,
             TYPE_VISIT,
@@ -33,10 +44,10 @@ enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
             TYPE_MEDICAL_SERVICE,
         ),
     ),
-    MEDICINE("دارو", listOf(TYPE_MEDICINE)),
-    VISIT("ویزیت", listOf(TYPE_VISIT)),
-    PARACLINIC("پاراکلینیک", listOf(TYPE_PARACLINIC)),
-    MEDICAL_SERVICE("خدمات پزشکی", listOf(TYPE_MEDICAL_SERVICE)),
+    MEDICINE(Res.string.tab_medicine, listOf(TYPE_MEDICINE)),
+    VISIT(Res.string.tab_visit, listOf(TYPE_VISIT)),
+    PARACLINIC(Res.string.tab_paraclinic, listOf(TYPE_PARACLINIC)),
+    MEDICAL_SERVICE(Res.string.tab_medical_service, listOf(TYPE_MEDICAL_SERVICE)),
     ;
 
     companion object {
@@ -45,21 +56,38 @@ enum class RecordTab(val label: String, val requestTypeIds: List<String>) {
 
         val chips: ImmutableList<RecordTab> = entries.toImmutableList()
 
-        /**
-         * The chips' labels, resolved once. The filter row is redrawn on every list update, and
-         * mapping them per recomposition would hand it a new list each time — which is the one
-         * thing that stops it skipping.
-         */
-        val chipLabels: ImmutableList<String> = chips.map { it.label }.toImmutableList()
-
         val medicalServiceTypeId: String = TYPE_MEDICAL_SERVICE
         val pharmacyTypeId: String = TYPE_PHARMACY
 
-        /** Persian name for a category id, including the two that have no tab. */
-        fun labelForTypeId(typeId: String): String? = when (typeId) {
-            TYPE_PHARMACY -> "داروخانه"
-            TYPE_MEDICAL_SERVICE -> "خدمات پزشکی"
+        /** Name for a category id, including the two that have no tab. */
+        fun labelForTypeId(typeId: String): StringResource? = when (typeId) {
+            TYPE_PHARMACY -> Res.string.tab_pharmacy
+            TYPE_MEDICAL_SERVICE -> Res.string.tab_medical_service
             else -> null
         }
     }
+}
+
+/**
+ * The name for the endpoint's numeric category, or null when the id is one neither a tab nor
+ * [RecordTab.labelForTypeId] knows — the caller shows the raw id then, so an unexpected value
+ * stays visible instead of blank.
+ *
+ * Lives with the categories it maps rather than in the screen that renders them.
+ */
+fun String.toCategoryLabel(): StringResource? =
+    RecordTab.entries.firstOrNull { it != RecordTab.ALL && this in it.requestTypeIds }?.label
+        ?: RecordTab.labelForTypeId(this)
+
+/**
+ * The chips' labels, resolved once per composition rather than per recomposition.
+ *
+ * The filter row is redrawn on every list update; keying the remember on the resolved labels
+ * hands it the same [ImmutableList] instance every time, which is the one thing that stops it
+ * from skipping.
+ */
+@Composable
+fun rememberRecordTabLabels(): ImmutableList<String> {
+    val labels = RecordTab.chips.map { stringResource(it.label) }
+    return remember(labels) { labels.toImmutableList() }
 }

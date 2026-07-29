@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.contract
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import org.jetbrains.compose.resources.StringResource
 
 /** Immutable by construction: the reducer only ever `copy`s, and no collection here is mutated. */
 @Immutable
@@ -42,5 +43,9 @@ sealed class CostsIntent {
 }
 
 sealed class CostsEvent {
-    data class ShowToast(val message: String) : CostsEvent()
+    /**
+     * Carries the resource rather than resolved text: reading a string is the UI's job, and
+     * keeping it out of the view model is what lets the view model be tested without resources.
+     */
+    data class ShowToast(val message: StringResource) : CostsEvent()
 }

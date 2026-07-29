@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.model.treatment.*
+import kotlinx.collections.immutable.persistentListOf
 
 object TreatmentMocks {
     val patientMain = PatientItem(
@@ -138,6 +139,6 @@ object TreatmentMocks {
     val prescriptionsUiState = PrescriptionsUiState(
         prescriptionList = listOf(prescription, prescription.copy(trackingCode = "TRK654321", docName = "مریم رضایی")),
         prescriptionDetailList = listOf(prescriptionDetail, prescriptionDetail.copy(serviceName = "کپسول آموکسی‌سیلین")),
-        prescriptionPriceList = listOf(prescriptionPrice)
+        prescriptionPriceList = persistentListOf(prescriptionPrice)
     )
 }

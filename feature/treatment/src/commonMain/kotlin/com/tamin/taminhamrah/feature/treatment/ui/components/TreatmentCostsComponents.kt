@@ -50,14 +50,34 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_hide_details
+import taminx.core.core_ui.action_show_details
+import taminx.core.core_ui.costs_admission_date
+import taminx.core.core_ui.costs_admission_no
+import taminx.core.core_ui.costs_center_name
+import taminx.core.core_ui.costs_empty
+import taminx.core.core_ui.costs_file_status
+import taminx.core.core_ui.costs_main_insured
+import taminx.core.core_ui.costs_other_services_payment
+import taminx.core.core_ui.costs_patient_national_code
+import taminx.core.core_ui.costs_prosthesis_payment
+import taminx.core.core_ui.costs_refund_amount
+import taminx.core.core_ui.costs_refund_date
+import taminx.core.core_ui.costs_return_reason
+import taminx.core.core_ui.costs_send_to_inbox
+import taminx.core.core_ui.costs_view_certificate
+import taminx.core.core_ui.error_pull_to_retry
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_download
 import taminx.core.core_ui.ic_tamin_misc_claims
+import taminx.core.core_ui.unit_rial
 
 /**
  * The refund-certificate list and its card, for «خسارت متفرقه».
@@ -86,7 +106,7 @@ internal fun CertificateList(
             error != null -> item { CostsErrorState(message = error) }
 
             certificates.isEmpty() -> item {
-                TaminEmptyState(message = "بازپرداخت هزینه‌ای برای نمایش وجود ندارد.")
+                TaminEmptyState(message = stringResource(Res.string.costs_empty))
             }
 
             else -> itemsIndexed(certificates) { index, item ->
@@ -165,7 +185,7 @@ private fun CertificateCard(
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = "شماره پذیرش ${item.noPazir}".toPersianDigits(),
+            text = stringResource(Res.string.costs_admission_no, item.noPazir).toPersianDigits(),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textTertiary,
         )
@@ -177,7 +197,7 @@ private fun CertificateCard(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "مبلغ بازپرداخت",
+                text = stringResource(Res.string.costs_refund_amount),
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textMuted,
             )
@@ -191,7 +211,7 @@ private fun CertificateCard(
                     color = accent,
                 )
                 Text(
-                    text = "ریال",
+                    text = stringResource(Res.string.unit_rial),
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.textMuted,
                 )
@@ -226,21 +246,21 @@ private fun CertificateDetails(
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
-        DetailRow(label = "کد ملی بیمار", value = item.maliCode)
-        DetailRow(label = "بیمه شده اصلی", value = item.nameAsli)
-        DetailRow(label = "نام مرکز درمانی", value = item.healthcenterName)
-        DetailRow(label = "تاریخ پذیرش", value = item.datePaz, valueColor = colors.blueText)
+        DetailRow(label = stringResource(Res.string.costs_patient_national_code), value = item.maliCode)
+        DetailRow(label = stringResource(Res.string.costs_main_insured), value = item.nameAsli)
+        DetailRow(label = stringResource(Res.string.costs_center_name), value = item.healthcenterName)
+        DetailRow(label = stringResource(Res.string.costs_admission_date), value = item.datePaz, valueColor = colors.blueText)
         DetailRow(
-            label = "تاریخ بازپرداخت هزینه درمان",
+            label = stringResource(Res.string.costs_refund_date),
             value = item.estimatePayDate,
             valueColor = colors.blueText,
         )
         DetailRow(
-            label = "وضعیت پرونده",
+            label = stringResource(Res.string.costs_file_status),
             value = item.statusDesc,
             valueColor = if (fileSettled) colors.greenText else colors.dangerText,
         )
-        DetailRow(label = "دلایل برگشت پرونده از مالی", value = item.returnReason)
+        DetailRow(label = stringResource(Res.string.costs_return_reason), value = item.returnReason)
 
         // The two amounts side by side rather than as two more label/value lines — the same
         // split-tile treatment the hub gives the insured and organization shares.
@@ -249,15 +269,15 @@ private fun CertificateDetails(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             StatTile(
-                label = "پرداختی پروتز",
-                amount = item.payService.asRial(),
+                label = stringResource(Res.string.costs_prosthesis_payment),
+                amount = item.payService.toRialAmount(ABSENT_VALUE),
                 containerColor = colors.blueBg,
                 contentColor = if (item.payService != NO_AMOUNT) colors.blueText else colors.textMuted,
                 modifier = Modifier.weight(1f),
             )
             StatTile(
-                label = "پرداختی سایر خدمات پزشکی",
-                amount = item.payOtherService.asRial(),
+                label = stringResource(Res.string.costs_other_services_payment),
+                amount = item.payOtherService.toRialAmount(ABSENT_VALUE),
                 containerColor = colors.greenBg,
                 contentColor = if (item.payOtherService != NO_AMOUNT) colors.greenText else colors.textMuted,
                 modifier = Modifier.weight(1f),
@@ -270,7 +290,7 @@ private fun CertificateDetails(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 CertificateAction(
-                    label = "مشاهده گواهی",
+                    label = stringResource(Res.string.costs_view_certificate),
                     icon = vectorResource(Res.drawable.ic_tamin_download),
                     containerColor = colors.greenBg,
                     contentColor = colors.teal,
@@ -278,7 +298,7 @@ private fun CertificateDetails(
                     modifier = Modifier.weight(1f),
                 )
                 CertificateAction(
-                    label = "ارسال به صندوق شخصی",
+                    label = stringResource(Res.string.costs_send_to_inbox),
                     icon = vectorResource(Res.drawable.ic_tamin_misc_claims),
                     containerColor = colors.blueBg,
                     contentColor = colors.blueText,
@@ -307,7 +327,9 @@ private fun ExpandToggle(expanded: Boolean, onToggle: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
     ) {
         Text(
-            text = if (expanded) "مخفی کردن جزئیات" else "نمایش جزئیات",
+            text = stringResource(
+            if (expanded) Res.string.action_hide_details else Res.string.action_show_details,
+        ),
             style = MaterialTheme.typography.labelLarge,
             color = colors.teal,
         )
@@ -319,10 +341,6 @@ private fun ExpandToggle(expanded: Boolean, onToggle: () -> Unit) {
         )
     }
 }
-
-/** Money the way every amount on these screens reads: grouped digits, then the unit. */
-private fun String.asRial(): String =
-    "${toLongOrNull()?.toPriceFormat() ?: ABSENT_VALUE} ریال"
 
 /** Label on one side, value on the other — the key/value line the file's paperwork reads as. */
 @Composable
@@ -416,7 +434,7 @@ private fun CostsErrorState(message: String) {
             textAlign = TextAlign.Center,
         )
         Text(
-            text = "برای تلاش دوباره، صفحه را به پایین بکشید.",
+            text = stringResource(Res.string.error_pull_to_retry),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
             textAlign = TextAlign.Center,

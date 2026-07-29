@@ -20,11 +20,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_user
+import taminx.core.core_ui.records_details
+import taminx.core.core_ui.search_advanced_cd
+import taminx.core.core_ui.share_yours
+import taminx.core.core_ui.unit_rial
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -152,7 +157,7 @@ private fun MedicalRecordFooter(shareAmount: String) {
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
-                text = "سهم شما",
+                text = stringResource(Res.string.share_yours),
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textMuted,
             )
@@ -168,7 +173,7 @@ private fun MedicalRecordFooter(shareAmount: String) {
                     color = colors.textPrimary,
                 )
                 Text(
-                    text = "ریال",
+                    text = stringResource(Res.string.unit_rial),
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.textPrimary,
                 )
@@ -183,7 +188,7 @@ private fun MedicalRecordFooter(shareAmount: String) {
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
-                text = "جزئیات",
+                text = stringResource(Res.string.records_details),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
             )
@@ -330,7 +335,7 @@ fun TimelineFilterBar(
         ) {
             Icon(
                 imageVector = searchIcon,
-                contentDescription = "جست‌وجوی پیشرفته",
+                contentDescription = stringResource(Res.string.search_advanced_cd),
                 tint = Color.White,
                 modifier = Modifier.size(IconSize.small),
             )
