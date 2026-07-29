@@ -45,6 +45,7 @@
     <string name="profile_electronic_file">پرونده الکترونیک</string>
     <string name="profile_bank_account">شماره حساب بانکی</string>
     <string name="profile_change_mobile">تغییر شماره موبایل</string>
+    <string name="profile_change_mobile_subtitle">جهت شناسایی شما در اپلیکیشن تأمین من</string>
     <string name="profile_cartable">کارتابل</string>
     <string name="profile_requests">درخواست ها</string>
     <string name="profile_personal_inbox">صندوق شخصی</string>

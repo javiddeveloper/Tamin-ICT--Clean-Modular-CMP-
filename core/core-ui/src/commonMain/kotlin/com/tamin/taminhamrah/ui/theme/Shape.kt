@@ -83,5 +83,9 @@ object IconSize {
     val largePlus = 42.dp
     val xlarge = 48.dp
     val xxlarge = 56.dp
+    val tile = 58.dp
+    val tileInner = 28.dp
+    val headerIconOuter = 104.dp
+    val headerIconInner = 78.dp
     val navBar = 24.dp
 }

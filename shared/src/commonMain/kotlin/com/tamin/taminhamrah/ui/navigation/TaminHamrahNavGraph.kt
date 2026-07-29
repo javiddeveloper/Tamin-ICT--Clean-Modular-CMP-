@@ -333,6 +333,9 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
                     },
+                    onNavigateToChangeMobile = {
+                        navController.navigate(ProfileRoute.ChangeMobile)
+                    },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
                 )
