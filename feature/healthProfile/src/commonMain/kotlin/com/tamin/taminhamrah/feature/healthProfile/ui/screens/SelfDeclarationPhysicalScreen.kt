@@ -25,7 +25,8 @@ import taminx.feature.healthprofile.generated.resources.*
 fun SelfDeclarationPhysicalScreen(
     state: PhysicalStepState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -54,24 +55,34 @@ fun SelfDeclarationPhysicalScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TaminText(
-                text = stringResource(Res.string.health_physical_desc),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textTertiary,
-                    lineHeight = 22.sp
-                ),
-                modifier = Modifier.align(Alignment.Start)
-            )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                PhysicalShimmerSkeleton()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TaminText(
+                    text = stringResource(Res.string.health_physical_desc),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = taminColors.textTertiary,
+                        lineHeight = 22.sp
+                    ),
+                    modifier = Modifier.align(Alignment.Start)
+                )
 
             TaminText(
                 text = stringResource(Res.string.health_physical_height_label),
@@ -80,43 +91,43 @@ fun SelfDeclarationPhysicalScreen(
                 modifier = Modifier.align(Alignment.Start)
             )
 
-            RulerPicker(
-                value = state.height,
-                onValueChange = { h ->
-                    onIntent(HealthProfileIntent.UpdatePhysical(state.copy(height = h)))
-                },
-                range = 120..220,
-                unit = stringResource(Res.string.health_physical_unit_cm),
-                defaultPoint = 170
-            )
+                RulerPicker(
+                    value = state.height,
+                    onValueChange = { h ->
+                        onIntent(HealthProfileIntent.UpdatePhysical(state.copy(height = h)))
+                    },
+                    range = 120..220,
+                    unit = stringResource(Res.string.health_physical_unit_cm),
+                    defaultPoint = 170
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            TaminText(
-                text = stringResource(Res.string.health_physical_weight_label),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.textPrimary,
-                modifier = Modifier.align(Alignment.Start)
-            )
+                TaminText(
+                    text = stringResource(Res.string.health_physical_weight_label),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = taminColors.textPrimary,
+                    modifier = Modifier.align(Alignment.Start)
+                )
 
-            RulerPicker(
-                value = state.weight,
-                onValueChange = { w ->
-                    onIntent(HealthProfileIntent.UpdatePhysical(state.copy(weight = w)))
-                },
-                range = 40..150,
-                unit = stringResource(Res.string.health_physical_unit_kg),
-                defaultPoint = 70
-            )
+                RulerPicker(
+                    value = state.weight,
+                    onValueChange = { w ->
+                        onIntent(HealthProfileIntent.UpdatePhysical(state.copy(weight = w)))
+                    },
+                    range = 40..150,
+                    unit = stringResource(Res.string.health_physical_unit_kg),
+                    defaultPoint = 70
+                )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            BmiMeter(bmi = bmiValue)
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+                BmiMeter(bmi = bmiValue)
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 }
-
 @PreviewRtlTheme
 @Preview
 @Composable

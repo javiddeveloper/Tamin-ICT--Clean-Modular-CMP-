@@ -49,7 +49,8 @@ import taminx.feature.healthprofile.generated.resources.ic_weight
 fun SelfDeclarationReviewScreen(
     state: HealthProfileUiState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isLoading: Boolean = false
 ) {
     val selfDecState = state.selfDeclaration
     val illnessGroups = state.illnessGroups
@@ -69,15 +70,32 @@ fun SelfDeclarationReviewScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-                .background(taminColors.bgPage)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                CardsListShimmerSkeleton()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .background(taminColors.bgPage)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+            TaminText(
+                text = "بررسی نهایی پروندهٔ سلامت",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = taminColors.textPrimary
+                )
+            )
 
             WarningBanner(
                 message = "لطفاً صحت اطلاعات وارد شده را بررسی و تأیید کنید."
@@ -290,6 +308,7 @@ fun SelfDeclarationReviewScreen(
                 IdentityRow(label = "داروهای آلرژیک:", value = allergyStr.ifEmpty { "ندارد" })
             }
             Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
 }
