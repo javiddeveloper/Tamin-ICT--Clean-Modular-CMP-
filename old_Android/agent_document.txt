@@ -1,9 +1,0 @@
-APPOINMET -> NO API
-
-DASTMOZD_INFOS_PER_YEAR -> GET history-services/dastmozdinfos
-DASTMOZD_INFOS_SALARY -> GET history-services/dastmozdinfos
-DASTMOZD_INFOS_SUM_TOTAL -> GET history-services/dastmozdinfos
-HISTORY_JOB_INFOS -> GET history-services/historyjobinfos
-HISTORY_JOB_INFOS_LAST -> GET history-services/historyjobinfos
-
-

@@ -1,9 +1,0 @@
-{
-    "message": "کاربر محترم خوشحالم که به شما خدمت میدهم. با توجه به درخواست شما این اطلاعات بدست آمده است. ",
-    "results": [
-        {
-            "message": "وضعیت استحقاق درمان به صورت زیر میباشد",
-            "url": "https://eservices.tamin.ir/api/booklet-req/deserve?page=1&start=0&limit=10&sort=[]"
-        }
-    ]
-}

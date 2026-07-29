@@ -1,9 +1,0 @@
-{
-    "message": "کاربر محترم خوشحالم که به شما خدمت میدهم. با توجه به درخواست شما این اطلاعات بدست آمده است. ",
-    "results": [
-        {
-            "message": "کاربر محترم سابقه مربوط به از روز 1 اردیبهشت 1398 تا روز 25 مرداد 1396 به صورت زیر می‌باشد",
-            "url": "https://eservices.tamin.ir/api/history-services/dastmozdinfos?page=0&start=0&limit=60&filter=[{\"property\":\"hisyear\",\"value\":\"1396\",\"operator\":\"EQUAL\"},{\"property\":\"hisyear\",\"value\":\"1398\",\"operator\":\"EQUAL\"}]&sort=[]"
-        }
-    ]
-}

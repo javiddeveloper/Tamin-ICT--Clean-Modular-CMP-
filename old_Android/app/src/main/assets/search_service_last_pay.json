@@ -1,9 +1,0 @@
-{
-    "message": "کاربر محترم خوشحالم که به شما خدمت میدهم. با توجه به درخواست شما این اطلاعات بدست آمده است. ",
-    "results": [
-        {
-            "message": "آحرین بیمه پردازی شما به صورت زیر میباشد",
-            "url": "https://eservices.tamin.ir/api/history-services/dastmozdinfos-last-pay?page=0&start=0&limit=60&filter=[]&sort=[]"
-        }
-    ]
-}
