@@ -24,7 +24,7 @@ class CheckChatAllowedUseCaseTest {
     @Test
     fun `invoke returns success result from repository`() = runTest {
         // Arrange
-        val expectedData = ChatAllowedDN(isAllowed = true, errorMessage = null, chatToken = "token123")
+        val expectedData = ChatAllowedDN(canStartChat = true, chatToken = "token123", errorMessage = null)
         val fakeRepo = FakeChatAgentRepository(Result.success(expectedData))
         val useCase = CheckChatAllowedUseCase(fakeRepo)
 

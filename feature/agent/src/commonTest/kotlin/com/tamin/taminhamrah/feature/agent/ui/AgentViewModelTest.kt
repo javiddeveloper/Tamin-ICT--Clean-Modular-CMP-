@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -162,21 +163,24 @@ class AgentViewModelTest {
     private lateinit var sendAgentPromptUseCase: SendAgentPromptUseCase
     private lateinit var fakeCacheRepository: FakeAgentChatCacheRepository
 
+    // A single StandardTestDispatcher shared between Dispatchers.Main (viewModelScope)
+    // and the runTest scope, so advanceUntilIdle() drains ALL pending coroutines.
+    private lateinit var testDispatcher: TestDispatcher
+
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-        
+        testDispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(testDispatcher)
+
         fakeFeatureManager = FakeFeatureManager()
         val registry = AgentServiceRegistry(emptyList())
         val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
         actionDispatcher = AgentActionDispatcher(registry, fakeFeatureManager, json)
-        
+
         fakeAgentRepository = FakeAgentRepository()
         fakeCacheRepository = FakeAgentChatCacheRepository()
         checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository)
         sendAgentPromptUseCase = SendAgentPromptUseCase(fakeAgentRepository)
-        
-        // Start Koin if required by BaseViewModel, but BaseViewModel usually doesn't need it if dependencies are injected
     }
 
     @AfterTest
@@ -208,7 +212,7 @@ class AgentViewModelTest {
     }
 
     @Test
-    fun `initial state has isCheckingPermission true`() {
+    fun `initial state has isCheckingPermission true`() = runTest(testDispatcher) {
         viewModel = createViewModel()
         val state = viewModel.uiState.value
         assertTrue(state.isCheckingPermission)
@@ -216,13 +220,13 @@ class AgentViewModelTest {
     }
 
     @Test
-    fun `CheckPermission intent updates state to allowed when repository returns success`() = runTest {
+    fun `CheckPermission intent updates state to allowed when repository returns success`() = runTest(testDispatcher) {
         viewModel = createViewModel()
         fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(true, null, "test-token"))
-        
+
         viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
-        
+
         val state = viewModel.uiState.value
         assertFalse(state.isCheckingPermission)
         assertFalse(state.isNotAllowed)
@@ -230,13 +234,13 @@ class AgentViewModelTest {
     }
 
     @Test
-    fun `CheckPermission intent updates state to not allowed when repository returns false`() = runTest {
+    fun `CheckPermission intent updates state to not allowed when repository returns false`() = runTest(testDispatcher) {
         viewModel = createViewModel()
         fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(false, "You are blocked", null))
-        
+
         viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
-        
+
         val state = viewModel.uiState.value
         assertFalse(state.isCheckingPermission)
         assertTrue(state.isNotAllowed)
@@ -244,11 +248,11 @@ class AgentViewModelTest {
     }
 
     @Test
-    fun `ChangeInputMode intent updates input mode`() = runTest {
+    fun `ChangeInputMode intent updates input mode`() = runTest(testDispatcher) {
         viewModel = createViewModel()
 
         viewModel.sendIntent(AgentIntent.ChangeInputMode(InputMode.Voice))
-        runCurrent()
+        advanceUntilIdle()
 
         assertEquals(InputMode.Voice, viewModel.uiState.value.inputMode)
     }

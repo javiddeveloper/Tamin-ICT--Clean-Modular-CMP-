@@ -54,19 +54,16 @@ class DastmozdInfosAgentServiceTest {
 
         // Assert
         val success = assertIs<AgentServiceResult.Success>(result)
-        
-        // First bubble should be text message
-        val textBubble = assertIs<ChatBubbleContent.Text>(success.bubbles[0])
-        assertEquals("This is a test message", textBubble.message)
-        
-        // Second bubble should be KeyValue list
-        val keyValueBubble = assertIs<ChatBubbleContent.KeyValue>(success.bubbles[1])
+
+        // Service returns a single KeyValue bubble (message is used as the title)
+        assertEquals(1, success.bubbles.size)
+        val keyValueBubble = assertIs<ChatBubbleContent.KeyValue>(success.bubbles[0])
         assertEquals("This is a test message", keyValueBubble.title)
-        
+
         // Assert some key values
         val amountPair = keyValueBubble.items.find { it.key == "مبلغ دستمزد فروردین" }
         assertEquals("1000", amountPair?.value)
-        
+
         val companyPair = keyValueBubble.items.find { it.key == "نام کارگاه" }
         assertEquals("Test Company", companyPair?.value)
     }

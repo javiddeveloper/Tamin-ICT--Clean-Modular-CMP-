@@ -16,7 +16,7 @@ class FakePromptAgentRepository(
 ) : AgentRepository {
     override fun sendPrompt(request: AgentRequest): Flow<AgentPollingState> = expectedFlow
     override suspend fun cancelRequest(requestId: String): Result<Unit> = Result.success(Unit)
-    override suspend fun checkChatAllowed(): Result<ChatAllowedDN> = Result.success(ChatAllowedDN(true, null, null))
+    override suspend fun checkChatAllowed(): Result<ChatAllowedDN> = Result.success(ChatAllowedDN(canStartChat = true, chatToken = null, errorMessage = null))
 }
 
 class SendAgentPromptUseCaseTest {
@@ -27,7 +27,7 @@ class SendAgentPromptUseCaseTest {
         val request = AgentRequest(prompt = "Hello AI", chatToken = "token", sessionId = null)
         val expectedStates = listOf(
             AgentPollingState.Pending("req1", 5),
-            AgentPollingState.Failed("req1", "Timeout Error")
+            AgentPollingState.Failed("Timeout Error")
         )
         val fakeRepo = FakePromptAgentRepository(flowOf(*expectedStates.toTypedArray()))
         val useCase = SendAgentPromptUseCase(fakeRepo)
