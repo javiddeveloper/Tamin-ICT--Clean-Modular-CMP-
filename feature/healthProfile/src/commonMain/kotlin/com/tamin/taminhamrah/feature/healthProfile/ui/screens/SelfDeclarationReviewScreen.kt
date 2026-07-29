@@ -64,7 +64,7 @@ fun SelfDeclarationReviewScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "تأیید و ثبت نهایی اطلاعات",
-                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.SUCCESS)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.SubmitDeclaration) },
                 secondaryText = "بازگشت",
                 onSecondaryClick = onBackClicked
             )
@@ -89,13 +89,6 @@ fun SelfDeclarationReviewScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-            TaminText(
-                text = "بررسی نهایی پروندهٔ سلامت",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = taminColors.textPrimary
-                )
-            )
 
             WarningBanner(
                 message = "لطفاً صحت اطلاعات وارد شده را بررسی و تأیید کنید."
