@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -89,7 +90,7 @@ data class ListItemData(
     val enabled: Boolean = true,
     val titleStyle: TextStyle? = null,
     val subtitleStyle: TextStyle? = null,
-    val colors: com.tamin.taminhamrah.ui.components.ListItemColors = ListItemColors(),
+    val colors: ListItemColors = ListItemColors(),
     val showDivider: Boolean? = null,
     val itemBorder: BorderStroke? = null
 )
@@ -187,11 +188,14 @@ private fun ListItemRow(
 
                 val boxModifier = if (item.colors.leadingIconBackgroundGradient != null) {
                     baseModifier
-                        .background(item.colors.leadingIconBackgroundGradient, item.leadingIconShape)
-                        .background(
-                            brush = taminColors.iconGlassShine,
-                            shape = item.leadingIconShape
+                        .coloredShadow(
+                            color = taminColors.shadowPrimary,
+                            borderRadius = CornerRadius.x3l,
+                            blurRadius = Spacing.xlg,
+                            offsetY = Elevation.smPlus
                         )
+                        .clip(item.leadingIconShape)
+                        .background(item.colors.leadingIconBackgroundGradient)
                         .border(
                             width = 1.dp,
                             brush = taminColors.iconGlassBorder,
@@ -224,6 +228,15 @@ private fun ListItemRow(
                             text = item.leadingText,
                             color = resolvedIconTintColor,
                             style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    if (item.colors.leadingIconBackgroundGradient != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.55f)
+                                .align(Alignment.TopCenter)
+                                .background(taminColors.iconGlassShine)
                         )
                     }
                 }

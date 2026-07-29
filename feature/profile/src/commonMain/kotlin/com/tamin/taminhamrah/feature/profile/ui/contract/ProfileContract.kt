@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.relation.TaminRelationPR
 @Immutable
 data class ProfileUiState(
     val isLoading: Boolean = false,
+    val isProfileImageLoading: Boolean = true,
     val error: String? = null,
     val userId: String? = null,
     val profileImage: String? = null,
@@ -43,8 +44,7 @@ sealed class ProfileIntent {
 
     data object LoadSubDominants : ProfileIntent()
     data object LoadBankAccountList : ProfileIntent()
-
-
+    data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 
 sealed class ProfileEvent {
