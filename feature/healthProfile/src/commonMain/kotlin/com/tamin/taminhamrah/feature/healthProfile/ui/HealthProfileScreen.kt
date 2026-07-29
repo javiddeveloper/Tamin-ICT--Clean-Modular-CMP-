@@ -69,9 +69,7 @@ fun HealthProfileScreen(
 
     HealthProfileMainContent(
         state = uiState,
-        selfDecState = uiState.selfDeclaration,
         onIntent = viewModel::sendIntent,
-        onSelfDecIntent = viewModel::sendIntent,
         onBackClicked = onBackClicked
     )
 }
@@ -98,46 +96,46 @@ fun HandleHealthProfileEvents(
 @Composable
 fun HealthProfileMainContent(
     state: HealthProfileUiState,
-    selfDecState: SelfDeclarationUiState,
     onIntent: (HealthProfileIntent) -> Unit,
-    onSelfDecIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val previousStep = selfDecState.currentStep.previousStep()
-    BackHandler {
-        if (previousStep != null) {
-            onSelfDecIntent(HealthProfileIntent.ChangeStep(previousStep))
-        } else {
-            onBackClicked()
+    val selfDecState = state.selfDeclaration
+    val currentStep = selfDecState.currentStep
+    val navigateBack = remember(currentStep, onBackClicked) {
+        {
+            val previousStep = currentStep.previousStep()
+            if (previousStep != null) {
+                onIntent(HealthProfileIntent.ChangeStep(previousStep))
+            } else {
+                onBackClicked()
+            }
         }
     }
 
+    BackHandler(onBack = navigateBack)
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         ProvideTextStyle(value = MaterialTheme.typography.bodyMedium) {
-            when (selfDecState.currentStep) {
+            when (currentStep) {
                 SelfDeclarationStep.GATE -> {
                     SelfDeclarationGateScreen(
-                        onIntent = onSelfDecIntent,
+                        onIntent = onIntent,
                         onBackClicked = onBackClicked
                     )
                 }
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.GATE))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.IDENTITY -> {
                     SelfDeclarationIdentityScreen(
                         state = selfDecState.identity,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.PERSONAL -> {
@@ -145,10 +143,8 @@ fun HealthProfileMainContent(
                         state = selfDecState.personal,
                         maritalStatusOptions = state.maritalStatusOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.CONTACT -> {
@@ -159,30 +155,24 @@ fun HealthProfileMainContent(
                         isLoading = state.isLoading || selfDecState.isLoading,
                         isProvincesLoading = state.isProvincesLoading,
                         isCitiesLoading = state.isCitiesLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PERSONAL))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.EMERGENCY -> {
                     SelfDeclarationEmergencyScreen(
                         state = selfDecState.emergency,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.CONTACT))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.PHYSICAL -> {
                     SelfDeclarationPhysicalScreen(
                         state = selfDecState.physical,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.BLOOD -> {
@@ -190,10 +180,8 @@ fun HealthProfileMainContent(
                         state = selfDecState.bloodGroup,
                         bloodGroupOptions = state.bloodGroupOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.LIFESTYLE -> {
@@ -203,9 +191,7 @@ fun HealthProfileMainContent(
                         actFrequencyOptions = state.actFrequencyOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onIntent,
-                        onBackClicked = {
-                            onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD))
-                        }
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.DISEASES -> {
@@ -213,10 +199,8 @@ fun HealthProfileMainContent(
                         state = selfDecState.diseases,
                         illnessGroups = state.illnessGroups,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.FAMILY -> {
@@ -224,10 +208,8 @@ fun HealthProfileMainContent(
                         state = selfDecState.family,
                         illnessGroups = state.illnessGroups,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.ALLERGY -> {
@@ -235,20 +217,16 @@ fun HealthProfileMainContent(
                         state = selfDecState.allergy,
                         drugOptions = state.drugOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
                 SelfDeclarationStep.REVIEW -> {
                     SelfDeclarationReviewScreen(
                         state = state,
                         isLoading = state.isLoading || selfDecState.isLoading,
-                        onIntent = onSelfDecIntent,
-                        onBackClicked = {
-                            onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY))
-                        }
+                        onIntent = onIntent,
+                        onBackClicked = navigateBack
                     )
                 }
 
@@ -256,7 +234,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationSuccessScreen(
                         onFinish = { enterProfile ->
                             if (enterProfile) {
-                                onSelfDecIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.COMPLETED))
+                                onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.COMPLETED))
                             } else {
                                 onBackClicked()
                             }
@@ -309,6 +287,7 @@ fun HealthProfileMainContent(
         }
     }
 }
+
 
 @Composable
 private fun HealthProfileContent(state: HealthProfileUiState) {
