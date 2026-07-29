@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -179,7 +180,10 @@ fun InsuranceCard(
                 Box(Modifier.layoutId(CardSlot.Badge)) { coverageBadge?.invoke() }
                 InsuranceCardFooter(
                     coverageLabel = coverageLabel,
-                    badge = coverageBadge,
+                    // Only the traveling slot above ever draws the tick. The footer just reserves
+                    // its width so the label keeps its place — drawing it here as well would show
+                    // two ticks the moment the fold starts, one gliding up and one fading out.
+                    badge = coverageBadge?.let { { Spacer(Modifier.size(TreatmentDimens.coverageBadgeSize)) } },
                     action = footerAction,
                     modifier = Modifier
                         .layoutId(CardSlot.Footer)
