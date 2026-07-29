@@ -2,12 +2,9 @@ package com.tamin.taminhamrah.feature.treatment.ui.records
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,12 +17,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.shimmer
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -134,46 +132,45 @@ private fun rememberPeriodOptions(): ImmutableList<Pair<RecordPeriod, String>> {
 }
 
 /**
- * The full-width filter chooser that drops below the bar.
+ * The chooser behind a filter chip.
  *
- * Rendered as an overlay in the content with a [Scrim] behind it, so it floats over the list,
- * dismisses on an outside tap, and always lands in the same place regardless of which chip opened
- * it — unlike a menu anchored to one trigger.
+ * Material's own menu rather than a panel of our own: it anchors to the chip that opened it,
+ * animates out of that anchor, and brings the platform's outside-tap and back handling with it.
  */
 @Composable
-private fun <T> RecordFilterPanel(
+private fun <T> RecordFilterMenu(
+    expanded: Boolean,
     options: ImmutableList<Pair<T, String>>,
     isSelected: (T) -> Boolean,
+    onDismiss: () -> Unit,
     onSelect: (T) -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.page, vertical = Spacing.sm),
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        // The menu keeps the card surface the panel had: menu defaults are a tighter radius and
+        // a tonal fill, which read as a system menu dropped onto the screen rather than as ours.
         shape = RoundedCornerShape(CornerRadius.card),
-        color = colors.bgSurface,
+        containerColor = colors.bgSurface,
         border = BorderStroke(1.dp, colors.border),
         shadowElevation = Elevation.md,
     ) {
-        Column {
-            options.forEach { (value, label) ->
-                val selected = isSelected(value)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(value) }
-                        .background(if (selected) colors.greenBg else colors.bgSurface)
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
+        options.forEach { (value, label) ->
+            val selected = isSelected(value)
+            DropdownMenuItem(
+                modifier = if (selected) Modifier.background(colors.greenBg) else Modifier,
+                text = {
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (selected) colors.teal else colors.textPrimary,
                     )
-                    if (selected) {
+                },
+                trailingIcon = if (!selected) {
+                    null
+                } else {
+                    {
                         Icon(
                             imageVector = vectorResource(Res.drawable.ic_tamin_check),
                             contentDescription = null,
@@ -181,24 +178,11 @@ private fun <T> RecordFilterPanel(
                             modifier = Modifier.size(IconSize.small),
                         )
                     }
-                }
-            }
+                },
+                onClick = { onSelect(value) },
+            )
         }
     }
-}
-
-/** A transparent full-size catch layer: a tap anywhere behind the panel closes it. */
-@Composable
-private fun Scrim(onDismiss: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onDismiss,
-            ),
-    )
 }
 
 /** The date trigger reads back the chosen custom range instead of the bare "تاریخ دلخواه". */
@@ -486,6 +470,36 @@ fun MedicalRecordsContent(
                     onSearchClick = { showSearchSheet = true },
                     personExpanded = openFilter == RecordFilter.PATIENT,
                     dateExpanded = openFilter == RecordFilter.PERIOD,
+                    personMenu = {
+                        RecordFilterMenu(
+                            expanded = openFilter == RecordFilter.PATIENT,
+                            options = remember(patients, selectedPatient, selfLabel) {
+                                patients
+                                    .map { it.nationalId to it.filterLabel(selfLabel) }
+                                    .ifEmpty { listOf(selectedPatient to selfLabel) }
+                                    .toImmutableList()
+                            },
+                            isSelected = { it == selectedPatient },
+                            onDismiss = { openFilter = null },
+                            onSelect = {
+                                onPatientSelected(it)
+                                openFilter = null
+                            },
+                        )
+                    },
+                    dateMenu = {
+                        RecordFilterMenu(
+                            expanded = openFilter == RecordFilter.PERIOD,
+                            options = rememberPeriodOptions(),
+                            isSelected = { it == selectedPeriod },
+                            onDismiss = { openFilter = null },
+                            onSelect = { period ->
+                                openFilter = null
+                                if (period == RecordPeriod.CUSTOM) pickingRangeStart = true
+                                else onPeriodSelected(period)
+                            },
+                        )
+                    },
                 )
             }
         },
@@ -537,36 +551,6 @@ fun MedicalRecordsContent(
         }
         }
 
-        // Both filters share one full-width panel that drops below the bar, so neither can anchor
-        // to the wrong chip. A tap on the scrim behind it dismisses.
-        openFilter?.let { filter ->
-            Scrim(onDismiss = { openFilter = null })
-            when (filter) {
-                RecordFilter.PATIENT -> RecordFilterPanel(
-                    options = remember(patients, selectedPatient, selfLabel) {
-                        patients
-                            .map { it.nationalId to it.filterLabel(selfLabel) }
-                            .ifEmpty { listOf(selectedPatient to selfLabel) }
-                            .toImmutableList()
-                    },
-                    isSelected = { it == selectedPatient },
-                    onSelect = {
-                        onPatientSelected(it)
-                        openFilter = null
-                    },
-                )
-
-                RecordFilter.PERIOD -> RecordFilterPanel(
-                    options = rememberPeriodOptions(),
-                    isSelected = { it == selectedPeriod },
-                    onSelect = { period ->
-                        openFilter = null
-                        if (period == RecordPeriod.CUSTOM) pickingRangeStart = true
-                        else onPeriodSelected(period)
-                    },
-                )
-            }
-        }
         }
     }
 }

@@ -301,6 +301,10 @@ fun TimelineFilterBar(
     // Which chooser is open, so its chevron can point the other way.
     personExpanded: Boolean = false,
     dateExpanded: Boolean = false,
+    // Each chooser's menu is composed beside the chip that opens it, so the menu anchors there
+    // instead of floating somewhere the trigger has no relationship with.
+    personMenu: @Composable () -> Unit = {},
+    dateMenu: @Composable () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -309,22 +313,28 @@ fun TimelineFilterBar(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        FilterTrigger(
-            label = personLabel,
-            leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
-            trailingIcon = dropdownIcon,
-            onClick = onPersonClick,
-            modifier = Modifier.weight(1f),
-            expanded = personExpanded,
-        )
-        FilterTrigger(
-            label = dateLabel,
-            leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
-            trailingIcon = dropdownIcon,
-            onClick = onDateClick,
-            modifier = Modifier.weight(1f),
-            expanded = dateExpanded,
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            FilterTrigger(
+                label = personLabel,
+                leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
+                trailingIcon = dropdownIcon,
+                onClick = onPersonClick,
+                modifier = Modifier.fillMaxWidth(),
+                expanded = personExpanded,
+            )
+            personMenu()
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            FilterTrigger(
+                label = dateLabel,
+                leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
+                trailingIcon = dropdownIcon,
+                onClick = onDateClick,
+                modifier = Modifier.fillMaxWidth(),
+                expanded = dateExpanded,
+            )
+            dateMenu()
+        }
         Box(
             modifier = Modifier
                 .size(38.dp)
