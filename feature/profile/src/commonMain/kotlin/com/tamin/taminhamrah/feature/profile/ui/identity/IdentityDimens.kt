@@ -43,7 +43,7 @@ internal object IdentityDimens {
 
     /**
      * Folded, the bar rides up by half its own height, so the header's bottom edge runs through
-     * its centre rather than sitting above it. Derived so it stays true if the bar height moves.
+     * its center rather than sitting above it. Derived so it stays true if the bar height moves.
      */
     val cardCollapsedOverlap = cardCollapsedHeight / 2
 
@@ -108,11 +108,15 @@ internal object IdentityDimens {
     const val footerRuleAlpha = 0.11f
     const val topEdgeAlpha = 0.16f
 
-    /** The social-security number stays legible in the folded bar, just a little smaller. */
-    const val ssnCollapsedScale = 0.62f
+    /**
+     * What the folded bar's text measures, as a fraction of the open card's.
+     *
+     * The bar is the only place these are read once the card is closed, so they stay close to
+     * full size — the number in particular has to survive being the card's whole summary.
+     */
+    const val ssnCollapsedScale = 0.82f
 
-    /** How far the holder's name shrinks by the time the card is a bar. */
-    const val nameCollapsedScale = 0.8f
+    const val nameCollapsedScale = 0.95f
 
     /**
      * The expanded-only pieces fade this much faster than the fold, so they have cleared well
