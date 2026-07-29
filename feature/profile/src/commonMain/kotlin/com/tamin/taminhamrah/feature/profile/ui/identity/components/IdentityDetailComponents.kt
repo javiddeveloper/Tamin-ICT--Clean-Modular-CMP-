@@ -14,18 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityDimens
-import com.tamin.taminhamrah.feature.profile.ui.identity.model.IdentityField
 import com.tamin.taminhamrah.feature.profile.ui.identity.model.IdentitySection
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_verified
+import taminx.core.core_ui.ic_tamin_check_circle
 import taminx.core.core_ui.identity_verified_notice
 
 /**
@@ -45,7 +45,7 @@ internal fun RegistryVerifiedNotice(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_tamin_verified),
+            imageVector = vectorResource(Res.drawable.ic_tamin_check_circle),
             contentDescription = null,
             tint = colors.greenText,
             modifier = Modifier.size(IdentityDimens.bannerIconSize),
@@ -81,6 +81,7 @@ private fun IdentitySectionCard(
     section: IdentitySection,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
     Column(modifier = modifier.fillMaxWidth()) {
         SectionLabel(
             text = stringResource(section.title),
@@ -93,39 +94,16 @@ private fun IdentitySectionCard(
                 .padding(horizontal = Spacing.md),
         ) {
             section.fields.forEachIndexed { index, field ->
-                IdentityFieldRow(field = field)
+                // Names, not codes, so the value keeps the screen's reading direction.
+                DetailRow(
+                    label = stringResource(field.label),
+                    value = field.value,
+                    valueColor = if (field.isAbsent) colors.textTertiary else colors.textPrimary,
+                    numeric = false,
+                    verticalPadding = Spacing.sm,
+                )
                 if (index != section.fields.lastIndex) TaminDivider()
             }
         }
-    }
-}
-
-/**
- * Label at the start, value at the end.
- *
- * Not core-ui's `DetailRow`: that one routes every value through [NumericText] and the identity
- * record is mostly names, which must stay in the reading direction of the rest of the screen.
- */
-@Composable
-private fun IdentityFieldRow(
-    field: IdentityField,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(field.label),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textMuted,
-        )
-        Text(
-            text = field.value,
-            style = MaterialTheme.typography.titleSmall,
-            color = if (field.isAbsent) colors.textTertiary else colors.textPrimary,
-        )
     }
 }

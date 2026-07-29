@@ -4,7 +4,7 @@
     <string name="btn_show_payroll_pdf">نمایش فیش حقوقی (PDF)</string>
     <string name="error_unknown">خطای ناشناخته</string>
     <string name="pdf_loaded_successfully">فایل PDF با موفقیت دریافت شد</string>
-    <string name="pdf_ready_rendering">آماده نمایش (نیاز به پیاده سازی رندرینگ)</string>
+    <string name="pdf_ready_rendering">آماده نمایش (نیاز به پیاده‌سازی رندرینگ)</string>
     <string name="btn_close">بستن</string>
     <string name="pdf_viewer_title">نمایش PDF</string>
     <string name="payroll_header">فیش حقوقی</string>
@@ -115,6 +115,11 @@
 
     <!-- Shown where the service returned nothing for a field -->
     <string name="identity_value_not_registered">ثبت نشده</string>
+
+    <!-- Gender, named from the civil-registry code the service sends -->
+    <string name="identity_gender_male">مرد</string>
+    <string name="identity_gender_female">زن</string>
+    <string name="identity_gender_unknown">نامشخص</string>
 
 </resources>
 

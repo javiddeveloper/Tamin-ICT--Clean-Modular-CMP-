@@ -8,13 +8,6 @@ fun IdentityInfoDN.toPresentation(): IdentityInfoPR {
     val fName = this.firstName ?: ""
     val lName = this.lastName ?: ""
     val resolvedFullName = "$fName $lName".trim()
-    // The service sends the civil-registry code ("01"/"02"); the letter forms are kept because
-    // other callers of this mapper still send them.
-    val resolvedGenderDisplay = when (this.gender?.uppercase()?.trimStart('0')) {
-        "M", "MALE", "1" -> "مرد"
-        "F", "FEMALE", "2" -> "زن"
-        else -> "نامشخص"
-    }
     val combinedSerial = when {
         !this.idCardSerial1.isNullOrEmpty() && !this.idCardSerial2.isNullOrEmpty() -> {
             "${this.idCardSerial1}/${this.idCardSerial2}"
@@ -31,9 +24,8 @@ fun IdentityInfoDN.toPresentation(): IdentityInfoPR {
         fatherName = this.fatherName ?: "",
         firstName = fName,
         lastName = lName,
-        fullName = resolvedFullName.ifEmpty { "نامشخص" },
+        fullName = resolvedFullName,
         gender = this.gender ?: "",
-        genderDisplay = resolvedGenderDisplay,
         id = this.id ?: 0,
         idCardNumber = this.idCardNumber ?: "",
         idCardSerial = combinedSerial,

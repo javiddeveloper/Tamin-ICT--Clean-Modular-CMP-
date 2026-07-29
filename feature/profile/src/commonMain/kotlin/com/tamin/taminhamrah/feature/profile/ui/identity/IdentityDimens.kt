@@ -3,19 +3,32 @@ package com.tamin.taminhamrah.feature.profile.ui.identity
 import androidx.compose.ui.unit.dp
 
 /**
- * Identity-screen layout numbers, kept in one place instead of scattered through the card's
- * measure block. Shared design tokens (spacing, radii, colors, type) live in core-ui's theme;
- * these are the ones only the insured-person card needs.
+ * Identity-screen layout numbers, taken from the design's SVG export and kept in one place
+ * instead of scattered through the card's measure block. Offsets are measured from the card's
+ * own top-start corner, so they read the same way the export does.
+ *
+ * Shared design tokens (spacing, radii, colors, type) live in core-ui's theme; these are the
+ * ones only the insured-person card needs.
  */
 internal object IdentityDimens {
 
     /** How much drag folds the header from open to collapsed. */
     val headerCollapseDistance = 220.dp
 
+    /**
+     * The width the design was drawn at. Every dp below is measured on that artboard, so the card
+     * scales them by whatever width it is actually handed — otherwise a narrower screen gets the
+     * artboard's absolute sizes and the card reads oversized.
+     */
+    val designCardWidth = 374.dp
+
     // The card, expanded and folded.
-    val cardExpandedHeight = 216.dp
+    val cardExpandedHeight = 276.dp
     val cardCollapsedHeight = 64.dp
-    val cardCorner = 20.dp
+    val cardCorner = 22.dp
+
+    /** The card's own inset. Everything on its face lines up to this. */
+    val cardPadding = 20.dp
 
     /** How far the card rides up into the header, open and folded. */
     val cardOverlap = 32.dp
@@ -31,28 +44,56 @@ internal object IdentityDimens {
     val cardHeaderGap = 24.dp
 
     // Slot offsets inside the expanded card, measured from its top.
-    val brandTop = 18.dp
-    val identityTop = 58.dp
-    val ssnTop = 112.dp
+    val brandTop = 19.dp
+    val chipTop = 20.dp
+    val avatarTop = 66.dp
+    val ssnCaptionTop = 145.dp
+    val ssnNumberTop = 167.dp
+    val footerRuleTop = 207.dp
+    val footerCaptionTop = 223.dp
+    val footerValueTop = 243.dp
 
-    // Avatar, expanded and folded into the top bar.
-    val avatarSize = 52.dp
-    val avatarCollapsedSize = 34.dp
-    val avatarCorner = 16.dp
-    val avatarInnerCorner = 12.dp
-    val avatarRim = 4.dp
+    // The holder's photo — taller than it is wide, as a portrait should be.
+    val avatarWidth = 48.dp
+    val avatarHeight = 58.dp
+    val avatarCorner = 12.dp
+    val avatarCollapsedHeight = 34.dp
+
+    /** Air between the photo and the name beside it. */
+    val avatarNameGap = 8.dp
 
     // The card's chrome.
-    val chipWidth = 38.dp
-    val chipHeight = 28.dp
+    val chipWidth = 35.dp
+    val chipHeight = 26.dp
     val chipCorner = 6.dp
-    val brandTileSize = 32.dp
-    val brandIconSize = 20.dp
-    val verifiedIconSize = 14.dp
+    val brandTileSize = 29.dp
+    val brandTileCorner = 9.dp
+    val brandIconSize = 18.dp
+    val verifiedIconSize = 12.dp
     val bannerIconSize = 18.dp
 
-    /** The band across the card's foot that carries the national code and date of birth. */
-    val footerBandHeight = 54.dp
+    /** The card's soft blue drop shadow. */
+    val cardShadow = 20.dp
+
+    // The sheen rings: thin arcs of light, not filled blobs. Centers are insets from the
+    // card's edges and radii are absolute, both straight from the design export.
+    val ringNearInset = 35.dp
+    val ringNearTop = 21.dp
+    val ringFarInset = 39.dp
+    val ringOuterRadius = 105.dp
+    val ringInnerRadius = 75.dp
+    val ringFootRadius = 85.dp
+
+    // The card's furniture, at the export's alphas.
+    const val ringOuterAlpha = 0.09f
+    const val ringInnerAlpha = 0.07f
+    const val ringFootAlpha = 0.06f
+    const val avatarBorderAlpha = 0.18f
+    const val avatarGlyphAlpha = 0.7f
+    const val brandTileFillAlpha = 0.08f
+    const val brandTileBorderAlpha = 0.17f
+    const val footerRuleAlpha = 0.11f
+    const val topEdgeAlpha = 0.16f
 
     /** The social-security number stays legible in the folded bar, just a little smaller. */
     const val ssnCollapsedScale = 0.62f

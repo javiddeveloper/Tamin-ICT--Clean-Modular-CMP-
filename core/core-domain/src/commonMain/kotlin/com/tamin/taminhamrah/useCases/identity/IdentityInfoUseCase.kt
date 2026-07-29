@@ -40,9 +40,11 @@ class IdentityInfoUseCase(
         val birthName = cityNameOf(birthId)
         val issueName = if (issueId == birthId) birthName else cityNameOf(issueId)
 
+        // Left null when the lookup finds nothing: naming it is the screen's job, so the
+        // wording stays in the string resources rather than hard-coded down here.
         return identity.apply {
-            cityOfBirthName = birthName ?: cityOfBirthName ?: UNKNOWN_CITY
-            cityOfIssueName = issueName ?: cityOfIssueName ?: UNKNOWN_CITY
+            cityOfBirthName = birthName ?: cityOfBirthName
+            cityOfIssueName = issueName ?: cityOfIssueName
         }
     }
 
@@ -54,9 +56,5 @@ class IdentityInfoUseCase(
         } catch (_: Exception) {
             null
         }
-    }
-
-    private companion object {
-        const val UNKNOWN_CITY = "نامشخص"
     }
 }

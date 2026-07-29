@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile.ui.identity.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.identity.IdentityInfoPR
+import com.tamin.taminhamrah.ui.orAbsent
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -60,6 +61,7 @@ data class IdentitySection(
  */
 fun IdentityInfoPR.toSections(
     nationality: String,
+    gender: String,
     absentValue: String,
     mobile: String?,
     email: String?,
@@ -70,7 +72,7 @@ fun IdentityInfoPR.toSections(
             IdentityField(Res.string.identity_field_first_name, firstName.orAbsent(absentValue)),
             IdentityField(Res.string.identity_field_last_name, lastName.orAbsent(absentValue)),
             IdentityField(Res.string.identity_field_father_name, fatherName.orAbsent(absentValue)),
-            IdentityField(Res.string.identity_field_gender, genderDisplay.orAbsent(absentValue)),
+            IdentityField(Res.string.identity_field_gender, gender),
             IdentityField(
                 label = Res.string.identity_field_birth_date,
                 value = dateOfBirthFormatted.toPersianDigits().orAbsent(absentValue),
@@ -122,7 +124,3 @@ fun IdentityInfoPR.toSections(
         ),
     ),
 ).toImmutableList()
-
-/** A field the service left empty reads as [absentValue], never as a blank line. */
-private fun String?.orAbsent(absentValue: String): String =
-    if (isNullOrBlank()) absentValue else this

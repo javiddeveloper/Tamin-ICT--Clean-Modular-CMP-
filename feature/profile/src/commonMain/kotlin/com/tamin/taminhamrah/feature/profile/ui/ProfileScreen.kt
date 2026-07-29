@@ -51,6 +51,7 @@ import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -67,6 +68,7 @@ import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.collections.immutable.persistentListOf
@@ -292,8 +294,10 @@ fun ProfileContent(
                                         style = MaterialTheme.typography.titleMedium,
                                         color = taminColors.txtNameProfile
                                     )
-                                    Text(
-                                        text = state.identityInfo?.nationalId ?: "22222222",
+                                    NumericText(
+                                        text = state.identityInfo?.nationalId
+                                            ?.toPersianDigits()
+                                            .orEmpty(),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = taminColors.txtNatProfile
                                     )

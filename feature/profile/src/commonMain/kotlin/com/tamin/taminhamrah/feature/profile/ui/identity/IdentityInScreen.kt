@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toGenderLabel
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -113,10 +114,11 @@ fun IdentityInScreen(
     val nationality = stringResource(Res.string.identity_nationality_value)
     val absentValue = stringResource(Res.string.identity_value_not_registered)
     val info = state.identityInfo
+    val gender = stringResource(info?.gender.toGenderLabel())
     val mobile = state.mobile
     val email = state.email
-    val sections = remember(info, nationality, absentValue, mobile, email) {
-        info?.toSections(nationality, absentValue, mobile, email)
+    val sections = remember(info, nationality, gender, absentValue, mobile, email) {
+        info?.toSections(nationality, gender, absentValue, mobile, email)
     }
 
     Box(
@@ -162,6 +164,7 @@ fun IdentityInScreen(
             progress = headerProgress,
             info = info,
             nationality = nationality,
+            gender = gender,
             photo = state.profileImage,
             onBack = onBack,
             modifier = Modifier
@@ -182,6 +185,7 @@ private fun IdentityHeader(
     progress: () -> Float,
     info: IdentityInfoPR?,
     nationality: String,
+    gender: String,
     photo: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -214,7 +218,7 @@ private fun IdentityHeader(
                 IdentityCard(
                     fullName = info.fullName,
                     fatherName = info.fatherName,
-                    gender = info.genderDisplay,
+                    gender = gender,
                     nationality = nationality,
                     ssn = info.ssn,
                     nationalId = info.nationalId,
@@ -250,7 +254,6 @@ private val PreviewIdentity = IdentityInfoPR(
     lastName = "مختاری اسفندواجانی",
     fullName = "سعید مختاری اسفندواجانی",
     gender = "M",
-    genderDisplay = "مرد",
     id = 0,
     idCardNumber = "15324",
     idCardSerial = "",

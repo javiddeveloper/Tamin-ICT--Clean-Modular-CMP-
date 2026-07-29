@@ -16,7 +16,6 @@ data class IdentityInfoPR(
     val lastName: String,
     val fullName: String,
     val gender: String,
-    val genderDisplay: String,
     val id: Int,
     val idCardNumber: String,
     val idCardSerial: String,
