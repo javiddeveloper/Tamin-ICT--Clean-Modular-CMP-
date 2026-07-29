@@ -134,7 +134,7 @@ class FakeAgentChatCacheRepository : com.tamin.taminhamrah.repository.AgentChatC
 }
 
 class FakeAgentRepository : AgentRepository {
-    var checkChatAllowedResult: Result<ChatAllowedDN> = Result.success(ChatAllowedDN(true, null, "fake-token"))
+    var checkChatAllowedResult: Result<ChatAllowedDN> = Result.success(ChatAllowedDN(canStartChat = true, chatToken = "fake-token", errorMessage = null))
     var sendPromptFlow: kotlinx.coroutines.flow.Flow<AgentPollingState> = flowOf()
     var cancelRequestCalled = false
 
@@ -222,7 +222,7 @@ class AgentViewModelTest {
     @Test
     fun `CheckPermission intent updates state to allowed when repository returns success`() = runTest(testDispatcher) {
         viewModel = createViewModel()
-        fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(true, null, "test-token"))
+        fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(canStartChat = true, chatToken = "test-token", errorMessage = null))
 
         viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
@@ -236,7 +236,7 @@ class AgentViewModelTest {
     @Test
     fun `CheckPermission intent updates state to not allowed when repository returns false`() = runTest(testDispatcher) {
         viewModel = createViewModel()
-        fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(false, "You are blocked", null))
+        fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(canStartChat = false, chatToken = null, errorMessage = "You are blocked"))
 
         viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
