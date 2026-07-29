@@ -1,14 +1,14 @@
 package com.tamin.taminhamrah.feature.profile
 
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.tamin.taminhamrah.feature.profile.ui.IdentityScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
+import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
+import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
 import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
@@ -45,13 +45,12 @@ fun NavGraphBuilder.profileGraph(
             )
         }
 
-        composable<ProfileRoute.Identity> { backStackEntry ->
-            val route = backStackEntry.toRoute<ProfileRoute.Identity>()
-            val viewModel = backStackEntry.sharedViewModel<ProfileViewModel>(navController)
+        composable<ProfileRoute.Identity> {
+            val viewModel = koinViewModel<IdentityInViewModel>()
 
-            IdentityScreen(
-                userId = route.userId,
+            IdentityInRoute(
                 viewModel = viewModel,
+                onNavigateToRoute = { /* Placeholder */ },
                 onBackClicked = onBack
             )
         }
