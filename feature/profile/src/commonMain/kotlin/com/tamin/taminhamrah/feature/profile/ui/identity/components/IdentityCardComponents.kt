@@ -129,7 +129,7 @@ internal fun IdentityCard(
                 CardAvatar(photo = photo, modifier = Modifier.layoutId(CardSlot.Avatar))
                 Text(
                     text = fullName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     maxLines = 1,
@@ -161,7 +161,7 @@ internal fun IdentityCard(
                 // The one figure that survives the fold, so the bar still identifies the holder.
                 NumericText(
                     text = ssn.toPersianDigits(),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     modifier = Modifier
                         .layoutId(CardSlot.SsnNumber)
@@ -200,7 +200,8 @@ internal fun IdentityCard(
             val width = constraints.maxWidth
             // Every dp below is an artboard measurement, so scale it to the width we were
             // actually handed. `scaled` is the only way a design dp reaches this layout.
-            val designScale = width / IdentityDimens.designCardWidth.toPx()
+            val designScale =
+                width / IdentityDimens.designCardWidth.toPx() * IdentityDimens.cardScale
             fun scaled(value: Dp) = (value.toPx() * designScale).roundToInt()
 
             val pad = scaled(IdentityDimens.cardPadding)
@@ -343,7 +344,7 @@ private fun CardCaption(text: String, modifier: Modifier = Modifier) {
 private fun CardValue(text: String, modifier: Modifier = Modifier) {
     NumericText(
         text = text,
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.labelLarge,
         color = Color.White,
         modifier = modifier,
     )
@@ -371,10 +372,12 @@ private fun CardBrandRow(modifier: Modifier = Modifier) {
                 modifier = Modifier.size(IdentityDimens.brandIconSize),
             )
         }
-        Column(horizontalAlignment = Alignment.End) {
+        // Start, not End: both lines hug the text block's reading edge — the right in RTL,
+        // beside the tile — and stay correct if the card is ever laid out left to right.
+        Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(Res.string.identity_card_org),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )

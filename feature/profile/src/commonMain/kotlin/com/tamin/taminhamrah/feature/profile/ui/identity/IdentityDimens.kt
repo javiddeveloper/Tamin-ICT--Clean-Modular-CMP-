@@ -22,6 +22,14 @@ internal object IdentityDimens {
      */
     val designCardWidth = 374.dp
 
+    /**
+     * Trims the whole card below the artboard's proportions.
+     *
+     * Separate from [designCardWidth], which records the width the design was drawn at and should
+     * keep saying so: this is the deliberate "render it a little smaller than drawn" decision.
+     */
+    const val cardScale = 0.9f
+
     // The card, expanded and folded.
     val cardExpandedHeight = 276.dp
     val cardCollapsedHeight = 64.dp
