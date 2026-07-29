@@ -11,7 +11,6 @@ import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class HealthProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
