@@ -52,7 +52,7 @@ val ApiClientsModule = module {
     single(named("healthKtorfit")) {
         Ktorfit.Builder()
             .baseUrl(NetworkConstants.BASE_URL_HEALTH_PROFILE)
-            .httpClient(get<HttpClient>(named("mainHttpClient")))
+            .httpClient(get<HttpClient>(named("healthHttpClient")))
             .build()
     }
 

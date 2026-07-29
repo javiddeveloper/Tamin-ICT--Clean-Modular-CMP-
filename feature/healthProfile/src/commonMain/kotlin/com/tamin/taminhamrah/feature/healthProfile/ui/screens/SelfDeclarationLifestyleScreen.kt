@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.SmokingStatus
 import com.tamin.taminhamrah.util.Logger
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.CustomChip
@@ -121,7 +122,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.isSmoking == true) 0 else 1,
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    isSmoking = isYes,
+                                    smokingStatusId = if (isYes) state.smokingStatusId else null,
+                                    smokingPattern = if (isYes) state.smokingPattern else null
+                                )
+                            )
+                        )
                         if (isYes) showSmokingBottomSheet = true
                     }
                 )
@@ -160,7 +169,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.hasAddiction == true) 0 else 1,
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    hasAddiction = isYes,
+                                    substanceStatusId = if (isYes) state.substanceStatusId else null,
+                                    substancePattern = if (isYes) state.substancePattern else null
+                                )
+                            )
+                        )
                         if (isYes) showAddictionBottomSheet = true
                     }
                 )
@@ -200,7 +217,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.isDrinking == true) 0 else 1,
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    isDrinking = isYes,
+                                    drinkingStatusId = if (isYes) state.drinkingStatusId else null,
+                                    drinkingPattern = if (isYes) state.drinkingPattern else null,
+                                )
+                            )
+                        )
                         if (isYes) showAlcoholBottomSheet = true
                     }
                 )
@@ -240,7 +265,15 @@ fun SelfDeclarationLifestyleScreen(
                     selectedIndex = if (state.isExercising == true) 0 else 1,
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
-                        onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = isYes)))
+                        onIntent(
+                            HealthProfileIntent.UpdateLifestyle(
+                                state.copy(
+                                    isExercising = isYes,
+                                    exerciseStatusId = if (isYes) state.exerciseStatusId else null,
+                                    exerciseFrequency = if (isYes) state.exerciseFrequency else null,
+                                )
+                            )
+                        )
                         if (isYes) showExerciseBottomSheet = true
                     }
                 )
@@ -282,10 +315,12 @@ fun SelfDeclarationLifestyleScreen(
                 showSmokingBottomSheet = false
             },
             onSubmit = { result ->
+                val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
-                            smokingStatusId = result.selectedItemIds.firstOrNull(),
+                            isSmoking = selectedId != SmokingStatus.NEVER_CONSUMED.id,
+                            smokingStatusId = selectedId,
                             smokingPattern = result.description
                                 ?: smokingStatusOptions.find { it.id == result.selectedItemIds.firstOrNull() }?.label
                         )
@@ -318,12 +353,14 @@ fun SelfDeclarationLifestyleScreen(
                 showAddictionBottomSheet = false
             },
             onSubmit = { result ->
+                val selectedId = result.selectedItemIds.firstOrNull()
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
-                            substanceStatusId = result.selectedItemIds.firstOrNull(),
+                            hasAddiction = LifeStyleStatus.fromStyleId(selectedId) != LifeStyleStatus.NEVER,
+                            substanceStatusId = selectedId,
                             substancePattern = result.description
-                                ?: actFrequencyOptions.find { it.id == result.selectedItemIds.firstOrNull() }?.label
+                                ?: actFrequencyOptions.find { it.id == selectedId }?.label
                         )
                     )
                 )
@@ -358,6 +395,7 @@ fun SelfDeclarationLifestyleScreen(
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
+                            isDrinking = LifeStyleStatus.fromStyleId(selectedId) != LifeStyleStatus.NEVER,
                             drinkingStatusId = selectedId,
                             drinkingPattern = result.description
                                 ?: LifeStyleStatus.fromStyleId(selectedId)?.title
@@ -395,6 +433,7 @@ fun SelfDeclarationLifestyleScreen(
                 onIntent(
                     HealthProfileIntent.UpdateLifestyle(
                         state.copy(
+                            isExercising = LifeStyleStatus.fromStyleId(selectedId) != LifeStyleStatus.NEVER,
                             exerciseStatusId = selectedId,
                             exerciseFrequency = result.description
                                 ?: LifeStyleStatus.fromStyleId(selectedId)?.title
