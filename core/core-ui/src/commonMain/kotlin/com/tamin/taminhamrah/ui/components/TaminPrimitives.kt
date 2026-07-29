@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -34,8 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.IconGradientBlueEnd
-import com.tamin.taminhamrah.ui.theme.IconGradientBlueStart
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -356,12 +355,13 @@ fun TaminFilledButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: ImageVector? = null,
+    painter: Painter? = null,
     shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
     height: Dp = PRIMARY_BUTTON_HEIGHT,
-    background: Brush = Brush.linearGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
-    disabledBackgroundColor: Color = LocalTaminColors.current.grey900,
+    background: Brush = LocalTaminColors.current.heroGradient,
+    disabledBackgroundColor: Color = LocalTaminColors.current.border,
     contentColor: Color = Color.White,
-    disabledContentColor: Color = Color.White.copy(alpha = 0.7f),
+    disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
     val shadowColor = Color(0x47173D7E)
@@ -398,6 +398,13 @@ fun TaminFilledButton(
         if (icon != null) {
             Icon(
                 imageVector = icon,
+                contentDescription = null,
+                tint = if (enabled) contentColor else disabledContentColor,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        } else if (painter != null) {
+            Icon(
+                painter = painter,
                 contentDescription = null,
                 tint = if (enabled) contentColor else disabledContentColor,
                 modifier = Modifier.size(IconSize.medium),
