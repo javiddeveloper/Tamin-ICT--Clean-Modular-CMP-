@@ -11,7 +11,6 @@ import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class HealthProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -45,6 +44,7 @@ class HealthProfileViewModel(
     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
         return when (intent) {
             is HealthProfileIntent.LoadHealthProfile     -> handleLoadHealthProfile(intent.nationalCode)
+            is HealthProfileIntent.RetryStep           -> handleRefreshStep()
             is HealthProfileIntent.LoadCitiesForProvince -> handleLoadCities(intent.provinceId)
 
             is HealthProfileIntent.ChangeStep -> flow {
@@ -171,8 +171,50 @@ class HealthProfileViewModel(
     private fun handleLoadHealthProfile(nationalCode: String?): Flow<PartialState> = merge(
         fetchLookupLists(),
         fetchPatientData(nationalCode)
-    ).onStart { emit(PartialState.Loading(true)) }
+    ).onStart {
+        emit(PartialState.ClearAllErrors)
+        emit(PartialState.Loading(true))
+    }
      .onCompletion { emit(PartialState.Loading(false)) }
+
+    private fun handleRefreshStep(): Flow<PartialState> = flow {
+        val step = uiState.value.selfDeclaration.currentStep
+        val natCode = currentPatientNatCode.takeIf { it.isNotBlank() }
+            ?: tokenStoreManager.getUserId() ?: ""
+        val patientId = currentPatientId
+
+        emit(PartialState.Loading(true))
+        when (step) {
+            SelfDeclarationStep.COMPLETED -> {
+                fetchPatientData(natCode).collect { emit(it) }
+            }
+
+            SelfDeclarationStep.CONTACT -> {
+                merge(
+                    fetchProvinces(),
+                    if (uiState.value.selfDeclaration.contact.provinceId != null)
+                        handleLoadCities(uiState.value.selfDeclaration.contact.provinceId!!)
+                    else emptyFlow()
+                ).collect { emit(it) }
+            }
+
+            SelfDeclarationStep.PERSONAL -> fetchMaritalStatus().collect { emit(it) }
+            SelfDeclarationStep.BLOOD -> fetchBloodGroups().collect { emit(it) }
+            SelfDeclarationStep.LIFESTYLE -> {
+                merge(fetchSmokingStatus(), fetchActFrequencies()).collect { emit(it) }
+            }
+
+            SelfDeclarationStep.DISEASES, SelfDeclarationStep.FAMILY -> {
+                fetchIllnessGroups().collect { emit(it) }
+            }
+
+            SelfDeclarationStep.ALLERGY -> fetchDrugs().collect { emit(it) }
+            else -> {
+                handleLoadHealthProfile(natCode).collect { emit(it) }
+            }
+        }
+        emit(PartialState.Loading(false))
+    }
 
     private fun fetchLookupLists(): Flow<PartialState> = merge(
         fetchMaritalStatus(),
@@ -185,63 +227,52 @@ class HealthProfileViewModel(
     )
 
     private fun fetchMaritalStatus() = flow {
-        if (uiState.value.maritalStatusOptions.isEmpty()) {
-            getMaritalStatusUseCase()
-                .catch { }
-                .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
-        }
+        getMaritalStatusUseCase()
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت وضعیت تاهل", ErrorSource.MARITAL_STATUS)) }
+            .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
     }
 
     private fun fetchProvinces() = flow {
-        if (uiState.value.provinceOptions.isEmpty()) {
-            emit(PartialState.ProvincesLoading(true))
-            getAllProvincesUseCase()
-                .catch { emit(PartialState.ProvincesLoading(false)) }
-                .collect {
-                    emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() }))
-                    emit(PartialState.ProvincesLoading(false))
-                }
-        }
+        emit(PartialState.ProvincesLoading(true))
+        getAllProvincesUseCase()
+            .catch {
+                emit(PartialState.Error(it.message ?: "خطا در دریافت لیست استان‌ها", ErrorSource.PROVINCES))
+                emit(PartialState.ProvincesLoading(true))
+            }
+            .collect {
+                emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() }))
+                emit(PartialState.ProvincesLoading(false))
+            }
     }
 
     private fun fetchBloodGroups() = flow {
-        if (uiState.value.bloodGroupOptions.isEmpty()) {
-            getBloodGroupsUseCase()
-                .catch { }
-                .collect { emit(PartialState.BloodGroupsLoaded(it.map { b -> b.toPresentation() })) }
-        }
+        getBloodGroupsUseCase()
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت گروه‌های خونی", ErrorSource.BLOOD_GROUPS)) }
+            .collect { emit(PartialState.BloodGroupsLoaded(it.map { b -> b.toPresentation() })) }
     }
 
     private fun fetchSmokingStatus() = flow {
-        if (uiState.value.smokingStatusOptions.isEmpty()) {
-            getSmokingStatusUseCase()
-                .catch { }
-                .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
-        }
+        getSmokingStatusUseCase()
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت وضعیت دخانیات", ErrorSource.SMOKING_STATUS)) }
+            .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
     }
 
     private fun fetchActFrequencies() = flow {
-        if (uiState.value.actFrequencyOptions.isEmpty()) {
-            getActFrequenciesUseCase()
-                .catch { }
-                .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
-        }
+        getActFrequenciesUseCase()
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت فرکانس فعالیت‌ها", ErrorSource.ACT_FREQUENCIES)) }
+            .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
     }
 
     private fun fetchIllnessGroups() = flow {
-        if (uiState.value.illnessGroups.isEmpty()) {
-            getSelfDeclarableIllnessesByGroupUseCase()
-                .catch { }
-                .collect { emit(PartialState.IllnessGroupsLoaded(it.map { g -> g.toPresentation() })) }
-        }
+        getSelfDeclarableIllnessesByGroupUseCase()
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت گروه‌های بیماری", ErrorSource.ILLNESS_GROUPS)) }
+            .collect { emit(PartialState.IllnessGroupsLoaded(it.map { g -> g.toPresentation() })) }
     }
 
     private fun fetchDrugs() = flow {
-        if (uiState.value.drugOptions.isEmpty()) {
-            getAllDrugsUseCase()
-                .catch { }
-                .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
-        }
+        getAllDrugsUseCase()
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست داروها", ErrorSource.DRUGS)) }
+            .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
     }
 
     private fun fetchPatientData(nationalCode: String?): Flow<PartialState> = flow {
@@ -252,7 +283,7 @@ class HealthProfileViewModel(
 
         if (targetNatCode.isNotBlank()) {
             getPatientGeneralUseCase(targetNatCode)
-                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی")) }
+                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی", ErrorSource.PATIENT_GENERAL)) }
                 .collect { general ->
                     val safeNatCode = general.patientNatCode?.takeIf { it.isNotBlank() } ?: targetNatCode
                     val safePatientId = general.ptientID ?: 0
@@ -272,13 +303,13 @@ class HealthProfileViewModel(
     private fun fetchAdditionalPatientInfo(natCode: String, patientId: Int): Flow<PartialState> = merge(
         flow {
             getPatientSelfDeclarativeUseCase(natCode, patientId)
-                .catch { }
+                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات خوداظهاری", ErrorSource.PATIENT_LIFESTYLE)) }
                 .firstOrNull()
                 ?.let { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
         },
         flow {
             getPatientDrugAllergiesUseCase(natCode, patientId)
-                .catch { }
+                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت حساسیت‌های دارویی", ErrorSource.PATIENT_ALLERGIES)) }
                 .firstOrNull()
                 ?.let { list -> emit(PartialState.AllergiesLoaded(list.map { d -> d.toPresentation() })) }
         }
@@ -287,7 +318,10 @@ class HealthProfileViewModel(
     private fun handleLoadCities(provinceId: Int): Flow<PartialState> = flow {
         emit(PartialState.CitiesLoading(true))
         getProvinceCitiesUseCase(provinceId)
-            .catch { emit(PartialState.CitiesLoading(false)) }
+            .catch {
+                emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شهرها", ErrorSource.CITIES))
+                emit(PartialState.CitiesLoading(false))
+            }
             .collect {
                 emit(PartialState.CitiesLoaded(it.map { c -> c.toPresentation() }))
                 emit(PartialState.CitiesLoading(false))
@@ -387,23 +421,65 @@ class HealthProfileViewModel(
         currentState: HealthProfileUiState,
         partialState: PartialState
     ): HealthProfileUiState = when (partialState) {
-        is PartialState.Loading          -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.Loading -> {
+            currentState.copy(isLoading = partialState.isLoading)
+        }
+
+        PartialState.ClearAllErrors -> {
+            currentState.copy(errors = emptyMap())
+        }
+
         is PartialState.ProvincesLoading -> currentState.copy(isProvincesLoading = partialState.isLoading)
         is PartialState.CitiesLoading    -> currentState.copy(isCitiesLoading = partialState.isLoading)
-        is PartialState.Error            -> currentState.copy(isLoading = false, error = partialState.message)
+        is PartialState.Error            -> currentState.copy(
+            isLoading = false,
+            errors = currentState.errors + (partialState.source to partialState.message)
+        )
 
-        is PartialState.GeneralLoaded    -> reduceGeneralLoaded(currentState, partialState.info)
-        is PartialState.LifestyleLoaded  -> reduceLifestyleLoaded(currentState, partialState.info)
-        is PartialState.AllergiesLoaded  -> reduceAllergiesLoaded(currentState, partialState.list)
+        is PartialState.GeneralLoaded    -> reduceGeneralLoaded(currentState, partialState.info).copy(
+            errors = currentState.errors - ErrorSource.PATIENT_GENERAL
+        )
+        is PartialState.LifestyleLoaded  -> reduceLifestyleLoaded(currentState, partialState.info).copy(
+            errors = currentState.errors - ErrorSource.PATIENT_LIFESTYLE
+        )
+        is PartialState.AllergiesLoaded  -> reduceAllergiesLoaded(currentState, partialState.list).copy(
+            errors = currentState.errors - ErrorSource.PATIENT_ALLERGIES
+        )
 
-        is PartialState.MaritalStatusLoaded -> currentState.copy(maritalStatusOptions = partialState.options)
-        is PartialState.ProvincesLoaded     -> currentState.copy(provinceOptions = partialState.options, isProvincesLoading = false)
-        is PartialState.CitiesLoaded        -> currentState.copy(cityOptions = partialState.options, isCitiesLoading = false)
-        is PartialState.BloodGroupsLoaded   -> currentState.copy(bloodGroupOptions = partialState.options)
-        is PartialState.SmokingStatusLoaded -> currentState.copy(smokingStatusOptions = partialState.options)
-        is PartialState.ActFrequenciesLoaded -> currentState.copy(actFrequencyOptions = partialState.options)
-        is PartialState.IllnessGroupsLoaded -> currentState.copy(illnessGroups = partialState.groups)
-        is PartialState.DrugsLoaded         -> currentState.copy(drugOptions = partialState.options)
+        is PartialState.MaritalStatusLoaded -> currentState.copy(
+            maritalStatusOptions = partialState.options,
+            errors = currentState.errors - ErrorSource.MARITAL_STATUS
+        )
+        is PartialState.ProvincesLoaded     -> currentState.copy(
+            provinceOptions = partialState.options,
+            isProvincesLoading = false,
+            errors = currentState.errors - ErrorSource.PROVINCES
+        )
+        is PartialState.CitiesLoaded        -> currentState.copy(
+            cityOptions = partialState.options,
+            isCitiesLoading = false,
+            errors = currentState.errors - ErrorSource.CITIES
+        )
+        is PartialState.BloodGroupsLoaded   -> currentState.copy(
+            bloodGroupOptions = partialState.options,
+            errors = currentState.errors - ErrorSource.BLOOD_GROUPS
+        )
+        is PartialState.SmokingStatusLoaded -> currentState.copy(
+            smokingStatusOptions = partialState.options,
+            errors = currentState.errors - ErrorSource.SMOKING_STATUS
+        )
+        is PartialState.ActFrequenciesLoaded -> currentState.copy(
+            actFrequencyOptions = partialState.options,
+            errors = currentState.errors - ErrorSource.ACT_FREQUENCIES
+        )
+        is PartialState.IllnessGroupsLoaded -> currentState.copy(
+            illnessGroups = partialState.groups,
+            errors = currentState.errors - ErrorSource.ILLNESS_GROUPS
+        )
+        is PartialState.DrugsLoaded         -> currentState.copy(
+            drugOptions = partialState.options,
+            errors = currentState.errors - ErrorSource.DRUGS
+        )
 
         is PartialState.StepChanged -> currentState.copy(
             selfDeclaration = currentState.selfDeclaration.copy(currentStep = partialState.step)

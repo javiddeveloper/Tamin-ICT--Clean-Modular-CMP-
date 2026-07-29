@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.LifestyleStepState
@@ -38,7 +39,8 @@ fun SelfDeclarationLifestyleScreen(
     actFrequencyOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -84,16 +86,21 @@ fun SelfDeclarationLifestyleScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                LifestyleShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    LifestyleShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -103,11 +110,10 @@ fun SelfDeclarationLifestyleScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-            InfoBanner(
-                message = stringResource(Res.string.health_confidential_notice),
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
+                InfoBanner(
+                    message = stringResource(Res.string.health_confidential_notice),
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
 
             // ── Smoking ──────────────────────────────────────────────────────
             Column(

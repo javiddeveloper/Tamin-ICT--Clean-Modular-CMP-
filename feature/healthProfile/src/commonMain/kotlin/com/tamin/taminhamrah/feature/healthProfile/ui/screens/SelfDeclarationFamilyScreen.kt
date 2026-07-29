@@ -2,16 +2,14 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
@@ -38,7 +36,8 @@ fun SelfDeclarationFamilyScreen(
     illnessGroups: List<IllnessGroupPR> = emptyList(),
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -81,16 +80,21 @@ fun SelfDeclarationFamilyScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                CardsListShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    CardsListShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -100,11 +104,10 @@ fun SelfDeclarationFamilyScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-            InfoBanner(
-                message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
+                InfoBanner(
+                    message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
 
             // Group 5: Family Diseases / Risk Factors
             familyDiseasesGroup?.let { group ->

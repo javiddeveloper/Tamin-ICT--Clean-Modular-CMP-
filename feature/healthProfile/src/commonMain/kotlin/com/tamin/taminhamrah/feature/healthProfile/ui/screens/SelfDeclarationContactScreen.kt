@@ -30,6 +30,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 import androidx.compose.ui.text.SpanStyle
@@ -41,6 +42,7 @@ fun SelfDeclarationContactScreen(
     provinceOptions: List<LookupItemPR> = emptyList(),
     cityOptions: List<LookupItemPR> = emptyList(),
     isLoading: Boolean = false,
+    error: String? = null,
     isProvincesLoading: Boolean = false,
     isCitiesLoading: Boolean = false,
     onIntent: (HealthProfileIntent) -> Unit,
@@ -95,16 +97,21 @@ fun SelfDeclarationContactScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                FormFieldsShimmerSkeleton(fieldCount = 6)
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    FormFieldsShimmerSkeleton(fieldCount = 6)
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -249,8 +256,9 @@ fun SelfDeclarationContactScreen(
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
+    }
 
-        if (showProvinceBottomSheet) {
+    if (showProvinceBottomSheet) {
             HealthBottomSheet(
                 config = BottomSheetConfig(
                     title = stringResource(Res.string.health_contact_province_bs_title),
@@ -332,7 +340,6 @@ fun SelfDeclarationContactScreen(
         }
     }
 
-}
 
 @Composable
 private fun StyledSelectField(

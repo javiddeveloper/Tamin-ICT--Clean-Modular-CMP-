@@ -19,12 +19,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileShimmerSkeleton
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.ErrorSource
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileEvent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -115,17 +116,28 @@ fun HealthProfileMainContent(
 
     BackHandler(onBack = navigateBack)
 
+    val errors = state.errors
+
+    fun getError(vararg allowedSources: ErrorSource): String? {
+        val matchingSource = allowedSources.firstOrNull { it in errors }
+        return errors[matchingSource] ?: errors[ErrorSource.PATIENT_GENERAL]
+    }
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         ProvideTextStyle(value = MaterialTheme.typography.bodyMedium) {
             when (currentStep) {
                 SelfDeclarationStep.GATE -> {
                     SelfDeclarationGateScreen(
+                        isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.GENERAL),
                         onIntent = onIntent,
                         onBackClicked = onBackClicked
                     )
                 }
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
+                        isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.GENERAL),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -134,6 +146,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationIdentityScreen(
                         state = selfDecState.identity,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -143,6 +156,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.personal,
                         maritalStatusOptions = state.maritalStatusOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -153,6 +167,7 @@ fun HealthProfileMainContent(
                         provinceOptions = state.provinceOptions,
                         cityOptions = state.cityOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.PROVINCES, ErrorSource.CITIES),
                         isProvincesLoading = state.isProvincesLoading,
                         isCitiesLoading = state.isCitiesLoading,
                         onIntent = onIntent,
@@ -163,6 +178,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationEmergencyScreen(
                         state = selfDecState.emergency,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -171,6 +187,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationPhysicalScreen(
                         state = selfDecState.physical,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -180,6 +197,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.bloodGroup,
                         bloodGroupOptions = state.bloodGroupOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.BLOOD_GROUPS),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -190,6 +208,7 @@ fun HealthProfileMainContent(
                         smokingStatusOptions = state.smokingStatusOptions,
                         actFrequencyOptions = state.actFrequencyOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.SMOKING_STATUS, ErrorSource.ACT_FREQUENCIES),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -199,6 +218,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.diseases,
                         illnessGroups = state.illnessGroups,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -208,6 +228,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.family,
                         illnessGroups = state.illnessGroups,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -217,6 +238,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.allergy,
                         drugOptions = state.drugOptions,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.DRUGS),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -225,6 +247,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationReviewScreen(
                         state = state,
                         isLoading = state.isLoading || selfDecState.isLoading,
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS, ErrorSource.DRUGS),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
@@ -254,31 +277,20 @@ fun HealthProfileMainContent(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(paddingValues)
-                                .background(MaterialTheme.colorScheme.background)
                         ) {
-                            if (state.isLoading) {
-                                HealthProfileShimmerSkeleton()
-                            } else if (!state.error.isNullOrEmpty()) {
-                                Column(
+                            HealthProfileErrorWrapper(
+                                isLoading = state.isLoading,
+                                error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.PATIENT_LIFESTYLE, ErrorSource.PATIENT_ALLERGIES),
+                                onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+                                shimmerContent = { HealthProfileShimmerSkeleton(modifier.padding(paddingValues)) }
+                            ) {
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                        .align(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.background)
                                 ) {
-                                    TaminText(
-                                        text = state.error ?: "",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.error,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Button(onClick = { onIntent(HealthProfileIntent.LoadHealthProfile()) }) {
-                                        TaminText("تلاش مجدد")
-                                    }
+                                    HealthProfileContent(state = state)
                                 }
-                            } else {
-                                HealthProfileContent(state = state)
                             }
                         }
                     }

@@ -6,16 +6,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.EmergencyStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,7 +26,8 @@ fun SelfDeclarationEmergencyScreen(
     state: EmergencyStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -39,7 +37,8 @@ fun SelfDeclarationEmergencyScreen(
 
     val isMobileValid = ValidationUtils.isPhoneNumberValid(state.emergencyMobile)
 
-    val isNextEnabled = isMobileValid && state.emergencyName.isNotEmpty() && state.emergencyFamily.isNotEmpty() && state.emergencyRelation.isNotEmpty() && state.emergencyMobile.length >= 10
+    val isNextEnabled =
+        isMobileValid && state.emergencyName.isNotEmpty() && state.emergencyFamily.isNotEmpty() && state.emergencyRelation.isNotEmpty() && state.emergencyMobile.length >= 10
 
     Scaffold(
         topBar = {
@@ -60,16 +59,21 @@ fun SelfDeclarationEmergencyScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                FormFieldsShimmerSkeleton(fieldCount = 4)
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    FormFieldsShimmerSkeleton(fieldCount = 4)
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -79,72 +83,77 @@ fun SelfDeclarationEmergencyScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-            WarningBanner(
-                message = stringResource(Res.string.health_emergency_desc),
-            )
+                WarningBanner(
+                    message = stringResource(Res.string.health_emergency_desc),
+                )
 
-            StyledTextField(
-                value = state.emergencyName,
-                onValueChange = { valStr ->
-                    onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyName = valStr)))
-                },
-                label = stringResource(Res.string.health_emergency_name_label),
-                placeholder = stringResource(Res.string.health_placeholder_enter)
-            )
+                StyledTextField(
+                    value = state.emergencyName,
+                    onValueChange = { valStr ->
+                        onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyName = valStr)))
+                    },
+                    label = stringResource(Res.string.health_emergency_name_label),
+                    placeholder = stringResource(Res.string.health_placeholder_enter)
+                )
 
-            StyledTextField(
-                value = state.emergencyFamily,
-                onValueChange = { valStr ->
-                    onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyFamily = valStr)))
-                },
-                label = stringResource(Res.string.health_label_last_name),
-                placeholder = stringResource(Res.string.health_placeholder_enter)
-            )
+                StyledTextField(
+                    value = state.emergencyFamily,
+                    onValueChange = { valStr ->
+                        onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyFamily = valStr)))
+                    },
+                    label = stringResource(Res.string.health_label_last_name),
+                    placeholder = stringResource(Res.string.health_placeholder_enter)
+                )
 
-            StyledTextField(
-                value = state.emergencyRelation,
-                onValueChange = { valStr ->
-                    onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyRelation = valStr)))
-                },
-                label = stringResource(Res.string.health_emergency_relation_label),
-                placeholder = stringResource(Res.string.health_emergency_relation_placeholder)
-            )
-            val showMobileError = emergencyTouched && !isMobileValid
+                StyledTextField(
+                    value = state.emergencyRelation,
+                    onValueChange = { valStr ->
+                        onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyRelation = valStr)))
+                    },
+                    label = stringResource(Res.string.health_emergency_relation_label),
+                    placeholder = stringResource(Res.string.health_emergency_relation_placeholder)
+                )
+                val showMobileError = emergencyTouched && !isMobileValid
 
-            StyledTextField(
-                value = state.emergencyMobile,
-                onValueChange = { valStr ->
-                    val filtered = ValidationUtils.validatePhoneNumber(valStr)
-                    onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyMobile = filtered)))
-                },
-                label = stringResource(Res.string.health_emergency_mobile_label),
-                placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                isValid = if (showMobileError) false else null,
-                errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
-                onFocusChanged = { isFocused ->
-                    if (isFocused) {
-                        emergencyFocused = true
-                    } else if (emergencyFocused) {
-                        emergencyTouched = true
+                StyledTextField(
+                    value = state.emergencyMobile,
+                    onValueChange = { valStr ->
+                        val filtered = ValidationUtils.validatePhoneNumber(valStr)
+                        onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyMobile = filtered)))
+                    },
+                    label = stringResource(Res.string.health_emergency_mobile_label),
+                    placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    isValid = if (showMobileError) false else null,
+                    errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            emergencyFocused = true
+                        } else if (emergencyFocused) {
+                            emergencyTouched = true
+                        }
                     }
-                }
-            )
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+                )
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+            }
         }
     }
-}}
 
-@PreviewRtlTheme
-@Preview
-@Composable
-fun SelfDeclarationEmergencyScreenPreview() {
-    PreviewRtlThemeContent {
-        SelfDeclarationEmergencyScreen(
-            state = EmergencyStepState(emergencyName = "مریم", emergencyRelation = "همسر", emergencyMobile = "09129876543"),
-            onIntent = {},
-            onBackClicked = {}
-        )
+    @PreviewRtlTheme
+    @Preview
+    @Composable
+    fun SelfDeclarationEmergencyScreenPreview() {
+        PreviewRtlThemeContent {
+            SelfDeclarationEmergencyScreen(
+                state = EmergencyStepState(
+                    emergencyName = "مریم",
+                    emergencyRelation = "همسر",
+                    emergencyMobile = "09129876543"
+                ),
+                onIntent = {},
+                onBackClicked = {}
+            )
+        }
     }
 }
 
