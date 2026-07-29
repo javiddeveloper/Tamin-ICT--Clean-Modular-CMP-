@@ -243,7 +243,7 @@ fun HealthProfileMainContent(
                 }
                 SelfDeclarationStep.REVIEW -> {
                     SelfDeclarationReviewScreen(
-                        state = selfDecState,
+                        state = state,
                         isLoading = state.isLoading || selfDecState.isLoading,
                         onIntent = onSelfDecIntent,
                         onBackClicked = {
