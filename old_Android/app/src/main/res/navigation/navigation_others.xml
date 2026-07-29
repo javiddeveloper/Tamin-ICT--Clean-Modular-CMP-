@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_others"
+    app:startDestination="@id/menuOthersFragment">
+
+    <fragment
+        android:id="@+id/menuOthersFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.MenuOthersFragment"
+        android:label="MenuOthersFragment"
+        tools:layout="@layout/fragment_menu_others">
+
+        <action
+            android:id="@+id/action_menu_to_contact_us"
+            app:destination="@id/contactUsFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"/>
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/versioningFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.VersioningFragment"
+        android:label="VersioningFragment"
+        tools:layout="@layout/fragment_versioning"/>
+    <fragment
+        android:id="@+id/contactUsFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.ContactUsFragment"
+        android:label="ContactUsFragment"
+        tools:layout="@layout/fragment_versioning"/>
+
+    <fragment
+        android:id="@+id/socialResponsibilityFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.SocialResponsibilityFragment"
+        android:label="socialResponsibilityFragment"
+        tools:layout="@layout/fragment_social_responsibility"/>
+
+    <fragment
+        android:id="@+id/taminRulesFragment"
+        android:name="com.tamin.taminhamrah.ui.login.rules.RulesFragment"
+        android:label="taminRulesFragment"
+        tools:layout="@layout/fragment_rules"/>
+</navigation>

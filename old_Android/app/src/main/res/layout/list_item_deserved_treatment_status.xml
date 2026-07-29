@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.treatmentServices.deserved.DeservedTreatment" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:id="@+id/rootLayout"
+        android:paddingBottom="@dimen/margin_20dp"
+        android:elevation="2dp">
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTitleFullName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:gravity="center"
+            android:text="@string/full_name"
+            app:layout_constraintBottom_toTopOf="@id/valueNumInspection"
+            app:layout_constraintEnd_toEndOf="@id/valueNumInspection"
+            app:layout_constraintStart_toStartOf="@id/valueNumInspection"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueNumInspection"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:gravity="center"
+            android:padding="@dimen/margin_4dp"
+            android:text='@{item.firstName+" "+item.lastName??"ـ"}'
+            app:layout_constraintBottom_toTopOf="@id/line1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/valueDateInspections"
+            app:layout_constraintTop_toBottomOf="@id/labelTitleFullName"
+            tools:text="سعید هنری" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDateInspections"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/label_organization_name"
+            app:layout_constraintBottom_toTopOf="@id/valueDateInspections"
+            app:layout_constraintEnd_toEndOf="@id/valueDateInspections"
+            app:layout_constraintStart_toStartOf="@id/valueDateInspections"
+            app:layout_constraintTop_toTopOf="@id/labelTitleFullName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/valueDateInspections"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:gravity="center"
+            android:padding="@dimen/margin_4dp"
+            android:text='@{item.brhName??"ـ"}'
+            app:layout_constraintBottom_toBottomOf="@id/valueNumInspection"
+            app:layout_constraintEnd_toStartOf="@+id/valueNumInspection"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelDateInspections"
+            tools:text="شعبه 11 تهران" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTypeActivity"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_insurance_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvDocSpecification"
+            app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/valueNumInspection" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDocSpecification"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:text='@{item.risuid??"-"}'
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@+id/labelTypeActivity"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelTypeActivity"
+            tools:text="1232456" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueInsuranceNumber"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:text='@{item.brhCode??"-"}'
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@+id/tvTitleInsuranceNumber"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleInsuranceNumber"
+            tools:text="1232456" />
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDocSpecification" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleInsuranceNumber"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_branch_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvValueInsuranceNumber"
+            app:layout_constraintTop_toBottomOf="@+id/line3" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleOriginalPersonInsurance"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_insurance_type"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvValueInsuranceNumber"
+            app:layout_constraintTop_toBottomOf="@+id/line4" />
+
+        <View
+            android:id="@+id/line4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueInsuranceNumber" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueOriginalPersonInsurance"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="end|center_vertical"
+            android:text='@{item.insuranceType??"-"}'
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@+id/tvTitleOriginalPersonInsurance"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleOriginalPersonInsurance"
+            tools:text="1232456" />
+
+
+        <View
+            android:id="@+id/line5"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvValueOriginalPersonInsurance" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitleEdictType"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/reference_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvValueEdictType"
+            app:layout_constraintTop_toBottomOf="@+id/line5" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvValueEdictType"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:text='@{item.trackingCode??"-"}'
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toStartOf="@+id/tvTitleEdictType"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTitleEdictType"
+            tools:text="نوع حکم" />
+
+
+        <include
+            android:id="@+id/layoutAnimation"
+            layout="@layout/view_stamp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:isTrue='@{item.isDeserved}'
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:textStamp='@{item.isDeserved?@string/label_stamp_enable_therapeutic_support:@string/label_stamp_disable_therapeutic_support}' />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

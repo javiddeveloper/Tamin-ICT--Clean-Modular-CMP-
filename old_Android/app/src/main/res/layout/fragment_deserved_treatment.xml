@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.deservedTreatment.DeservedTreatmentViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/colorSurface">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurface"
+            android:fillViewport="true"
+            android:scrollbars="none"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler"
+                    style="@style/LinearRecyclerStyle"
+                   android:layout_margin="@dimen/margin_20dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:background="@drawable/bg_item_blue"
+                    android:elevation="2dp"
+                    />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/containerResult"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="2dp"
+                    android:background="@drawable/bg_item_blue"
+                    android:layout_margin="@dimen/margin_20dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recycler"
+                    android:orientation="vertical"
+                    android:gravity="top"
+                    android:padding="@dimen/margin_20dp">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/label_result"
+                        style="@style/TextStyle.SubTitle"
+                        android:text="@string/label_deserved_treatment_status"
+                        android:layout_gravity="end"
+                        android:visibility="gone"
+                        />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imgBarcode"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/recycler"
+                        android:layout_gravity="center_horizontal"
+                        />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvResult"
+                        style="@style/TextStyle.SubTitle"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        tools:text="@string/label_unknown"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="@dimen/margin_10dp"
+                        android:textDirection="rtl"
+                        android:gravity="start"
+                        />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

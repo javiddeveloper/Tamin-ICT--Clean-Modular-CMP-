@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.user.ContractItem" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+
+        <!--        <androidx.core.widget.NestedScrollView-->
+        <!--            android:id="@+id/nestedScrollView"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            android:animateLayoutChanges="true"-->
+        <!--            android:fillViewport="true"-->
+        <!--          >-->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:background="?attr/colorSurface"
+            android:clickable="false"
+            android:fillViewport="true"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddContract"
+                style="@style/TextButtonBordered.Green"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:drawableRight="@drawable/ic_add_circle"
+                android:text="@string/add_contract"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="@dimen/font_size_12"
+                android:paddingStart="8dp"
+                app:layout_constraintBottom_toBottomOf="@id/tvTitleListContract"
+                app:layout_constraintEnd_toStartOf="@+id/tvTitleListContract"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleListContract"
+                style="@style/TextStyle.Title.Bold"
+                android:layout_width="0dp"
+                android:layout_margin="@dimen/margin_20dp"
+                android:gravity="start"
+                android:text="@string/contract_list"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/btnAddContract"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="قراردادها" />
+
+            <com.tamin.taminhamrah.widget.CustomRecyclerView
+                android:id="@+id/recycler"
+                style="@style/LinearPaginationRecyclerStyle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/_10sdp"
+
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleListContract"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
+

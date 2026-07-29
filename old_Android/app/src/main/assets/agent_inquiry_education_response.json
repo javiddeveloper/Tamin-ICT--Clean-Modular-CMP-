@@ -1,0 +1,26 @@
+{
+  "status": 200,
+  "family": "SUCCESSFUL",
+  "reason": "OK",
+  "traceId": "57e1b52b-25be-4b08-b1d7-0f17d5cbfc40",
+  "data": {
+    "id": "0a9e6612-0f10-46ad-a875-7b6fcead7219",
+    "eta": 3,
+    "status": "DONE",
+    "message": null,
+    "result": {
+      "sessionId": "c0324d6a-ed19-4ec6-8fa4-2da3049c6059",
+      "lastEntity": null,
+      "entities": [
+        {
+          "key": "inquiry_education",
+          "step_number": 1,
+          "payload": {},
+          "data": [],
+          "message": "استعلام کد رهگیری تحصیلی",
+          "message_id": "34dfef1b-6296-4742-9544-0c0af8926a3f"
+        }
+      ]
+    }
+  }
+}

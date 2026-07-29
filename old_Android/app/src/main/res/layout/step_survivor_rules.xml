@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        style="@style/VerticalStepperItemView"
+        android:id="@+id/rulesStepper"
+        app:step_state="selected"
+        app:step_index="1"
+        app:step_title="@string/rules_title"
+        app:previousStepVisible="false"
+        app:nextStepEnable="false"
+        >
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_5sdp"
+               >
+
+                <include
+                    android:id="@+id/tvDescRules"
+                    layout="@layout/item_desc_static"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnShowRules"
+                    style="@style/TextButtonBordered.Blue"
+                    android:layout_width="match_parent"
+                    android:layout_marginHorizontal="@dimen/_20sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:text="@string/show_rules"
+                    app:layout_constraintTop_toBottomOf="@+id/tvDescRules"
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                   style="@style/TextStyle.Title.Bold"
+                    android:id="@+id/tvTitleCommitment"
+                    app:layout_constraintTop_toBottomOf="@id/btnShowRules"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="@string/commitment"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    style="@style/CheckBoxStepperStyle"
+                    android:id="@+id/cbConfirmRulesSurvivor"
+                    android:checked="false"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleCommitment"
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvDescCommitment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    style="@style/TextStyle.Title"
+                    android:text="@string/desc_rules_pension_survivor"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:justificationMode="inter_word"
+                    app:layout_constraintEnd_toStartOf="@+id/cbConfirmRulesSurvivor"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleCommitment" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

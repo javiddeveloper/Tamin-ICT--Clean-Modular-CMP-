@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+  <data>
+    <import type="android.view.View" />
+    <import type="androidx.core.content.ContextCompat"/>
+
+    <variable
+        name="hintItem"
+        type="String" />
+
+    <variable
+        name="status"
+        type="com.tamin.taminhamrah.data.entity.UploadImageStatusForUiModel" />
+
+    <import type="com.tamin.taminhamrah.data.entity.EnumStausUploadImage" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:animateLayoutChanges="true"
+      android:id="@+id/rootLayout"
+      android:elevation="2dp">
+
+    <View
+        android:id="@+id/containerUpload"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:layout_marginStart="@dimen/margin_20dp"
+        android:layout_marginBottom="@dimen/margin_20dp"
+        android:layout_marginTop="@dimen/margin_25dp"
+        android:background="@drawable/bg_border_rectangle_grey"
+        tools:background='@{status.status==EnumStausUploadImage.ERROR?@drawable/bg_border_rectangle_red:status.status==EnumStausUploadImage.SUCCESS?@drawable/bg_border_rectangle_green:@drawable/bg_border_rectangle_grey}'
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.487" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextStyle.Title.Bold"
+        android:layout_marginEnd="@dimen/margin_15dp"
+        android:layout_alignParentTop="true"
+        android:textColor="?attr/colorOnSurface"
+
+        android:hint="@{hintItem}"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/containerUpload"
+        app:layout_constraintEnd_toEndOf="@+id/containerUpload"
+        app:layout_constraintTop_toTopOf="@+id/containerUpload"
+        tools:text="@string/error_first_page_of_mother_id_card_image" />
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/authorized_format_text"
+        style="@style/TextStyle.SubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:background="@drawable/bg_lable_normal"
+        android:text="@string/label_authorized_format"
+        android:textAlignment="center"
+        android:paddingStart="@dimen/margin_10dp"
+        android:paddingEnd="@dimen/margin_10dp"
+        app:layout_constraintEnd_toEndOf="@+id/containerUpload"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView"
+        style="@style/TextStyle.SubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginEnd="@dimen/margin_20dp"
+        android:background="@drawable/bg_lable_normal"
+        android:paddingStart="@dimen/margin_10dp"
+        android:paddingEnd="@dimen/margin_10dp"
+        android:text="@string/label_permitted_volume"
+        app:layout_constraintEnd_toStartOf="@+id/authorized_format_text"
+        app:layout_constraintTop_toTopOf="@+id/authorized_format_text" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/get_from_gallery"
+        style="@style/ImageButton.Clickable"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="@dimen/margin_20dp"
+        android:background="@drawable/bg_dash_line_border"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/get_from_camera"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/get_from_camera"
+        app:layout_constraintTop_toBottomOf="@+id/authorized_format_text">
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:scaleType="centerCrop"
+          app:srcCompat="@drawable/ic_add_from_gallery" />
+
+      <androidx.appcompat.widget.AppCompatTextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/lable_gallery"
+          android:textSize="6sp" />
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/get_from_camera"
+        style="@style/ImageButton.Clickable"
+        android:layout_width="80dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_20dp"
+        android:layout_marginRight="@dimen/margin_20dp"
+        android:layout_marginBottom="@dimen/margin_20dp"
+        android:background="@drawable/bg_dash_line_border"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/containerUpload"
+        app:layout_constraintEnd_toStartOf="@+id/get_from_gallery"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/authorized_format_text">
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          app:srcCompat="@drawable/ic_add_from_camera" />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/lable_camera"
+          android:textSize="5sp" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupUpload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="@{status.status==EnumStausUploadImage.SUCCESS?View.GONE:View.VISIBLE}"
+        app:constraint_referenced_ids="get_from_camera, get_from_gallery" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="@{status.status==EnumStausUploadImage.SUCCESS?View.VISIBLE:View.GONE}"
+        tools:visibility="visible"
+        app:constraint_referenced_ids="fab_delete_image, layout_view_image" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_view_image"
+        android:layout_width="@dimen/margin_100dp"
+        android:layout_height="@dimen/margin_100dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/bg_dash_line_border"
+        android:layoutDirection="rtl"
+        android:layout_margin="@dimen/margin_10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/containerUpload"
+        app:layout_constraintEnd_toEndOf="@+id/containerUpload"
+        app:layout_constraintStart_toStartOf="@+id/containerUpload"
+        app:layout_constraintTop_toBottomOf="@+id/appCompatTextView">
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:id="@+id/imgUploaded"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_alignParentStart="true"
+          android:layout_alignParentTop="true"
+          android:padding="3dp"
+          android:scaleType="centerCrop"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_delete_image"
+        style="@style/FabStyleMini"
+        app:fabCustomSize="@dimen/margin_40dp"
+        app:layout_constraintBottom_toBottomOf="@+id/containerUpload"
+        app:layout_constraintStart_toStartOf="@+id/containerUpload"
+        app:srcCompat="@drawable/ic_delete" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_circle_orange"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/containerUpload"
+        app:layout_constraintTop_toBottomOf="@+id/fab_delete_image"
+        app:tint="@color/text_color_dialog_red" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_error"
+        style="@style/TextStyle.SubTitle.Red"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/margin_10dp"
+        android:paddingEnd="@dimen/margin_10dp"
+        android:text="@string/label_permitted_volume"
+        android:textSize="@dimen/margin_12dp"
+        app:layout_constraintEnd_toStartOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="@+id/imageView2" />
+
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:constraint_referenced_ids="tv_error,imageView2"/>
+
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
+
+

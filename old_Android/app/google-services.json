@@ -1,0 +1,97 @@
+{
+  "project_info": {
+    "project_number": "942755453963",
+    "project_id": "taminhamrah-f87a7",
+    "storage_bucket": "taminhamrah-f87a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942755453963:android:8f88f86699cd663d30fb0e",
+        "android_client_info": {
+          "package_name": "com.tamin.taminhamrah"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942755453963-hs22bn0v3gaakmv6pa5lfgpp0pdo9021.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRb2ILfLF9m82Av1C0P4EpfX6-wpQqFEw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942755453963-hs22bn0v3gaakmv6pa5lfgpp0pdo9021.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942755453963:android:652a1723539ba25130fb0e",
+        "android_client_info": {
+          "package_name": "com.tamin.taminhamrahreporter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942755453963-hs22bn0v3gaakmv6pa5lfgpp0pdo9021.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRb2ILfLF9m82Av1C0P4EpfX6-wpQqFEw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942755453963-hs22bn0v3gaakmv6pa5lfgpp0pdo9021.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942755453963:android:652a1723539ba25130fb0e",
+        "android_client_info": {
+          "package_name": "com.tamin.taminhamrahdirect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942755453963-hs22bn0v3gaakmv6pa5lfgpp0pdo9021.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRb2ILfLF9m82Av1C0P4EpfX6-wpQqFEw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942755453963-hs22bn0v3gaakmv6pa5lfgpp0pdo9021.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

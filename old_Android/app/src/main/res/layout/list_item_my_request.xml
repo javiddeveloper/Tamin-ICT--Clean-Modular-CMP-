@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+        <import type="androidx.core.content.ContextCompat"/>
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.user.MyRequestItem" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp"
+        android:paddingBottom="@dimen/_20sdp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTrackingCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/reference_code"
+            app:layout_constraintBottom_toTopOf="@id/line1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTrackingCode"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end"
+            android:text='@{item.refCode}'
+            app:layout_constraintBottom_toBottomOf="@+id/labelTrackingCode"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelTrackingCode"
+            tools:text="زززززز" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelTrackingCode" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTitle"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/label_request_title"
+            app:layout_constraintBottom_toTopOf="@id/line2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/line1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:maxLines="2"
+            android:text='@{item.title}'
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="@+id/labelTitle"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelTitle"
+            tools:text="درخواست اعلام شماره حساب بانکي مستمري بگير ان" />
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelTitle" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelRequestDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/request_date"
+            app:layout_constraintBottom_toTopOf="@id/line3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/line2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvRequestDate"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end"
+            android:text='@{item.getPersianDate(item.creationTime)}'
+            app:layout_constraintBottom_toBottomOf="@+id/labelRequestDate"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelRequestDate" />
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelRequestDate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelRequestStatus"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="start"
+            android:text="@string/request_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline_center"
+            app:layout_constraintTop_toBottomOf="@id/line3"
+            tools:text="کد" />
+        <!--
+        android:textColor="@{ContextCompat.getColor(context, item.getColor(item.status.requestCode))}"
+-->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvRequestStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text='@{item.status.requestDesc ?? "در انتظار ثبت درخواست"}'
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/labelRequestStatus"
+            app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/labelRequestStatus"
+            tools:text="زززززز" />
+
+        <View
+            android:id="@+id/line4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvRequestStatus" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowError"
+            style="@style/TextButtonBordered.Amer"
+            android:layout_width="0dp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:lines="1"
+            android:text="@string/label_show_error"
+            android:textSize="@dimen/font_size_10"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line4"
+            app:layout_constraintWidth_percent="0.3"
+            tools:textColor="@color/black"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnGuide"
+            style="@style/TextButtonBordered.Green"
+            android:layout_width="0dp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:lines="1"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:text="@string/label_smart_guide"
+            android:textSize="@dimen/font_size_10"
+            android:visibility="visible"
+            app:layout_constraintStart_toEndOf="@+id/btnShowError"
+            app:layout_constraintTop_toBottomOf="@+id/line4"
+            app:layout_constraintWidth_percent="0.3"
+            tools:textColor="@color/red" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowRequest"
+            style="@style/TextButtonBordered.Blue"
+            android:layout_width="0dp"
+            android:layout_marginHorizontal="@dimen/_5sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:lines="1"
+            android:text="@string/show_request"
+            android:textSize="@dimen/font_size_10"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/btnGuide"
+            app:layout_constraintTop_toBottomOf="@+id/line4"
+            app:layout_constraintWidth_percent="0.3"
+            tools:textColor="@color/red"
+            tools:visibility="visible" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

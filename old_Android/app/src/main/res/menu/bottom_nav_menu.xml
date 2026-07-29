@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--<item
+        android:id="@+id/navigation_others"
+        android:icon="@drawable/ic_more_horizontal"
+        android:title="@string/menu_title_others" -->
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="@string/menu_title_profile" />
+
+    <item
+        android:id="@+id/navigation_mytamin"
+        android:icon="@drawable/ic_cartabl"
+        android:title="@string/menu_title_my_tamin" />
+
+    <item
+        android:id="@+id/navigation_treatment"
+        android:icon="@drawable/ic_medical_kit"
+        android:title="@string/menu_title_treatment" />
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_home"
+        android:title="@string/menu_title_services" />
+</menu>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tilDatePicker"
+    style="@style/TextInputLayout"
+    tools:hint="@string/label_selecte_date"
+    android:hint='@{hint}'
+    app:errorEnabled="false">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputDatePicker"
+        style="@style/EditTextStyle"
+        android:clickable="false"
+        android:drawableStart="@drawable/ic_calendar"
+        android:drawablePadding="@dimen/margin_10dp"
+        android:focusable="false"
+        android:inputType="none"
+        android:maxLength="14" />
+
+</com.google.android.material.textfield.TextInputLayout>
+
+

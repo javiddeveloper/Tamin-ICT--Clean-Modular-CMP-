@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.dashboard.DrawerFragmentViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/backgroundColor"
+        android:clickable="true"
+        android:focusable="true"
+        tools:context=".ui.home.dashboard.DrawerFragment">
+
+
+        <include
+            android:id="@+id/layHeader"
+            layout="@layout/view_toolbar_login"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_80sdp"
+            android:layout_below="@+id/layHeader"
+            app:srcCompat="@drawable/ic_account"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layHeader" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvUsername"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_alignTop="@+id/imgProfile"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:layout_toStartOf="@+id/imgProfile"
+            android:text='@{viewModel.mldProfile.data.fullName}'
+            app:layout_constraintBottom_toTopOf="@id/tvNationalCode"
+            app:layout_constraintEnd_toStartOf="@id/imgProfile"
+            app:layout_constraintTop_toTopOf="@id/imgProfile"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textDirection="rtl"
+            tools:text="سمیه مدبری" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvNationalCode"
+            style="@style/TextStyle.Title"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_width="0dp"
+            app:layout_constraintStart_toStartOf="@id/tvUsername"
+            android:textDirection="rtl"
+            android:text='@{viewModel.mldProfile.data.nationalCode}'
+            app:layout_constraintBottom_toBottomOf="@id/imgProfile"
+            app:layout_constraintEnd_toEndOf="@id/tvUsername"
+            app:layout_constraintTop_toBottomOf="@id/tvUsername"
+            tools:text="0083834001"
+            android:gravity="right"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            style="@style/LinearRecyclerStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_below="@+id/imgProfile"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:layout_marginBottom="@dimen/_20sdp"
+            app:layout_constraintTop_toBottomOf="@+id/imgProfile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvDesignedBy"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDesignedBy"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:gravity="center"
+            android:text="@string/label_designed_by"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

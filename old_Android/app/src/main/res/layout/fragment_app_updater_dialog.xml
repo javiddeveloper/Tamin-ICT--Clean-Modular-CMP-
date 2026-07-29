@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <import type="android.view.View"/>
+    </data>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_update_dialog">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgIcon"
+                android:layout_width="@dimen/_110sdp"
+                android:layout_height="@dimen/_110sdp"
+                android:layout_marginTop="16dp"
+                android:contentDescription="@string/update_icon"
+                app:srcCompat="@drawable/ic_update"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:gravity="center"
+                android:text="بروزرسانی اپلیکیشن"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="@dimen/_14sdp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/imgIcon" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/updateTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:gravity="center"
+                android:text="بروزرسانی اپلیکیشن"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtTitle" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerUpdateInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/updateTitle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:alpha="0.7"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:id="@+id/line1"
+                app:layout_constraintTop_toBottomOf="@+id/recyclerUpdateInfo"
+                android:background="@color/appupdater_text_colors" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/optionHolder"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                app:layout_constraintTop_toBottomOf="@+id/line1">
+
+                <ImageView
+                    android:id="@+id/bazaarDownload"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="@dimen/_8sdp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:srcCompat="@drawable/ic_cafe_bazaar_new" />
+
+                <ImageView
+                    android:id="@+id/myKetDownload"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="@dimen/_8sdp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:srcCompat="@drawable/ic_myket" />
+
+                <LinearLayout
+                    android:id="@+id/directLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:fontFamily="@font/iran_sans_mobile_fa_num"
+                        android:text="@string/label_update_direct"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="@dimen/_14sdp"
+                        android:id="@+id/tv_titleDirect"
+                        android:textStyle="bold" />
+
+                    <ImageView
+
+                        android:layout_width="@dimen/_25sdp"
+                        android:layout_height="match_parent"
+                        app:srcCompat="@drawable/ic_android" />
+
+
+                </LinearLayout>
+
+                <androidx.constraintlayout.helper.widget.Flow
+                    android:id="@+id/flow2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="myKetDownload,bazaarDownload,directLayout"
+                    app:layout_constraintTop_toTopOf="@+id/bazaarDownload" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <View
+                android:id="@+id/line2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="center"
+                android:alpha="0.7"
+                app:layout_constraintTop_toBottomOf="@+id/optionHolder"
+                android:background="@color/appupdater_text_colors" />
+
+<!--            <LinearLayout-->
+<!--                android:id="@+id/linearLayout"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:orientation="vertical"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/recyclerDirect">-->
+
+<!--         -->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/txtStore"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:layout_marginTop="@dimen/_4sdp"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="@string/download_from_store"-->
+<!--                    android:textColor="@color/appupdater_text_colors"-->
+<!--                    android:textSize="16sp" />-->
+<!--            </LinearLayout>-->
+
+<!--            <androidx.recyclerview.widget.RecyclerView-->
+<!--                android:id="@+id/recyclerStores"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="8dp"-->
+<!--                android:layout_marginEnd="8dp"-->
+<!--                android:layout_marginBottom="@dimen/_4sdp"-->
+<!--                android:orientation="vertical"-->
+<!--                app:layout_constraintBottom_toTopOf="@+id/btnCancelUpdate"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />-->
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCancelUpdate"
+                style="@style/MainButton"
+                android:layout_width="0dp"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:layout_weight="1"
+                app:layout_constraintTop_toBottomOf="@+id/line2"
+                android:background="@drawable/bg_btn_dialog_dark_blue"
+                android:paddingStart="@dimen/margin_4dp"
+                android:textStyle="bold"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:paddingEnd="@dimen/margin_4dp"
+                android:text="@string/label_cancel_update"
+                android:textColor="@color/white"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</LinearLayout>
+</layout>

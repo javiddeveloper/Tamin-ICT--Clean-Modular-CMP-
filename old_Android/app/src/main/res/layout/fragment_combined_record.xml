@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.combinedRecord.CombinedRecordViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+       android:background="?attr/colorSurface"
+        android:fitsSystemWindows="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurface"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelTotalDays"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_50dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:text="@string/total_days"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvTotalDays"
+                    style="@style/TextStyle.Title.colorPrimary"
+                    android:textSize="@dimen/font_header_size"
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    app:layout_constraintBottom_toBottomOf="@id/labelTotalDays"
+                    app:layout_constraintStart_toEndOf="@id/labelDay"
+                    app:layout_constraintTop_toTopOf="@id/labelTotalDays"
+                    tools:text="1234" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelDay"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:text="@string/label_day"
+                    app:layout_constraintBottom_toBottomOf="@id/labelTotalDays"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvTotalDays" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_margin="@dimen/margin_20dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelTotalDays" />
+
+                <View
+                    android:id="@+id/line"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/line_height"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/chart"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:background="@color/lineColor"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelDetail"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:text="@string/label_records_according_years"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/line"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelDetailDesc"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_marginTop="@dimen/margin_between_items"
+                    android:text="@string/label_records_according_years_desc"
+                    app:layout_constraintEnd_toEndOf="@id/labelDetail"
+                    app:layout_constraintTop_toBottomOf="@id/labelDetail"/>
+
+                <com.tamin.taminhamrah.widget.CustomRecyclerView
+                    android:id="@+id/recycler"
+                    style="@style/LinearPaginationRecyclerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    app:decoration_type="grid_3_col"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/labelDetailDesc" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/containerButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            app:layout_anchor="@id/appBar"
+            android:layoutDirection="rtl"
+            app:layout_anchorGravity="center|bottom">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnYears"
+                style="@style/OvalButton"
+                android:background="@drawable/bg_oval_accent"
+                tools:text="15
+             سال" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnMonths"
+                style="@style/OvalButton"
+                android:background="@drawable/bg_oval_accent"
+                android:backgroundTint="@color/green_blue"
+                tools:text="03
+             ماه" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDays"
+                style="@style/OvalButton"
+                android:background="@drawable/bg_oval_accent"
+                android:backgroundTint="@color/green"
+                tools:text="29
+             روز" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

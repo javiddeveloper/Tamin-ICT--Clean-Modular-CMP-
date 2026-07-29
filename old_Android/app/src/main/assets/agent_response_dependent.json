@@ -1,0 +1,197 @@
+{
+  "session_id": "jkld-gkl4-v444v-hjk4656-sbhdkjf8-bbbb",
+  "lastEntity": "doctorName:ali , proficiency:heart, nezam:123456",
+  "entities": [
+
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 101"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (فرزند)",
+      "failed_message": null,
+      "message_id": "117cb392-6abf-4500-8f9b-91adf3001cd6"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (همه)",
+      "failed_message": null,
+      "message_id": "a066006f-d91a-47c6-9370-9057c39a3fe3"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 101"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (پسر)",
+      "failed_message": null,
+      "message_id": "21488487-3535-4fde-bf01-c0d4ec54427c"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 102"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (دختر)",
+      "failed_message": null,
+      "message_id": "7810b2fe-c02b-4fcb-b6a3-a63d48d551c6"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 106",
+          "gendercode: 01"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (پدر)",
+      "failed_message": null,
+      "message_id": "a72373fb-af5d-4afa-b864-9bc90bc74c56"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 106",
+          "gendercode: 02"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (مادر)",
+      "failed_message": null,
+      "message_id": "7fa9f388-a356-4674-b519-2347c6923e7c"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode:124"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (خواهر)",
+      "failed_message": null,
+      "message_id": "c5f7b087-4a7a-44ae-8201-13ef6f1e66e3"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 124"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (برادر)",
+      "failed_message": null,
+      "message_id": "f6c8790b-f09b-4240-8ac1-89054b66a68c"
+    },
+    {
+      "key": "get_dependent",
+      "step_number": 1,
+      "move_new_session": false,
+      "item_type": "text",
+      "has_data": false,
+      "payload": {
+        "itemType": 1,
+        "page": 1,
+        "start": 0,
+        "limit": 10,
+        "filter": [
+          "tendencyCode: 100"
+        ],
+        "sort": {}
+      },
+      "data": null,
+      "success_message": "افراد تحت پوشش (زن/شوهر)",
+      "failed_message": null,
+      "message_id": "f6c8790b-f09b-4240-8ac1-89054b66a68c"
+    }
+
+  ]
+}

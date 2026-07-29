@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/labelWorkshopAddress"
+        style="@style/TextStyle.SubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="top|right"
+        android:padding="@dimen/margin_10dp"
+        android:text="@string/label_constructor_workshop"
+        android:textDirection="rtl"
+        app:layout_constraintBottom_toBottomOf="@+id/tvWorkshopAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvWorkshopAddress"
+        app:layout_constraintTop_toTopOf="@id/labelWorkshopAddress" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvWorkshopAddress"
+        style="@style/TextStyle.Title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:gravity="top|left"
+        android:padding="@dimen/margin_10dp"
+        android:textDirection="rtl"
+        app:layout_constraintEnd_toStartOf="@+id/labelWorkshopAddress"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="نتمنتکمنتمنکمنکم" />
+
+    <View
+        android:id="@+id/lin1"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/line_height"
+        android:background="@color/lineColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWorkshopAddress" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/labelNationalCode"
+        style="@style/TextStyle.SubTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="top|right"
+        android:padding="@dimen/margin_10dp"
+        android:text="@string/label_national_code_2"
+        android:textDirection="rtl"
+        app:layout_constraintBottom_toBottomOf="@+id/tvNationalCode"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvNationalCode"
+        app:layout_constraintTop_toTopOf="@id/tvNationalCode" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvNationalCode"
+        style="@style/TextStyle.Title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:gravity="top|left"
+        android:padding="@dimen/margin_10dp"
+        android:textDirection="rtl"
+        app:layout_constraintEnd_toStartOf="@+id/labelNationalCode"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lin1"
+        tools:text="123213213" />
+
+    <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+        android:id="@+id/inputMadePrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_5dp"
+        android:layout_marginTop="@dimen/margin_20dp"
+        app:editText_hint="@string/label_made_price"
+        app:editText_max_len="50"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/inputTransportPrice"
+        app:layout_constraintTop_toBottomOf="@id/tvNationalCode" />
+
+    <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+        android:id="@+id/inputTransportPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_5dp"
+        app:editText_hint="@string/label_transport_price"
+        app:editText_max_len="50"
+        app:layout_constraintBottom_toBottomOf="@id/inputMadePrice"
+        app:layout_constraintEnd_toStartOf="@id/inputMadePrice"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/inputMadePrice" />
+
+    <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+        android:id="@+id/inputInstallationPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_5dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        app:editText_hint="@string/label_installation_price"
+        app:editText_max_len="50"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/inputPerformancePrice"
+        app:layout_constraintTop_toBottomOf="@id/inputMadePrice" />
+
+    <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+        android:id="@+id/inputPerformancePrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_5dp"
+        app:editText_hint="@string/label_performance_price"
+        app:editText_max_len="50"
+        app:layout_constraintBottom_toBottomOf="@id/inputInstallationPrice"
+        app:layout_constraintEnd_toStartOf="@id/inputInstallationPrice"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/inputInstallationPrice" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.CombinedRecordModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:layoutDirection="ltr"
+        android:focusable="true">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="30dp"
+                android:layout_height="4dp"
+                android:layout_margin="@dimen/margin_10dp"
+                android:background="?attr/colorSurfaceContainer"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelRecordDetail"
+                style="@style/TextStyle.Title.Bold"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:text="@string/label_details_record"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/view" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTotalDays"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:text='@{item.sumYear.toString()}'
+                android:textSize="@dimen/font_header_size"
+                app:layout_constraintBottom_toBottomOf="@id/labelRecordDetail"
+                app:layout_constraintStart_toEndOf="@id/labelDay"
+                app:layout_constraintTop_toTopOf="@id/labelRecordDetail"
+                tools:text="1234" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelDay"
+                style="@style/TextStyle.Title.Bold"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:text="@string/label_day"
+                app:layout_constraintBottom_toBottomOf="@id/tvTotalDays"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvTotalDays" />
+
+        <include
+            android:id="@+id/season1"
+            layout="@layout/list_item_season_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/labelDay"
+            android:layout_marginTop="10dp"
+            app:season='@{1}'
+            app:valueMonth1='@{item.getDay(item.hisMonth1)}'
+            app:valueMonth2='@{item.getDay(item.hisMonth2)}'
+            app:valueMonth3='@{item.getDay(item.hisMonth3)}'
+            />
+
+        <include
+            android:id="@+id/season2"
+            layout="@layout/list_item_season_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/season1"
+            android:layout_marginTop="@dimen/margin_5dp"
+            app:season='@{2}'
+            app:valueMonth1='@{item.getDay(item.hisMonth4)}'
+            app:valueMonth2='@{item.getDay(item.hisMonth5)}'
+            app:valueMonth3='@{item.getDay(item.hisMonth6)}'
+            />
+
+        <include
+            android:id="@+id/season3"
+            layout="@layout/list_item_season_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/season2"
+            android:layout_marginTop="@dimen/margin_5dp"
+            app:season='@{3}'
+            app:valueMonth1='@{item.getDay(item.hisMonth7)}'
+            app:valueMonth2='@{item.getDay(item.hisMonth8)}'
+            app:valueMonth3='@{item.getDay(item.hisMonth9)}'
+            />
+
+        <include
+            android:id="@+id/season4"
+            layout="@layout/list_item_season_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/season3"
+            android:layout_marginTop="@dimen/margin_5dp"
+            app:season='@{4}'
+            app:valueMonth1='@{item.getDay(item.hisMonth10)}'
+            app:valueMonth2='@{item.getDay(item.hisMonth11)}'
+            app:valueMonth3='@{item.getDay(item.hisMonth12)}'
+            app:leapYear='@{item.isLeapYear(item.hisYear)?"اسفند(سال کبیسه)":"اسفند"}'
+            />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
+

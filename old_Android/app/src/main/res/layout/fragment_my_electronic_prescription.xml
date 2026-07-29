@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvSearch"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:padding="@dimen/margin_20dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:text="@string/label_search_my_electronic_prescription"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/selectableDependant"
+                    app:editText_hint="@string/under_18_dependant_user"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/tvSearch"/>
+
+                <com.tamin.taminhamrah.widget.DatePickerWidget
+                    android:id="@+id/datePickerFrom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    app:date_piker_hint="@string/label_start_prescription"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    app:layout_constraintEnd_toEndOf="@id/selectableDependant"
+                    app:layout_constraintStart_toEndOf="@id/datePickerTo"
+                    app:layout_constraintTop_toBottomOf="@+id/selectableDependant" />
+
+                <com.tamin.taminhamrah.widget.DatePickerWidget
+                    android:id="@+id/datePickerTo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:date_piker_hint="@string/label_end_prescription"
+                    app:layout_constraintBottom_toBottomOf="@id/datePickerFrom"
+                    app:layout_constraintEnd_toStartOf="@id/datePickerFrom"
+                    app:layout_constraintStart_toStartOf="@id/selectableDependant"
+                    app:layout_constraintTop_toTopOf="@id/datePickerFrom" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSearchMyRequest"
+                    style="@style/MainButton"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:text="@string/label_search"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@id/datePickerFrom" />
+
+                <com.tamin.taminhamrah.widget.squareRadioGroup.SquareRadioGroup
+                    android:id="@+id/squareRadioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/_10sdp"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@+id/btnSearchMyRequest"
+                    />
+
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelPrescriptionList"
+                    style="@style/TextStyle.Title.Bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:text="@{String.format(@string/prescriptions_with_value, @string/medical)}"
+                    app:layout_constraintEnd_toEndOf="@+id/btnSearchMyRequest"
+                    app:layout_constraintTop_toBottomOf="@+id/squareRadioGroup" />
+
+
+                <include
+                    android:id="@+id/item_Desc_1"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:item='@{@string/label_desc_last_week_prescription}'
+                    app:layout_constraintEnd_toEndOf="@+id/btnSearchMyRequest"
+                    app:layout_constraintStart_toStartOf="@+id/btnSearchMyRequest"
+                    app:layout_constraintTop_toBottomOf="@+id/labelPrescriptionList" />
+
+                <com.tamin.taminhamrah.widget.CustomRecyclerView
+                    android:id="@+id/recycler"
+                    style="@style/LinearPaginationRecyclerStyle"
+                    app:decoration_type="vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/item_Desc_1"/>
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/group_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="recycler,labelPrescriptionList" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

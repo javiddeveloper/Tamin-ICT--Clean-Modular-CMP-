@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.workshop.WorkshopInfo" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp"
+        android:paddingBottom="@dimen/_4sdp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTitle"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_workshop_name"
+
+
+            app:layout_constraintEnd_toEndOf="@+id/tvTitle"
+            app:layout_constraintTop_toTopOf="parent"
+
+            />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkshopCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_workshop_code"
+            app:layout_constraintEnd_toEndOf="@+id/tvWorkshopCode"
+            app:layout_constraintStart_toStartOf="@+id/tvWorkshopCode"
+            app:layout_constraintTop_toTopOf="parent"
+
+            />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:lines="2"
+            android:text='@{item.workshopName()}'
+            android:textColor="@color/colorPrimary"
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvWorkshopCode"
+            app:layout_constraintWidth_percent="0.6"
+            tools:text="@string/label_workshop_name" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvWorkshopCode"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            app:layout_constraintWidth_percent="0.35"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:paddingLeft="@dimen/_12sdp"
+            android:paddingTop="@dimen/_3sdp"
+            android:paddingRight="@dimen/_12sdp"
+            android:paddingBottom="@dimen/_3sdp"
+            android:text='@{item.workshopId()}'
+            android:textColor="@color/white"
+            android:background="@drawable/bg_workshop_code"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/labelWorkshopCode"
+            tools:text="1990321488" />
+
+        <View
+            android:id="@+id/line0"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@color/lineColor"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+
+        <!--        <androidx.appcompat.widget.AppCompatTextView-->
+        <!--            android:id="@+id/labelTitle"-->
+        <!--            style="@style/TextStyle.SubTitle"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_margin="@dimen/_10sdp"-->
+        <!--            android:ellipsize="end"-->
+        <!--            android:gravity="start"-->
+        <!--            android:text="@string/label_workshop_name"-->
+        <!--            app:layout_constraintBottom_toTopOf="@id/line2"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/line1" />-->
+
+        <!--        <androidx.appcompat.widget.AppCompatTextView-->
+        <!--            android:id="@+id/tvTitle"-->
+        <!--            style="@style/TextStyle.Title"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_margin="@dimen/_10sdp"-->
+        <!--            android:ellipsize="end"-->
+        <!--            android:gravity="end|center_vertical"-->
+        <!--            android:text='@{item.workshopName()}'-->
+        <!--            app:autoSizeMaxTextSize="@dimen/font_title_size"-->
+        <!--            app:autoSizeMinTextSize="10sp"-->
+        <!--            app:autoSizeStepGranularity=".5sp"-->
+        <!--            app:autoSizeTextType="uniform"-->
+
+        <!--            app:layout_constraintBottom_toTopOf="@id/line2"-->
+        <!--            app:layout_constraintHorizontal_chainStyle="spread_inside"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/line1"-->
+
+        <!--            tools:text="@string/label_workshop_name" />-->
+
+
+        <!--        <View-->
+        <!--            android:id="@+id/line2"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="@dimen/line_height"-->
+        <!--            android:layout_margin="@dimen/_10sdp"-->
+        <!--            android:background="@color/lineColor"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/labelTitle" />-->
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelAgreementRow"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_contract_row"
+            app:layout_constraintBottom_toTopOf="@id/line3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line0" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvAgreementRow"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="end|center_vertical"
+            android:text='@{item.getAgreementRow()}'
+            app:autoSizeMaxTextSize="@dimen/font_title_size"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity=".5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@id/line3"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line0"
+            tools:text="@string/label_contract_row" />
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@color/lineColor"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelAgreementRow" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelBranchCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_branch_code"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/line4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line3" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvBranchCode"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.branchCode()}'
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/line4"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line3"
+            tools:text="@string/label_branch_code" />
+
+        <View
+            android:id="@+id/line4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@color/lineColor"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelBranchCode" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelBranchName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:text="@string/label_branch_name"
+            android:visibility="visible"
+
+            app:layout_constraintBottom_toTopOf="@id/line5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line4" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvBranchName"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:text='@{item.branchName()}'
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/line5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line4"
+            tools:text="@string/label_branch_name" />
+
+        <View
+            android:id="@+id/line5"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@color/lineColor"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelBranchName" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRegisterDebt"
+            style="@style/TextButtonBordered.Blue"
+            android:layout_width="wrap_content"
+            android:layout_marginVertical="@dimen/_5sdp"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/registration_debt_installment_request"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/line5"
+            app:layout_constraintTop_toBottomOf="@+id/line5"
+            tools:visibility="visible" />
+<!--
+
+        <RelativeLayout
+            android:id="@+id/btnActions"
+            android:layout_width="@dimen/button_min_width"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@drawable/workshop_action_bg"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line5">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="@dimen/_6sdp"
+                android:src="@drawable/ic_menu_blue" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAction"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="عملیات"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+
+                />
+
+        </RelativeLayout>
+-->
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

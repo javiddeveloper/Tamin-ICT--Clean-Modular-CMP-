@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="prescription"
+            type="com.tamin.taminhamrah.data.remote.models.services.electronicPrescription.ElectronicPrescription" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="2dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDoctorName"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/doc_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_10dp"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDoctorName"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            app:layout_constraintTop_toTopOf="@id/labelDoctorName"
+            app:layout_constraintBottom_toBottomOf="@id/labelDoctorName"
+            app:layout_constraintEnd_toStartOf="@id/labelDoctorName"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text=" رضا اسدی درویشی زین آبادی "
+            android:text='@{prescription.docName}'/>
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDoctorName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTrackingCode"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tracking_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line1"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_10dp"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTrackingCode"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            app:layout_constraintTop_toTopOf="@id/labelTrackingCode"
+            app:layout_constraintBottom_toBottomOf="@id/labelTrackingCode"
+            app:layout_constraintEnd_toStartOf="@id/labelTrackingCode"
+            tools:text="123456"/>
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTrackingCode" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelVisitDate"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:text="@string/label_visit_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvVisitDate"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            app:layout_constraintEnd_toStartOf="@+id/labelVisitDate"
+            app:layout_constraintTop_toTopOf="@id/labelVisitDate"
+            tools:text="12345"
+            android:text='@{prescription.getLocalDate(prescription.prescDate)}'/>
+
+        <View
+            android:id="@+id/line3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/line_height"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvVisitDate" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDownload"
+            style="@style/TextButtonBordered.Blue"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            tools:text="@string/download_prescription"
+            android:textSize="@dimen/font_sub_title_size"
+            app:layout_constraintStart_toEndOf="@+id/btnShowDetail"
+            app:layout_constraintTop_toBottomOf="@id/line3" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnShowDetail"
+            style="@style/TextButtonBordered"
+            android:layout_marginVertical="@dimen/_10sdp"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:text="@string/label_prescription_detail"
+            android:textSize="@dimen/font_sub_title_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line3" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:fitsSystemWindows="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/nestedScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true"
+                android:background="?attr/colorSurface"
+                android:clickable="false"
+                android:nestedScrollingEnabled="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <include
+                    android:id="@+id/layoutDesc1"
+                    layout="@layout/item_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:item='@{@string/label_desc_last_week_prescription}' />
+
+                <include
+                    android:id="@+id/layoutDesc2"
+                    layout="@layout/item_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutDesc1"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:item='@{@string/label_desc_last_week_prescription}' />
+
+                <include
+                    android:id="@+id/layoutDesc3"
+                    layout="@layout/item_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutDesc2"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:item='@{@string/label_desc_last_week_prescription}' />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/btnActions"
+                        style="@style/TextButtonBordered.ActionButton"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="start"
+                        android:layout_margin="@dimen/_10sdp"
+                        android:drawableEnd="@drawable/ic_menu_blue"
+                        android:text="@string/label_follow_installment"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/layoutDesc3" />
+
+                <com.tamin.taminhamrah.widget.CustomRecyclerView
+                    android:id="@+id/recycler"
+                    style="@style/LinearPaginationRecyclerStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/_500sdp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnActions"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

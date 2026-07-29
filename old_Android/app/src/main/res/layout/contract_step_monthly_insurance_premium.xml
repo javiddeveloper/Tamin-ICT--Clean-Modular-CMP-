@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+    android:id="@+id/stepperItem"
+    style="@style/VerticalStepperItemView"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:nextStepEnable="false"
+    tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            >
+
+            <include
+                android:id="@+id/ItemDesc5"
+                layout="@layout/item_desc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:item='@{@string/desc_monthly_premium1}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/ItemDesc6"
+                layout="@layout/item_desc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:item='@{@string/desc_monthly_premium2}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ItemDesc5" />
+
+            <include
+                android:id="@+id/ItemDesc7"
+                layout="@layout/item_desc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:item='@{@string/desc_monthly_premium3}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ItemDesc6" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerPaymentRate"
+                style="@style/LinearRecyclerStyle"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ItemDesc7"
+                tools:itemCount="1"/>
+
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/selectInsuredJobTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/_2sdp"
+                android:visibility="visible"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:editText_hint="@string/insured_title_insurance"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/recyclerPaymentRate" />
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

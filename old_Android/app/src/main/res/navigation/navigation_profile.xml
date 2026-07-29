@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_profile"
+    app:startDestination="@id/profileFragment">
+
+    <fragment
+        android:id="@+id/drawerFragment"
+        android:name="com.tamin.taminhamrah.ui.home.dashboard.DrawerFragment"
+        android:label="Drawer">
+        <action
+            android:id="@+id/action_user_mode_to_home"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_deserved_treatment"
+            app:destination="@id/deservedTreatmentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_identity_info"
+            app:destination="@id/identityInfoInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_bank_account_list"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_account_list_to_cancel_dependent_fragment"
+            app:destination="@id/cancelDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_active_relation"
+            app:destination="@id/activeRelationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit"
+            app:destination="@id/editProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit_image"
+            app:destination="@id/editProfileImageFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_user_mode"
+            app:destination="@id/userModeDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out">
+            <argument android:name="aaaa" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.tamin.taminhamrah.ui.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_user_mode_to_home"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_deserved_treatment"
+            app:destination="@id/deservedTreatmentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_identity_info"
+            app:destination="@id/identityInfoInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_bank_account_list"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_active_relation"
+            app:destination="@id/activeRelationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit"
+            app:destination="@id/editProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit_image"
+            app:destination="@id/editProfileImageFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_user_mode"
+            app:destination="@id/userModeDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out">
+            <argument android:name="aaaa" />
+        </action>
+
+        <action
+            android:id="@+id/action_profile_to_DependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_myElectronicFile"
+            app:destination="@id/myElectronicFileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_cancel_dependent_fragment"
+            app:destination="@id/cancelDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/DependentsFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.showAndAddDependent.DependentsFragment"
+        android:label="ViewAndRegisterDependentsFragment"
+        tools:layout="@layout/fragment_show_dependents">
+        <action
+            android:id="@+id/action_DependentsFragment_to_AddNewDependentFragment"
+            app:destination="@id/AddDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AddDependentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.showAndAddDependent.addDependent.AddDependentFragment"
+        android:label="RegisterNewDependentFragment"
+        tools:layout="@layout/fragment_add_dependent">
+        <action
+            android:id="@+id/action_AddDependentFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <activity
+        android:id="@+id/ImageViewerActivity"
+        android:name="com.tamin.taminhamrah.ui.ViewerImageActivity"
+        android:label="ViewerImageActivity"
+        tools:layout="@layout/activity_main" />
+
+    <fragment
+        android:id="@+id/identityInfoInquiryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.identityinfo.IdentityInfoInquiryFragment"
+        android:label="IdentityInfoInquiryFragment"
+        tools:layout="@layout/fragment_identity_info_inquiry" />
+
+    <fragment
+        android:id="@+id/bankAccountListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.accountlist.BankAccountListFragment"
+        android:label="BankAccountListFragment"
+        tools:layout="@layout/fragment_list">
+        <action
+            android:id="@+id/action_account_list_to_declare_bank_account"
+            app:destination="@id/bankAccountDeclarationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <deepLink
+            android:id="@+id/deepLink_edit_profile"
+            app:uri="mytamin://bank_account_list" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/cancelDependentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.dependentCancellation.CancellationDependentFragment"
+        android:label="CancellationDependentFragment"
+        tools:layout="@layout/fragment_list">
+        <deepLink app:uri="mytamin://cancel_dependent" />
+        <action
+            android:id="@+id/action_account_list_to_cancel_dependent_fragment"
+            app:destination="@id/cancelDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/activeRelationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.activeRelationInquiry.ActiveRelationInquiryFragment"
+        android:label="ActiveRelationInquiryFragment"
+        tools:layout="@layout/fragment_active_relation_inquiry">
+        <action
+            android:id="@+id/action_active_relation_to_guide_dialog"
+            app:destination="@id/serviceGuideDialog"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/serviceGuideDialog"
+        android:name="com.tamin.taminhamrah.ui.dialog.ServiceGuideDialogFragment"
+        android:label="ServiceGuideDialogFragment"
+        tools:layout="@layout/dialog_service_guide" />
+
+    <dialog
+        android:id="@+id/menuDialogFragment"
+        android:name="com.tamin.taminhamrah.ui.dialog.MenuDialogFragment"
+        android:label="MenuDialogFragment"
+        tools:layout="@layout/dialog_menu" />
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.tamin.taminhamrah.ui.profile.EditProfileFragment"
+        android:label="EditProfileFragment"
+        tools:layout="@layout/fragment_edit_profile" >
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="TOOLBAR_SUBTITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="TOOLBAR_ICON_IMAGE"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <deepLink
+            android:id="@+id/deepLink_edit_profile"
+            app:uri="mytamin://edit_phone_number?TOOLBAR_TITLE={TOOLBAR_TITLE}&amp;TOOLBAR_SUBTITLE={TOOLBAR_SUBTITLE}&amp;TOOLBAR_ICON_IMAGE={TOOLBAR_ICON_IMAGE}" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editProfileImageFragment"
+        android:name="com.tamin.taminhamrah.ui.profile.EditProfileImageFragment"
+        android:label="EditProfileImageFragment"
+        tools:layout="@layout/fragment_edit_profile_image" />
+
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.tamin.taminhamrah.ui.login.LoginActivity"
+        android:label="LoginActivity"
+        tools:layout="@layout/activity_login" />
+
+    <dialog
+        android:id="@+id/userModeDialogFragment"
+        android:name="com.tamin.taminhamrah.ui.login.usermode.UserModeDialogFragment"
+        android:label="UserModeDialogFragment"
+        tools:layout="@layout/dialog_user_mode" />
+
+    <fragment
+        android:id="@+id/bankAccountDeclarationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.account.BankAccountDeclarationFragment"
+        android:label="BankAccountDeclarationFragment"
+        tools:layout="@layout/fragment_bank_account_declaration">
+
+        <action
+            android:id="@+id/action_bank_account_to_guide_dialog"
+            app:destination="@id/serviceGuideDialog"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_bank_account_to_menu"
+            app:destination="@id/menuDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/deservedTreatmentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.deservedTreatment.DeservedTreatmentFragment"
+        android:label="DeservedTreatmentFragment"
+        tools:layout="@layout/fragment_deserved_treatment" />
+
+    <fragment
+        android:id="@+id/servicesFragment"
+        android:name="com.tamin.taminhamrah.ui.home.dashboard.DashboardFragment"
+        android:label="ServicesFragment"
+        tools:layout="@layout/fragment_deserved_treatment" />
+
+    <fragment
+        android:id="@+id/versioningFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.VersioningFragment"
+        android:label="VersioningFragment"
+        tools:layout="@layout/fragment_versioning" />
+
+    <fragment
+        android:id="@+id/contactUsFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.ContactUsFragment"
+        android:label="ContactUsFragment"
+        tools:layout="@layout/fragment_contact_us" />
+
+    <fragment
+        android:id="@+id/myElectronicFileFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.electronicFileServices.myElectronicFileService.MyElectronicFileFragment"
+        android:label="SubmitInspectionRequestFragment"
+        tools:layout="@layout/fragment_my_electronic_file">
+        <action
+            android:id="@+id/action_myElectronicFile_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_myElectronicFile_to_image_viewer"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <activity
+        android:id="@+id/pdfViewerActivity"
+        android:name="com.tamin.taminhamrah.ui.PdfViewerActivity"
+        android:label="PdfViewerActivity"
+        tools:layout="@layout/activity_main" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.tamin.taminhamrah.ui.settings.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settings_to_biometric"
+            app:destination="@id/biometricFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/biometricFragment"
+        android:name="com.tamin.taminhamrah.ui.biometric.BiometricAuthFragment"
+        android:label="BiometricAuthFragment"
+        tools:layout="@layout/fragment_biometric_auth">
+
+        <action
+            android:id="@+id/action_biometricFragment_to_mainActivity"
+            app:destination="@id/mainActivity"
+            app:popUpTo="@id/navigation_profile"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.tamin.taminhamrah.ui.MainActivity"
+        android:label="MainActivity"
+        tools:layout="@layout/activity_main" />
+
+</navigation>

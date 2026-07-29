@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItemMafasaHesabContractInfo"
+        style="@style/VerticalStepperItemView"
+        app:previousStepVisible="false"
+        app:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractNumber"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:text="@string/label_contract_number"
+                app:layout_constraintBottom_toBottomOf="@id/tvContractNumber"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractNumber"
+                app:layout_constraintTop_toTopOf="@id/tvContractNumber"
+                app:layout_constraintWidth_percent=".3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractNumber"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:gravity="end"
+                app:layout_constraintEnd_toStartOf="@id/labelContractNumber"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="-" />
+
+            <View
+                android:id="@+id/line1"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvContractNumber" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractDate"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:text="@string/label_contract_date_2"
+                app:layout_constraintBottom_toBottomOf="@id/tvContractDate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractDate"
+                app:layout_constraintTop_toTopOf="@id/tvContractDate"
+                app:layout_constraintWidth_percent=".3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractDate"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toStartOf="@id/labelContractDate"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line1"
+                tools:text="-" />
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvContractDate" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractTitle"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:text="@string/label_contract_title"
+                app:layout_constraintBottom_toBottomOf="@id/tvContractTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractTitle"
+                app:layout_constraintTop_toTopOf="@id/tvContractTitle"
+                app:layout_constraintWidth_percent=".3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractTitle"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toStartOf="@id/labelContractTitle"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line2"
+                android:gravity="left"
+                tools:text="-" />
+
+            <View
+                android:id="@+id/line3"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvContractTitle" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractorName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:text="@string/label_contactor_name"
+                app:layout_constraintBottom_toBottomOf="@id/tvContractorName"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractorName"
+                app:layout_constraintTop_toTopOf="@id/tvContractorName"
+                app:layout_constraintWidth_percent=".3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractorName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toStartOf="@id/labelContractorName"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line3"
+                android:gravity="left"
+                tools:text="-" />
+
+            <View
+                android:id="@+id/line4"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvContractorName" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractorWorkshopId"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:text="@string/label_contactor_workshop_id"
+                app:layout_constraintBottom_toBottomOf="@id/tvContractorWorkshopId"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractorWorkshopId"
+                app:layout_constraintTop_toTopOf="@id/tvContractorWorkshopId"
+                app:layout_constraintWidth_percent=".3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractorWorkshopId"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toStartOf="@id/labelContractorWorkshopId"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line4"
+                tools:text="-" />
+
+            <View
+                android:id="@+id/line5"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvContractorWorkshopId" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelContractRow"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:text="@string/label_contract_row"
+                app:layout_constraintBottom_toBottomOf="@id/tvContractRow"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvContractRow"
+                app:layout_constraintTop_toTopOf="@id/tvContractRow"
+                app:layout_constraintWidth_percent=".3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContractRow"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toStartOf="@id/labelContractRow"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line5"
+                tools:text="-" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

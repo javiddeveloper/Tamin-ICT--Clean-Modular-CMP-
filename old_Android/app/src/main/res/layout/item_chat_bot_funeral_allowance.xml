@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:background="@drawable/bg_chat_bot_clickable"
+    android:padding="16dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/btnCancel"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_close_outline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/material_grey_500" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/iran_sans_mobile_fa_num"
+        android:text="کمک هزینه مراسم ترحیم"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Step Indicators -->
+    <LinearLayout
+        android:id="@+id/layoutSteps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+
+        <View
+            android:id="@+id/step3"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/shape_circle_grey" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="20dp"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@color/grey_color_text_button_bordered" />
+
+        <View
+            android:id="@+id/step2"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/shape_circle_grey" />
+            
+        <View
+            android:id="@+id/line2"
+            android:layout_width="20dp"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@color/grey_color_text_button_bordered" />
+
+        <View
+            android:id="@+id/step1"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/shape_circle_blue"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/groupExpanded"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/layoutSteps">
+
+        <!-- Step 1: Input Deceased National Code -->
+        <LinearLayout
+            android:id="@+id/groupStep1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:text="کد ملی متوفی"
+                android:layout_gravity="right"
+                android:textColor="@color/material_grey_500"
+                android:textSize="12sp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/inputNationalCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_edit_text_border"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="10"
+                android:padding="10dp"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnValidate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:padding="12dp"
+                android:text="استعلام"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/material_blue_500"
+                app:cornerRadius="8dp" />
+        </LinearLayout>
+
+        <!-- Step 2: Show Deceased Info and Confirm -->
+        <LinearLayout
+            android:id="@+id/groupStep2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvDeceasedInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:text="اطلاعات متوفی"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitRequest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:padding="12dp"
+                android:text="ثبت درخواست"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/material_blue_500"
+                app:cornerRadius="8dp" />
+        </LinearLayout>
+
+        <!-- Step 3: Result / Account Edit -->
+        <LinearLayout
+            android:id="@+id/groupStep3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgStatus"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_check_circle_green" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:gravity="center"
+                android:textColor="@color/green_dark"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:padding="12dp"
+                android:text="اصلاح شماره حساب"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/material_blue_500"
+                app:cornerRadius="8dp"
+                android:visibility="gone"/>
+                
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnConfirmEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/iran_sans_mobile_fa_num"
+                android:padding="12dp"
+                android:text="تایید اصلاح شماره حساب"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/material_blue_500"
+                app:cornerRadius="8dp"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/groupExpanded" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/margin_20dp">
+
+
+        <include
+            android:id="@+id/item_Desc_1"
+            layout="@layout/item_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:item='@{@string/label_image_guid}'
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnAddDocument"
+            style="@style/TextButtonBordered.Green"
+            android:layout_width="match_parent"
+            android:drawableRight="@drawable/ic_add_circle"
+            android:drawableTint="@color/green"
+            android:text="@string/label_add_document"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:textSize="@dimen/margin_12dp"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inputImageDesc"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+        <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+            android:id="@+id/inputImageDesc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:editText_hint="@string/label_image_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_Desc_1"
+            app:type="username" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            style="@style/LinearRecyclerStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnAddDocument" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

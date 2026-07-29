@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.electronicFile.myElectronicFile.ElectronicFileModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/margin_200dp"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_item_blue"
+        android:elevation="@dimen/margin_5dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="@+id/imagePreviewFullSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imagePreviewFullSize"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:alpha="0.5"
+            android:background="@color/bgTransparent"
+            android:elevation="@dimen/margin_10dp"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toTopOf="@+id/tvTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:srcCompat="@drawable/ic_search" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/TextStyle.SubTitle.Black"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text='@{item.name}'
+            android:textDirection="rtl"
+            app:layout_constraintBottom_toTopOf="@+id/tvDesc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imagePreviewFullSize"
+            tools:text=" یشسنی خشسحیئح خشسئی خشسئ یخئشس ئیخشس ئیهشس ئسیهحخ ئشخسح ئیخهشحسئنبت میبل میبلن نبت میبل میبلن ن نبت میبل میبلن نبت میبل میبلن ن نبت میبل میبلن نبت میبل میبلن ن نبت میبل میبلن نبت میبل میبلن ن " />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDesc"
+            style="@style/TextStyle.SubTitle.Black"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:layout_marginBottom="@dimen/margin_10dp"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@{'('+item.categoryName+')'}"
+            android:textDirection="rtl"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+            tools:text=" یشسنی خشسحیئح خشسئی خشسئ یخئشس ئیخشس ئیهشس ئسیهحخ ئشخسح ئیخهشحسئنبت میبل میبلن نبت میبل میبلن ن نبت میبل میبلن نبت میبل میبلن ن نبت میبل میبلن نبت میبل میبلن ن نبت میبل میبلن نبت میبل میبلن ن " />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        style="@style/VerticalStepperItemView"
+        android:id="@+id/authenticationStepper"
+        app:step_state="normal"
+        tools:step_state="selected"
+        app:step_index="2"
+        app:step_title="@string/authentication_step"
+        app:nextStepEnable="false"
+        >
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:paddingBottom="@dimen/_20sdp"
+               >
+
+                <include
+                    android:id="@+id/tvDesc"
+                    layout="@layout/item_desc_static"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    style="@style/MainButton"
+                    android:id="@+id/btnReceiveCode"
+                    android:layout_width="match_parent"
+                    android:text="@string/receive_code"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:layout_constraintTop_toBottomOf="@+id/tvDesc"
+                    />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/edAuthentication"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    app:editText_max_len="6"
+                    app:layout_constraintTop_toBottomOf="@+id/btnReceiveCode"
+                    app:editText_hint="@string/six_digit_validation_code"
+                     />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

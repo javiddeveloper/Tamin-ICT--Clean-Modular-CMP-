@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.tamin.taminhamrah.utils.Utility" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.deferredInstallmentCertificate.DeferredInstallmentCertificateViewModel" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurface"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/_10sdp"
+                android:animateLayoutChanges="true">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelTitle"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:padding="@dimen/margin_20dp"
+                    android:text="@string/label_request_certification"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:id="@+id/selectPensionId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/margin_20dp"
+                    android:textAlignment="textStart"
+                    app:editText_hint="@string/pension_number"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelTitle"
+                    tools:layout_editor_absoluteX="12dp" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvTitleGuarantee"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:text= "@string/titleGuarantee"
+                    app:layout_constraintEnd_toEndOf="@+id/selectGuaranteeStatus"
+                    app:layout_constraintStart_toStartOf="@+id/selectGuaranteeStatus"
+                    app:layout_constraintTop_toBottomOf="@+id/selectPensionId" />
+
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:id="@+id/selectGuaranteeStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:editText_hint="@string/label_status_guarantee"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleGuarantee"  />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupVisit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:constraint_referenced_ids="labelBorrowerPersonalInformation, layoutNameOthers,layout_last_name_others,widgetDatePicker,widgetNationalCode"
+                    tools:visibility="gone"
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelBorrowerPersonalInformation"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:text="@string/label_Borrower_personal_information"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/selectGuaranteeStatus" />
+
+                <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                    android:id="@+id/layoutNameOthers"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/labelBorrowerPersonalInformation"
+                    app:type="first_name"
+                    />
+
+
+                <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                    android:id="@+id/layout_last_name_others"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutNameOthers"
+                    app:layout_constraintStart_toStartOf="@+id/layoutNameOthers"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutNameOthers"
+                    app:type="last_name" />
+
+
+                <com.tamin.taminhamrah.widget.edittext.nationalcode.EditTextNationalCode
+                    android:id="@+id/widgetNationalCode"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:layout_constraintEnd_toEndOf="@+id/layout_last_name_others"
+                    app:layout_constraintStart_toStartOf="@+id/layout_last_name_others"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_last_name_others" />
+
+                <include
+                    android:id="@+id/widgetDatePicker"
+                    layout="@layout/widget_date_picker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:hint="@{@string/birthdate}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/widgetNationalCode" />
+
+
+                <View
+                    android:id="@+id/containerSelectBank"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:background="?attr/colorSurfaceContainerHigh"
+                    android:paddingStart="@dimen/margin_20dp"
+                    android:paddingLeft="@dimen/margin_20dp"
+                    app:layout_constraintBottom_toBottomOf="@id/btnFinalApproval"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/widgetDatePicker"
+                    app:layout_constraintVertical_bias="0.0"
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelInfoWageAfterIncrease"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:text="@string/label_loan_details"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/containerSelectBank" />
+
+
+                <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                    android:id="@+id/selectBankName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:editText_hint="@string/label_bank"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    app:layout_constraintEnd_toEndOf="@+id/containerSelectBank"
+                    app:layout_constraintStart_toStartOf="@+id/containerSelectBank"
+                    app:layout_constraintTop_toBottomOf="@id/labelInfoWageAfterIncrease"  />
+
+                <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                    android:id="@+id/layoutBranchName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:layout_constraintEnd_toEndOf="@+id/selectBankName"
+                    app:layout_constraintStart_toStartOf="@+id/selectBankName"
+                    app:layout_constraintTop_toBottomOf="@+id/selectBankName"
+                    app:editText_hint ='@string/label_branch_name_bank'
+                    app:type="place_name"
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvMinimum_500000"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:text="@string/minimum_500000_rials"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintStart_toStartOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutBranchName" />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/layoutAmountPerInstallment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:editText_hint ="@string/label_amount_per_installment"
+                    app:editText_max_len ="13"
+                    android:maxLines="1"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutBranchName"
+                    app:layout_constraintStart_toStartOf="@+id/layoutBranchName"
+                    app:layout_constraintTop_toBottomOf="@+id/tvMinimum_500000" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvNumberInstallments"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:text="@string/minimum_12_and_maximum_240"
+                    app:layout_constraintEnd_toEndOf="@+id/inputGuaranteeAmount"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutAmountPerInstallment" />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/layoutNumberInstallments"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:editText_hint ="@string/label_number_installments"
+                    app:editText_max_len ="3"
+                    android:maxLines="1"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintStart_toStartOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintTop_toBottomOf="@+id/tvNumberInstallments" />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/layoutRefundAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:editText_hint ="@string/label_refund_amount"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:editText_max_len ="15"
+                    android:maxLines="1"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintStart_toStartOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutNumberInstallments" />
+
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvGuaranteeAmount"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintStart_toStartOf="@+id/layoutAmountPerInstallment"
+                    android:text="@string/guarantee_amount_shouldnot_be_less_than_refund_amount"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutRefundAmount"
+                    />
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/inputGuaranteeAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:editText_hint ="@string/label_guarantee_amount"
+                    app:editText_max_len ="15"
+                    android:maxLines="1"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintStart_toStartOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintTop_toBottomOf="@+id/tvGuaranteeAmount"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnFinalApproval"
+                    style="@style/MainButton"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:layout_marginBottom="@dimen/margin_20dp"
+                    app:layout_constraintEnd_toEndOf="@+id/layoutAmountPerInstallment"
+                    app:layout_constraintStart_toStartOf="@+id/layoutAmountPerInstallment"
+                    android:text="@string/label_final_approval"
+                    app:layout_constraintTop_toBottomOf="@id/inputGuaranteeAmount" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
+

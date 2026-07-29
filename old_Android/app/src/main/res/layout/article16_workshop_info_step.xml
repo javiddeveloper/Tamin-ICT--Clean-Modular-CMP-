@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperWorkshopInfo"
+        style="@style/VerticalStepperItemView"
+        app:previousStepVisible="false"
+        app:step_index="1"
+        app:step_title="@string/workshop_profile"
+        app:step_state="selected"
+        android:paddingTop="@dimen/_10sdp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:paddingBottom="@dimen/_20sdp">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleEmployer"
+                style="@style/TextStyle.SubTitle"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/full_name_real_employer"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueEmployer"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:ellipsize="end"
+                android:gravity="right|center_vertical"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleEmployer"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleEmployer"
+                tools:text="سعید هنری" />
+
+            <View
+                android:id="@+id/line1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@color/lineColor"
+                app:layout_constraintTop_toBottomOf="@id/tvValueEmployer" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleWorkShopName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/label_workshop_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueWorkShopName"
+                style="@style/TextStyle.Title"
+                android:textColor="@color/text_color_dialog_orange"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleWorkShopName"
+                tools:text="سالوت تکنیک" />
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@color/lineColor"
+                app:layout_constraintTop_toBottomOf="@id/tvValueWorkShopName" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleWorkShopCode"
+                style="@style/TextStyle.SubTitle"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/label_workshop_code"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueWorkShopCode"
+                style="@style/TextStyle.Title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleWorkShopCode"
+                tools:text="234234234" />
+
+            <View
+                android:id="@+id/line3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@color/lineColor"
+                app:layout_constraintTop_toBottomOf="@id/tvValueWorkShopCode" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleWorkshopAddress"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/label_workshop_address"
+                app:layout_constraintWidth_percent="0.2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/line3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueWorkshopAddress"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:gravity="end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleWorkshopAddress"
+                app:layout_constraintWidth_percent="0.8"
+                tools:text="  خ حرم پاساژ قدس زيرزمين خ حرم پاساژ قدس زيرزمين پ 8" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

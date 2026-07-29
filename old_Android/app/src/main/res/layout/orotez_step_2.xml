@@ -1,0 +1,347 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="itemDependant"
+            type="com.tamin.taminhamrah.data.remote.models.services.DependantsModel" />
+
+    </data>
+
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        app:step_index="2"
+        app:step_state="normal"
+        tools:step_state="selected"
+        app:step_title="@string/label_step_info_selected_orotez">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            >
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelFullNameUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/full_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueFullNameUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="end|center_vertical"
+                android:text='@{itemDependant.risuFname+" "+itemDependant.risuLName}'
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelFullNameUser"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/labelFullNameUser"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="سعید هنری" />
+
+            <View
+                android:id="@+id/line1User"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelFullNameUser" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelKinshipUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/relative"
+                app:layout_constraintBottom_toTopOf="@id/line2User"
+                app:layout_constraintEnd_toEndOf="@+id/labelFullNameUser"
+                app:layout_constraintStart_toEndOf="@id/valueKinshipUser"
+                app:layout_constraintTop_toBottomOf="@id/line1User" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueKinshipUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end|center_vertical"
+                android:text='@{itemDependant.relationShip}'
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="@+id/labelKinshipUser"
+                app:layout_constraintEnd_toStartOf="@+id/labelKinshipUser"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/valueFullNameUser"
+                app:layout_constraintTop_toBottomOf="@id/line1User"
+                tools:text="همسر" />
+
+            <View
+                android:id="@+id/line2User"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelKinshipUser" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelNationalCodeUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text="@string/label_national_code"
+                app:layout_constraintBottom_toTopOf="@id/line3User"
+                app:layout_constraintEnd_toEndOf="@+id/labelFullNameUser"
+                app:layout_constraintStart_toEndOf="@id/valueNationalCodeUser"
+                app:layout_constraintTop_toBottomOf="@id/line2User" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueNationalCodeUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:text='@{itemDependant.nationCode}'
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toTopOf="@id/line3User"
+                app:layout_constraintEnd_toStartOf="@+id/labelNationalCodeUser"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/valueFullNameUser"
+                app:layout_constraintTop_toBottomOf="@id/line2User"
+                tools:text="3860387211" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueInsuranceStatusUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:text='@{itemDependant.risuIdNo}'
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toTopOf="@id/line4User"
+                app:layout_constraintEnd_toStartOf="@+id/labelIdentityNumberUser"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/valueNationalCodeUser"
+                app:layout_constraintTop_toBottomOf="@id/line3User"
+                tools:text="1313212313132" />
+            <View
+                android:id="@+id/line3User"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelNationalCodeUser" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelIdentityNumberUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text="@string/identity_number"
+                app:layout_constraintBottom_toTopOf="@id/line4User"
+                app:layout_constraintEnd_toEndOf="@+id/labelNationalCodeUser"
+                app:layout_constraintStart_toEndOf="@id/valueInsuranceStatusUser"
+                app:layout_constraintTop_toBottomOf="@id/line3User" />
+
+
+
+            <View
+                android:id="@+id/line4User"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelIdentityNumberUser" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelIdentityPlaceUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_identity_place"
+                app:layout_constraintBottom_toTopOf="@id/line5User"
+                app:layout_constraintEnd_toEndOf="@+id/labelIdentityNumberUser"
+                app:layout_constraintStart_toEndOf="@id/valueIdentityPlaceUser"
+                app:layout_constraintTop_toBottomOf="@id/line4User" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueIdentityPlaceUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text='@{itemDependant.cityName}'
+                app:layout_constraintBottom_toTopOf="@id/line5User"
+                app:layout_constraintEnd_toStartOf="@+id/labelIdentityPlaceUser"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/valueInsuranceStatusUser"
+                app:layout_constraintTop_toBottomOf="@id/line4User"
+                tools:text="تهران" />
+
+            <View
+                android:id="@+id/line5User"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelIdentityPlaceUser" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelBirthDateUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/birthdate"
+                app:layout_constraintBottom_toTopOf="@id/line6User"
+                app:layout_constraintEnd_toEndOf="@+id/labelIdentityPlaceUser"
+                app:layout_constraintStart_toEndOf="@id/valueBirthDateUser"
+                app:layout_constraintTop_toBottomOf="@id/line5User" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueBirthDateUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text='@{itemDependant.getDate(itemDependant.brithDate)}'
+                app:layout_constraintBottom_toTopOf="@id/line6User"
+                app:layout_constraintEnd_toStartOf="@+id/labelBirthDateUser"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/valueIdentityPlaceUser"
+                app:layout_constraintTop_toBottomOf="@id/line5User"
+                tools:text="1370/07/08" />
+
+            <View
+                android:id="@+id/line6User"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelBirthDateUser" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelExpirationDateUser"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_expiration_date"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/labelBirthDateUser"
+                app:layout_constraintStart_toEndOf="@id/valueExpirationDateUser"
+                app:layout_constraintTop_toBottomOf="@id/line6User" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/valueExpirationDateUser"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text='@{itemDependant.bletenddate}'
+                app:layout_constraintEnd_toStartOf="@+id/labelExpirationDateUser"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="@+id/valueBirthDateUser"
+                app:layout_constraintTop_toBottomOf="@id/line6User" />
+
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupDetailsUserInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                app:constraint_referenced_ids="line1User,labelFullNameUser,valueFullNameUser,labelKinshipUser,valueKinshipUser"
+                tools:visibility="visible" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupDetailsUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                app:constraint_referenced_ids="line2User,line4User,valueInsuranceStatusUser,labelIdentityNumberUser,line3User,valueNationalCodeUser,labelNationalCodeUser, labelIdentityPlaceUser, valueIdentityPlaceUser, line5User, labelBirthDateUser, valueBirthDateUser, line6User, labelExpirationDateUser, valueExpirationDateUser"
+                tools:visibility="visible" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

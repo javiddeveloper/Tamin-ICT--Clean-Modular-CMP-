@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.employer.contract.ContractInfoViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurface"
+            android:fillViewport="true"
+            android:id="@+id/nestedScrollView"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelContractDetail"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:padding="@dimen/margin_20dp"
+                    android:text="@string/label_contract_detail"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerContractDetail"
+                   style="@style/LinearRecyclerStyle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelContractDetail"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recyclerContractDetail"
+                    app:layout_constraintBottom_toBottomOf="@id/recyclerAssignerInfo"
+                    android:background="@drawable/bg_left_corner_rounded_grey_with_white_adge"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelAssignerInfo"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:padding="@dimen/margin_20dp"
+                    android:text="@string/label_assigner_info"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recyclerContractDetail" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerAssignerInfo"
+                    style="@style/LinearRecyclerStyle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelAssignerInfo"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelContractorInfo"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:padding="@dimen/margin_20dp"
+                    android:text="@string/label_contractor_info"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recyclerAssignerInfo" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerContractorInfo"
+                    style="@style/LinearRecyclerStyle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelContractorInfo"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

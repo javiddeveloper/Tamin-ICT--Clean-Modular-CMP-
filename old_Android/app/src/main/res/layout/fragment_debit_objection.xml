@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.WorkshopInfoViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:fitsSystemWindows="false"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurface"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerInfo"
+                    style="@style/LinearRecyclerStyle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <include
+                    android:id="@+id/labelSubmitInfo"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/margin_20dp"
+                    app:item='@{@string/label_employer_debit_objection_submit_info}'
+                    app:layout_constraintEnd_toEndOf="@id/recyclerInfo"
+                    app:layout_constraintStart_toStartOf="@id/recyclerInfo"
+                    app:layout_constraintTop_toBottomOf="@id/recyclerInfo"
+                    />
+
+                <include
+                    android:id="@+id/labelAddDocs"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:item='@{@string/label_add_new_document_desc}'
+                    app:layout_constraintEnd_toEndOf="@id/labelSubmitInfo"
+                    app:layout_constraintStart_toStartOf="@id/labelSubmitInfo"
+                    app:layout_constraintTop_toBottomOf="@id/labelSubmitInfo"/>
+
+                <include
+                    android:id="@+id/labelImageInfo"
+                    layout="@layout/item_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:item='@{@string/label_image_guid}'
+                    app:layout_constraintEnd_toEndOf="@id/labelSubmitInfo"
+                    app:layout_constraintStart_toStartOf="@id/labelSubmitInfo"
+                    app:layout_constraintTop_toBottomOf="@id/labelAddDocs"/>
+
+
+                <include
+                    android:id="@+id/layoutUploadImage"
+                    layout="@layout/item_add_doc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:layout_marginBottom="@dimen/_100sdp"
+                    app:layout_constraintEnd_toEndOf="@id/labelSubmitInfo"
+                    app:layout_constraintStart_toStartOf="@id/labelSubmitInfo"
+                    app:layout_constraintTop_toBottomOf="@+id/labelImageInfo" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerDocs"
+                    style="@style/LinearRecyclerStyle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutUploadImage" />
+
+
+                <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                    android:id="@+id/etObjectionDesc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:layout_marginTop="32dp"
+                    app:editText_hint="@string/label_objection_description"
+                    app:editText_max_len="250"
+                    app:editText_max_line="6"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recyclerDocs" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/cbBankDeposit"
+                    style="@style/CheckBoxStyle"
+                    android:checked="false"
+                    app:layout_constraintBottom_toBottomOf="@id/labelBankDeposit"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/etObjectionDesc"
+                    app:layout_constraintTop_toTopOf="@id/labelBankDeposit" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelBankDeposit"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="0dp"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/label_bank_deposit"
+                    app:layout_constraintEnd_toStartOf="@id/cbBankDeposit"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/etObjectionDesc" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/cbSubmit"
+                    style="@style/CheckBoxStyle"
+                    android:checked="false"
+                    app:layout_constraintBottom_toBottomOf="@id/labelSubmitDebitObjection"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/labelSubmitDebitObjection" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelSubmitDebitObjection"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="0dp"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:text="@string/label_submit_debit_objection"
+                    app:layout_constraintEnd_toStartOf="@id/cbSubmit"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelBankDeposit"
+
+                    />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvError"
+                    style="@style/TextStyle.SubTitle"
+                    android:layout_width="0dp"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:drawableEnd="@drawable/ic_circle_orange"
+                    android:text="عغمنتعا"
+                    android:textColor="@color/red"
+                    android:visibility="gone"
+                    app:drawableTint="@color/red"
+                    app:layout_constraintBottom_toTopOf="@id/btnSubmit"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelSubmitDebitObjection"
+                    tools:visibility="visible" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSubmit"
+                    style="@style/MainButton"
+                    android:layout_margin="@dimen/margin_20dp"
+                    android:text="@string/submit_request"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvError"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

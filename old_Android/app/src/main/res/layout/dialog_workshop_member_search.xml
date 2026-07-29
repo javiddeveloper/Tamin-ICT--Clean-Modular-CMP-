@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:layoutDirection="rtl">
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="30dp"
+            android:layout_height="4dp"
+            android:layout_margin="@dimen/margin_10dp"
+            android:background="#dadce0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputInsuranceNumber"
+            style="@style/TextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            app:editText_hint="@string/label_insurance_number"
+            app:editText_max_len="10"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/view"
+            app:layout_constraintBottom_toTopOf="@id/inputNationalCode"/>
+
+        <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+            android:id="@+id/inputNationalCode"
+            style="@style/TextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:editText_hint="@string/label_national_code"
+            app:editText_max_len="10"
+            app:layout_constraintEnd_toEndOf="@id/inputInsuranceNumber"
+            app:layout_constraintStart_toStartOf="@id/inputInsuranceNumber"
+            app:layout_constraintTop_toBottomOf="@id/inputInsuranceNumber"
+            app:layout_constraintBottom_toTopOf="@id/btnSearch"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSearch"
+            style="@style/MainButton"
+            android:layout_width="0dp"
+            android:layout_margin="@dimen/margin_20dp"
+            android:text="@string/label_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnGetAllList"
+            app:layout_constraintTop_toBottomOf="@id/inputNationalCode"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnGetAllList"
+            style="@style/TextButton"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:text="@string/label_get_all_workshops"
+            app:layout_constraintEnd_toStartOf="@id/btnSearch"
+            app:layout_constraintStart_toStartOf="@id/inputNationalCode"
+            app:layout_constraintTop_toTopOf="@id/btnSearch"
+            app:layout_constraintBottom_toBottomOf="@id/btnSearch"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

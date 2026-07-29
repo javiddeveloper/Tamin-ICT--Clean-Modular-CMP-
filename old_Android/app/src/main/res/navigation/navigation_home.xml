@@ -1,0 +1,3289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_home"
+    app:startDestination="@id/servicesFragment">
+
+    <fragment
+        android:id="@+id/versioningFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.VersioningFragment"
+        android:label="VersioningFragment"
+        tools:layout="@layout/fragment_versioning" />
+
+    <fragment
+        android:id="@+id/servicesFragment"
+        android:name="com.tamin.taminhamrah.ui.home.dashboard.DashboardFragment"
+        android:label="ServicesFragment"
+        tools:layout="@layout/fragment_services">
+        <action
+            android:id="@+id/action_home_to_registration"
+            app:destination="@id/insuranceRegistrationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_drawer_to_versioning"
+            app:destination="@id/versioningFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:launchSingleTop="false"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_drawer_to_contact_us"
+            app:destination="@id/contactUsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/profileFragment"
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_dashboard_to_aiFragment"
+            app:destination="@id/aiFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <!--        <action-->
+        <!--            android:id="@+id/action_menu_to_versioning"-->
+        <!--            app:destination="@id/versioningFragment"-->
+        <!--            app:popEnterAnim="@anim/fade_in"-->
+        <!--            app:popExitAnim="@anim/fade_out"-->
+        <!--            app:enterAnim="@anim/fade_in"-->
+        <!--            app:exitAnim="@anim/fade_out"/>-->
+
+        <action
+            android:id="@+id/action_user_mode_to_home"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_deserved_treatment"
+            app:destination="@id/deservedTreatmentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_identity_info"
+            app:destination="@id/identityInfoInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_bank_account_list"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_account_list_to_cancel_dependent_fragment"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_active_relation"
+            app:destination="@id/activeRelationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit"
+            app:destination="@id/editProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit_image"
+            app:destination="@id/editProfileImageFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_user_mode"
+            app:destination="@id/userModeDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out">
+            <argument android:name="aaaa" />
+        </action>
+
+        <action
+            android:id="@+id/action_service_to_contact_us"
+            app:destination="@id/contactUsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_search"
+            app:destination="@id/searchServiceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_service_to_wedding_present"
+            app:destination="@id/weddingPresentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_active_relation"
+            app:destination="@id/activeRelationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_identity_info"
+            app:destination="@id/identityInfoInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_declare_bank_account"
+            app:destination="@id/bankAccountDeclarationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_service_to_follow_protest_status"
+            app:destination="@id/FollowProtestStatus"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_service_to_installment_debt"
+            app:destination="@id/installmentDebtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_bank_account_list"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_allHistoryInsuranceFragment"
+            app:destination="@id/allHistoryInsuranceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_wageAndHistoryFragment"
+            app:destination="@id/wageAndHistoryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_mergeHistoryFragment"
+            app:destination="@id/mergeHistoryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_viewTitleJobFragment"
+            app:destination="@id/viewTitleJobFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_services_to_pay_roll"
+            app:destination="@id/pensionerPayRollFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_services_to_combined_record"
+            app:destination="@id/combinedRecordFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_viewShortTermFragment"
+            app:destination="@id/viewShortTermFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_calculateMarriageAllowanceFragment"
+            app:destination="@id/calculateMarriageAllowanceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_calculateWageIllDaysFragment"
+            app:destination="@id/calculateWageIllDaysFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_calculateWagePregnancyFragment"
+            app:destination="@id/calculateWagePregnancyFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_girl_survivor"
+            app:destination="@id/girlSurvivorFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_edictPensionerFragment"
+            app:destination="@id/edictPensionerFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_issuanceWageCertificateFragment"
+            app:destination="@id/issuanceWageCertificateFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_edit_image"
+            app:destination="@id/editProfileImageFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_deferredInstallmentCertificateFragment"
+            app:destination="@id/deferredInstallmentCertificateFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_deserved_treatment"
+            app:destination="@id/deservedTreatmentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_sendInsuranceHistoryToInstitutionFragment"
+            app:destination="@id/sendInsuranceHistoryToInstitutionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_calculateWagePensionFragment"
+            app:destination="@id/calculateWagePensionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_prescription"
+            app:destination="@id/electronicPrescriptionListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_loginActivity"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_orotezProtezFragment"
+            app:destination="@id/orotezProtezFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_requestForPregnancyPayFragment"
+            app:destination="@id/requestForPregnancyPayFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_workshop_all"
+            app:destination="@id/workshopInfoFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_stack_holder_list"
+            app:destination="@id/legalStackHolderListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_service_to_complete_workshop_info"
+            app:destination="@id/completeWorkshopInfoTabFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_searchServiceFragment"
+            app:destination="@id/searchServiceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_objectionInsuranceHistoryFragment"
+            app:destination="@id/objectionInsuranceHistoryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_objectionNonExistentHistoryFragment"
+            app:destination="@id/objectionNonExistentHistoryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_DependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_services_to_performed_inspection"
+            app:destination="@id/performedInspectionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_report_inspections"
+            app:destination="@id/inspectionReportFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_requestPaymentForillDaysFragment"
+            app:destination="@id/requestPaymentForillDaysFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_requestFuneralGrantFragment"
+            app:destination="@id/requestFuneralGrantFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_listOfInspectionsPerformedFragment"
+            app:destination="@id/listOfInspectionsPerformedFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_myElectronicFileFragment"
+            app:destination="@id/myElectronicFileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_WorkersPaymentInfoFragment"
+            app:destination="@id/workersPaymentInfoFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_services_to_contractInfoFragment"
+            app:destination="@id/contractInfoFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_services_to_assignerContractFragment"
+            app:destination="@id/assignerContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+<!--        <action
+            android:id="@+id/action_services_to_confirmation_medical_authorities"
+            app:destination="@id/navigation"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />-->
+        <action
+            android:id="@+id/action_servicesFragment_to_inquirePensionStatusFragment"
+            app:destination="@id/inquirePensionStatusFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_concludingStudentInsuranceContractFragment"
+            app:destination="@id/concludingStudentInsuranceContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_insuranceContractBusinessOwnersAndFreelancers"
+            app:destination="@id/insuranceContractBusinessOwnersAndFreelancers"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_womenContractFragment"
+            app:destination="@id/womenContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_fraction_contract_fragment"
+            app:destination="@id/fraction_contract_fragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_optionalContractFragment"
+            app:destination="@id/optionalContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_freelancers_contract_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_insurancePayment"
+            app:destination="@id/insurancePaymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_contractList"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_contractListFragment"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_inquiryEducationFragment"
+            app:destination="@+id/inquiryEducationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_dashboard_to_newContract"
+            app:destination="@id/insuranceContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractList_to_registration"
+            app:destination="@id/insuranceRegistrationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_disabilityPensionFragment"
+            app:destination="@+id/disabilityPensionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshop_info_to_register_agreement"
+            app:destination="@id/employerAgreementFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_requestPensionBySurvivor"
+            app:destination="@+id/requestPensionBySurvivor"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_services_to_retirementPension"
+            app:destination="@+id/retirementPensionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_services_to_constructionInsuranceFragment"
+            app:destination="@+id/constructionInsuranceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_services_to_occurrence_fragment"
+            app:destination="@+id/occurrenceReportFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_services_to_laws_fragment"
+            app:destination="@+id/lawsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/lawsFragment"
+        android:name="com.tamin.taminhamrah.ui.laws.LawsFragment"
+        android:label="LawsFragment"
+        tools:layout="@layout/fragment_laws">
+
+        <argument
+            android:name="webUrl"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+
+    </fragment>
+    <dialog
+        android:id="@+id/aiCategoryEditBottomSheet"
+        android:name="com.tamin.taminhamrah.ui.aiAgent.ui.history.HistoryCategoryEditBottomSheet"
+        android:label="aiCategoryHistoryEdit"
+        tools:layout="@layout/history_category_edit_bottom_sheet" >
+
+        <argument
+            android:name="categoryItem"
+            app:argType="com.tamin.taminhamrah.data.repository.ai.model.AiHistoryCategory"
+            />
+    </dialog>
+
+    <dialog
+        android:id="@+id/aiCategoryBottomSheet"
+        android:name="com.tamin.taminhamrah.ui.aiAgent.ui.history.HistoryCategoryBottomSheet"
+        android:label="aiCategoryHistory"
+        tools:layout="@layout/history_category_bottom_sheet" >
+
+        <argument
+            android:name="isLawSearch"
+            android:defaultValue="false"
+            app:argType="boolean" />
+
+    </dialog>
+
+
+    <fragment
+        android:id="@+id/aiFragment"
+        android:name="com.tamin.taminhamrah.ui.aiAgent.ui.AgentFragment"
+        android:label="AIFragment"
+        tools:layout="@layout/fragment_ai" >
+
+        <argument
+            android:name="transitionArg"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/ai_lows_assistant_fragment_to_laws_fragment"
+            app:destination="@id/lawsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/ai_fragment_to_aiCategoryBottomSheet"
+            app:destination="@id/aiCategoryBottomSheet" />
+        <action
+            android:id="@+id/ai_fragment_to_aiEdit_CategoryBottomSheet"
+            app:destination="@id/aiCategoryEditBottomSheet" />
+        <action
+            android:id="@+id/ai_fragment_to_electronicPrescriptionDetailFragment"
+            app:destination="@id/electronicPrescriptionDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.tamin.taminhamrah.ui.profile.EditProfileFragment"
+        android:label="EditProfileFragment"
+        tools:layout="@layout/fragment_edit_profile">
+        <action
+            android:id="@+id/action_user_mode_to_home"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_deserved_treatment"
+            app:destination="@id/deservedTreatmentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_identity_info"
+            app:destination="@id/identityInfoInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_bank_account_list"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_active_relation"
+            app:destination="@id/activeRelationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit"
+            app:destination="@id/editProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit_image"
+            app:destination="@id/editProfileImageFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_user_mode"
+            app:destination="@id/userModeDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <argument android:name="aaaa" />
+    </fragment>
+
+    <!--<fragment
+        android:id="@+id/profileFragment"
+        android:name="com.tamin.taminhamrah.ui.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_user_mode_to_home"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_deserved_treatment"
+            app:destination="@id/deservedTreatmentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_identity_info"
+            app:destination="@id/identityInfoInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_bank_account_list"
+            app:destination="@id/bankAccountListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_active_relation"
+            app:destination="@id/activeRelationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit"
+            app:destination="@id/editProfileFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_edit_image"
+            app:destination="@id/editProfileImageFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_profile_to_user_mode"
+            app:destination="@id/userModeDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out">
+            <argument android:name="aaaa" />
+        </action>
+
+
+    </fragment>-->
+    <fragment
+        android:id="@+id/searchServiceFragment"
+        android:name="com.tamin.taminhamrah.ui.home.dashboard.SearchServiceFragment"
+        android:label="SearchServiceFragment"
+        tools:layout="@layout/fragment_search_services" />
+
+    <dialog
+        android:id="@+id/menuDialogFragment"
+        android:name="com.tamin.taminhamrah.ui.dialog.MenuDialogFragment"
+        android:label="MenuDialogFragment"
+        tools:layout="@layout/dialog_menu" />
+
+    <fragment
+        android:id="@+id/weddingPresentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.wedingpresent.WeddingPresentFragment"
+        android:label="WeddingPresentFragment"
+        tools:layout="@layout/fragment_wedding_present">
+
+        <action
+            android:id="@+id/action_wedding_to_validation"
+            app:destination="@id/validationDialog"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_wedding_to_service_guide"
+            app:destination="@id/serviceGuideDialog"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_wedding_to_calculate_wedding"
+            app:destination="@id/calculateMarriageAllowanceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <dialog
+        android:id="@+id/validationDialog"
+        android:name="com.tamin.taminhamrah.ui.home.services.wedingpresent.ValidationResultDialogFragment"
+        android:label="ValidationResultDialogFragment"
+        tools:layout="@layout/dialog_result_api" />
+
+    <dialog
+        android:id="@+id/serviceGuideDialog"
+        android:name="com.tamin.taminhamrah.ui.dialog.ServiceGuideDialogFragment"
+        android:label="ServiceGuideDialogFragment"
+        tools:layout="@layout/dialog_service_guide" />
+
+
+    <fragment
+        android:id="@+id/activeRelationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.activeRelationInquiry.ActiveRelationInquiryFragment"
+        android:label="ActiveRelationInquiryFragment"
+        tools:layout="@layout/fragment_active_relation_inquiry">
+
+        <action
+            android:id="@+id/action_active_relation_to_guide_dialog"
+            app:destination="@id/serviceGuideDialog"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_active_relation_to_certificate"
+            app:destination="@id/statusCertificateDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+
+    <!-- <fragment
+         android:id="@+id/statusCertificateFragment"
+         android:name="com.tamin.taminhamrah.ui.home.services.activeRelationInquiry.StatusCertificateFragment"
+         android:label="StatusCertificateFragment"
+         tools:layout="@layout/dialog_active_relation_status_certificate">
+
+         <action
+             android:id="@+id/action_status_certification_to_menu"
+             app:destination="@id/menuDialogFragment" />
+     </fragment>-->
+
+    <dialog
+        android:id="@+id/statusCertificateDialogFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.activeRelationInquiry.StatusCertificateDialogFragment"
+        android:label="StatusCertificateDialogFragment">
+        <action
+            android:id="@+id/action_status_certification_to_menu"
+            app:destination="@id/menuDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </dialog>
+    <fragment
+        android:id="@+id/identityInfoInquiryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.identityinfo.IdentityInfoInquiryFragment"
+        android:label="IdentityInfoInquiryFragment"
+        tools:layout="@layout/fragment_identity_info_inquiry">
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/bankAccountDeclarationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.account.BankAccountDeclarationFragment"
+        android:label="BankAccountDeclarationFragment"
+        tools:layout="@layout/fragment_bank_account_declaration">
+
+        <action
+            android:id="@+id/action_bank_account_to_guide_dialog"
+            app:destination="@id/serviceGuideDialog"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_bank_account_to_menu"
+            app:destination="@id/menuDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/installmentDebtFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.debt.InstallmentDebtFragment"
+        android:label="InstallmentDebtFragment"
+        tools:layout="@layout/fragment_installment_debt">
+
+        <action
+            android:id="@+id/action_installment_to_debt"
+            app:destination="@+id/debtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_installment_to_follow_debt"
+            app:destination="@+id/followDebtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/followDebtFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.debt.followUpAndPayment.FollowUpAndPaymentFragment"
+        android:label="InstallmentList">
+        <action
+            android:id="@+id/action_followAndPayment_to_Activity_pdf_view"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_followAndPayment_to_PaymentDebtFragment"
+            app:destination="@id/paymentDebtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_followAndPayment_to_paidDebtList"
+            app:destination="@id/paidDebtList"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/paidDebtList"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.debt.followUpAndPayment.paidDebtList.PaidDebtListFragment"
+        android:label="InstallmentList"></fragment>
+    <fragment
+        android:id="@+id/paymentDebtFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.debt.followUpAndPayment.payment.PaymentDebtFragment"
+        android:label="InstallmentList">
+        <action
+            android:id="@+id/action_paymentDebtFragment_to_Payment"
+            app:destination="@id/paymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/debtFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.debt.DebtFragment"
+        android:label="DebtFragment"
+        tools:layout="@layout/fragment_debt" />
+    <fragment
+        android:id="@+id/FollowProtestStatus"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.protestStatus.FollowObjectionsStatusFragment"
+        android:label="FollowProtestStatusFragment"
+        tools:layout="@layout/fragment_follow_protest_status"
+
+        >
+        <action
+            android:id="@+id/action_objections_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_messages_objections"
+            app:destination="@id/messagesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/messagesFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.protestStatus.MessagesFragment"
+        android:label="MessagesFragment"
+        tools:layout="@layout/fragment_messages" />
+    <!--   <activity
+           android:id="@+id/loginActivity"
+           android:name="com.tamin.taminhamrah.ui.activity.login.LoginActivity"
+           android:label="LoginActivity" />-->
+    <fragment
+        android:id="@+id/bankAccountListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.accountlist.BankAccountListFragment"
+        android:label="BankAccountListFragment"
+        tools:layout="@layout/fragment_list">
+
+        <action
+            android:id="@+id/action_account_list_to_declare_bank_account"
+            app:destination="@id/bankAccountDeclarationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+    <fragment
+        android:id="@+id/allHistoryInsuranceFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.historyinsurance.AllHistoryInsuranceFragment"
+        android:label="AllRecordsInsuranceFragment"
+        tools:layout="@layout/fragment_all_history_insurance">
+
+        <action
+            android:id="@+id/action_all_history_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_allHistoryInsuranceFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <!--
+        <fragment
+            android:id="@+id/wageAndHistoryFragment"
+            android:name="com.tamin.taminhamrah.ui.home.services.wageandhistory.WageAndHistoryFragment"
+            android:label="WageAndHistoryFragment"
+            tools:layout="@layout/fragment_wage_and_history">
+    -->
+    <fragment
+        android:id="@+id/wageAndHistoryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.wageandhistory.WageAndHistoryFragment"
+        android:label="WageAndHistoryFragment"
+        tools:layout="@layout/fragment_wage_and_history">
+
+        <action
+            android:id="@+id/action_wage_history_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_wageAndHistoryFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/wageAndHistoryDetailFullFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.wageandhistory.WageAndHistoryDetailFullFragment"
+        android:label="WageAndHistoryDetailFullFragment"
+        tools:layout="@layout/fragment_wage_and_history_detail" />
+    <fragment
+        android:id="@+id/mergeHistoryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.mergeHistory.MergeHistoryFragment"
+        android:label="MergeCombinedRecordFragment"
+        tools:layout="@layout/fragment_merge_combined_record">
+
+        <action
+            android:id="@+id/action_merge_history_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/viewTitleJobFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.showTitleJob.ViewTitleJobFragment"
+        android:label="ViewTitleJobFragment"
+        tools:layout="@layout/fragment_view_title_job">
+
+        <action
+            android:id="@+id/action_viewTitleJobFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/pensionerPayRollFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.showAndAddDependent.payroll.PensionerPayRollFragment"
+        android:label="PensionerPayRollFragment"
+        tools:layout="@layout/fragment_pensioner_pay_roll">
+
+        <action
+            android:id="@+id/action_pay_roll_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/combinedRecordFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.combinedRecord.CombinedRecordFragment"
+        android:label="CombinedRecordFragment"
+        tools:layout="@layout/fragment_combined_record">
+
+        <action
+            android:id="@+id/action_combined_records_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_combinedRecordFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/viewShortTermFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.viewShortTermSupport.ViewShortTermFragment"
+        android:label="ViewShortTermFragment"
+        tools:layout="@layout/fragment_view_short_term">
+
+    </fragment>
+    <fragment
+        android:id="@+id/calculateMarriageAllowanceFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.calculateMarriageAllowance.CalculateMarriageAllowanceFragment"
+        android:label="CalculateMarriageAllowanceFragment"
+        tools:layout="@layout/fragment_calculate_marriage_allowance">
+        <action
+            android:id="@+id/action_calculateMarriageAllowanceFragment_to_messageOfRequestDialogFragment"
+            app:destination="@id/messageOfRequestDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <dialog
+        android:id="@+id/messageOfRequestDialogFragment"
+        android:name="com.tamin.taminhamrah.ui.dialog.messageOfReques.MessageOfRequestDialogFragment"
+        android:label="MessageOfRequestDialogFragment"
+        tools:layout="@layout/dialog_message_of_request">
+        <action
+            android:id="@+id/action_messageOfRequestDialogFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </dialog>
+    <fragment
+        android:id="@+id/calculateWageIllDaysFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.calculateWageIllDays.CalculateWageIllDaysFragment"
+        android:label="CalculateWageIllDaysFragment"
+        tools:layout="@layout/fragment_calculate_wage_ill_days">
+        <action
+            android:id="@+id/action_calculateWageIllDaysFragment_to_messageOfRequestDialogFragment"
+            app:destination="@id/messageOfRequestDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/calculateWagePregnancyFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.calculateWagePregnancy.CalculateWagePregnancyFragment"
+        android:label="CalculateWagePregnancyFragment"
+        tools:layout="@layout/fragment_calculate_wage_pregnancy">
+        <action
+            android:id="@+id/action_calculateWagePregnancyFragment_to_messageOfRequestDialogFragment"
+            app:destination="@id/messageOfRequestDialogFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_calculateWagePregnancyFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/girlSurvivorFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.girlservivor.GirlSurvivorFragment"
+        android:label="GirlSurvivorFragment"
+        tools:layout="@layout/fragment_girl_survivor">
+
+        <action
+            android:id="@+id/action_girlSurvivorFragment_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/edictPensionerFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.viewEdictPensioner.EdictPensionerFragment"
+        android:label="EdictPensionerFragment"
+        tools:layout="@layout/fragment_edict_pensioner">
+
+        <action
+            android:id="@+id/action_edictPensionerFragment_to_pdfViewerActivity"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/issuanceWageCertificateFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.issuanceWageCertificate.IssuanceWageCertificateFragment"
+        android:label="IssuanceWageCertificateFragment" >
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <deepLink app:uri="mytamin://issuance_wage_certificate?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+    </fragment>
+    <fragment
+        android:id="@+id/editProfileImageFragment"
+        android:name="com.tamin.taminhamrah.ui.profile.EditProfileImageFragment"
+        android:label="EditProfileImageFragment"
+        tools:layout="@layout/fragment_edit_profile_image" />
+    <fragment
+        android:id="@+id/deferredInstallmentCertificateFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.deferredInstallmentCertificate.DeferredInstallmentCertificateFragment"
+        android:label="DeferredInstallmentCertificateFragment">
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            android:defaultValue=""
+            app:argType="string" />
+
+        <deepLink app:uri="mytamin://deferred_installment_certificate?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/deservedTreatmentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.deservedTreatment.DeservedTreatmentFragment"
+        android:label="DeservedTreatmentFragment"
+        tools:layout="@layout/fragment_deserved_treatment" />
+    <fragment
+        android:id="@+id/sendInsuranceHistoryToInstitutionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.historyCertificate.HistoryCertificateFragment"
+        android:label="SendInsuranceHistoryToInstitutionFragment">
+        <action
+            android:id="@+id/action_sendInsuranceHistoryToInstitutionFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/calculateWagePensionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.calculateWagePension.CalculateWagePensionFragment"
+        android:label="CalculateWagePensionFragment" />
+    <fragment
+        android:id="@+id/electronicPrescriptionListFragment"
+        android:name="com.tamin.taminhamrah.ui.treatment.electronicPrescription.ElectronicPrescriptionListFragment"
+        android:label="ElectronicPrescriptionListFragment"
+        tools:layout="@layout/fragment_my_electronic_prescription">
+
+        <action
+            android:id="@+id/action_service_to_prescription_detail"
+            app:destination="@id/electronicPrescriptionDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/electronicPrescriptionDetailFragment"
+        android:name="com.tamin.taminhamrah.ui.treatment.electronicPrescription.detail.ElectronicPrescriptionDetailFragment"
+        android:label="ElectronicPrescriptionDetailFragment"
+        tools:layout="@layout/fragment_my_electronic_prescription_detail">
+        <argument
+            android:name="ARG_NOTE_HEAD_ELECTRONIC_PRESCRIPTION"
+            app:argType="long"
+            android:defaultValue="0L" />
+        <argument
+            android:name="ARG_REQUEST_TYPE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="PRES_TYPE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="ARG_NATIONAL_CODE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="ARG_CHILD_NATIONAL_CODE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="ARG_FLAG_SATA"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="TOOLBAR_SUBTITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="TOOLBAR_ICON_IMAGE"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <deepLink
+            android:id="@+id/prescription_detail"
+            app:uri="mytamin://prescription_detail?ARG_NOTE_HEAD_ELECTRONIC_PRESCRIPTION={ARG_NOTE_HEAD_ELECTRONIC_PRESCRIPTION}&amp;ARG_REQUEST_TYPE={ARG_REQUEST_TYPE}&amp;PRES_TYPE={PRES_TYPE}&amp;ARG_NATIONAL_CODE={ARG_NATIONAL_CODE}&amp;ARG_CHILD_NATIONAL_CODE={ARG_CHILD_NATIONAL_CODE}&amp;ARG_FLAG_SATA={ARG_FLAG_SATA}&amp;TOOLBAR_TITLE={TOOLBAR_TITLE}&amp;TOOLBAR_SUBTITLE={TOOLBAR_SUBTITLE}&amp;TOOLBAR_ICON_IMAGE={TOOLBAR_ICON_IMAGE}" />
+    </fragment>
+
+    <activity
+        android:id="@+id/pdfViewerActivity"
+        android:name="com.tamin.taminhamrah.ui.PdfViewerActivity"
+        android:label="PdfViewerActivity"
+        tools:layout="@layout/activity_main" />
+    <activity
+        android:id="@+id/ImageViewerActivity"
+        android:name="com.tamin.taminhamrah.ui.ViewerImageActivity"
+        android:label="ViewerImageActivity"
+        tools:layout="@layout/activity_main" />
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.tamin.taminhamrah.ui.login.LoginActivity"
+        android:label="LoginActivity"
+        tools:layout="@layout/activity_login" />
+    <fragment
+        android:id="@+id/requestForPregnancyPayFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.requestForPregnancyPay.RequestForPregnancyPayFragment"
+        android:label="RequestForPregnancyPayFragment"
+        tools:layout="@layout/fragment_request_for_pregnancy_pay">
+
+        <deepLink app:uri="mytamin://pregnancy_pay?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
+        <action
+            android:id="@+id/action_requestForPregnancyPayFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_requestForPregnancyPayFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_pregnancy_to_calculate"
+            app:destination="@id/calculateWagePregnancyFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/workshopInfoFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.WorkshopInfoFragment"
+        android:label="WorkshopInfoFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_workshopInfo_to_objectionable_debit"
+            app:destination="@id/workshopObjectionableDebtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshopInfo_to_debit"
+            app:destination="@id/workshopDebtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <!-- <action
+             android:id="@+id/action_workshopInfo_to_contract_list"
+             app:destination="@id/specialContactListFragment"
+             app:enterAnim="@anim/fade_in"
+             app:exitAnim="@anim/fade_out"
+             app:popEnterAnim="@anim/fade_in"
+             app:popExitAnim="@anim/fade_out" />-->
+
+        <action
+            android:id="@+id/action_workshopInfo_to_stack_holders"
+            app:destination="@id/workshopStackHolderListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshopInfo_to_members"
+            app:destination="@id/workshopMemberListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshopInfo_to_payment_sheet"
+            app:destination="@id/workshopPaymentSheetsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshopInfo_to_debt_inquiry"
+            app:destination="@id/workshopDebtInquiryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshopInfo_to_recently_added_insured"
+            app:destination="@id/workshopRecentlyAddedMemberListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshopInfo_to_legal_workshop_info"
+            app:destination="@id/completeInfoOfLegalWorkshopFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshop_info_to_register_agreement"
+            app:destination="@id/employerAgreementFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshop_info_to_contract_list"
+            app:destination="@id/employerWorkshopListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshop_info_to_article16_debts_list"
+            app:destination="@id/article16DebtListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_workshop_info_to_letter_list"
+            app:destination="@id/distantCorrespondenceListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_workshop_info_to_inbox_fragment"
+            app:destination="@id/inboxFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/inboxFragment"
+        android:name="com.tamin.taminhamrah.ui.mytamin.inbox.InboxFragment"
+        android:label="InboxFragment"
+        tools:layout="@layout/fragment_inbox">
+        <action
+            android:id="@+id/action_inbox_to_detail"
+            app:destination="@id/inboxDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_inbox_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/workshopRecentlyAddedMemberListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.registration.WRecentlyAddedMemberListFragment"
+        android:label="WorkshopRecentlyAddedMemberListFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_recently_added_to_new_member"
+            app:destination="@id/insuredRegistrationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_new_member_to_cartable"
+            app:destination="@id/navigation_mytamin"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/employerAgreementInfoList"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.onlineService.EmployerAgreementInfoListFragment"
+        android:label="EmployerAgreementInfoList"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_agreement_info_to_workshop_list"
+            app:destination="@id/employerWorkshopListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_agreement_info_to_register_agreement"
+            app:destination="@id/employerAgreementFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/employerAgreementFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.onlineService.EmployerAgreementFragment"
+        android:label="EmployerAgreementFragment"
+        tools:layout="@layout/fragment_workshop_info">
+        <action
+            android:id="@+id/action_agreement_to_contact_list"
+            app:destination="@id/workshopContractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/distantCorrespondenceListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.distantCorrespondence.DistantCorrespondenceListFragment"
+        android:label="EmployerWorkshopListFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_list_to_distant_correspondence"
+            app:destination="@id/distantCorrespondenceFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+    <fragment
+        android:id="@+id/distantCorrespondenceFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.distantCorrespondence.DistantCorrespondenceFragment"
+        android:label="EmployerWorkshopListFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_correspondence_to_image_preview"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/employerWorkshopListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.onlineService.EmployerWorkshopListFragment"
+        android:label="EmployerWorkshopListFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+    <fragment
+        android:id="@+id/workshopContractListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.onlineService.WorkshopContractListFragment"
+        android:label="WorkshopContractListFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+    <fragment
+        android:id="@+id/insuredRegistrationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.registration.InsuredRegistrationFragment"
+        android:label="InsuredRegistrationFragment"
+        tools:layout="@layout/fragment_workshop_info">
+        <action
+            android:id="@+id/action_insured_registration_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_objections_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/legalStackHolderListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.legalStackHolders.LegalStackHolderListFragment"
+        android:label="LegalStackHolderListFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_stack_holder_to_introduce_agent"
+            app:destination="@id/legalStackHolderOtpFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_stack_holder_to_new_item"
+            app:destination="@id/addLegalStackHolderListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/legalStackHolderOtpFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.legalStackHolders.LegalStackHolderOtpDialog"
+        android:label="LegalStackHolderOtpFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/addLegalStackHolderListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.legalStackHolders.AddLegalStackHolderListFragment"
+        android:label="AddLegalStackHolderListFragment"
+        tools:layout="@layout/fragment_workshop_info">
+        <action
+            android:id="@+id/action_list_to_new_stack_holder"
+            app:destination="@id/addLegalStackHolderFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addLegalStackHolderFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.legalStackHolders.AddLegalStackHolderFragment"
+        android:label="AddLegalStackHolderFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/completeWorkshopInfoTabFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.completeInfo.CompleteWorkshopInfoTabFragment"
+        android:label="CompleteWorkshopInfoTabFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            android:defaultValue=""
+            app:argType="string" />
+
+        <deepLink app:uri="mytamin://complete_workshop_info?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+
+        <action
+            android:id="@+id/action_tab_to_legal_workshop"
+            app:destination="@id/completeInfoOfLegalWorkshopFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/completeInfoOfRealWorkshopFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.completeInfo.CompleteInfoOfRealWorkshopFragment"
+        android:label="CompleteInfoOfRealWorkshopFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/completeInfoOfLegalWorkshopFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.completeInfo.CompleteInfoOfLegalWorkshopFragment"
+        android:label="CompleteInfoOfLegalWorkshopFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/workshopStackHolderListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.membersAndStachholders.WorkshopStackHolderListFragment"
+        android:label="WorkshopStackHolderListFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/workshopMemberListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.membersAndStachholders.WorkshopMemberListFragment"
+        android:label="WorkshopMemberListFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/orotezProtezFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.orotezProtez.OrotezProtezFragment"
+        android:label="orotezProtezFragment"
+        tools:layout="@layout/fragment_orotez_protez">
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            android:defaultValue=""
+            app:argType="string" />
+
+        <deepLink app:uri="mytamin://orotez_protez?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+        <action
+            android:id="@+id/action_orotezProtezFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/contractListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contractList.ContractListFragment"
+        android:label="ContractListFragment"
+        tools:layout="@layout/fragment_contract_list">
+        <action
+            android:id="@+id/action_contractListFragment_to_cancelContractFragment"
+            app:destination="@id/cancelContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractListFragment_to_editContractFragment"
+            app:destination="@id/editContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractListFragment_to_editOptionalContractFragment"
+            app:destination="@id/editOptionalContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractListFragment_to_paymentListFragment"
+            app:destination="@id/paymentListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractList_to_insurancePayment"
+            app:destination="@id/insurancePaymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractList_to_newContract"
+            app:destination="@id/insuranceContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_to_optionalContractFragment"
+            app:destination="@id/optionalContractFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_ContractFragment_to_Activity_pdf_view"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractList_to_registration"
+            app:destination="@id/insuranceRegistrationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/insuranceContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.InsuranceContractFragment"
+        android:label="InsuranceContractFragment">
+
+        <action
+            android:id="@+id/action_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contract_to_DependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contract_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contract_to_insurancePayment"
+            app:destination="@id/insurancePaymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/editOptionalContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.EditOptionalContractFragment"
+        android:label="editContractFragment"
+        tools:layout="@layout/fragment_show_contract">
+        <action
+            android:id="@+id/action_editContractFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_editContractFragment_to_Activity_pdf_view"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_editContractFragment_to_showAndRegisterDependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.EditContractFragment"
+        android:label="editContractFragment"
+        tools:layout="@layout/fragment_show_contract">
+        <action
+            android:id="@+id/action_editContractFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_editContractFragment_to_Activity_pdf_view"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_editContractFragment_to_showAndRegisterDependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/cancelContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.studentContract.cancelContract.CancelContractFragment"
+        android:label="cancelContractFragment"
+        tools:layout="@layout/fragment_cancel_contract" />
+
+
+    <fragment
+        android:id="@+id/workshopDebtFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.debit.WorkshopDebtFragment"
+        android:label="WorkshopDebtFragment"
+        tools:layout="@layout/fragment_workshop_info">
+        <action
+            android:id="@+id/action_workshopInfo_debt_to_documents"
+            app:destination="@id/workshopDemandDocumentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_workshopInfo_debt_to_Payment"
+            app:destination="@id/paymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/paymentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.payment.PaymentFragment"
+        android:label="PaymentFragment"
+        tools:layout="@layout/fragment_payment">
+
+        <action
+            android:id="@+id/action_payment_to_tfhFragment"
+            app:destination="@id/tfhFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tfhFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.payment.TFHFragment"
+        android:label="TfhFragment"
+        tools:layout="@layout/fragment_payment" />
+
+
+    <fragment
+        android:id="@+id/workshopDemandDocumentsFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.debit.WorkshopDemandDocumentsFragment"
+        android:label="WorkshopDemandDocumentsFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_workshop_docs_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/workshopPaymentSheetsFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.paymentSheet.WorkshopPaymentSheetsFragment"
+        android:label="WorkshopPaymentSheetsFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/workshopDebtInquiryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.debit.WorkshopDebtInquiryFragment"
+        android:label="WorkshopDebtInquiryFragment"
+        tools:layout="@layout/fragment_workshop_info" />
+
+    <fragment
+        android:id="@+id/objectionInsuranceHistoryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.objectionInsuranceHistory.ObjectionInsuranceHistoryFragment"
+        android:label="ObjectionInsuranceHistoryFragment"
+        tools:layout="@layout/fragment_objection_insurance_history">
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <deepLink app:uri="mytamin://objection_insurance_history?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+        <action
+            android:id="@+id/action_objectionInsuranceHistoryFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/objectionNonExistentHistoryFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.objectionNonExistentHistory.ObjectionNotExistentHistoryFragment"
+        android:label="ObjectionNonExistentHistoryFragment"
+
+        tools:layout="@layout/fragment_objection_non_existent_history">
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <deepLink app:uri="mytamin://objection_non_existent_history?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+        <action
+            android:id="@+id/action_objectionNonExistentHistoryFragment_to_servicesFragment"
+            app:destination="@id/servicesFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/DependentsFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.showAndAddDependent.DependentsFragment"
+        android:label="ViewAndRegisterDependentsFragment"
+        tools:layout="@layout/fragment_show_dependents">
+        <action
+            android:id="@+id/action_DependentsFragment_to_AddNewDependentFragment"
+            app:destination="@id/addDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addDependentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.showAndAddDependent.addDependent.AddDependentFragment"
+        android:label="RegisterNewDependentFragment"
+        tools:layout="@layout/fragment_add_dependent">
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <deepLink app:uri="mytamin://add_dependent?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+        <action
+            android:id="@+id/action_AddDependentFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/inspectionReportFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.correspondence.correspondenceReport.CorrespondenceFragment"
+        android:label="InspectionReportFragment"
+        tools:layout="@layout/fragment_correspondence_report">
+        <action
+            android:id="@+id/action_correspondence_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/performedInspectionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.inspection.PerformedInspectionFragment"
+        android:label="PerformedInspectionFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_objectionList_to_submitInspectionRequest"
+            app:destination="@id/submitInspectionRequestFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_performed_inspection_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+    <fragment
+        android:id="@+id/requestPaymentForillDaysFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.requestPaymentForillDays.RequestPaymentForillDaysFragment"
+        android:label="RequestPaymentForillDaysFragment"
+        tools:layout="@layout/fragment_request_payment_for_ill_days">
+        <action
+            android:id="@+id/action_requestPaymentForillDaysFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_illness_to_calculate"
+            app:destination="@id/calculateWageIllDaysFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/requestFuneralGrantFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.funeralAllowance.FuneralAllowanceFragment"
+        android:label="RequestFuneralGrantFragment"
+        tools:layout="@layout/fragment_funeral_allowance" />
+
+    <fragment
+        android:id="@+id/workshopObjectionableDebtFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.debit.objectionableDebit.WorkshopObjectionableDebtFragment"
+        android:label="WorkshopObjectionableDebtFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_workshopObjection_to_objection_request"
+            app:destination="@id/debitObjectionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/debitObjectionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.debit.objectionableDebit.DebitObjectionFragment"
+        android:label="DebitObjectionFragment"
+        tools:layout="@layout/fragment_workshop_info">
+        <action
+            android:id="@+id/action_debit_objection_to_image_preview"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/specialContactListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.debit.objectionableDebit.SpecialContactListFragment"
+        android:label="WorkshopInfoFragment"
+        tools:layout="@layout/fragment_workshop_info">
+
+        <action
+            android:id="@+id/action_contracts_to_debit"
+            app:destination="@id/workshopDebtFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/listOfInspectionsPerformedFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.inspectionsPlaceEmployment.viewInspectionsPerformedByOrganization.ListOfInspectionsPerformedFragment"
+        android:label="WorkshopInfoFragment"
+        tools:layout="@layout/fragment_list_of_inspections_performed">
+
+        <action
+            android:id="@+id/action_inspections_performed_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_listOfInspectionsPerformedFragment_to_submitInspectionRequestFragment"
+            app:destination="@id/submitInspectionRequestFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+    <fragment
+        android:id="@+id/submitInspectionRequestFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.inspectionsPlaceEmployment.submitInspectionRequest.SubmitInspectionRequestFragment"
+        android:label="SubmitInspectionRequestFragment"
+        tools:layout="@layout/fragment_list_of_inspections_performed" />
+
+    <fragment
+        android:id="@+id/contractInfoFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.ContractInfoFragment"
+        android:label="ContractInfoFragment"
+        tools:layout="@layout/fragment_contract_info">
+
+        <action
+            android:id="@+id/action_contracts_to_detail"
+            app:destination="@id/assignerContractDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contracts_to_computationalBase"
+            app:destination="@id/computationalBaseFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contracts_to_clause38"
+            app:destination="@id/clause38Fragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/workersPaymentInfoFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.construction.WorkersPaymentInfoFragment"
+        android:label="WorkersPaymentInfoFragment"
+        tools:layout="@layout/construction_workers_info_ui">
+
+        <deepLink app:uri="mytamin://workers_payment_info?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
+        <action
+            android:id="@+id/action_workersPaymentInfo_to_Payment"
+            app:destination="@id/paymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/clause38Fragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.clause38.Clause38Fragment"
+        android:label="Clause38Fragment"
+        tools:layout="@layout/fragment_contract_info">
+        <action
+            android:id="@+id/action_clause38_to_Detail"
+            app:destination="@id/clause38DetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/clause38DetailFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.clause38.Clause38DetailFragment"
+        android:label="Clause38DetailFragment"
+        tools:layout="@layout/fragment_contract_info" />
+
+    <fragment
+        android:id="@+id/assignerContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.assignerContract.AssignerContractFragment"
+        android:label="AssignerContractFragment"
+        tools:layout="@layout/fragment_contract_info">
+        <action
+            android:id="@+id/action_assigner_contracts_to_detail"
+            app:destination="@id/assignerContractDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_assigner_to_mafasaHesabRegisterFragment"
+            app:destination="@id/mafasaHesabRegisterFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_contracts_to_computationalBase"
+            app:destination="@id/computationalBaseFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/assignerContractDetailFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.assignerContract.AssignerContractDetailFragment"
+        android:label="AssignerContractDetailFragment"
+        tools:layout="@layout/fragment_contract_info" />
+
+    <fragment
+        android:id="@+id/mafasaHesabRegisterFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.assignerContract.mafasahesab.MafasaHesabRegisterFragment"
+        android:label="MafasaHesabRegisterFragment"
+        tools:layout="@layout/fragment_contract_info">
+        <action
+            android:id="@+id/action_registerMafasa_to_image_preview"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_registerMafasa_to_pdf_preview"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/computationalBaseFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.computationalBase.ComputationalBaseFragment"
+        android:label="ComputationalBaseFragment"
+        tools:layout="@layout/fragment_contract_info">
+
+        <action
+            android:id="@+id/action_computational_base_to_detail"
+            app:destination="@id/computationalBaseDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/computationalBaseDetailFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.contract.computationalBase.ComputationalBaseDetailFragment"
+        android:label="ComputationalBaseDetailFragment"
+        tools:layout="@layout/fragment_contract_info">
+        <action
+            android:id="@+id/action_computational_base_to_image_preview"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_computational_base_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/myElectronicFileFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.electronicFileServices.myElectronicFileService.MyElectronicFileFragment"
+        android:label="SubmitInspectionRequestFragment"
+        tools:layout="@layout/fragment_my_electronic_file">
+        <action
+            android:id="@+id/action_myElectronicFile_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_myElectronicFile_to_image_viewer"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inquirePensionStatusFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.inquirePensionStatus.InquirePensionStatusFragment"
+        android:label="InquirePensionStatusFragment"
+        tools:layout="@layout/fragment_inquire_pension_status" />
+
+
+    <fragment
+        android:id="@+id/contactUsFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.ContactUsFragment"
+        android:label="ContactUsFragment"
+        tools:layout="@layout/fragment_contact_us" />
+
+
+    <fragment
+        android:id="@+id/fraction_contract_fragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.FractionContractFragment"
+        android:label="fractionContractFragment">
+
+        <action
+            android:id="@+id/action_contractList_to_registration"
+            app:destination="@id/insuranceRegistrationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contract_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractListFragment_to_paymentListFragment"
+            app:destination="@id/paymentListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_fraction_contract_to_insurancePayment"
+            app:destination="@id/insurancePaymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_DependentsFragment_to_AddNewDependentFragment"
+            app:destination="@id/AddDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_contractListFragment"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/optionalContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.OptionalContractFragment"
+        android:label="optionalContractFragment">
+        <argument android:name="ARG_CONTACT_TYPE" app:argType="com.tamin.taminhamrah.ui.home.services.contracts.model.EnumInsuranceType" android:defaultValue="TYPE_OPTIONAL"/>
+        <argument android:name="TOOLBAR_TITLE" app:argType="string" app:nullable="true" android:defaultValue="@null"/>
+        <deepLink app:uri="mytamin://contract_optional?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+        <action
+            android:id="@+id/action_contractList_to_registration"
+            app:destination="@id/insuranceRegistrationFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contract_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contractListFragment_to_paymentListFragment"
+            app:destination="@id/paymentListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_contractList_to_insurancePayment"
+            app:destination="@id/insurancePaymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_DependentsFragment_to_AddNewDependentFragment"
+            app:destination="@id/addDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_contractListFragment"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/womenContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.InsuranceContractFragment"
+        android:label="womenContractFragment">
+        <argument android:name="ARG_CONTACT_TYPE" app:argType="com.tamin.taminhamrah.ui.home.services.contracts.model.EnumInsuranceType" android:defaultValue="TYPE_WOMAN"/>
+        <argument android:name="TOOLBAR_TITLE" app:argType="string" app:nullable="true" android:defaultValue="@null"/>
+        <deepLink app:uri="mytamin://contract_woman?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+        <action
+            android:id="@+id/action_women_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_servicesFragment_to_DependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_contractListFragment"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/insuranceContractBusinessOwnersAndFreelancers"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.InsuranceContractFragment"
+        android:label="insuranceContractBusinessOwnersAndFreelancers">
+        <argument android:name="ARG_CONTACT_TYPE" app:argType="com.tamin.taminhamrah.ui.home.services.contracts.model.EnumInsuranceType" android:defaultValue="TYPE_FREELANCE"/>
+        <argument android:name="TOOLBAR_TITLE" app:argType="string" app:nullable="true" android:defaultValue="@null"/>
+        <deepLink app:uri="mytamin://contract_freelance?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+        <action
+            android:id="@+id/action_freelancers_contract_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_student_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_servicesFragment_to_DependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_freelancers_contract_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_freelancers_contract_to_contractListFragment"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/concludingStudentInsuranceContractFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.contracts.InsuranceContractFragment"
+        android:label="ConcludingStudentInsuranceContractFragment"
+        tools:layout="@layout/fragment_student_contract">
+        <argument android:name="ARG_CONTACT_TYPE" app:argType="com.tamin.taminhamrah.ui.home.services.contracts.model.EnumInsuranceType" android:defaultValue="TYPE_STUDENT"/>
+        <argument android:name="TOOLBAR_TITLE" app:argType="string" app:nullable="true" android:defaultValue="@null"/>
+        <deepLink app:uri="mytamin://contract_student?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+        <action
+            android:id="@+id/action_student_contract_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_servicesFragment_to_DependentsFragment"
+            app:destination="@id/DependentsFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_student_to_contractListFragment"
+            app:destination="@id/contractListFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_contract_to_insurancePayment"
+            app:destination="@id/insurancePaymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/insuranceRegistrationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.insuranceRegistration.InsuranceRegistrationFragment"
+        android:label="InsuranceRegistrationFragment"
+        tools:layout="@layout/fragment_student_contract">
+
+        <action
+            android:id="@+id/action_insurance_registration_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/insurancePaymentFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.studentContract.payment.insurance.InsurancePaymentFragment"
+        android:label="InsurancePaymentFragment"
+        tools:layout="@layout/fragment_student_contract">
+
+        <action
+            android:id="@+id/action_insurancePaymentFragment_to_Payment"
+            app:destination="@id/paymentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_payment_to_details"
+            app:destination="@id/paymentCalculationDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/paymentListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.studentContract.payment.paymentList.PaymentListFragment"
+        android:label="PaymentListFragment" />
+    <fragment
+        android:id="@+id/paymentCalculationDetailFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.studentContract.payment.PaymentCalculationDetailFragment"
+        android:label="PaymentCalculationDetailFragment" />
+
+    <fragment
+        android:id="@+id/inquiryEducationFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.inquiryStudyCode.InquiryStudyCodeFragment"
+        android:label="InquiryEducationFragment"
+        tools:layout="@layout/fragment_inquiry_study_code" />
+
+
+    <fragment
+        android:id="@+id/disabilityPensionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.disabilityPension.DisabilityPensionFragment"
+        android:label="InquiryEducationFragment"
+        tools:layout="@layout/fragment_inquiry_study_code">
+
+        <argument
+            android:name="TOOLBAR_TITLE"
+            app:argType="string"
+            android:defaultValue="" />
+        <deepLink app:uri="mytamin://disability_pension?TOOLBAR_TITLE={TOOLBAR_TITLE}" />
+
+        <action
+            android:id="@+id/action_disability_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_disability_to_add_dependent"
+            app:destination="@id/addDependentFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_objectionInsuranceHistoryFragment"
+            app:destination="@id/objectionNonExistentHistoryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_disability_to_Activity_pdf_view"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+
+        <action
+            android:id="@+id/action_disability_to_image_activity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_disability_to_registeredRequestFragment"
+            app:destination="@id/registeredRequestFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/registeredRequestFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.disabilityPension.medicalCommission.registerdRequest.RegisteredRequestFragment"
+        android:label="objectionMedicalWebView"
+        tools:layout="@layout/fragment_object_medical_commission" />
+
+
+    <fragment
+        android:id="@+id/article16DebtListFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.article16.debtList.Article16DebtListFragment"
+        android:label="DebtListFragment"
+        tools:layout="@layout/fragment_debt_list">
+
+        <action
+            android:id="@+id/action_debt_list_to_debt_investigation"
+            app:destination="@id/requestDebtInvestigationArticle16Fragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_article16_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/requestDebtInvestigationArticle16Fragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.employer.workshopInfo.article16.requestArticle16.RequestArticle16Fragment"
+        android:label="RequestDebtInvestigationFragment"
+        tools:layout="@layout/fragment_request_article16">
+        <action
+            android:id="@+id/action_request_article16_to_imageView"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/requestPensionBySurvivor"
+        android:name="com.tamin.taminhamrah.ui.home.services.pensionSurvivor.PensionSurvivorFragment"
+        android:label="requestPensionBySurvivor"
+        tools:layout="@layout/fragment_pension_survivor">
+        <action
+            android:id="@+id/action_pension_survivor_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_pension_survivor_to_image"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_survivor_to_dependent_info"
+            app:destination="@id/survivorDependentInfo"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/survivorDependentInfo"
+        android:name="com.tamin.taminhamrah.ui.home.services.pensionSurvivor.survivorInfo.SurvivorInfoFragment"
+        android:label="SurvivorDependentInfo"
+        tools:layout="@layout/fragment_survivor_info">
+        <action
+            android:id="@+id/action_pension_survivor_info_to_image"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_pension_survivor_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/retirementPensionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.retirementRequest.RetirementPensionFragment"
+        tools:label="RetirementPensionFragment"
+        tools:layout="@layout/fragment_retirement_pension">
+        <action
+            android:id="@+id/action_retirement_pension_to_pdf_viewer"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_retirement_to_objectionInsuranceHistoryFragment"
+            app:destination="@id/objectionNonExistentHistoryFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_retirement_to_image_activity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/constructionInsuranceFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.ConstructionInsurancePremiumFragment"
+        tools:label="constructionInsuranceFragment"
+        tools:layout="@layout/fragment_construction_insurance_premium">
+
+        <action
+            android:id="@+id/action_to_view_detail_request"
+            app:destination="@id/viewDetailRequestFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_beneficiaries_fragment"
+            app:destination="@id/beneficiariesWorkshopFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_payment_sheet"
+            app:destination="@id/issuanceAndManagementPaymentSheetFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_to_installment_management"
+            app:destination="@id/installmentLetterFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/viewDetailRequestFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.viewDetail.ViewDetailRequestFragment"
+        tools:label="viewDetailRequestFragment"
+        tools:layout="@layout/fragment_view_detail_request" />
+
+    <fragment
+        android:id="@+id/issuanceAndManagementPaymentSheetFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.paymentSheet.IssuanceAndManagementPaymentSheetFragment"
+        tools:label="viewDetailRequestFragment"
+        tools:layout="@layout/fragment_view_detail_request">
+
+        <action
+            android:id="@+id/action_payment_sheet_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/beneficiariesWorkshopFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.beneficiaries.BeneficiariesWorkshopFragment"
+        tools:label="viewDetailRequestFragment"
+        tools:layout="@layout/fragment_view_detail_request" />
+
+    <fragment
+        android:id="@+id/constructionPaymentSheetFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.installmentManagement.installmentAndPaymentSheet.InstallmentManagementAndPaymentSheetFragment"
+        tools:label="viewDetailRequestFragment"
+        tools:layout="@layout/fragment_view_detail_request">
+        <action
+            android:id="@+id/action_payment_sheet_to_pdf"
+            app:destination="@id/pdfViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/installmentLetterFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.installmentManagement.installmentLetter.InstallmentLetterFragment"
+        tools:label="viewDetailRequestFragment"
+        tools:layout="@layout/fragment_view_detail_request">
+
+        <action
+            android:id="@+id/action_installment_action_to_debit_list_fragment"
+            app:destination="@id/installmentDebitListConstructionFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+        <action
+            android:id="@+id/action_installment_action_to_installment_management"
+            app:destination="@id/installmentManagementFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/installmentDebitListConstructionFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.installmentManagement.installmentDebitList.InstallmentDebitListFragment"
+        tools:layout="@layout/fragment_installment_debit_list">
+
+    </fragment>
+    <fragment
+        android:id="@+id/installmentManagementFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.constructionInsurancePremium.installmentManagement.installmentAndPaymentSheet.InstallmentManagementAndPaymentSheetFragment"
+        tools:layout="@layout/fragment_installment_managment">
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/socialResponsibilityFragment"
+        android:name="com.tamin.taminhamrah.ui.menuOthers.SocialResponsibilityFragment"
+        android:label="socialResponsibilityFragment"
+        tools:layout="@layout/fragment_social_responsibility" />
+
+    <fragment
+        android:id="@+id/taminRulesFragment"
+        android:name="com.tamin.taminhamrah.ui.login.rules.RulesFragment"
+        android:label="taminRulesFragment"
+        tools:layout="@layout/fragment_rules" />
+
+    <fragment
+        android:id="@+id/occurrenceReportFragment"
+        android:name="com.tamin.taminhamrah.ui.home.services.occurence.OccurrenceReportFragment"
+        android:label="OccurrenceReportFragment"
+        tools:layout="@layout/fragment_rules">
+
+        <action
+            android:id="@+id/action_occurrenceReportFragment_to_ImageViewerActivity"
+            app:destination="@id/ImageViewerActivity"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
+
+</navigation>

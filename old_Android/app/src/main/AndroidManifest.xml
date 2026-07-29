@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries> <!-- Manage Package visibility on Android 11 -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="image/jpeg" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+    <queries>
+        <package android:name="com.farsitel.bazaar" />
+    </queries>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!--
+    -->
+    <application
+        android:name=".AppController"
+        android:configChanges="uiMode"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
+        tools:ignore="UnusedAttribute"
+        android:allowClearUserData="true"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="false"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name="com.tamin.taminhamrah.ui.imagePicker.MultiCustomGalleryUI"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.splash.SplashActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+                <action android:name="android.intent.action.CLOSE_SYSTEM_DIALOGS" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection|locale"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateVisible|adjustResize">
+
+            <intent-filter
+
+                tools:targetApi="m">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!--https://tfh.tamin.ir/#/result/f4c47854-7a64-467d-b471-8f3ea06408b4-->
+                <!--mytamin://callback/freelance-pay-premium/99760000000003288-->
+                <data
+                    android:host="login"
+                    android:scheme="mytamin" />
+
+            </intent-filter>
+        </activity>
+
+        <!--https://tfh.tamin.ir/#/result/f4c47854-7a64-467d-b471-8f3ea06408b4-->
+        <!--        "redirectURL":"mytamin://callback/freelance-pay-premium/0760dc36-093e-4460-badd-0fc0853cf21f"-->
+        <!--        "redirectURL":"mytamin://callback/workshop_payment/0760dc36-093e-4460-badd-0fc0853cf21f"-->
+        <!--            android:configChanges="orientation|screenSize|layoutDirection|locale"
+        -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:configChanges="orientation|screenSize|layoutDirection|locale"
+            android:exported="true"
+            android:fitsSystemWindows="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+            <!--            the autoVerify attribute “allows your app to designate itself as the default handler of a given type of link.-->
+            <intent-filter
+
+                tools:targetApi="m">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!--https://tfh.tamin.ir/#/result/f4c47854-7a64-467d-b471-8f3ea06408b4-->
+                <!--mytamin://callback/freelance-pay-premium/99760000000003288-->
+
+                <data android:scheme="mytamin" />
+                <data android:host="callback_freelance" />
+                <data android:scheme="mytamin" />
+                <data android:host="callback_optional" />
+                <data android:scheme="mytamin" />
+                <data android:host="callback_fraction" />
+                <data android:scheme="mytamin" />
+                <data android:host="callback" />
+                <!--    <data android:scheme="https"/>
+                    <data android:host="tfh.tamin.ir"/>-->
+                <data android:scheme="mytamin" />
+                <data android:host="logout" />
+
+
+                <!-- Accepts URIs that begin with "mytamin://workers_payment_callback/paymentInfo” -->
+                <data android:scheme="mytamin" />
+                <data android:host="workers_payment_callback" />
+
+                <data android:scheme="mytamin" />
+                <data android:host="workers_payment_info" />
+
+                <data android:scheme="mytamin" />
+                <data android:host="edit_phone_number" />
+
+                <data android:scheme="mytamin" />
+                <data android:host="prescription_detail" />
+
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.PdfViewerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.ViewerImageActivity"
+            android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+
+        <meta-data
+            android:name="Android_Device_Verification_key"
+            android:value="AIzaSyDgnITvLdS3HcG-YOeh4pvonqF6Z0u9FK4" />
+
+        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more. -->
+
+        <!-- [END fcm_default_icon] -->
+        <!-- [START fcm_default_channel] -->
+
+        <provider
+            android:name=".utils.updater.fileprovider.GenericFileProvider"
+            android:authorities="${applicationId}.fileProvider.GenericFileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
+        <provider
+            android:name="io.sentry.android.core.SentryInitProvider"
+            android:authorities="${applicationId}.SentryInitProvider"
+            tools:node="remove"
+            />
+        <provider
+            android:name="io.sentry.android.core.SentryPerformanceProvider"
+            android:authorities="${applicationId}.SentryPerformanceProvider"
+            tools:node="remove"
+            />
+
+    </application>
+
+</manifest>

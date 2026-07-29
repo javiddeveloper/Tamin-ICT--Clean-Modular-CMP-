@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        app:layout_constraintTop_toBottomOf="@+id/stepperRules"
+        tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            >
+
+
+            <include
+                android:id="@+id/itemDescAddress"
+                layout="@layout/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:item='@{@string/label_desc_address}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/selectCityName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:elevation="@dimen/_2sdp"
+                android:visibility="visible"
+                app:editText_hint="@string/label_city_name_of_address"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/itemDescAddress" />
+
+
+            <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                android:id="@+id/inputAddress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:elevation="@dimen/_2sdp"
+                app:editText_hint="@string/label_address_of_home"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/selectCityName"
+                app:type="address" />
+
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/inputZipCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:elevation="@dimen/_2sdp"
+                app:editText_hint="@string/label_zipcode"
+                app:editText_max_len="10"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputAddress" />
+
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/inputMobile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:elevation="@dimen/_2sdp"
+                app:editText_max_len="11"
+                app:editText_hint="@string/label_mobile_num"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputZipCode" />
+
+
+            <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                android:id="@+id/inputPhoneNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:elevation="@dimen/_2sdp"
+                app:editText_hint="@string/label_phone"
+                app:editText_max_len="11"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputMobile" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>

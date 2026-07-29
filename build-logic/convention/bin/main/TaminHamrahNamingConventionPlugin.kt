@@ -8,6 +8,7 @@ class TaminHamrahNamingConventionPlugin : Plugin<Project> {
             val checkTask = tasks.register("checkNamingConvention") {
                 group = "verification"
                 description = "Enforces naming conventions for models and mappers based on architecture layers."
+
                 doLast {
                     val conventions = when {
                         path.endsWith("core-domain") -> listOf("model" to "DN.kt")

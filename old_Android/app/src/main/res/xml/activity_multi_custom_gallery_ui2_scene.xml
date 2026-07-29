@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        motion:constraintSetEnd="@+id/end"
+        motion:constraintSetStart="@id/start"
+        motion:duration="1000">
+       <KeyFrameSet>
+       </KeyFrameSet>
+        <OnSwipe motion:touchAnchorId="@+id/rv" />
+    </Transition>
+
+    <ConstraintSet android:id="@+id/start">
+        <Constraint
+            android:id="@+id/fabGoToCamera"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:visibility="invisible"
+            android:layout_marginStart="50dp" />
+        <Constraint
+            android:id="@+id/fabGoToFolder"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="@dimen/margin_50dp"
+            motion:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_width="wrap_content"
+            android:visibility="invisible" />
+        <Constraint
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:id="@+id/fabCameraLarge" />
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/end">
+        <Constraint
+            android:id="@+id/preview"
+            motion:layout_constraintEnd_toEndOf="@+id/guideline"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:alpha="0" />
+        <Constraint
+            android:id="@+id/folderLayout"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toEndOf="@+id/preview"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:visibility="visible"
+            motion:layout_constraintTop_toTopOf="parent"
+            android:translationZ="2dp"
+            android:alpha="0" />
+        <Constraint
+            android:id="@+id/fabCameraLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:visibility="invisible"
+            motion:transitionEasing="linear" />
+    </ConstraintSet>
+</MotionScene>

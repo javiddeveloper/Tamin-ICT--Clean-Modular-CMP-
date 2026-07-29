@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomDatePicker">
+        <attr name="date_piker_hint" format="string" />
+    </declare-styleable>
+  <declare-styleable name="CustomEditText">
+        <attr name="editText_text_color" format="reference" />
+        <attr name="editText_hint_color" format="reference" />
+        <attr name="editText_box_stroke_color" format="reference" />
+        <attr name="editText_hint" format="string" />
+        <attr name="editText_text" format="string" />
+        <attr name="editText_max_line" format="integer" />
+        <attr name="editText_max_len" format="integer" />
+        <attr name="editText_min_len" format="integer" />
+        <attr name="editText_max_day" format="string" />
+        <attr name="editText_year" format="string" />
+        <attr name="editText_line" format="integer" />
+        <attr name="editText_text_size" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="customTextType">
+        <attr name="type" format="enum">
+            <enum name="username" value="0" />
+            <enum name="address" value="1" />
+            <enum name="first_name" value="2" />
+            <enum name="last_name" value="3" />
+            <enum name="place_name" value="4" />
+            <enum name="email" value="5" />
+            <enum name="custom" value="6" />
+            <enum name="serialNumber" value="7" />
+            <enum name="english_input" value="8" />
+            <enum name="time_format" value="9" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="customTextNumberType">
+        <attr name="typeNumberInput" format="enum">
+            <enum name="num" value="0" />
+            <enum name="price" value="1" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="AvatarImageBehavior">
+        <attr name="finalXPosition" format="dimension" />
+        <attr name="finalYPosition" format="dimension" />
+        <attr name="finalHeight" format="dimension" />
+        <attr name="finalToolbarHeight" format="dimension" />
+    </declare-styleable>
+
+
+    <declare-styleable name="SMRecycler">
+        <attr name="decoration_type" format="enum">
+            <enum name="vertical" value="0" />
+            <enum name="horizontal" value="1" />
+            <enum name="line" value="2" />
+            <enum name="tamin_bg" value="3" />
+            <enum name="grid_multi_col" value="4" />
+            <enum name="menu" value="5" />
+            <enum name="grid_3_col" value="6" />
+            <enum name="grid_2_col" value="7" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="Slidr">
+        <attr name="slidr_barHeight" format="dimension" />
+        <attr name="slidr_textTop_visible" format="boolean" />
+        <attr name="slidr_textTop_size" format="dimension" />
+        <attr name="slidr_textBottom_visible" format="boolean" />
+        <attr name="slidr_textBottom_size" format="dimension" />
+        <attr name="slidr_backgroundColor" format="color" />
+
+        <attr name="slidr_step_colorizeAfterLast" format="boolean" />
+        <attr name="slidr_step_drawLine" format="boolean" />
+        <attr name="slidr_step_colorizeOnlyBeforeIndicator" format="boolean" />
+
+        <attr name="slidr_draw_bubble" format="boolean" />
+
+        <attr name="slidr_regions" format="boolean" />
+        <attr name="slidr_regions_centerText" format="boolean" />
+        <attr name="slidr_regions_textFollowRegionColor" format="boolean" />
+        <attr name="slidr_region_leftColor" format="color" />
+        <attr name="slidr_region_rightColor" format="color" />
+
+        <attr name="slidr_indicator_inside" format="boolean" />
+        <attr name="slidr_edditable" format="boolean" />
+    </declare-styleable>
+
+
+        </resources>

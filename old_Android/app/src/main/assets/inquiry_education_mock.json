@@ -1,0 +1,81 @@
+{
+  "get_response": {
+    "key": "inquiry_education_get",
+    "title": "استعلام کد تحصیلی (تستی)",
+    "schema": {
+      "key": "inquiry_education",
+      "currentStep": 1,
+      "showCancelButton": true,
+      "steps": [
+        {
+          "index": 1,
+          "title": "ورود اطلاعات استعلام",
+          "fields": [
+            {
+              "id": "code",
+              "label": "انتخاب فرد (فرزند/تبعی)",
+              "type": "DROPDOWN",
+              "value": "1",
+              "required": true,
+              "options": [
+                {"id": "1", "title": "خود بیمه‌شده (خودم)"},
+                {"id": "1270000001", "title": "علی علوی (فرزند - تستی)"},
+                {"id": "1270000002", "title": "زهرا علوی (فرزند - تستی)"}
+              ]
+            },
+            {
+              "id": "studyCode",
+              "label": "کد رهگیری تحصیلی",
+              "type": "TEXT",
+              "required": true,
+              "validations": [
+                {
+                  "type": "MIN_LENGTH",
+                  "value": "4",
+                  "message": "کد رهگیری تحصیلی باید حداقل ۴ رقم باشد"
+                }
+              ]
+            }
+          ],
+          "actions": []
+        }
+      ]
+    }
+  },
+  "submit_success": {
+    "key": "inquiry_education_submit",
+    "title": "استعلام کد تحصیلی (تستی)",
+    "schema": {
+      "key": "inquiry_education",
+      "currentStep": 2,
+      "showCancelButton": false,
+      "message": "تاییدیه تحصیلی تستی با موفقیت ثبت شد.\nنام دانشجو: محمد علوی\nموسسه: دانشگاه تهران",
+      "steps": [
+        {
+          "index": 2,
+          "title": "نتیجه استعلام",
+          "fields": [],
+          "actions": []
+        }
+      ]
+    }
+  },
+  "submit_failure": {
+    "key": "inquiry_education_submit",
+    "title": "استعلام کد تحصیلی (تستی)",
+    "schema": {
+      "key": "inquiry_education",
+      "currentStep": 1,
+      "showCancelButton": true,
+      "errorMessage": "کد رهگیری تحصیلی وارد شده نامعتبر است یا اطلاعات یافت نشد (کد تست موفق: 123456)",
+      "steps": [
+        {
+          "index": 1,
+          "title": "ورود اطلاعات استعلام",
+          "fields": [],
+          "actions": []
+        }
+      ]
+    }
+  }
+}

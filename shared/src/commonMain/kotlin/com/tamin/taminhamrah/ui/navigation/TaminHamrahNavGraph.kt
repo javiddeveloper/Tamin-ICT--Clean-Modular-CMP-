@@ -1,6 +1,7 @@
-package com.tamin.taminhamrah.ui.navigation
+﻿package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -32,6 +33,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -51,22 +54,24 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.feature.agent.AgentDestination
+import com.tamin.taminhamrah.feature.agent.agentScreen
+import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
-import com.tamin.taminhamrah.feature.history.HistoryRoute
 import com.tamin.taminhamrah.feature.history.historyScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
@@ -74,49 +79,40 @@ import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
+import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
-import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
+import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import com.tamin.taminhamrah.feature.history.navigateToHistory
-import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
-import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
@@ -161,6 +157,19 @@ internal fun TaminHamrahNavGraph(
 
     val showLoginBottomSheet = !isLoggedIn && !isLoading
 
+    val isCartableSelected = currentDestination?.hasRoute<CartableRoute.Main>() == true
+    val isTreatmentSelected = currentDestination?.hasRoute<TreatmentRoute.Main>() == true
+    val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
+    val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
+
+val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
+
+    // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
+    val featureManager: FeatureManager = koinInject()
+    val isAgentEnabled by featureManager
+        .getFeatureStatus(FeatureFlag.AGENT)
+        .map { it is FeatureStatus.Enabled }
+        .collectAsState(initial = false)
     val currentTab = currentDestination.toBottomTab()
     val isBottomBarVisible = currentTab != BottomTab.OTHER
 
@@ -219,8 +228,16 @@ internal fun TaminHamrahNavGraph(
 
 
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
-    Scaffold(
-        contentWindowInsets = WindowInsets(0),
+    Scaffold(contentWindowInsets = WindowInsets(0),
+        floatingActionButton = {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isHomeRoute && isAgentEnabled,
+                enter = androidx.compose.animation.scaleIn(),
+                exit = androidx.compose.animation.scaleOut()
+            ) {
+                AgentFab(onClick = { navController.navigateToAgent() })
+            }
+        },
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -236,14 +253,7 @@ internal fun TaminHamrahNavGraph(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.6f)
-                                )
-                            )
-                        )
+                        .background(brush = AppBarScrim.bottomGradient)
                 ) {
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
@@ -378,6 +388,23 @@ internal fun TaminHamrahNavGraph(
                 workshopsScreen(navController)
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+
+                // Maps the assistant's destination ids to real routes. Ids come from
+                // AgentDestination; anything unmapped is ignored rather than crashing.
+                agentScreen(
+                    onNavigateToDestination = { destination ->
+                        when (destination) {
+                            AgentDestination.DISABILITY_PENSION -> navController.navigateToDisabilityPension()
+                            AgentDestination.DEFERRED_INSTALLMENT -> navController.navigateToDeferredInstallment()
+                            AgentDestination.CONTRACTS -> navController.navigateToContracts()
+                            AgentDestination.WORKSHOPS -> navController.navigateToWorkshops()
+                            AgentDestination.PRESCRIPTION -> navController.navigateToPrescription()
+                            else -> Unit
+                        }
+                    }
+                )
+
+                healthProfileScreen(onBack = { navController.popBackStack() })
             }
 
             AnimatedVisibility(
@@ -390,19 +417,7 @@ internal fun TaminHamrahNavGraph(
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Black.copy(alpha = 0.35f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                )
+                TopBarScrim()
             }
 
             if (isLoading) {
@@ -639,6 +654,129 @@ fun HomeScreen(
                     Text(stringResource(Res.string.retry))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun Handleevents(
+    viewModel: HomeViewModel,
+    onNavigateToHistory: () -> Unit,
+    onNavigateToWorkshops: () -> Unit,
+    onNavigateToContracts: () -> Unit,
+    onNavigateToStudentInsuranceContract: () -> Unit,
+    onNavigateToFreelanceInsuranceContract: () -> Unit,
+    onNavigateToOptionalInsuranceContract: () -> Unit,
+    onNavigateToHousewifeInsuranceContract: () -> Unit,
+    onNavigateToPensionInquiry: () -> Unit,
+    onNavigateToCalculatePension: () -> Unit,
+    onNavigateToPrescription: () -> Unit,
+    onNavigateToDeservedTreatment: () -> Unit,
+    onNavigateToPayRoll: () -> Unit,
+    onNavigateToEdict: () -> Unit,
+    onNavigateToIssuanceCertificate: () -> Unit,
+    onNavigateToDeferredInstallment: () -> Unit,
+    onNavigateToGirlSurvivor: () -> Unit,
+    onNavigateToPensionSurvivor: () -> Unit,
+    onNavigateToDisabilityPension: () -> Unit
+) {
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is HomeEvent.NavigateToService -> {
+                    when (event.flag) {
+                        FeatureFlag.MERGE_HISTORY -> onNavigateToHistory()
+                        FeatureFlag.WORKSHOPS -> onNavigateToWorkshops()
+                        FeatureFlag.CONTRACTS -> onNavigateToContracts()
+                        FeatureFlag.STUDENT_INSURANCE -> onNavigateToStudentInsuranceContract()
+                        FeatureFlag.FREELANCE_INSURANCE -> onNavigateToFreelanceInsuranceContract()
+                        FeatureFlag.OPTIONAL_INSURANCE -> onNavigateToOptionalInsuranceContract()
+                        FeatureFlag.HOUSEWIFE_INSURANCE -> onNavigateToHousewifeInsuranceContract()
+                        FeatureFlag.PENSION_INQUIRY -> onNavigateToPensionInquiry()
+                        FeatureFlag.CALCULATE_WAGE_PENSION -> onNavigateToCalculatePension()
+                        FeatureFlag.PRESCRIPTION -> onNavigateToPrescription()
+                        FeatureFlag.DESERVED_TREATMENT_101 -> onNavigateToDeservedTreatment()
+                        FeatureFlag.PAY_ROLL -> onNavigateToPayRoll()
+                        FeatureFlag.EDICT_PENSIONER -> onNavigateToEdict()
+                        FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> onNavigateToIssuanceCertificate()
+                        FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> onNavigateToDeferredInstallment()
+                        FeatureFlag.GIRL_SURVIVOR -> onNavigateToGirlSurvivor()
+                        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> onNavigateToPensionSurvivor()
+                        FeatureFlag.DISABILITY_PENSION -> onNavigateToDisabilityPension()
+                        else -> { /* Handle other flags if needed */
+                        }
+                    }
+                }
+
+                is HomeEvent.NavigateToWeb -> {
+                    openUrl(event.url)
+                }
+
+                is HomeEvent.ShowMessage -> {
+                    // In a real app, we'd use a SnackbarHostState
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AgentFab(onClick: () -> Unit) {
+    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.9f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween<Float>(1200),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.08f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween<Float>(1200),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
+    androidx.compose.ui.layout.Layout(
+        content = {
+            androidx.compose.foundation.Canvas(modifier = Modifier.size(72.dp)) {
+                drawCircle(
+                    color = androidx.compose.ui.graphics.Color(0xFF1A73E8).copy(alpha = glowAlpha * 0.4f),
+                    radius = size.minDimension / 2f * 1.3f
+                )
+            }
+            FloatingActionButton(
+                onClick = onClick,
+                modifier = Modifier.size(56.dp),
+                containerColor = androidx.compose.ui.graphics.Color(0xFF1A73E8),
+                contentColor = androidx.compose.ui.graphics.Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 8.dp,
+                    pressedElevation = 4.dp
+                )
+            ) {
+                Text(
+                    text = "AI",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White
+                    )
+                )
+            }
+        }
+    ) { measurables, constraints ->
+        val glow = measurables[0].measure(constraints)
+        val fab = measurables[1].measure(constraints)
+        val w = maxOf(glow.width, fab.width)
+        val h = maxOf(glow.height, fab.height)
+        layout(w, h) {
+            glow.placeRelative((w - glow.width) / 2, (h - glow.height) / 2)
+            fab.placeRelative((w - fab.width) / 2, (h - fab.height) / 2)
         }
     }
 }

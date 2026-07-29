@@ -1,0 +1,133 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        app:nextStepEnable="true"
+        app:previousStepVisible="true"
+        app:previousStepEnable="true"
+        app:step_index="4"
+        app:step_state="normal"
+        app:step_title="@string/label_step_occurrence_description"
+        app:nextStepTitle="@string/send_request">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <include
+                android:id="@+id/widgetDatePicker"
+                layout="@layout/widget_date_picker"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:hint='@{@string/label_occurrence_date}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <com.tamin.taminhamrah.widget.edittext.string.EditTextString
+                android:id="@+id/etOccurrenceTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_occurrence_time"
+                app:editText_max_len="5"
+                app:layout_constraintTop_toBottomOf="@id/widgetDatePicker"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:type="time_format" />
+
+            <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+                android:id="@+id/selectResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:editText_hint="@string/label_occurrence_result"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etOccurrenceTime" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                android:id="@+id/etOccurrenceLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_occurrence_location"
+                android:tag="address"
+                app:editText_max_len="300"
+                app:editText_max_line="3"
+                app:layout_constraintTop_toBottomOf="@+id/selectResult"
+                app:type="address" />
+
+            <com.tamin.taminhamrah.widget.edittext.string.MultiLineEditTextString
+                android:id="@+id/etOccurrenceDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
+                app:editText_hint="@string/label_occurrence_description"
+                android:tag="address"
+                app:editText_max_len="300"
+                app:editText_max_line="3"
+                app:layout_constraintTop_toBottomOf="@+id/etOccurrenceLocation"
+                app:type="custom" />
+
+            <include
+                android:id="@+id/item_Desc_1"
+                layout="@layout/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_10dp"
+                app:item='@{@string/label_image_guid}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etOccurrenceDescription"/>
+
+            <include
+                android:id="@+id/item_Desc_2"
+                layout="@layout/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_10dp"
+                app:item='@{@string/label_image_guid_2_item_needed}'
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_Desc_1" />
+
+            <LinearLayout
+                android:id="@+id/layoutDescHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/margin_10dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_Desc_1"/>
+
+            <include
+                android:id="@+id/item_add_doc"
+                layout="@layout/item_add_doc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_Desc_2" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                style="@style/LinearRecyclerStyle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_add_doc" />
+            
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>

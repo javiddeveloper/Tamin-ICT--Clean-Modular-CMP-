@@ -1,0 +1,10 @@
+{
+    "status": 200,
+    "family": "SUCCESSFUL",
+    "reason": "OK",
+    "data": {
+       "updateLink" : "https://s.cafebazaar.ir/2/bazaarapk/bazaar.apk",
+       "updateDetail" : "2:2",
+        "md5" : "093876F367ACEE201C520A4936770F25"
+    }
+}

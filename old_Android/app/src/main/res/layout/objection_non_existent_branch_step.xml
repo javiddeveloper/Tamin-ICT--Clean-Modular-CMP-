@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/stepperRegistration"
+    style="@style/VerticalStepperItemView"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/btnRegistration"
+    app:previousStepVisible="false"
+    app:step_index="1"
+    app:step_state="selected"
+
+    app:step_title="@string/label_branch_information">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="?attr/colorSurface">
+
+        <com.tamin.taminhamrah.widget.LocationSelectorWidget
+            android:id="@+id/locationSelector"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.tamin.taminhamrah.widget.edittext.SelectableItemView
+            android:id="@+id/selectInsuranceType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:editText_hint="@string/label_insurance_type"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/locationSelector" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+

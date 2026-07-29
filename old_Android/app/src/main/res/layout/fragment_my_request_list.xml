@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/view_appbar_service" />
+
+        <include
+            android:id="@+id/appbarBackgroundImage"
+            layout="@layout/view_appbar_image" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/rootLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true"
+                android:clickable="false"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/labelSearchMyRequest"
+                    style="@style/TextStyle.Title.Bold"
+                    android:padding="@dimen/margin_20dp"
+                    android:text="@string/label_search_my_request"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btnCloseSearch"
+                    style="@style/ImageButton.Clickable"
+                    android:layout_height="48dp"
+                    android:scaleY="-1"
+                    android:tint="@color/black"
+                    android:layout_margin="@dimen/_5sdp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_expand_more" />
+
+
+
+                <com.tamin.taminhamrah.widget.edittext.number.EditTextNumber
+                    android:id="@+id/inputTrackingCode"
+                    style="@style/TextInputLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginEnd="@dimen/margin_20dp"
+                    app:editText_hint="@string/label_tracking_code"
+                    app:editText_max_len="10"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelSearchMyRequest" />
+
+                <include
+                    android:id="@+id/inputRequestType"
+                    layout="@layout/widget_selectable_item"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10dp"
+                    app:hintselect="@{@string/label_request_type}"
+                    app:layout_constraintEnd_toEndOf="@id/inputTrackingCode"
+                    app:layout_constraintStart_toStartOf="@id/inputTrackingCode"
+                    app:layout_constraintTop_toBottomOf="@id/inputTrackingCode" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSearch"
+                    style="@style/MainButton"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:text="@string/label_search_my_request"
+                    app:layout_constraintEnd_toEndOf="@id/inputRequestType"
+                    app:layout_constraintStart_toStartOf="@id/inputRequestType"
+                    app:layout_constraintTop_toBottomOf="@id/inputRequestType" />
+
+                <TextView
+                    android:id="@+id/tvTitleService"
+                    style="@style/TextStyle.Title.Bold"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
+                    android:text="@string/label_my_request_list"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnSearch" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btnOpenSearch"
+                    style="@style/ImageButton.Clickable"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnSearch"
+                    app:srcCompat="@drawable/ic_search_black"
+                    android:tint="?attr/colorOnSurface"
+                    />
+
+                <com.tamin.taminhamrah.widget.CustomRecyclerView
+                    android:id="@+id/recycler"
+                    style="@style/LinearPaginationRecyclerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnOpenSearch"
+
+                    app:decoration_type="vertical"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:constraint_referenced_ids="inputTrackingCode,inputRequestType,btnSearch,labelSearchMyRequest,btnCloseSearch" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_item_dark_blue_top"
+        android:layoutDirection="ltr"
+        android:minWidth="@dimen/dialog_min_width"
+        android:padding="@dimen/margin_20dp"
+        android:textDirection="rtl"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/img"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="@dimen/margin_20dp"
+            android:background="@drawable/ic_launcher"
+            app:layout_constraintBottom_toTopOf="@id/labelTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelTitle"
+            style="@style/TextStyle.Header.Black"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_40dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:gravity="center"
+            android:text="@string/label_app_update_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/img" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelDescription"
+            style="@style/TextStyle.Title"
+            android:layout_width="0dp"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:gravity="center"
+            android:text="@string/label_app_update_description"
+            app:layout_constraintEnd_toEndOf="@id/labelTitle"
+            app:layout_constraintStart_toStartOf="@id/labelTitle"
+            app:layout_constraintTop_toBottomOf="@id/labelTitle" />
+
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_40dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/labelDescription"
+            app:layout_constraintStart_toStartOf="@+id/labelDescription"
+            app:layout_constraintTop_toBottomOf="@id/labelDescription">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCancel"
+                style="@style/MainButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:visibility="visible"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:background="@drawable/bg_btn_dialog_dark_blue"
+                android:backgroundTint="@color/bg_dialog_cancel"
+                android:text="@string/cancel"
+                android:textColor="?attr/colorOnSurface"
+                />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDirectUpdate"
+                style="@style/MainButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:paddingStart="@dimen/margin_4dp"
+                android:paddingEnd="@dimen/margin_4dp"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:background="@drawable/bg_btn_dialog_dark_blue"
+                android:text="@string/label_update_direct"
+                android:textColor="@color/white"
+                />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnUpdateFromBazaar"
+                style="@style/MainButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:paddingStart="@dimen/margin_4dp"
+                android:paddingEnd="@dimen/margin_4dp"
+                android:background="@drawable/bg_btn_dialog_dark_blue"
+                android:text="@string/label_update_bazaar"
+                android:textColor="@color/white" />
+
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

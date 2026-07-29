@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:animateLayoutChanges="true"
+    android:id="@+id/recorde_container"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    tools:showIn="@layout/fragment_ai_laws">
+
+    <ImageView
+        android:id="@+id/buttonDeleteVoice"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_delete"
+        app:tint="@color/colorPrimary" />
+
+    <ImageView
+        android:id="@+id/buttonPlayPause"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="@dimen/margin_4dp"
+        android:src="@drawable/ic_account"
+        app:tint="@color/colorPrimary" />
+
+    <com.masoudss.lib.WaveformSeekBar
+        android:id="@+id/audio_player"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:layout_marginEnd="@dimen/margin_4dp"
+        android:layout_marginStart="@dimen/margin_4dp"
+        app:marker_color="@color/red"
+        app:marker_text_color="@color/colorAccent"
+        app:marker_text_padding="2dp"
+        app:marker_text_size="12dp"
+        app:marker_width="1dp"
+        app:wave_background_color="@color/color_workshop_code"
+        app:wave_corner_radius="2dp"
+        app:wave_gap="2dp"
+        app:wave_gravity="center"
+        app:wave_max_progress="100"
+        app:wave_min_height="5dp"
+        app:wave_padding_Bottom="2dp"
+        app:wave_padding_left="2dp"
+        app:wave_padding_right="2dp"
+        app:wave_padding_top="2dp"
+        app:wave_progress="0"
+        app:wave_progress_color="@color/colorPrimary"
+        app:wave_visible_progress="0"
+        app:wave_width="5dp" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txt_count_down"
+        android:layout_width="wrap_content"
+        style="@style/TextStyle.Title"
+        android:gravity="center"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        tools:text="00:20" />
+
+    <com.visualizer.amplitude.AudioRecordView
+        android:id="@+id/audio_recorder"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_weight="1"
+        app:chunkAlignTo="center"
+        app:chunkColor="@color/colorPrimary"
+        app:chunkMaxHeight="48dp"
+        app:chunkMinHeight="2dp"
+        app:chunkRoundedCorners="true"
+        app:chunkSoftTransition="true"
+        app:chunkSpace="2dp"
+        app:chunkWidth="5dp"
+        app:direction="leftToRight" />
+
+
+</LinearLayout>

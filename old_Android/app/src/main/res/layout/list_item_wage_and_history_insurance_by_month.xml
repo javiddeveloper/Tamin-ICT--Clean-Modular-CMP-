@@ -1,0 +1,1556 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <data>
+        <import type="android.view.View" />
+
+        <variable
+            name="item"
+            type="com.tamin.taminhamrah.data.remote.models.services.WageAndHistoryModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/margin_5dp">
+
+        <View
+            android:id="@+id/containerWorkshopInformation"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelWorkshopInformation"
+            style="@style/TextStyle.Title.Bold"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/margin_20dp"
+            android:text="@string/workshop_information"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/item_workshop_name_information"
+            app:layout_constraintTop_toTopOf="@id/item_workshop_name_information" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/item_workshop_name_information"
+            style="@style/TextStyle.Title.colorPrimary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20dp"
+            android:gravity="end"
+            android:padding="@dimen/margin_6dp"
+            android:text="@{item.rwshname}"
+            app:layout_constraintHeight_max="@dimen/dimen_60dp"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/labelWorkshopInformation"
+            tools:text="تسیبامنتبا نتباسمنتب یتبا تیابسمنت ینتبا نیتا نتیا بن سنتبیاتیان س س نیتنب تسا ینتبیسنت ستب اینب یبنت سابی بنست ابب ی سنت ا ب سینتاب  سنتاب نت" />
+
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnInfoWorkShopExpand"
+            style="@style/ImageButton.Clickable"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_20dp"
+            android:visibility="gone"
+            android:tint="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/item_workshop_name_information"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_expand_more" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelHistoryTypeNameTitle"
+            style="@style/TextStyle.Title"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/margin_20dp"
+            android:text="@string/label_history_typeName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_workshop_name_information" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/labelHistoryTypeNameValue"
+            style="@style/TextStyle.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="20dp"
+            android:padding="@dimen/margin_20dp"
+            android:text="@{item.historytypedesc}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_workshop_name_information"
+            tools:text="ssss" />
+
+            <View
+                android:id="@+id/lineInfo1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="@dimen/margin_16dp"
+                android:layout_marginEnd="@dimen/margin_16dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelHistoryTypeNameValue" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelBranchNameTitle"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:padding="@dimen/margin_20dp"
+                android:text="@string/label_branch_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lineInfo1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelBranchNameValue"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="20dp"
+                android:padding="@dimen/margin_20dp"
+                android:text="@{item.brhname}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lineInfo1"
+                tools:text="ssss" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelWorkshopNumberValue"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="20dp"
+                android:padding="@dimen/margin_20dp"
+                android:text="@{item.rwshid}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lineInfo2"
+                tools:text="ssss" />
+
+            <View
+                android:id="@+id/lineInfo2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="@dimen/margin_16dp"
+                android:layout_marginEnd="@dimen/margin_16dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelBranchNameValue" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelWorkshopNumberTitle"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:padding="@dimen/margin_20dp"
+                android:text="@string/label_workshop_number"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lineInfo2" />
+
+        <View
+            android:id="@+id/lineInfo3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_1dp"
+            android:layout_marginStart="@dimen/margin_16dp"
+            android:layout_marginEnd="@dimen/margin_16dp"
+            android:background="@color/lineColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/labelWorkshopNumberTitle" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelDetailHistory"
+                style="@style/TextStyle.Title.Bold"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:padding="@dimen/margin_20dp"
+                android:text="@string/label_history_details"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/labelWorkshopNumberTitle"/>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rootLayoutSeason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/margin_14dp"
+            android:paddingEnd="@dimen/margin_14dp"
+            android:paddingBottom="@dimen/margin_15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/labelDetailHistory"
+            >
+
+            <!--season: spring-->
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupspring"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:constraint_referenced_ids="guideline3,line3,titleWageUnit3,tvWage3,titleDay3,tvValueMonth3,verticalLine6,tvTitleMonth3,verticalLine5,guideline2,line2,titleWageUnit2,tvWage2,titleDay2,tvValueMonth2,verticalLine4,tvTitleMonth2,verticalLine3,guideline1,line1,titleWageUnit1,tvWage1,titleDay1,tvValueMonth1,verticalLine1,containerSpring,verticalLine2,tvTitleMonth1"
+                app:layout_constraintBottom_toBottomOf="@id/containerSpring"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/containerSpring" />
+
+            <View
+                android:id="@+id/containerSpring"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:background="@drawable/bg_item_spring"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@id/line3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <View
+                android:id="@+id/verticalLine2"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/line1"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay1"
+                app:layout_constraintTop_toTopOf="@+id/containerSpring" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth1"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month1"
+                app:layout_constraintEnd_toEndOf="@id/containerSpring"
+                app:layout_constraintTop_toTopOf="@id/containerSpring" />
+
+            <View
+                android:id="@+id/verticalLine1"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth1"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth1"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth1"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon1)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth1"
+                app:layout_constraintStart_toStartOf="@+id/guideline1"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth1"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay1"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth1"
+                app:layout_constraintEnd_toStartOf="@+id/guideline1"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth1" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage1"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage1)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLine2"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit1"
+                app:layout_constraintTop_toTopOf="@+id/verticalLine2"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit1"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage1" />
+
+            <View
+                android:id="@+id/line1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth1" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLine3"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLine4"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay2"
+                app:layout_constraintTop_toTopOf="@+id/verticalLine4" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth2"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month2"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth1"
+                app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+            <View
+                android:id="@+id/verticalLine4"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth2"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth2"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth2" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth2"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon2)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth2"
+                app:layout_constraintStart_toStartOf="@+id/guideline2"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth2"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay2"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth2"
+                app:layout_constraintEnd_toStartOf="@+id/guideline2"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth2" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage2"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage2)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLine3"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit2"
+                app:layout_constraintTop_toTopOf="@+id/verticalLine3"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit2"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage2" />
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth2" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLine5"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/line3"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay3"
+                app:layout_constraintTop_toTopOf="@+id/verticalLine6" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth3"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month3"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth2"
+                app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+            <View
+                android:id="@+id/verticalLine6"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/line3"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth3"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth3"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon3)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLine6"
+                app:layout_constraintStart_toStartOf="@+id/guideline3"
+                app:layout_constraintTop_toTopOf="@+id/verticalLine6"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay3"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth3"
+                app:layout_constraintEnd_toStartOf="@+id/guideline3"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth3" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage3"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage3)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLine5"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit3"
+                app:layout_constraintTop_toTopOf="@+id/verticalLine5"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit3"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage3" />
+
+            <View
+                android:id="@+id/line3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth3" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+
+            <!--season: summer-->
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupSummer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:constraint_referenced_ids="guidelineSummer4,lineSummer3,titleWageUnit6,tvWage6,titleDay6,tvValueMonth6,verticalLineSummer6,tvTitleMonth6,verticalLineSummer5,guidelineSummer2,lineSummer2,titleWageUnit5,tvWage5,titleDay5,tvValueMonth5,verticalLineSummer4,tvTitleMonth5,verticalLineSummer3,guidelineSummer1,lineSummer1,titleWageUnit4,tvWage4,titleDay4,tvValueMonth4,verticalLineSummer2,containerSummer,verticalLineSummer1,tvTitleMonth4"
+                app:layout_constraintBottom_toBottomOf="@id/containerSummer"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/containerSummer" />
+
+            <View
+                android:id="@+id/containerSummer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:background="@drawable/bg_item_summer"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@id/lineSummer3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/line3" />
+
+
+            <View
+                android:id="@+id/verticalLineSummer1"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineSummer1"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay4"
+                app:layout_constraintTop_toTopOf="@+id/containerSummer" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth4"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month4"
+                app:layout_constraintEnd_toEndOf="@id/containerSummer"
+                app:layout_constraintTop_toTopOf="@id/containerSummer" />
+
+            <View
+                android:id="@+id/verticalLineSummer2"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth4"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth4"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth4" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth4"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon4)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth4"
+                app:layout_constraintStart_toStartOf="@+id/guidelineSummer1"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth4"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay4"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth4"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineSummer1"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth4" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage4"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage4)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineSummer1"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit4"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineSummer1"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit4"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage4" />
+
+            <View
+                android:id="@+id/lineSummer1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth4" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineSummer1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLineSummer3"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineSummer4"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay5"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineSummer4" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth5"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month5"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth4"
+                app:layout_constraintTop_toBottomOf="@+id/lineSummer1" />
+
+            <View
+                android:id="@+id/verticalLineSummer4"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth5"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth5"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth5" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth5"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon5)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth5"
+                app:layout_constraintStart_toStartOf="@+id/guidelineSummer2"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth5"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay5"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth5"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineSummer2"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth5" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage5"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage5)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineSummer3"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit5"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineSummer3"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit5"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage5" />
+
+            <View
+                android:id="@+id/lineSummer2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth5" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineSummer2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLineSummer5"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineSummer3"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay6"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineSummer6" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth6"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month6"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth5"
+                app:layout_constraintTop_toBottomOf="@+id/lineSummer2" />
+
+            <View
+                android:id="@+id/verticalLineSummer6"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineSummer3"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth6"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth6" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth6"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon6)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineSummer6"
+                app:layout_constraintStart_toStartOf="@+id/guidelineSummer4"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineSummer6"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay6"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth6"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineSummer4"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth6" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage6"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage6)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineSummer5"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit6"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineSummer5"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit6"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage6" />
+
+            <View
+                android:id="@+id/lineSummer3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth6" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineSummer4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+
+
+            <!--season: fall-->
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupFall"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:constraint_referenced_ids="guidelineFall4,lineFall3,titleWageUnit9,tvWage9,titleDay9,tvValueMonth9,verticalLineFall6,tvTitleMonth9,verticalLineFall5,guidelineFall2,lineFall2,titleWageUnit8,tvWage8,titleDay8,tvValueMonth8,verticalLineFall4,tvTitleMonth8,verticalLineFall3,guidelineFall1,lineFall1,titleWageUnit7,tvWage7,titleDay7,tvValueMonth7,verticalLineFall2,containerFall,verticalLineFall1,tvTitleMonth7"
+                app:layout_constraintBottom_toBottomOf="@id/containerFall"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/containerFall" />
+
+            <View
+                android:id="@+id/containerFall"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:background="@drawable/bg_item_fall"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@id/lineFall3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/lineSummer3" />
+
+
+            <View
+                android:id="@+id/verticalLineFall1"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineFall1"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay7"
+                app:layout_constraintTop_toTopOf="@+id/containerFall" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth7"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month7"
+                app:layout_constraintEnd_toEndOf="@id/containerFall"
+                app:layout_constraintTop_toTopOf="@id/containerFall" />
+
+            <View
+                android:id="@+id/verticalLineFall2"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth7"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth7"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth7" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth7"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon7)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth7"
+                app:layout_constraintStart_toStartOf="@+id/guidelineFall1"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth7"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay7"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth7"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineFall1"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth7" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage7"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage7)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineFall1"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit7"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineFall1"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit7"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage7"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage7" />
+
+            <View
+                android:id="@+id/lineFall1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth7" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineFall1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLineFall3"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineFall4"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay8"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineFall4" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth8"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month8"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth7"
+                app:layout_constraintTop_toBottomOf="@+id/lineFall1" />
+
+            <View
+                android:id="@+id/verticalLineFall4"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth8"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth8"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth8" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth8"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon8)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth8"
+                app:layout_constraintStart_toStartOf="@+id/guidelineFall2"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth8"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay8"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth8"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineFall2"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth8" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage8"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage8)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineFall3"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit8"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineFall3"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit8"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage8"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage8" />
+
+            <View
+                android:id="@+id/lineFall2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth8" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineFall2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLineFall5"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineFall3"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay9"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineFall6" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth9"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month9"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth8"
+                app:layout_constraintTop_toBottomOf="@+id/lineFall2" />
+
+            <View
+                android:id="@+id/verticalLineFall6"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineFall3"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth9"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth9" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth9"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon9)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineFall6"
+                app:layout_constraintStart_toStartOf="@+id/guidelineFall4"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineFall6"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay9"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth9"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineFall4"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth9" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage9"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage9)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineFall5"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit9"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineFall5"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit9"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage9"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage9" />
+
+            <View
+                android:id="@+id/lineFall3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth9" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineFall4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+
+            <!--season: winter-->
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/groupWinter"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:constraint_referenced_ids="guidelineWinter4,lineWinter3,titleWageUnit12,tvWage12,titleDay12,tvValueMonth12,verticalLineWinter6,tvTitleMonth12,verticalLineWinter5,guidelineWinter2,lineWinter2,titleWageUnit11,tvWage11,titleDay11,tvValueMonth11,verticalLineWinter4,tvTitleMonth11,verticalLineWinter3,guidelineWinter1,lineWinter1,titleWageUnit10,tvWage10,titleDay10,tvValueMonth10,verticalLineWinter2,containerWinter,verticalLineWinter1,tvTitleMonth10"
+                app:layout_constraintBottom_toBottomOf="@id/containerWinter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/containerWinter" />
+
+            <View
+                android:id="@+id/containerWinter"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:background="@drawable/bg_item_winter"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@id/lineWinter3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/lineFall3" />
+
+
+            <View
+                android:id="@+id/verticalLineWinter1"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineWinter1"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay10"
+                app:layout_constraintTop_toTopOf="@+id/containerWinter" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth10"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month10"
+                app:layout_constraintEnd_toEndOf="@id/containerWinter"
+                app:layout_constraintTop_toTopOf="@id/containerWinter" />
+
+            <View
+                android:id="@+id/verticalLineWinter2"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth10"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth10"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth10" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth10"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon10)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth10"
+                app:layout_constraintStart_toStartOf="@+id/guidelineWinter1"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth10"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay10"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth10"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineWinter1"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth10" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage10"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage10)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineWinter1"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit10"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineWinter1"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit10"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage10"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage10" />
+
+            <View
+                android:id="@+id/lineWinter1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth10" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineWinter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLineWinter3"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineWinter4"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay11"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineWinter4" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth11"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month11"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth10"
+                app:layout_constraintTop_toBottomOf="@+id/lineWinter1" />
+
+            <View
+                android:id="@+id/verticalLineWinter4"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth11"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth11"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth11" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth11"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon11)}"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitleMonth11"
+                app:layout_constraintStart_toStartOf="@+id/guidelineWinter2"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth11"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay11"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth11"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineWinter2"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth11" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage11"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage11)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineWinter3"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit11"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineWinter3"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit11"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage11"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage11" />
+
+            <View
+                android:id="@+id/lineWinter2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth11" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineWinter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <View
+                android:id="@+id/verticalLineWinter5"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineWinter3"
+                app:layout_constraintEnd_toStartOf="@+id/titleDay12"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineWinter6" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitleMonth12"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/month12"
+                app:layout_constraintEnd_toEndOf="@+id/tvTitleMonth11"
+                app:layout_constraintTop_toBottomOf="@+id/lineWinter2" />
+
+            <View
+                android:id="@+id/verticalLineWinter6"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintBottom_toBottomOf="@+id/lineWinter3"
+                app:layout_constraintStart_toEndOf="@+id/tvValueMonth12"
+                app:layout_constraintTop_toTopOf="@+id/tvTitleMonth12" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValueMonth12"
+                style="@style/TextStyle.Title.colorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getDay(item.hismon12)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineWinter6"
+                app:layout_constraintStart_toStartOf="@+id/guidelineWinter4"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineWinter6"
+                tools:text="31" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleDay12"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_1dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/day"
+                app:layout_constraintBottom_toBottomOf="@+id/tvValueMonth12"
+                app:layout_constraintEnd_toStartOf="@+id/guidelineWinter4"
+                app:layout_constraintTop_toTopOf="@+id/tvValueMonth12" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWage12"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@{item.getCurrency(item.hiswage12)}"
+                app:layout_constraintBottom_toBottomOf="@+id/verticalLineWinter5"
+                app:layout_constraintStart_toEndOf="@+id/titleWageUnit12"
+                app:layout_constraintTop_toTopOf="@+id/verticalLineWinter5"
+                tools:text="60,000,000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/titleWageUnit12"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_19dp"
+                android:elevation="@dimen/margin_5dp"
+                android:text="@string/rial"
+                app:layout_constraintBottom_toBottomOf="@+id/tvWage12"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvWage12" />
+
+            <View
+                android:id="@+id/lineWinter3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_1dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="5dp"
+                android:background="@color/lineColor"
+                android:elevation="@dimen/margin_5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitleMonth12" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineWinter4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/margin_5dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:constraint_referenced_ids="lineInfo3,labelDetailHistory,rootLayoutSeason"
+            tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

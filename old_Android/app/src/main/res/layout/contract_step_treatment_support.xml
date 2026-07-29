@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="isSelectedTherapeuticSupport"
+            type="Boolean" />
+    </data>
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/stepperItem"
+        style="@style/VerticalStepperItemView"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        app:layout_constraintTop_toBottomOf="@+id/stepperImageUpload"
+        app:nextStepEnable="false"
+        tools:step_state="selected">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
+
+            <RadioGroup
+                android:id="@+id/rgTreatmentSupport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+               >
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/rbWantTreatmentSupport"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rb_want_treatment_support" />
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/rbNotWantTreatmentSupport"
+                    style="@style/TextStyle.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rb_do_not_want_treatment_support" />
+
+            </RadioGroup>
+
+
+            <LinearLayout
+                android:id="@+id/agreementLayout"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/rgTreatmentSupport"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:weightSum="8"
+                android:paddingTop="@dimen/margin_10dp"
+                android:paddingBottom="@dimen/margin_10dp"
+                android:paddingStart="@dimen/margin_10dp"
+                android:background="@drawable/bg_border_rectangle_grey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/descTxt"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="7"
+                    android:textDirection="ltr"
+                    android:lineSpacingExtra="@dimen/_2sdp"
+                    android:fontFamily="@font/iran_sans_mobile_fa_num"
+                    android:lineSpacingMultiplier="1.5"
+                    android:textSize="@dimen/font_sub_title_size"
+                    android:layout_marginEnd="@dimen/margin_5dp"
+                    android:justificationMode="inter_word"
+                    android:textColor="?attr/colorOnSurface"
+                    android:text="@string/agreement" />
+                <CheckBox
+                    android:id="@+id/checkboxAgreement"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnShowSubordinatePeople"
+                style="@style/TextButtonBordered.Green"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:gravity="center"
+                android:paddingStart="@dimen/_16sdp"
+                android:paddingEnd="@dimen/_16sdp"
+                android:text="@string/lebel_show_subordinate_people"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/agreementLayout"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+</layout>
+
+

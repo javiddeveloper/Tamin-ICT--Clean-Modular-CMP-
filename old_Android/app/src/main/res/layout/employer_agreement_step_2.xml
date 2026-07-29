@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView
+        android:id="@+id/stepperEmployerInfo"
+        style="@style/VerticalStepperItemView"
+        app:layout_constraintTop_toBottomOf="@+id/stepperRules"
+        app:previousStepVisible="true"
+        app:step_index="2"
+        app:step_title="@string/label_employer_info"
+        app:step_state="normal"
+        android:paddingTop="@dimen/_12sdp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSurface">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelFullName"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/full_name"
+                app:layout_constraintBottom_toTopOf="@id/line10"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvFullName"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvFullName"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/line10"
+                app:layout_constraintEnd_toStartOf="@+id/labelFullName"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="سمیه مدبری" />
+
+            <View
+                android:id="@+id/line10"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelFullName" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelNationalCode"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_national_code"
+                app:layout_constraintBottom_toTopOf="@id/line20"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvNationalCode"
+                app:layout_constraintTop_toBottomOf="@id/line10" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvNationalCode"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/line20"
+                app:layout_constraintEnd_toStartOf="@+id/labelNationalCode"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line10"
+                tools:text="091255555555" />
+
+            <View
+                android:id="@+id/line20"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelNationalCode" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelCurrentMob"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_current_mobile"
+                app:layout_constraintBottom_toTopOf="@id/line20"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvCurrentMob"
+                app:layout_constraintTop_toBottomOf="@id/line1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvCurrentMob"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/line20"
+                app:layout_constraintEnd_toStartOf="@+id/labelCurrentMob"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line1"
+                tools:text="091255555555" />
+
+            <View
+                android:id="@+id/line1"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelCurrentMob" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelNewMob"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_new_mobile"
+                app:layout_constraintBottom_toTopOf="@id/line2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvNewMob"
+                app:layout_constraintTop_toBottomOf="@id/line1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvNewMob"
+                style="@style/TextStyle.Title"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_10dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_10dp"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                app:autoSizeMaxTextSize="@dimen/font_title_size"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity=".5sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toTopOf="@id/line2"
+                app:layout_constraintEnd_toStartOf="@+id/labelNewMob"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line1"
+                tools:text="09123333333" />
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelNewMob" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelCurrentEmail"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_current_email"
+                app:layout_constraintBottom_toTopOf="@id/line3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvCurrentEmail"
+                app:layout_constraintTop_toBottomOf="@id/line2" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvCurrentEmail"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                app:layout_constraintBottom_toTopOf="@id/line3"
+                app:layout_constraintEnd_toStartOf="@+id/labelCurrentEmail"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line2"
+                tools:text="s.modaber@gmail.com" />
+
+            <View
+                android:id="@+id/line3"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/line_height"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:layout_marginBottom="@dimen/margin_20dp"
+                android:background="@color/lineColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelCurrentEmail" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelNewEmail"
+                style="@style/TextStyle.SubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:text="@string/label_new_email"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvNewEmail"
+                app:layout_constraintTop_toBottomOf="@id/line3" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvNewEmail"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                app:layout_constraintEnd_toStartOf="@+id/labelNewEmail"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line3"
+                tools:text="s.modaber@gmail.com" />
+
+            <View
+                android:id="@+id/viewBg"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvNewEmail"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:background="@drawable/bg_left_corner_rounded_grey_with_white_adge"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/labelWorkshopList"
+                style="@style/TextStyle.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_20dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:text="@string/label_workshop_list"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/viewBg" />
+
+            <com.tamin.taminhamrah.widget.CustomRecyclerView
+                android:id="@+id/recycler"
+                style="@style/LinearPaginationRecyclerStyle"
+                android:nestedScrollingEnabled="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/labelWorkshopList"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.tamin.taminhamrah.utils.stepperView.VerticalStepperItemView>
+
+</layout>
