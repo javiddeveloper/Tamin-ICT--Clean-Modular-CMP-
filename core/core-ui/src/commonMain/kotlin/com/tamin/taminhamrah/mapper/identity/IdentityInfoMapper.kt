@@ -34,6 +34,8 @@ fun IdentityInfoDN.toPresentation(): IdentityInfoPR {
         id = this.id ?: 0,
         idCardNumber = this.idCardNumber ?: "",
         idCardSerial = combinedSerial,
+        idCardSerial1 = this.idCardSerial1 ?: "",
+        idCardSerial2 = this.idCardSerial2 ?: "",
         nationalId = this.nationalId ?: "",
         ssn = this.ssn ?: "",
         cityOfBirthName = this.cityOfBirthName ?: "",
