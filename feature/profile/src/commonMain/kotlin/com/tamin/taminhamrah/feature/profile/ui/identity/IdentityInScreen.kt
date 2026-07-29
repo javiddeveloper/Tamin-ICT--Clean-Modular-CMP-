@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -193,7 +194,12 @@ private fun IdentityHeader(
                     modifier = Modifier.clip(CircleShape)
                 )
             },
-            bottomPadding = 48.dp
+            bottomPadding = 48.dp,
+            modifier = Modifier.graphicsLayer {
+                // Fade out top bar title as we collapse
+                // Actually TaminTopAppBar doesn't expose title alpha easily,
+                // but we can overlap it with the card content.
+            }
         )
         Box(
             modifier = Modifier
@@ -308,15 +314,15 @@ private fun IdentityInfoRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = Color(0xFF8E8E8E)
+            )
+            Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = if (isPlaceholder) Color(0xFF9DB2CE) else Color(0xFF0F172A)
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF8E8E8E)
             )
         }
         if (showDivider) {
@@ -331,17 +337,14 @@ private fun IdentityInsuranceCard(
     collapseProgress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF2C5CB0), Color(0xFF1C4488), Color(0xFF123566))
-    )
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(backgroundGradient)
-            .identityCardDecoration(),
+            .identityCardBackground()
+            .identityCardDecoration(rtl),
     ) {
         Layout(
             content = {
@@ -368,7 +371,7 @@ private fun IdentityInsuranceCard(
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.layoutId(IdSlot.Name).shrinkOnCollapse(collapseProgress, 0.85f, rtl),
+                    modifier = Modifier.layoutId(IdSlot.Name).shrinkOnCollapse(collapseProgress, 0.8f, rtl),
                 )
 
                 Text(
@@ -417,7 +420,7 @@ private fun IdentityInsuranceCard(
             val t = FastOutSlowInEasing.transform(collapseProgress())
 
             layout(width, lerp(expandedH, barH, t)) {
-                // Expanded positions from Start (Right)
+                // Expanded positions from Start (Right in RTL)
                 val avatarX = pad
                 val avatarY = 88.dp.roundToPx()
 
@@ -445,9 +448,14 @@ private fun IdentityInsuranceCard(
                 ssn.placeRelative(ssnX, ssnY)
                 footer.placeRelative(footerX, footerY)
 
-                // Collapsed Target (Right side of header)
-                val avatarTargetX = pad
-                val avatarTargetSize = 40.dp.roundToPx()
+                // Collapsed Target: Move into Top Bar Row
+                // In TaminTopAppBar, the back button is at pad (Right).
+                // We'll move the avatar to the LEFT of the back button?
+                // Or to the far LEFT (End) of the row.
+                // Let's target center-ish or next to back button.
+
+                val avatarTargetX = pad + 44.dp.roundToPx() // Next to back button
+                val avatarTargetSize = 36.dp.roundToPx()
                 val avatarTargetY = (barH - avatarTargetSize) / 2
 
                 avatar.placeRelativeWithLayer(
@@ -460,7 +468,7 @@ private fun IdentityInsuranceCard(
                     transformOrigin = TransformOrigin(0f, 0f)
                 }
 
-                val nameTargetX = avatarTargetX + avatarTargetSize + 12.dp.roundToPx()
+                val nameTargetX = avatarTargetX + avatarTargetSize + 8.dp.roundToPx()
                 val nameTargetY = (barH - name.height) / 2
                 name.placeRelative(
                     lerp(nameX.toFloat(), nameTargetX.toFloat(), t).toInt(),
@@ -490,16 +498,49 @@ private fun IdentityGoldenChip(modifier: Modifier = Modifier) {
     )
 }
 
-private fun Modifier.identityCardDecoration(): Modifier = drawBehind {
+private fun Modifier.identityCardBackground(): Modifier = drawBehind {
+    val backgroundGradient = Brush.linearGradient(
+        colors = listOf(Color(0xFF2C5CB0), Color(0xFF1C4488), Color(0xFF123566))
+    )
+    drawRect(backgroundGradient)
+
+    // Diagonal Shine Band from SVG paint1
+    val shineGradient = Brush.linearGradient(
+        colors = listOf(Color.White.copy(alpha = 0f), Color.White.copy(alpha = 0.07f), Color.White.copy(alpha = 0f)),
+        start = Offset(0f, size.height * 0.2f),
+        end = Offset(size.width, size.height * 0.8f)
+    )
+    drawRect(shineGradient)
+
+    // Subtle Inner Glow
+    drawRect(
+        color = Color.White.copy(alpha = 0.16f),
+        size = Size(size.width, 1.dp.toPx())
+    )
+}
+
+private fun Modifier.identityCardDecoration(rtl: Boolean): Modifier = drawBehind {
+    // Circle positions relative to card (from SVG coords relative to card TL 19, 22)
+    val startX = if (rtl) size.width * 0.1f else size.width * 0.9f
+    val endX = if (rtl) size.width * 0.9f else size.width * 0.1f
+
+    // Top-Right Circles (Start in RTL)
     drawCircle(
-        color = Color.White.copy(alpha = 0.08f),
-        radius = 120.dp.toPx(),
-        center = Offset(size.width * 0.15f, 60.dp.toPx())
+        color = Color.White.copy(alpha = 0.09f),
+        radius = 105.dp.toPx(),
+        center = Offset(startX, 21.dp.toPx())
     )
     drawCircle(
-        color = Color.White.copy(alpha = 0.05f),
-        radius = 160.dp.toPx(),
-        center = Offset(size.width * 0.85f, size.height * 0.9f)
+        color = Color.White.copy(alpha = 0.07f),
+        radius = 75.dp.toPx(),
+        center = Offset(startX, 21.dp.toPx())
+    )
+
+    // Bottom-Left Circle (End in RTL)
+    drawCircle(
+        color = Color.White.copy(alpha = 0.06f),
+        radius = 85.dp.toPx(),
+        center = Offset(endX, size.height - 9.dp.toPx())
     )
 }
 
@@ -531,7 +572,7 @@ private fun CardBrandRow(modifier: Modifier = Modifier) {
 }
 
 private fun Modifier.vanishOnCollapse(progress: () -> Float): Modifier = graphicsLayer {
-    alpha = (1f - progress() * 2.5f).coerceIn(0f, 1f)
+    alpha = (1f - progress() * 3f).coerceIn(0f, 1f)
 }
 
 private fun Modifier.shrinkOnCollapse(progress: () -> Float, minScale: Float, rtl: Boolean = false): Modifier = graphicsLayer {
