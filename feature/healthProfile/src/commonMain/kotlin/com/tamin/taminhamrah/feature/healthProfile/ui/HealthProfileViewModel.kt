@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractLetter
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractRh
 import com.tamin.taminhamrah.model.health.*
+import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
 class HealthProfileViewModel(
+    private val tokenStoreManager: TokenStoreManager,
     private val getPatientGeneralUseCase: GetPatientGeneralUseCase,
     private val getPatientSelfDeclarativeUseCase: GetPatientSelfDeclarativeUseCase,
     private val getPatientDrugAllergiesUseCase: GetPatientDrugAllergiesUseCase,
@@ -177,40 +179,57 @@ class HealthProfileViewModel(
     private fun handleLoadHealthProfile(nationalCode: String?): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
 
-        // 1. Lookup lists (independent of patient data — load immediately)
-        getMaritalStatusUseCase.invoke()
-            .catch { }
-            .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
+        // 1. Lookup lists (independent of patient data — load only if not already present)
+        if (uiState.value.maritalStatusOptions.isEmpty()) {
+            getMaritalStatusUseCase.invoke()
+                .catch { }
+                .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
+        }
 
-        emit(PartialState.ProvincesLoading(true))
-        getAllProvincesUseCase()
-            .catch { emit(PartialState.ProvincesLoading(false)) }
-            .collect {
-                emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() }))
-                emit(PartialState.ProvincesLoading(false))
-            }
+        if (uiState.value.provinceOptions.isEmpty()) {
+            emit(PartialState.ProvincesLoading(true))
+            getAllProvincesUseCase()
+                .catch { emit(PartialState.ProvincesLoading(false)) }
+                .collect {
+                    emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() }))
+                    emit(PartialState.ProvincesLoading(false))
+                }
+        }
 
-        getBloodGroupsUseCase()
-            .catch { }
-            .collect { emit(PartialState.BloodGroupsLoaded(it.map { b -> b.toPresentation() })) }
+        if (uiState.value.bloodGroupOptions.isEmpty()) {
+            getBloodGroupsUseCase()
+                .catch { }
+                .collect { emit(PartialState.BloodGroupsLoaded(it.map { b -> b.toPresentation() })) }
+        }
 
-        getSmokingStatusUseCase()
-            .catch { }
-            .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
+        if (uiState.value.smokingStatusOptions.isEmpty()) {
+            getSmokingStatusUseCase()
+                .catch { }
+                .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
+        }
 
-        getActFrequenciesUseCase()
-            .catch { }
-            .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
+        if (uiState.value.actFrequencyOptions.isEmpty()) {
+            getActFrequenciesUseCase()
+                .catch { }
+                .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
+        }
 
-        getSelfDeclarableIllnessesByGroupUseCase()
-            .catch { }
-            .collect { emit(PartialState.IllnessGroupsLoaded(it.map { g -> g.toPresentation() })) }
+        if (uiState.value.illnessGroups.isEmpty()) {
+            getSelfDeclarableIllnessesByGroupUseCase()
+                .catch { }
+                .collect { emit(PartialState.IllnessGroupsLoaded(it.map { g -> g.toPresentation() })) }
+        }
 
-        getAllDrugsUseCase()
-            .catch { }
-            .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
+        if (uiState.value.drugOptions.isEmpty()) {
+            getAllDrugsUseCase()
+                .catch { }
+                .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
+        }
 
-        val targetNatCode = nationalCode?.takeIf { it.isNotBlank() } ?: currentPatientNatCode
+        val targetNatCode = nationalCode?.takeIf { it.isNotBlank() }
+            ?: currentPatientNatCode.takeIf { it.isNotBlank() }
+            ?: tokenStoreManager.getUserId()
+            ?: ""
 
         if (targetNatCode.isNotBlank()) {
             // 2. Patient general info
