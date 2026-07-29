@@ -1,11 +1,10 @@
 package com.tamin.taminhamrah.feature.profile
 
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.profile.ui.IdentityScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
@@ -32,7 +31,7 @@ fun NavGraphBuilder.profileGraph(
     onBack: () -> Unit
 ) {
     navigation<ProfileRoute.Graph>(startDestination = ProfileRoute.Main()) {
-        composable<ProfileRoute.Main> { backStackEntry ->
+        composableWithFadeTransitions<ProfileRoute.Main> { backStackEntry ->
             val route = backStackEntry.toRoute<ProfileRoute.Main>()
             val viewModel = backStackEntry.sharedViewModel<ProfileViewModel>(navController)
 
@@ -45,7 +44,7 @@ fun NavGraphBuilder.profileGraph(
             )
         }
 
-        composable<ProfileRoute.Identity> { backStackEntry ->
+        composableWithFadeTransitions<ProfileRoute.Identity> { backStackEntry ->
             val route = backStackEntry.toRoute<ProfileRoute.Identity>()
             val viewModel = backStackEntry.sharedViewModel<ProfileViewModel>(navController)
 
