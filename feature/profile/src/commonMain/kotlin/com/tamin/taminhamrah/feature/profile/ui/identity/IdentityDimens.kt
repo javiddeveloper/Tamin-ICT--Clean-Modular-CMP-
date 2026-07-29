@@ -82,6 +82,7 @@ internal object IdentityDimens {
     val brandTileSize = 29.dp
     val brandTileCorner = 9.dp
     val brandIconSize = 18.dp
+    val brandIconPadding = (brandTileSize - brandIconSize) / 2
     val verifiedIconSize = 12.dp
     val bannerIconSize = 18.dp
 

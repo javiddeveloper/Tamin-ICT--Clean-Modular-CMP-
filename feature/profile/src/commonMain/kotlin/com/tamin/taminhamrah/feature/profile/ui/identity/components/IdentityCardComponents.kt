@@ -369,7 +369,9 @@ private fun CardBrandRow(modifier: Modifier = Modifier) {
                 imageVector = vectorResource(Res.drawable.ic_tamin_shield_check),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(IdentityDimens.brandIconSize),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(IdentityDimens.brandIconPadding),
             )
         }
         // Start, not End: both lines hug the text block's reading edge — the right in RTL,
