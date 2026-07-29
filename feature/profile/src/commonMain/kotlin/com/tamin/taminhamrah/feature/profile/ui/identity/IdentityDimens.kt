@@ -38,9 +38,14 @@ internal object IdentityDimens {
     /** The card's own inset. Everything on its face lines up to this. */
     val cardPadding = 20.dp
 
-    /** How far the card rides up into the header, open and folded. */
+    /** How far the card rides up into the header when open. */
     val cardOverlap = 32.dp
-    val cardCollapsedOverlap = 8.dp
+
+    /**
+     * Folded, the bar rides up by half its own height, so the header's bottom edge runs through
+     * its centre rather than sitting above it. Derived so it stays true if the bar height moves.
+     */
+    val cardCollapsedOverlap = cardCollapsedHeight / 2
 
     /**
      * Clear air between the app bar's title row and the top of the card.
