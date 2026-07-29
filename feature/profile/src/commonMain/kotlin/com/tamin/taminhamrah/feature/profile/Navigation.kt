@@ -50,7 +50,6 @@ fun NavGraphBuilder.profileGraph(
 
             IdentityInRoute(
                 viewModel = viewModel,
-                onNavigateToRoute = { /* Placeholder */ },
                 onBackClicked = onBack
             )
         }
