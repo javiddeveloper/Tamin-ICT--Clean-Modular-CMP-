@@ -150,3 +150,15 @@ val IconGradientGrayEnd = Color(0xFF4A5567)
 
 val IconGradientRedStart = Color(0xFFF0635F)
 val IconGradientRedEnd = Color(0xFFC42121)
+
+// Identity card — the insured-person card on the profile's identity screen. Fixed in both themes,
+// like the treatment cards: it stands in for a physical card, so it keeps its own identity.
+val TaminIdentityCardStart = Color(0xFF2C5CB0)
+val TaminIdentityCardMid = Color(0xFF1C4488)
+val TaminIdentityCardEnd = Color(0xFF123566)
+
+// The card's gold contact chip.
+val TaminIdentityChipStart = Color(0xFFF4E1A0)
+val TaminIdentityChipMid = Color(0xFFD6AE5C)
+val TaminIdentityChipEnd = Color(0xFFBC934A)
+val TaminIdentityChipTrace = Color(0x8078541C)
