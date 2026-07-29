@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LifeStyleStatus
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.SmokingStatus
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractLetter
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.extractRh
 import com.tamin.taminhamrah.model.health.*
@@ -454,7 +455,7 @@ class HealthProfileViewModel(
                         sd.lifestyle
                     } else {
                         sd.lifestyle.copy(
-                            isSmoking = (info.smokingStatus ?: 0) > 0,
+                            isSmoking = info.smokingStatus != null && info.smokingStatus != SmokingStatus.NONE.id && info.smokingStatus != SmokingStatus.NEVER_CONSUMED.id,
                             smokingStatusId = info.smokingStatus,
                             smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() }
                                 ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label,

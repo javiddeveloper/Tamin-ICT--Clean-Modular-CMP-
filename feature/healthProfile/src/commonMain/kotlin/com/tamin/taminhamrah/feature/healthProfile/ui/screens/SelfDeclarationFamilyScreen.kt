@@ -50,8 +50,9 @@ fun SelfDeclarationFamilyScreen(
     )
 
     // Lookup family groups via Enum mapping (forFamily = true)
-    val familyDiseasesGroup = illnessGroups.findGroup(BottomSheetType.FAMILY_DISEASES, forFamily = true)
-    val familyCancerGroup   = illnessGroups.findGroup(BottomSheetType.FAMILY_CANCER, forFamily = true)
+    val familyDiseasesGroup =
+        illnessGroups.findGroup(BottomSheetType.FAMILY_DISEASES, forFamily = true)
+    val familyCancerGroup = illnessGroups.findGroup(BottomSheetType.FAMILY_CANCER, forFamily = true)
 
     // Selected cancer names for display when fallback textfield is shown
     val selectedCancerNames = remember(familyCancerGroup, state.familyCancerIds) {
@@ -166,7 +167,8 @@ fun SelfDeclarationFamilyScreen(
 
                 if (state.familyHasCancer == true) {
                     if (state.familyCancerIds.isNotEmpty()) {
-                        val selectedItems = group.illnesses.filter { state.familyCancerIds.contains(it.id) }
+                        val selectedItems =
+                            group.illnesses.filter { state.familyCancerIds.contains(it.id) }
                         FlowRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -207,11 +209,20 @@ fun SelfDeclarationFamilyScreen(
                 singleSelection = false,
                 items = bottomSheetItems
             ),
-            onDismissRequest = { showCancerSheet = false },
+            onDismissRequest = {
+                if (state.familyCancerIds.isEmpty()) {
+                    onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyHasCancer = false)))
+                }
+                showCancerSheet = false
+            },
             onSubmit = { result ->
+                val selectedIds = result.selectedItemIds.toSet()
                 onIntent(
                     HealthProfileIntent.UpdateFamily(
-                        state.copy(familyCancerIds = result.selectedItemIds.toSet())
+                        state.copy(
+                            familyCancerIds = selectedIds,
+                            familyHasCancer = selectedIds.isNotEmpty()
+                        )
                     )
                 )
                 showCancerSheet = false
