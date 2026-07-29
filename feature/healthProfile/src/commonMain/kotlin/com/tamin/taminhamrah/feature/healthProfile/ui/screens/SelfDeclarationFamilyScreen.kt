@@ -46,13 +46,14 @@ fun SelfDeclarationFamilyScreen(
     var showCancerSheet by remember { mutableStateOf(false) }
 
     val optionsYesNo = listOf(
-        stringResource(Res.string.health_option_no),
-        stringResource(Res.string.health_option_yes)
+        stringResource(Res.string.health_option_yes),
+        stringResource(Res.string.health_option_no)
     )
 
     // Lookup family groups via Enum mapping (forFamily = true)
-    val familyDiseasesGroup = illnessGroups.findGroup(BottomSheetType.FAMILY_DISEASES, forFamily = true)
-    val familyCancerGroup   = illnessGroups.findGroup(BottomSheetType.FAMILY_CANCER, forFamily = true)
+    val familyDiseasesGroup =
+        illnessGroups.findGroup(BottomSheetType.FAMILY_DISEASES, forFamily = true)
+    val familyCancerGroup = illnessGroups.findGroup(BottomSheetType.FAMILY_CANCER, forFamily = true)
 
     // Selected cancer names for display when fallback textfield is shown
     val selectedCancerNames = remember(familyCancerGroup, state.familyCancerIds) {
@@ -157,9 +158,9 @@ fun SelfDeclarationFamilyScreen(
 
                     SegmentedControl(
                         options = optionsYesNo,
-                        selectedIndex = if (state.familyHasCancer == true) 1 else 0,
+                        selectedIndex = if (state.familyHasCancer == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            val isYes = idx == 1
+                            val isYes = idx == 0
                             onIntent(
                                 HealthProfileIntent.UpdateFamily(
                                     state.copy(
@@ -177,7 +178,8 @@ fun SelfDeclarationFamilyScreen(
 
                 if (state.familyHasCancer == true) {
                     if (state.familyCancerIds.isNotEmpty()) {
-                        val selectedItems = group.illnesses.filter { state.familyCancerIds.contains(it.id) }
+                        val selectedItems =
+                            group.illnesses.filter { state.familyCancerIds.contains(it.id) }
                         FlowRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -219,11 +221,20 @@ fun SelfDeclarationFamilyScreen(
                 singleSelection = false,
                 items = bottomSheetItems
             ),
-            onDismissRequest = { showCancerSheet = false },
+            onDismissRequest = {
+                if (state.familyCancerIds.isEmpty()) {
+                    onIntent(HealthProfileIntent.UpdateFamily(state.copy(familyHasCancer = false)))
+                }
+                showCancerSheet = false
+            },
             onSubmit = { result ->
+                val selectedIds = result.selectedItemIds.toSet()
                 onIntent(
                     HealthProfileIntent.UpdateFamily(
-                        state.copy(familyCancerIds = result.selectedItemIds.toSet())
+                        state.copy(
+                            familyCancerIds = selectedIds,
+                            familyHasCancer = selectedIds.isNotEmpty()
+                        )
                     )
                 )
                 showCancerSheet = false
