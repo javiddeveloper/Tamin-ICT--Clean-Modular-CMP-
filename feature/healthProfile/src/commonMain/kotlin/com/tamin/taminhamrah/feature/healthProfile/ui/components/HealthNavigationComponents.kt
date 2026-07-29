@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 
 import androidx.compose.foundation.background
@@ -202,41 +203,13 @@ fun HealthIrritateNavigationBar(
             }
 
             // Primary Solid Button
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(54.dp)
-                    .background(
-                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    TaminText(
-                        text = primaryText,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 15.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (primaryEnabled) Color.White else taminColors.textMuted
-                        )
-                    )
-                    if (showChevron) {
-                        Spacer(modifier = Modifier.width(9.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
+            TaminFilledButton(
+                text = primaryText,
+                onClick = onPrimaryClick,
+                enabled = primaryEnabled,
+                modifier = Modifier.weight(1f),
+                icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
+            )
         }
     }
 }
@@ -272,49 +245,13 @@ fun HealthNavigationBar(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .background(
-                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    TaminText(
-                        text = primaryText,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 15.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (primaryEnabled) Color.White else taminColors.textMuted
-                        )
-                    )
-                    if (primaryIconPainter != null) {
-                        Spacer(modifier = Modifier.width(9.dp))
-                        Icon(
-                            painter = primaryIconPainter,
-                            contentDescription = null,
-                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    } else if (showChevron) {
-                        Spacer(modifier = Modifier.width(9.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
+            TaminFilledButton(
+                text = primaryText,
+                onClick = onPrimaryClick,
+                enabled = primaryEnabled,
+                painter = primaryIconPainter,
+                icon = if (primaryIconPainter == null && showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
+            )
 
             if (secondaryText != null && onSecondaryClick != null) {
                 Spacer(modifier = Modifier.height(10.dp))
