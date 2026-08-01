@@ -480,6 +480,7 @@ fun InsuranceCardCarousel(
             val sidePadding = maxWidth * (1 - TreatmentDimens.cardPeekFraction) / 2
             HorizontalPager(
                 state = pagerState,
+                key = { page -> page },
                 contentPadding = PaddingValues(horizontal = sidePadding),
                 pageSpacing = Spacing.cardGap,
                 modifier = Modifier.fillMaxWidth(),
