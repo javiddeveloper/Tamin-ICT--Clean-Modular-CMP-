@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -80,7 +82,8 @@ fun MedicalRecordCard(
     date: String,
     title: String,
     subtitle: String,
-    shareAmount: String,
+    /** `null` until this record's price arrives, which is a separate request from the list. */
+    shareAmount: String?,
     accentColor: Color,
     accentContainerColor: Color,
     onClick: () -> Unit,
@@ -145,7 +148,7 @@ internal fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
 }
 
 @Composable
-private fun MedicalRecordFooter(shareAmount: String) {
+private fun MedicalRecordFooter(shareAmount: String?) {
     val colors = LocalTaminColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -167,11 +170,19 @@ private fun MedicalRecordFooter(shareAmount: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
             ) {
-                NumericText(
-                    text = shareAmount,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.textPrimary,
-                )
+                if (shareAmount == null) {
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(TreatmentDimens.recordShareShimmerWidth)
+                            .height(TreatmentDimens.recordShareShimmerHeight),
+                    )
+                } else {
+                    NumericText(
+                        text = shareAmount,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.textPrimary,
+                    )
+                }
                 Text(
                     text = stringResource(Res.string.unit_rial),
                     style = MaterialTheme.typography.labelMedium,
@@ -421,11 +432,12 @@ private const val CHEVRON_ROTATION_EXPANDED = -90f
 @Composable
 fun CostTotalsBar(
     insuredShareLabel: String,
-    insuredShareAmount: String,
+    /** `null` for a figure still being fetched; that tile shimmers on its own. */
+    insuredShareAmount: String?,
     organizationShareLabel: String,
-    organizationShareAmount: String,
+    organizationShareAmount: String?,
     totalLabel: String,
-    totalAmount: String,
+    totalAmount: String?,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current

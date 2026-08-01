@@ -208,6 +208,7 @@ fun TreatmentContent(
             TreatmentCostSummary(
                 insuredShare = state.insuredShareTotal,
                 organizationShare = state.organizationShareTotal,
+                isLoading = state.isLoading,
             )
             // Clears the floating navigation bar, as the pre-collapse layout did.
             Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))

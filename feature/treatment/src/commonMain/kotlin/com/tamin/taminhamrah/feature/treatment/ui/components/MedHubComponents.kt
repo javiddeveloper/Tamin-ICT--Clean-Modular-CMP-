@@ -90,9 +90,10 @@ fun CategoryTile(
 fun CostSummaryCard(
     title: String,
     insuredShareLabel: String,
-    insuredShareAmount: String,
+    /** `null` while the year's totals are still loading; the tiles shimmer until they land. */
+    insuredShareAmount: String?,
     organizationShareLabel: String,
-    organizationShareAmount: String,
+    organizationShareAmount: String?,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current

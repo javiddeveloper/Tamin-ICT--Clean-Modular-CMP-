@@ -320,6 +320,7 @@ internal fun TreatmentCategories(
 internal fun TreatmentCostSummary(
     insuredShare: Long?,
     organizationShare: Long?,
+    isLoading: Boolean,
 ) {
     CostSummaryCard(
         title = stringResource(
@@ -328,11 +329,13 @@ internal fun TreatmentCostSummary(
         )
             .toPersianDigits(),
         insuredShareLabel = stringResource(Res.string.share_insured),
+        // Shimmers while the request is out; once it is back, a still-missing total is a
+        // genuine absence and reads as one.
         insuredShareAmount = insuredShare?.toPriceFormat()
-            ?: stringResource(Res.string.amount_unknown),
+            ?: stringResource(Res.string.amount_unknown).takeIf { !isLoading },
         organizationShareLabel = stringResource(Res.string.share_organization),
         organizationShareAmount = organizationShare?.toPriceFormat()
-            ?: stringResource(Res.string.amount_unknown),
+            ?: stringResource(Res.string.amount_unknown).takeIf { !isLoading },
         modifier = Modifier.padding(horizontal = Spacing.page),
     )
 }

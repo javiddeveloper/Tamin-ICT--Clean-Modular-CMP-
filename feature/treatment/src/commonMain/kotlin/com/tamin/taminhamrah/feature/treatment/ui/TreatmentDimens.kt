@@ -40,6 +40,10 @@ internal object TreatmentDimens {
     /** Breathing room above and below the collapsed bar's contents. */
     val cardBarPadding = 28.dp
 
+    /** The share figure's placeholder on a record card, sized to the digits it stands in for. */
+    val recordShareShimmerWidth = 48.dp
+    val recordShareShimmerHeight = 12.dp
+
     // Miscellaneous-claim certificates ("خسارت متفرقه")
     val certificateSkeletonHeight = 150.dp
     const val certificateSkeletonRows = 4

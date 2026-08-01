@@ -85,3 +85,12 @@ object IconSize {
     val xxlarge = 56.dp
     val navBar = 24.dp
 }
+
+/**
+ * Placeholder sizes for a value that has not arrived, so a shimmering figure occupies roughly what
+ * the real one will and nothing resizes when it lands.
+ */
+object ShimmerSize {
+    val valueWidth = 56.dp
+    val valueHeight = 14.dp
+}

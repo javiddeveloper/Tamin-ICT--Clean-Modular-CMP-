@@ -503,7 +503,12 @@ fun MedicalRecordsContent(
                 )
             }
         },
-        bottomBar = { RecordsTotals(prices = state.prescriptionPriceList) },
+        bottomBar = {
+            RecordsTotals(
+                prices = state.prescriptionPriceList,
+                isLoading = state.isLoading,
+            )
+        },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         PullToRefreshBox(
@@ -545,6 +550,7 @@ fun MedicalRecordsContent(
                 else -> recordTimeline(
                     groups = recordGroups,
                     prices = state.recordPrices,
+                    isLoadingPrices = state.isLoadingPrices,
                     onRecordSelected = onRecordSelected,
                 )
             }
@@ -559,6 +565,7 @@ fun MedicalRecordsContent(
 private fun LazyListScope.recordTimeline(
     groups: Map<String, List<ElectronicPrescriptionPR>>,
     prices: Map<String, ElectronicPrescriptionPricePR>,
+    isLoadingPrices: Boolean,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
 ) {
     groups.forEach { (monthLabel, monthRecords) ->
@@ -579,7 +586,14 @@ private fun LazyListScope.recordTimeline(
                 // The list endpoint carries no amount, so «سهم شما» comes from the per-record
                 // price lookup; it reads as unknown until that arrives. Old app: the insured's
                 // share is headSsoPayment (headInsuPayment is the organization's share).
-                shareAmount = prices[record.noteHeadEprescID]?.headSsoPayment?.toLongOrNull()?.toPriceFormat() ?: UNKNOWN_AMOUNT,
+                // The list endpoint carries no amount, so the share comes from the per-record
+                // price lookup. It shimmers only while that lookup is out; once it is back, a
+                // record with no price shows the absent marker rather than shimmering forever.
+                shareAmount = prices[record.noteHeadEprescID]
+                    ?.headSsoPayment
+                    ?.toLongOrNull()
+                    ?.toPriceFormat()
+                    ?: UNKNOWN_AMOUNT.takeIf { !isLoadingPrices },
                 accentColor = accent.content,
                 accentContainerColor = accent.container,
                 categoryIcon = accent.icon,
@@ -597,15 +611,21 @@ private fun LazyListScope.recordTimeline(
 
 /** Totals pinned under the list; hidden until a price lookup has returned. */
 @Composable
-private fun RecordsTotals(prices: ImmutableList<ElectronicPrescriptionPricePR>) {
-    if (prices.isEmpty()) return
+private fun RecordsTotals(
+    prices: ImmutableList<ElectronicPrescriptionPricePR>,
+    isLoading: Boolean,
+) {
+    // Nothing to total and nothing on its way: the bar stays away rather than showing three
+    // dashes. While the request is out it shows itself shimmering, so the bar does not pop in.
+    if (prices.isEmpty() && !isLoading) return
+    val pending = prices.isEmpty()
     CostTotalsBar(
         insuredShareLabel = stringResource(Res.string.share_insured),
-        insuredShareAmount = prices.totalOf { it.headSsoPayment },
+        insuredShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
         organizationShareLabel = stringResource(Res.string.share_organization),
-        organizationShareAmount = prices.totalOf { it.headInsuPayment },
+        organizationShareAmount = prices.totalOf { it.headInsuPayment }.takeUnless { pending },
         totalLabel = stringResource(Res.string.amount_total),
-        totalAmount = prices.totalOf { it.requestPrice },
+        totalAmount = prices.totalOf { it.requestPrice }.takeUnless { pending },
     )
 }
 
