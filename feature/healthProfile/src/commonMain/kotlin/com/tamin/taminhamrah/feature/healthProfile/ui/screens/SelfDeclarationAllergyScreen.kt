@@ -1,5 +1,14 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -102,7 +111,7 @@ fun SelfDeclarationAllergyScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding())
+                    .padding(top = paddingValues.calculateTopPadding(), bottom = paddingValues.calculateBottomPadding())
                     .background(taminColors.bgPage)
                     .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -162,18 +171,41 @@ fun SelfDeclarationAllergyScreen(
                         )
                     }
                 } else {
-                    state.allergies.forEachIndexed { idx, allergy ->
-                        DynamicItemCard(
-                            title = allergy.drugName,
-                            description = allergy.allergyComments,
-                            onDelete = {
-                                onIntent(
-                                    HealthProfileIntent.UpdateAllergy(
-                                        state.copy(allergies = state.allergies.filterIndexed { i, _ -> i != idx })
-                                    )
+                    state.allergies.forEach { allergy ->
+                        key(allergy.drugId) {
+                            val visibleState = remember {
+                                MutableTransitionState(false).apply { targetState = true }
+                            }
+
+                            AnimatedVisibility(
+                                visibleState = visibleState,
+                                enter = fadeIn(tween(300)) + slideInVertically(
+                                    initialOffsetY = { fullHeight -> fullHeight / 3 }
+                                ),
+                                exit = fadeOut(tween(200)) + shrinkVertically(
+                                    animationSpec = tween(250)
+                                ) + slideOutVertically(
+                                    targetOffsetY = { fullHeight -> -fullHeight / 4 }
+                                ),
+                                modifier = Modifier.animateContentSize()
+                            ) {
+                                DynamicItemCard(
+                                    title = allergy.drugName,
+                                    description = allergy.allergyComments,
+                                    onDelete = { visibleState.targetState = false }
                                 )
                             }
-                        )
+
+                            LaunchedEffect(visibleState.currentState, visibleState.isIdle) {
+                                if (!visibleState.targetState && visibleState.isIdle) {
+                                    onIntent(
+                                        HealthProfileIntent.UpdateAllergy(
+                                            state.copy(allergies = state.allergies.filter { it.drugId != allergy.drugId })
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
