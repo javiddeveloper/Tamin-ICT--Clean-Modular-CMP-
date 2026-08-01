@@ -1,20 +1,16 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,34 +21,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.ui.components.AutoResizeText
 import com.tamin.taminhamrah.ui.components.IconTile
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
-import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
 import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.components.taminSurface
-import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -68,11 +50,8 @@ import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
 import com.tamin.taminhamrah.ui.theme.TaminCardTealEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
-import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
-import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
 import com.tamin.taminhamrah.ui.theme.TaminTeal500
 import com.tamin.taminhamrah.ui.theme.TaminTeal900
-import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
@@ -101,178 +80,10 @@ private val DependantCardStops = listOf(
     listOf(TaminCardAmberStart, TaminCardAmberMid, TaminCardAmberEnd),
 )
 
-/**
- * The card identity for one insured person. [dependantOrdinal] is the person's position
- * among the dependants only — the main insured person ignores it and always reads teal.
- *
- * Any ordinal is valid: it wraps, so the count of dependants is never a constraint.
- */
-fun insuranceCardGradient(isDependent: Boolean, dependantOrdinal: Int = 0): Brush {
-    val stops = if (isDependent) {
-        DependantCardStops[dependantOrdinal.mod(DependantCardStops.size)]
-    } else {
-        MainInsuredCardStops
-    }
-    return Brush.linearGradient(stops)
-}
 
 /** The prominent teal gradient behind the "سوابق درمانی من" quick-access card. */
 @Composable
 fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
-
-/**
- * The electronic health-insurance card for one insured person: organization branding,
- * the holder's name and national ID, and a coverage-status footer.
- */
-@Composable
-fun InsuranceCard(
-    holderName: String,
-    nationalId: String,
-    coverageLabel: String,
-    modifier: Modifier = Modifier,
-    background: Brush = insuranceCardGradient(isDependent = false),
-    coverageBadge: @Composable (() -> Unit)? = null,
-    footerAction: @Composable (() -> Unit)? = null,
-    // 0 shows the full card; as it runs to 1 the card cross-fades into a compact
-    // tick + name + national-code bar and shrinks to that height. Read only inside
-    // layout/draw lambdas, so the morph never recomposes the card.
-    collapseProgress: () -> Float = { 0f },
-) {
-    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.cardCompact))
-            .background(background)
-            .cardDecoration(),
-    ) {
-        Layout(
-            content = {
-                InsuranceCardBrandRow(
-                    modifier = Modifier
-                        .layoutId(CardSlot.Brand)
-                        .vanishOnCollapse(collapseProgress),
-                )
-                Text(
-                    text = holderName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .layoutId(CardSlot.Name)
-                        .shrinkOnCollapse(collapseProgress, NameCollapsedScale, rtl),
-                )
-                Text(
-                    text = "کد ملی",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.75f),
-                    modifier = Modifier
-                        .layoutId(CardSlot.CodeLabel)
-                        .vanishOnCollapse(collapseProgress),
-                )
-                NumericText(
-                    text = nationalId.toPersianDigits(),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
-                    modifier = Modifier.layoutId(CardSlot.Code),
-                )
-                // Wrapped so the slot exists even when there is no badge to show.
-                Box(Modifier.layoutId(CardSlot.Badge)) { coverageBadge?.invoke() }
-                InsuranceCardFooter(
-                    coverageLabel = coverageLabel,
-                    badge = coverageBadge,
-                    action = footerAction,
-                    modifier = Modifier
-                        .layoutId(CardSlot.Footer)
-                        .vanishOnCollapse(collapseProgress),
-                )
-            },
-        ) { measurables, constraints ->
-            val width = constraints.maxWidth
-            val pad = Spacing.lg.roundToPx()
-            val md = Spacing.md.roundToPx()
-            val xs = Spacing.xs.roundToPx()
-            val sm = Spacing.sm.roundToPx()
-            val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
-
-            val brand = measurables.slot(CardSlot.Brand).measure(innerC)
-            val name = measurables.slot(CardSlot.Name).measure(innerC)
-            val label = measurables.slot(CardSlot.CodeLabel).measure(innerC)
-            val number = measurables.slot(CardSlot.Code).measure(innerC)
-            val badge = measurables.slot(CardSlot.Badge).measure(Constraints())
-            val footer = measurables.slot(CardSlot.Footer).measure(Constraints.fixedWidth(width))
-
-            // Expanded slots (start-offset from the start edge, top from the card top).
-            val nameExpTop = pad + brand.height + md
-            val labelExpTop = nameExpTop + name.height + xs
-            val numberExpTop = labelExpTop + label.height
-            val footerTop = numberExpTop + number.height + pad
-            val badgeExpTop = footerTop + (footer.height - badge.height) / 2
-            val expandedH = footerTop + footer.height
-
-            // Collapsed slots — a compact bar of tick + name + code (slightly larger).
-            val barH = maxOf(badge.height, name.height, number.height) +
-                TreatmentDimens.cardBarPadding.roundToPx()
-            val badgeColTop = (barH - badge.height) / 2
-            val nameColStart = pad + badge.width + sm
-            val nameColTop = (barH - name.height) / 2
-            // The name shrinks in the bar, so the code sits just past its scaled width.
-            val numberColStart = nameColStart + (name.width * NameCollapsedScale).toInt() + sm
-            val numberColTop = (barH - number.height) / 2
-
-            val t = CardCollapseEasing.transform(collapseProgress())
-
-            layout(width, lerp(expandedH, barH, t)) {
-                // Fading pieces stay at their expanded spots (and clip as the card shrinks).
-                brand.placeRelative(pad, pad)
-                label.placeRelative(pad, labelExpTop)
-                footer.placeRelative(0, footerTop)
-                // Traveling pieces glide from their expanded slot to their bar slot.
-                name.placeRelative(lerp(pad, nameColStart, t), lerp(nameExpTop, nameColTop, t))
-                number.placeRelative(lerp(pad, numberColStart, t), lerp(numberExpTop, numberColTop, t))
-                badge.placeRelative(pad, lerp(badgeExpTop, badgeColTop, t))
-            }
-        }
-    }
-}
-
-/** The pieces of the card's expanded → collapsed morph, addressed by name rather than by index. */
-private enum class CardSlot { Brand, Name, CodeLabel, Code, Badge, Footer }
-
-private fun List<Measurable>.slot(id: CardSlot): Measurable = first { it.layoutId == id }
-
-private val CardCollapseEasing = FastOutSlowInEasing
-
-/** How far the holder name shrinks by the time the card is a compact bar. */
-private const val NameCollapsedScale = 0.88f
-
-/**
- * The small round glyph beside the coverage line — a tick when treatment support is
- * active, a cross when it is not. Defaults to the design's mint-on-deep-green tick.
- */
-@Composable
-fun CoverageBadge(
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    containerColor: Color = TaminCoverageBadgeBg,
-    contentColor: Color = TaminCoverageBadgeFg,
-) {
-    Box(
-        modifier = modifier
-            .size(TreatmentDimens.coverageBadgeSize)
-            .background(containerColor, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(TreatmentDimens.coverageBadgeIconSize),
-        )
-    }
-}
-
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
@@ -364,43 +175,6 @@ private fun InsuranceCardFooter(
             modifier = Modifier.weight(1f),
         )
         action?.invoke()
-    }
-}
-
-/**
- * Snapping carousel of insured-person cards with a page-indicator strip. The
- * neighboring cards peek at the edges, matching the design's scroll-snap row.
- */
-@Composable
-fun InsuranceCardCarousel(
-    pageCount: Int,
-    pagerState: PagerState,
-    modifier: Modifier = Modifier,
-    card: @Composable (page: Int) -> Unit,
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Each card occupies TreatmentDimens.cardPeekFraction of the viewport and stays centred,
-            // so the neighboring cards peek evenly on both edges.
-            val sidePadding = maxWidth * (1 - TreatmentDimens.cardPeekFraction) / 2
-            HorizontalPager(
-                state = pagerState,
-                contentPadding = PaddingValues(horizontal = sidePadding),
-                pageSpacing = Spacing.cardGap,
-                modifier = Modifier.fillMaxWidth(),
-            ) { page ->
-                card(page)
-            }
-        }
-        if (pageCount > 1) {
-            PageIndicator(
-                pageCount = pageCount,
-                pagerState = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.sm),
-            )
-        }
     }
 }
 
