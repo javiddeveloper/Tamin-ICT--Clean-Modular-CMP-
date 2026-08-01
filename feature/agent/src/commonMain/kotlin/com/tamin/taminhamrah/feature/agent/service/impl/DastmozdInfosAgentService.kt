@@ -6,7 +6,9 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
+import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
+import com.tamin.taminhamrah.util.toPersianDigits
 
 /**
  * Dedicated handler for the "Wage History" service in the chatbot.
@@ -102,11 +104,16 @@ class DastmozdInfosAgentService(
                 allDetails.add("نوع سابقه" to (info.historytypedesc ?: "-"))
                 allDetails.add("نام شعبه" to (info.brhname ?: "-"))
 
+                val monthNames = listOf("فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند")
+
                 // Map monthly wage details
-                info.wageDetails.forEach { detail ->
-                    val month = detail.month ?: return@forEach
-                    val amount = detail.wage ?: "-"
-                    allDetails.add("مبلغ دستمزد $month" to amount)
+                info.wageDetails.forEachIndexed { index, detail ->
+                    val amount = detail.wage ?: return@forEachIndexed
+                    if (amount == "0") return@forEachIndexed
+                    
+                    val monthName = monthNames.getOrNull(index) ?: return@forEachIndexed
+                    val formattedAmount = amount.toRialAmount().toPersianDigits()
+                    allDetails.add("مبلغ دستمزد $monthName" to formattedAmount)
                 }
 
                 if (index < filteredList.lastIndex) {
