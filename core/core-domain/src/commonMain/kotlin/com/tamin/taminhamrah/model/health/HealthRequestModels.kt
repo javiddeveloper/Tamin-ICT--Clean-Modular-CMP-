@@ -35,26 +35,19 @@ data class AddSelfDeclarativeRequest(
     val natCode: String?,
     val patientID: Int?,
     val smoking: Int?,
-    val smokeDesc: String?,
     val alcoholUse: Int?,
-    val alcoholUseDesc: String?,
     val substanceUse: Int?,
-    val substanceUseDesc: String?,
     val exerciseFrequency: Int?,
-    val exerciseDesc: String?
+
 )
 
 data class UpdateSelfDeclarativeRequest(
     val patientID: Int?,
     val objectID: Int?,
     val smoking: Int?,
-    val smokeDesc: String?,
     val alcoholUse: Int?,
-    val alcoholUseDesc: String?,
     val substanceUse: Int?,
-    val substanceUseDesc: String?,
     val exerciseFrequency: Int?,
-    val exerciseDesc: String?
 )
 
 data class SyncIllnessSelfDeclarativesRequest(

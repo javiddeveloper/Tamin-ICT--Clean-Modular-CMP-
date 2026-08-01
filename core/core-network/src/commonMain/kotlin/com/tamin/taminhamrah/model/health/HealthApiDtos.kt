@@ -12,7 +12,7 @@ data class AddSelfDeclarativeRequestDTO(
     @SerialName("natCode") val natCode: String? = null,
     @SerialName("patientID") val patientID: Int? = null,
     @SerialName("smokeDesc") val smokeDesc: String? = null,
-    @SerialName("smoking") val smoking: Int? = null,
+    @SerialName("Smoking") val smoking: Int? = null,
     @SerialName("substanceUse") val substanceUse: Int? = null,
     @SerialName("substanceUseDesc") val substanceUseDesc: String? = null
 )
@@ -537,9 +537,9 @@ data class UpdateSelfDeclarativeRequestDTO(
     @SerialName("objectID") val objectID: Int? = null,
     @SerialName("patientID") val patientID: Int? = null,
     @SerialName("smokeDesc") val smokeDesc: String? = null,
-    @SerialName("smoking") val smoking: Int? = null,
+    @SerialName("Smoking") val smoking: Int? = null,
     @SerialName("substanceUse") val substanceUse: Int? = null,
-    @SerialName("substanceUseDesc") val substanceUseDesc: String? = null
+    @SerialName("substanceUseDesc") val substanceUseDesc: String? = null,
 )
 
 @Serializable

@@ -595,18 +595,14 @@ class HealthProfileViewModel(
             val hasUserDeclared = uiState.value.lifestyleInfo != null
             val lifestyle = selfDecState.lifestyle
 
-            if (hasUserDeclared) {
+            if (true) {
                 val updateLifestyleReq = UpdateSelfDeclarativeRequest(
                     patientID = currentPatientId,
                     objectID = uiState.value.lifestyleInfo?.objectId,
                     smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else SmokingStatus.NEVER_CONSUMED.id,
-                    smokeDesc = lifestyle.smokingPattern,
                     alcoholUse = if (lifestyle.isDrinking == true) lifestyle.drinkingStatusId else LifeStyleStatus.NEVER.id,
-                    alcoholUseDesc = lifestyle.drinkingPattern,
                     substanceUse = if (lifestyle.hasAddiction == true) lifestyle.substanceStatusId else LifeStyleStatus.NEVER.id,
-                    substanceUseDesc = lifestyle.substancePattern,
                     exerciseFrequency = if (lifestyle.isExercising == true) lifestyle.exerciseStatusId else LifeStyleStatus.NEVER.id,
-                    exerciseDesc = lifestyle.exerciseFrequency
                 )
                 Logger.d("HealthProfile", "Updating Lifestyle: $updateLifestyleReq")
                 updateSelfDeclarativeUseCase(updateLifestyleReq)
@@ -615,13 +611,9 @@ class HealthProfileViewModel(
                     natCode = currentPatientNatCode,
                     patientID = currentPatientId,
                     smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else SmokingStatus.NEVER_CONSUMED.id,
-                    smokeDesc = lifestyle.smokingPattern,
                     alcoholUse = if (lifestyle.isDrinking == true) lifestyle.drinkingStatusId else LifeStyleStatus.NEVER.id,
-                    alcoholUseDesc = lifestyle.drinkingPattern,
                     substanceUse = if (lifestyle.hasAddiction == true) lifestyle.substanceStatusId else LifeStyleStatus.NEVER.id,
-                    substanceUseDesc = lifestyle.substancePattern,
                     exerciseFrequency = if (lifestyle.isExercising == true) lifestyle.exerciseStatusId else LifeStyleStatus.NEVER.id,
-                    exerciseDesc = lifestyle.exerciseFrequency
                 )
                 Logger.d("HealthProfile", "Adding Lifestyle: $addLifestyleReq")
                 addSelfDeclarativeUseCase(addLifestyleReq)

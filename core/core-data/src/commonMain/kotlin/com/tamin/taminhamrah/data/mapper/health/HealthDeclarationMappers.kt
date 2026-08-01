@@ -296,26 +296,18 @@ fun AddSelfDeclarativeRequest.toDTO() = AddSelfDeclarativeRequestDTO(
     natCode = natCode,
     patientID = patientID,
     smoking = smoking,
-    smokeDesc = smokeDesc,
     alcoholUse = alcoholUse,
-    alcoholUseDesc = alcoholUseDesc,
     substanceUse = substanceUse,
-    substanceUseDesc = substanceUseDesc,
     exerciseFrequency = exerciseFrequency,
-    exerciseDesc = exerciseDesc
 )
 
 fun UpdateSelfDeclarativeRequest.toDTO() = UpdateSelfDeclarativeRequestDTO(
     patientID = patientID,
     objectID = objectID,
     smoking = smoking,
-    smokeDesc = smokeDesc,
     alcoholUse = alcoholUse,
-    alcoholUseDesc = alcoholUseDesc,
     substanceUse = substanceUse,
-    substanceUseDesc = substanceUseDesc,
     exerciseFrequency = exerciseFrequency,
-    exerciseDesc = exerciseDesc
 )
 
 fun SyncIllnessSelfDeclarativesRequest.toDTO() = SyncIllnessesSelfDecRequestDTO(
