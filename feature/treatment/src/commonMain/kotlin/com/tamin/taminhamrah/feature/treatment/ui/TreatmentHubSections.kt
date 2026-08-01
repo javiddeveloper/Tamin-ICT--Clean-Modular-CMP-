@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -115,17 +116,24 @@ internal fun PatientCarousel(
             onRetry = onRetry,
         )
 
-        else -> InsuranceCardCarousel(
-            pageCount = cards.size,
-            pagerState = pagerState,
-        ) { page ->
-            val card = cards[page]
-            PatientCard(
-                patient = card.patient,
-                status = card.coverage,
-                dependantOrdinal = card.dependantOrdinal,
-                onShowEntitlementReason = onShowEntitlementReason,
-                collapseProgress = collapseProgress,
+        else -> {
+            val cardLambda: @Composable (Int) -> Unit = remember(cards, onShowEntitlementReason, collapseProgress) {
+                { page ->
+                    cards.getOrNull(page)?.let { card ->
+                        PatientCard(
+                            patient = card.patient,
+                            status = card.coverage,
+                            dependantOrdinal = card.dependantOrdinal,
+                            onShowEntitlementReason = onShowEntitlementReason,
+                            collapseProgress = collapseProgress,
+                        )
+                    }
+                }
+            }
+            InsuranceCardCarousel(
+                pageCount = cards.size,
+                pagerState = pagerState,
+                card = cardLambda,
             )
         }
     }
