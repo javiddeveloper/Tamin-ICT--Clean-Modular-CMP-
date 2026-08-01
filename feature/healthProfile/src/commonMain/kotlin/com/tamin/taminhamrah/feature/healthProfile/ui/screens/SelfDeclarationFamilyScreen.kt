@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
@@ -46,7 +47,8 @@ fun SelfDeclarationFamilyScreen(
 
     val optionsYesNo = listOf(
         stringResource(Res.string.health_option_yes),
-        stringResource(Res.string.health_option_no)
+        stringResource(Res.string.health_option_no),
+
     )
 
     // Lookup family groups via Enum mapping (forFamily = true)
@@ -113,8 +115,8 @@ fun SelfDeclarationFamilyScreen(
             familyDiseasesGroup?.let { group ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconBox(
-                        painter = painterResource(Res.drawable.ic_health_high_risk),
-                        backgroundColor = LocalTaminColors.current.greenText.copy(alpha = 0.2f),
+                        painter = painterResource(Res.drawable.ic_family_high_risk),
+                        backgroundColor = LocalTaminColors.current.teal.copy(alpha = 0.15f),
                         contentDescription = null,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -147,7 +149,7 @@ fun SelfDeclarationFamilyScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconBox(
-                            painter = painterResource(Res.drawable.ic_health_cancer),
+                            painter = painterResource(Res.drawable.ic_family_cancer),
                             backgroundColor = LocalTaminColors.current.dangerText.copy(alpha = 0.13f),
                             contentDescription = null,
                         )
@@ -179,24 +181,60 @@ fun SelfDeclarationFamilyScreen(
                     )
                 }
 
-                if (state.familyHasCancer == true) {
-                    if (state.familyCancerIds.isNotEmpty()) {
-                        val selectedItems =
-                            group.illnesses.filter { state.familyCancerIds.contains(it.id) }
-                        FlowRow(
+                if (state.familyHasCancer == true && state.familyCancerIds.isNotEmpty()) {
+                    val selectedItems =
+                        group.illnesses.filter { state.familyCancerIds.contains(it.id) }
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showCancerSheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Edit button chip
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showCancerSheet = true },
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            selectedItems.forEach { item ->
-                                CustomChip(
-                                    text = item.label,
-                                    containerColor = LocalTaminColors.current.dangerText.copy(alpha = 0.13f),
-                                    textColor = taminColors.textPrimary
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
                                 )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            if (selectedItems.isNotEmpty()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_family_edit),
+                                        contentDescription = null,
+                                        tint = taminColors.blueText,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    TaminText(
+                                        text = "ویرایش",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = taminColors.blueText
+                                        )
+                                    )
+                                }
                             }
+                        }
+                        // Individual selected cancer chips
+                        selectedItems.forEach { item ->
+                            CustomChip(
+                                text = item.label,
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
+                                )
+                            )
                         }
                     }
                 }

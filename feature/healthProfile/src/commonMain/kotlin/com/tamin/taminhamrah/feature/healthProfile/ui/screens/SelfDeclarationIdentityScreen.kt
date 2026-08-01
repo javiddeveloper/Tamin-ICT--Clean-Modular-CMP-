@@ -178,8 +178,8 @@ fun SelfDeclarationIdentityScreen(
                                     value = state.patientName
                                 )
                                 IdentityGridItem(
-                                    label = stringResource(Res.string.health_label_father_name),
-                                    value = state.patientFather
+                                    label = stringResource(Res.string.health_label_gender),
+                                    value = state.patientGender
                                 )
                                 IdentityGridItem(
                                     label = stringResource(Res.string.health_label_birth_date),
@@ -195,8 +195,8 @@ fun SelfDeclarationIdentityScreen(
                                     value = state.patientFamily
                                 )
                                 IdentityGridItem(
-                                    label = stringResource(Res.string.health_label_gender),
-                                    value = state.patientGender
+                                    label = stringResource(Res.string.health_label_father_name),
+                                    value = state.patientFather
                                 )
                                 IdentityGridItem(
                                     label = stringResource(Res.string.health_label_insurance_number),

@@ -191,7 +191,9 @@ fun StyledTextField(
     label: String,
     placeholder: String,
     leadingIcon: ImageVector? = null,
+    leadingIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     trailingIcon: ImageVector? = null,
+    trailingIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     isValid: Boolean? = null,
     errorText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -248,7 +250,15 @@ fun StyledTextField(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Leading Icon
-                if (leadingIcon != null) {
+                if (leadingIconPainter != null) {
+                    Icon(
+                        painter = leadingIconPainter,
+                        contentDescription = null,
+                        tint = leadingIconColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else if (leadingIcon != null) {
                     Icon(
                         imageVector = leadingIcon,
                         contentDescription = null,
@@ -292,6 +302,14 @@ fun StyledTextField(
                         contentDescription = "معتبر",
                         tint = taminColors.greenText,
                         modifier = Modifier.size(19.dp)
+                    )
+                } else if (trailingIconPainter != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        painter = trailingIconPainter,
+                        contentDescription = null,
+                        tint = trailingIconColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 } else if (trailingIcon != null) {
                     Spacer(modifier = Modifier.width(8.dp))

@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -91,14 +92,11 @@ fun SelfDeclarationPhysicalScreen(
                     modifier = Modifier.align(Alignment.Start)
                 )
 
-            TaminText(
-                text = stringResource(Res.string.health_physical_height_label),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.textPrimary,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
                 RulerPicker(
+                    title = stringResource(Res.string.health_physical_height_label),
+                    titleIconPainter = painterResource(Res.drawable.ic_physical_height),
+                    titleIconBgColor = taminColors.blueBg,
+                    titleIconTintColor = taminColors.blueText,
                     value = state.height,
                     onValueChange = { h ->
                         onIntent(HealthProfileIntent.UpdatePhysical(state.copy(height = h)))
@@ -110,21 +108,19 @@ fun SelfDeclarationPhysicalScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TaminText(
-                    text = stringResource(Res.string.health_physical_weight_label),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = taminColors.textPrimary,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-
                 RulerPicker(
+                    title = stringResource(Res.string.health_physical_weight_label),
+                    titleIconPainter = painterResource(Res.drawable.ic_weight),
+                    titleIconBgColor = taminColors.teal.copy(alpha = 0.15f),
+                    titleIconTintColor = taminColors.teal,
                     value = state.weight,
                     onValueChange = { w ->
                         onIntent(HealthProfileIntent.UpdatePhysical(state.copy(weight = w)))
                     },
                     range = 40..150,
                     unit = stringResource(Res.string.health_physical_unit_kg),
-                    defaultPoint = 70
+                    defaultPoint = 70,
+                    accentColor = taminColors.teal
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))

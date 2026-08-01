@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.util.ValidationUtils
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.Res
 import taminx.feature.healthprofile.generated.resources.*
@@ -93,7 +94,8 @@ fun SelfDeclarationEmergencyScreen(
                         onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyName = valStr)))
                     },
                     label = stringResource(Res.string.health_emergency_name_label),
-                    placeholder = stringResource(Res.string.health_placeholder_enter)
+                    placeholder = stringResource(Res.string.health_placeholder_enter),
+                    leadingIconPainter = painterResource(Res.drawable.ic_emergency_name)
                 )
 
                 StyledTextField(
@@ -102,17 +104,10 @@ fun SelfDeclarationEmergencyScreen(
                         onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyFamily = valStr)))
                     },
                     label = stringResource(Res.string.health_label_last_name),
-                    placeholder = stringResource(Res.string.health_placeholder_enter)
+                    placeholder = stringResource(Res.string.health_placeholder_enter),
+                    leadingIconPainter = painterResource(Res.drawable.ic_emergency_name)
                 )
 
-                StyledTextField(
-                    value = state.emergencyRelation,
-                    onValueChange = { valStr ->
-                        onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyRelation = valStr)))
-                    },
-                    label = stringResource(Res.string.health_emergency_relation_label),
-                    placeholder = stringResource(Res.string.health_emergency_relation_placeholder)
-                )
                 val showMobileError = emergencyTouched && !isMobileValid
 
                 StyledTextField(
@@ -123,6 +118,7 @@ fun SelfDeclarationEmergencyScreen(
                     },
                     label = stringResource(Res.string.health_emergency_mobile_label),
                     placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_mobile),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     isValid = if (showMobileError) false else null,
                     errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
@@ -134,26 +130,37 @@ fun SelfDeclarationEmergencyScreen(
                         }
                     }
                 )
+
+                StyledTextField(
+                    value = state.emergencyRelation,
+                    onValueChange = { valStr ->
+                        onIntent(HealthProfileIntent.UpdateEmergency(state.copy(emergencyRelation = valStr)))
+                    },
+                    label = stringResource(Res.string.health_emergency_relation_label),
+                    placeholder = stringResource(Res.string.health_emergency_relation_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_family)
+                )
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
     }
+}
 
-    @PreviewRtlTheme
-    @Preview
-    @Composable
-    fun SelfDeclarationEmergencyScreenPreview() {
-        PreviewRtlThemeContent {
-            SelfDeclarationEmergencyScreen(
-                state = EmergencyStepState(
-                    emergencyName = "مریم",
-                    emergencyRelation = "همسر",
-                    emergencyMobile = "09129876543"
-                ),
-                onIntent = {},
-                onBackClicked = {}
-            )
-        }
+@PreviewRtlTheme
+@Preview
+@Composable
+fun SelfDeclarationEmergencyScreenPreview() {
+    PreviewRtlThemeContent {
+        SelfDeclarationEmergencyScreen(
+            state = EmergencyStepState(
+                emergencyName = "مریم",
+                emergencyRelation = "همسر",
+                emergencyMobile = "09129876543"
+            ),
+            onIntent = {},
+            onBackClicked = {}
+        )
     }
 }
+
 

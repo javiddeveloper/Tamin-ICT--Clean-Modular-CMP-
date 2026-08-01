@@ -88,13 +88,6 @@ fun SelfDeclarationReviewScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                TaminText(
-                    text = "بررسی نهایی پروندهٔ سلامت",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = taminColors.textPrimary
-                    )
-                )
 
                 WarningBanner(
                     message = "لطفاً صحت اطلاعات وارد شده را بررسی و تأیید کنید."

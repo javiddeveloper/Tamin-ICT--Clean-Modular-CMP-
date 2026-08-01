@@ -31,13 +31,15 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+
 @Composable
-fun SelfDeclarationContactScreen(
+fun SelfDeclarationContactScreen (
     state: ContactStepState,
     provinceOptions: List<LookupItemPR> = emptyList(),
     cityOptions: List<LookupItemPR> = emptyList(),
@@ -138,6 +140,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_mobile_label),
                     placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_mobile),
                     isValid = if (showMobileError) false else null,
                     errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -159,6 +162,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_email_label),
                     placeholder = stringResource(Res.string.health_contact_email_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_email),
                     isValid = if (showEmailError) false else null,
                     errorText = if (showEmailError) stringResource(Res.string.health_contact_email_error) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -172,15 +176,6 @@ fun SelfDeclarationContactScreen(
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        StyledSelectField(
-                            value = state.provinceLabel,
-                            label = stringResource(Res.string.health_contact_province_label),
-                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
-                            isLoading = isProvincesLoading,
-                            onClick = { showProvinceBottomSheet = true }
-                        )
-                    }
                     Box(modifier = Modifier.weight(1f)) {
                         StyledSelectField(
                             value = state.cityLabel,
@@ -197,6 +192,15 @@ fun SelfDeclarationContactScreen(
                                     showCityBottomSheet = true
                                 }
                             }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        StyledSelectField(
+                            value = state.provinceLabel,
+                            label = stringResource(Res.string.health_contact_province_label),
+                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
+                            isLoading = isProvincesLoading,
+                            onClick = { showProvinceBottomSheet = true }
                         )
                     }
                 }
@@ -220,6 +224,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_postcode_label),
                     placeholder = stringResource(Res.string.health_contact_postcode_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_postcode),
                     isValid = if (showPostcodeError) false else null,
                     errorText = if (showPostcodeError) stringResource(Res.string.health_contact_postcode_error) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -242,7 +247,7 @@ fun SelfDeclarationContactScreen(
                     border = BorderStroke(1.dp, taminColors.blueText)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.LocationOn,
+                        painter = painterResource(Res.drawable.ic_contact_map),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )

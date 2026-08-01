@@ -25,6 +25,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -105,24 +106,14 @@ fun SelfDeclarationPersonalScreen(
                     )
                 )
 
-                // Marital Status — Clickable field opening HealthBottomSheet
-                StyledTextField(
-                    value = selectedMaritalLabel,
-                    onValueChange = {},
-                    label = stringResource(Res.string.health_personal_marital_status),
-                    placeholder = stringResource(Res.string.choose),
-                    trailingIcon = Icons.Default.KeyboardArrowDown,
-                    readOnly = true,
-                    onClick = { showMaritalBottomSheet = true }
-                )
-
                 StyledTextField(
                     value = state.job,
                     onValueChange = { jobStr ->
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(job = jobStr)))
                     },
                     label = stringResource(Res.string.health_personal_job_label),
-                    placeholder = stringResource(Res.string.health_personal_job_placeholder)
+                    placeholder = stringResource(Res.string.health_personal_job_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_job)
                 )
 
                 StyledTextField(
@@ -131,7 +122,8 @@ fun SelfDeclarationPersonalScreen(
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(citizenship = cit)))
                     },
                     label = stringResource(Res.string.health_personal_citizenship_label),
-                    placeholder = stringResource(Res.string.health_personal_citizenship_placeholder)
+                    placeholder = stringResource(Res.string.health_personal_citizenship_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_citizenship)
                 )
 
                 StyledTextField(
@@ -140,7 +132,20 @@ fun SelfDeclarationPersonalScreen(
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(nationality = nat)))
                     },
                     label = stringResource(Res.string.health_personal_nationality_label),
-                    placeholder = stringResource(Res.string.health_personal_nationality_placeholder)
+                    placeholder = stringResource(Res.string.health_personal_nationality_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_nationality)
+                )
+
+                // Marital Status — Clickable field opening HealthBottomSheet
+                StyledTextField(
+                    value = selectedMaritalLabel,
+                    onValueChange = {},
+                    label = stringResource(Res.string.health_personal_marital_status),
+                    placeholder = stringResource(Res.string.choose),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_marital),
+                    trailingIcon = Icons.Default.KeyboardArrowDown,
+                    readOnly = true,
+                    onClick = { showMaritalBottomSheet = true }
                 )
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }

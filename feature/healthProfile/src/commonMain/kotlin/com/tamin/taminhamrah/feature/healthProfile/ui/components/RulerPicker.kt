@@ -57,6 +57,10 @@ import taminx.feature.healthprofile.generated.resources.*
 @Composable
 fun RulerPicker(
     modifier: Modifier = Modifier,
+    title: String? = null,
+    titleIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
+    titleIconBgColor: Color? = null,
+    titleIconTintColor: Color? = null,
     value: Int?,
     onValueChange: (Int) -> Unit,
     range: IntRange,
@@ -69,6 +73,9 @@ fun RulerPicker(
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
     val coroutineScope = rememberCoroutineScope()
+
+    val resolvedIconBgColor = titleIconBgColor ?: taminColors.blueBg
+    val resolvedIconTintColor = titleIconTintColor ?: accentColor
 
     // Ticks configuration
     val tickSpacingPx = 24f // spacing between ticks in pixels
@@ -96,6 +103,43 @@ fun RulerPicker(
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Card Title & Icon Badge (Inside component container)
+        if (!title.isNullOrEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                if (titleIconPainter != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .background(resolvedIconBgColor, RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = titleIconPainter,
+                            contentDescription = null,
+                            tint = resolvedIconTintColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                TaminText(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.textPrimary
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
         // Value and Unit display
         Row(
             verticalAlignment = Alignment.Bottom,
