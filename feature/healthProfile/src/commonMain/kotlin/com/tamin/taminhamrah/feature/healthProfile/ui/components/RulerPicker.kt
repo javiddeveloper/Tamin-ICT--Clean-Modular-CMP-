@@ -1,6 +1,9 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
 import com.tamin.taminhamrah.ui.components.TaminText
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
@@ -61,6 +64,7 @@ fun RulerPicker(
     titleIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     titleIconBgColor: Color? = null,
     titleIconTintColor: Color? = null,
+    isRequired: Boolean = false,
     value: Int?,
     onValueChange: (Int) -> Unit,
     range: IntRange,
@@ -91,6 +95,17 @@ fun RulerPicker(
         val targetOffset = (activeValue - range.first) * tickSpacingPx
         if (scrollOffset.value.roundToInt() != targetOffset.roundToInt()) {
             scrollOffset.animateTo(targetOffset)
+        }
+    }
+
+    val annotatedTitle = remember(title, isRequired, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(title.orEmpty())
+            if (isRequired) {
+                withStyle(SpanStyle(color = taminColors.dangerText)) {
+                    append(" *")
+                }
+            }
         }
     }
 
@@ -129,7 +144,7 @@ fun RulerPicker(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 TaminText(
-                    text = title,
+                    text = annotatedTitle,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,

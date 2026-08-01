@@ -212,7 +212,7 @@ fun SelfDeclarationContactScreen (
                     },
                     label = stringResource(Res.string.health_contact_address_label),
                     placeholder = stringResource(Res.string.health_contact_address_placeholder),
-                    singleLine = false
+                    singleLine = false,
                 )
 
                 val showPostcodeError = postcodeTouched && state.postcode.length != 10

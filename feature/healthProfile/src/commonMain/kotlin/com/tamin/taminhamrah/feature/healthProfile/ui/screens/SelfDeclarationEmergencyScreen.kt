@@ -95,7 +95,8 @@ fun SelfDeclarationEmergencyScreen(
                     },
                     label = stringResource(Res.string.health_emergency_name_label),
                     placeholder = stringResource(Res.string.health_placeholder_enter),
-                    leadingIconPainter = painterResource(Res.drawable.ic_emergency_name)
+                    leadingIconPainter = painterResource(Res.drawable.ic_emergency_name),
+                    isRequired = true
                 )
 
                 StyledTextField(
@@ -105,7 +106,8 @@ fun SelfDeclarationEmergencyScreen(
                     },
                     label = stringResource(Res.string.health_label_last_name),
                     placeholder = stringResource(Res.string.health_placeholder_enter),
-                    leadingIconPainter = painterResource(Res.drawable.ic_emergency_name)
+                    leadingIconPainter = painterResource(Res.drawable.ic_emergency_name),
+                    isRequired = true
                 )
 
                 val showMobileError = emergencyTouched && !isMobileValid
@@ -122,6 +124,7 @@ fun SelfDeclarationEmergencyScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     isValid = if (showMobileError) false else null,
                     errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
+                    isRequired = true,
                     onFocusChanged = { isFocused ->
                         if (isFocused) {
                             emergencyFocused = true
@@ -138,7 +141,8 @@ fun SelfDeclarationEmergencyScreen(
                     },
                     label = stringResource(Res.string.health_emergency_relation_label),
                     placeholder = stringResource(Res.string.health_emergency_relation_placeholder),
-                    leadingIconPainter = painterResource(Res.drawable.ic_family)
+                    leadingIconPainter = painterResource(Res.drawable.ic_family),
+                    isRequired = true
                 )
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }

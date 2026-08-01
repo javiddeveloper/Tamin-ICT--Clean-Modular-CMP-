@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +44,6 @@ import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.util.Logger
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*

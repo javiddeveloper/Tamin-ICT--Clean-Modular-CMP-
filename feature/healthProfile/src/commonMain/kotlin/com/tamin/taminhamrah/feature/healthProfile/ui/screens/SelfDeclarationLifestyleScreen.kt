@@ -28,6 +28,9 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.SmokingStatus
 import com.tamin.taminhamrah.util.Logger
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.CustomChip
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
@@ -55,6 +58,41 @@ fun SelfDeclarationLifestyleScreen(
         stringResource(Res.string.health_option_no)
     )
 
+    val isNextEnabled = (state.isSmoking != null && (state.isSmoking == false || state.smokingStatusId != null)) &&
+            (state.hasAddiction != null && (state.hasAddiction == false || state.substanceStatusId != null)) &&
+            (state.isDrinking != null && (state.isDrinking == false || state.drinkingStatusId != null)) &&
+            (state.isExercising != null && (state.isExercising == false || state.exerciseStatusId != null))
+
+    val smokingTitle = stringResource(Res.string.health_lifestyle_smoking_question)
+    val addictionTitle = stringResource(Res.string.health_lifestyle_addiction_question)
+    val alcoholTitle = stringResource(Res.string.health_lifestyle_alcohol_question)
+    val exerciseTitle = stringResource(Res.string.health_lifestyle_exercise_question)
+
+    val annotatedSmoking = remember(smokingTitle, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(smokingTitle)
+            withStyle(SpanStyle(color = taminColors.dangerText)) { append(" *") }
+        }
+    }
+    val annotatedAddiction = remember(addictionTitle, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(addictionTitle)
+            withStyle(SpanStyle(color = taminColors.dangerText)) { append(" *") }
+        }
+    }
+    val annotatedAlcohol = remember(alcoholTitle, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(alcoholTitle)
+            withStyle(SpanStyle(color = taminColors.dangerText)) { append(" *") }
+        }
+    }
+    val annotatedExercise = remember(exerciseTitle, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(exerciseTitle)
+            withStyle(SpanStyle(color = taminColors.dangerText)) { append(" *") }
+        }
+    }
+
     Scaffold(
         topBar = {
             HealthTopAppBar(
@@ -67,6 +105,7 @@ fun SelfDeclarationLifestyleScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = stringResource(Res.string.health_btn_next_step),
+                primaryEnabled = isNextEnabled,
                 onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES)) },
                 secondaryText = stringResource(Res.string.health_btn_prev_step),
                 onSecondaryClick = onBackClicked
@@ -115,7 +154,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        text = stringResource(Res.string.health_lifestyle_smoking_question),
+                        text = annotatedSmoking,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -162,7 +201,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        text = stringResource(Res.string.health_lifestyle_addiction_question),
+                        text = annotatedAddiction,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -210,7 +249,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        text = stringResource(Res.string.health_lifestyle_alcohol_question),
+                        text = annotatedAlcohol,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )
@@ -258,7 +297,7 @@ fun SelfDeclarationLifestyleScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TaminText(
-                        text = stringResource(Res.string.health_lifestyle_exercise_question),
+                        text = annotatedExercise,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = taminColors.textPrimary
                     )

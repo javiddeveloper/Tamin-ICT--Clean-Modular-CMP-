@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
@@ -60,6 +63,27 @@ fun SelfDeclarationBloodScreen(
     val unknownText = stringResource(Res.string.health_allergy_unknows)
     val dontKnowText = stringResource(Res.string.i_dont_know)
     val dontKnowTextt = stringResource(Res.string.i_dont_knoww)
+
+    val bloodGroupLabel = stringResource(Res.string.health_blood_blood_group_type)
+    val rhFactorLabel = stringResource(Res.string.health_blood_rh_factor)
+
+    val annotatedBloodGroup = remember(bloodGroupLabel, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(bloodGroupLabel)
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
+            }
+        }
+    }
+
+    val annotatedRhFactor = remember(rhFactorLabel, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(rhFactorLabel)
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -132,7 +156,7 @@ fun SelfDeclarationBloodScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             TaminText(
-                text = stringResource(Res.string.health_blood_blood_group_type),
+                text = annotatedBloodGroup,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textTertiary,
                 modifier = Modifier.align(Alignment.Start)
@@ -158,7 +182,7 @@ fun SelfDeclarationBloodScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             TaminText(
-                text = stringResource(Res.string.health_blood_rh_factor),
+                text = annotatedRhFactor,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textTertiary,
                 modifier = Modifier.align(Alignment.Start)

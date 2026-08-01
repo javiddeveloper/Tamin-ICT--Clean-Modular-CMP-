@@ -40,6 +40,7 @@ fun SelfDeclarationPhysicalScreen(
         state.weight / (heightInMeters * heightInMeters)
     } else null
 
+
     Scaffold(
         topBar = {
             HealthTopAppBar(
