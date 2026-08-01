@@ -91,30 +91,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                 "message_id": "81307dc3-3b75-4796-80ef-fd42ae3d6fdc"
             },
             {
-                "key": "dastmozd_infos",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "endDate:14040430"
-                    ]
-                },
-                "data": null,
-                "message": "سابقه پرداخت حق بیمه تا تاریخ 14040430",
-                "message_id": "cafabfcf-db89-4ed1-8437-46ac820cf98c"
-            },
-            {
-                "key": "dastmozd_infos",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": []
-                },
-                "data": null,
-                "message": "سابقه پرداخت حق بیمه",
-                "message_id": "7e2d8329-d5d1-42ab-9960-bd9202c225ab"
-            },
-            {
                 "key": "history_job_infos",
                 "step_number": 1,
                 "payload": {
@@ -164,19 +140,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                 "data": null,
                 "message": "محاسبه غرامت دستمزد از تاریخ شروع",
                 "message_id": "0447c044-b8f5-404f-9fc5-128ed154816f"
-            },
-            {
-                "key": "calcIllness",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "endDate:14040430"
-                    ]
-                },
-                "data": null,
-                "message": "محاسبه غرامت دستمزد تا تاریخ پایان",
-                "message_id": "c171a2d4-a8c7-47eb-9439-aebbc7a17a14"
             },
             {
                 "key": "repIllness_last",
@@ -323,99 +286,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                 "message_id": "a066006f-d91a-47c6-9370-9057c39a3fe3"
             },
             {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode: 101"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (پسر)",
-                "message_id": "21488487-3535-4fde-bf01-c0d4ec54427c"
-            },
-            {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode: 102"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (دختر)",
-                "message_id": "7810b2fe-c02b-4fcb-b6a3-a63d48d551c6"
-            },
-            {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode: 106",
-                        "gendercode : 01"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (پدر)",
-                "message_id": "a72373fb-af5d-4afa-b864-9bc90bc74c56"
-            },
-            {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode: 106",
-                        "gendercode : 02"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (مادر)",
-                "message_id": "7fa9f388-a356-4674-b519-2347c6923e7c"
-            },
-            {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode:124"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (خواهر)",
-                "message_id": "c5f7b087-4a7a-44ae-8201-13ef6f1e66e3"
-            },
-            {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode : 124"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (برادر)",
-                "message_id": "f6c8790b-f09b-4240-8ac1-89054b66a68c"
-            },
-            {
-                "key": "get_dependent",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "tendencyCode : 100"
-                    ]
-                },
-                "data": null,
-                "message": "افراد تحت پوشش (زن/شوهر)",
-                "message_id": "f6c8790b-f09b-4240-8ac1-89054b66a68c"
-            },
-            {
                 "key": "fish",
                 "step_number": 1,
                 "payload": {
@@ -464,22 +334,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                 "message_id": "7e6bec64-b935-42ba-b193-9681e748e98e"
             },
             {
-                "key": "fish",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "startDate:14040401",
-                        "pensionerId:@pensionerId",
-                        "NationalId:@nationalID",
-                        "paymentType:03"
-                    ]
-                },
-                "data": null,
-                "message": "کاربر محترم عیدی مربوط به @startDate به صورت زیر می‌باشد",
-                "message_id": "7e6bec64-b935-42ba-b193-9681e748e98e"
-            },
-            {
                 "key": "fish_last",
                 "step_number": 1,
                 "payload": {
@@ -492,38 +346,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                 },
                 "data": null,
                 "message": "آخرین عیدی",
-                "message_id": "7e6bec64-b935-42ba-b193-9681e748e98e"
-            },
-            {
-                "key": "fish",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "startDate:14040401",
-                        "pensionerId:@pensionerId",
-                        "NationalId:@nationalID",
-                        "paymentType:08"
-                    ]
-                },
-                "data": null,
-                "message": "کاربر محترم معوقه مربوط به @startDate به صورت زیر می‌باشد",
-                "message_id": "7e6bec64-b935-42ba-b193-9681e748e98e"
-            },
-            {
-                "key": "fish",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "startDate:14040401",
-                        "pensionerId:@pensionerId",
-                        "NationalId:@nationalID",
-                        "paymentType:08"
-                    ]
-                },
-                "data": null,
-                "message": "آخرین معوقه",
                 "message_id": "7e6bec64-b935-42ba-b193-9681e748e98e"
             },
             {
@@ -637,30 +459,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                     "filter": [
                         "startDate:14020401"
                     ]
-                },
-                "data": null,
-                "message": "لیست کد پیگیری: ",
-                "message_id": "4ce0813b-2106-41d8-8ebd-a62553ebd555"
-            },
-            {
-                "key": "tracking_code",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": [
-                        "endDate:14040430"
-                    ]
-                },
-                "data": null,
-                "message": "لیست کد پیگیری: ",
-                "message_id": "4ce0813b-2106-41d8-8ebd-a62553ebd555"
-            },
-            {
-                "key": "tracking_code",
-                "step_number": 1,
-                "payload": {
-                    "itemType": 1,
-                    "filter": []
                 },
                 "data": null,
                 "message": "لیست کد پیگیری: ",
@@ -870,61 +668,6 @@ internal const val FAKE_AGENT_ONE_RESPONSE = """
                 ],
                 "message": "اضافه کردن شماره حساب",
                 "message_id": "47da4216-5509-4f17-a12e-c5196f0f8c3b"
-            },
-            {
-                "key": "appoinmet",
-                "step_number": 1,
-                "payload": {
-                    "filter": []
-                },
-                "data": [
-                    {
-                        "item_type": "message_item",
-                        "message": "برای متخصص داخلی"
-                    },
-                    {
-                        "item_type": "appoinmet_item",
-                        "NAME": "ali",
-                        "PROFICIENCY": "3",
-                        "CITY": "sdg",
-                        "ADDRESS": "dsf",
-                        "CENTER": "fsdf",
-                        "TITLE": "متخصص داخلی",
-                        "URL": "//jkif",
-                        "MATCH_PERCENTAGE": "65"
-                    },
-                    {
-                        "item_type": "message_item",
-                        "message": "برای متخصص چشم"
-                    },
-                    {
-                        "item_type": "appoinmet_item",
-                        "NAME": "ali",
-                        "PROFICIENCY": "3",
-                        "CITY": "sdg",
-                        "ADDRESS": "dsf",
-                        "CENTER": "fsdf",
-                        "TITLE": "متخصص چشم",
-                        "URL": "//jkif",
-                        "MATCH_PERCENTAGE": "65"
-                    },
-                    {
-                        "item_type": "message_item",
-                        "message": "مسیج فوتر"
-                    },
-                    {
-                        "item_type": "prompt_item",
-                        "action_type": "open_support_link",
-                        "prompt": "یاز کزدن سایت ۱۴۲۰"
-                    },
-                    {
-                        "item_type": "prompt_item",
-                        "action_type": "open_support_dial",
-                        "prompt": "تماس با ۱۴۲۰"
-                    }
-                ],
-                "message": "",
-                "message_id": "e6e66430-8de6-41cc-ba7d-b405377118a0"
             },
             {
                 "key": "message",

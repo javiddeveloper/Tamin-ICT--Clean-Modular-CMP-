@@ -740,8 +740,9 @@ private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
 /**
  * Follow-up suggestion chips. Tapping one sends it as the next prompt.
  *
- * Rendered inside the reply bubble it belongs to, so an answer and its suggestions stay
- * a single chat item rather than two rows with two timestamps.
+ * Chips wrap horizontally (FlowRow) so short prompts sit side-by-side rather than
+ * every chip taking its own full-width row — matching the GroupButtonItemViewHolder
+ * chip-group layout from the legacy Android adapter.
  */
 @Composable
 private fun SuggestedPromptChips(
@@ -752,31 +753,36 @@ private fun SuggestedPromptChips(
     val taminColors = LocalTaminColors.current
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             text = "پیشنهادات:",
             style = MaterialTheme.typography.labelSmall.copy(color = taminColors.textMuted)
         )
-        prompts.forEach { prompt ->
-            SuggestionChip(
-                onClick = { onPromptClick(prompt) },
-                label = {
-                    Text(
-                        text = prompt,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.primary
+        androidx.compose.foundation.layout.FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            prompts.forEach { prompt ->
+                SuggestionChip(
+                    onClick = { onPromptClick(prompt) },
+                    label = {
+                        Text(
+                            text = prompt,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         )
+                    },
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    border = SuggestionChipDefaults.suggestionChipBorder(
+                        enabled = true,
+                        borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                     )
-                },
-                colors = SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                border = SuggestionChipDefaults.suggestionChipBorder(
-                    enabled = true,
-                    borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                 )
-            )
+            }
         }
     }
 }
@@ -943,23 +949,120 @@ private fun nextWordBoundary(s: String, from: Int): Int {
     return i
 }
 
+/**
+ * Parses a single line of markdown into a styled AnnotatedString.
+ *
+ * Handles (in priority order):
+ * - `### Header` / `## Header` / `# Header` → Bold + larger visual weight
+ * - `> Blockquote` → italic + muted color prefix
+ * - `1. …` numbered list → keeps number, indented
+ * - `- `, `* `, `● `, `• ` bullet list → replaces with `● `
+ * - `***bold+italic***` / `___bold+italic___`
+ * - `**bold**` / `__bold__`
+ * - `*italic*` / `_italic_`
+ * - Inline `code` spans
+ */
 private fun parseMarkdownLine(line: String): androidx.compose.ui.text.AnnotatedString {
     return androidx.compose.ui.text.buildAnnotatedString {
-        var processedLine = line
-        if (processedLine.trimStart().startsWith("- ") || processedLine.trimStart().startsWith("* ")) {
-            processedLine = processedLine.replaceFirst(Regex("^\\s*[-*]\\s+"), "•  ")
-        }
-        var currentIndex = 0
-        val boldRegex = "\\*\\*(.*?)\\*\\*".toRegex()
-        for (match in boldRegex.findAll(processedLine)) {
-            append(processedLine.substring(currentIndex, match.range.first))
-            withStyle(style = androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) {
-                append(match.groupValues[1])
+        val trimmed = line.trimStart()
+
+        // ── Block-level prefixes ──────────────────────────────────────────────
+        val (processedLine, blockStyle) = when {
+            trimmed.startsWith("### ") -> {
+                trimmed.removePrefix("### ") to
+                    androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)
             }
-            currentIndex = match.range.last + 1
+            trimmed.startsWith("## ") -> {
+                trimmed.removePrefix("## ") to
+                    androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)
+            }
+            trimmed.startsWith("# ") -> {
+                trimmed.removePrefix("# ") to
+                    androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)
+            }
+            trimmed.startsWith("> ") -> {
+                // Blockquote: keep a ▌ prefix and render the rest in italic
+                "▌ " + trimmed.removePrefix("> ") to
+                    androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+            }
+            // Numbered list: 1. / 2. / … — keep the number, add indent
+            Regex("^\\d+\\.\\s+").containsMatchIn(trimmed) -> {
+                val match = Regex("^(\\d+\\.\\s+)").find(trimmed)
+                val prefix = match?.value ?: ""
+                "  $prefix" + trimmed.removePrefix(prefix) to null
+            }
+            // Bullet list: -, *, ●, •
+            Regex("^[-*●•]\\s+").containsMatchIn(trimmed) -> {
+                "● " + Regex("^[-*●•]\\s+").replace(trimmed, "") to null
+            }
+            else -> line to null
         }
-        append(processedLine.substring(currentIndex))
+
+        // Apply block-level style wrapping for headers/blockquotes
+        if (blockStyle != null) {
+            withStyle(blockStyle) {
+                appendInlineStyles(processedLine)
+            }
+        } else {
+            appendInlineStyles(processedLine)
+        }
     }
+}
+
+/**
+ * Applies inline markdown styles (bold+italic, bold, italic, code) to [text].
+ * Called from [parseMarkdownLine] after block-level prefix handling.
+ */
+private fun androidx.compose.ui.text.AnnotatedString.Builder.appendInlineStyles(text: String) {
+    // Regex order matters: bold+italic must come before bold and italic.
+    val inlinePatterns = listOf(
+        // ***bold+italic*** or ___bold+italic___
+        Regex("(\\*\\*\\*|___)(.*?)\\1") to { _: String, content: String ->
+            androidx.compose.ui.text.SpanStyle(
+                fontWeight = FontWeight.Bold,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            ) to content
+        },
+        // **bold** or __bold__
+        Regex("(\\*\\*|__)(.*?)\\1") to { _: String, content: String ->
+            androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold) to content
+        },
+        // *italic* or _italic_  (but not ** or __)
+        Regex("(?<!\\*)\\*(?!\\*)(.*?)(?<!\\*)\\*(?!\\*)|(?<!_)_(?!_)(.*?)(?<!_)_(?!_)") to { _: String, content: String ->
+            androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic) to content
+        },
+        // `inline code`
+        Regex("`(.*?)`") to { _: String, content: String ->
+            androidx.compose.ui.text.SpanStyle(
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                background = androidx.compose.ui.graphics.Color(0x18000000)
+            ) to content
+        }
+    )
+
+    // Build a flat list of (range, style, content) from all patterns
+    data class Span(val start: Int, val end: Int, val style: androidx.compose.ui.text.SpanStyle, val content: String)
+
+    val spans = mutableListOf<Span>()
+    for ((regex, styleBuilder) in inlinePatterns) {
+        for (match in regex.findAll(text)) {
+            // Extract the actual content (group 2 for bold+italic/bold, or 1/2 for italic)
+            val content = match.groupValues.drop(1).firstOrNull { it.isNotEmpty() } ?: continue
+            val (style, _) = styleBuilder("", content)
+            // Avoid overlapping spans from earlier (higher-priority) patterns
+            val overlaps = spans.any { it.start < match.range.last + 1 && it.end > match.range.first }
+            if (!overlaps) spans.add(Span(match.range.first, match.range.last + 1, style, content))
+        }
+    }
+    spans.sortBy { it.start }
+
+    var cursor = 0
+    for (span in spans) {
+        if (cursor < span.start) append(text.substring(cursor, span.start))
+        withStyle(span.style) { append(span.content) }
+        cursor = span.end
+    }
+    if (cursor < text.length) append(text.substring(cursor))
 }
 
 private fun parseMarkdownBlock(text: String): androidx.compose.ui.text.AnnotatedString {
