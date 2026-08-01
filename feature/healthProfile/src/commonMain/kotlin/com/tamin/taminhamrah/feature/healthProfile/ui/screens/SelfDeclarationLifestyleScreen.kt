@@ -8,6 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
@@ -179,13 +182,49 @@ fun SelfDeclarationLifestyleScreen(
                 )
 
                 if (state.isSmoking == true && state.smokingPattern != null) {
-                    CustomChip(
-                        text = state.smokingPattern,
-                        containerColor = taminColors.warning.copy(alpha = 0.13f),
-                        textColor = taminColors.textPrimary,
+                    FlowRow(
                         modifier = Modifier
-                            .clickable { showSmokingBottomSheet = true }
-                    )
+                            .fillMaxWidth()
+                            .clickable { showSmokingBottomSheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
+                        CustomChip(
+                            text = state.smokingPattern,
+                            containerColor = taminColors.warning.copy(alpha = 0.13f),
+                            textColor = taminColors.textPrimary
+                        )
+                    }
                 }
             }
 
@@ -226,13 +265,50 @@ fun SelfDeclarationLifestyleScreen(
                 )
 
                 if (state.hasAddiction == true && state.substancePattern != null) {
-                    CustomChip(
-                        text = state.substancePattern,
-                        containerColor = taminColors.dangerText.copy(alpha = 0.13f),
-                        textColor = taminColors.textPrimary,
+                    androidx.compose.foundation.layout.FlowRow(
                         modifier = Modifier
-                            .clickable { showAddictionBottomSheet = true }
-                    )
+                            .fillMaxWidth()
+                            .clickable { showAddictionBottomSheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Edit button chip
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
+                        CustomChip(
+                            text = state.substancePattern,
+                            containerColor = taminColors.dangerText.copy(alpha = 0.13f),
+                            textColor = taminColors.textPrimary
+                        )
+                    }
                 }
 
             }
@@ -274,13 +350,50 @@ fun SelfDeclarationLifestyleScreen(
                 )
 
                 if (state.isDrinking == true && state.drinkingPattern != null) {
-                    CustomChip(
-                        text = state.drinkingPattern,
-                        containerColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
-                        textColor = taminColors.textPrimary,
+                    androidx.compose.foundation.layout.FlowRow(
                         modifier = Modifier
-                            .clickable { showAlcoholBottomSheet = true }
-                    )
+                            .fillMaxWidth()
+                            .clickable { showAlcoholBottomSheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Edit button chip
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
+                        CustomChip(
+                            text = state.drinkingPattern,
+                            containerColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
+                            textColor = taminColors.textPrimary
+                        )
+                    }
                 }
 
             }
@@ -322,13 +435,50 @@ fun SelfDeclarationLifestyleScreen(
                 )
 
                 if (state.isExercising == true && state.exerciseFrequency != null) {
-                    CustomChip(
-                        text = state.exerciseFrequency,
-                        containerColor = taminColors.greenText.copy(alpha = 0.13f),
-                        textColor = taminColors.textPrimary,
+                    androidx.compose.foundation.layout.FlowRow(
                         modifier = Modifier
-                            .clickable { showExerciseBottomSheet = true }
-                    )
+                            .fillMaxWidth()
+                            .clickable { showExerciseBottomSheet = true },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Edit button chip
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
+                        CustomChip(
+                            text = state.exerciseFrequency,
+                            containerColor = taminColors.greenText.copy(alpha = 0.13f),
+                            textColor = taminColors.textPrimary
+                        )
+                    }
                 }
             }
 
