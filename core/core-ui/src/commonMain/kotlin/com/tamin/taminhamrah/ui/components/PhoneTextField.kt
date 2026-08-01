@@ -81,7 +81,7 @@ fun PhoneTextField(
                     imageVector = leadingIcon,
                     contentDescription = null,
                     tint = colors.blueText,
-                    modifier = Modifier.size(IconSize.small),
+                    modifier = Modifier.size(IconSize.banner),
                 )
             }
         }

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.ui.theme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 val TaminHamrahShapes = Shapes(
     small = RoundedCornerShape(CornerRadius.sm),
@@ -62,6 +63,7 @@ object CornerRadius {
     val cardCompact = 20.dp
     val card = 22.dp
     val sheet = 28.dp
+    val textFieldIcon = 11.dp
 }
 
 object Elevation {
@@ -74,23 +76,45 @@ object Elevation {
     val lg = 12.dp
     val xl = 24.dp
     val xxl = 30.dp
+
+    val button = 8.dp
+}
+
+object ButtonDimens {
+    val height = 56.dp
+    val loadingIndicatorSize = 18.dp
+    val loadingIndicatorStroke = 2.dp
+}
+
+object TextDimens {
+    val phoneLetterSpacing = 1.5.sp
+    val stepperTitle = 10.5.sp
+    val stepperNumber = 13.sp
 }
 
 object IconSize {
     val statIcon = 10.dp
     val small = 16.dp
+    val badgeInner = 17.dp
     val banner = 20.dp
     val medium = 24.dp
+    val badge = 32.dp
     val large = 38.dp
     val largePlus = 42.dp
     val xlarge = 48.dp
     val xxlarge = 56.dp
     val tile = 58.dp
     val tileInner = 28.dp
+    val textFieldIconContainer = 34.dp
     val headerIconOuter = 104.dp
     val headerIconInner = 78.dp
     val navBar = 24.dp
     val stepperCircle = 30.dp
     val stepperConnectorHeight = 2.dp
     val stepperConnectorWidth = 44.dp
+}
+
+object Thickness {
+    val border = 1.dp
+    val medium = 2.dp
 }

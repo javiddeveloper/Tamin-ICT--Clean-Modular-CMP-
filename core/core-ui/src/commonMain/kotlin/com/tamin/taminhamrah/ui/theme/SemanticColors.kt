@@ -20,6 +20,12 @@ data class TaminColors(
     val iconGradientSuccess: Brush,
     val iconGlassShine: Brush,
     val iconGlassBorder: Brush,
+    val glassIconTileBg: Color,
+    val glassIconTileBorder: Color,
+    val glassIconTileShine: Brush,
+    val glassIconTileIconTint: Color,
+    val glassIconRipple1: Color,
+    val glassIconRipple2: Color,
     val validationCardGradient: Brush,
 
     // Text
@@ -48,6 +54,7 @@ data class TaminColors(
 
     // Shadows
     val shadowPrimary: Color,
+    val shadowSubtle: Color,
 
     // Glass / tab-bar tokens (translucency layers for the bottom nav)
     val glassA1: Color,
@@ -79,6 +86,15 @@ data class TaminColors(
     val hawkesBlue : Color,
     val chipBg: Color,
     val verifiedBadgeBg: Color,
+    val buttonGradient: Brush,
+    val buttonDisabledGradient: Brush,
+
+    // Verified Status Tokens
+    val verifiedContainerBg: Color,
+    val verifiedContainerBorder: Color,
+    val verifiedIconGradient: Brush?,
+    val verifiedIconBg: Color,
+    val verifiedIconTint: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -136,6 +152,17 @@ val LightTaminColors = TaminColors(
             Color.White.copy(alpha = 0.05f)
         )
     ),
+    glassIconTileBg = Color.White.copy(alpha = 0.12f),
+    glassIconTileBorder = Color.White.copy(alpha = 0.227f),
+    glassIconTileShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.26f),
+            Color.Transparent
+        )
+    ),
+    glassIconTileIconTint = Color.White,
+    glassIconRipple1 = Color.White.copy(alpha = 0.1f),
+    glassIconRipple2 = Color.White.copy(alpha = 0.16f),
     validationCardGradient = Brush.verticalGradient(listOf(Color(0xADFFFFFF), Color(0x6BFFFFFF))),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8CFFFFFF),
@@ -158,6 +185,7 @@ val LightTaminColors = TaminColors(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
     shadowPrimary = Primary700.copy(alpha = 0.5f),
+    shadowSubtle = Gray900.copy(alpha = 0.1f),
 
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
@@ -166,6 +194,18 @@ val LightTaminColors = TaminColors(
     chipBg = Color(0xFFEFF6FF),
     springGreenText = TaminSpringGreen,
     verifiedBadgeBg = TaminLightSurface,
+    buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    buttonDisabledGradient = Brush.horizontalGradient(
+        listOf(
+            TaminLightTextMuted.copy(alpha = 0.4f),
+            TaminLightTextMuted.copy(alpha = 0.6f)
+        )
+    ),
+    verifiedContainerBg = Secondary50, // greenBg
+    verifiedContainerBorder = TaminLightSuccess.copy(alpha = 0.2f),
+    verifiedIconGradient = null,
+    verifiedIconBg = TaminLightSurface,
+    verifiedIconTint = TaminLightSuccess, // greenText
 )
 
 val DarkTaminColors = TaminColors(
@@ -198,6 +238,17 @@ val DarkTaminColors = TaminColors(
     iconGradientSuccess = Brush.verticalGradient(listOf(TaminDarkSuccess, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.0f))),
     iconGlassBorder = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.05f))),
+    glassIconTileBg = Color.White.copy(alpha = 0.12f),
+    glassIconTileBorder = Color.White.copy(alpha = 0.227f),
+    glassIconTileShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.26f),
+            Color.Transparent
+        )
+    ),
+    glassIconTileIconTint = Color.White,
+    glassIconRipple1 = Color.White.copy(alpha = 0.1f),
+    glassIconRipple2 = Color.White.copy(alpha = 0.16f),
     validationCardGradient = Brush.horizontalGradient(
         listOf(
             TaminTeal700.copy(alpha = 0.35f),
@@ -229,10 +280,23 @@ val DarkTaminColors = TaminColors(
     hawkesBlue = TaminDarkOuterBorder,
     chipBg = Color(0x293B82F6),
     shadowPrimary = Color.Black.copy(alpha = 0.4f),
+    shadowSubtle = Color.Black.copy(alpha = 0.3f),
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
     springGreenText = TaminDarkSuccess,
     verifiedBadgeBg = TaminDarkGreenBg,
+    buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    buttonDisabledGradient = Brush.horizontalGradient(
+        listOf(
+            TaminDarkTextMuted.copy(alpha = 0.4f),
+            TaminDarkTextMuted.copy(alpha = 0.6f)
+        )
+    ),
+    verifiedContainerBg = TaminDarkSurface, // bgSurface
+    verifiedContainerBorder = TaminDarkSuccess.copy(alpha = 0.15f),
+    verifiedIconGradient = null,
+    verifiedIconBg = TaminDarkGreenBg, // greenBg
+    verifiedIconTint = TaminDarkSuccess, // greenText
 )
 
