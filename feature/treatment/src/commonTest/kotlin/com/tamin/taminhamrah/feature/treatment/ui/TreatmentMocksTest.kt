@@ -11,10 +11,12 @@ class TreatmentMocksTest {
     fun testMocksAreInitializedCorrectly() {
         assertNotNull(TreatmentMocks.mainUiState)
         assertNotNull(TreatmentMocks.prescriptionsUiState)
+        assertNotNull(TreatmentMocks.costsUiState)
 
         assertEquals("رضا احمدی", TreatmentMocks.patientMain.fullName)
         assertEquals(1, TreatmentMocks.mainUiState.deservedList.size)
         assertEquals("رضا احمدی", TreatmentMocks.deservedTreatment.fullName)
         assertEquals("TRK123456", TreatmentMocks.prescription.trackingCode)
+        assertEquals("850000", TreatmentMocks.treatmentCost.payPrice)
     }
 }

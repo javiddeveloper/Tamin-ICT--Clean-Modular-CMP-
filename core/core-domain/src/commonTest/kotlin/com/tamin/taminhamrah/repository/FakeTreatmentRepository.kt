@@ -18,6 +18,9 @@ class FakeTreatmentRepository : TreatmentRepository {
     var getDependantUnderEighteenResult: List<DependantUserUnderEighteenDN> = emptyList()
     var getPrescriptionPdfFileResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
     var downloadLabResultPdfResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
+    var getTreatmentCostsResult: List<TreatmentCostDN> = emptyList()
+    var getTreatmentCostsPDFResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
+    var sendToInboxTreatmentCostsResult: String = ""
 
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> = flow {
         if (shouldThrowError) throw error
@@ -64,5 +67,20 @@ class FakeTreatmentRepository : TreatmentRepository {
     ): Flow<PdfDownloadDN> = flow {
         if (shouldThrowError) throw error
         emit(downloadLabResultPdfResult)
+    }
+
+    override suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getTreatmentCostsResult)
+    }
+
+    override suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN> = flow {
+        if (shouldThrowError) throw error
+        emit(getTreatmentCostsPDFResult)
+    }
+
+    override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(sendToInboxTreatmentCostsResult)
     }
 }

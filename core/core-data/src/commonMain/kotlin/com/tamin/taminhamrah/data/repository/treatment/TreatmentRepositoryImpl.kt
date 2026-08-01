@@ -173,6 +173,32 @@ internal class TreatmentRepositoryImpl(
         val result = treatmentRemoteDataSource.downloadLabResultPdf(patientID, noteHeadEprescID, currentUserNationalCode)
         emit(result.toDomain())
     }
+
+    override suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>> = flow {
+        // Local-first like every other treatment list here: show what is cached, refresh from the
+        // service, then keep emitting from the database so the screen has one source of truth.
+        val localTreatmentCosts = treatmentDao.getTreatmentCosts().first()
+        if (localTreatmentCosts.isNotEmpty()) {
+            emit(localTreatmentCosts.map { it.toDomain() })
+        }
+        try {
+            val result = treatmentRemoteDataSource.getTreatmentCosts(treatmentQuery())
+            val remote = result?.list?.map { it.toDomain() } ?: emptyList()
+            treatmentDao.clearTreatmentCosts()
+            treatmentDao.insertTreatmentCosts(remote.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localTreatmentCosts.isEmpty()) throw e
+        }
+        emitAll(treatmentDao.getTreatmentCosts().map { list -> list.map { it.toDomain() } })
+    }.distinctUntilChanged()
+
+    override suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN> = flow {
+        emit(treatmentRemoteDataSource.getTreatmentCostsPDF(repId).toDomain())
+    }
+
+    override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> = flow {
+        emit(treatmentRemoteDataSource.sendToInboxTreatmentCosts(repId))
+    }
 }
 
 /**

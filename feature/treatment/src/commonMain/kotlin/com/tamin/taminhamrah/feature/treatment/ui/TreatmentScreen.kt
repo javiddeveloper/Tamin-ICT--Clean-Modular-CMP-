@@ -50,6 +50,12 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_confirm
+import taminx.core.core_ui.coverage_reason_dialog_title
+import taminx.core.core_ui.patient_dependant_relation
+import taminx.core.core_ui.patient_main_insured_fallback
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Treatment hub: the insured person's electronic health-insurance cards, the quick-access
@@ -61,6 +67,7 @@ fun TreatmentScreen(
     onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -86,6 +93,7 @@ fun TreatmentScreen(
             onOpenMedicalRecords = onOpenMedicalRecords,
             onOpenHealthProfile = onOpenHealthProfile,
             onOpenPrescriptions = onOpenPrescriptions,
+            onOpenMiscClaims = onOpenMiscClaims,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
@@ -128,11 +136,20 @@ fun TreatmentContent(
     onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
+    onOpenMiscClaims: () -> Unit = {},
 ) {
     // Keyed on the data the cards are built from, not on the whole state: selecting a patient
     // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
-    val patients = remember(state.mainUserNationalCode, state.deservedList, state.dependantList) {
-        state.toPatientList()
+    val mainInsuredFallback = stringResource(Res.string.patient_main_insured_fallback)
+    val dependantRelation = stringResource(Res.string.patient_dependant_relation)
+    val patients = remember(
+        state.mainUserNationalCode,
+        state.deservedList,
+        state.dependantList,
+        mainInsuredFallback,
+        dependantRelation,
+    ) {
+        state.toPatientList(mainInsuredFallback, dependantRelation)
     }
     val cards = remember(patients, state.deservedList) { patients.toCardItems(state.deservedList) }
     var entitlementReason by remember { mutableStateOf<String?>(null) }
@@ -184,11 +201,14 @@ fun TreatmentContent(
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
                 onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
+                // Not feature-flag gated like the records, so the tap navigates straight away.
+                onOpenMiscClaims = onOpenMiscClaims,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCostSummary(
                 insuredShare = state.insuredShareTotal,
                 organizationShare = state.organizationShareTotal,
+                isLoading = state.isLoading,
             )
             // Clears the floating navigation bar, as the pre-collapse layout did.
             Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
@@ -260,9 +280,9 @@ private fun EntitlementReasonDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("تایید") }
+            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_confirm)) }
         },
-        title = { Text("علت عدم استحقاق درمان") },
+        title = { Text(stringResource(Res.string.coverage_reason_dialog_title)) },
         text = { Text(reason) },
     )
 }

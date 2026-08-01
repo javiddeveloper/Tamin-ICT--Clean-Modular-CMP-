@@ -4,12 +4,15 @@ import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDTO
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDTO
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
+
 
 fun DeservedTreatmentDTO.toDomain() = DeservedTreatmentDN(
     birthDate = birthDate,
@@ -84,3 +87,34 @@ fun DependantUserUnderEighteenDTO.toDomain() = DependantUserUnderEighteenDN(
     nationalId = relationWithTamin?.personal?.nationalId,
     id = id
 )
+
+fun TreatmentCostDTO.toDomain() = TreatmentCostDN(
+    accountNumber = accountNumber,
+    bimeCode = bimeCode,
+    datePaz = datePaz,
+    famil = famil,
+    healthcenterName = healthcenterName,
+    mainNational = mainNational,
+    maliCode = maliCode,
+    name = name,
+    nameAsli = nameAsli,
+    nameFamil = nameFamil,
+    noPazir = noPazir,
+    payNatCode = payNatCode,
+    payOtherService = payOtherService,
+    payPrice = payPrice,
+    payService = payService,
+    payStatus = payStatus,
+    payType = payType,
+    province = province,
+    rahgiriCode = rahgiriCode,
+    releaseDate = releaseDate,
+    repId = repId,
+    serviceDate = serviceDate,
+    status = status,
+    statusDesc = statusDesc,
+    payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
+    returnReason = returnReason
+)
+

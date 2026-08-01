@@ -42,9 +42,9 @@ import com.tamin.taminhamrah.data.local.entity.PatientImagingEntity
 import com.tamin.taminhamrah.data.local.entity.DeservedTreatmentEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionDetailEntity
-import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
 import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.MedicalAuthoritiesEntity
 import com.tamin.taminhamrah.data.local.entity.AgentSessionEntity
 import com.tamin.taminhamrah.data.local.entity.AgentMessageEntity

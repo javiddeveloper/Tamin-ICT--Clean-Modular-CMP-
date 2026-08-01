@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.treatment.fake
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
@@ -29,6 +30,9 @@ class FakeTreatmentRepository : TreatmentRepository {
     var prescriptionPriceResult: List<ElectronicPrescriptionPriceDN> = emptyList()
     var prescriptionPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
     var labResultPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
+    var treatmentCostsResult: List<TreatmentCostDN> = emptyList()
+    var treatmentCostsPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
+    var sendToInboxResult: String = "SUCCESS"
 
     private fun <T> result(value: T): Flow<T> = flow {
         if (shouldThrowError) throw error
@@ -62,4 +66,13 @@ class FakeTreatmentRepository : TreatmentRepository {
     override suspend fun downloadLabResultPdf(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): Flow<PdfDownloadDN> = result(labResultPdfResult)
+
+    override suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>> =
+        result(treatmentCostsResult)
+
+    override suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN> =
+        result(treatmentCostsPdfResult)
+
+    override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> =
+        result(sendToInboxResult)
 }

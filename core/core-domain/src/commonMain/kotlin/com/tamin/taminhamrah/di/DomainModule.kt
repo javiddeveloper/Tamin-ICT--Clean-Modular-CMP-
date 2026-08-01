@@ -111,6 +111,9 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
 
 val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
@@ -214,6 +217,9 @@ val domainModule = module {
     factoryOf(::GetWorkshopRecentlyAddedMembersUseCase)
     factoryOf(::GetWorkshopsDebtsListUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetTreatmentCostsUseCase)
+    factoryOf(::GetTreatmentCostsPDFUseCase)
+    factoryOf(::SendToInboxTreatmentCostsUseCase)
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)

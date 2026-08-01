@@ -17,6 +17,9 @@ import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.util.getCurrentTimestamp
 import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
@@ -185,7 +188,7 @@ class PrescriptionsViewModel(
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.PrescriptionsLoaded -> currentState.copy(isLoading = false, prescriptionList = partialState.list)
         is PartialState.PrescriptionDetailsLoaded -> currentState.copy(isLoading = false, prescriptionDetailList = partialState.list)
-        is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list)
+        is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list.toImmutableList())
         is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,
             viewerPdf = partialState.pdf,
@@ -197,13 +200,13 @@ class PrescriptionsViewModel(
         )
         is PartialState.PrescriptionSelected -> currentState.copy(selectedNoteHeadId = partialState.noteHeadID)
         is PartialState.RecordPricesLoaded -> currentState.copy(
-            recordPrices = currentState.recordPrices + partialState.prices,
+            recordPrices = (currentState.recordPrices + partialState.prices).toImmutableMap(),
         )
         is PartialState.LoadingPrices -> currentState.copy(isLoadingPrices = partialState.isLoading)
         is PartialState.PrescriptionCleared -> currentState.copy(
             selectedNoteHeadId = null,
             prescriptionDetailList = emptyList(),
-            prescriptionPriceList = emptyList()
+            prescriptionPriceList = persistentListOf()
         )
     }
 

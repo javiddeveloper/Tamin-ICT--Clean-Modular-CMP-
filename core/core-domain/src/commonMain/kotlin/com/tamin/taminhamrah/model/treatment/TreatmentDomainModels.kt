@@ -73,3 +73,33 @@ data class DependantUserUnderEighteenDN(
     val nationalId: String?,
     val id: Long?
 )
+
+data class TreatmentCostDN(
+    val accountNumber: String?,
+    val bimeCode: String?,
+    val datePaz: String?,
+    val famil: String?,
+    val healthcenterName: String?,
+    val mainNational: String?,
+    val maliCode: String?,
+    val name: String?,
+    val nameAsli: String?,
+    val nameFamil: String?,
+    val noPazir: String?,
+    val payNatCode: String?,
+    val payOtherService: String?,
+    val payPrice: String?,
+    val payService: String?,
+    val payStatus: String?,
+    val payType: String?,
+    val province: String?,
+    val rahgiriCode: String?,
+    val releaseDate: String?,
+    val repId: Int?,
+    val serviceDate: String?,
+    val status: String?,
+    val statusDesc: String?,
+    val payStatusDesc: String?,
+    val estimatePayDate: String?,
+    val returnReason: String?
+)

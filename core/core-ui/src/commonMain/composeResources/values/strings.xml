@@ -4,7 +4,7 @@
     <string name="btn_show_payroll_pdf">نمایش فیش حقوقی (PDF)</string>
     <string name="error_unknown">خطای ناشناخته</string>
     <string name="pdf_loaded_successfully">فایل PDF با موفقیت دریافت شد</string>
-    <string name="pdf_ready_rendering">آماده نمایش (نیاز به پیاده سازی رندرینگ)</string>
+    <string name="pdf_ready_rendering">آماده نمایش (نیاز به پیاده‌سازی رندرینگ)</string>
     <string name="btn_close">بستن</string>
     <string name="pdf_viewer_title">نمایش PDF</string>
     <string name="payroll_header">فیش حقوقی</string>
@@ -78,4 +78,157 @@
     <string name="user_type_employer">کارفرمایان</string>
     <string name="error_load_menu_failed">خطا در دریافت اطلاعات یا لیست خالی است</string>
     <string name="retry">تلاش مجدد</string>
+    <!-- ===================== Treatment ===================== -->
+
+    <!-- Shared wording -->
+    <string name="action_retry">تلاش دوباره</string>
+    <string name="action_confirm">تایید</string>
+    <string name="action_back">بازگشت</string>
+    <string name="action_call">تماس</string>
+    <string name="action_show_details">نمایش جزئیات</string>
+    <string name="action_hide_details">مخفی کردن جزئیات</string>
+    <string name="unit_rial">ریال</string>
+    <string name="share_insured">سهم بیمه‌شده</string>
+    <string name="share_organization">سهم سازمان</string>
+    <string name="share_yours">سهم شما</string>
+    <string name="amount_total">جمع کل</string>
+    <!-- Stands in for an amount that has not loaded; must never read as a real figure. -->
+    <string name="amount_unknown">—</string>
+    <string name="error_pull_to_retry">برای تلاش دوباره، صفحه را به پایین بکشید.</string>
+
+    <!-- Treatment hub -->
+    <string name="hub_empty_patients">بیمه‌شده‌ای برای نمایش وجود ندارد</string>
+    <string name="hub_quick_access">دسترسی سریع</string>
+    <string name="hub_records_title">سوابق درمانی من</string>
+    <string name="hub_records_subtitle">تاریخچهٔ نسخه، ویزیت، پاراکلینیک و آزمایش</string>
+    <string name="hub_health_profile_title">پروندهٔ سلامت من</string>
+    <string name="hub_health_profile_subtitle">خوداظهاری سلامت و اطلاعات پزشکی</string>
+    <string name="hub_health_profile_completed">تکمیل شده</string>
+    <string name="hub_health_profile_incomplete">تکمیل نشده</string>
+    <string name="hub_centers_title">مراکز درمانی طرف قرارداد</string>
+    <string name="hub_centers_subtitle">جست‌وجوی بیمارستان و داروخانه</string>
+    <string name="hub_costs_title">هزینه‌های سال %1$s (سال جاری)</string>
+
+    <!-- Service categories -->
+    <string name="category_prescriptions">نسخه‌های الکترونیک</string>
+    <string name="category_approvals">تاییدیه‌های پزشکی</string>
+    <string name="category_misc_claims">خسارت متفرقه</string>
+
+    <!-- Insurance card -->
+    <string name="card_org_name">سازمان تامین اجتماعی</string>
+    <string name="card_subtitle">کارت الکترونیک بیمهٔ درمان</string>
+    <string name="card_national_code">کد ملی</string>
+    <string name="coverage_pending">در حال استعلام وضعیت استحقاق…</string>
+    <string name="coverage_rejected">فاقد استحقاق درمان</string>
+    <string name="coverage_covered">وضعیت حمایت‌های درمانی: برخوردار هستید</string>
+    <string name="coverage_reason_action">علت</string>
+    <string name="coverage_reason_dialog_title">علت عدم استحقاق درمان</string>
+
+    <!-- Medical records -->
+    <string name="records_title">سوابق درمانی</string>
+    <string name="records_self">خودم</string>
+    <string name="records_date_from">از تاریخ</string>
+    <string name="records_date_to">تا تاریخ</string>
+    <string name="records_details">جزئیات</string>
+    <string name="records_doctor_named">دکتر %1$s</string>
+    <string name="records_empty_search">موردی با «%1$s» یافت نشد.</string>
+    <string name="records_empty_period">در بازهٔ انتخاب‌شده، سابقهٔ «%1$s» ثبت نشده است.</string>
+
+    <!-- Prescription / record detail -->
+    <string name="prescription_title">نسخهٔ الکترونیک</string>
+    <string name="prescription_download_cd">دریافت نسخهٔ الکترونیک</string>
+    <string name="prescription_lab_result_cd">دریافت جواب آزمایش</string>
+    <string name="prescription_empty">برای این نسخه قلمی ثبت نشده است.</string>
+    <string name="prescription_items">اقلام دارویی</string>
+    <string name="detail_doctor">پزشک</string>
+    <string name="detail_tracking_code">کد رهگیری</string>
+    <string name="detail_date">تاریخ</string>
+    <string name="detail_dose">دستور مصرف</string>
+    <string name="detail_prescribed">تجویزی</string>
+    <string name="detail_received">دریافتی</string>
+    <string name="detail_center">داروخانه/پاراکلینیک</string>
+    <string name="detail_action_date">تاریخ اقدام</string>
+    <string name="detail_patient_share">سهم بیمار</string>
+    <string name="detail_visit_reason">دلیل مراجعه</string>
+    <string name="detail_diagnosis">تشخیص</string>
+    <string name="detail_doctor_note">یادداشت پزشک</string>
+    <string name="detail_result">نتیجه</string>
+    <string name="detail_normal_range">محدودهٔ طبیعی</string>
+    <string name="detail_cost_breakdown">تفکیک هزینه</string>
+
+    <!-- Advanced search -->
+    <string name="search_advanced_cd">جست‌وجوی پیشرفته</string>
+    <string name="search_title">جستجوی پیشرفته</string>
+    <string name="search_service_type">نوع خدمت</string>
+    <string name="search_custom_range">بازهٔ تاریخ دلخواه</string>
+    <string name="search_from_placeholder">از (۱۴۰۴/۰۱/۰۱)</string>
+    <string name="search_from_prefix">از</string>
+    <string name="search_to_placeholder">تا (۱۴۰۴/۱۲/۲۹)</string>
+    <string name="search_to_prefix">تا</string>
+    <string name="search_doctor_or_center">نام پزشک یا مرکز</string>
+    <string name="search_doctor_hint">مثلاً دکتر محمدی یا آزمایشگاه مرکزی</string>
+    <string name="search_amount_range">بازهٔ مبلغ هزینه (ریال)</string>
+    <string name="search_min">حداقل</string>
+    <string name="search_max">حداکثر</string>
+    <string name="search_clear">پاک کردن</string>
+    <string name="search_apply">اعمال جستجو</string>
+
+    <!-- Miscellaneous-claim certificates -->
+    <string name="costs_empty">بازپرداخت هزینه‌ای برای نمایش وجود ندارد.</string>
+    <string name="costs_admission_no">شماره پذیرش %1$s</string>
+    <string name="costs_refund_amount">مبلغ بازپرداخت</string>
+    <string name="costs_patient_national_code">کد ملی بیمار</string>
+    <string name="costs_main_insured">بیمه شده اصلی</string>
+    <string name="costs_center_name">نام مرکز درمانی</string>
+    <string name="costs_admission_date">تاریخ پذیرش</string>
+    <string name="costs_refund_date">تاریخ بازپرداخت هزینه درمان</string>
+    <string name="costs_file_status">وضعیت پرونده</string>
+    <string name="costs_return_reason">دلایل برگشت پرونده از مالی</string>
+    <string name="costs_prosthesis_payment">پرداختی پروتز</string>
+    <string name="costs_other_services_payment">پرداختی سایر خدمات پزشکی</string>
+    <string name="costs_view_certificate">مشاهده گواهی</string>
+    <string name="costs_send_to_inbox">ارسال به صندوق شخصی</string>
+    <!-- The previous app's confirmation, kept word for word. -->
+    <string name="costs_sent_to_inbox">گواهی بازپرداخت هزینه های درمانی به صندوق شخصی شما ارسال شد</string>
+
+    <!-- Surfaced by the treatment view models -->
+    <string name="error_identity_not_found">اطلاعات کاربری یافت نشد.</string>
+    <string name="patient_main_user">کاربر اصلی</string>
+
+    <!-- Record categories: the filter chips, and the two ids that only ever label a record -->
+    <string name="tab_all">همه</string>
+    <string name="tab_medicine">دارو</string>
+    <string name="tab_visit">ویزیت</string>
+    <string name="tab_paraclinic">پاراکلینیک</string>
+    <string name="tab_medical_service">خدمات پزشکی</string>
+    <string name="tab_pharmacy">داروخانه</string>
+
+    <!-- Date-range presets -->
+    <string name="period_last_month">۱ ماه اخیر</string>
+    <string name="period_last_six_months">۶ ماه اخیر</string>
+    <string name="period_last_year">۱ سال اخیر</string>
+    <string name="period_all_time">از ابتدا</string>
+    <string name="period_custom">تاریخ دلخواه</string>
+
+    <!-- Patients -->
+    <string name="patient_main_insured_fallback">بیمه‌شده اصلی</string>
+    <string name="patient_dependant_relation">تحت تکفل</string>
+
+    <!-- Jalali month names, in calendar order; index 0 is Farvardin -->
+    <string-array name="jalali_months">
+        <item>فروردین</item>
+        <item>اردیبهشت</item>
+        <item>خرداد</item>
+        <item>تیر</item>
+        <item>مرداد</item>
+        <item>شهریور</item>
+        <item>مهر</item>
+        <item>آبان</item>
+        <item>آذر</item>
+        <item>دی</item>
+        <item>بهمن</item>
+        <item>اسفند</item>
+    </string-array>
+
 </resources>
+

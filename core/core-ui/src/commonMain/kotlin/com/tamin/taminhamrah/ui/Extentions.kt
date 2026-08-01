@@ -198,6 +198,24 @@ fun String.toPriceFormat(): String {
 fun Long.toPriceFormat(): String = groupThousands(this.toString())
 
 /**
+ * Normalizes a numeric amount string (digits only) to a plain Long string, defaulting to "0".
+ *
+ * The services send amounts as free-form text, so this is what makes an amount safe to hand to
+ * [toPriceFormat], which rejects anything that is not a digit.
+ */
+fun String?.toLongStringOrZero(): String = this?.toLongOrNull()?.toString() ?: "0"
+
+/**
+ * An amount with its unit, the way every money line in the app reads it: grouped digits, then
+ * «ریال».
+ *
+ * A value the service did not send formats as [fallback] on its own — a missing amount must never
+ * read as a real zero.
+ */
+fun String.toRialAmount(fallback: String = "—"): String =
+    toLongOrNull()?.let { "${it.toPriceFormat()} ریال" } ?: fallback
+
+/**
  * Formats a [Double] amount as a thousands-grouped price.
  * Currency amounts in the app are integral (Rial), so the fractional part is dropped.
  */

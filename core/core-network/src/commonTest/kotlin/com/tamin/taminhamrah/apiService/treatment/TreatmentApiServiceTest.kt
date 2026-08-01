@@ -186,6 +186,36 @@ class TreatmentApiServiceTest {
     }
 
     @Test
+    fun testGetTreatmentCosts() = runTest {
+        responseContent = ApiTestUtils.createJsonResponse(TreatmentTestData.costsSuccess)
+        val apiService = createApiService()
+        val result = apiService.getTreatmentCosts(emptyMap())
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/health/tcr-price-certificate", interceptedUrl)
+        val data = result.extractData()
+        assertNotNull(data)
+        assertEquals(2, data.list?.size)
+        val firstItem = data.list?.firstOrNull()
+        assertNotNull(firstItem)
+        assertEquals(1, firstItem.repId)
+        assertEquals("رضا احمدی", firstItem.nameFamil)
+        assertEquals("پرداخت شده", firstItem.payStatusDesc)
+    }
+
+    @Test
+    fun testGetTreatmentCostsPDF() = runTest {
+        val pdfBytes = byteArrayOf(7, 8, 9)
+        responseBytes = pdfBytes
+        val apiService = createApiService()
+        val executed = apiService.getTreatmentCostsPDF("1").execute()
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/health/tcr-price-certificate/report/1", interceptedUrl)
+        assertEquals(200, executed.status.value)          // ← was missing
+    }                                                      // ← was missing
+
+    @Test                                                  // ← was missing
     fun testGetPrescriptionPdfFile() = runTest {
         val pdfBytes = byteArrayOf(1, 2, 3)
         responseBytes = pdfBytes
@@ -198,6 +228,17 @@ class TreatmentApiServiceTest {
     }
 
     @Test
+    fun testSendToInboxTreatmentCosts() = runTest {
+        responseContent = ApiTestUtils.createJsonResponse(TreatmentTestData.sendToInboxSuccess)
+        val apiService = createApiService()
+        val result = apiService.sendToInboxTreatmentCosts("1")
+
+        assertEquals("GET", interceptedMethod)
+        assertEquals("https://eservices.tamin.ir/api/health/tcr-price-certificate/announcement/1", interceptedUrl)
+        assertEquals("SUCCESS", result.extractData())
+    }                                                      // ← was missing
+
+    @Test                                                  // ← was missing
     fun testDownloadLabResultPdf() = runTest {
         val pdfBytes = byteArrayOf(4, 5, 6)
         responseBytes = pdfBytes
