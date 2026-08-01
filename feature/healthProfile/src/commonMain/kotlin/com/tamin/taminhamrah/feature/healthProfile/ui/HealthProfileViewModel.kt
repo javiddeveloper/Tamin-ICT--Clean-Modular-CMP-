@@ -488,10 +488,21 @@ class HealthProfileViewModel(
             isCitiesLoading = false,
             errors = currentState.errors - ErrorSource.CITIES
         )
-        is PartialState.BloodGroupsLoaded   -> currentState.copy(
-            bloodGroupOptions = partialState.options,
-            errors = currentState.errors - ErrorSource.BLOOD_GROUPS
-        )
+        is PartialState.BloodGroupsLoaded   -> {
+            val sd = currentState.selfDeclaration
+            val updatedSd = if (sd.bloodGroup.isBloodGroupUnknown && sd.bloodGroup.selectedBloodGroupId == null) {
+                val unknownId = partialState.options.find {
+                    it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains("نمیدانم") || it.label.contains("unknown")
+                }?.id
+                sd.copy(bloodGroup = sd.bloodGroup.copy(selectedBloodGroupId = unknownId))
+            } else sd
+            
+            currentState.copy(
+                bloodGroupOptions = partialState.options,
+                selfDeclaration = updatedSd,
+                errors = currentState.errors - ErrorSource.BLOOD_GROUPS
+            )
+        }
         is PartialState.SmokingStatusLoaded -> currentState.copy(
             smokingStatusOptions = partialState.options,
             errors = currentState.errors - ErrorSource.SMOKING_STATUS
@@ -563,10 +574,20 @@ class HealthProfileViewModel(
                 bloodGroup = if (hasLocalBloodGroupEdit) {
                     sd.bloodGroup
                 } else {
+                    val isUnknown = info.patientBloodGroupCode == null || info.patientBloodGroupCode == 0
+                    val unknownId = if (isUnknown) {
+                        currentState.bloodGroupOptions.find {
+                            it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains("نمیدانم") || it.label.contains("unknown")
+                        }?.id
+                    } else {
+                        info.patientBloodGroupCode
+                    }
+
                     sd.bloodGroup.copy(
-                        selectedBloodGroupId = info.patientBloodGroupCode,
+                        selectedBloodGroupId = unknownId,
                         selectedBloodGroupLetter = extractLetter(info.patientBloodGroup),
-                        selectedBloodGroupRh = extractRh(info.patientBloodGroup)
+                        selectedBloodGroupRh = extractRh(info.patientBloodGroup),
+                        isBloodGroupUnknown = isUnknown
                     )
                 }
             )
