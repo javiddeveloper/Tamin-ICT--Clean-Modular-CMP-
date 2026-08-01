@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
@@ -91,7 +92,9 @@ val LocalAgentNavigator = staticCompositionLocalOf<(String) -> Unit> { {} }
 @Composable
 fun AgentScreen(
     viewModel: AgentViewModel = koinViewModel(),
-    onNavigateToDestination: (String) -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    onNavigateToDestination: (String) -> Unit = {},
+    onShareText: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
@@ -144,6 +147,7 @@ fun AgentScreen(
                 is AgentEvent.ShowError -> { /* handled via bubble */ }
                 is AgentEvent.NavigateToDeepLink -> onNavigateToDestination(event.destination)
                 is AgentEvent.NavigateToWebView -> { /* External navigation */ }
+                is AgentEvent.ShareText -> onShareText(event.text)
             }
         }
     }
@@ -964,7 +968,7 @@ private fun nextWordBoundary(s: String, from: Int): Int {
  */
 private fun parseMarkdownLine(line: String): androidx.compose.ui.text.AnnotatedString {
     return androidx.compose.ui.text.buildAnnotatedString {
-        val trimmed = line.trimStart()
+        val trimmed = line.trimStart().toPersianDigits()
 
         // ── Block-level prefixes ──────────────────────────────────────────────
         val (processedLine, blockStyle) = when {
@@ -1095,7 +1099,7 @@ private fun ChatBubbleItem(
     // full-width / processing box) differs. Content itself is drawn in the caller's
     // layout direction while the Row stays LTR for consistent bubble alignment.
     val renderContent: @Composable (Color) -> Unit = { contentColor ->
-        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             BubbleContentRenderer(
                 content = item.content,
                 isTypingAnimating = item.isTypingAnimating,
@@ -1174,7 +1178,7 @@ private fun ChatBubbleItem(
                         }
                         // Footer: only for agent bubbles, not SuggestedPrompts
                         if (item.content !is ChatBubbleContent.SuggestedPrompts && isAnimationFinished) {
-                            AgentBubbleFooter()
+                            AgentBubbleFooter(item = item, onIntent = onIntent)
                         }
                     }
                 }
@@ -1294,13 +1298,13 @@ private fun BubbleContentRenderer(
                                     Text(
                                         text = androidx.compose.ui.text.buildAnnotatedString {
                                             withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
-                                                append("$key: ")
+                                                append("${key.toPersianDigits()}: ")
                                             }
                                             withStyle(style = androidx.compose.ui.text.SpanStyle(
                                                 fontWeight = FontWeight.Medium,
                                                 color = contentColor
                                             )) {
-                                                append(value)
+                                                append(value.toPersianDigits())
                                             }
                                         },
                                         style = MaterialTheme.typography.bodySmall.copy(
@@ -1670,15 +1674,17 @@ private fun NotAllowedMessage(message: String?) {
 // ─── Agent Bubble Footer ──────────────────────────────────────────────────────
 
 @Composable
-private fun AgentBubbleFooter() {
+private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
     val timeString = rememberSaveable {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}"
+        "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}".toPersianDigits()
     }
 
     // State for like/dislike toggle
     var liked    by rememberSaveable { mutableStateOf<Boolean?>(null) }
     var copied   by rememberSaveable { mutableStateOf(false) }
+
+    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
     val iconTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
     val activeTint = MaterialTheme.colorScheme.primary
@@ -1737,7 +1743,10 @@ private fun AgentBubbleFooter() {
             )
 
             IconButton(
-                onClick = { copied = true },
+                onClick = {
+                    copied = true
+                    clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(extractTextFromItem(item)))
+                },
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
@@ -1749,7 +1758,7 @@ private fun AgentBubbleFooter() {
             }
 
             IconButton(
-                onClick = { },
+                onClick = { onIntent(AgentIntent.ShareContent(extractTextFromItem(item))) },
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
@@ -1760,6 +1769,19 @@ private fun AgentBubbleFooter() {
                 )
             }
         }
+    }
+}
+
+private fun extractTextFromItem(item: ChatItem): String {
+    return when (val content = item.content) {
+        is ChatBubbleContent.Text -> content.message
+        is ChatBubbleContent.KeyValue -> {
+            buildString {
+                content.title?.let { appendLine(it) }
+                content.items.forEach { (k, v) -> appendLine("$k: $v") }
+            }
+        }
+        else -> ""
     }
 }
 
