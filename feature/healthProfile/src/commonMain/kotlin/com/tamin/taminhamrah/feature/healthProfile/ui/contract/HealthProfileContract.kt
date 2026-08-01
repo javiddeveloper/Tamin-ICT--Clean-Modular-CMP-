@@ -191,7 +191,8 @@ data class SelfDeclarationUiState(
     val family: FamilyStepState = FamilyStepState(),
     val bloodGroup: BloodGroupStepState = BloodGroupStepState(),
     val lifestyle: LifestyleStepState = LifestyleStepState(),
-    val allergy: AllergyStepState = AllergyStepState()
+    val allergy: AllergyStepState = AllergyStepState(),
+    val isEditMode: Boolean = false
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -248,7 +249,7 @@ data class HealthProfileUiState(
         data class DrugsLoaded(val options: List<LookupItemPR>) : PartialState
 
         // ── Step navigation ───────────────────────────────────────────────────
-        data class StepChanged(val step: SelfDeclarationStep) : PartialState
+        data class StepChanged(val step: SelfDeclarationStep, val isEditMode: Boolean = false) : PartialState
 
         // ── Per-step field updates ────────────────────────────────────────────
         data class IdentityUpdated(val identity: IdentityStepState) : PartialState
@@ -296,7 +297,7 @@ sealed interface HealthProfileIntent {
     data class LoadCitiesForProvince(val provinceId: Int) : HealthProfileIntent
 
     // Self-declaration wizard
-    data class ChangeStep(val step: SelfDeclarationStep) : HealthProfileIntent
+    data class ChangeStep(val step: SelfDeclarationStep, val isEditMode: Boolean = false) : HealthProfileIntent
     data class UpdateIdentity(val identity: IdentityStepState) : HealthProfileIntent
     data class UpdatePersonal(val personal: PersonalStepState) : HealthProfileIntent
     data class UpdateContact(val contact: ContactStepState) : HealthProfileIntent

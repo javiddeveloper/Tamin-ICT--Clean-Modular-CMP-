@@ -31,7 +31,12 @@ import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.material.icons.filled.Check
+import com.tamin.taminhamrah.ui.components.IconPosition
 import taminx.feature.healthprofile.generated.resources.*
+
+val LocalIsEditMode = staticCompositionLocalOf { false }
 
 /**
  * Static Top Bar for Health Profile screens with status bar inset padding.
@@ -72,7 +77,7 @@ fun HealthTopAppBar(
                 },
                 onNavigationClick = onBackClicked
             )
-            if (currentStep != null && currentStep > 0) {
+            if (currentStep != null && currentStep > 0 && !LocalIsEditMode.current) {
                 HealthProgressBar(
                     currentStep = currentStep,
                     totalSteps = totalSteps,
@@ -178,38 +183,68 @@ fun HealthIrritateNavigationBar(
                 bottom = 14.dp + bottomInset
             )
     ) {
+        val isEditMode = LocalIsEditMode.current
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Optional Secondary outlined button
-            if (secondaryText != null && onSecondaryClick != null) {
-                Box(
-                    modifier = Modifier
-                        .size(54.dp)
-                        .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
-                        .clip(RoundedCornerShape(15.dp))
-                        .clickable { onSecondaryClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(20.dp)
-                    )
+            if (isEditMode) {
+                if (onSecondaryClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .height(54.dp)
+                            .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
+                            .clip(RoundedCornerShape(15.dp))
+                            .clickable { onSecondaryClick() }
+                            .padding(horizontal = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TaminText(
+                            text = "انصراف",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textSecondary
+                        )
+                    }
                 }
-            }
 
-            // Primary Solid Button
-            TaminFilledButton(
-                text = primaryText,
-                onClick = onPrimaryClick,
-                enabled = primaryEnabled,
-                modifier = Modifier.weight(1f),
-                icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
-            )
+                TaminFilledButton(
+                    text = "ثبت ویرایش",
+                    onClick = onPrimaryClick,
+                    enabled = primaryEnabled,
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Check,
+                    iconPosition = IconPosition.End
+                )
+            } else {
+                // Optional Secondary outlined button
+                if (secondaryText != null && onSecondaryClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
+                            .clip(RoundedCornerShape(15.dp))
+                            .clickable { onSecondaryClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                // Primary Solid Button
+                TaminFilledButton(
+                    text = primaryText,
+                    onClick = onPrimaryClick,
+                    enabled = primaryEnabled,
+                    modifier = Modifier.weight(1f),
+                    icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
+                )
+            }
         }
     }
 }

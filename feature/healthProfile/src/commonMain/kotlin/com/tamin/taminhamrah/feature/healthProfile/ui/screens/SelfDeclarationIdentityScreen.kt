@@ -270,7 +270,7 @@ fun SelfDeclarationIdentityScreen(
 }
 
 @Composable
-fun IdentityRow(label: String, value: String) {
+fun IdentityRow(label: String, value: String, showDivider: Boolean = true) {
     val taminColors = LocalTaminColors.current
     Row(
         modifier = Modifier
@@ -289,7 +289,9 @@ fun IdentityRow(label: String, value: String) {
             color = taminColors.textPrimary
         )
     }
-    HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+    if (showDivider) {
+        HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+    }
 }
 
 @Composable

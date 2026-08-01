@@ -54,7 +54,6 @@ fun SelfDeclarationBloodScreen(
     val scrollState = rememberScrollState()
 
     val bloodGroupLetters = remember(bloodGroupOptions) { bloodGroupLetters(bloodGroupOptions) }
-    val chipsAlpha = if (state.isBloodGroupUnknown) 0.5f else 1f
 
     val isNextEnabled = state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null && state.selectedBloodGroupRh != null)
 
@@ -142,14 +141,14 @@ fun SelfDeclarationBloodScreen(
             BloodGroupChipsRow(
                 letters = bloodGroupLetters,
                 selectedLetter = state.selectedBloodGroupLetter,
-                enabled = !state.isBloodGroupUnknown,
-                modifier = Modifier.alpha(chipsAlpha),
+                enabled = true,
                 onLetterSelected = { letter ->
                     onIntent(
                         HealthProfileIntent.UpdateBloodGroup(
                             state.copy(
                                 selectedBloodGroupLetter = letter,
-                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, letter, state.selectedBloodGroupRh)
+                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, letter, state.selectedBloodGroupRh),
+                                isBloodGroupUnknown = false
                             )
                         )
                     )
@@ -167,13 +166,14 @@ fun SelfDeclarationBloodScreen(
 
             RhFactor(
                 selectedRh = state.selectedBloodGroupRh,
-                enabled = !state.isBloodGroupUnknown,
+                enabled = true,
                 onRhSelected = { rh ->
                     onIntent(
                         HealthProfileIntent.UpdateBloodGroup(
                             state.copy(
                                 selectedBloodGroupRh = rh,
-                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, state.selectedBloodGroupLetter, rh)
+                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, state.selectedBloodGroupLetter, rh),
+                                isBloodGroupUnknown = false
                             )
                         )
                     )
