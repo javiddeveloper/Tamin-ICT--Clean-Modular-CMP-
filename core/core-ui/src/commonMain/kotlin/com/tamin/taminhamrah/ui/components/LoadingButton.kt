@@ -76,12 +76,6 @@ fun LoadingButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally)
         ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = contentColor
-            )
-
             Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
                 Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
                     if (loading) {
@@ -100,6 +94,11 @@ fun LoadingButton(
                     }
                 }
             }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = contentColor
+            )
         }
     }
 }

@@ -33,6 +33,7 @@ data class TaminColors(
     val textSecondary: Color,
     val textTertiary: Color,
     val textMuted: Color,
+    val textHeaderSubtitle: Color,
     val chevron: Color,
 
     // Status pills (background + foreground pairs)
@@ -107,6 +108,7 @@ val LightTaminColors = TaminColors(
     textSecondary = TaminLightTextSecondary,
     textTertiary = Gray400,
     textMuted = TaminLightTextMuted,
+    textHeaderSubtitle = TaminLightTextSubProfile,
     chevron = Gray300,
     greenBg = Secondary50,
     greenBorder = TaminDarkGreenAlpha,
@@ -218,6 +220,7 @@ val DarkTaminColors = TaminColors(
     textSecondary = TaminDarkTextSecondary,
     textTertiary = TaminDarkTextSecondary,
     textMuted = TaminDarkTextMuted,
+    textHeaderSubtitle = TaminDarkTextSubProfile,
     chevron = TaminDarkChevron,
     greenBg = TaminDarkGreenBg,
     greenBorder = TaminDarkGreenAlpha,
