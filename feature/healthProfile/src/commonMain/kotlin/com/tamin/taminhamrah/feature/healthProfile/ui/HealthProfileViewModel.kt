@@ -37,14 +37,10 @@ class HealthProfileViewModel(
     private var currentPatientNatCode: String = ""
     private var currentPatientId: Int = 0
 
-    init {
-        sendIntent(HealthProfileIntent.LoadHealthProfile())
-    }
-
     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
         return when (intent) {
-            is HealthProfileIntent.LoadHealthProfile     -> handleLoadHealthProfile(intent.nationalCode)
-            is HealthProfileIntent.RetryStep           -> handleRefreshStep()
+            is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile(intent.nationalCode)
+            is HealthProfileIntent.RetryStep -> handleRefreshStep()
             is HealthProfileIntent.LoadCitiesForProvince -> handleLoadCities(intent.provinceId)
 
             is HealthProfileIntent.ChangeStep -> flow {
@@ -52,7 +48,12 @@ class HealthProfileViewModel(
                     emit(PartialState.Loading(true))
                     val success = submitFullDeclaration()
                     emit(PartialState.Loading(false))
-                    if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS, intent.isEditMode))
+                    if (success) emit(
+                        PartialState.StepChanged(
+                            SelfDeclarationStep.SUCCESS,
+                            intent.isEditMode
+                        )
+                    )
                 } else {
                     emit(PartialState.StepChanged(intent.step, intent.isEditMode))
                 }
@@ -65,44 +66,89 @@ class HealthProfileViewModel(
                 if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
             }
 
-            is HealthProfileIntent.UpdateIdentity   -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
-            is HealthProfileIntent.UpdatePersonal   -> flow { emit(PartialState.PersonalUpdated(intent.personal)) }
-            is HealthProfileIntent.UpdateContact    -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
-            is HealthProfileIntent.UpdateEmergency  -> flow { emit(PartialState.EmergencyUpdated(intent.emergency)) }
-            is HealthProfileIntent.UpdatePhysical   -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
-            is HealthProfileIntent.UpdateDiseases   -> flow {
+            is HealthProfileIntent.UpdateIdentity -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
+            is HealthProfileIntent.UpdatePersonal -> flow { emit(PartialState.PersonalUpdated(intent.personal)) }
+            is HealthProfileIntent.UpdateContact -> flow { emit(PartialState.ContactUpdated(intent.contact)) }
+            is HealthProfileIntent.UpdateEmergency -> flow {
+                emit(
+                    PartialState.EmergencyUpdated(
+                        intent.emergency
+                    )
+                )
+            }
+
+            is HealthProfileIntent.UpdatePhysical -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
+            is HealthProfileIntent.UpdateDiseases -> flow {
                 val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
-                intent.diseases.riskFactorIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-                intent.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-                intent.diseases.mentalIllnessIds.forEach  { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-                intent.diseases.cancerIds.forEach         { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+                intent.diseases.riskFactorIds.forEach {
+                    illnessList.add(
+                        IllnessSelfDeclareRequest(
+                            it,
+                            0,
+                            null
+                        )
+                    )
+                }
+                intent.diseases.chronicDiseaseIds.forEach {
+                    illnessList.add(
+                        IllnessSelfDeclareRequest(it, 0, null)
+                    )
+                }
+                intent.diseases.mentalIllnessIds.forEach {
+                    illnessList.add(
+                        IllnessSelfDeclareRequest(
+                            it,
+                            0,
+                            null
+                        )
+                    )
+                }
+                intent.diseases.cancerIds.forEach {
+                    illnessList.add(
+                        IllnessSelfDeclareRequest(
+                            it,
+                            0,
+                            null
+                        )
+                    )
+                }
 
                 Logger.d("DiseasesUpdate", "User updated diseases section")
                 Logger.d("DiseasesUpdate", "New Request Payload Preview: $illnessList")
 
                 emit(PartialState.DiseasesUpdated(intent.diseases))
             }
+
             is HealthProfileIntent.OpenDiseaseBottomSheet -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 emit(PartialState.DiseasesUpdated(currentDiseases.copy(activeBottomSheet = intent.type)))
             }
+
             is HealthProfileIntent.CloseDiseaseBottomSheet -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val type = currentDiseases.activeBottomSheet
                 val reverted = when (type) {
                     BottomSheetType.ILLNESS_HISTORY ->
-                        if (currentDiseases.chronicDiseaseIds.isEmpty()) currentDiseases.copy(hasChronicDisease = false)
+                        if (currentDiseases.chronicDiseaseIds.isEmpty()) currentDiseases.copy(
+                            hasChronicDisease = false
+                        )
                         else currentDiseases
+
                     BottomSheetType.MENTAL ->
-                        if (currentDiseases.mentalIllnessIds.isEmpty()) currentDiseases.copy(hasMentalIllness = false)
+                        if (currentDiseases.mentalIllnessIds.isEmpty()) currentDiseases.copy(
+                            hasMentalIllness = false
+                        )
                         else currentDiseases
+
                     BottomSheetType.CANCER ->
                         if (currentDiseases.cancerIds.isEmpty()) currentDiseases.copy(hasCancer = false)
                         else currentDiseases
+
                     else -> currentDiseases
                 }
                 emit(PartialState.DiseasesUpdated(reverted.copy(activeBottomSheet = null)))
             }
+
             is HealthProfileIntent.SetDiseaseAnswer -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val updatedDiseases = when (intent.type) {
@@ -111,20 +157,24 @@ class HealthProfileViewModel(
                         chronicDiseaseIds = if (!intent.isYes) emptySet() else currentDiseases.chronicDiseaseIds,
                         activeBottomSheet = if (intent.isYes) BottomSheetType.ILLNESS_HISTORY else null
                     )
+
                     BottomSheetType.MENTAL -> currentDiseases.copy(
                         hasMentalIllness = intent.isYes,
                         mentalIllnessIds = if (!intent.isYes) emptySet() else currentDiseases.mentalIllnessIds,
                         activeBottomSheet = if (intent.isYes) BottomSheetType.MENTAL else null
                     )
+
                     BottomSheetType.CANCER -> currentDiseases.copy(
                         hasCancer = intent.isYes,
                         cancerIds = if (!intent.isYes) emptySet() else currentDiseases.cancerIds,
                         activeBottomSheet = if (intent.isYes) BottomSheetType.CANCER else null
                     )
+
                     else -> currentDiseases
                 }
                 emit(PartialState.DiseasesUpdated(updatedDiseases))
             }
+
             is HealthProfileIntent.UpdateDiseaseSelections -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val updatedDiseases = when (intent.type) {
@@ -132,39 +182,59 @@ class HealthProfileViewModel(
                         chronicDiseaseIds = intent.selectedIds,
                         hasChronicDisease = intent.selectedIds.isNotEmpty()
                     )
+
                     BottomSheetType.MENTAL -> currentDiseases.copy(
                         mentalIllnessIds = intent.selectedIds,
                         hasMentalIllness = intent.selectedIds.isNotEmpty()
                     )
+
                     BottomSheetType.CANCER -> currentDiseases.copy(
                         cancerIds = intent.selectedIds,
                         hasCancer = intent.selectedIds.isNotEmpty()
                     )
+
                     BottomSheetType.RISK_FACTOR -> currentDiseases.copy(riskFactorIds = intent.selectedIds)
                     else -> currentDiseases
                 }
                 emit(PartialState.DiseasesUpdated(updatedDiseases))
             }
-            is HealthProfileIntent.UpdateFamily     -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
+
+            is HealthProfileIntent.UpdateFamily -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
             is HealthProfileIntent.UpdateBloodGroup -> flow {
                 Logger.d("BloodGroupUpdate", "User updated blood group")
-                Logger.d("BloodGroupUpdate", "selectedBloodGroupId: ${intent.bloodGroup.selectedBloodGroupId}")
-                Logger.d("BloodGroupUpdate", "selectedBloodGroupLetter: ${intent.bloodGroup.selectedBloodGroupLetter}")
-                Logger.d("BloodGroupUpdate", "selectedBloodGroupRh: ${intent.bloodGroup.selectedBloodGroupRh}")
-                Logger.d("BloodGroupUpdate", "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}")
+                Logger.d(
+                    "BloodGroupUpdate",
+                    "selectedBloodGroupId: ${intent.bloodGroup.selectedBloodGroupId}"
+                )
+                Logger.d(
+                    "BloodGroupUpdate",
+                    "selectedBloodGroupLetter: ${intent.bloodGroup.selectedBloodGroupLetter}"
+                )
+                Logger.d(
+                    "BloodGroupUpdate",
+                    "selectedBloodGroupRh: ${intent.bloodGroup.selectedBloodGroupRh}"
+                )
+                Logger.d(
+                    "BloodGroupUpdate",
+                    "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}"
+                )
                 emit(PartialState.BloodGroupUpdated(intent.bloodGroup))
             }
-            is HealthProfileIntent.UpdateLifestyle  -> flow {
+
+            is HealthProfileIntent.UpdateLifestyle -> flow {
                 Logger.d("LifestyleUpdate", "User updated lifestyle section")
-                Logger.d("LifestyleUpdate", """
+                Logger.d(
+                    "LifestyleUpdate", """
                     isSmoking: ${intent.lifestyle.isSmoking}, smokingStatusId: ${intent.lifestyle.smokingStatusId}, smokingPattern: ${intent.lifestyle.smokingPattern}
                     hasAddiction: ${intent.lifestyle.hasAddiction}, substanceStatusId: ${intent.lifestyle.substanceStatusId}, substancePattern: ${intent.lifestyle.substancePattern}
                     isDrinking: ${intent.lifestyle.isDrinking}, drinkingStatusId: ${intent.lifestyle.drinkingStatusId}, drinkingPattern: ${intent.lifestyle.drinkingPattern}
                     isExercising: ${intent.lifestyle.isExercising}, exerciseStatusId: ${intent.lifestyle.exerciseStatusId}, exerciseFrequency: ${intent.lifestyle.exerciseFrequency}
-                """.trimIndent())
+                """.trimIndent()
+                )
                 emit(PartialState.LifestyleUpdated(intent.lifestyle))
             }
-            is HealthProfileIntent.UpdateAllergy    -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
+
+            is HealthProfileIntent.UpdateAllergy -> flow { emit(PartialState.AllergyUpdated(intent.allergy)) }
         }
     }
 
@@ -175,7 +245,7 @@ class HealthProfileViewModel(
         emit(PartialState.ClearAllErrors)
         emit(PartialState.Loading(true))
     }
-     .onCompletion { emit(PartialState.Loading(false)) }
+        .onCompletion { emit(PartialState.Loading(false)) }
 
     private fun handleRefreshStep(): Flow<PartialState> = flow {
         val step = uiState.value.selfDeclaration.currentStep
@@ -228,15 +298,29 @@ class HealthProfileViewModel(
 
     private fun fetchMaritalStatus() = flow {
         getMaritalStatusUseCase()
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت وضعیت تاهل", ErrorSource.MARITAL_STATUS)) }
-            .collect { emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() })) }
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت وضعیت تاهل",
+                        ErrorSource.MARITAL_STATUS
+                    )
+                )
+            }
+            .collect {
+                emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() }))
+            }
     }
 
     private fun fetchProvinces() = flow {
         emit(PartialState.ProvincesLoading(true))
         getAllProvincesUseCase()
             .catch {
-                emit(PartialState.Error(it.message ?: "خطا در دریافت لیست استان‌ها", ErrorSource.PROVINCES))
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت لیست استان‌ها",
+                        ErrorSource.PROVINCES
+                    )
+                )
                 emit(PartialState.ProvincesLoading(true))
             }
             .collect {
@@ -247,31 +331,66 @@ class HealthProfileViewModel(
 
     private fun fetchBloodGroups() = flow {
         getBloodGroupsUseCase()
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت گروه‌های خونی", ErrorSource.BLOOD_GROUPS)) }
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت گروه‌های خونی",
+                        ErrorSource.BLOOD_GROUPS
+                    )
+                )
+            }
             .collect { emit(PartialState.BloodGroupsLoaded(it.map { b -> b.toPresentation() })) }
     }
 
     private fun fetchSmokingStatus() = flow {
         getSmokingStatusUseCase()
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت وضعیت دخانیات", ErrorSource.SMOKING_STATUS)) }
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت وضعیت دخانیات",
+                        ErrorSource.SMOKING_STATUS
+                    )
+                )
+            }
             .collect { emit(PartialState.SmokingStatusLoaded(it.map { s -> s.toPresentation() })) }
     }
 
     private fun fetchActFrequencies() = flow {
         getActFrequenciesUseCase()
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت فرکانس فعالیت‌ها", ErrorSource.ACT_FREQUENCIES)) }
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت فرکانس فعالیت‌ها",
+                        ErrorSource.ACT_FREQUENCIES
+                    )
+                )
+            }
             .collect { emit(PartialState.ActFrequenciesLoaded(it.map { s -> s.toPresentation() })) }
     }
 
     private fun fetchIllnessGroups() = flow {
         getSelfDeclarableIllnessesByGroupUseCase()
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت گروه‌های بیماری", ErrorSource.ILLNESS_GROUPS)) }
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت گروه‌های بیماری",
+                        ErrorSource.ILLNESS_GROUPS
+                    )
+                )
+            }
             .collect { emit(PartialState.IllnessGroupsLoaded(it.map { g -> g.toPresentation() })) }
     }
 
     private fun fetchDrugs() = flow {
         getAllDrugsUseCase()
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست داروها", ErrorSource.DRUGS)) }
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت لیست داروها",
+                        ErrorSource.DRUGS
+                    )
+                )
+            }
             .collect { emit(PartialState.DrugsLoaded(it.map { d -> d.toPresentation() })) }
     }
 
@@ -283,9 +402,17 @@ class HealthProfileViewModel(
 
         if (targetNatCode.isNotBlank()) {
             getPatientGeneralUseCase(targetNatCode)
-                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات عمومی", ErrorSource.PATIENT_GENERAL)) }
+                .catch {
+                    emit(
+                        PartialState.Error(
+                            it.message ?: "خطا در دریافت اطلاعات عمومی",
+                            ErrorSource.PATIENT_GENERAL
+                        )
+                    )
+                }
                 .collect { general ->
-                    val safeNatCode = general.patientNatCode?.takeIf { it.isNotBlank() } ?: targetNatCode
+                    val safeNatCode =
+                        general.patientNatCode?.takeIf { it.isNotBlank() } ?: targetNatCode
                     val safePatientId = general.ptientID ?: 0
 
                     currentPatientNatCode = safeNatCode
@@ -300,26 +427,46 @@ class HealthProfileViewModel(
         }
     }
 
-    private fun fetchAdditionalPatientInfo(natCode: String, patientId: Int): Flow<PartialState> = merge(
-        flow {
-            getPatientSelfDeclarativeUseCase(natCode, patientId)
-                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت اطلاعات خوداظهاری", ErrorSource.PATIENT_LIFESTYLE)) }
-                .firstOrNull()
-                ?.let { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
-        },
-        flow {
-            getPatientDrugAllergiesUseCase(natCode, patientId)
-                .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت حساسیت‌های دارویی", ErrorSource.PATIENT_ALLERGIES)) }
-                .firstOrNull()
-                ?.let { list -> emit(PartialState.AllergiesLoaded(list.map { d -> d.toPresentation() })) }
-        }
-    )
+    private fun fetchAdditionalPatientInfo(natCode: String, patientId: Int): Flow<PartialState> =
+        merge(
+            flow {
+                getPatientSelfDeclarativeUseCase(natCode, patientId)
+                    .catch {
+                        emit(
+                            PartialState.Error(
+                                it.message ?: "خطا در دریافت اطلاعات خوداظهاری",
+                                ErrorSource.PATIENT_LIFESTYLE
+                            )
+                        )
+                    }
+                    .firstOrNull()
+                    ?.let { emit(PartialState.LifestyleLoaded(it.toPresentation())) }
+            },
+            flow {
+                getPatientDrugAllergiesUseCase(natCode, patientId)
+                    .catch {
+                        emit(
+                            PartialState.Error(
+                                it.message ?: "خطا در دریافت حساسیت‌های دارویی",
+                                ErrorSource.PATIENT_ALLERGIES
+                            )
+                        )
+                    }
+                    .firstOrNull()
+                    ?.let { list -> emit(PartialState.AllergiesLoaded(list.map { d -> d.toPresentation() })) }
+            }
+        )
 
     private fun handleLoadCities(provinceId: Int): Flow<PartialState> = flow {
         emit(PartialState.CitiesLoading(true))
         getProvinceCitiesUseCase(provinceId)
             .catch {
-                emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شهرها", ErrorSource.CITIES))
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت لیست شهرها",
+                        ErrorSource.CITIES
+                    )
+                )
                 emit(PartialState.CitiesLoading(false))
             }
             .collect {
@@ -330,7 +477,12 @@ class HealthProfileViewModel(
 
     private suspend fun submitFullDeclaration(): Boolean {
         if (currentPatientId == 0 || currentPatientNatCode.isBlank()) {
-            sendEvent(HealthProfileEvent.ShowToast("اطلاعات شناسایی بیمار یا کد ملی یافت نشد.", isError = true))
+            sendEvent(
+                HealthProfileEvent.ShowToast(
+                    "اطلاعات شناسایی بیمار یا کد ملی یافت نشد.",
+                    isError = true
+                )
+            )
             return false
         }
 
@@ -368,12 +520,52 @@ class HealthProfileViewModel(
 
             // 2. Sync Illnesses (Diseases + Family)
             val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
-            selfDecState.diseases.riskFactorIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.mentalIllnessIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.cancerIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.family.familyDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
-            selfDecState.family.familyCancerIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
+            selfDecState.diseases.riskFactorIds.forEach {
+                illnessList.add(
+                    IllnessSelfDeclareRequest(
+                        it,
+                        0,
+                        null
+                    )
+                )
+            }
+            selfDecState.diseases.chronicDiseaseIds.forEach {
+                illnessList.add(
+                    IllnessSelfDeclareRequest(it, 0, null)
+                )
+            }
+            selfDecState.diseases.mentalIllnessIds.forEach {
+                illnessList.add(
+                    IllnessSelfDeclareRequest(it, 0, null)
+                )
+            }
+            selfDecState.diseases.cancerIds.forEach {
+                illnessList.add(
+                    IllnessSelfDeclareRequest(
+                        it,
+                        0,
+                        null
+                    )
+                )
+            }
+            selfDecState.family.familyDiseaseIds.forEach {
+                illnessList.add(
+                    IllnessSelfDeclareRequest(
+                        it,
+                        1,
+                        null
+                    )
+                )
+            }
+            selfDecState.family.familyCancerIds.forEach {
+                illnessList.add(
+                    IllnessSelfDeclareRequest(
+                        it,
+                        1,
+                        null
+                    )
+                )
+            }
 
             if (illnessList.isNotEmpty()) {
                 val syncIllnessReq = SyncIllnessSelfDeclarativesRequest(
@@ -435,11 +627,21 @@ class HealthProfileViewModel(
                 addSelfDeclarativeUseCase(addLifestyleReq)
             }
 
-            sendEvent(HealthProfileEvent.ShowToast("اطلاعات پرونده سلامت با موفقیت ثبت شد", isError = false))
+            sendEvent(
+                HealthProfileEvent.ShowToast(
+                    "اطلاعات پرونده سلامت با موفقیت ثبت شد",
+                    isError = false
+                )
+            )
             true
         } catch (e: Exception) {
             Logger.e("HealthProfile", "Error in submitFullDeclaration: ${e.message}")
-            sendEvent(HealthProfileEvent.ShowToast("خطا در ثبت اطلاعات: ${e.message}",isError = true))
+            sendEvent(
+                HealthProfileEvent.ShowToast(
+                    "خطا در ثبت اطلاعات: ${e.message}",
+                    isError = true
+                )
+            )
             false
         }
     }
@@ -458,19 +660,27 @@ class HealthProfileViewModel(
         }
 
         is PartialState.ProvincesLoading -> currentState.copy(isProvincesLoading = partialState.isLoading)
-        is PartialState.CitiesLoading    -> currentState.copy(isCitiesLoading = partialState.isLoading)
-        is PartialState.Error            -> currentState.copy(
+        is PartialState.CitiesLoading -> currentState.copy(isCitiesLoading = partialState.isLoading)
+        is PartialState.Error -> currentState.copy(
             isLoading = false,
             errors = currentState.errors + (partialState.source to partialState.message)
         )
 
-        is PartialState.GeneralLoaded    -> reduceGeneralLoaded(currentState, partialState.info).copy(
+        is PartialState.GeneralLoaded -> reduceGeneralLoaded(currentState, partialState.info).copy(
             errors = currentState.errors - ErrorSource.PATIENT_GENERAL
         )
-        is PartialState.LifestyleLoaded  -> reduceLifestyleLoaded(currentState, partialState.info).copy(
+
+        is PartialState.LifestyleLoaded -> reduceLifestyleLoaded(
+            currentState,
+            partialState.info
+        ).copy(
             errors = currentState.errors - ErrorSource.PATIENT_LIFESTYLE
         )
-        is PartialState.AllergiesLoaded  -> reduceAllergiesLoaded(currentState, partialState.list).copy(
+
+        is PartialState.AllergiesLoaded -> reduceAllergiesLoaded(
+            currentState,
+            partialState.list
+        ).copy(
             errors = currentState.errors - ErrorSource.PATIENT_ALLERGIES
         )
 
@@ -478,44 +688,54 @@ class HealthProfileViewModel(
             maritalStatusOptions = partialState.options,
             errors = currentState.errors - ErrorSource.MARITAL_STATUS
         )
-        is PartialState.ProvincesLoaded     -> currentState.copy(
+
+        is PartialState.ProvincesLoaded -> currentState.copy(
             provinceOptions = partialState.options,
             isProvincesLoading = false,
             errors = currentState.errors - ErrorSource.PROVINCES
         )
-        is PartialState.CitiesLoaded        -> currentState.copy(
+
+        is PartialState.CitiesLoaded -> currentState.copy(
             cityOptions = partialState.options,
             isCitiesLoading = false,
             errors = currentState.errors - ErrorSource.CITIES
         )
-        is PartialState.BloodGroupsLoaded   -> {
+
+        is PartialState.BloodGroupsLoaded -> {
             val sd = currentState.selfDeclaration
-            val updatedSd = if (sd.bloodGroup.isBloodGroupUnknown && sd.bloodGroup.selectedBloodGroupId == null) {
-                val unknownId = partialState.options.find {
-                    it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains("نمیدانم") || it.label.contains("unknown")
-                }?.id
-                sd.copy(bloodGroup = sd.bloodGroup.copy(selectedBloodGroupId = unknownId))
-            } else sd
-            
+            val updatedSd =
+                if (sd.bloodGroup.isBloodGroupUnknown && sd.bloodGroup.selectedBloodGroupId == null) {
+                    val unknownId = partialState.options.find {
+                        it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains(
+                            "نمیدانم"
+                        ) || it.label.contains("unknown")
+                    }?.id
+                    sd.copy(bloodGroup = sd.bloodGroup.copy(selectedBloodGroupId = unknownId))
+                } else sd
+
             currentState.copy(
                 bloodGroupOptions = partialState.options,
                 selfDeclaration = updatedSd,
                 errors = currentState.errors - ErrorSource.BLOOD_GROUPS
             )
         }
+
         is PartialState.SmokingStatusLoaded -> currentState.copy(
             smokingStatusOptions = partialState.options,
             errors = currentState.errors - ErrorSource.SMOKING_STATUS
         )
+
         is PartialState.ActFrequenciesLoaded -> currentState.copy(
             actFrequencyOptions = partialState.options,
             errors = currentState.errors - ErrorSource.ACT_FREQUENCIES
         )
+
         is PartialState.IllnessGroupsLoaded -> currentState.copy(
             illnessGroups = partialState.groups,
             errors = currentState.errors - ErrorSource.ILLNESS_GROUPS
         )
-        is PartialState.DrugsLoaded         -> currentState.copy(
+
+        is PartialState.DrugsLoaded -> currentState.copy(
             drugOptions = partialState.options,
             errors = currentState.errors - ErrorSource.DRUGS
         )
@@ -527,45 +747,98 @@ class HealthProfileViewModel(
             )
         )
 
-        is PartialState.IdentityUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(identity  = partialState.identity))
-        is PartialState.PersonalUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(personal  = partialState.personal))
-        is PartialState.ContactUpdated   -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(contact   = partialState.contact))
-        is PartialState.EmergencyUpdated -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(emergency = partialState.emergency))
-        is PartialState.PhysicalUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(physical  = partialState.physical))
-        is PartialState.DiseasesUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(diseases  = partialState.diseases))
-        is PartialState.FamilyUpdated    -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(family    = partialState.family))
-        is PartialState.BloodGroupUpdated -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(bloodGroup = partialState.bloodGroup))
-        is PartialState.LifestyleUpdated -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(lifestyle = partialState.lifestyle))
-        is PartialState.AllergyUpdated   -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(allergy   = partialState.allergy))
+        is PartialState.IdentityUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                identity = partialState.identity
+            )
+        )
+
+        is PartialState.PersonalUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                personal = partialState.personal
+            )
+        )
+
+        is PartialState.ContactUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                contact = partialState.contact
+            )
+        )
+
+        is PartialState.EmergencyUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                emergency = partialState.emergency
+            )
+        )
+
+        is PartialState.PhysicalUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                physical = partialState.physical
+            )
+        )
+
+        is PartialState.DiseasesUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                diseases = partialState.diseases
+            )
+        )
+
+        is PartialState.FamilyUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                family = partialState.family
+            )
+        )
+
+        is PartialState.BloodGroupUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                bloodGroup = partialState.bloodGroup
+            )
+        )
+
+        is PartialState.LifestyleUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                lifestyle = partialState.lifestyle
+            )
+        )
+
+        is PartialState.AllergyUpdated -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                allergy = partialState.allergy
+            )
+        )
     }
 
-    private fun reduceGeneralLoaded(currentState: HealthProfileUiState, info: com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralPR): HealthProfileUiState {
+    private fun reduceGeneralLoaded(
+        currentState: HealthProfileUiState,
+        info: com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralPR
+    ): HealthProfileUiState {
         val sd = currentState.selfDeclaration
-        val hasLocalBloodGroupEdit = sd.bloodGroup.selectedBloodGroupId != null || sd.bloodGroup.isBloodGroupUnknown
+        val hasLocalBloodGroupEdit =
+            sd.bloodGroup.selectedBloodGroupId != null || sd.bloodGroup.isBloodGroupUnknown
 
         return currentState.copy(
-            isLoading   = false,
+            isLoading = false,
             generalInfo = info,
             selfDeclaration = sd.copy(
                 identity = sd.identity.copy(
-                    patientName    = info.patientName,
-                    patientFamily  = info.patientFamily,
-                    patientFather  = info.patientFather,
-                    patientGender  = info.patientGender,
+                    patientName = info.patientName,
+                    patientFamily = info.patientFamily,
+                    patientFather = info.patientFather,
+                    patientGender = info.patientGender,
                     patientBirthDate = info.patientBirthDate,
                     insuranceNumber = info.insuranceNumber,
-                    insuranceType  = info.insuranceType,
-                    lastVisitDate  = info.lastVisitDate
+                    insuranceType = info.insuranceType,
+                    lastVisitDate = info.lastVisitDate
                 ),
                 contact = sd.contact.copy(
-                    mobile  = info.patientMobile,
+                    mobile = info.patientMobile,
                     address = info.patientAddress
                 ),
                 emergency = sd.emergency.copy(
-                    emergencyName    = info.emergencyName,
-                    emergencyFamily  = info.emergencyFamily,
+                    emergencyName = info.emergencyName,
+                    emergencyFamily = info.emergencyFamily,
                     emergencyRelation = info.emergencyRelation,
-                    emergencyMobile  = info.emergencyMobile
+                    emergencyMobile = info.emergencyMobile
                 ),
                 physical = sd.physical.copy(
                     height = if (info.patientHeight > 0) info.patientHeight.toInt() else null,
@@ -574,10 +847,13 @@ class HealthProfileViewModel(
                 bloodGroup = if (hasLocalBloodGroupEdit) {
                     sd.bloodGroup
                 } else {
-                    val isUnknown = info.patientBloodGroupCode == null || info.patientBloodGroupCode == 0
+                    val isUnknown =
+                        info.patientBloodGroupCode == null || info.patientBloodGroupCode == 0
                     val unknownId = if (isUnknown) {
                         currentState.bloodGroupOptions.find {
-                            it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains("نمیدانم") || it.label.contains("unknown")
+                            it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains(
+                                "نمیدانم"
+                            ) || it.label.contains("unknown")
                         }?.id
                     } else {
                         info.patientBloodGroupCode
@@ -594,9 +870,13 @@ class HealthProfileViewModel(
         )
     }
 
-    private fun reduceLifestyleLoaded(currentState: HealthProfileUiState, info: com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativePR): HealthProfileUiState {
+    private fun reduceLifestyleLoaded(
+        currentState: HealthProfileUiState,
+        info: com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativePR
+    ): HealthProfileUiState {
         val sd = currentState.selfDeclaration
-        fun isActive(code: Int?) = code != null && LifeStyleStatus.fromStyleId(code) != LifeStyleStatus.NEVER
+        fun isActive(code: Int?) =
+            code != null && LifeStyleStatus.fromStyleId(code) != LifeStyleStatus.NEVER
 
         val hasLocalLifestyleEdit = with(sd.lifestyle) {
             isSmoking != null || hasAddiction != null || isDrinking != null || isExercising != null
@@ -635,7 +915,10 @@ class HealthProfileViewModel(
         )
     }
 
-    private fun reduceAllergiesLoaded(currentState: HealthProfileUiState, list: List<com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR>): HealthProfileUiState {
+    private fun reduceAllergiesLoaded(
+        currentState: HealthProfileUiState,
+        list: List<com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR>
+    ): HealthProfileUiState {
         val sd = currentState.selfDeclaration
         return currentState.copy(
             isLoading = false,

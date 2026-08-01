@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui
 
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.util.Logger
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
