@@ -239,7 +239,7 @@ fun RecordDetailContent(
                                 itemTotal = item.sumPriceItem.toPriceFormat(),
                                 patientShare = item.ssoPayment.toPriceFormat(),
                                 organizationShare = item.insurancePayment.toPriceFormat(),
-                                modifier = Modifier.staggeredItemEntrance(index = index, key = "${item.noteHeadEprescID}_$index", state = staggerState),
+                                modifier = Modifier.staggeredItemEntrance(index = index, key = item, state = staggerState),
                             )
                         }
 
