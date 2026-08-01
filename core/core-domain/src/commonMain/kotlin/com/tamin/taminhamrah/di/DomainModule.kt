@@ -89,6 +89,20 @@ import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationa
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
+import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
+import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCaseImpl
+import com.tamin.taminhamrah.useCases.agent.ObserveCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.PruneEmptyAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionsUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
+import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
@@ -164,6 +178,22 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    // Agent
+    factoryOf(::SendAgentPromptUseCase)
+    factoryOf(::CheckChatAllowedUseCase)
+    // Agent conversation cache
+    factory<GetCurrentUserNationalCodeUseCase> { GetCurrentUserNationalCodeUseCaseImpl(get()) }
+    factoryOf(::PruneEmptyAgentSessionUseCase)
+    factoryOf(::GetAgentSessionsUseCase)
+    factoryOf(::GetAgentSessionUseCase)
+    factoryOf(::StartAgentSessionUseCase)
+    factoryOf(::SaveCachedMessageUseCase)
+    factoryOf(::GetCachedMessagesUseCase)
+    factoryOf(::ObserveCachedMessagesUseCase)
+    factoryOf(::DeletePendingAgentMessagesUseCase)
+    factoryOf(::DeleteAgentSessionUseCase)
+    factoryOf(::UpdateAgentSessionUseCase)
+
     factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetRolesUseCase)
 

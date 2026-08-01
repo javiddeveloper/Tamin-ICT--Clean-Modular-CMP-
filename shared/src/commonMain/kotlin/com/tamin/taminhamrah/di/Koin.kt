@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.contracts.di.contractsModule
 import com.tamin.taminhamrah.feature.taminServices.di.TaminServicesModule
 import com.tamin.taminhamrah.feature.cartable.di.cartableModule
 import com.tamin.taminhamrah.feature.pensionInquiry.di.pensionInquiryModule
+import com.tamin.taminhamrah.feature.agent.di.agentModule
 import com.tamin.taminhamrah.feature.profile.di.profileModule
 import com.tamin.taminhamrah.feature.treatment.di.treatmentModule
 import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
@@ -28,6 +29,7 @@ val sharedModules: List<Module>
         dataKoinModule,
         dataModule,
         pluginModule,
+        agentModule,
         profileModule,
         pensionInquiryModule,
         treatmentModule,
