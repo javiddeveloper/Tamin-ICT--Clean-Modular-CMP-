@@ -4,7 +4,9 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.service.base.KeyValueRow
 import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
+import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -42,7 +44,7 @@ class AppointmentAgentService : AgentServiceUseCase {
             items.forEachIndexed { idx, appt ->
                 bubbles.add(ChatBubbleContent.KeyValue(
                     title = "نوبت ${idx + 1}",
-                    items = appt
+                    items = appt.toKeyValueRows()
                 ))
             }
 
