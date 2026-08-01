@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,8 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileInte
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.Res
@@ -53,8 +57,9 @@ fun SelfDeclarationAllergyScreen(
     error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
-    val scrollState = rememberScrollState()
+    val toaster = LocalToaster.current
 
+    val scrollState = rememberScrollState()
     var showBottomsheet by remember { mutableStateOf(false) }
 
     val unknownDrugText = stringResource(Res.string.health_allergy_unknows)
@@ -171,7 +176,6 @@ fun SelfDeclarationAllergyScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
     }
@@ -198,21 +202,29 @@ fun SelfDeclarationAllergyScreen(
             onSubmit = { result ->
                 val selectedId = result.selectedItemIds.firstOrNull()
                 if (selectedId != null) {
-                    val drugOption = drugOptions.find { it.id == selectedId }
-                    val allergy = DrugAllergyItemPR(
-                        drugId = selectedId,
-                        drugName = drugOption?.label
-                            ?: unknownDrugText,
-                        allergyComments = result.description?.takeIf { it.isNotBlank() }
-                            ?: noDescriptionText
-                    )
-                    onIntent(
-                        HealthProfileIntent.UpdateAllergy(
-                            state.copy(allergies = state.allergies + allergy)
+                    val alreadyExists = state.allergies.any { it.drugId == selectedId }
+
+                    if (!alreadyExists) {
+                        val drugOption = drugOptions.find { it.id == selectedId }
+                        val allergy = DrugAllergyItemPR(
+                            drugId = selectedId,
+                            drugName = drugOption?.label ?: unknownDrugText,
+                            allergyComments = result.description?.takeIf { it.isNotBlank() }
+                                ?: noDescriptionText
                         )
-                    )
+
+                        onIntent(
+                            HealthProfileIntent.UpdateAllergy(
+                                state.copy(allergies = state.allergies + allergy)
+                            )
+                        )
+                        showBottomsheet = false
+                    } else {
+                        toaster.error("شما قبلا این دارو را اضافه کرده اید.")
+                    }
+                } else {
+                    showBottomsheet = false
                 }
-                showBottomsheet = false
             }
         )
     }

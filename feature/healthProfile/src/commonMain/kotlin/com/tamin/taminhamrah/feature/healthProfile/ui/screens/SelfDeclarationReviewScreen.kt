@@ -49,7 +49,6 @@ fun SelfDeclarationReviewScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     isLoading: Boolean = false,
-    error: String? = null
 ) {
     val selfDecState = state.selfDeclaration
     val illnessGroups = state.illnessGroups
@@ -112,7 +111,8 @@ fun SelfDeclarationReviewScreen(
                     )
                     IdentityRow(
                         label = "بیمه:",
-                        value = selfDecState.identity.insuranceNumber
+                        value = selfDecState.identity.insuranceNumber,
+                        showDivider = false
                     )
                 }
 
@@ -130,7 +130,9 @@ fun SelfDeclarationReviewScreen(
                         value = selfDecState.personal.maritalStatusLabel.ifEmpty { "نامشخص" })
                     IdentityRow(
                         label = "شغل:",
-                        value = selfDecState.personal.job.ifEmpty { "نامشخص" })
+                        value = selfDecState.personal.job.ifEmpty { "نامشخص" },
+                        showDivider = false
+                    )
                 }
 
                 // Contact
@@ -143,7 +145,7 @@ fun SelfDeclarationReviewScreen(
                     IdentityRow(
                         label = "شهر / استان:",
                         value = "${selfDecState.contact.cityLabel} / ${selfDecState.contact.provinceLabel}".ifEmpty { "نامشخص" })
-                    IdentityRow(label = "کد پستی:", value = selfDecState.contact.postcode)
+                    IdentityRow(label = "کد پستی:", value = selfDecState.contact.postcode, showDivider = false)
                 }
 
                 // Emergency
@@ -161,7 +163,9 @@ fun SelfDeclarationReviewScreen(
                         value = selfDecState.emergency.emergencyMobile.ifEmpty { "نامشخص" })
                     IdentityRow(
                         label = "نسبت:",
-                        value = selfDecState.emergency.emergencyRelation.ifEmpty { "نامشخص" })
+                        value = selfDecState.emergency.emergencyRelation.ifEmpty { "نامشخص" },
+                        showDivider = false
+                    )
                 }
 
                 // Height and Weight
@@ -175,7 +179,9 @@ fun SelfDeclarationReviewScreen(
                         value = selfDecState.physical.height?.let { "$it سانتی‌متر" } ?: "ثبت نشده")
                     IdentityRow(
                         label = "وزن:",
-                        value = selfDecState.physical.weight?.let { "$it کیلوگرم" } ?: "ثبت نشده")
+                        value = selfDecState.physical.weight?.let { "$it کیلوگرم" } ?: "ثبت نشده",
+                        showDivider = false
+                    )
                 }
 
                 // Blood
@@ -186,7 +192,7 @@ fun SelfDeclarationReviewScreen(
                 ) {
                     val group =
                         if (selfDecState.bloodGroup.isBloodGroupUnknown) "نامشخص" else "${selfDecState.bloodGroup.selectedBloodGroupLetter ?: ""}${selfDecState.bloodGroup.selectedBloodGroupRh ?: ""}"
-                    IdentityRow(label = "گروه خونی:", value = group.ifEmpty { "نامشخص" })
+                    IdentityRow(label = "گروه خونی:", value = group.ifEmpty { "نامشخص" }, showDivider = false)
                 }
 
                 // Lifestyle
@@ -209,7 +215,8 @@ fun SelfDeclarationReviewScreen(
                     )
                     IdentityRow(
                         label = "دخانیات:",
-                        value = if (selfDecState.lifestyle.isSmoking == true) "بله (${selfDecState.lifestyle.smokingPattern ?: ""})" else "خیر"
+                        value = if (selfDecState.lifestyle.isSmoking == true) "بله (${selfDecState.lifestyle.smokingPattern ?: ""})" else "خیر",
+                        showDivider = false
                     )
                 }
 
@@ -268,7 +275,8 @@ fun SelfDeclarationReviewScreen(
                             else -> {
                                 "نامشخص"
                             }
-                        }
+                        },
+                        showDivider = false
                     )
                 }
 
@@ -302,7 +310,8 @@ fun SelfDeclarationReviewScreen(
                             else -> {
                                 "نامشخص"
                             }
-                        }
+                        },
+                        showDivider = false
                     )
                 }
 
@@ -313,7 +322,7 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_allergy)
                 ) {
                     val allergyStr = selfDecState.allergy.allergies.joinToString { it.drugName }
-                    IdentityRow(label = "داروهای آلرژیک:", value = allergyStr.ifEmpty { "ندارد" })
+                    IdentityRow(label = "داروهای آلرژیک:", value = allergyStr.ifEmpty { "ندارد" }, showDivider = false)
                 }
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }

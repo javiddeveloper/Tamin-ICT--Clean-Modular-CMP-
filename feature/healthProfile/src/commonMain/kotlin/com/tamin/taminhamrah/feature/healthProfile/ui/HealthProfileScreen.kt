@@ -280,11 +280,6 @@ fun HealthProfileMainContent(
                         state = state,
                         isLoading = combinedLoading,
                         onIntent = onIntent,
-                        error = getError(
-                            ErrorSource.PATIENT_GENERAL,
-                            ErrorSource.ILLNESS_GROUPS,
-                            ErrorSource.DRUGS
-                        ),
                         onBackClicked = navigateBack
                     )
                 }

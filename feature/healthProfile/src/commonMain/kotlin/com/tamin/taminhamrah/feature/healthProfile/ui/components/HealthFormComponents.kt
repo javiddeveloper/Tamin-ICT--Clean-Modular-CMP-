@@ -169,7 +169,7 @@ fun InteractiveChoiceChips(
                 contentAlignment = Alignment.Center
             ) {
                 TaminText(
-                    text = label,
+                    text = label.replace(Regex("\\r?\\n"), " ").trim(),
                     fontSize = 12.5.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     color = chipTextColor
