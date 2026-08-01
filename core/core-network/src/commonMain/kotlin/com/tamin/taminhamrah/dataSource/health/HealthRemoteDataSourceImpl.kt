@@ -285,7 +285,8 @@ internal class HealthRemoteDataSourceImpl(
 
     override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): SyncIllnessSelfDeclarativesDTO? {
         return try {
-            apiService.syncIllnessSelfDeclaratives(request).extractData()
+            val resultMsg = apiService.syncIllnessSelfDeclaratives(request).extractData()
+            SyncIllnessSelfDeclarativesDTO(data = resultMsg)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -296,7 +297,8 @@ internal class HealthRemoteDataSourceImpl(
 
     override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): SyncDrugAllergiesDTO? {
         return try {
-            apiService.syncDrugAllergies(request).extractData()
+            val resultMsg = apiService.syncDrugAllergies(request).extractData()
+            SyncDrugAllergiesDTO(data = resultMsg)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

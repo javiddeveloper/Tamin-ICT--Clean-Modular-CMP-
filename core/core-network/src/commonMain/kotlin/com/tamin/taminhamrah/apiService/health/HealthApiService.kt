@@ -108,12 +108,12 @@ internal interface HealthApiService {
     @POST("patient/PatientSelfDeclarative/v1/SyncIllnessSelfDeclaratives")
     suspend fun syncIllnessSelfDeclaratives(
         @Body syncIllnessesRequest: SyncIllnessesSelfDecRequestDTO
-    ): BaseDTO<SyncIllnessSelfDeclarativesDTO>
+    ): BaseDTO<String>
 
     @POST("patient/PatientSelfDeclarative/v1/SyncDrugAllergies")
     suspend fun syncDrugAllergies(
         @Body syncDrugAllergiesRequest: SyncDrugAllergiesRequestDTO
-    ): BaseDTO<SyncDrugAllergiesDTO>
+    ): BaseDTO<String>
 
     @POST("patient/PatientSelfDeclarative/v1/AddSelfDeclarative")
     suspend fun addSelfDeclarative(

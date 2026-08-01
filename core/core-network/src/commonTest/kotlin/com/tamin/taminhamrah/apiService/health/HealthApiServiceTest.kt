@@ -251,7 +251,7 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `syncIllnessSelfDeclaratives should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyObjectSuccess)
+        val jsonResponse = ApiTestUtils.createJsonResponse("\"Success\"")
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val request = SyncIllnessesSelfDecRequestDTO(
@@ -263,7 +263,7 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `syncDrugAllergies should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyObjectSuccess)
+        val jsonResponse = ApiTestUtils.createJsonResponse("\"Success\"")
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val request = SyncDrugAllergiesRequestDTO(
