@@ -395,6 +395,12 @@ fun TaminFilledButton(
             Alignment.CenterHorizontally,
         ),
     ) {
+
+        Text(
+            text = text,
+            style = textStyle,
+            color = if (enabled) contentColor else disabledContentColor,
+        )
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -410,12 +416,6 @@ fun TaminFilledButton(
                 modifier = Modifier.size(IconSize.medium),
             )
         }
-
-        Text(
-            text = text,
-            style = textStyle,
-            color = if (enabled) contentColor else disabledContentColor,
-        )
     }
 }
 

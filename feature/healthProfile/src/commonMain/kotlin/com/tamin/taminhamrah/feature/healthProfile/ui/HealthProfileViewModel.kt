@@ -337,85 +337,113 @@ class HealthProfileViewModel(
         return try {
             val selfDecState = uiState.value.selfDeclaration
 
+            // 1. Update Patient General Info
             val updatePatientReq = UpdatePatientRequest(
-                patientID        = currentPatientId,
-                patientNatCode   = currentPatientNatCode,
-                patientMobile    = selfDecState.contact.mobile,
-                patientEmail     = selfDecState.contact.email,
-                patientAddress   = selfDecState.contact.address,
-                patientArea      = null,
-                patientCityID    = selfDecState.contact.cityId,
+                patientID = currentPatientId,
+                patientNatCode = currentPatientNatCode,
+                patientMobile = selfDecState.contact.mobile,
+                patientEmail = selfDecState.contact.email,
+                patientAddress = selfDecState.contact.address,
+                patientArea = selfDecState.contact.postcode, // Assuming postcode or some neighborhood equivalent
+                patientCityID = selfDecState.contact.cityId,
                 patientBloodGroup = selfDecState.bloodGroup.selectedBloodGroupId,
-                patientMarriage  = selfDecState.personal.maritalStatusId,
-                patientJob       = selfDecState.personal.job,
-                patientHeight    = selfDecState.physical.height,
-                patientWeight    = selfDecState.physical.weight,
+                patientMarriage = selfDecState.personal.maritalStatusId,
+                patientJob = selfDecState.personal.job,
+                patientHeight = selfDecState.physical.height,
+                patientWeight = selfDecState.physical.weight,
                 patientCitizenship = selfDecState.personal.citizenship,
                 patientNationality = selfDecState.personal.nationality,
                 patientInsurance = null,
-                emergencyName    = selfDecState.emergency.emergencyName,
-                emergencyFamily  = selfDecState.emergency.emergencyFamily,
-                emergencyMobile  = selfDecState.emergency.emergencyMobile,
-                emergencyEmail   = null,
-                emergencyRelation = null,
+                emergencyName = selfDecState.emergency.emergencyName,
+                emergencyFamily = selfDecState.emergency.emergencyFamily,
+                emergencyMobile = selfDecState.emergency.emergencyMobile,
+                emergencyEmail = null,
+                emergencyRelation = 1, // Specific logic from old code
                 emergencyAddress = null,
-                emergencyArea    = null,
-                emergencyCityID  = null
+                emergencyArea = null,
+                emergencyCityID = null
             )
+            Logger.d("HealthProfile", "Updating Patient: $updatePatientReq")
             updatePatientUseCase(updatePatientReq)
 
+            // 2. Sync Illnesses (Diseases + Family)
             val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
-            selfDecState.diseases.riskFactorIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.diseases.riskFactorIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
             selfDecState.diseases.chronicDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.mentalIllnessIds.forEach  { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.diseases.cancerIds.forEach         { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
-            selfDecState.family.familyDiseaseIds.forEach    { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
-            selfDecState.family.familyCancerIds.forEach     { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
+            selfDecState.diseases.mentalIllnessIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.diseases.cancerIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 0, null)) }
+            selfDecState.family.familyDiseaseIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
+            selfDecState.family.familyCancerIds.forEach { illnessList.add(IllnessSelfDeclareRequest(it, 1, null)) }
 
             if (illnessList.isNotEmpty()) {
-                syncIllnessSelfDeclarativesUseCase(
-                    SyncIllnessSelfDeclarativesRequest(
-                        natCode              = currentPatientNatCode,
-                        patientID            = currentPatientId,
-                        illnessSelfDeclareList = illnessList
-                    )
+                val syncIllnessReq = SyncIllnessSelfDeclarativesRequest(
+                    natCode = currentPatientNatCode,
+                    patientID = currentPatientId,
+                    illnessSelfDeclareList = illnessList
                 )
+                Logger.d("HealthProfile", "Syncing Illnesses: $syncIllnessReq")
+                syncIllnessSelfDeclarativesUseCase(syncIllnessReq)
             }
 
+            // 3. Sync Drug Allergies
             val allergyList = selfDecState.allergy.allergies.map {
                 DrugAllergyRequest(drugId = it.drugId, allergyComments = it.allergyComments)
             }
             if (allergyList.isNotEmpty()) {
-                syncDrugAllergiesUseCase(
-                    SyncDrugAllergiesRequest(
-                        natCode        = currentPatientNatCode,
-                        patientID      = currentPatientId,
-                        drugAllergyList = allergyList
-                    )
+                val syncAllergyReq = SyncDrugAllergiesRequest(
+                    natCode = currentPatientNatCode,
+                    patientID = currentPatientId,
+                    drugAllergyList = allergyList
                 )
+                Logger.d("HealthProfile", "Syncing Drug Allergies: $syncAllergyReq")
+                syncDrugAllergiesUseCase(syncAllergyReq)
             }
 
-            val lifestyleReq = AddSelfDeclarativeRequest(
-                natCode          = currentPatientNatCode,
-                patientID        = currentPatientId,
-                smoking          = if (selfDecState.lifestyle.isSmoking == true) selfDecState.lifestyle.smokingStatusId ?: 0 else 0,
-                smokeDesc        = selfDecState.lifestyle.smokingPattern,
-                alcoholUse       = if (selfDecState.lifestyle.isDrinking == true) selfDecState.lifestyle.drinkingStatusId ?: 0 else LifeStyleStatus.NEVER.id,
-                alcoholUseDesc   = selfDecState.lifestyle.drinkingPattern,
-                substanceUse     = if (selfDecState.lifestyle.hasAddiction == true) selfDecState.lifestyle.substanceStatusId ?: 0 else LifeStyleStatus.NEVER.id,
-                substanceUseDesc = selfDecState.lifestyle.substancePattern,
-                exerciseFrequency = if (selfDecState.lifestyle.isExercising == true) selfDecState.lifestyle.exerciseStatusId ?: 0 else LifeStyleStatus.NEVER.id,
-                exerciseDesc     = selfDecState.lifestyle.exerciseFrequency
-            )
-            addSelfDeclarativeUseCase(lifestyleReq)
+            // 4. Add or Update Self Declarative (Lifestyle)
+            val hasUserDeclared = uiState.value.lifestyleInfo != null
+            val lifestyle = selfDecState.lifestyle
+
+            if (hasUserDeclared) {
+                val updateLifestyleReq = UpdateSelfDeclarativeRequest(
+                    patientID = currentPatientId,
+                    objectID = uiState.value.lifestyleInfo?.objectId,
+                    smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else 0,
+                    smokeDesc = lifestyle.smokingPattern,
+                    alcoholUse = if (lifestyle.isDrinking == true) lifestyle.drinkingStatusId else LifeStyleStatus.NEVER.id,
+                    alcoholUseDesc = lifestyle.drinkingPattern,
+                    substanceUse = if (lifestyle.hasAddiction == true) lifestyle.substanceStatusId else LifeStyleStatus.NEVER.id,
+                    substanceUseDesc = lifestyle.substancePattern,
+                    exerciseFrequency = if (lifestyle.isExercising == true) lifestyle.exerciseStatusId else LifeStyleStatus.NEVER.id,
+                    exerciseDesc = lifestyle.exerciseFrequency
+                )
+                Logger.d("HealthProfile", "Updating Lifestyle: $updateLifestyleReq")
+                updateSelfDeclarativeUseCase(updateLifestyleReq)
+            } else {
+                val addLifestyleReq = AddSelfDeclarativeRequest(
+                    natCode = currentPatientNatCode,
+                    patientID = currentPatientId,
+                    smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else 0,
+                    smokeDesc = lifestyle.smokingPattern,
+                    alcoholUse = if (lifestyle.isDrinking == true) lifestyle.drinkingStatusId else LifeStyleStatus.NEVER.id,
+                    alcoholUseDesc = lifestyle.drinkingPattern,
+                    substanceUse = if (lifestyle.hasAddiction == true) lifestyle.substanceStatusId else LifeStyleStatus.NEVER.id,
+                    substanceUseDesc = lifestyle.substancePattern,
+                    exerciseFrequency = if (lifestyle.isExercising == true) lifestyle.exerciseStatusId else LifeStyleStatus.NEVER.id,
+                    exerciseDesc = lifestyle.exerciseFrequency
+                )
+                Logger.d("HealthProfile", "Adding Lifestyle: $addLifestyleReq")
+                addSelfDeclarativeUseCase(addLifestyleReq)
+            }
 
             sendEvent(HealthProfileEvent.ShowToast("اطلاعات پرونده سلامت با موفقیت ثبت شد"))
             true
         } catch (e: Exception) {
+            Logger.e("HealthProfile", "Error in submitFullDeclaration: ${e.message}")
             sendEvent(HealthProfileEvent.ShowToast("خطا در ثبت اطلاعات: ${e.message}"))
             false
         }
     }
+
 
     override fun reduceState(
         currentState: HealthProfileUiState,

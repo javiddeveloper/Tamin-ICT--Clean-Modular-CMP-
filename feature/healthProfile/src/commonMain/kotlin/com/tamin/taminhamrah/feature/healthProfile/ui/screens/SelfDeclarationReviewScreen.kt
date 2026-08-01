@@ -63,7 +63,7 @@ fun SelfDeclarationReviewScreen(
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = "تأیید و ثبت نهایی اطلاعات",
-                onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.SUCCESS)) },
+                onPrimaryClick = { onIntent(HealthProfileIntent.SubmitDeclaration) },
                 secondaryText = "بازگشت",
                 onSecondaryClick = onBackClicked
             )
