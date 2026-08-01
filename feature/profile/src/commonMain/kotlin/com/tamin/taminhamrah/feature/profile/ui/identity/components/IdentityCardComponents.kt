@@ -112,8 +112,12 @@ internal fun IdentityCard(
     ) {
         Layout(
             content = {
+                CardNameRow(
+                    fullName = fullName,
+                    collapseProgress = collapseProgress,
+                    modifier = Modifier.layoutId(CardSlot.Name),
+                )
                 CardTopInfo(
-                    firstName = firstName,
                     lastName = lastName,
                     fatherName = fatherName,
                     dateOfBirth = dateOfBirth,
@@ -121,40 +125,20 @@ internal fun IdentityCard(
                         .layoutId(CardSlot.TopInfo)
                         .vanishOnCollapse(collapseProgress, IdentityDimens.VANISH_RATE),
                 )
-                CardAvatar(photo = photo, modifier = Modifier.layoutId(CardSlot.Avatar))
-                Text(
-                    text = fullName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .layoutId(CardSlot.Name)
-                        .shrinkOnCollapse(
-                            progress = collapseProgress,
-                            minScale = IdentityDimens.nameCollapsedScale,
-                            rtl = rtl,
-                        ),
+                CardAvatar(
+                    photo = photo,
+                    modifier = Modifier.layoutId(CardSlot.Avatar),
                 )
-                CardBottomSection(
+                CardNationalId(
                     nationalId = nationalId,
-                    ssn = ssn,
                     modifier = Modifier
-                        .layoutId(CardSlot.BottomSection)
+                        .layoutId(CardSlot.NationalId)
                         .vanishOnCollapse(collapseProgress, IdentityDimens.VANISH_RATE),
                 )
-                NumericText(
-                    text = ssn.toPersianDigits(),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
-                    modifier = Modifier
-                        .layoutId(CardSlot.SsnNumber)
-                        .shrinkOnCollapse(
-                            progress = collapseProgress,
-                            minScale = IdentityDimens.ssnCollapsedScale,
-                            rtl = !rtl,
-                        ),
+                CardSsn(
+                    ssn = ssn,
+                    collapseProgress = collapseProgress,
+                    modifier = Modifier.layoutId(CardSlot.SsnNumber),
                 )
             },
         ) { measurables, constraints ->
@@ -169,27 +153,27 @@ internal fun IdentityCard(
             val avatarH = scaled(IdentityDimens.avatarHeight)
             val gap = scaled(IdentityDimens.avatarNameGap)
 
-            val topInfo = measurables.slot(CardSlot.TopInfo).measure(
-                Constraints(maxWidth = (width - 2 * pad - avatarW - gap).coerceAtLeast(0))
-            )
-            val avatar = measurables.slot(CardSlot.Avatar)
-                .measure(Constraints.fixed(avatarW, avatarH))
-
             val textC = Constraints(maxWidth = (width - 2 * pad - avatarW - gap).coerceAtLeast(0))
+
             val name = measurables.slot(CardSlot.Name).measure(textC)
-            val bottomSection = measurables.slot(CardSlot.BottomSection).measure(inner)
-            val ssnNumber = measurables.slot(CardSlot.SsnNumber).measure(inner)
+            val topInfo = measurables.slot(CardSlot.TopInfo).measure(textC)
+            val avatar = measurables.slot(CardSlot.Avatar).measure(Constraints.fixed(avatarW, avatarH))
+            val nationalIdPlaceable = measurables.slot(CardSlot.NationalId).measure(inner)
+            val ssnPlaceable = measurables.slot(CardSlot.SsnNumber).measure(inner)
 
             val expandedH = scaled(IdentityDimens.cardExpandedHeight)
             val barH = IdentityDimens.cardCollapsedHeight.roundToPx()
+            val t = Easing.standard.transform(collapseProgress())
 
             // Expanded positions
             val expAvatarX = if (rtl) width - pad - avatarW else pad
             val expAvatarY = scaled(IdentityDimens.avatarTop)
             val expTopInfoX = if (rtl) pad else avatarW + gap + pad
-            val expTopInfoY = scaled(IdentityDimens.topInfoTop)
+            val expNameY = scaled(IdentityDimens.topInfoTop)
+            val expTopInfoY = expNameY + name.height + 4.dp.roundToPx()
             val expFooterY = scaled(IdentityDimens.footerTop)
-            val expSsnX = if (rtl) width - pad - ssnNumber.width else pad
+            val expNationalIdX = if (rtl) pad else width - pad - nationalIdPlaceable.width
+            val expSsnX = if (rtl) width - pad - ssnPlaceable.width else pad
 
             // Collapsed positions
             val avatarScale = IdentityDimens.avatarCollapsedHeight.toPx() / avatarH
@@ -199,21 +183,19 @@ internal fun IdentityCard(
             val collAvatarX = if (rtl) pad else width - pad - avatarWCollapsed
             val collNameX = if (rtl) pad + avatarWCollapsed + gap else width - pad - avatarWCollapsed - gap - name.width
             val collNameY = (barH - name.height) / 2
-            val collSsnX = if (rtl) width - pad - ssnNumber.width else pad
-            val collSsnY = (barH - ssnNumber.height) / 2
+            val collSsnX = if (rtl) width - pad - ssnPlaceable.width else pad
+            val collSsnY = (barH - ssnPlaceable.height) / 2
 
-            layout(width, lerp(expandedH, barH, Easing.standard.transform(collapseProgress()))) {
-                val t = Easing.standard.transform(collapseProgress())
-
-                // Detailed fields fade out softly as the card folds
+            layout(width, lerp(expandedH, barH, t)) {
+                // Secondary fields fade out smoothly
                 topInfo.placeRelativeWithLayer(expTopInfoX, expTopInfoY) {
-                    alpha = (1f - t * 1.5f).coerceIn(0f, 1f)
+                    alpha = (1f - t * 2f).coerceIn(0f, 1f)
                 }
-                bottomSection.placeRelativeWithLayer(pad, expFooterY) {
-                    alpha = (1f - t * 1.5f).coerceIn(0f, 1f)
+                nationalIdPlaceable.placeRelativeWithLayer(expNationalIdX, expFooterY) {
+                    alpha = (1f - t * 2f).coerceIn(0f, 1f)
                 }
 
-                // Avatar glides and scales smoothly to its collapsed bar position without fading
+                // Avatar glides and scales
                 avatar.placeRelativeWithLayer(
                     lerp(expAvatarX, collAvatarX, t),
                     lerp(expAvatarY, collAvatarY, t),
@@ -224,14 +206,14 @@ internal fun IdentityCard(
                     transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0f)
                 }
 
-                // Full Name glides smoothly to its collapsed bar position without fading
+                // Name glides smoothly from top-right to collapsed position
                 name.placeRelative(
                     lerp(expTopInfoX, collNameX, t),
-                    lerp(expTopInfoY, collNameY, t),
+                    lerp(expNameY, collNameY, t),
                 )
 
-                // SSN Number glides smoothly to its collapsed bar position without fading
-                ssnNumber.placeRelative(
+                // SSN glides smoothly from bottom-left to collapsed position
+                ssnPlaceable.placeRelative(
                     lerp(expSsnX, collSsnX, t),
                     lerp(expFooterY, collSsnY, t),
                 )
@@ -242,7 +224,7 @@ internal fun IdentityCard(
 
 /** The card's pieces, addressed by name rather than by index into the measurables. */
 private enum class CardSlot {
-    TopInfo, Avatar, Name, BottomSection, SsnNumber
+    Name, TopInfo, Avatar, NationalId, SsnNumber
 }
 
 private fun List<Measurable>.slot(id: CardSlot): Measurable = first { it.layoutId == id }
@@ -284,8 +266,37 @@ private fun AvatarGlyph() {
 }
 
 @Composable
+private fun CardNameRow(
+    fullName: String,
+    collapseProgress: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val fade = (1f - collapseProgress() * 2f).coerceIn(0f, 1f)
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (fade > 0f) {
+            Text(
+                text = stringResource(Res.string.identity_field_first_name),
+                style = MaterialTheme.typography.labelSmall,
+                color = TaminIdentityCardMuted.copy(alpha = fade),
+            )
+        }
+        Text(
+            text = fullName,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
 private fun CardTopInfo(
-    firstName: String,
     lastName: String,
     fatherName: String,
     dateOfBirth: String,
@@ -296,10 +307,6 @@ private fun CardTopInfo(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.Start,
     ) {
-        CardFieldRow(
-            label = stringResource(Res.string.identity_field_first_name),
-            value = firstName,
-        )
         CardFieldRow(
             label = stringResource(Res.string.identity_field_last_name),
             value = lastName,
@@ -343,40 +350,50 @@ private fun CardFieldRow(
 }
 
 @Composable
-private fun CardBottomSection(
+private fun CardNationalId(
     nationalId: String,
-    ssn: String,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
     ) {
-        Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                text = stringResource(Res.string.identity_field_national_code),
-                style = MaterialTheme.typography.labelSmall,
-                color = TaminIdentityCardMuted,
-            )
-            NumericText(
-                text = nationalId.toPersianDigits(),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
-            )
-        }
-        Column(horizontalAlignment = Alignment.Start) {
+        Text(
+            text = stringResource(Res.string.identity_field_national_code),
+            style = MaterialTheme.typography.labelSmall,
+            color = TaminIdentityCardMuted,
+        )
+        NumericText(
+            text = nationalId.toPersianDigits(),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = Color.White,
+        )
+    }
+}
+
+@Composable
+private fun CardSsn(
+    ssn: String,
+    collapseProgress: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val fade = (1f - collapseProgress() * 2f).coerceIn(0f, 1f)
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
+    ) {
+        if (fade > 0f) {
             Text(
                 text = stringResource(Res.string.identity_ssn_label),
                 style = MaterialTheme.typography.labelSmall,
-                color = TaminIdentityCardMuted,
-            )
-            NumericText(
-                text = ssn.toPersianDigits(),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
+                color = TaminIdentityCardMuted.copy(alpha = fade),
             )
         }
+        NumericText(
+            text = ssn.toPersianDigits(),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = Color.White,
+        )
     }
 }
 
