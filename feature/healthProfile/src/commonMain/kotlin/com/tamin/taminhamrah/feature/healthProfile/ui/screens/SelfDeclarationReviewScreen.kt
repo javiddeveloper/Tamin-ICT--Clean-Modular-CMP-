@@ -69,21 +69,16 @@ fun SelfDeclarationReviewScreen(
             )
         }
     ) { paddingValues ->
-        HealthProfileErrorWrapper(
-            isLoading = isLoading,
-            error = error,
-            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
-            modifier = Modifier.padding(paddingValues),
-            shimmerContent = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(taminColors.bgPage)
-                ) {
-                    CardsListShimmerSkeleton()
-                }
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(taminColors.bgPage)
+            ) {
+                CardsListShimmerSkeleton()
             }
-        ) {
+        } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()

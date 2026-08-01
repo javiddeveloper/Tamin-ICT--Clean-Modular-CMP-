@@ -330,7 +330,7 @@ class HealthProfileViewModel(
 
     private suspend fun submitFullDeclaration(): Boolean {
         if (currentPatientId == 0 || currentPatientNatCode.isBlank()) {
-            sendEvent(HealthProfileEvent.ShowToast("اطلاعات شناسایی بیمار یا کد ملی یافت نشد."))
+            sendEvent(HealthProfileEvent.ShowToast("اطلاعات شناسایی بیمار یا کد ملی یافت نشد.", isError = true))
             return false
         }
 
@@ -435,11 +435,11 @@ class HealthProfileViewModel(
                 addSelfDeclarativeUseCase(addLifestyleReq)
             }
 
-            sendEvent(HealthProfileEvent.ShowToast("اطلاعات پرونده سلامت با موفقیت ثبت شد"))
+            sendEvent(HealthProfileEvent.ShowToast("اطلاعات پرونده سلامت با موفقیت ثبت شد", isError = false))
             true
         } catch (e: Exception) {
             Logger.e("HealthProfile", "Error in submitFullDeclaration: ${e.message}")
-            sendEvent(HealthProfileEvent.ShowToast("خطا در ثبت اطلاعات: ${e.message}"))
+            sendEvent(HealthProfileEvent.ShowToast("خطا در ثبت اطلاعات: ${e.message}",isError = true))
             false
         }
     }

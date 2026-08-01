@@ -320,5 +320,5 @@ sealed interface HealthProfileIntent {
 
 sealed interface HealthProfileEvent {
     data object NavigateBack : HealthProfileEvent
-    data class ShowToast(val message: String) : HealthProfileEvent
+    data class ShowToast(val message: String,val isError: Boolean) : HealthProfileEvent
 }

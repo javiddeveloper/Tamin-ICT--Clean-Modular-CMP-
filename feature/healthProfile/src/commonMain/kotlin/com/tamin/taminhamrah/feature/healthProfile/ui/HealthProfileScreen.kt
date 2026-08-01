@@ -37,6 +37,9 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.util.formatDecimal
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.toast.success
 import org.koin.compose.viewmodel.koinViewModel
 
 private fun SelfDeclarationStep.previousStep(): SelfDeclarationStep? = when (this) {
@@ -84,10 +87,19 @@ fun HandleHealthProfileEvents(
     events: Flow<HealthProfileEvent>,
     onBackClicked: () -> Unit
 ) {
+    val toaster = LocalToaster.current
     events.collectWithLifecycleAware(key = onBackClicked) { event ->
         when (event) {
             HealthProfileEvent.NavigateBack -> {
                 onBackClicked()
+            }
+
+            is HealthProfileEvent.ShowToast -> {
+                if (event.isError) {
+                    toaster.error(event.message)
+                } else {
+                    toaster.success(event.message)
+                }
             }
 
             else -> {
@@ -136,12 +148,14 @@ fun HealthProfileMainContent(
                         onBackClicked = onBackClicked
                     )
                 }
+
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.IDENTITY -> {
                     SelfDeclarationIdentityScreen(
                         state = selfDecState.identity,
@@ -151,6 +165,7 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.PERSONAL -> {
                     SelfDeclarationPersonalScreen(
                         state = selfDecState.personal,
@@ -161,19 +176,25 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.CONTACT -> {
                     SelfDeclarationContactScreen(
                         state = selfDecState.contact,
                         provinceOptions = state.provinceOptions,
                         cityOptions = state.cityOptions,
                         isLoading = combinedLoading,
-                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.PROVINCES, ErrorSource.CITIES),
+                        error = getError(
+                            ErrorSource.PATIENT_GENERAL,
+                            ErrorSource.PROVINCES,
+                            ErrorSource.CITIES
+                        ),
                         isProvincesLoading = state.isProvincesLoading,
                         isCitiesLoading = state.isCitiesLoading,
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.EMERGENCY -> {
                     SelfDeclarationEmergencyScreen(
                         state = selfDecState.emergency,
@@ -183,6 +204,7 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.PHYSICAL -> {
                     SelfDeclarationPhysicalScreen(
                         state = selfDecState.physical,
@@ -192,6 +214,7 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.BLOOD -> {
                     SelfDeclarationBloodScreen(
                         state = selfDecState.bloodGroup,
@@ -202,17 +225,23 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.LIFESTYLE -> {
                     SelfDeclarationLifestyleScreen(
                         state = selfDecState.lifestyle,
                         smokingStatusOptions = state.smokingStatusOptions,
                         actFrequencyOptions = state.actFrequencyOptions,
                         isLoading = combinedLoading,
-                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.SMOKING_STATUS, ErrorSource.ACT_FREQUENCIES),
+                        error = getError(
+                            ErrorSource.PATIENT_GENERAL,
+                            ErrorSource.SMOKING_STATUS,
+                            ErrorSource.ACT_FREQUENCIES
+                        ),
                         onIntent = onIntent,
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.DISEASES -> {
                     SelfDeclarationDiseasesScreen(
                         state = selfDecState.diseases,
@@ -223,6 +252,7 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.FAMILY -> {
                     SelfDeclarationFamilyScreen(
                         state = selfDecState.family,
@@ -233,6 +263,7 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.ALLERGY -> {
                     SelfDeclarationAllergyScreen(
                         state = selfDecState.allergy,
@@ -243,12 +274,17 @@ fun HealthProfileMainContent(
                         onBackClicked = navigateBack
                     )
                 }
+
                 SelfDeclarationStep.REVIEW -> {
                     SelfDeclarationReviewScreen(
                         state = state,
                         isLoading = combinedLoading,
                         onIntent = onIntent,
-                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS, ErrorSource.DRUGS),
+                        error = getError(
+                            ErrorSource.PATIENT_GENERAL,
+                            ErrorSource.ILLNESS_GROUPS,
+                            ErrorSource.DRUGS
+                        ),
                         onBackClicked = navigateBack
                     )
                 }
@@ -265,6 +301,7 @@ fun HealthProfileMainContent(
                     }
                     SelfDeclarationSuccessScreen(onFinish = onFinish)
                 }
+
                 else -> {
                     Scaffold(
                         topBar = {
@@ -281,7 +318,11 @@ fun HealthProfileMainContent(
                         ) {
                             HealthProfileErrorWrapper(
                                 isLoading = state.isLoading,
-                                error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.PATIENT_LIFESTYLE, ErrorSource.PATIENT_ALLERGIES),
+                                error = getError(
+                                    ErrorSource.PATIENT_GENERAL,
+                                    ErrorSource.PATIENT_LIFESTYLE,
+                                    ErrorSource.PATIENT_ALLERGIES
+                                ),
                                 onRetry = { onIntent(HealthProfileIntent.RetryStep) },
                                 shimmerContent = { HealthProfileShimmerSkeleton() }
                             ) {
@@ -329,13 +370,28 @@ private fun HealthProfileContent(
 
                     val name = "${general.patientName} ${general.patientFamily}".trim()
                     ProfileRowItem(label = "نام بیمار:", value = name.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "کد ملی:", value = general.patientNatCode.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "نام پدر:", value = general.patientFather.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "سن:", value = "${general.patientAge.ifEmpty { "نامشخص" }} سال")
-                    ProfileRowItem(label = "تاریخ تولد:", value = general.patientBirthDate.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "جنسیت:", value = general.patientGender.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "شماره همراه:", value = general.patientMobile.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "آدرس بیمار:", value = general.patientAddress.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "کد ملی:",
+                        value = general.patientNatCode.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "نام پدر:",
+                        value = general.patientFather.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "سن:",
+                        value = "${general.patientAge.ifEmpty { "نامشخص" }} سال"
+                    )
+                    ProfileRowItem(
+                        label = "تاریخ تولد:",
+                        value = general.patientBirthDate.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "جنسیت:",
+                        value = general.patientGender.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "شماره همراه:",
+                        value = general.patientMobile.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "آدرس بیمار:",
+                        value = general.patientAddress.ifEmpty { "نامشخص" })
                 }
             }
 
@@ -343,7 +399,11 @@ private fun HealthProfileContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                        alpha = 0.2f
+                    )
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
@@ -389,13 +449,27 @@ private fun HealthProfileContent(
                     SectionHeaderTitle(title = "سبک زندگی و خود اظهاری")
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    ProfileRowItem(label = "مصرف سیگار / دخانیات:", value = lifestyle.smokingStatusLabel.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "توضیحات دخانیات:", value = lifestyle.smokingDesc.ifEmpty { "ندارد" })
-                    ProfileRowItem(label = "مصرف الکل:", value = lifestyle.alcoholUsageLabel.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "توضیحات الکل:", value = lifestyle.alcoholDesc.ifEmpty { "ندارد" })
-                    ProfileRowItem(label = "فراوانی ورزش:", value = lifestyle.exerciseFreqLabel.ifEmpty { "نامشخص" })
-                    ProfileRowItem(label = "توضیحات فعالیت ورزشی:", value = lifestyle.exerciseDesc.ifEmpty { "ندارد" })
-                    ProfileRowItem(label = "سوء مصرف مواد:", value = lifestyle.substanceUsageLabel.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "مصرف سیگار / دخانیات:",
+                        value = lifestyle.smokingStatusLabel.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "توضیحات دخانیات:",
+                        value = lifestyle.smokingDesc.ifEmpty { "ندارد" })
+                    ProfileRowItem(
+                        label = "مصرف الکل:",
+                        value = lifestyle.alcoholUsageLabel.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "توضیحات الکل:",
+                        value = lifestyle.alcoholDesc.ifEmpty { "ندارد" })
+                    ProfileRowItem(
+                        label = "فراوانی ورزش:",
+                        value = lifestyle.exerciseFreqLabel.ifEmpty { "نامشخص" })
+                    ProfileRowItem(
+                        label = "توضیحات فعالیت ورزشی:",
+                        value = lifestyle.exerciseDesc.ifEmpty { "ندارد" })
+                    ProfileRowItem(
+                        label = "سوء مصرف مواد:",
+                        value = lifestyle.substanceUsageLabel.ifEmpty { "نامشخص" })
                 }
             }
         }
@@ -461,9 +535,16 @@ private fun HealthProfileContent(
                         SectionHeaderTitle(title = "اطلاعات تماس اضطراری")
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        ProfileRowItem(label = "نام مخاطب اضطراری:", value = "${general.emergencyName} ${general.emergencyFamily}".trim())
-                        ProfileRowItem(label = "نسبت خانوادگی:", value = general.emergencyRelation.ifEmpty { "نامشخص" })
-                        ProfileRowItem(label = "تلفن همراه اضطراری:", value = general.emergencyMobile.ifEmpty { "نامشخص" })
+                        ProfileRowItem(
+                            label = "نام مخاطب اضطراری:",
+                            value = "${general.emergencyName} ${general.emergencyFamily}".trim()
+                        )
+                        ProfileRowItem(
+                            label = "نسبت خانوادگی:",
+                            value = general.emergencyRelation.ifEmpty { "نامشخص" })
+                        ProfileRowItem(
+                            label = "تلفن همراه اضطراری:",
+                            value = general.emergencyMobile.ifEmpty { "نامشخص" })
                     }
                 }
             }
