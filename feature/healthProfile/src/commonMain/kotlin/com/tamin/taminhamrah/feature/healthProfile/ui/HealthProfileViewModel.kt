@@ -79,42 +79,8 @@ class HealthProfileViewModel(
 
             is HealthProfileIntent.UpdatePhysical -> flow { emit(PartialState.PhysicalUpdated(intent.physical)) }
             is HealthProfileIntent.UpdateDiseases -> flow {
-                val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
-                intent.diseases.riskFactorIds.forEach {
-                    illnessList.add(
-                        IllnessSelfDeclareRequest(
-                            it,
-                            0,
-                            null
-                        )
-                    )
-                }
-                intent.diseases.chronicDiseaseIds.forEach {
-                    illnessList.add(
-                        IllnessSelfDeclareRequest(it, 0, null)
-                    )
-                }
-                intent.diseases.mentalIllnessIds.forEach {
-                    illnessList.add(
-                        IllnessSelfDeclareRequest(
-                            it,
-                            0,
-                            null
-                        )
-                    )
-                }
-                intent.diseases.cancerIds.forEach {
-                    illnessList.add(
-                        IllnessSelfDeclareRequest(
-                            it,
-                            0,
-                            null
-                        )
-                    )
-                }
-
                 Logger.d("DiseasesUpdate", "User updated diseases section")
-                Logger.d("DiseasesUpdate", "New Request Payload Preview: $illnessList")
+                Logger.d("DiseasesUpdate", "New Request Payload Preview: ${intent.diseases.toIllnessRequests()}")
 
                 emit(PartialState.DiseasesUpdated(intent.diseases))
             }
@@ -260,11 +226,10 @@ class HealthProfileViewModel(
             }
 
             SelfDeclarationStep.CONTACT -> {
+                val provinceId = uiState.value.selfDeclaration.contact.provinceId
                 merge(
                     fetchProvinces(),
-                    if (uiState.value.selfDeclaration.contact.provinceId != null)
-                        handleLoadCities(uiState.value.selfDeclaration.contact.provinceId!!)
-                    else emptyFlow()
+                    provinceId?.let { handleLoadCities(it) } ?: emptyFlow()
                 ).collect { emit(it) }
             }
 
@@ -321,7 +286,7 @@ class HealthProfileViewModel(
                         ErrorSource.PROVINCES
                     )
                 )
-                emit(PartialState.ProvincesLoading(true))
+                emit(PartialState.ProvincesLoading(false))
             }
             .collect {
                 emit(PartialState.ProvincesLoaded(it.map { p -> p.toPresentation() }))
@@ -475,6 +440,14 @@ class HealthProfileViewModel(
             }
     }
 
+    private fun DiseasesStepState.toIllnessRequests(relation: Int = 0): List<IllnessSelfDeclareRequest> {
+        val ids = riskFactorIds.toList() + chronicDiseaseIds.toList() + mentalIllnessIds.toList() + cancerIds.toList()
+        return ids.map { IllnessSelfDeclareRequest(it, relation, null) }
+    }
+
+    private fun FamilyStepState.toIllnessRequests(relation: Int = 1): List<IllnessSelfDeclareRequest> =
+        (familyDiseaseIds.toList() + familyCancerIds.toList()).map { IllnessSelfDeclareRequest(it, relation, null) }
+
     private suspend fun submitFullDeclaration(): Boolean {
         if (currentPatientId == 0 || currentPatientNatCode.isBlank()) {
             sendEvent(
@@ -519,53 +492,7 @@ class HealthProfileViewModel(
             updatePatientUseCase(updatePatientReq)
 
             // 2. Sync Illnesses (Diseases + Family)
-            val illnessList = mutableListOf<IllnessSelfDeclareRequest>()
-            selfDecState.diseases.riskFactorIds.forEach {
-                illnessList.add(
-                    IllnessSelfDeclareRequest(
-                        it,
-                        0,
-                        null
-                    )
-                )
-            }
-            selfDecState.diseases.chronicDiseaseIds.forEach {
-                illnessList.add(
-                    IllnessSelfDeclareRequest(it, 0, null)
-                )
-            }
-            selfDecState.diseases.mentalIllnessIds.forEach {
-                illnessList.add(
-                    IllnessSelfDeclareRequest(it, 0, null)
-                )
-            }
-            selfDecState.diseases.cancerIds.forEach {
-                illnessList.add(
-                    IllnessSelfDeclareRequest(
-                        it,
-                        0,
-                        null
-                    )
-                )
-            }
-            selfDecState.family.familyDiseaseIds.forEach {
-                illnessList.add(
-                    IllnessSelfDeclareRequest(
-                        it,
-                        1,
-                        null
-                    )
-                )
-            }
-            selfDecState.family.familyCancerIds.forEach {
-                illnessList.add(
-                    IllnessSelfDeclareRequest(
-                        it,
-                        1,
-                        null
-                    )
-                )
-            }
+            val illnessList = selfDecState.diseases.toIllnessRequests() + selfDecState.family.toIllnessRequests()
 
             if (illnessList.isNotEmpty()) {
                 val syncIllnessReq = SyncIllnessSelfDeclarativesRequest(
@@ -595,7 +522,7 @@ class HealthProfileViewModel(
             val hasUserDeclared = uiState.value.lifestyleInfo != null
             val lifestyle = selfDecState.lifestyle
 
-            if (true) {
+            if (hasUserDeclared) {
                 val updateLifestyleReq = UpdateSelfDeclarativeRequest(
                     patientID = currentPatientId,
                     objectID = uiState.value.lifestyleInfo?.objectId,
@@ -697,11 +624,7 @@ class HealthProfileViewModel(
             val sd = currentState.selfDeclaration
             val updatedSd =
                 if (sd.bloodGroup.isBloodGroupUnknown && sd.bloodGroup.selectedBloodGroupId == null) {
-                    val unknownId = partialState.options.find {
-                        it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains(
-                            "نمیدانم"
-                        ) || it.label.contains("unknown")
-                    }?.id
+                    val unknownId = partialState.options.find { it.isUnknownBloodGroup() }?.id
                     sd.copy(bloodGroup = sd.bloodGroup.copy(selectedBloodGroupId = unknownId))
                 } else sd
 
@@ -842,11 +765,7 @@ class HealthProfileViewModel(
                     val isUnknown =
                         info.patientBloodGroupCode == null || info.patientBloodGroupCode == 0
                     val unknownId = if (isUnknown) {
-                        currentState.bloodGroupOptions.find {
-                            it.label.contains("نامشخص") || it.label.contains("نمی‌دانم") || it.label.contains(
-                                "نمیدانم"
-                            ) || it.label.contains("unknown")
-                        }?.id
+                        currentState.bloodGroupOptions.find { it.isUnknownBloodGroup() }?.id
                     } else {
                         info.patientBloodGroupCode
                     }

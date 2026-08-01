@@ -142,7 +142,7 @@ fun HealthProfileMainContent(
 
     fun getError(vararg allowedSources: ErrorSource): String? {
         val matchingSource = allowedSources.firstOrNull { it in errors }
-        return errors[matchingSource] ?: errors[ErrorSource.PATIENT_GENERAL]
+        return matchingSource?.let { errors[it] } ?: errors[ErrorSource.PATIENT_GENERAL]
     }
 
     val wrappedOnIntent: (HealthProfileIntent) -> Unit = { intent ->

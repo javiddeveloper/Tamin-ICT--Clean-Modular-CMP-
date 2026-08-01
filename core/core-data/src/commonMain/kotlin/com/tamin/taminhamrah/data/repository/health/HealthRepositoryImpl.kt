@@ -31,7 +31,6 @@ import com.tamin.taminhamrah.model.health.UpdatePatientRequest
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeRequest
 import com.tamin.taminhamrah.repository.health.HealthRepository
-import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -91,8 +90,7 @@ internal class HealthRepositoryImpl(
         if (localPatientDrugAllergies.isNotEmpty()) emit(localPatientDrugAllergies.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientDrugAllergies(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
-            healthDao.clearDrugAllergies(natCode)
-            healthDao.insertDrugAllergies(remote.map { it.toEntity(natCode) })
+            healthDao.replaceDrugAllergies(natCode, remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
             if (localPatientDrugAllergies.isEmpty()) throw e
         }
@@ -107,8 +105,7 @@ internal class HealthRepositoryImpl(
         if (localPatientHospitalizations.isNotEmpty()) emit(localPatientHospitalizations.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientHospitalizations(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
-            healthDao.clearHospitalizations(natCode)
-            healthDao.insertHospitalizations(remote.map { it.toEntity(natCode) })
+            healthDao.replaceHospitalizations(natCode, remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
             if (localPatientHospitalizations.isEmpty()) throw e
         }
@@ -123,8 +120,7 @@ internal class HealthRepositoryImpl(
         if (localPatientVisits.isNotEmpty()) emit(localPatientVisits.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientVisits(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
-            healthDao.clearVisits(natCode)
-            healthDao.insertVisits(remote.map { it.toEntity(natCode) })
+            healthDao.replaceVisits(natCode, remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
             if (localPatientVisits.isEmpty()) throw e
         }
@@ -139,8 +135,7 @@ internal class HealthRepositoryImpl(
         if (localPatientLabs.isNotEmpty()) emit(localPatientLabs.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientLabs(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
-            healthDao.clearLabs(natCode)
-            healthDao.insertLabs(remote.map { it.toEntity(natCode) })
+            healthDao.replaceLabs(natCode, remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
             if (localPatientLabs.isEmpty()) throw e
         }
@@ -155,8 +150,7 @@ internal class HealthRepositoryImpl(
         if (localPatientImaging.isNotEmpty()) emit(localPatientImaging.map { it.toDomain() })
         try {
             val remote = healthRemoteDataSource.getPatientImaging(natCode, patientID)?.list?.map { it.toDomain() } ?: emptyList()
-            healthDao.clearImaging(natCode)
-            healthDao.insertImaging(remote.map { it.toEntity(natCode) })
+            healthDao.replaceImaging(natCode, remote.map { it.toEntity(natCode) })
         } catch (e: Exception) {
             if (localPatientImaging.isEmpty()) throw e
         }
@@ -184,13 +178,11 @@ internal class HealthRepositoryImpl(
 
     override suspend fun getMaritalStatus(): Flow<List<MaritalStatusDN>> = flow {
         val remote = healthRemoteDataSource.getMaritalStatus()?.map { it.toDomain() } ?: emptyList()
-        Logger.d("getMaritalStatus" , remote.toString())
         emit(remote)
     }
 
     override suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>> = flow {
         val remote = healthRemoteDataSource.getSmokingStatus()?.map { it.toDomain() } ?: emptyList()
-        Logger.d("getSmokingStatus" , remote.toString())
         emit(remote)
     }
 

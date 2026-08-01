@@ -39,272 +39,131 @@ internal class HealthRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : HealthRemoteDataSource {
 
-    override suspend fun getPatientGeneral(natCode: String): PatientGeneralDTO? {
+    /**
+     * Runs [block], normalizing every failure through [errorParser].
+     * Consolidates the try/catch boilerplate that used to be duplicated
+     * identically in every method of this class.
+     */
+    private inline fun <T> safeCall(tag: String, block: () -> T): T {
         return try {
-            val response = apiService.getPatientGeneral(natCode)
-            response.extractData()
+            block()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientGeneral failed: ${e::class.simpleName} - ${e.message}" }
+            Logger.e("HealthDS") { "$tag failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
+    }
+
+    override suspend fun getPatientGeneral(natCode: String): PatientGeneralDTO? = safeCall("getPatientGeneral") {
+        apiService.getPatientGeneral(natCode).extractData()
     }
 
     override suspend fun getPatientSelfDeclarative(
         natCode: String,
         patientID: Int
-    ): PatientSelfDeclarativeDTO? {
-        return try {
-            val response = apiService.getPatientSelfDeclarative(natCode, patientID)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientSelfDeclarative failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    ): PatientSelfDeclarativeDTO? = safeCall("getPatientSelfDeclarative") {
+        apiService.getPatientSelfDeclarative(natCode, patientID).extractData()
     }
 
     override suspend fun getPatientDrugAllergies(
         natCode: String,
         patientID: Int
-    ): ListData<DrugItemAllergiesDTO>? {
-        return try {
-            val response = apiService.getPatientDrugAllergies(natCode, patientID)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientDrugAllergies failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    ): ListData<DrugItemAllergiesDTO>? = safeCall("getPatientDrugAllergies") {
+        apiService.getPatientDrugAllergies(natCode, patientID).extractData()
     }
 
     override suspend fun getPatientHospitalizations(
         natCode: String,
         patientID: Int
-    ): ListData<PatientHospitalizationsDTO>? {
-        return try {
-            val response = apiService.getPatientHospitalize(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientHospitalizations failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    ): ListData<PatientHospitalizationsDTO>? = safeCall("getPatientHospitalizations") {
+        apiService.getPatientHospitalize(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
     }
 
     override suspend fun getPatientVisits(
         natCode: String,
         patientID: Int
-    ): ListData<PatientVisitDTO>? {
-        return try {
-            val response = apiService.getPatientVisit(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientVisits failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    ): ListData<PatientVisitDTO>? = safeCall("getPatientVisits") {
+        apiService.getPatientVisit(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
     }
 
     override suspend fun getPatientLabs(
         natCode: String,
         patientID: Int
-    ): ListData<PatientLabDTO>? {
-        return try {
-            val response = apiService.getPatientLab(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientLabs failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    ): ListData<PatientLabDTO>? = safeCall("getPatientLabs") {
+        apiService.getPatientLab(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
     }
 
     override suspend fun getPatientImaging(
         natCode: String,
         patientID: Int
-    ): ListData<PatientImagingDTO>? {
-        return try {
-            val response = apiService.getPatientImaging(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientImaging failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    ): ListData<PatientImagingDTO>? = safeCall("getPatientImaging") {
+        apiService.getPatientImaging(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
     }
 
     // --- Location ---
 
-    override suspend fun getAllProvinces(): ProvincesDTO? {
-        return try {
-            apiService.getAllProvinces().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getAllProvinces failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getAllProvinces(): ProvincesDTO? = safeCall("getAllProvinces") {
+        apiService.getAllProvinces().extractData()
     }
 
-    override suspend fun getProvinceCities(provinceID: Int): ProvinceCitiesDTO? {
-        return try {
-            apiService.getProvinceCities(provinceID).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getProvinceCities failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getProvinceCities(provinceID: Int): ProvinceCitiesDTO? = safeCall("getProvinceCities") {
+        apiService.getProvinceCities(provinceID).extractData()
     }
 
     // --- Lookup ---
 
-    override suspend fun getBloodGroups(): List<BloodGroupDTO>? {
-        return try {
-            apiService.getBloodGroups()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getBloodGroups failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getBloodGroups(): List<BloodGroupDTO>? = safeCall("getBloodGroups") {
+        apiService.getBloodGroups()
     }
 
-    override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? {
-        return try {
-            apiService.getMaritalStatus()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getMaritalStatus failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? = safeCall("getMaritalStatus") {
+        apiService.getMaritalStatus()
     }
 
-    override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? {
-        return try {
-            apiService.getSmokingStatus()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getSmokingStatus failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? = safeCall("getSmokingStatus") {
+        apiService.getSmokingStatus()
     }
 
-    override suspend fun getActFrequencies(): List<ActFrequencyDTO>? {
-        return try {
-            apiService.getActFrequencies()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getActFrequencies failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getActFrequencies(): List<ActFrequencyDTO>? = safeCall("getActFrequencies") {
+        apiService.getActFrequencies()
     }
 
     // --- Illnesses ---
 
-    override suspend fun getSelfDeclarableIllnesses(): DeclarableIllnessesDTO? {
-        return try {
-            apiService.getSelfDeclarableIllnesses().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getSelfDeclarableIllnesses failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getSelfDeclarableIllnesses(): DeclarableIllnessesDTO? = safeCall("getSelfDeclarableIllnesses") {
+        apiService.getSelfDeclarableIllnesses().extractData()
     }
 
-    override suspend fun getSelfDeclarableIllnessesByGroup(): SelfDeclarableIllnessesByGroupDTO? {
-        return try {
-            apiService.getSelfDeclarableIllnessesByGroup().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getSelfDeclarableIllnessesByGroup failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getSelfDeclarableIllnessesByGroup(): SelfDeclarableIllnessesByGroupDTO? = safeCall("getSelfDeclarableIllnessesByGroup") {
+        apiService.getSelfDeclarableIllnessesByGroup().extractData()
     }
 
     // --- Drug master list ---
 
-    override suspend fun getAllDrugs(): AllergicDrugsDTO? {
-        return try {
-            apiService.getAllergicDrugs().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "getAllDrugs failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun getAllDrugs(): AllergicDrugsDTO? = safeCall("getAllDrugs") {
+        apiService.getAllergicDrugs().extractData()
     }
 
     // --- Mutations (POST) ---
 
-    override suspend fun updatePatient(request: UpdatePatientRequestDTO): UpdatePatientDTO? {
-        return try {
-            apiService.updatePatient(request).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "updatePatient failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun updatePatient(request: UpdatePatientRequestDTO): UpdatePatientDTO? = safeCall("updatePatient") {
+        apiService.updatePatient(request).extractData()
     }
 
-    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): AddSelfDeclarativeDTO? {
-        return try {
-            apiService.addSelfDeclarative(request).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "addSelfDeclarative failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): AddSelfDeclarativeDTO? = safeCall("addSelfDeclarative") {
+        apiService.addSelfDeclarative(request).extractData()
     }
 
-    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): UpdateSelfDeclarativeDTO? {
-        return try {
-            apiService.updateSelfDeclarative(request).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "updateSelfDeclarative failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): UpdateSelfDeclarativeDTO? = safeCall("updateSelfDeclarative") {
+        apiService.updateSelfDeclarative(request).extractData()
     }
 
-    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): SyncIllnessSelfDeclarativesDTO? {
-        return try {
-            val resultMsg = apiService.syncIllnessSelfDeclaratives(request).extractData()
-            SyncIllnessSelfDeclarativesDTO(data = resultMsg)
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "syncIllnessSelfDeclaratives failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): SyncIllnessSelfDeclarativesDTO? = safeCall("syncIllnessSelfDeclaratives") {
+        SyncIllnessSelfDeclarativesDTO(data = apiService.syncIllnessSelfDeclaratives(request).extractData())
     }
 
-    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): SyncDrugAllergiesDTO? {
-        return try {
-            val resultMsg = apiService.syncDrugAllergies(request).extractData()
-            SyncDrugAllergiesDTO(data = resultMsg)
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "syncDrugAllergies failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
+    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): SyncDrugAllergiesDTO? = safeCall("syncDrugAllergies") {
+        SyncDrugAllergiesDTO(data = apiService.syncDrugAllergies(request).extractData())
     }
 }
-

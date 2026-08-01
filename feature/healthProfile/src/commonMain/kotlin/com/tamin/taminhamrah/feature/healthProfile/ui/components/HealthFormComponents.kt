@@ -415,7 +415,7 @@ fun WarningBanner(
     ) {
         Icon(
             imageVector = Icons.Default.Warning,
-            contentDescription = "قفل",
+            contentDescription = "هشدار",
             tint = taminColors.warning,
             modifier = Modifier
                 .size(18.dp)
