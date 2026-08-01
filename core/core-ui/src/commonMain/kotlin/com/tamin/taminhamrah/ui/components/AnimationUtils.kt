@@ -104,20 +104,19 @@ fun rememberStaggeredEntranceState(key: Any? = null): StaggeredEntranceState {
  */
 @Composable
 fun Modifier.staggeredItemEntrance(
-    index: Int,
+    index: Int = 0,
     key: Any? = null,
     state: StaggeredEntranceState? = null,
 ): Modifier {
     val reducedMotion = isReducedMotionEnabled()
     if (reducedMotion) return this
 
-    val itemKey = key ?: index
-    // Check if the item has already completed its entrance animation previously
-    val isAlreadyAnimated = state?.isAnimated(itemKey) == true
+    // Check if the item key has already completed its entrance animation previously
+    val isAlreadyAnimated = key?.let { state?.isAnimated(it) } == true
     // Initialize Animatable directly to 1f if already animated, skipping initial opacity 0f
-    val animatable = remember(itemKey) { Animatable(if (isAlreadyAnimated) 1f else 0f) }
+    val animatable = remember(key) { Animatable(if (isAlreadyAnimated) 1f else 0f) }
 
-    LaunchedEffect(itemKey) {
+    LaunchedEffect(key) {
         if (!isAlreadyAnimated) {
             val delay = (index * Stagger.delayPerItemMs).coerceAtMost(Stagger.maxDelayMs)
             animatable.animateTo(
@@ -129,7 +128,9 @@ fun Modifier.staggeredItemEntrance(
                 ),
             )
             // Mark key as animated once the transition completes
-            state?.markAnimated(itemKey)
+            if (key != null) {
+                state?.markAnimated(key)
+            }
         }
     }
 
