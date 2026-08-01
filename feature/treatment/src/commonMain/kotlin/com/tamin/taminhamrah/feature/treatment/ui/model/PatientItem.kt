@@ -15,17 +15,19 @@ data class PatientItem(
     val brhName: String? = null,
     val insuranceType: String? = null
 ) {
-    /** Label for the records patient filter: the insured reads as «خودم», dependants as «رابطه - نام». */
-    val filterLabel: String
-        get() = when {
-            !isDependent -> "خودم"
-            relation.isNullOrEmpty() -> fullName
-            else -> "$relation - $fullName"
-        }
+    /**
+     * Label for the records patient filter: the insured reads as [selfLabel], dependants as
+     * «رابطه - نام».
+     *
+     * [selfLabel] is passed in because this is read inside a remember block, where a resource
+     * lookup is not available.
+     */
+    fun filterLabel(selfLabel: String): String = when {
+        !isDependent -> selfLabel
+        relation.isNullOrEmpty() -> fullName
+        else -> "$relation - $fullName"
+    }
 }
-
-private const val FALLBACK_MAIN_INSURED_NAME = "بیمه‌شده اصلی"
-private const val DEPENDANT_RELATION = "تحت تکفل"
 
 /**
  * Flattens the treatment state into the carousel's display order: the main insured
@@ -33,15 +35,19 @@ private const val DEPENDANT_RELATION = "تحت تکفل"
  * code arrives, which the screen surfaces as its empty state.
  *
  * Deliberately reads no selection state: the list is who there is, not who is in view, so
- * swiping the carousel cannot invalidate it and rebuild the hub.
+ * swiping the carousel cannot invalidate it and rebuild the hub. The two labels are parameters
+ * for the same reason the list is remembered: this runs outside composition.
  */
-fun TreatmentUiState.toPatientList(): ImmutableList<PatientItem> = buildList {
+fun TreatmentUiState.toPatientList(
+    mainInsuredFallback: String,
+    dependantRelation: String,
+): ImmutableList<PatientItem> = buildList {
     mainUserNationalCode?.let { nationalCode ->
         val mainRecord = deservedList.firstOrNull()
         add(
             PatientItem(
                 nationalId = nationalCode,
-                fullName = mainRecord?.fullName ?: FALLBACK_MAIN_INSURED_NAME,
+                fullName = mainRecord?.fullName ?: mainInsuredFallback,
                 isDependent = false,
                 brhName = mainRecord?.brhName,
                 insuranceType = mainRecord?.insuranceType,
@@ -54,7 +60,7 @@ fun TreatmentUiState.toPatientList(): ImmutableList<PatientItem> = buildList {
                 nationalId = dependant.nationalId,
                 fullName = dependant.fullName,
                 isDependent = true,
-                relation = DEPENDANT_RELATION,
+                relation = dependantRelation,
             ),
         )
     }

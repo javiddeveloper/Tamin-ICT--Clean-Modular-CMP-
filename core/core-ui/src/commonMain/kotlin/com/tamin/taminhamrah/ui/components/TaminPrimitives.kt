@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 /**
@@ -110,7 +113,8 @@ fun StatusPill(
 @Composable
 fun StatTile(
     label: String,
-    amount: String,
+    /** `null` while the figure is still being fetched: the tile shimmers instead of reading zero. */
+    amount: String?,
     containerColor: Color,
     contentColor: Color,
     modifier: Modifier = Modifier,
@@ -129,13 +133,23 @@ fun StatTile(
             color = labelColor,
             textAlign = TextAlign.Center,
         )
-        NumericText(
-            text = amount,
-            style = MaterialTheme.typography.titleMedium,
-            color = contentColor,
-        )
+        if (amount == null) {
+            ShimmerBlock(
+                modifier = Modifier
+                    .padding(vertical = Spacing.xxs)
+                    .width(ShimmerSize.valueWidth)
+                    .height(ShimmerSize.valueHeight),
+            )
+        } else {
+            NumericText(
+                text = amount,
+                style = MaterialTheme.typography.titleMedium,
+                color = contentColor,
+            )
+        }
     }
 }
+
 
 /** Muted caption above a group of cards. */
 @Composable

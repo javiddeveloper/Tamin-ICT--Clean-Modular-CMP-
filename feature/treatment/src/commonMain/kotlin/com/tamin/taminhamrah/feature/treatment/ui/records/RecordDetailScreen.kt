@@ -46,11 +46,23 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_back
+import taminx.core.core_ui.amount_total
+import taminx.core.core_ui.detail_doctor
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_download
+import taminx.core.core_ui.prescription_download_cd
+import taminx.core.core_ui.prescription_empty
+import taminx.core.core_ui.prescription_items
+import taminx.core.core_ui.prescription_lab_result_cd
+import taminx.core.core_ui.prescription_title
+import taminx.core.core_ui.records_doctor_named
+import taminx.core.core_ui.share_organization
+import taminx.core.core_ui.share_yours
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
@@ -160,11 +172,11 @@ fun RecordDetailContent(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 TaminTopAppBar(
-                    title = "نسخهٔ الکترونیک",
+                    title = stringResource(Res.string.prescription_title),
                     navigationIcon = {
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = "بازگشت",
+                            contentDescription = stringResource(Res.string.action_back),
                             onClick = onBack,
                         )
                     },
@@ -172,12 +184,12 @@ fun RecordDetailContent(
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
-                                contentDescription = "دریافت نسخهٔ الکترونیک",
+                                contentDescription = stringResource(Res.string.prescription_download_cd),
                                 onClick = { showing = PdfExport.PRESCRIPTION },
                             )
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
-                                contentDescription = "دریافت جواب آزمایش",
+                                contentDescription = stringResource(Res.string.prescription_lab_result_cd),
                                 onClick = { showing = PdfExport.LAB_RESULT },
                             )
                         }
@@ -194,20 +206,24 @@ fun RecordDetailContent(
                     )
 
                     state.prescriptionDetailList.isEmpty() ->
-                        TaminEmptyState(message = "برای این نسخه قلمی ثبت نشده است.")
+                        TaminEmptyState(message = stringResource(Res.string.prescription_empty))
 
                     else -> Column(
                         modifier = Modifier.padding(Spacing.page),
                         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
                     ) {
                         RecordSummaryCard(
-                            metaLabel = "پزشک",
-                            metaValue = if (docName.isBlank()) UNKNOWN_VALUE else "دکتر $docName",
+                            metaLabel = stringResource(Res.string.detail_doctor),
+                            metaValue = if (docName.isBlank()) {
+            UNKNOWN_VALUE
+        } else {
+            stringResource(Res.string.records_doctor_named, docName)
+        },
                             trackingCode = trackingCode.ifBlank { UNKNOWN_VALUE }.toPersianDigits(),
                             date = prescDate.ifBlank { UNKNOWN_VALUE }.toJalaliDateLabel(),
                         )
 
-                        SectionLabel(text = "اقلام دارویی")
+                        SectionLabel(text = stringResource(Res.string.prescription_items))
                         state.prescriptionDetailList.forEach { item ->
                             PrescriptionItemCard(
                                 name = item.serviceName,
@@ -232,11 +248,11 @@ fun RecordDetailContent(
             price?.let {
                 CostTotalsBar(
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    insuredShareLabel = "سهم شما",
+                    insuredShareLabel = stringResource(Res.string.share_yours),
                     insuredShareAmount = it.headSsoPayment.toPriceFormat(),
-                    organizationShareLabel = "سهم سازمان",
+                    organizationShareLabel = stringResource(Res.string.share_organization),
                     organizationShareAmount = it.headInsuPayment.toPriceFormat(),
-                    totalLabel = "جمع کل",
+                    totalLabel = stringResource(Res.string.amount_total),
                     totalAmount = it.requestPrice.toPriceFormat(),
                 )
             }

@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.model
 
-import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentPR
 
 /**
@@ -9,7 +8,6 @@ import com.tamin.taminhamrah.model.treatment.DeservedTreatmentPR
  * This is the decision only — how it is colored, worded and badged is the screen's
  * business. Keeping the rule free of Compose is what makes it testable.
  */
-@Immutable
 sealed interface CoverageStatus {
 
     /** The entitlement check has not come back yet. */

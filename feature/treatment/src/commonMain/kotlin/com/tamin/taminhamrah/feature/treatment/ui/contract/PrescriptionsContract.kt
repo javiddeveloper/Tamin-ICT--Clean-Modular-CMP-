@@ -3,6 +3,10 @@ package com.tamin.taminhamrah.feature.treatment.ui.contract
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 
 /** Immutable by construction: the reducer only ever `copy`s, and no collection here is mutated. */
 @Immutable
@@ -11,7 +15,7 @@ data class PrescriptionsUiState(
     val error: String? = null,
     val prescriptionList: List<ElectronicPrescriptionPR> = emptyList(),
     val prescriptionDetailList: List<ElectronicPrescriptionDetailPR> = emptyList(),
-    val prescriptionPriceList: List<ElectronicPrescriptionPricePR> = emptyList(),
+    val prescriptionPriceList: ImmutableList<ElectronicPrescriptionPricePR> = persistentListOf(),
     /**
      * The fetched PDF waiting to be shown, or null when none has been asked for.
      *
@@ -31,7 +35,7 @@ data class PrescriptionsUiState(
      * [PrescriptionsIntent.LoadRecordPrices]. They feed both the «سهم شما» shown on each list card
      * (`headSsoPayment`) and the advanced search's cost filter.
      */
-    val recordPrices: Map<String, ElectronicPrescriptionPricePR> = emptyMap(),
+    val recordPrices: ImmutableMap<String, ElectronicPrescriptionPricePR> = persistentMapOf(),
     val isLoadingPrices: Boolean = false
 ) {
     sealed class PartialState {

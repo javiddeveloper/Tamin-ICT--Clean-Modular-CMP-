@@ -2,12 +2,9 @@ package com.tamin.taminhamrah.feature.treatment.ui.records
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,12 +17,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.shimmer
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -55,6 +53,9 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.rememberJalaliMonthNames
+import com.tamin.taminhamrah.feature.treatment.ui.model.rememberRecordTabLabels
+import com.tamin.taminhamrah.feature.treatment.ui.model.toCategoryLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliMonthLabel
@@ -79,9 +80,13 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_back
+import taminx.core.core_ui.amount_total
+import taminx.core.core_ui.error_pull_to_retry
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_cross
@@ -90,9 +95,19 @@ import taminx.core.core_ui.ic_tamin_medical_approvals
 import taminx.core.core_ui.ic_tamin_medical_centers
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.patient_dependant_relation
+import taminx.core.core_ui.patient_main_insured_fallback
+import taminx.core.core_ui.records_date_from
+import taminx.core.core_ui.records_date_to
+import taminx.core.core_ui.records_doctor_named
+import taminx.core.core_ui.records_empty_period
+import taminx.core.core_ui.records_empty_search
+import taminx.core.core_ui.records_self
+import taminx.core.core_ui.records_title
+import taminx.core.core_ui.share_insured
+import taminx.core.core_ui.share_organization
 
 /** Shown on the person chip until the patient list arrives. */
-private const val SELF_LABEL = "خودم"
 
 /** Which filter panel is open over the list; only one shows at a time, or none. */
 private enum class RecordFilter { PATIENT, PERIOD }
@@ -101,51 +116,61 @@ private enum class RecordFilter { PATIENT, PERIOD }
 private fun RecordFilter?.toggle(target: RecordFilter): RecordFilter? =
     if (this == target) null else target
 
-/** The period chooser's rows, built once — the presets never change at runtime. */
-private val RecordPeriodOptions: ImmutableList<Pair<RecordPeriod, String>> =
-    RecordPeriod.entries.map { it to it.label }.toImmutableList()
-
 /**
- * The full-width filter chooser that drops below the bar.
+ * The period chooser's rows.
  *
- * Rendered as an overlay in the content with a [Scrim] behind it, so it floats over the list,
- * dismisses on an outside tap, and always lands in the same place regardless of which chip opened
- * it — unlike a menu anchored to one trigger.
+ * Keyed on the resolved labels, so the panel gets the same [ImmutableList] instance on every
+ * recomposition — the presets themselves never change at runtime.
  */
 @Composable
-private fun <T> RecordFilterPanel(
+private fun rememberPeriodOptions(): ImmutableList<Pair<RecordPeriod, String>> {
+    val labels = RecordPeriod.entries.map { stringResource(it.label) }
+    return remember(labels) {
+        RecordPeriod.entries.mapIndexed { index, period -> period to labels[index] }
+            .toImmutableList()
+    }
+}
+
+/**
+ * The chooser behind a filter chip.
+ *
+ * Material's own menu rather than a panel of our own: it anchors to the chip that opened it,
+ * animates out of that anchor, and brings the platform's outside-tap and back handling with it.
+ */
+@Composable
+private fun <T> RecordFilterMenu(
+    expanded: Boolean,
     options: ImmutableList<Pair<T, String>>,
     isSelected: (T) -> Boolean,
+    onDismiss: () -> Unit,
     onSelect: (T) -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.page, vertical = Spacing.sm),
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        // The menu keeps the card surface the panel had: menu defaults are a tighter radius and
+        // a tonal fill, which read as a system menu dropped onto the screen rather than as ours.
         shape = RoundedCornerShape(CornerRadius.card),
-        color = colors.bgSurface,
+        containerColor = colors.bgSurface,
         border = BorderStroke(1.dp, colors.border),
         shadowElevation = Elevation.md,
     ) {
-        Column {
-            options.forEach { (value, label) ->
-                val selected = isSelected(value)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(value) }
-                        .background(if (selected) colors.greenBg else colors.bgSurface)
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
+        options.forEach { (value, label) ->
+            val selected = isSelected(value)
+            DropdownMenuItem(
+                modifier = if (selected) Modifier.background(colors.greenBg) else Modifier,
+                text = {
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (selected) colors.teal else colors.textPrimary,
                     )
-                    if (selected) {
+                },
+                trailingIcon = if (!selected) {
+                    null
+                } else {
+                    {
                         Icon(
                             imageVector = vectorResource(Res.drawable.ic_tamin_check),
                             contentDescription = null,
@@ -153,29 +178,17 @@ private fun <T> RecordFilterPanel(
                             modifier = Modifier.size(IconSize.small),
                         )
                     }
-                }
-            }
+                },
+                onClick = { onSelect(value) },
+            )
         }
     }
 }
 
-/** A transparent full-size catch layer: a tap anywhere behind the panel closes it. */
-@Composable
-private fun Scrim(onDismiss: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onDismiss,
-            ),
-    )
-}
-
 /** The date trigger reads back the chosen custom range instead of the bare "تاریخ دلخواه". */
+@Composable
 private fun periodLabel(period: RecordPeriod, customRange: Pair<String, String>?): String {
-    if (period != RecordPeriod.CUSTOM || customRange == null) return period.label
+    if (period != RecordPeriod.CUSTOM || customRange == null) return stringResource(period.label)
     val from = PersianDateFormatter.formatTimestamp(customRange.first.toLongOrNull())
     val to = PersianDateFormatter.formatTimestamp(customRange.second.toLongOrNull())
     return "$from - $to"
@@ -208,7 +221,7 @@ private fun RecordsErrorState(message: String) {
             textAlign = TextAlign.Center,
         )
         Text(
-            text = "برای تلاش دوباره، صفحه را به پایین بکشید.",
+            text = stringResource(Res.string.error_pull_to_retry),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
             textAlign = TextAlign.Center,
@@ -261,12 +274,19 @@ fun MedicalRecordsScreen(
     }
     // Keyed on the data the list is built from, not the whole state: a selection or a cost total
     // arriving must not rebuild it and invalidate everything the patient chip feeds.
+    // Resolved here because toPatientList runs inside the remember below, where composition —
+    // and so a resource lookup — is not available.
+    val mainInsuredFallback = stringResource(Res.string.patient_main_insured_fallback)
+    val dependantRelation = stringResource(Res.string.patient_dependant_relation)
+
     val patients = remember(
         treatmentState.mainUserNationalCode,
         treatmentState.deservedList,
         treatmentState.dependantList,
+        mainInsuredFallback,
+        dependantRelation,
     ) {
-        treatmentState.toPatientList()
+        treatmentState.toPatientList(mainInsuredFallback, dependantRelation)
     }
 
     // A shortcut opens this with no code; fall back to whoever the dashboard has selected.
@@ -376,13 +396,17 @@ fun MedicalRecordsContent(
 
     val currentPatient = patients.firstOrNull { it.nationalId == selectedPatient }
 
+    // Resolved once, up here, because the blocks below read them from inside a remember.
+    val selfLabel = stringResource(Res.string.records_self)
+    val monthNames = rememberJalaliMonthNames()
+
     // The search runs over the whole list, so it is done once per input change rather than on
     // every recomposition — and once, not twice, since the empty check reads the same result.
     val visibleRecords = remember(state.prescriptionList, searchCriteria, state.recordPrices) {
         state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) }
     }
-    val recordGroups = remember(visibleRecords) {
-        visibleRecords.groupBy { it.prescDate.toJalaliMonthLabel() }
+    val recordGroups = remember(visibleRecords, monthNames) {
+        visibleRecords.groupBy { it.prescDate.toJalaliMonthLabel(monthNames) }
     }
 
     if (showSearchSheet) {
@@ -398,7 +422,7 @@ fun MedicalRecordsContent(
 
     if (pickingRangeStart) {
         TaminJalaliDatePicker(
-            title = "از تاریخ",
+            title = stringResource(Res.string.records_date_from),
             onDismiss = { pickingRangeStart = false },
             onConfirm = { y, m, d ->
                 rangeStart = PersianDateFormatter.toEpochMillis(y, m, d).toString()
@@ -411,7 +435,7 @@ fun MedicalRecordsContent(
     // with only one end of the range, so both are required before the query runs.
     rangeStart?.let { start ->
         TaminJalaliDatePicker(
-            title = "تا تاریخ",
+            title = stringResource(Res.string.records_date_to),
             onDismiss = { rangeStart = null },
             onConfirm = { y, m, d ->
                 onCustomRangePicked(start, PersianDateFormatter.toEpochMillis(y, m, d).toString())
@@ -426,18 +450,18 @@ fun MedicalRecordsContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TaminTopAppBar(
-                title = "سوابق درمانی",
+                title = stringResource(Res.string.records_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = "بازگشت",
+                        contentDescription = stringResource(Res.string.action_back),
                         onClick = onBack,
                     )
                 },
             ) {
                 TimelineFilterBar(
                     // Never blank: the insured person is the default until the list arrives.
-                    personLabel = currentPatient?.filterLabel ?: SELF_LABEL,
+                    personLabel = currentPatient?.filterLabel(selfLabel) ?: selfLabel,
                     dateLabel = periodLabel(selectedPeriod, customRange),
                     dropdownIcon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     searchIcon = vectorResource(Res.drawable.ic_tamin_search),
@@ -446,10 +470,45 @@ fun MedicalRecordsContent(
                     onSearchClick = { showSearchSheet = true },
                     personExpanded = openFilter == RecordFilter.PATIENT,
                     dateExpanded = openFilter == RecordFilter.PERIOD,
+                    personMenu = {
+                        RecordFilterMenu(
+                            expanded = openFilter == RecordFilter.PATIENT,
+                            options = remember(patients, selectedPatient, selfLabel) {
+                                patients
+                                    .map { it.nationalId to it.filterLabel(selfLabel) }
+                                    .ifEmpty { listOf(selectedPatient to selfLabel) }
+                                    .toImmutableList()
+                            },
+                            isSelected = { it == selectedPatient },
+                            onDismiss = { openFilter = null },
+                            onSelect = {
+                                onPatientSelected(it)
+                                openFilter = null
+                            },
+                        )
+                    },
+                    dateMenu = {
+                        RecordFilterMenu(
+                            expanded = openFilter == RecordFilter.PERIOD,
+                            options = rememberPeriodOptions(),
+                            isSelected = { it == selectedPeriod },
+                            onDismiss = { openFilter = null },
+                            onSelect = { period ->
+                                openFilter = null
+                                if (period == RecordPeriod.CUSTOM) pickingRangeStart = true
+                                else onPeriodSelected(period)
+                            },
+                        )
+                    },
                 )
             }
         },
-        bottomBar = { RecordsTotals(prices = state.prescriptionPriceList) },
+        bottomBar = {
+            RecordsTotals(
+                prices = state.prescriptionPriceList,
+                isLoading = state.isLoading,
+            )
+        },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         PullToRefreshBox(
@@ -462,9 +521,9 @@ fun MedicalRecordsContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item(key = "categories") {
                 TreatmentFilterChipRow(
-                    // Resolved once on the enum, not mapped here: a fresh list per recomposition
+                    // A remember-keyed factory, not a map here: a fresh list per recomposition
                     // is a changed argument, and the row would redraw on every list update.
-                    categories = RecordTab.chipLabels,
+                    categories = rememberRecordTabLabels(),
                     selectedIndex = RecordTab.chips.indexOf(selectedTab).coerceAtLeast(0),
                     onSelect = { onTabSelected(RecordTab.chips[it]) },
                 )
@@ -481,9 +540,9 @@ fun MedicalRecordsContent(
                 visibleRecords.isEmpty() -> item {
                     TaminEmptyState(
                         message = if (searchCriteria.nameQuery.isNotBlank()) {
-                            "موردی با «${searchCriteria.nameQuery}» یافت نشد."
+                            stringResource(Res.string.records_empty_search, searchCriteria.nameQuery)
                         } else {
-                            "در بازهٔ انتخاب‌شده، سابقهٔ «${selectedTab.label}» ثبت نشده است."
+                            stringResource(Res.string.records_empty_period, stringResource(selectedTab.label))
                         },
                     )
                 }
@@ -491,42 +550,13 @@ fun MedicalRecordsContent(
                 else -> recordTimeline(
                     groups = recordGroups,
                     prices = state.recordPrices,
+                    isLoadingPrices = state.isLoadingPrices,
                     onRecordSelected = onRecordSelected,
                 )
             }
         }
         }
 
-        // Both filters share one full-width panel that drops below the bar, so neither can anchor
-        // to the wrong chip. A tap on the scrim behind it dismisses.
-        openFilter?.let { filter ->
-            Scrim(onDismiss = { openFilter = null })
-            when (filter) {
-                RecordFilter.PATIENT -> RecordFilterPanel(
-                    options = remember(patients, selectedPatient) {
-                        patients
-                            .map { it.nationalId to it.filterLabel }
-                            .ifEmpty { listOf(selectedPatient to SELF_LABEL) }
-                            .toImmutableList()
-                    },
-                    isSelected = { it == selectedPatient },
-                    onSelect = {
-                        onPatientSelected(it)
-                        openFilter = null
-                    },
-                )
-
-                RecordFilter.PERIOD -> RecordFilterPanel(
-                    options = RecordPeriodOptions,
-                    isSelected = { it == selectedPeriod },
-                    onSelect = { period ->
-                        openFilter = null
-                        if (period == RecordPeriod.CUSTOM) pickingRangeStart = true
-                        else onPeriodSelected(period)
-                    },
-                )
-            }
-        }
         }
     }
 }
@@ -535,6 +565,7 @@ fun MedicalRecordsContent(
 private fun LazyListScope.recordTimeline(
     groups: Map<String, List<ElectronicPrescriptionPR>>,
     prices: Map<String, ElectronicPrescriptionPricePR>,
+    isLoadingPrices: Boolean,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
 ) {
     groups.forEach { (monthLabel, monthRecords) ->
@@ -545,14 +576,24 @@ private fun LazyListScope.recordTimeline(
         itemsIndexed(monthRecords) { index, record ->
             val accent = recordAccent(record.prescType)
             MedicalRecordCard(
-                category = record.prescType.toCategoryLabel(),
+                // An id neither a tab nor the extra labels know shows as-is, rather than blank.
+                category = record.prescType.toCategoryLabel()
+                    ?.let { stringResource(it) }
+                    ?: record.prescType,
                 date = record.prescDate.toJalaliDateLabel(),
-                title = "دکتر ${record.docName}",
+                title = stringResource(Res.string.records_doctor_named, record.docName),
                 subtitle = record.location.ifBlank { record.specDesc },
                 // The list endpoint carries no amount, so «سهم شما» comes from the per-record
                 // price lookup; it reads as unknown until that arrives. Old app: the insured's
                 // share is headSsoPayment (headInsuPayment is the organization's share).
-                shareAmount = prices[record.noteHeadEprescID]?.headSsoPayment?.toLongOrNull()?.toPriceFormat() ?: UNKNOWN_AMOUNT,
+                // The list endpoint carries no amount, so the share comes from the per-record
+                // price lookup. It shimmers only while that lookup is out; once it is back, a
+                // record with no price shows the absent marker rather than shimmering forever.
+                shareAmount = prices[record.noteHeadEprescID]
+                    ?.headSsoPayment
+                    ?.toLongOrNull()
+                    ?.toPriceFormat()
+                    ?: UNKNOWN_AMOUNT.takeIf { !isLoadingPrices },
                 accentColor = accent.content,
                 accentContainerColor = accent.container,
                 categoryIcon = accent.icon,
@@ -570,15 +611,21 @@ private fun LazyListScope.recordTimeline(
 
 /** Totals pinned under the list; hidden until a price lookup has returned. */
 @Composable
-private fun RecordsTotals(prices: List<ElectronicPrescriptionPricePR>) {
-    if (prices.isEmpty()) return
+private fun RecordsTotals(
+    prices: ImmutableList<ElectronicPrescriptionPricePR>,
+    isLoading: Boolean,
+) {
+    // Nothing to total and nothing on its way: the bar stays away rather than showing three
+    // dashes. While the request is out it shows itself shimmering, so the bar does not pop in.
+    if (prices.isEmpty() && !isLoading) return
+    val pending = prices.isEmpty()
     CostTotalsBar(
-        insuredShareLabel = "سهم بیمه‌شده",
-        insuredShareAmount = prices.totalOf { it.headSsoPayment },
-        organizationShareLabel = "سهم سازمان",
-        organizationShareAmount = prices.totalOf { it.headInsuPayment },
-        totalLabel = "جمع کل",
-        totalAmount = prices.totalOf { it.requestPrice },
+        insuredShareLabel = stringResource(Res.string.share_insured),
+        insuredShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
+        organizationShareLabel = stringResource(Res.string.share_organization),
+        organizationShareAmount = prices.totalOf { it.headInsuPayment }.takeUnless { pending },
+        totalLabel = stringResource(Res.string.amount_total),
+        totalAmount = prices.totalOf { it.requestPrice }.takeUnless { pending },
     )
 }
 
@@ -643,7 +690,10 @@ fun MedicalRecordsPreview() {
     PreviewRtlThemeContent {
         MedicalRecordsContent(
             state = TreatmentMocks.prescriptionsUiState,
-            patients = TreatmentMocks.mainUiState.toPatientList(),
+            patients = TreatmentMocks.mainUiState.toPatientList(
+                mainInsuredFallback = stringResource(Res.string.patient_main_insured_fallback),
+                dependantRelation = stringResource(Res.string.patient_dependant_relation),
+            ),
             selectedPatient = "1234567890",
             selectedPeriod = RecordPeriod.LAST_SIX_MONTHS,
             customRange = null,
@@ -661,8 +711,3 @@ fun MedicalRecordsPreview() {
     }
 }
 
-/** Turns the endpoint's numeric category into its Persian name; unknown ids show as-is. */
-private fun String.toCategoryLabel(): String =
-    RecordTab.entries.firstOrNull { it != RecordTab.ALL && this in it.requestTypeIds }?.label
-        ?: RecordTab.labelForTypeId(this)
-        ?: this

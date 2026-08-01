@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -118,6 +119,39 @@ internal class TreatmentRemoteDataSourceImpl(
                 patientID ?: "", noteHeadEprescID ?: "", currentUserNationalCode ?: ""
             )
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.readPdfChannel()))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getTreatmentCosts(params: Map<String, String>): ListData<TreatmentCostDTO>? {
+        return try {
+            val response = apiService.getTreatmentCosts(params)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getTreatmentCostsPDF(repId: String): PdfDownloadDTO {
+        return try {
+            // Drained through readPdfChannel like every other PDF here: the raw response body is a
+            // single-use stream that is already closed by the time a caller reads it.
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = apiService.getTreatmentCostsPDF(repId).readPdfChannel()))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun sendToInboxTreatmentCosts(repId: String): String {
+        return try {
+            apiService.sendToInboxTreatmentCosts(repId).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

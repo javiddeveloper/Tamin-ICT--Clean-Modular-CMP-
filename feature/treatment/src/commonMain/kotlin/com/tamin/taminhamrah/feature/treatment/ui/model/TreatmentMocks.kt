@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.model.treatment.*
+import kotlinx.collections.immutable.persistentListOf
 
 object TreatmentMocks {
     val patientMain = PatientItem(
@@ -38,6 +39,36 @@ object TreatmentMocks {
         message = "مشمول حمایت درمانی",
         illness = "",
         trackingCode = ""
+    )
+
+    val treatmentCost = TreatmentCostPR(
+        repId = "1",
+        nameFamil = "رضا احمدی",
+        healthcenterName = "داروخانه شبانه‌روزی مرکزی",
+        payPrice = "850000",
+        payStatusDesc = "پرداخت شده",
+        estimatePayDate = "1402/06/30",
+        rahgiriCode = "REF-98765",
+        serviceDate = "1402/04/20",
+        statusDesc = "نهایی",
+        accountNumber = "0100000000",
+        bimeCode = "12345678",
+        datePaz = "1402/04/20",
+        famil = "احمدی",
+        mainNational = "1234567890",
+        maliCode = "M1",
+        name = "رضا",
+        nameAsli = "رضا",
+        noPazir = "NP1",
+        payNatCode = "1234567890",
+        payOtherService = "0",
+        payService = "850000",
+        payStatus = "4",
+        payType = "1",
+        province = "تهران",
+        releaseDate = "1402/04/21",
+        status = "7",
+        returnReason = ""
     )
 
     val prescription = ElectronicPrescriptionPR(
@@ -98,9 +129,16 @@ object TreatmentMocks {
         healthProfileCompleted = true
     )
 
+    val costsUiState = CostsUiState(
+        treatmentCostList = listOf(
+            treatmentCost,
+            treatmentCost.copy(healthcenterName = "آزمایشگاه نیلو", payPrice = "1200000"),
+        )
+    )
+
     val prescriptionsUiState = PrescriptionsUiState(
         prescriptionList = listOf(prescription, prescription.copy(trackingCode = "TRK654321", docName = "مریم رضایی")),
         prescriptionDetailList = listOf(prescriptionDetail, prescriptionDetail.copy(serviceName = "کپسول آموکسی‌سیلین")),
-        prescriptionPriceList = listOf(prescriptionPrice)
+        prescriptionPriceList = persistentListOf(prescriptionPrice)
     )
 }

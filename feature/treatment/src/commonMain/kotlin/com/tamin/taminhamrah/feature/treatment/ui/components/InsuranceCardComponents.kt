@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,29 +31,23 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
-import com.tamin.taminhamrah.ui.components.AutoResizeText
-import com.tamin.taminhamrah.ui.components.IconTile
+import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
-import com.tamin.taminhamrah.ui.components.startToEndGradient
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
@@ -70,21 +64,31 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
-import com.tamin.taminhamrah.ui.theme.TaminTeal500
-import com.tamin.taminhamrah.ui.theme.TaminTeal900
+import com.tamin.taminhamrah.ui.theme.TaminRed
+import com.tamin.taminhamrah.ui.theme.TaminRedDark
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.card_national_code
+import taminx.core.core_ui.card_org_name
+import taminx.core.core_ui.card_subtitle
+import taminx.core.core_ui.coverage_covered
+import taminx.core.core_ui.coverage_pending
+import taminx.core.core_ui.coverage_reason_action
+import taminx.core.core_ui.coverage_rejected
 import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_ejtemaei_logo
+import taminx.core.core_ui.ic_tamin_verified
 
 /**
- * Components for the treatment hub landing screen: the quick-access and navigation cards, the
- * service category grid and the yearly cost summary. The insured-person card, its morph and its
- * carousel live in InsuranceCardComponents.kt.
+ * The electronic health-insurance card and everything that dresses one: its gradient identity,
+ * the expanded → collapsed morph, the coverage badge and footer, and the snapping carousel that
+ * pages between insured people.
  *
- * None of these depend on a domain model — they take display strings and lambdas, so
- * they stay decoupled from whatever shape the treatment entities settle on.
+ * Kept apart from the hub's sections so that the card's layout maths lives beside the card rather
+ * than among the screen's stacked blocks.
  */
 
 /** The main insured person's card: teal fading into brand blue. */
@@ -115,10 +119,6 @@ fun insuranceCardGradient(isDependent: Boolean, dependantOrdinal: Int = 0): Brus
     }
     return Brush.linearGradient(stops)
 }
-
-/** The prominent teal gradient behind the "سوابق درمانی من" quick-access card. */
-@Composable
-fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
 
 /**
  * The electronic health-insurance card for one insured person: organization branding,
@@ -161,10 +161,14 @@ fun InsuranceCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .layoutId(CardSlot.Name)
-                        .shrinkOnCollapse(collapseProgress, NameCollapsedScale, rtl),
+                        .shrinkOnCollapse(
+                            progress = collapseProgress,
+                            minScale = TreatmentDimens.cardNameCollapsedScale,
+                            rtl = rtl,
+                        ),
                 )
                 Text(
-                    text = "کد ملی",
+                    text = stringResource(Res.string.card_national_code),
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.White.copy(alpha = 0.75f),
                     modifier = Modifier
@@ -181,7 +185,10 @@ fun InsuranceCard(
                 Box(Modifier.layoutId(CardSlot.Badge)) { coverageBadge?.invoke() }
                 InsuranceCardFooter(
                     coverageLabel = coverageLabel,
-                    badge = coverageBadge,
+                    // Only the traveling slot above ever draws the tick. The footer just reserves
+                    // its width so the label keeps its place — drawing it here as well would show
+                    // two ticks the moment the fold starts, one gliding up and one fading out.
+                    badge = coverageBadge?.let { { Spacer(Modifier.size(TreatmentDimens.coverageBadgeSize)) } },
                     action = footerAction,
                     modifier = Modifier
                         .layoutId(CardSlot.Footer)
@@ -218,10 +225,11 @@ fun InsuranceCard(
             val nameColStart = pad + badge.width + sm
             val nameColTop = (barH - name.height) / 2
             // The name shrinks in the bar, so the code sits just past its scaled width.
-            val numberColStart = nameColStart + (name.width * NameCollapsedScale).toInt() + sm
+            val numberColStart =
+                nameColStart + (name.width * TreatmentDimens.cardNameCollapsedScale).toInt() + sm
             val numberColTop = (barH - number.height) / 2
 
-            val t = CardCollapseEasing.transform(collapseProgress())
+            val t = Easing.standard.transform(collapseProgress())
 
             layout(width, lerp(expandedH, barH, t)) {
                 // Fading pieces stay at their expanded spots (and clip as the card shrinks).
@@ -241,11 +249,6 @@ fun InsuranceCard(
 private enum class CardSlot { Brand, Name, CodeLabel, Code, Badge, Footer }
 
 private fun List<Measurable>.slot(id: CardSlot): Measurable = first { it.layoutId == id }
-
-private val CardCollapseEasing = FastOutSlowInEasing
-
-/** How far the holder name shrinks by the time the card is a compact bar. */
-private const val NameCollapsedScale = 0.88f
 
 /**
  * The small round glyph beside the coverage line — a tick when treatment support is
@@ -272,7 +275,6 @@ fun CoverageBadge(
         )
     }
 }
-
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
@@ -314,12 +316,12 @@ private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "سازمان تامین اجتماعی",
+                text = stringResource(Res.string.card_org_name),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
             )
             Text(
-                text = "کارت الکترونیک بیمهٔ درمان",
+                text = stringResource(Res.string.card_subtitle),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.75f),
             )
@@ -339,7 +341,6 @@ private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
         }
     }
 }
-
 
 @Composable
 private fun InsuranceCardFooter(
@@ -365,6 +366,100 @@ private fun InsuranceCardFooter(
         )
         action?.invoke()
     }
+}
+
+/**
+ * One insured person's card, dressed for their entitlement.
+ *
+ * Takes the resolved pieces rather than the hub's state, so a total loading elsewhere on the
+ * screen leaves the card untouched.
+ */
+@Composable
+internal fun PatientCard(
+    patient: PatientItem,
+    status: CoverageStatus,
+    dependantOrdinal: Int,
+    onShowEntitlementReason: (String) -> Unit,
+    collapseProgress: () -> Float = { 0f },
+) {
+    val style = status.cardStyle(
+        isDependent = patient.isDependent,
+        dependantOrdinal = dependantOrdinal,
+    )
+    InsuranceCard(
+        holderName = patient.fullName,
+        nationalId = patient.nationalId,
+        coverageLabel = style.label,
+        background = style.background,
+        coverageBadge = style.badge,
+        footerAction = (status as? CoverageStatus.Rejected)?.let { rejected ->
+            { EntitlementReasonChip(onClick = { onShowEntitlementReason(rejected.reason) }) }
+        },
+        collapseProgress = collapseProgress,
+    )
+}
+
+/** How a [CoverageStatus] is dressed on the card: wording, gradient and badge. */
+private data class CoverageCardStyle(
+    val label: String,
+    val background: Brush,
+    val badge: (@Composable () -> Unit)?,
+)
+
+/**
+ * Covered is the only state that shows the person's own card identity — pending and
+ * rejected deliberately override it so status stays readable at a glance.
+ */
+@Composable
+private fun CoverageStatus.cardStyle(
+    isDependent: Boolean,
+    dependantOrdinal: Int,
+): CoverageCardStyle {
+    val colors = LocalTaminColors.current
+    return when (this) {
+        CoverageStatus.Pending -> CoverageCardStyle(
+            label = stringResource(Res.string.coverage_pending),
+            background = Brush.verticalGradient(listOf(colors.textMuted, colors.chevron)),
+            badge = null,
+        )
+
+        is CoverageStatus.Rejected -> CoverageCardStyle(
+            label = stringResource(Res.string.coverage_rejected),
+            background = Brush.verticalGradient(listOf(TaminRedDark, TaminRed)),
+            badge = {
+                CoverageBadge(
+                    icon = vectorResource(Res.drawable.ic_tamin_cross),
+                    containerColor = Color.White,
+                    contentColor = TaminRedDark,
+                )
+            },
+        )
+
+        CoverageStatus.Covered -> CoverageCardStyle(
+            label = stringResource(Res.string.coverage_covered),
+            background = insuranceCardGradient(isDependent, dependantOrdinal),
+            badge = {
+                CoverageBadge(
+                    icon = vectorResource(Res.drawable.ic_tamin_verified),
+                    containerColor = TaminCoverageBadgeBg,
+                    contentColor = TaminCoverageBadgeFg,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun EntitlementReasonChip(onClick: () -> Unit) {
+    Text(
+        text = stringResource(Res.string.coverage_reason_action),
+        style = MaterialTheme.typography.labelMedium,
+        color = Color.White,
+        modifier = Modifier
+            .background(Color.White.copy(alpha = 0.22f), CircleShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+    )
 }
 
 /**
@@ -439,104 +534,17 @@ private fun PageIndicator(
             Box(
                 modifier = Modifier
                     .size(
-                        width = if (isSelected) SelectedDotWidth else DotSize,
-                        height = DotSize,
+                        width = if (isSelected) {
+                            TreatmentDimens.pageIndicatorSelectedWidth
+                        } else {
+                            TreatmentDimens.pageIndicatorDotSize
+                        },
+                        height = TreatmentDimens.pageIndicatorDotSize,
                     )
                     .background(
                         color = if (isSelected) colors.teal else colors.chevron,
                         shape = CircleShape,
                     ),
-            )
-        }
-    }
-}
-
-private val DotSize = 6.dp
-private val SelectedDotWidth = 16.dp
-
-/**
- * One square tile in the hub's three-up service grid — electronic prescriptions,
- * medical confirmations, miscellaneous claims.
- */
-@Composable
-fun CategoryTile(
-    label: String,
-    icon: ImageVector,
-    iconTint: Color,
-    iconBackground: Brush,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    Column(
-        modifier = modifier
-            .taminSurface(CornerRadius.cardCompact)
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.sm, vertical = Spacing.lg),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        IconTile(
-            icon = icon,
-            tint = iconTint,
-            background = iconBackground,
-            size = TreatmentDimens.categoryTileIconSize,
-            cornerRadius = CornerRadius.lg,
-        )
-        AutoResizeText(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                color = colors.textPrimary,
-                textAlign = TextAlign.Center,
-            ),
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.xxs),
-        )
-    }
-}
-
-/**
- * Yearly spend summary: the insured person's share beside the organization's share.
- */
-@Composable
-fun CostSummaryCard(
-    title: String,
-    insuredShareLabel: String,
-    /** `null` while the year's totals are still loading; the tiles shimmer until they land. */
-    insuredShareAmount: String?,
-    organizationShareLabel: String,
-    organizationShareAmount: String?,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
-            .padding(Spacing.page),
-        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            color = colors.textPrimary,
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            StatTile(
-                label = insuredShareLabel,
-                amount = insuredShareAmount,
-                containerColor = colors.greenBg,
-                contentColor = colors.greenText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = organizationShareLabel,
-                amount = organizationShareAmount,
-                containerColor = colors.blueBg,
-                contentColor = colors.blueText,
-                modifier = Modifier.weight(1f),
             )
         }
     }

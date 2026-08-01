@@ -47,4 +47,15 @@ interface TreatmentRepository {
         noteHeadEprescID: String?,
         currentUserNationalCode: String?
     ): Flow<PdfDownloadDN>
+
+    /**
+     * The «خسارت متفرقه» certificates. Paging and filters are decided in the implementation, as
+     * with every other treatment list — the use case only asks for them.
+     */
+    suspend fun getTreatmentCosts(): Flow<List<TreatmentCostDN>>
+
+    suspend fun getTreatmentCostsPDF(repId: String): Flow<PdfDownloadDN>
+
+    /** Queues the certificate for the person's inbox; emits the service's acknowledgement. */
+    suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String>
 }

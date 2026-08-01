@@ -6,9 +6,10 @@ import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 
 /**
- * Central factory of sample domain models for the treatment dashboard ViewModel tests.
+ * Central factory of sample domain models for the treatment dashboard and costs ViewModel tests.
  *
  * Keeping fixtures in one place (instead of inlined per fake/test) keeps the test
  * doubles small and lets every dashboard test share consistent, realistic data.
@@ -51,6 +52,18 @@ object TreatmentTestData {
         lastName = "Name",
         nationalId = nationalId,
         id = 1L
+    )
+
+    fun treatmentCost() = TreatmentCostDN(
+        accountNumber = "123", bimeCode = "456", datePaz = "14020101",
+        famil = "Doe", healthcenterName = "Hospital", mainNational = "111",
+        maliCode = "222", name = "John", nameAsli = "John", nameFamil = "Doe",
+        noPazir = "789", payNatCode = "333", payOtherService = "0",
+        payPrice = "1000", payService = "service", payStatus = "1",
+        payType = "Type", province = "Tehran", rahgiriCode = "555",
+        releaseDate = "14020102", repId = 1, serviceDate = "14020101",
+        status = "Status", statusDesc = "Description", payStatusDesc = "PayDescription", estimatePayDate = "14020630",
+        returnReason = "None"
     )
 
     fun prescription() = ElectronicPrescriptionDN(
