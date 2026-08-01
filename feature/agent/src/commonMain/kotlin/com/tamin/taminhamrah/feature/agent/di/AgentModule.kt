@@ -5,19 +5,24 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceRegistry
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.audio.createVoicePlayer
 import com.tamin.taminhamrah.feature.agent.audio.createVoiceRecorder
+import com.tamin.taminhamrah.feature.agent.service.impl.AppointmentAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.AverageWageAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.DastmozdInfosAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.DeepLinkAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.DependentsAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.EdictAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.GeneralResponseAgentService
+import com.tamin.taminhamrah.feature.agent.service.impl.IllnessAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.JobHistoryAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.LawAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.MedicalEntitlementAgentService
+import com.tamin.taminhamrah.feature.agent.service.impl.PatientHistoryAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.PayRollAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.PensionInquiryAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.ProfileAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.ShowcaseAgentService
+import com.tamin.taminhamrah.feature.agent.service.impl.TrackingAgentService
+import com.tamin.taminhamrah.feature.agent.service.impl.TreatmentCostAgentService
 import com.tamin.taminhamrah.feature.agent.ui.AgentViewModel
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
@@ -50,23 +55,48 @@ val agentModule = module {
     // 4. Concrete Service Handlers
     // Using bind identifies this handler as an AgentServiceUseCase
     // so it can be found by the getAll call above.
+
+    // ── Wage / History ────────────────────────────────────────────────────────
     singleOf(::DastmozdInfosAgentService) { bind<AgentServiceUseCase>() }
+    singleOf(::AverageWageAgentService)   { bind<AgentServiceUseCase>() }
+    singleOf(::JobHistoryAgentService)    { bind<AgentServiceUseCase>() }
+
+    // ── Pension ───────────────────────────────────────────────────────────────
+    singleOf(::PensionInquiryAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Pay / Payslip ─────────────────────────────────────────────────────────
+    singleOf(::PayRollAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Edict / Decree ────────────────────────────────────────────────────────
+    singleOf(::EdictAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Tracking ──────────────────────────────────────────────────────────────
+    singleOf(::TrackingAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Health / Treatment ────────────────────────────────────────────────────
+    singleOf(::PatientHistoryAgentService) { bind<AgentServiceUseCase>() }
+    singleOf(::TreatmentCostAgentService)  { bind<AgentServiceUseCase>() }
+    singleOf(::MedicalEntitlementAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Illness (placeholder — routes to dedicated screens) ───────────────────
+    singleOf(::IllnessAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Appointment ───────────────────────────────────────────────────────────
+    singleOf(::AppointmentAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Profile / Identity ────────────────────────────────────────────────────
+    singleOf(::ProfileAgentService)   { bind<AgentServiceUseCase>() }
+    singleOf(::DependentsAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Law ───────────────────────────────────────────────────────────────────
     singleOf(::LawAgentService) { bind<AgentServiceUseCase>() }
 
-    // Ported from old_Android's aiAgent use cases. Data-display services only —
-    // the generative-form flows (wedding present, funeral allowance, occurrence
-    // report, education inquiry, dependent cancellation, edit phone/bank) still
-    // need their own handlers and are intentionally not registered yet.
+    // ── General / Misc ────────────────────────────────────────────────────────
     singleOf(::GeneralResponseAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::ProfileAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::DependentsAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::PensionInquiryAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::PayRollAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::EdictAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::MedicalEntitlementAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::JobHistoryAgentService) { bind<AgentServiceUseCase>() }
-    singleOf(::AverageWageAgentService) { bind<AgentServiceUseCase>() }
+
+    // ── Deep Link (form flows & screens not yet in KMP) ───────────────────────
     singleOf(::DeepLinkAgentService) { bind<AgentServiceUseCase>() }
+
     // Demo-only, paired with the showcase fixture; remove with AgentActionKey.SHOWCASE.
     singleOf(::ShowcaseAgentService) { bind<AgentServiceUseCase>() }
 }
