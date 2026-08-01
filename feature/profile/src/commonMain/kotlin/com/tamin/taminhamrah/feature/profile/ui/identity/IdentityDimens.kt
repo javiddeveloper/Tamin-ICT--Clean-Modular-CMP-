@@ -24,16 +24,16 @@ internal object IdentityDimens {
 
     /**
      * Trims the whole card below the artboard's proportions.
-     *
-     * Separate from [designCardWidth], which records the width the design was drawn at and should
-     * keep saying so: this is the deliberate "render it a little smaller than drawn" decision.
      */
-    const val cardScale = 0.9f
+    const val cardScale = 0.92f
 
     // The card, expanded and folded.
-    val cardExpandedHeight = 276.dp
+    val cardExpandedHeight = 236.dp
     val cardCollapsedHeight = 64.dp
     val cardCorner = 22.dp
+
+    /** The large rounded bottom of the hero header. */
+    val headerCorner = 40.dp
 
     /** The card's own inset. Everything on its face lines up to this. */
     val cardPadding = 20.dp
@@ -49,48 +49,30 @@ internal object IdentityDimens {
 
     /**
      * Clear air between the app bar's title row and the top of the card.
-     *
-     * The app bar reserves [cardOverlap] + this below its content and the card then rides
-     * [cardOverlap] of it back, so what is left is the gap. Reserving only the overlap would
-     * cancel out and leave the card sitting on the title.
      */
     val cardHeaderGap = 24.dp
 
     // Slot offsets inside the expanded card, measured from its top.
-    val brandTop = 19.dp
-    val chipTop = 20.dp
-    val avatarTop = 66.dp
-    val ssnCaptionTop = 145.dp
-    val ssnNumberTop = 167.dp
-    val footerRuleTop = 207.dp
-    val footerCaptionTop = 223.dp
-    val footerValueTop = 243.dp
+    val topInfoTop = 20.dp
+    val avatarTop = 20.dp
+    val footerRuleTop = 154.dp
+    val footerTop = 168.dp
 
-    // The holder's photo — taller than it is wide, as a portrait should be.
-    val avatarWidth = 48.dp
-    val avatarHeight = 58.dp
-    val avatarCorner = 12.dp
-    val avatarCollapsedHeight = 34.dp
+    // The holder's photo.
+    val avatarWidth = 72.dp
+    val avatarHeight = 80.dp
+    val avatarCorner = 14.dp
+    val avatarCollapsedHeight = 36.dp
 
     /** Air between the photo and the name beside it. */
-    val avatarNameGap = 8.dp
+    val avatarNameGap = 12.dp
 
-    // The card's chrome.
-    val chipWidth = 35.dp
-    val chipHeight = 26.dp
-    val chipCorner = 6.dp
-    val brandTileSize = 29.dp
-    val brandTileCorner = 9.dp
-    val brandIconSize = 18.dp
-    val brandIconPadding = (brandTileSize - brandIconSize) / 2
-    val verifiedIconSize = 12.dp
     val bannerIconSize = 18.dp
 
     /** The card's soft blue drop shadow. */
     val cardShadow = 20.dp
 
-    // The sheen rings: thin arcs of light, not filled blobs. Centers are insets from the
-    // card's edges and radii are absolute, both straight from the design export.
+    // The sheen rings: thin arcs of light.
     val ringNearInset = 35.dp
     val ringNearTop = 21.dp
     val ringFarInset = 39.dp
@@ -102,26 +84,17 @@ internal object IdentityDimens {
     const val ringOuterAlpha = 0.09f
     const val ringInnerAlpha = 0.07f
     const val ringFootAlpha = 0.06f
-    const val avatarBorderAlpha = 0.18f
-    const val avatarGlyphAlpha = 0.7f
-    const val brandTileFillAlpha = 0.08f
-    const val brandTileBorderAlpha = 0.17f
-    const val footerRuleAlpha = 0.11f
+    const val avatarBorderAlpha = 0.28f
+    const val AVATAR_GLYPH_ALPHA = 0.85f
+    const val footerRuleAlpha = 0.18f
     const val topEdgeAlpha = 0.16f
 
-    /**
-     * What the folded bar's text measures, as a fraction of the open card's.
-     *
-     * The bar is the only place these are read once the card is closed, so they stay close to
-     * full size — the number in particular has to survive being the card's whole summary.
-     */
     const val ssnCollapsedScale = 0.82f
-
     const val nameCollapsedScale = 0.95f
 
     /**
      * The expanded-only pieces fade this much faster than the fold, so they have cleared well
      * before the bar forms rather than ghosting over it.
      */
-    const val vanishRate = 3f
+    const val VANISH_RATE = 3f
 }

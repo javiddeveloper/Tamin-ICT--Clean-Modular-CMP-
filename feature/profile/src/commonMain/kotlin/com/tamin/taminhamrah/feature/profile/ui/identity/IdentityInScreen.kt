@@ -195,6 +195,7 @@ private fun IdentityHeader(
             title = stringResource(Res.string.identity_title),
             centerTitle = true,
             background = taminTopAppBarGradient(LocalTaminColors.current.profileGradientStops),
+            cornerRadius = IdentityDimens.headerCorner,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -216,10 +217,10 @@ private fun IdentityHeader(
                     ),
             ) {
                 IdentityCard(
+                    firstName = info.firstName,
+                    lastName = info.lastName,
                     fullName = info.fullName,
                     fatherName = info.fatherName,
-                    gender = gender,
-                    nationality = nationality,
                     ssn = info.ssn,
                     nationalId = info.nationalId,
                     dateOfBirth = info.dateOfBirthFormatted,

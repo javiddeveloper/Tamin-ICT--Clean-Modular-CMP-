@@ -67,6 +67,21 @@ fun IdentityInfoPR.toSections(
     email: String?,
 ): ImmutableList<IdentitySection> = persistentListOf(
     IdentitySection(
+        title = Res.string.identity_section_contact,
+        fields = persistentListOf(
+            IdentityField(
+                label = Res.string.identity_field_mobile,
+                value = mobile?.toPersianDigits().orAbsent(absentValue),
+                isAbsent = mobile.isNullOrBlank(),
+            ),
+            IdentityField(
+                label = Res.string.identity_field_email,
+                value = email.orAbsent(absentValue),
+                isAbsent = email.isNullOrBlank(),
+            ),
+        ),
+    ),
+    IdentitySection(
         title = Res.string.identity_section_personal,
         fields = persistentListOf(
             IdentityField(Res.string.identity_field_first_name, firstName.orAbsent(absentValue)),
@@ -106,21 +121,6 @@ fun IdentityInfoPR.toSections(
             ),
             IdentityField(Res.string.identity_field_birth_city, cityOfBirthName.orAbsent(absentValue)),
             IdentityField(Res.string.identity_field_issue_city, cityOfIssueName.orAbsent(absentValue)),
-        ),
-    ),
-    IdentitySection(
-        title = Res.string.identity_section_contact,
-        fields = persistentListOf(
-            IdentityField(
-                label = Res.string.identity_field_mobile,
-                value = mobile?.toPersianDigits().orAbsent(absentValue),
-                isAbsent = mobile.isNullOrBlank(),
-            ),
-            IdentityField(
-                label = Res.string.identity_field_email,
-                value = email.orAbsent(absentValue),
-                isAbsent = email.isNullOrBlank(),
-            ),
         ),
     ),
 ).toImmutableList()

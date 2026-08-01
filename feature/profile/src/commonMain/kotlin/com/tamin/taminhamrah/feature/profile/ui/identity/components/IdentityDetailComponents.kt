@@ -44,17 +44,17 @@ internal fun RegistryVerifiedNotice(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
     ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_check_circle),
-            contentDescription = null,
-            tint = colors.greenText,
-            modifier = Modifier.size(IdentityDimens.bannerIconSize),
-        )
         Text(
             text = stringResource(Res.string.identity_verified_notice),
             style = MaterialTheme.typography.labelSmall,
             color = colors.textMuted,
             textAlign = TextAlign.Center,
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_check_circle),
+            contentDescription = null,
+            tint = colors.greenText,
+            modifier = Modifier.size(IdentityDimens.bannerIconSize),
         )
     }
 }
@@ -85,6 +85,7 @@ private fun IdentitySectionCard(
     Column(modifier = modifier.fillMaxWidth()) {
         SectionLabel(
             text = stringResource(section.title),
+            color = colors.textSecondary,
             modifier = Modifier.padding(bottom = Spacing.sm),
         )
         Column(
