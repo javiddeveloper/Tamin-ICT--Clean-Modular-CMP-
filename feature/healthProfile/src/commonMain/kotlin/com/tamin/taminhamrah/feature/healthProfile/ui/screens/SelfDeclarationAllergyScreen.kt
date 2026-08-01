@@ -1,7 +1,18 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +37,8 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileInte
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.Res
@@ -53,8 +66,9 @@ fun SelfDeclarationAllergyScreen(
     error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
-    val scrollState = rememberScrollState()
+    val toaster = LocalToaster.current
 
+    val scrollState = rememberScrollState()
     var showBottomsheet by remember { mutableStateOf(false) }
 
     val unknownDrugText = stringResource(Res.string.health_allergy_unknows)
@@ -97,7 +111,7 @@ fun SelfDeclarationAllergyScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding())
+                    .padding(top = paddingValues.calculateTopPadding(), bottom = paddingValues.calculateBottomPadding())
                     .background(taminColors.bgPage)
                     .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -157,21 +171,43 @@ fun SelfDeclarationAllergyScreen(
                         )
                     }
                 } else {
-                    state.allergies.forEachIndexed { idx, allergy ->
-                        DynamicItemCard(
-                            title = allergy.drugName,
-                            description = allergy.allergyComments,
-                            onDelete = {
-                                onIntent(
-                                    HealthProfileIntent.UpdateAllergy(
-                                        state.copy(allergies = state.allergies.filterIndexed { i, _ -> i != idx })
-                                    )
+                    state.allergies.forEach { allergy ->
+                        key(allergy.drugId) {
+                            val visibleState = remember {
+                                MutableTransitionState(false).apply { targetState = true }
+                            }
+
+                            AnimatedVisibility(
+                                visibleState = visibleState,
+                                enter = fadeIn(tween(300)) + slideInVertically(
+                                    initialOffsetY = { fullHeight -> fullHeight / 3 }
+                                ),
+                                exit = fadeOut(tween(200)) + shrinkVertically(
+                                    animationSpec = tween(250)
+                                ) + slideOutVertically(
+                                    targetOffsetY = { fullHeight -> -fullHeight / 4 }
+                                ),
+                                modifier = Modifier.animateContentSize()
+                            ) {
+                                DynamicItemCard(
+                                    title = allergy.drugName,
+                                    description = allergy.allergyComments,
+                                    onDelete = { visibleState.targetState = false }
                                 )
                             }
-                        )
+
+                            LaunchedEffect(visibleState.currentState, visibleState.isIdle) {
+                                if (!visibleState.targetState && visibleState.isIdle) {
+                                    onIntent(
+                                        HealthProfileIntent.UpdateAllergy(
+                                            state.copy(allergies = state.allergies.filter { it.drugId != allergy.drugId })
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
     }
@@ -198,21 +234,29 @@ fun SelfDeclarationAllergyScreen(
             onSubmit = { result ->
                 val selectedId = result.selectedItemIds.firstOrNull()
                 if (selectedId != null) {
-                    val drugOption = drugOptions.find { it.id == selectedId }
-                    val allergy = DrugAllergyItemPR(
-                        drugId = selectedId,
-                        drugName = drugOption?.label
-                            ?: unknownDrugText,
-                        allergyComments = result.description?.takeIf { it.isNotBlank() }
-                            ?: noDescriptionText
-                    )
-                    onIntent(
-                        HealthProfileIntent.UpdateAllergy(
-                            state.copy(allergies = state.allergies + allergy)
+                    val alreadyExists = state.allergies.any { it.drugId == selectedId }
+
+                    if (!alreadyExists) {
+                        val drugOption = drugOptions.find { it.id == selectedId }
+                        val allergy = DrugAllergyItemPR(
+                            drugId = selectedId,
+                            drugName = drugOption?.label ?: unknownDrugText,
+                            allergyComments = result.description?.takeIf { it.isNotBlank() }
+                                ?: noDescriptionText
                         )
-                    )
+
+                        onIntent(
+                            HealthProfileIntent.UpdateAllergy(
+                                state.copy(allergies = state.allergies + allergy)
+                            )
+                        )
+                        showBottomsheet = false
+                    } else {
+                        toaster.error("شما قبلا این دارو را اضافه کرده اید.")
+                    }
+                } else {
+                    showBottomsheet = false
                 }
-                showBottomsheet = false
             }
         )
     }

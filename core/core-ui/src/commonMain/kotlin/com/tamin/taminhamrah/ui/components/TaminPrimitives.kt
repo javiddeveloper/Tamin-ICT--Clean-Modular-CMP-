@@ -348,6 +348,11 @@ fun TaminOutlinedButton(
     }
 }
 
+enum class IconPosition {
+    Start,
+    End,
+}
+
 @Composable
 fun TaminFilledButton(
     text: String,
@@ -356,6 +361,7 @@ fun TaminFilledButton(
     enabled: Boolean = true,
     icon: ImageVector? = null,
     painter: Painter? = null,
+    iconPosition: IconPosition = IconPosition.Start,
     shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
     height: Dp = PRIMARY_BUTTON_HEIGHT,
     background: Brush = LocalTaminColors.current.heroGradient,
@@ -365,6 +371,10 @@ fun TaminFilledButton(
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
     val shadowColor = Color(0x47173D7E)
+
+    val showIconBeforeText =
+        (LocalLayoutDirection.current == LayoutDirection.Ltr && iconPosition == IconPosition.Start) ||
+            (LocalLayoutDirection.current == LayoutDirection.Rtl && iconPosition == IconPosition.End)
 
     Row(
         modifier = modifier
@@ -378,12 +388,16 @@ fun TaminFilledButton(
             )
             .clip(shape)
             .background(
-                if (enabled) background else Brush.linearGradient(
-                    listOf(
-                        disabledBackgroundColor,
-                        disabledBackgroundColor
+                if (enabled) {
+                    background
+                } else {
+                    Brush.linearGradient(
+                        listOf(
+                            disabledBackgroundColor,
+                            disabledBackgroundColor,
+                        )
                     )
-                )
+                }
             )
             .clickable(
                 enabled = enabled,
@@ -396,25 +410,46 @@ fun TaminFilledButton(
         ),
     ) {
 
+        if (showIconBeforeText) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (enabled) contentColor else disabledContentColor,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            } else if (painter != null) {
+                Icon(
+                    painter = painter,
+                    contentDescription = null,
+                    tint = if (enabled) contentColor else disabledContentColor,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+        }
+
         Text(
             text = text,
             style = textStyle,
             color = if (enabled) contentColor else disabledContentColor,
         )
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (enabled) contentColor else disabledContentColor,
-                modifier = Modifier.size(IconSize.medium),
-            )
-        } else if (painter != null) {
-            Icon(
-                painter = painter,
-                contentDescription = null,
-                tint = if (enabled) contentColor else disabledContentColor,
-                modifier = Modifier.size(IconSize.medium),
-            )
+
+        if (!showIconBeforeText) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (enabled) contentColor else disabledContentColor,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            } else if (painter != null) {
+                Icon(
+                    painter = painter,
+                    contentDescription = null,
+                    tint = if (enabled) contentColor else disabledContentColor,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
         }
     }
 }
