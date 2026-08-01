@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -97,6 +99,9 @@ internal fun CertificateList(
     onOpenCertificate: (String) -> Unit,
     onSendToInbox: (String) -> Unit,
 ) {
+    // Remembers completed entrance animations across list scrolls to avoid re-triggering entrance animations on already-visible items.
+    val staggerState = rememberStaggeredEntranceState()
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
@@ -115,6 +120,7 @@ internal fun CertificateList(
                     onOpenCertificate = onOpenCertificate,
                     onSendToInbox = onSendToInbox,
                     modifier = Modifier
+                        .staggeredItemEntrance(index = index, key = item.repId, state = staggerState)
                         .padding(horizontal = Spacing.page)
                         .padding(
                             top = if (index == 0) Spacing.md else 0.dp,
