@@ -102,7 +102,7 @@ fun SelfDeclarationReviewScreen(
                 // Identity
                 ReviewSection(
                     title = "مشخصات هویتی",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_identity)
                 ) {
                     IdentityRow(
@@ -119,7 +119,7 @@ fun SelfDeclarationReviewScreen(
                 // Personal
                 ReviewSection(
                     title = "اطلاعات تکمیلی فردی",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PERSONAL)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PERSONAL, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_personal)
                 ) {
                     IdentityRow(
@@ -138,7 +138,7 @@ fun SelfDeclarationReviewScreen(
                 // Contact
                 ReviewSection(
                     title = "تماس و سکونت",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.CONTACT)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.CONTACT, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_contact)
                 ) {
                     IdentityRow(label = "موبایل:", value = selfDecState.contact.mobile)
@@ -151,7 +151,7 @@ fun SelfDeclarationReviewScreen(
                 // Emergency
                 ReviewSection(
                     title = "تماس اضطراری",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.EMERGENCY, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_emergency)
                 ) {
                     IdentityRow(
@@ -171,7 +171,7 @@ fun SelfDeclarationReviewScreen(
                 // Height and Weight
                 ReviewSection(
                     title = "قد و وزن",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.PHYSICAL, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_weight)
                 ) {
                     IdentityRow(
@@ -187,7 +187,7 @@ fun SelfDeclarationReviewScreen(
                 // Blood
                 ReviewSection(
                     title = "گروه خونی",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.BLOOD, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_blood)
                 ) {
                     val group =
@@ -198,7 +198,7 @@ fun SelfDeclarationReviewScreen(
                 // Lifestyle
                 ReviewSection(
                     title = "سبک زندگی",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.LIFESTYLE, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_lifestyle)
                 ) {
                     IdentityRow(
@@ -223,7 +223,7 @@ fun SelfDeclarationReviewScreen(
                 // Health Questions
                 ReviewSection(
                     title = "سوالات سلامت",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.DISEASES, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_health_question)
                 ) {
                     val highRik =
@@ -284,7 +284,7 @@ fun SelfDeclarationReviewScreen(
                 // Family Health
                 ReviewSection(
                     title = "سلامتی خانواده درجه یک",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.FAMILY, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_family)
                 ) {
                     val cancer = illnessGroups.findGroup(
@@ -318,7 +318,7 @@ fun SelfDeclarationReviewScreen(
                 // Allergies
                 ReviewSection(
                     title = "حساسیت‌های دارویی",
-                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY)) },
+                    onEdit = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.ALLERGY, isEditMode = true)) },
                     icon = painterResource(Res.drawable.ic_allergy)
                 ) {
                     val allergyStr = selfDecState.allergy.allergies.joinToString { it.drugName }

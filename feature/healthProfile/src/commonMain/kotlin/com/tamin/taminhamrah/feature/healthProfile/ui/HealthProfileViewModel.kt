@@ -52,9 +52,9 @@ class HealthProfileViewModel(
                     emit(PartialState.Loading(true))
                     val success = submitFullDeclaration()
                     emit(PartialState.Loading(false))
-                    if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
+                    if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS, intent.isEditMode))
                 } else {
-                    emit(PartialState.StepChanged(intent.step))
+                    emit(PartialState.StepChanged(intent.step, intent.isEditMode))
                 }
             }
 
@@ -510,7 +510,10 @@ class HealthProfileViewModel(
         )
 
         is PartialState.StepChanged -> currentState.copy(
-            selfDeclaration = currentState.selfDeclaration.copy(currentStep = partialState.step)
+            selfDeclaration = currentState.selfDeclaration.copy(
+                currentStep = partialState.step,
+                isEditMode = partialState.isEditMode
+            )
         )
 
         is PartialState.IdentityUpdated  -> currentState.copy(selfDeclaration = currentState.selfDeclaration.copy(identity  = partialState.identity))

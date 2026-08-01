@@ -34,6 +34,7 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.LocalIsEditMode
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.util.formatDecimal
@@ -119,13 +120,17 @@ fun HealthProfileMainContent(
     val currentStep = selfDecState.currentStep
     val combinedLoading = state.isLoading || selfDecState.isLoading
 
-    val navigateBack = remember(currentStep, onBackClicked, onIntent) {
+    val navigateBack = remember(currentStep, selfDecState.isEditMode, onBackClicked, onIntent) {
         {
-            val previousStep = currentStep.previousStep()
-            if (previousStep != null) {
-                onIntent(HealthProfileIntent.ChangeStep(previousStep))
+            if (selfDecState.isEditMode) {
+                onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.REVIEW, isEditMode = false))
             } else {
-                onBackClicked()
+                val previousStep = currentStep.previousStep()
+                if (previousStep != null) {
+                    onIntent(HealthProfileIntent.ChangeStep(previousStep))
+                } else {
+                    onBackClicked()
+                }
             }
         }
     }
@@ -139,19 +144,29 @@ fun HealthProfileMainContent(
         return errors[matchingSource] ?: errors[ErrorSource.PATIENT_GENERAL]
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+    val wrappedOnIntent: (HealthProfileIntent) -> Unit = { intent ->
+        if (selfDecState.isEditMode && intent is HealthProfileIntent.ChangeStep) {
+            onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.REVIEW, isEditMode = false))
+        } else {
+            onIntent(intent)
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalIsEditMode provides selfDecState.isEditMode
+    ) {
         ProvideTextStyle(value = MaterialTheme.typography.bodyMedium) {
             when (currentStep) {
                 SelfDeclarationStep.GATE -> {
                     SelfDeclarationGateScreen(
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = onBackClicked
                     )
                 }
 
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -161,7 +176,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.identity,
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -172,7 +187,7 @@ fun HealthProfileMainContent(
                         maritalStatusOptions = state.maritalStatusOptions,
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -190,7 +205,7 @@ fun HealthProfileMainContent(
                         ),
                         isProvincesLoading = state.isProvincesLoading,
                         isCitiesLoading = state.isCitiesLoading,
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -200,7 +215,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.emergency,
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -210,7 +225,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.physical,
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -221,7 +236,7 @@ fun HealthProfileMainContent(
                         bloodGroupOptions = state.bloodGroupOptions,
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.BLOOD_GROUPS),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -237,7 +252,7 @@ fun HealthProfileMainContent(
                             ErrorSource.SMOKING_STATUS,
                             ErrorSource.ACT_FREQUENCIES
                         ),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
@@ -247,7 +262,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.diseases,
                         illnessGroups = state.illnessGroups,
                         isLoading = combinedLoading,
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
                         onBackClicked = navigateBack
                     )
@@ -258,7 +273,7 @@ fun HealthProfileMainContent(
                         state = selfDecState.family,
                         illnessGroups = state.illnessGroups,
                         isLoading = combinedLoading,
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
                         onBackClicked = navigateBack
                     )
@@ -270,7 +285,7 @@ fun HealthProfileMainContent(
                         drugOptions = state.drugOptions,
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.DRUGS),
-                        onIntent = onIntent,
+                        onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack
                     )
                 }
