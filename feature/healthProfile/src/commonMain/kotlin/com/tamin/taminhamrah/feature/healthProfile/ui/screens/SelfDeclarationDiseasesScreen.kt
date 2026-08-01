@@ -23,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.CardsListShimmerSkeleton
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
@@ -195,6 +198,37 @@ fun SelfDeclarationDiseasesScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Edit button chip
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
                         selectedItems.forEach { item ->
                             CustomChip(
                                 text = item.label,
@@ -251,6 +285,37 @@ fun SelfDeclarationDiseasesScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Edit button chip
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
                         selectedItems.forEach { item ->
                             CustomChip(
                                 text = item.label,
@@ -306,6 +371,36 @@ fun SelfDeclarationDiseasesScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
+                                .border(
+                                    1.dp,
+                                    taminColors.blueText.copy(alpha = 0.3f),
+                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    painter = painterResource(Res.drawable.ic_family_edit),
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                TaminText(
+                                    text = "ویرایش",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.blueText
+                                    )
+                                )
+                            }
+                        }
                         selectedItems.forEach { item ->
                             CustomChip(
                                 text = item.label,
