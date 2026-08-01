@@ -407,7 +407,7 @@ class HealthProfileViewModel(
                 val updateLifestyleReq = UpdateSelfDeclarativeRequest(
                     patientID = currentPatientId,
                     objectID = uiState.value.lifestyleInfo?.objectId,
-                    smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else 0,
+                    smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else SmokingStatus.NEVER_CONSUMED.id,
                     smokeDesc = lifestyle.smokingPattern,
                     alcoholUse = if (lifestyle.isDrinking == true) lifestyle.drinkingStatusId else LifeStyleStatus.NEVER.id,
                     alcoholUseDesc = lifestyle.drinkingPattern,
@@ -422,7 +422,7 @@ class HealthProfileViewModel(
                 val addLifestyleReq = AddSelfDeclarativeRequest(
                     natCode = currentPatientNatCode,
                     patientID = currentPatientId,
-                    smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else 0,
+                    smoking = if (lifestyle.isSmoking == true) lifestyle.smokingStatusId else SmokingStatus.NEVER_CONSUMED.id,
                     smokeDesc = lifestyle.smokingPattern,
                     alcoholUse = if (lifestyle.isDrinking == true) lifestyle.drinkingStatusId else LifeStyleStatus.NEVER.id,
                     alcoholUseDesc = lifestyle.drinkingPattern,
@@ -496,7 +496,7 @@ class HealthProfileViewModel(
                 }?.id
                 sd.copy(bloodGroup = sd.bloodGroup.copy(selectedBloodGroupId = unknownId))
             } else sd
-            
+
             currentState.copy(
                 bloodGroupOptions = partialState.options,
                 selfDeclaration = updatedSd,
