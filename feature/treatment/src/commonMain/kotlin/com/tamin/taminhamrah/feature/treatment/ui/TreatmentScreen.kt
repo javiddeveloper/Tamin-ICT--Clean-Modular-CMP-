@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
@@ -42,6 +43,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.PullToRefreshBox
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
@@ -49,13 +51,13 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_confirm
 import taminx.core.core_ui.coverage_reason_dialog_title
 import taminx.core.core_ui.patient_dependant_relation
 import taminx.core.core_ui.patient_main_insured_fallback
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * Treatment hub: the insured person's electronic health-insurance cards, the quick-access
@@ -169,52 +171,75 @@ fun TreatmentContent(
     val headerProgress = remember(collapse) { { collapse.progress } }
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
-    // Hoisted so the section lambdas below capture one string rather than the whole state —
-    // capturing `state` would make them a new instance on every load and defeat skipping.
+    // =================================================================================
+    // MEMOIZED CALLBACK LAMBDAS
+    // Hoisted and wrapped in `remember` so child composables (TreatmentQuickAccess, TreatmentCategories)
+    // receive stable function references and completely skip recomposition when patient cards are swiped.
+    // =================================================================================
     val mainUserNationalCode = state.mainUserNationalCode
+    val currentOnOpenHealthProfile by rememberUpdatedState(onOpenHealthProfile)
+    val currentOnOpenMiscClaims by rememberUpdatedState(onOpenMiscClaims)
+
+    val handleOpenMedicalRecords = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) } }
+    val handleOpenHealthProfile = remember(mainUserNationalCode) {
+        { mainUserNationalCode?.let { currentOnOpenHealthProfile(it) } ?: Unit }
+    }
+    val handleOpenPrescriptions = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) } }
+    val handleOpenMiscClaims = remember { { currentOnOpenMiscClaims() } }
+    val handleShowEntitlementReason = remember { { reason: String -> entitlementReason = reason } }
+    val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
+
+    val density = LocalDensity.current
+    val headerHeightDp = remember(headerHeightPx, density) {
+        with(density) { headerHeightPx.toDp() }
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(LocalTaminColors.current.bgPage),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                // The body's drag first folds the header, then scrolls the sections, and only what
-                // neither wanted reaches the rubber band — so the fold always wins over the bounce.
-                .nestedScroll(collapse.nestedScrollConnection)
-                .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
+        // Pull-to-refresh container wraps only the scrollable body content below the insurance card
+        PullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = handleRetry,
+            indicatorTopPadding = headerHeightDp + Spacing.xs,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            // Stands in for the floating header, which is measured rather than fixed.
-            Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            TreatmentQuickAccess(
-                healthProfileCompleted = state.healthProfileCompleted,
-                // Records are feature-flag gated, so the tap fires an intent; the emitted
-                // NavigateToRecords event carries the selected patient's national code.
-                onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) },
-                // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
-                // which patient card is in view. No-op until the main code is known.
-                onOpenHealthProfile = { mainUserNationalCode?.let(onOpenHealthProfile) },
-            )
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            TreatmentCategories(
-                onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
-                // Not feature-flag gated like the records, so the tap navigates straight away.
-                onOpenMiscClaims = onOpenMiscClaims,
-            )
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            TreatmentCostSummary(
-                insuredShare = state.insuredShareTotal,
-                organizationShare = state.organizationShareTotal,
-                isLoading = state.isLoading,
-            )
-            // Clears the floating navigation bar, as the pre-collapse layout did.
-            Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    // The body's drag first folds the header, then scrolls the sections, and only what
+                    // neither wanted reaches the rubber band — so the fold always wins over the bounce.
+                    .nestedScroll(collapse.nestedScrollConnection)
+                    .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
+            ) {
+                // Stands in for the floating header, which is measured rather than fixed.
+                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                TreatmentQuickAccess(
+                    healthProfileCompleted = state.healthProfileCompleted,
+                    onOpenMedicalRecords = handleOpenMedicalRecords,
+                    onOpenHealthProfile = handleOpenHealthProfile,
+                )
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                TreatmentCategories(
+                    onOpenPrescriptions = handleOpenPrescriptions,
+                    onOpenMiscClaims = handleOpenMiscClaims,
+                )
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                TreatmentCostSummary(
+                    insuredShare = state.insuredShareTotal,
+                    organizationShare = state.organizationShareTotal,
+                    isLoading = state.isLoading,
+                )
+                // Clears the floating navigation bar, as the pre-collapse layout did.
+                Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
+            }
         }
 
         // The header floats on top so that as content scrolls up, it passes underneath the header.
+        // It stays completely fixed during pull-to-refresh.
         TreatmentHubHeader(
             progress = headerProgress,
             modifier = Modifier
@@ -226,8 +251,8 @@ fun TreatmentContent(
                 isLoading = state.isLoading,
                 error = state.error,
                 pagerState = pagerState,
-                onShowEntitlementReason = { entitlementReason = it },
-                onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
+                onShowEntitlementReason = handleShowEntitlementReason,
+                onRetry = handleRetry,
                 collapseProgress = headerProgress,
             )
         }
