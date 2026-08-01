@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.layout
@@ -17,6 +19,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.util.lerp
+import com.tamin.taminhamrah.ui.theme.Easing
+import kotlin.math.roundToInt
 
 /**
  * Drives a collapsing header the way a CollapsingToolbar does: a [NestedScrollConnection] consumes
@@ -124,4 +129,49 @@ fun Modifier.reservedHeight(heightPx: () -> Int): Modifier = layout { measurable
         Constraints.fixed(constraints.maxWidth, heightPx().coerceAtLeast(0)),
     )
     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+}
+
+/**
+ * Fades a piece out as the header folds, [rate] times faster than the fold itself — so pieces that
+ * only belong to the expanded state have cleared before the collapsed one forms.
+ *
+ * [progress] is read inside the draw lambda, so a frame of the fold costs no recomposition.
+ */
+fun Modifier.vanishOnCollapse(progress: () -> Float, rate: Float = 2f): Modifier = graphicsLayer {
+    alpha = (1f - progress() * rate).coerceIn(0f, 1f)
+}
+
+/**
+ * Shrinks a piece toward [minScale] as it travels, anchored to its start edge so it keeps its
+ * place in the collapsed bar rather than drifting toward the middle.
+ */
+fun Modifier.shrinkOnCollapse(
+    progress: () -> Float,
+    minScale: Float,
+    rtl: Boolean,
+): Modifier = graphicsLayer {
+    val scale = lerp(1f, minScale, Easing.standard.transform(progress()))
+    scaleX = scale
+    scaleY = scale
+    transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+}
+
+/**
+ * Lets content ride up into the header above it, by [expandedOverlap] when open and
+ * [collapsedOverlap] when folded.
+ *
+ * The overlap is applied during layout, so the ride costs a re-layout rather than a recomposition,
+ * and the space the content reserves below shrinks by exactly what it borrows above.
+ */
+fun Modifier.rideUpIntoHeader(
+    progress: () -> Float,
+    expandedOverlap: Dp,
+    collapsedOverlap: Dp,
+): Modifier = layout { measurable, constraints ->
+    val overlapPx = lerp(expandedOverlap.toPx(), collapsedOverlap.toPx(), progress())
+    val placeable = measurable.measure(constraints)
+    val reserved = (placeable.height - overlapPx).coerceAtLeast(0f).roundToInt()
+    layout(placeable.width, reserved) {
+        placeable.placeRelative(0, -overlapPx.roundToInt())
+    }
 }

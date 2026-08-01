@@ -31,8 +31,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
@@ -46,6 +44,8 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
+import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -161,7 +161,11 @@ fun InsuranceCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .layoutId(CardSlot.Name)
-                        .shrinkOnCollapse(collapseProgress, rtl),
+                        .shrinkOnCollapse(
+                            progress = collapseProgress,
+                            minScale = TreatmentDimens.cardNameCollapsedScale,
+                            rtl = rtl,
+                        ),
                 )
                 Text(
                     text = stringResource(Res.string.card_national_code),
@@ -245,26 +249,6 @@ fun InsuranceCard(
 private enum class CardSlot { Brand, Name, CodeLabel, Code, Badge, Footer }
 
 private fun List<Measurable>.slot(id: CardSlot): Measurable = first { it.layoutId == id }
-
-/**
- * Fades a piece out over the first half of the fold, so the vanishing pieces have cleared before
- * the compact bar forms. [progress] is read inside the draw lambda — no recomposition per frame.
- */
-private fun Modifier.vanishOnCollapse(progress: () -> Float): Modifier = graphicsLayer {
-    alpha = (1f - progress() * 2f).coerceIn(0f, 1f)
-}
-
-/** Shrinks the holder name as it travels, anchored to its start edge so it stays put in the bar. */
-private fun Modifier.shrinkOnCollapse(progress: () -> Float, rtl: Boolean): Modifier = graphicsLayer {
-    val scale = lerp(
-        1f,
-        TreatmentDimens.cardNameCollapsedScale,
-        Easing.standard.transform(progress()),
-    )
-    scaleX = scale
-    scaleY = scale
-    transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
-}
 
 /**
  * The small round glyph beside the coverage line — a tick when treatment support is

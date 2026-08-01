@@ -5,15 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.Spacing
-import kotlin.math.roundToInt
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.tab_treatment
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The hub header: the gradient bar keeps its colors and title in place while the insured-person
@@ -31,7 +25,7 @@ internal fun TreatmentHubHeader(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         TaminTopAppBar(
-            title = stringResource(Res.string.tab_treatment),
+            title = "درمان",
             centerTitle = false,
             bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
         )
@@ -46,23 +40,5 @@ internal fun TreatmentHubHeader(
         ) {
             card()
         }
-    }
-}
-
-/**
- * Lifts the content into the band above it by [expandedOverlap], narrowing to [collapsedOverlap]
- * as [progress] runs 0 → 1, and gives back the overlapped strip so the body below closes up
- * instead of leaving a gap.
- */
-private fun Modifier.rideUpIntoHeader(
-    progress: () -> Float,
-    expandedOverlap: Dp,
-    collapsedOverlap: Dp,
-): Modifier = layout { measurable, constraints ->
-    val overlapPx = lerp(expandedOverlap.toPx(), collapsedOverlap.toPx(), progress())
-    val placeable = measurable.measure(constraints)
-    val reserved = (placeable.height - overlapPx).coerceAtLeast(0f).roundToInt()
-    layout(placeable.width, reserved) {
-        placeable.place(0, -overlapPx.roundToInt())
     }
 }
