@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.BloodGroupStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -46,7 +47,8 @@ fun SelfDeclarationBloodScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     bloodGroupOptions: List<LookupItemPR>,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -59,14 +61,6 @@ fun SelfDeclarationBloodScreen(
     val unknownText = stringResource(Res.string.health_allergy_unknows)
     val dontKnowText = stringResource(Res.string.i_dont_know)
     val dontKnowTextt = stringResource(Res.string.i_dont_knoww)
-
-    LaunchedEffect(Unit) {
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "Screen opened. Initial state:")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupId: ${state.selectedBloodGroupId}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupLetter: ${state.selectedBloodGroupLetter}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupRh: ${state.selectedBloodGroupRh}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "isBloodGroupUnknown: ${state.isBloodGroupUnknown}")
-    }
 
     Scaffold(
         topBar = {
@@ -87,16 +81,21 @@ fun SelfDeclarationBloodScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                BloodShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    BloodShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -107,8 +106,7 @@ fun SelfDeclarationBloodScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-            // Blood Droplet Graphic
+                // Blood Droplet Graphic
             BloodDropletGraphic(
                 selectedLetter = state.selectedBloodGroupLetter,
                 selectedRh = state.selectedBloodGroupRh,

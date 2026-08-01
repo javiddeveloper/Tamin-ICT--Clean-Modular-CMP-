@@ -204,7 +204,7 @@ data class HealthProfileUiState(
     val isLoading: Boolean = false,
     val isProvincesLoading: Boolean = false,
     val isCitiesLoading: Boolean = false,
-    val error: String? = null,
+    val errors: Map<ErrorSource, String> = emptyMap(),
 
     // ── Patient data (loaded from API) ────────────────────────────────────────
     val generalInfo: PatientGeneralPR? = null,
@@ -227,9 +227,10 @@ data class HealthProfileUiState(
     sealed interface PartialState {
         // ── Loading / Error ───────────────────────────────────────────────────
         data class Loading(val isLoading: Boolean) : PartialState
+        data object ClearAllErrors : PartialState
         data class ProvincesLoading(val isLoading: Boolean) : PartialState
         data class CitiesLoading(val isLoading: Boolean) : PartialState
-        data class Error(val message: String) : PartialState
+        data class Error(val message: String, val source: ErrorSource = ErrorSource.GENERAL) : PartialState
 
         // ── Remote data loaded ────────────────────────────────────────────────
         data class GeneralLoaded(val info: PatientGeneralPR) : PartialState
@@ -264,12 +265,32 @@ data class HealthProfileUiState(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Error Source
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum class ErrorSource {
+    GENERAL,
+    PATIENT_GENERAL,
+    PATIENT_LIFESTYLE,
+    PATIENT_ALLERGIES,
+    MARITAL_STATUS,
+    PROVINCES,
+    CITIES,
+    BLOOD_GROUPS,
+    SMOKING_STATUS,
+    ACT_FREQUENCIES,
+    ILLNESS_GROUPS,
+    DRUGS
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Intents
 // ─────────────────────────────────────────────────────────────────────────────
 
 sealed interface HealthProfileIntent {
     // Top-level
     data class LoadHealthProfile(val nationalCode: String? = null) : HealthProfileIntent
+    data object RetryStep : HealthProfileIntent
 
     // Step 3: triggered when province changes to reload cities
     data class LoadCitiesForProvince(val provinceId: Int) : HealthProfileIntent
@@ -299,5 +320,5 @@ sealed interface HealthProfileIntent {
 
 sealed interface HealthProfileEvent {
     data object NavigateBack : HealthProfileEvent
-    data class ShowToast(val message: String) : HealthProfileEvent
+    data class ShowToast(val message: String,val isError: Boolean) : HealthProfileEvent
 }

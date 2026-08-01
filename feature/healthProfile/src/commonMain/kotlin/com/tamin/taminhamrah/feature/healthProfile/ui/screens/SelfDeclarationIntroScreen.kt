@@ -39,11 +39,13 @@ import taminx.feature.healthprofile.generated.resources.*
 fun SelfDeclarationIntroScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     SelfDeclarationIntroContent(
         onIntent = onIntent,
         onBackClicked = onBackClicked,
+        isLoading = isLoading,
         modifier = modifier
     )
 }
@@ -52,6 +54,7 @@ fun SelfDeclarationIntroScreen(
 fun SelfDeclarationIntroContent(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current

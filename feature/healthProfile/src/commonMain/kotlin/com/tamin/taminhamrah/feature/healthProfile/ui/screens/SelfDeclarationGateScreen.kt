@@ -10,8 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
@@ -43,11 +40,13 @@ import taminx.feature.healthprofile.generated.resources.*
 fun SelfDeclarationGateScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     SelfDeclarationGateContent(
         onIntent = onIntent,
         onBackClicked = onBackClicked,
+        isLoading = isLoading,
         modifier = modifier
     )
 }
@@ -56,6 +55,7 @@ fun SelfDeclarationGateScreen(
 fun SelfDeclarationGateContent(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current

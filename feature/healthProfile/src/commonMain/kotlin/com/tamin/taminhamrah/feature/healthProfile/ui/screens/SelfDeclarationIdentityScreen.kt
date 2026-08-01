@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.IdentityStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
@@ -30,7 +31,8 @@ fun SelfDeclarationIdentityScreen(
     state: IdentityStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -53,16 +55,21 @@ fun SelfDeclarationIdentityScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                IdentityShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    IdentityShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -261,6 +268,7 @@ fun SelfDeclarationIdentityScreen(
         }
     }
 }
+
 @Composable
 fun IdentityRow(label: String, value: String) {
     val taminColors = LocalTaminColors.current

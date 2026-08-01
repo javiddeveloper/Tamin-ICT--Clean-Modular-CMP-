@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateN
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.InfoBanner
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.InteractiveChoiceChips
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.SegmentedControl
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
@@ -55,7 +56,8 @@ fun SelfDeclarationDiseasesScreen(
     illnessGroups: List<IllnessGroupPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -70,20 +72,6 @@ fun SelfDeclarationDiseasesScreen(
     val chronicGroup = illnessGroups.findGroup(BottomSheetType.ILLNESS_HISTORY)
     val mentalGroup = illnessGroups.findGroup(BottomSheetType.MENTAL)
     val cancerGroup = illnessGroups.findGroup(BottomSheetType.CANCER)
-
-    LaunchedEffect(Unit) {
-        Logger.d(
-            "DiseasesScreen",
-            """
-            Initial State Loaded:
-            riskFactorIds: ${state.riskFactorIds}
-            hasChronicDisease: ${state.hasChronicDisease}, chronicDiseaseIds: ${state.chronicDiseaseIds}
-            hasMentalIllness: ${state.hasMentalIllness}, mentalIllnessIds: ${state.mentalIllnessIds}
-            hasCancer: ${state.hasCancer}, cancerIds: ${state.cancerIds}
-            activeBottomSheet: ${state.activeBottomSheet}
-            """.trimIndent()
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -103,16 +91,21 @@ fun SelfDeclarationDiseasesScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                CardsListShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    CardsListShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -122,11 +115,10 @@ fun SelfDeclarationDiseasesScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-            InfoBanner(
-                message = stringResource(Res.string.health_confidential_notice),
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
+                InfoBanner(
+                    message = stringResource(Res.string.health_confidential_notice),
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
 
             // Group 1: Risk Factors
             riskFactorGroup?.let { group ->

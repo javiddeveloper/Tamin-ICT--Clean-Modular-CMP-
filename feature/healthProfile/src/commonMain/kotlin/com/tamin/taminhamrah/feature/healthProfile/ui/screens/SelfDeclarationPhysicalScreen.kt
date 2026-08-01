@@ -10,6 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PhysicalStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
@@ -26,7 +27,8 @@ fun SelfDeclarationPhysicalScreen(
     state: PhysicalStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -55,16 +57,21 @@ fun SelfDeclarationPhysicalScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                PhysicalShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .background(taminColors.bgPage)
+                ) {
+                    PhysicalShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
