@@ -580,6 +580,18 @@
                 3
             ],
             "active": true
+        },
+        {
+            "id": 2000,
+            "name": "دستیار هوشمند (ایجنت)",
+            "icon": "bot",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2,
+                3
+            ],
+            "active": true
         }
     ]
 }

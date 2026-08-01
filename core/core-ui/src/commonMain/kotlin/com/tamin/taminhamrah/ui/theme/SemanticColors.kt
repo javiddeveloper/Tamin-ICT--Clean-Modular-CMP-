@@ -76,7 +76,10 @@ data class TaminColors(
     val aiAssistantGradient: Brush,
 
     val hawkesBlue : Color,
-    val chipBg: Color
+    val chipBg: Color,
+    // Solid tint derived from the AI-assistant gradient family — used for blur tints
+    // and fallbacks where a single color (not a Brush) is required.
+    val aiAssistantTint: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -155,6 +158,7 @@ val LightTaminColors = TaminColors(
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    aiAssistantTint = TaminPurple900,
     shadowPrimary = Primary700.copy(alpha = 0.5f),
 
     txtNameProfile = TaminLightSurface,
@@ -228,5 +232,6 @@ val DarkTaminColors = TaminColors(
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
+    aiAssistantTint = TaminPurple900,
 )
 

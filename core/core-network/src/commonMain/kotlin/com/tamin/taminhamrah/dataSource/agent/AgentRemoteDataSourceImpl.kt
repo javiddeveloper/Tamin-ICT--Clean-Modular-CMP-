@@ -1,0 +1,116 @@
+package com.tamin.taminhamrah.dataSource.agent
+
+import com.tamin.taminhamrah.apiService.agent.AgentApiService
+import com.tamin.taminhamrah.model.agent.AgentRequestDTO
+import com.tamin.taminhamrah.model.agent.CancelResponseDTO
+import com.tamin.taminhamrah.model.agent.ChatAllowedDTO
+import com.tamin.taminhamrah.model.agent.PollingResponseDTO
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+
+internal class AgentRemoteDataSourceImpl(
+    private val agentApiService: AgentApiService,
+    private val errorParser: ErrorParser,
+    private val json: Json
+) : AgentRemoteDataSource {
+
+    override suspend fun checkChatAllowed(): ChatAllowedDTO {
+        return try {
+            agentApiService.checkChatAllowed()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    private fun createMultipartRequest(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray? = null,
+        voiceFileName: String? = null
+    ): MultiPartFormDataContent {
+        val requestJson = json.encodeToString(request)
+        return MultiPartFormDataContent(
+            formData {
+                append("data", requestJson, Headers.build {
+                    append(HttpHeaders.ContentType, "application/json; charset=UTF-8")
+                })
+                // Optional voice recording — mirrors old_Android's `file` part on the
+                // same search/service and search/rule endpoints.
+                if (voiceBytes != null && voiceBytes.isNotEmpty()) {
+                    val name = voiceFileName ?: "voice.m4a"
+                    append("file", voiceBytes, Headers.build {
+                        append(HttpHeaders.ContentType, "audio/mp4")
+                        append(HttpHeaders.ContentDisposition, "filename=\"$name\"")
+                    })
+                }
+            }
+        )
+    }
+
+    override suspend fun sendServicePrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO {
+        return try {
+            agentApiService.sendServicePrompt(createMultipartRequest(request, voiceBytes, voiceFileName))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun sendLawPrompt(
+        request: AgentRequestDTO,
+        voiceBytes: ByteArray?,
+        voiceFileName: String?
+    ): PollingResponseDTO {
+        return try {
+            agentApiService.sendLawPrompt(createMultipartRequest(request, voiceBytes, voiceFileName))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun trackRequest(requestId: String): PollingResponseDTO {
+        return try {
+            agentApiService.trackRequest(requestId)
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun cancelRequest(requestId: String): CancelResponseDTO {
+        return try {
+            agentApiService.cancelRequest(requestId)
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+}

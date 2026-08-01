@@ -4,7 +4,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 class TaminHamrahAndroidApplicationPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -28,9 +27,7 @@ class TaminHamrahAndroidApplicationPlugin : Plugin<Project> {
             }
 
             extensions.configure<KotlinAndroidProjectExtension> {
-                compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_17)
-                }
+                jvmToolchain(17)
             }
         }
     }
