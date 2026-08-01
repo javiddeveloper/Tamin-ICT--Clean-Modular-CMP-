@@ -46,6 +46,7 @@ val TaminCoverageBadgeFg = Color(0xFF0B5F4F)
 // ---- Semantic accents ----
 val TaminGreen = Color(0xFF03AD5F)       // success / active dot
 val TaminGreenDark = Color(0xFF03794A)   // success text (on light bg)
+val TaminSpringGreen = Color(0xFF0B7A45)
 val TaminOrange = Color(0xFFC97E0A)      // warning text
 val TaminOrangeDark = Color(0xFF9A6B00)
 val TaminAmber = Color(0xFFF9A825)

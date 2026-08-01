@@ -35,6 +35,7 @@ object Spacing {
     val xxxxxxl = 80.dp
     val xxxxxxxl = 96.dp
 
+    val smd = 14.dp
     val page = 18.dp
     val cardGap = 11.dp
     val tabSelector = 6.dp
@@ -78,6 +79,7 @@ object Elevation {
 object IconSize {
     val statIcon = 10.dp
     val small = 16.dp
+    val banner = 20.dp
     val medium = 24.dp
     val large = 38.dp
     val largePlus = 42.dp
@@ -88,4 +90,7 @@ object IconSize {
     val headerIconOuter = 104.dp
     val headerIconInner = 78.dp
     val navBar = 24.dp
+    val stepperCircle = 30.dp
+    val stepperConnectorHeight = 2.dp
+    val stepperConnectorWidth = 44.dp
 }

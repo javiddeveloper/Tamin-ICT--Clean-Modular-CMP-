@@ -33,6 +33,7 @@ data class TaminColors(
     val greenBg: Color,
     val greenBorder: Color,
     val greenText: Color,
+    val springGreenText: Color,
     val blueBg: Color,
     val blueText: Color,
     val orangeBg: Color,
@@ -76,7 +77,8 @@ data class TaminColors(
     val aiAssistantGradient: Brush,
 
     val hawkesBlue : Color,
-    val chipBg: Color
+    val chipBg: Color,
+    val verifiedBadgeBg: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -161,7 +163,9 @@ val LightTaminColors = TaminColors(
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
     hawkesBlue = Color(0xFFDCE7FB),
-    chipBg = Color(0xFFEFF6FF)
+    chipBg = Color(0xFFEFF6FF),
+    springGreenText = TaminSpringGreen,
+    verifiedBadgeBg = TaminLightSurface,
 )
 
 val DarkTaminColors = TaminColors(
@@ -228,5 +232,7 @@ val DarkTaminColors = TaminColors(
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
+    springGreenText = TaminDarkSuccess,
+    verifiedBadgeBg = TaminDarkGreenBg,
 )
 
