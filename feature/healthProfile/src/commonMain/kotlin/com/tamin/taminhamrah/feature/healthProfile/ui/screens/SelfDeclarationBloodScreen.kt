@@ -62,14 +62,6 @@ fun SelfDeclarationBloodScreen(
     val dontKnowText = stringResource(Res.string.i_dont_know)
     val dontKnowTextt = stringResource(Res.string.i_dont_knoww)
 
-    LaunchedEffect(Unit) {
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "Screen opened. Initial state:")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupId: ${state.selectedBloodGroupId}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupLetter: ${state.selectedBloodGroupLetter}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupRh: ${state.selectedBloodGroupRh}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "isBloodGroupUnknown: ${state.isBloodGroupUnknown}")
-    }
-
     Scaffold(
         topBar = {
             HealthTopAppBar(

@@ -41,14 +41,12 @@ fun SelfDeclarationGateScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     isLoading: Boolean = false,
-    error: String? = null,
     modifier: Modifier = Modifier
 ) {
     SelfDeclarationGateContent(
         onIntent = onIntent,
         onBackClicked = onBackClicked,
         isLoading = isLoading,
-        error = error,
         modifier = modifier
     )
 }
@@ -58,7 +56,6 @@ fun SelfDeclarationGateContent(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     isLoading: Boolean = false,
-    error: String? = null,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current

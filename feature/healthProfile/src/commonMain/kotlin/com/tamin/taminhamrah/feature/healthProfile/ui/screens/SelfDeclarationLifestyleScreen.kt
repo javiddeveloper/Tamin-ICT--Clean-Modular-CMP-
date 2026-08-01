@@ -55,19 +55,6 @@ fun SelfDeclarationLifestyleScreen(
         stringResource(Res.string.health_option_no)
     )
 
-    LaunchedEffect(Unit) {
-        Logger.d(
-            "LifestyleScreen",
-            """
-        Initial State Loaded:
-        isSmoking: ${state.isSmoking}, smokingStatusId: ${state.smokingStatusId}, smokingPattern: ${state.smokingPattern}
-        hasAddiction: ${state.hasAddiction}, substanceStatusId: ${state.substanceStatusId}, substancePattern: ${state.substancePattern}
-        isDrinking: ${state.isDrinking}, drinkingStatusId: ${state.drinkingStatusId}, drinkingPattern: ${state.drinkingPattern}
-        isExercising: ${state.isExercising}, exerciseStatusId: ${state.exerciseStatusId}, exerciseFrequency: ${state.exerciseFrequency}
-        """.trimIndent()
-        )
-    }
-
     Scaffold(
         topBar = {
             HealthTopAppBar(

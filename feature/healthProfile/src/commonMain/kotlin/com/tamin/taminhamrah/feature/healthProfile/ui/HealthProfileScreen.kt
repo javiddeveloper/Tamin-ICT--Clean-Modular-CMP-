@@ -133,14 +133,12 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.GATE -> {
                     SelfDeclarationGateScreen(
                         onIntent = onIntent,
-                        error = getError(ErrorSource.GENERAL),
                         onBackClicked = onBackClicked
                     )
                 }
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
                         onIntent = onIntent,
-                        error = getError(ErrorSource.GENERAL),
                         onBackClicked = navigateBack
                     )
                 }
@@ -285,25 +283,8 @@ fun HealthProfileMainContent(
                                 isLoading = state.isLoading,
                                 error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.PATIENT_LIFESTYLE, ErrorSource.PATIENT_ALLERGIES),
                                 onRetry = { onIntent(HealthProfileIntent.RetryStep) },
-                                shimmerContent = { HealthProfileShimmerSkeleton(modifier.padding(paddingValues)) }
+                                shimmerContent = { HealthProfileShimmerSkeleton() }
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.background)
-                                ) {
-                                    TaminText(
-                                        text = state.error,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.error,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Button(onClick = { onIntent(HealthProfileIntent.LoadHealthProfile()) }) {
-                                        TaminText("تلاش مجدد")
-                                    }
-                                }
-                            } else {
                                 HealthProfileContent(
                                     generalInfo = state.generalInfo,
                                     lifestyleInfo = state.lifestyleInfo,

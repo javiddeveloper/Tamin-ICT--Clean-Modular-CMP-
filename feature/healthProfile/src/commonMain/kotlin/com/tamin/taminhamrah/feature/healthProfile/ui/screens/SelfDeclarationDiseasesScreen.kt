@@ -73,20 +73,6 @@ fun SelfDeclarationDiseasesScreen(
     val mentalGroup = illnessGroups.findGroup(BottomSheetType.MENTAL)
     val cancerGroup = illnessGroups.findGroup(BottomSheetType.CANCER)
 
-    LaunchedEffect(Unit) {
-        Logger.d(
-            "DiseasesScreen",
-            """
-            Initial State Loaded:
-            riskFactorIds: ${state.riskFactorIds}
-            hasChronicDisease: ${state.hasChronicDisease}, chronicDiseaseIds: ${state.chronicDiseaseIds}
-            hasMentalIllness: ${state.hasMentalIllness}, mentalIllnessIds: ${state.mentalIllnessIds}
-            hasCancer: ${state.hasCancer}, cancerIds: ${state.cancerIds}
-            activeBottomSheet: ${state.activeBottomSheet}
-            """.trimIndent()
-        )
-    }
-
     Scaffold(
         topBar = {
             HealthTopAppBar(
