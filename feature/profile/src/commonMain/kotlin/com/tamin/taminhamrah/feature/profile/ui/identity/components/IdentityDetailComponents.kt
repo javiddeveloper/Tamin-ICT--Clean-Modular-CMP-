@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityDimens
 import com.tamin.taminhamrah.feature.profile.ui.identity.model.IdentitySectionPR
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SectionLabel

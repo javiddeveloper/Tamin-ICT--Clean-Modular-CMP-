@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityDimens
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.collapseAway

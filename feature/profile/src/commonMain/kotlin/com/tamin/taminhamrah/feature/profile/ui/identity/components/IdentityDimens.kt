@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.identity
+package com.tamin.taminhamrah.feature.profile.ui.identity.components
 
 import androidx.compose.ui.unit.dp
 

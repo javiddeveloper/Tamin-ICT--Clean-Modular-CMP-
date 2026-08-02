@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentityCard
+import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentityDimens
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentitySections
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.RegistryVerifiedNotice
 import com.tamin.taminhamrah.feature.profile.ui.identity.contract.IdentityInEvent
