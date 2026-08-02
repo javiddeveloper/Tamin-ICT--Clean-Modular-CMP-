@@ -271,6 +271,7 @@ fun OtpInputField(
     error: Boolean = false,
     errorMessage: String? = null,
     showClearButton: Boolean = true,
+    leadingIcon: ImageVector? = null
 ) {
     SegmentedInputField(
         value = value,
@@ -281,6 +282,7 @@ fun OtpInputField(
         error = error,
         errorMessage = errorMessage,
         showClearButton = showClearButton,
+        leadingIcon = leadingIcon,
         horizontalArrangement = Arrangement.Center,
         slotSpacing = Spacing.sm
     )
