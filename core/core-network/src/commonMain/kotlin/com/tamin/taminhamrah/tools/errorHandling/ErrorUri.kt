@@ -41,7 +41,8 @@ enum class ErrorUri {
     ERROR_LOAD_DEPENDANTS,
     ERROR_LOAD_HEALTH_PROFILE,
     FEATURE_UNAVAILABLE,
-    FEATURE_TEMPORARILY_UNAVAILABLE
+    FEATURE_TEMPORARILY_UNAVAILABLE,
+    SERVER_PROBLEM
     ;
 
     companion object {
@@ -80,6 +81,7 @@ enum class ErrorUri {
                 ERROR_LOAD_HEALTH_PROFILE.name -> ERROR_LOAD_HEALTH_PROFILE
                 FEATURE_UNAVAILABLE.name -> FEATURE_UNAVAILABLE
                 FEATURE_TEMPORARILY_UNAVAILABLE.name -> FEATURE_TEMPORARILY_UNAVAILABLE
+                SERVER_PROBLEM.name -> SERVER_PROBLEM
                 else -> UNKNOWN
             }
         }

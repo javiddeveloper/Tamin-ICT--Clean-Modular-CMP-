@@ -8,6 +8,18 @@ package com.tamin.taminhamrah.tools.errorHandling
 
 internal class ErrorParserImpl : ErrorParser {
     override fun parseGeneralError(exception: TaminErrorUriException): TaminApiException {
+        // The backend sent its own (already localized) message via the
+        // hasError/problems envelope (see BaseDTO.problemMessage) - prefer
+        // that verbatim over the generic per-ErrorUri copy below, since it's
+        // usually specific and actionable (e.g. field validation errors).
+        exception.serverMessage?.takeIf { it.isNotBlank() }?.let { serverMessage ->
+            return TaminApiException(
+                title = "خطا",
+                subtitle = serverMessage,
+                cause = exception
+            )
+        }
+
         val (title, subtitle) = when (exception.uri) {
             ErrorUri.INVALID_AUTH -> "خطای احراز هویت" to "لطفا دوباره وارد شوید"
             ErrorUri.FORBIDDEN -> "دسترسی غیرمجاز" to "شما اجازه دسترسی به این بخش را ندارید"
@@ -26,6 +38,7 @@ internal class ErrorParserImpl : ErrorParser {
             ErrorUri.ERROR_LOAD_HEALTH_PROFILE -> "خطا در دریافت پرونده سلامت" to "لطفا بعدا تلاش کنید"
             ErrorUri.FEATURE_UNAVAILABLE -> "عدم دسترسی به سرویس" to "این سرویس در حال حاضر در دسترس نیست."
             ErrorUri.FEATURE_TEMPORARILY_UNAVAILABLE -> "عدم دسترسی موقت" to "این سرویس موقتاً در دسترس نیست."
+            ErrorUri.SERVER_PROBLEM -> "خطا" to "اطلاعات ارسالی صحیح نیست"
             else -> "خطا" to "مشکلی پیش آمده است"
         }
 
