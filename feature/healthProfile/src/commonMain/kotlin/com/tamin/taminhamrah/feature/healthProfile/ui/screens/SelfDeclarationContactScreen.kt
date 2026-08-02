@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -178,29 +179,26 @@ fun SelfDeclarationContactScreen (
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(modifier = Modifier.weight(1f)) {
                         StyledSelectField(
-                            value = state.cityLabel,
-                            label = stringResource(Res.string.health_contact_city_label),
-                            placeholder = stringResource(Res.string.health_contact_city_placeholder),
-                            isLoading = isCitiesLoading,
-                            onClick = {
-                                if (state.provinceId == null) {
-                                    showProvinceBottomSheet = true
-                                } else {
-                                    if (cityOptions.isEmpty() && !isCitiesLoading) {
-                                        onIntent(HealthProfileIntent.LoadCitiesForProvince(state.provinceId))
-                                    }
-                                    showCityBottomSheet = true
-                                }
-                            }
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        StyledSelectField(
                             value = state.provinceLabel,
                             label = stringResource(Res.string.health_contact_province_label),
                             placeholder = stringResource(Res.string.health_contact_province_placeholder),
                             isLoading = isProvincesLoading,
                             onClick = { showProvinceBottomSheet = true }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        StyledSelectField(
+                            value = state.cityLabel,
+                            label = stringResource(Res.string.health_contact_city_label),
+                            placeholder = stringResource(Res.string.health_contact_city_placeholder),
+                            isLoading = isCitiesLoading,
+                            enabled = state.provinceId != null,
+                            onClick = {
+                                if (cityOptions.isEmpty() && !isCitiesLoading) {
+                                    onIntent(HealthProfileIntent.LoadCitiesForProvince(state.provinceId!!))
+                                }
+                                showCityBottomSheet = true
+                            }
                         )
                     }
                 }
@@ -381,6 +379,7 @@ private fun StyledSelectField(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
+                .then(if (!enabled) Modifier.alpha(taminColors.disabledAlpha) else Modifier)
                 .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
                 .border(BorderStroke(1.5.dp, taminColors.border), RoundedCornerShape(13.dp))
                 .clip(RoundedCornerShape(13.dp))
