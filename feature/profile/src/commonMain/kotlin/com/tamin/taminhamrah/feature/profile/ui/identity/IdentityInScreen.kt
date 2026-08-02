@@ -40,7 +40,7 @@ import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
-import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
@@ -132,7 +132,7 @@ fun IdentityInScreen(
                 // The drag folds the card first, then scrolls the body, and only what neither
                 // wanted reaches the rubber band — so the fold always wins over the bounce.
                 .nestedScroll(collapse.nestedScrollConnection)
-                .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
+                .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
             // Stands in for the floating header, which is measured rather than fixed.
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })

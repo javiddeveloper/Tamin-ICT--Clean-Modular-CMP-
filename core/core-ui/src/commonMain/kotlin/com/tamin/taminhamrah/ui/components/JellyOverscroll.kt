@@ -22,7 +22,7 @@ import kotlin.math.abs
 import kotlin.math.sign
 
 /**
- * iOS-style rubber-band overscroll — the "jello" pull the system apps have.
+ * iOS-style rubber-band overscroll — the "jelly" pull the system apps have.
  *
  * Past the edge the content keeps following the finger, but with resistance that grows the further
  * it goes, and it springs back the moment the finger lifts. A fling that reaches the edge throws
@@ -32,14 +32,14 @@ import kotlin.math.sign
  * Use it by handing it to the scrollable, which then both feeds and draws it:
  *
  * ```
- * Column(Modifier.verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()))
+ * Column(Modifier.verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()))
  * ```
  *
  * The pull is held in a snapshot float read only inside the draw lambda, so a stretch costs a
  * redraw and never a recomposition or a re-layout — the content is translated, not measured again.
  */
 @Stable
-class JelloOverscrollEffect : OverscrollEffect {
+class JellyOverscrollEffect : OverscrollEffect {
 
     /** Signed pixels the content is pulled past its edge; positive is downward. */
     private var pullPx by mutableFloatStateOf(0f)
@@ -101,9 +101,9 @@ class JelloOverscrollEffect : OverscrollEffect {
         return delta
     }
 
-    override val node: DelegatableNode = JelloNode()
+    override val node: DelegatableNode = JellyNode()
 
-    private inner class JelloNode : Modifier.Node(), DrawModifierNode {
+    private inner class JellyNode : Modifier.Node(), DrawModifierNode {
         override fun ContentDrawScope.draw() {
             viewportPx = size.height
             val pull = pullPx
@@ -125,6 +125,6 @@ class JelloOverscrollEffect : OverscrollEffect {
     }
 }
 
-/** A [JelloOverscrollEffect] for one scrollable. Hand it to `verticalScroll`/`LazyColumn`. */
+/** A [JellyOverscrollEffect] for one scrollable. Hand it to `verticalScroll`/`LazyColumn`. */
 @Composable
-fun rememberJelloOverscroll(): JelloOverscrollEffect = remember { JelloOverscrollEffect() }
+fun rememberJellyOverscroll(): JellyOverscrollEffect = remember { JellyOverscrollEffect() }

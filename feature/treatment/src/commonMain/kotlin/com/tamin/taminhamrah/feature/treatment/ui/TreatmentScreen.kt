@@ -43,7 +43,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
-import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -183,7 +183,7 @@ fun TreatmentContent(
                 // The body's drag first folds the header, then scrolls the sections, and only what
                 // neither wanted reaches the rubber band — so the fold always wins over the bounce.
                 .nestedScroll(collapse.nestedScrollConnection)
-                .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
+                .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
             // Stands in for the floating header, which is measured rather than fixed.
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })

@@ -57,7 +57,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.components.ValidationStatusCard
-import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.motionFade
 import com.tamin.taminhamrah.ui.motion.motionParallax
@@ -326,7 +326,7 @@ fun ProfileContent(
             flingBehavior = snapFlingBehavior,
             // Same rubber band as the treatment hub: what the list cannot scroll bends instead
             // of stopping dead at the edge.
-            overscrollEffect = rememberJelloOverscroll(),
+            overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
