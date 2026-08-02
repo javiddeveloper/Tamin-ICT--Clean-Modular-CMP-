@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityDimens
-import com.tamin.taminhamrah.feature.profile.ui.identity.model.IdentitySection
+import com.tamin.taminhamrah.feature.profile.ui.identity.model.IdentitySectionPR
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -62,7 +62,7 @@ internal fun RegistryVerifiedNotice(modifier: Modifier = Modifier) {
 /** Every section of the record, in the order the design lists them. */
 @Composable
 internal fun IdentitySections(
-    sections: ImmutableList<IdentitySection>,
+    sections: ImmutableList<IdentitySectionPR>,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -78,7 +78,7 @@ internal fun IdentitySections(
 /** One titled card: a muted caption, then the fields ruled off from each other. */
 @Composable
 private fun IdentitySectionCard(
-    section: IdentitySection,
+    section: IdentitySectionPR,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current

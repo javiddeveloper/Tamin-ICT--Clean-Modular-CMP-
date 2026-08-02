@@ -35,7 +35,7 @@ import taminx.core.core_ui.identity_section_personal
  * contents stays a pure function — it runs inside a `remember`, where composition is not available.
  */
 @Immutable
-data class IdentityField(
+data class IdentityFieldPR(
     val label: StringResource,
     val value: String,
     /** Renders muted: the service returned nothing for this line. */
@@ -44,9 +44,9 @@ data class IdentityField(
 
 /** A titled card holding a run of [fields]. */
 @Immutable
-data class IdentitySection(
+data class IdentitySectionPR(
     val title: StringResource,
-    val fields: ImmutableList<IdentityField>,
+    val fields: ImmutableList<IdentityFieldPR>,
 )
 
 /**
@@ -65,62 +65,62 @@ fun IdentityInfoPR.toSections(
     absentValue: String,
     mobile: String?,
     email: String?,
-): ImmutableList<IdentitySection> = persistentListOf(
-    IdentitySection(
+): ImmutableList<IdentitySectionPR> = persistentListOf(
+    IdentitySectionPR(
         title = Res.string.identity_section_contact,
         fields = persistentListOf(
-            IdentityField(
+            IdentityFieldPR(
                 label = Res.string.identity_field_mobile,
                 value = mobile?.toPersianDigits().orAbsent(absentValue),
                 isAbsent = mobile.isNullOrBlank(),
             ),
-            IdentityField(
+            IdentityFieldPR(
                 label = Res.string.identity_field_email,
                 value = email.orAbsent(absentValue),
                 isAbsent = email.isNullOrBlank(),
             ),
         ),
     ),
-    IdentitySection(
+    IdentitySectionPR(
         title = Res.string.identity_section_personal,
         fields = persistentListOf(
-            IdentityField(Res.string.identity_field_first_name, firstName.orAbsent(absentValue)),
-            IdentityField(Res.string.identity_field_last_name, lastName.orAbsent(absentValue)),
-            IdentityField(Res.string.identity_field_father_name, fatherName.orAbsent(absentValue)),
-            IdentityField(Res.string.identity_field_gender, gender),
-            IdentityField(
+            IdentityFieldPR(Res.string.identity_field_first_name, firstName.orAbsent(absentValue)),
+            IdentityFieldPR(Res.string.identity_field_last_name, lastName.orAbsent(absentValue)),
+            IdentityFieldPR(Res.string.identity_field_father_name, fatherName.orAbsent(absentValue)),
+            IdentityFieldPR(Res.string.identity_field_gender, gender),
+            IdentityFieldPR(
                 label = Res.string.identity_field_birth_date,
                 value = dateOfBirthFormatted.toPersianDigits().orAbsent(absentValue),
             ),
-            IdentityField(Res.string.identity_field_nationality, nationality),
+            IdentityFieldPR(Res.string.identity_field_nationality, nationality),
         ),
     ),
-    IdentitySection(
+    IdentitySectionPR(
         title = Res.string.identity_section_identifier,
         fields = persistentListOf(
-            IdentityField(
+            IdentityFieldPR(
                 label = Res.string.identity_field_national_code,
                 value = nationalId.toPersianDigits().orAbsent(absentValue),
             ),
         ),
     ),
-    IdentitySection(
+    IdentitySectionPR(
         title = Res.string.identity_section_birth_certificate,
         fields = persistentListOf(
-            IdentityField(
+            IdentityFieldPR(
                 label = Res.string.identity_field_id_number,
                 value = idCardNumber.toPersianDigits().orAbsent(absentValue),
             ),
-            IdentityField(
+            IdentityFieldPR(
                 label = Res.string.identity_field_id_series,
                 value = idCardSerial1.toPersianDigits().orAbsent(absentValue),
             ),
-            IdentityField(
+            IdentityFieldPR(
                 label = Res.string.identity_field_id_serial,
                 value = idCardSerial2.toPersianDigits().orAbsent(absentValue),
             ),
-            IdentityField(Res.string.identity_field_birth_city, cityOfBirthName.orAbsent(absentValue)),
-            IdentityField(Res.string.identity_field_issue_city, cityOfIssueName.orAbsent(absentValue)),
+            IdentityFieldPR(Res.string.identity_field_birth_city, cityOfBirthName.orAbsent(absentValue)),
+            IdentityFieldPR(Res.string.identity_field_issue_city, cityOfIssueName.orAbsent(absentValue)),
         ),
     ),
 ).toImmutableList()
