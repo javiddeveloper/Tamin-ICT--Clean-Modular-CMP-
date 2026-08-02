@@ -35,6 +35,7 @@ fun SelfDeclarationPersonalScreen(
     maritalStatusOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -54,7 +55,8 @@ fun SelfDeclarationPersonalScreen(
                 title = stringResource(Res.string.health_personal_title),
                 currentStep = 2,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {

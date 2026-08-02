@@ -28,6 +28,7 @@ fun SelfDeclarationPhysicalScreen(
     state: PhysicalStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -47,6 +48,7 @@ fun SelfDeclarationPhysicalScreen(
                 currentStep = 5,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked,
                 title = stringResource(Res.string.health_physical_title)
             )
         },

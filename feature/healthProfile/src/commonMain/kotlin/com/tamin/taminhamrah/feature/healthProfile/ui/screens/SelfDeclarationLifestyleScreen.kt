@@ -45,6 +45,7 @@ fun SelfDeclarationLifestyleScreen(
     actFrequencyOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -103,7 +104,8 @@ fun SelfDeclarationLifestyleScreen(
                 title = stringResource(Res.string.health_lifestyle_title),
                 currentStep = 7,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {

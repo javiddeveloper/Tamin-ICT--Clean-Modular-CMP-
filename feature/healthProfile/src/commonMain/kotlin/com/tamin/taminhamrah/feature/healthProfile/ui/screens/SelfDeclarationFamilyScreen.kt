@@ -37,6 +37,7 @@ fun SelfDeclarationFamilyScreen(
     illnessGroups: List<IllnessGroupPR> = emptyList(),
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -70,6 +71,7 @@ fun SelfDeclarationFamilyScreen(
                 currentStep = 9,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked,
                 title = stringResource(Res.string.health_family_title)
             )
         },

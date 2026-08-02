@@ -49,6 +49,7 @@ fun SelfDeclarationBloodScreen(
     state: BloodGroupStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     bloodGroupOptions: List<LookupItemPR>,
     isLoading: Boolean = false,
     error: String? = null
@@ -91,7 +92,8 @@ fun SelfDeclarationBloodScreen(
                 title = stringResource(Res.string.health_type_blood_group),
                 currentStep = 6,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {

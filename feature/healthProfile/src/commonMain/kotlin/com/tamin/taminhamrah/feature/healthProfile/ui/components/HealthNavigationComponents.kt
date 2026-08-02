@@ -30,9 +30,11 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.draw.rotate
 import com.tamin.taminhamrah.ui.components.IconPosition
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -45,6 +47,7 @@ val LocalIsEditMode = staticCompositionLocalOf { false }
 fun HealthTopAppBar(
     title: String = "خوداظهاری سلامت",
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     currentStep: Int? = null,
     totalSteps: Int = 10,
     modifier: Modifier = Modifier
@@ -71,11 +74,24 @@ fun HealthTopAppBar(
                 },
                 navigationIcon = {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "بازگشت"
+                        modifier = modifier.rotate(180f),
+                        painter = painterResource(Res.drawable.ic_health_back),
+                        contentDescription = "بازگشت",
+                        tint = taminColors.textPrimary
                     )
                 },
-                onNavigationClick = onBackClicked
+                onNavigationClick = onBackClicked,
+                actionIcon = onCloseClicked?.let {
+                    {
+                        Icon(
+
+                            painter = painterResource(Res.drawable.ic_health_close),
+                            contentDescription = "بستن",
+                            tint = taminColors.textPrimary
+                        )
+                    }
+                },
+                onActionClick = onCloseClicked
             )
             if (currentStep != null && currentStep > 0 && !LocalIsEditMode.current) {
                 HealthProgressBar(

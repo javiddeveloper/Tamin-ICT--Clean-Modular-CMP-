@@ -793,7 +793,7 @@ class HealthProfileViewModel(
                     patientGender = info.patientGender,
                     patientBirthDate = info.patientBirthDate,
                     insuranceNumber = info.insuranceNumber,
-                    insuranceType = info.insuranceType,
+                    insuranceType = info.patientId.toString(),
                     lastVisitDate = info.lastVisitDate
                 ),
                 contact = sd.contact.copy(

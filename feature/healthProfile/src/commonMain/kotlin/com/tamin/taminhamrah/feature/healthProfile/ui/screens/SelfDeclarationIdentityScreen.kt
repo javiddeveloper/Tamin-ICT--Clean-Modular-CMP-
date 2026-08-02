@@ -31,6 +31,7 @@ fun SelfDeclarationIdentityScreen(
     state: IdentityStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -43,7 +44,8 @@ fun SelfDeclarationIdentityScreen(
                 title = stringResource(Res.string.health_identity_title),
                 currentStep = 1,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {
@@ -122,40 +124,48 @@ fun SelfDeclarationIdentityScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Avatar Icon
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .background(taminColors.blueBg, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_health_identity_avatar),
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(48.dp)
-                            )
+                        Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically , horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .background(taminColors.blueBg, CircleShape),
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_health_identity_avatar),
+                                    contentDescription = null,
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.padding(bottom = 4.dp).size(48.dp).align(Alignment.Center)
+                                )
+                            }
+
+
+
+                            Column {
+                                TaminText(
+                                    text = "${state.patientName} ${state.patientFamily}".trim(),
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = taminColors.textPrimary
+                                    )
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                TaminText(
+                                    text = if (state.insuranceNumber.isNotBlank()) "${
+                                        stringResource(
+                                            Res.string.health_identity_insurance_number_prefix
+                                        )
+                                    } ${state.insuranceNumber}" else "",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = 13.sp,
+                                        color = taminColors.textTertiary
+                                    )
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        TaminText(
-                            text = "${state.patientName} ${state.patientFamily}".trim(),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = taminColors.textPrimary
-                            )
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        TaminText(
-                            text = if (state.insuranceNumber.isNotBlank()) "${stringResource(Res.string.health_identity_insurance_number_prefix)} ${state.insuranceNumber}" else "",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 13.sp,
-                                color = taminColors.textTertiary
-                            )
-                        )
 
                         Spacer(modifier = Modifier.height(20.dp))
                         HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
@@ -322,7 +332,16 @@ private fun IdentityGridItem(label: String, value: String) {
 fun SelfDeclarationIdentityScreenPreview() {
     PreviewRtlThemeContent {
         SelfDeclarationIdentityScreen(
-            state = IdentityStepState(),
+            state = IdentityStepState(
+                insuranceNumber = "dfvdfv",
+                insuranceType = "fvdfvdfv",
+                patientName = "fdvd dfvd ",
+                patientFamily = "fsdvdf dfvd ",
+                patientFather = "dfddfvdf",
+                patientGender = "dfvdf fvd",
+                patientBirthDate = "dfvdfv",
+                lastVisitDate = "sfdv dfvd"
+            ),
             onIntent = {},
             onBackClicked = {}
         )
