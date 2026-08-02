@@ -213,6 +213,21 @@ fun HealthBottomSheet(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.LocationOn,
+                                        contentDescription = null,
+                                        tint = LocalTaminColors.current.textSecondary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(Spacing.sm))
+                                    TaminText(
+                                        text = item.title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = LocalTaminColors.current.textPrimary
+                                    )
+                                }
+
                                 if (isSelected) {
                                     Icon(
                                         imageVector = Icons.Filled.CheckCircle,
@@ -222,21 +237,6 @@ fun HealthBottomSheet(
                                     )
                                 } else {
                                     Spacer(modifier = Modifier.size(24.dp))
-                                }
-
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    TaminText(
-                                        text = item.title,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = LocalTaminColors.current.textPrimary
-                                    )
-                                    Spacer(modifier = Modifier.width(Spacing.sm))
-                                    Icon(
-                                        imageVector = Icons.Outlined.LocationOn,
-                                        contentDescription = null,
-                                        tint = LocalTaminColors.current.textSecondary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
                                 }
                             }
                         }

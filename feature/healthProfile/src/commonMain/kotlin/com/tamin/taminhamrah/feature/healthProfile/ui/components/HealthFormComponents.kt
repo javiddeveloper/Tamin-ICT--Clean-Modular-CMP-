@@ -52,7 +52,7 @@ import com.tamin.taminhamrah.ui.theme.applicationFont
 fun SegmentedControl(
     modifier: Modifier = Modifier,
     options: List<String>,
-    selectedIndex: Int,
+    selectedIndex: Int?,
     onOptionSelected: (Int) -> Unit,
     activeColor: Color = Color.White,
     activeBgColor: Color = LocalTaminColors.current.blueText
@@ -63,33 +63,33 @@ fun SegmentedControl(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.divider, RoundedCornerShape(13.dp))
-//            .border(0.5.dp, taminColors.border.copy(alpha = 0.5f), RoundedCornerShape(13.dp))
             .padding(4.dp)
             .height(42.dp)
     ) {
         val width = maxWidth
         val tabWidth = width / options.size
 
-        // Animated slider background capsule
-        val indicatorOffset by animateDpAsState(
-            targetValue = tabWidth * selectedIndex,
-            animationSpec = tween(300),
-            label = "tabSlide"
-        )
+        if (selectedIndex != null && selectedIndex in options.indices) {
+            val indicatorOffset by animateDpAsState(
+                targetValue = tabWidth * selectedIndex,
+                animationSpec = tween(300),
+                label = "tabSlide"
+            )
 
-        Box(
-            modifier = Modifier
-                .offset(x = indicatorOffset)
-                .width(tabWidth)
-                .fillMaxHeight()
-                .shadow(
-                    elevation = 4.dp,
-                    shape = RoundedCornerShape(10.dp),
-                    spotColor = activeBgColor.copy(alpha = 0.25f),
-                    ambientColor = activeBgColor.copy(alpha = 0.25f)
-                )
-                .background(activeBgColor, RoundedCornerShape(10.dp))
-        )
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .width(tabWidth)
+                    .fillMaxHeight()
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        spotColor = activeBgColor.copy(alpha = 0.25f),
+                        ambientColor = activeBgColor.copy(alpha = 0.25f)
+                    )
+                    .background(activeBgColor, RoundedCornerShape(10.dp))
+            )
+        }
 
         Row(modifier = Modifier.fillMaxSize()) {
             options.forEachIndexed { index, label ->
@@ -119,6 +119,7 @@ fun SegmentedControl(
         }
     }
 }
+
 
 /**
  * Interactive filter choice chips wrapping nicely inside containers.
@@ -169,7 +170,7 @@ fun InteractiveChoiceChips(
                 contentAlignment = Alignment.Center
             ) {
                 TaminText(
-                    text = label,
+                    text = label.replace(Regex("\\r?\\n"), " ").trim(),
                     fontSize = 12.5.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     color = chipTextColor
@@ -191,7 +192,9 @@ fun StyledTextField(
     label: String,
     placeholder: String,
     leadingIcon: ImageVector? = null,
+    leadingIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     trailingIcon: ImageVector? = null,
+    trailingIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     isValid: Boolean? = null,
     errorText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -248,7 +251,15 @@ fun StyledTextField(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Leading Icon
-                if (leadingIcon != null) {
+                if (leadingIconPainter != null) {
+                    Icon(
+                        painter = leadingIconPainter,
+                        contentDescription = null,
+                        tint = leadingIconColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else if (leadingIcon != null) {
                     Icon(
                         imageVector = leadingIcon,
                         contentDescription = null,
@@ -292,6 +303,14 @@ fun StyledTextField(
                         contentDescription = "معتبر",
                         tint = taminColors.greenText,
                         modifier = Modifier.size(19.dp)
+                    )
+                } else if (trailingIconPainter != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        painter = trailingIconPainter,
+                        contentDescription = null,
+                        tint = trailingIconColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 } else if (trailingIcon != null) {
                     Spacer(modifier = Modifier.width(8.dp))
@@ -397,7 +416,7 @@ fun WarningBanner(
     ) {
         Icon(
             imageVector = Icons.Default.Warning,
-            contentDescription = "قفل",
+            contentDescription = "هشدار",
             tint = taminColors.warning,
             modifier = Modifier
                 .size(18.dp)

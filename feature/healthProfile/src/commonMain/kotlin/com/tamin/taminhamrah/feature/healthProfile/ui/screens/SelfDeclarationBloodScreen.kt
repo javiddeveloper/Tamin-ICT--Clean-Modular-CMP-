@@ -12,8 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.BloodGroupStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -46,13 +50,13 @@ fun SelfDeclarationBloodScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
     bloodGroupOptions: List<LookupItemPR>,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
     val bloodGroupLetters = remember(bloodGroupOptions) { bloodGroupLetters(bloodGroupOptions) }
-    val chipsAlpha = if (state.isBloodGroupUnknown) 0.5f else 1f
 
     val isNextEnabled = state.isBloodGroupUnknown || (state.selectedBloodGroupLetter != null && state.selectedBloodGroupRh != null)
 
@@ -60,12 +64,25 @@ fun SelfDeclarationBloodScreen(
     val dontKnowText = stringResource(Res.string.i_dont_know)
     val dontKnowTextt = stringResource(Res.string.i_dont_knoww)
 
-    LaunchedEffect(Unit) {
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "Screen opened. Initial state:")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupId: ${state.selectedBloodGroupId}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupLetter: ${state.selectedBloodGroupLetter}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "selectedBloodGroupRh: ${state.selectedBloodGroupRh}")
-        com.tamin.taminhamrah.util.Logger.d("BloodGroupScreen", "isBloodGroupUnknown: ${state.isBloodGroupUnknown}")
+    val bloodGroupLabel = stringResource(Res.string.health_blood_blood_group_type)
+    val rhFactorLabel = stringResource(Res.string.health_blood_rh_factor)
+
+    val annotatedBloodGroup = remember(bloodGroupLabel, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(bloodGroupLabel)
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
+            }
+        }
+    }
+
+    val annotatedRhFactor = remember(rhFactorLabel, taminColors.dangerText) {
+        buildAnnotatedString {
+            append(rhFactorLabel)
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
+            }
+        }
     }
 
     Scaffold(
@@ -87,16 +104,21 @@ fun SelfDeclarationBloodScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                BloodShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    BloodShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -107,8 +129,7 @@ fun SelfDeclarationBloodScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-            // Blood Droplet Graphic
+                // Blood Droplet Graphic
             BloodDropletGraphic(
                 selectedLetter = state.selectedBloodGroupLetter,
                 selectedRh = state.selectedBloodGroupRh,
@@ -135,7 +156,7 @@ fun SelfDeclarationBloodScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             TaminText(
-                text = stringResource(Res.string.health_blood_blood_group_type),
+                text = annotatedBloodGroup,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textTertiary,
                 modifier = Modifier.align(Alignment.Start)
@@ -144,14 +165,14 @@ fun SelfDeclarationBloodScreen(
             BloodGroupChipsRow(
                 letters = bloodGroupLetters,
                 selectedLetter = state.selectedBloodGroupLetter,
-                enabled = !state.isBloodGroupUnknown,
-                modifier = Modifier.alpha(chipsAlpha),
+                enabled = true,
                 onLetterSelected = { letter ->
                     onIntent(
                         HealthProfileIntent.UpdateBloodGroup(
                             state.copy(
                                 selectedBloodGroupLetter = letter,
-                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, letter, state.selectedBloodGroupRh)
+                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, letter, state.selectedBloodGroupRh),
+                                isBloodGroupUnknown = false
                             )
                         )
                     )
@@ -161,7 +182,7 @@ fun SelfDeclarationBloodScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             TaminText(
-                text = stringResource(Res.string.health_blood_rh_factor),
+                text = annotatedRhFactor,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textTertiary,
                 modifier = Modifier.align(Alignment.Start)
@@ -169,13 +190,14 @@ fun SelfDeclarationBloodScreen(
 
             RhFactor(
                 selectedRh = state.selectedBloodGroupRh,
-                enabled = !state.isBloodGroupUnknown,
+                enabled = true,
                 onRhSelected = { rh ->
                     onIntent(
                         HealthProfileIntent.UpdateBloodGroup(
                             state.copy(
                                 selectedBloodGroupRh = rh,
-                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, state.selectedBloodGroupLetter, rh)
+                                selectedBloodGroupId = findBloodGroupId(bloodGroupOptions, state.selectedBloodGroupLetter, rh),
+                                isBloodGroupUnknown = false
                             )
                         )
                     )

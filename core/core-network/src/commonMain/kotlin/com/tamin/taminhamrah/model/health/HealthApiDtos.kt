@@ -12,7 +12,7 @@ data class AddSelfDeclarativeRequestDTO(
     @SerialName("natCode") val natCode: String? = null,
     @SerialName("patientID") val patientID: Int? = null,
     @SerialName("smokeDesc") val smokeDesc: String? = null,
-    @SerialName("smoking") val smoking: Int? = null,
+    @SerialName("Smoking") val smoking: Int? = null,
     @SerialName("substanceUse") val substanceUse: Int? = null,
     @SerialName("substanceUseDesc") val substanceUseDesc: String? = null
 )
@@ -431,11 +431,6 @@ data class DrugAllergyDTO(
 )
 
 @Serializable
-data class SyncDrugAllergiesDTO(
-    @SerialName("data") val data: String? = null
-)
-
-@Serializable
 data class SyncIllnessesSelfDecRequestDTO(
     @SerialName("illnessSelfDeclareList") val illnessSelfDeclareList: List<IllnessSelfDeclareDTO>? = null,
     @SerialName("natCode") val natCode: String? = null,
@@ -447,11 +442,6 @@ data class IllnessSelfDeclareDTO(
     @SerialName("illnessComments") val illnessComments: String? = null,
     @SerialName("illnessID") val illnessID: Int? = null,
     @SerialName("relation") val relation: Int? = null
-)
-
-@Serializable
-data class SyncIllnessSelfDeclarativesDTO(
-    @SerialName("data") val data: String? = null
 )
 
 @Serializable
@@ -537,9 +527,9 @@ data class UpdateSelfDeclarativeRequestDTO(
     @SerialName("objectID") val objectID: Int? = null,
     @SerialName("patientID") val patientID: Int? = null,
     @SerialName("smokeDesc") val smokeDesc: String? = null,
-    @SerialName("smoking") val smoking: Int? = null,
+    @SerialName("Smoking") val smoking: Int? = null,
     @SerialName("substanceUse") val substanceUse: Int? = null,
-    @SerialName("substanceUseDesc") val substanceUseDesc: String? = null
+    @SerialName("substanceUseDesc") val substanceUseDesc: String? = null,
 )
 
 @Serializable

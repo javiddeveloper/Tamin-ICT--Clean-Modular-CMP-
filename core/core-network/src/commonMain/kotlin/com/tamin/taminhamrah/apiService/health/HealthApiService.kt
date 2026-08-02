@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.apiService.health
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import kotlinx.serialization.json.JsonElement
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Body
@@ -105,15 +106,19 @@ internal interface HealthApiService {
         @Body updatePatientRequest: UpdatePatientRequestDTO
     ): BaseDTO<UpdatePatientDTO>
 
+    // These two endpoints return a bare success message, not an object payload.
+    // BaseDTO<JsonElement?> + extractMessage() is the app-wide idiom for that
+    // (see PersonalApiService / PensionApiService) and tolerates a null or
+    // object "data" by falling back to the envelope's "reason" field.
     @POST("patient/PatientSelfDeclarative/v1/SyncIllnessSelfDeclaratives")
     suspend fun syncIllnessSelfDeclaratives(
         @Body syncIllnessesRequest: SyncIllnessesSelfDecRequestDTO
-    ): BaseDTO<SyncIllnessSelfDeclarativesDTO>
+    ): BaseDTO<JsonElement?>
 
     @POST("patient/PatientSelfDeclarative/v1/SyncDrugAllergies")
     suspend fun syncDrugAllergies(
         @Body syncDrugAllergiesRequest: SyncDrugAllergiesRequestDTO
-    ): BaseDTO<SyncDrugAllergiesDTO>
+    ): BaseDTO<JsonElement?>
 
     @POST("patient/PatientSelfDeclarative/v1/AddSelfDeclarative")
     suspend fun addSelfDeclarative(

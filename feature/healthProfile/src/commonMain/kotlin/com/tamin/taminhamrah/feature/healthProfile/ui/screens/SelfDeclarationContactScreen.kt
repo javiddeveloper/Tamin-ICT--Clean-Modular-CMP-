@@ -30,17 +30,21 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+
 @Composable
-fun SelfDeclarationContactScreen(
+fun SelfDeclarationContactScreen (
     state: ContactStepState,
     provinceOptions: List<LookupItemPR> = emptyList(),
     cityOptions: List<LookupItemPR> = emptyList(),
     isLoading: Boolean = false,
+    error: String? = null,
     isProvincesLoading: Boolean = false,
     isCitiesLoading: Boolean = false,
     onIntent: (HealthProfileIntent) -> Unit,
@@ -95,16 +99,21 @@ fun SelfDeclarationContactScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                FormFieldsShimmerSkeleton(fieldCount = 6)
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    FormFieldsShimmerSkeleton(fieldCount = 6)
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -131,6 +140,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_mobile_label),
                     placeholder = stringResource(Res.string.health_contact_mobile_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_mobile),
                     isValid = if (showMobileError) false else null,
                     errorText = if (showMobileError) stringResource(Res.string.health_contact_mobile_error) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -152,6 +162,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_email_label),
                     placeholder = stringResource(Res.string.health_contact_email_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_email),
                     isValid = if (showEmailError) false else null,
                     errorText = if (showEmailError) stringResource(Res.string.health_contact_email_error) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -165,15 +176,6 @@ fun SelfDeclarationContactScreen(
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        StyledSelectField(
-                            value = state.provinceLabel,
-                            label = stringResource(Res.string.health_contact_province_label),
-                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
-                            isLoading = isProvincesLoading,
-                            onClick = { showProvinceBottomSheet = true }
-                        )
-                    }
                     Box(modifier = Modifier.weight(1f)) {
                         StyledSelectField(
                             value = state.cityLabel,
@@ -192,6 +194,15 @@ fun SelfDeclarationContactScreen(
                             }
                         )
                     }
+                    Box(modifier = Modifier.weight(1f)) {
+                        StyledSelectField(
+                            value = state.provinceLabel,
+                            label = stringResource(Res.string.health_contact_province_label),
+                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
+                            isLoading = isProvincesLoading,
+                            onClick = { showProvinceBottomSheet = true }
+                        )
+                    }
                 }
 
                 StyledTextField(
@@ -201,7 +212,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_address_label),
                     placeholder = stringResource(Res.string.health_contact_address_placeholder),
-                    singleLine = false
+                    singleLine = false,
                 )
 
                 val showPostcodeError = postcodeTouched && state.postcode.length != 10
@@ -213,6 +224,7 @@ fun SelfDeclarationContactScreen(
                     },
                     label = stringResource(Res.string.health_contact_postcode_label),
                     placeholder = stringResource(Res.string.health_contact_postcode_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_contact_postcode),
                     isValid = if (showPostcodeError) false else null,
                     errorText = if (showPostcodeError) stringResource(Res.string.health_contact_postcode_error) else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -235,7 +247,7 @@ fun SelfDeclarationContactScreen(
                     border = BorderStroke(1.dp, taminColors.blueText)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.LocationOn,
+                        painter = painterResource(Res.drawable.ic_contact_map),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -249,8 +261,9 @@ fun SelfDeclarationContactScreen(
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
+    }
 
-        if (showProvinceBottomSheet) {
+    if (showProvinceBottomSheet) {
             HealthBottomSheet(
                 config = BottomSheetConfig(
                     title = stringResource(Res.string.health_contact_province_bs_title),
@@ -332,7 +345,6 @@ fun SelfDeclarationContactScreen(
         }
     }
 
-}
 
 @Composable
 private fun StyledSelectField(

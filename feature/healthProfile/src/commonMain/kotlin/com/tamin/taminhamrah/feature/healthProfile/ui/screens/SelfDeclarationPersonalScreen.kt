@@ -2,12 +2,10 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,15 +16,16 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PersonalStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -36,7 +35,8 @@ fun SelfDeclarationPersonalScreen(
     maritalStatusOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -66,16 +66,21 @@ fun SelfDeclarationPersonalScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                FormFieldsShimmerSkeleton(fieldCount = 4)
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    FormFieldsShimmerSkeleton(fieldCount = 4)
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -101,24 +106,14 @@ fun SelfDeclarationPersonalScreen(
                     )
                 )
 
-                // Marital Status — Clickable field opening HealthBottomSheet
-                StyledTextField(
-                    value = selectedMaritalLabel,
-                    onValueChange = {},
-                    label = stringResource(Res.string.health_personal_marital_status),
-                    placeholder = stringResource(Res.string.choose),
-                    trailingIcon = Icons.Default.KeyboardArrowDown,
-                    readOnly = true,
-                    onClick = { showMaritalBottomSheet = true }
-                )
-
                 StyledTextField(
                     value = state.job,
                     onValueChange = { jobStr ->
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(job = jobStr)))
                     },
                     label = stringResource(Res.string.health_personal_job_label),
-                    placeholder = stringResource(Res.string.health_personal_job_placeholder)
+                    placeholder = stringResource(Res.string.health_personal_job_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_job)
                 )
 
                 StyledTextField(
@@ -127,7 +122,8 @@ fun SelfDeclarationPersonalScreen(
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(citizenship = cit)))
                     },
                     label = stringResource(Res.string.health_personal_citizenship_label),
-                    placeholder = stringResource(Res.string.health_personal_citizenship_placeholder)
+                    placeholder = stringResource(Res.string.health_personal_citizenship_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_citizenship)
                 )
 
                 StyledTextField(
@@ -136,7 +132,20 @@ fun SelfDeclarationPersonalScreen(
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(nationality = nat)))
                     },
                     label = stringResource(Res.string.health_personal_nationality_label),
-                    placeholder = stringResource(Res.string.health_personal_nationality_placeholder)
+                    placeholder = stringResource(Res.string.health_personal_nationality_placeholder),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_nationality)
+                )
+
+                // Marital Status — Clickable field opening HealthBottomSheet
+                StyledTextField(
+                    value = selectedMaritalLabel,
+                    onValueChange = {},
+                    label = stringResource(Res.string.health_personal_marital_status),
+                    placeholder = stringResource(Res.string.choose),
+                    leadingIconPainter = painterResource(Res.drawable.ic_personal_marital),
+                    trailingIcon = Icons.Default.KeyboardArrowDown,
+                    readOnly = true,
+                    onClick = { showMaritalBottomSheet = true }
                 )
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }

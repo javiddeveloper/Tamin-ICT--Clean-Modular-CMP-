@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.IdentityStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
@@ -30,7 +31,8 @@ fun SelfDeclarationIdentityScreen(
     state: IdentityStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -53,16 +55,21 @@ fun SelfDeclarationIdentityScreen(
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(taminColors.bgPage)
-            ) {
-                IdentityShimmerSkeleton()
+        HealthProfileErrorWrapper(
+            isLoading = isLoading,
+            error = error,
+            onRetry = { onIntent(HealthProfileIntent.RetryStep) },
+            modifier = Modifier.padding(paddingValues),
+            shimmerContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(taminColors.bgPage)
+                ) {
+                    IdentityShimmerSkeleton()
+                }
             }
-        } else {
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -171,8 +178,8 @@ fun SelfDeclarationIdentityScreen(
                                     value = state.patientName
                                 )
                                 IdentityGridItem(
-                                    label = stringResource(Res.string.health_label_father_name),
-                                    value = state.patientFather
+                                    label = stringResource(Res.string.health_label_gender),
+                                    value = state.patientGender
                                 )
                                 IdentityGridItem(
                                     label = stringResource(Res.string.health_label_birth_date),
@@ -188,8 +195,8 @@ fun SelfDeclarationIdentityScreen(
                                     value = state.patientFamily
                                 )
                                 IdentityGridItem(
-                                    label = stringResource(Res.string.health_label_gender),
-                                    value = state.patientGender
+                                    label = stringResource(Res.string.health_label_father_name),
+                                    value = state.patientFather
                                 )
                                 IdentityGridItem(
                                     label = stringResource(Res.string.health_label_insurance_number),
@@ -261,8 +268,9 @@ fun SelfDeclarationIdentityScreen(
         }
     }
 }
+
 @Composable
-fun IdentityRow(label: String, value: String) {
+fun IdentityRow(label: String, value: String, showDivider: Boolean = true) {
     val taminColors = LocalTaminColors.current
     Row(
         modifier = Modifier
@@ -281,7 +289,9 @@ fun IdentityRow(label: String, value: String) {
             color = taminColors.textPrimary
         )
     }
-    HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+    if (showDivider) {
+        HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
+    }
 }
 
 @Composable

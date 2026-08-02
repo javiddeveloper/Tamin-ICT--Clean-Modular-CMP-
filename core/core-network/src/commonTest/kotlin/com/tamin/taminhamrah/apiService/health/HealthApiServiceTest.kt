@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.apiService.health
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.HealthTestData
 import kotlinx.coroutines.test.runTest
@@ -251,26 +252,26 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `syncIllnessSelfDeclaratives should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyObjectSuccess)
+        val jsonResponse = ApiTestUtils.createJsonResponse("\"Success\"")
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val request = SyncIllnessesSelfDecRequestDTO(
             illnessSelfDeclareList = null, natCode = null, patientID = null
         )
         val response = apiService.syncIllnessSelfDeclaratives(request)
-        assertNotNull(response.extractData())
+        assertEquals("Success", response.extractMessage())
     }
 
     @Test
     fun `syncDrugAllergies should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyObjectSuccess)
+        val jsonResponse = ApiTestUtils.createJsonResponse("\"Success\"")
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val request = SyncDrugAllergiesRequestDTO(
             drugAllergyList = null, natCode = null, patientID = null
         )
         val response = apiService.syncDrugAllergies(request)
-        assertNotNull(response.extractData())
+        assertEquals("Success", response.extractMessage())
     }
 
     @Test

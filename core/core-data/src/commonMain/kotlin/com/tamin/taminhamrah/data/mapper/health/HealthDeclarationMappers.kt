@@ -260,10 +260,6 @@ fun UpdateSelfDeclarativeDTO.toDomain() = UpdateSelfDeclarativeDN(
     lastUpdateDate = lastUpdateDate
 )
 
-fun SyncIllnessSelfDeclarativesDTO.toDomain() = SyncResultDN(data = data)
-
-fun SyncDrugAllergiesDTO.toDomain() = SyncResultDN(data = data)
-
 // --- Domain request → DTO request converters ---
 
 fun UpdatePatientRequest.toDTO() = UpdatePatientRequestDTO(
@@ -296,26 +292,18 @@ fun AddSelfDeclarativeRequest.toDTO() = AddSelfDeclarativeRequestDTO(
     natCode = natCode,
     patientID = patientID,
     smoking = smoking,
-    smokeDesc = smokeDesc,
     alcoholUse = alcoholUse,
-    alcoholUseDesc = alcoholUseDesc,
     substanceUse = substanceUse,
-    substanceUseDesc = substanceUseDesc,
     exerciseFrequency = exerciseFrequency,
-    exerciseDesc = exerciseDesc
 )
 
 fun UpdateSelfDeclarativeRequest.toDTO() = UpdateSelfDeclarativeRequestDTO(
     patientID = patientID,
     objectID = objectID,
     smoking = smoking,
-    smokeDesc = smokeDesc,
     alcoholUse = alcoholUse,
-    alcoholUseDesc = alcoholUseDesc,
     substanceUse = substanceUse,
-    substanceUseDesc = substanceUseDesc,
     exerciseFrequency = exerciseFrequency,
-    exerciseDesc = exerciseDesc
 )
 
 fun SyncIllnessSelfDeclarativesRequest.toDTO() = SyncIllnessesSelfDecRequestDTO(
