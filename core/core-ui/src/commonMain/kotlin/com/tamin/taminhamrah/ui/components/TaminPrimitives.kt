@@ -232,11 +232,13 @@ fun DetailRow(
     numeric: Boolean = true,
     /** A unit (e.g. "ریال") drawn to the left of the numeric [value], regardless of RTL. */
     unit: String? = null,
+    /** Row height, for callers whose cards breathe more than the default. */
+    verticalPadding: Dp = Spacing.xs,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.xs),
+            .padding(vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {

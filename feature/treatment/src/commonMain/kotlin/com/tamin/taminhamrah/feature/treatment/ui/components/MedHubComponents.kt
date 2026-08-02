@@ -39,7 +39,6 @@ import com.tamin.taminhamrah.ui.theme.TaminTeal900
 /** The prominent teal gradient behind the "سوابق درمانی من" quick-access card. */
 @Composable
 fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, TaminTeal500))
-
 /**
  * One square tile in the hub's three-up service grid — electronic prescriptions,
  * medical confirmations, miscellaneous claims.

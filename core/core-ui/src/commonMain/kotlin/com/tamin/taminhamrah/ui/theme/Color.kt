@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 // ---- Brand navy (primary / insured-services / account) ----
@@ -150,3 +151,47 @@ val IconGradientGrayEnd = Color(0xFF4A5567)
 
 val IconGradientRedStart = Color(0xFFF0635F)
 val IconGradientRedEnd = Color(0xFFC42121)
+
+// Identity card — the insured-person card on the profile's identity screen. Fixed in both themes,
+// like the treatment cards: it stands in for a physical card, so it keeps its own identity.
+val TaminIdentityCardStart = Color(0xFF2C5CB0)
+val TaminIdentityCardMid = Color(0xFF1C4488)
+val TaminIdentityCardEnd = Color(0xFF123566)
+
+// The card's gold contact chip.
+val TaminIdentityChipStart = Color(0xFFF4E1A0)
+val TaminIdentityChipMid = Color(0xFFD6AE5C)
+val TaminIdentityChipEnd = Color(0xFFBC934A)
+val TaminIdentityChipTrace = Color(0x8078541C)
+
+// Captions on the identity card read as a light blue, not white at low alpha (Figma #9FB6DE).
+val TaminIdentityCardMuted = Color(0xFF9FB6DE)
+
+// The card's drop shadow: a deep blue, not black (Figma rgba(14, 42, 90, 0.34)).
+val TaminIdentityCardShadow = Color(0x570E2A5A)
+
+/** The identity card's face. */
+val TaminIdentityCardGradient = Brush.linearGradient(
+    listOf(TaminIdentityCardStart, TaminIdentityCardMid, TaminIdentityCardEnd),
+)
+
+/** The card's gold contact plate. */
+val TaminIdentityChipGradient = Brush.linearGradient(
+    listOf(TaminIdentityChipStart, TaminIdentityChipMid, TaminIdentityChipEnd),
+)
+
+/**
+ * The card's gloss: a narrow diagonal streak rather than a broad wash — the design export puts
+ * the whole band between 0.44 and 0.56, peaking at 7%. Left at the default corner-to-corner span
+ * so it scales with whatever the card measures to.
+ */
+val TaminIdentityCardShine = Brush.linearGradient(
+    0.44f to Color.Transparent,
+    0.50f to Color.White.copy(alpha = 0.07f),
+    0.56f to Color.Transparent,
+)
+
+/** The pane the holder's photo sits behind, lighter at the top than at the bottom. */
+val TaminIdentityAvatarGlass = Brush.verticalGradient(
+    listOf(Color.White.copy(alpha = 0.125f), Color.White.copy(alpha = 0.05f)),
+)

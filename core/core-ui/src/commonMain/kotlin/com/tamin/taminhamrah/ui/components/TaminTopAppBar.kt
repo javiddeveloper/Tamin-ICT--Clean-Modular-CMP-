@@ -61,6 +61,7 @@ fun TaminTopAppBar(
     action: @Composable (() -> Unit)? = null,
     centerTitle: Boolean = true,
     background: Brush = taminTopAppBarGradient(),
+    cornerRadius: Dp = CornerRadius.sheet,
     bottomPadding: Dp = Spacing.page,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -70,8 +71,8 @@ fun TaminTopAppBar(
             .background(
                 brush = background,
                 shape = RoundedCornerShape(
-                    bottomStart = CornerRadius.sheet,
-                    bottomEnd = CornerRadius.sheet,
+                    bottomStart = cornerRadius,
+                    bottomEnd = cornerRadius,
                 ),
             )
             // One painted area covering the status bar and the bar below it, so the two

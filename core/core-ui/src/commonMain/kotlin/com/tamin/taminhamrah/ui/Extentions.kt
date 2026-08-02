@@ -139,6 +139,13 @@ fun Modifier.animatePlacement(): Modifier = composed {
         }
 }
 
+/**
+ * A field the service left empty reads as [fallback], never as a blank line.
+ *
+ * The fallback is passed in rather than fixed here so the wording stays in the string resources.
+ */
+fun String?.orAbsent(fallback: String): String = if (isNullOrBlank()) fallback else this
+
 fun String.iSValidForSearch(): Boolean = this.trim().length > 2
 
 fun String.iSValidForSearchHashtag(): Boolean = this.trim().length > 1
