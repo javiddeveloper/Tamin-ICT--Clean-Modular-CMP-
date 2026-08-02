@@ -127,6 +127,8 @@
     <!-- Shared Yes / No Options -->
     <string name="health_option_no">خیر</string>
     <string name="health_option_yes">بله</string>
+    <string name="health_option_has">دارد</string>
+    <string name="health_option_has_not">ندارد</string>
 
     <!-- Family Screen Strings -->
     <string name="health_family_title">سلامتی خانواده درجه یک</string>
@@ -190,6 +192,45 @@
     <string name="health_blood_blood_group_type">نوع گروه خونی</string>
     <string name="health_blood_rh_factor">فاکتور Rh</string>
     <string name="health_blood_i_dont_know_my_blood_group">گروه خونی خود را نمی‌دانم</string>
+
+
+    <!-- Review Screen-->
+    <string name="health_review_title">بررسی نهایی پروندهٔ سلامت</string>
+    <string name="health_confirm_info_btn">تأیید و ثبت نهایی اطلاعات</string>
+    <string name="health_warning_banner_desc">لطفاً صحت اطلاعات وارد شده را بررسی و تأیید کنید.</string>
+    <string name="health_review_edit">ویرایش</string>
+    <string name="health_identity_section_title">مشخصات هویتی</string>
+    <string name="health_identity_section_patient_name">نام بیمار:</string>
+    <string name="health_identity_section_insurance">بیمه:</string>
+    <string name="health_identity_section_personal_title">اطلاعات تکمیلی فردی</string>
+    <string name="health_identity_section_personal_nationality">ملیت:</string>
+    <string name="health_identity_section_personal_marriage">تاهل:</string>
+    <string name="health_identity_section_personal_job">شغل:</string>
+    <string name="health_identity_section_contact_title">تماس و سکونت</string>
+    <string name="health_identity_section_contact_mobile">موبایل:</string>
+    <string name="health_identity_section_contact_province_city">شهر / استان:</string>
+    <string name="health_identity_section_contact_postal_code">کد پستی:</string>
+    <string name="health_identity_section_contact_emergency_title">تماس اضطراری</string>
+    <string name="health_identity_section_contact_emergency_name">نام:</string>
+    <string name="health_identity_section_contact_emergency_relation">نسبت:</string>
+    <string name="health_identity_section_contact_height_weight_title">قد و وزن</string>
+    <string name="health_identity_section_contact_height">قد:</string>
+    <string name="health_identity_section_contact_weight">وزن:</string>
+    <string name="health_identity_section_blood_group_title">گروه خونی</string>
+    <string name="health_identity_section_blood_group">گروه خونی:</string>
+    <string name="health_identity_section_lifestyle_title">سبک زندگی</string>
+    <string name="health_identity_section_lifestyle_addiction">اعتیاد:</string>
+    <string name="health_identity_section_lifestyle_alcohol">الکل:</string>
+    <string name="health_identity_section_lifestyle_exercise">ورزش:</string>
+    <string name="health_identity_section_lifestyle_smoking">دخانیات:</string>
+    <string name="health_identity_section_diseases_title">سوالات سلامت</string>
+    <string name="health_identity_section_diseases_risk_factor">سابقهٔ فشار/قند/چربی:</string>
+    <string name="health_identity_section_diseases_chronic">ابتلا به بیماری:</string>
+    <string name="health_identity_section_diseases_mental">اعصاب و روان:</string>
+    <string name="health_identity_section_diseases_cancer">سابقهٔ سرطان:</string>
+    <string name="health_identity_section_family_title">سلامتی خانواده درجه یک</string>
+    <string name="health_identity_section_allergy_title">حساسیت‌های دارویی</string>
+    <string name="health_identity_section_allergy_drugs">داروهای آلرژیک:</string>
 
 
 

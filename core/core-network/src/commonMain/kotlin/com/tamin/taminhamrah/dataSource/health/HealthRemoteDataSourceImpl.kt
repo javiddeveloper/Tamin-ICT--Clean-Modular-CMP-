@@ -158,8 +158,15 @@ internal class HealthRemoteDataSourceImpl(
         apiService.updateSelfDeclarative(request).extractData()
     }
 
-    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): String? = safeCall("syncIllnessSelfDeclaratives") {
-        apiService.syncIllnessSelfDeclaratives(request).extractMessage()
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): SyncIllnessSelfDeclarativesDTO? {
+        return try {
+            apiService.syncIllnessSelfDeclaratives(request).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            Logger.e("HealthDS") { "syncIllnessSelfDeclaratives failed: ${e::class.simpleName} - ${e.message}" }
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
     }
 
     override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): String? = safeCall("syncDrugAllergies") {
