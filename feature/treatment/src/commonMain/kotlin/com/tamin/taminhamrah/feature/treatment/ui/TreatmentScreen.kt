@@ -166,7 +166,6 @@ fun TreatmentContent(
     // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
     // only inside the card morph's layout/draw lambdas, so the fold never recomposes the hub.
     val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
-    val headerProgress = remember(collapse) { { collapse.progress } }
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
     // Hoisted so the section lambdas below capture one string rather than the whole state —
@@ -216,7 +215,7 @@ fun TreatmentContent(
 
         // The header floats on top so that as content scrolls up, it passes underneath the header.
         TreatmentHubHeader(
-            progress = headerProgress,
+            progress = collapse.progressProvider,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
@@ -228,7 +227,7 @@ fun TreatmentContent(
                 pagerState = pagerState,
                 onShowEntitlementReason = { entitlementReason = it },
                 onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
-                collapseProgress = headerProgress,
+                collapseProgress = collapse.progressProvider,
             )
         }
     }

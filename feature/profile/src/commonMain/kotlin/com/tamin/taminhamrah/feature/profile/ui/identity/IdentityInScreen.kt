@@ -103,7 +103,6 @@ fun IdentityInScreen(
     // Folds the card from the body's drag, snapping on release. Read only inside the card's
     // layout/draw lambdas, so the fold never recomposes the screen.
     val collapse = rememberCollapsingHeaderState(IdentityDimens.headerCollapseDistance)
-    val headerProgress = remember(collapse) { { collapse.progress } }
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
     // Hoisted so the header's lambda captures the callback rather than being rebuilt each time —
@@ -162,7 +161,7 @@ fun IdentityInScreen(
 
         // The header floats on top so the body passes underneath it as it scrolls away.
         IdentityHeader(
-            progress = headerProgress,
+            progress = collapse.progressProvider,
             info = info,
             nationality = nationality,
             gender = gender,

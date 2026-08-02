@@ -54,6 +54,12 @@ class CollapsingHeaderState(private val maxCollapsePx: Float) {
             (offsetPx / maxCollapsePx).coerceIn(-OVERSHOOT, 1f + OVERSHOOT)
         }
 
+    /**
+     * [progress] as the lambda the layout and draw modifiers take. Allocated once with the state,
+     * so handing it down costs no call site a `remember` of its own.
+     */
+    val progressProvider: () -> Float = { progress }
+
     val nestedScrollConnection: NestedScrollConnection = object : NestedScrollConnection {
 
         // Dragging the content up folds the header first, before the content itself scrolls.
