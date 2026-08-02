@@ -25,6 +25,7 @@ import com.tamin.taminhamrah.model.health.UpdatePatientRequestDTO
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeDTO
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeRequestDTO
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.tools.ApiOutcome
 
 interface HealthRemoteDataSource {
 
@@ -55,11 +56,13 @@ interface HealthRemoteDataSource {
     suspend fun getAllDrugs(): AllergicDrugsDTO?
 
     // --- Mutations (POST) ---
-    suspend fun updatePatient(request: UpdatePatientRequestDTO): UpdatePatientDTO?
-    suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): AddSelfDeclarativeDTO?
-    suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): UpdateSelfDeclarativeDTO?
+    // ApiOutcome carries the backend's `problems` list through instead of only
+    // throwing on failure - see BaseDTO.extractDataOrProblems()/ApiOutcome docs.
+    suspend fun updatePatient(request: UpdatePatientRequestDTO): ApiOutcome<UpdatePatientDTO>
+    suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): ApiOutcome<AddSelfDeclarativeDTO>
+    suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): ApiOutcome<UpdateSelfDeclarativeDTO>
     /** Returns the server's success message; see HealthApiService for why this is a String. */
-    suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): String?
-    suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): String?
+    suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): ApiOutcome<String>
+    suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): ApiOutcome<String>
 }
 

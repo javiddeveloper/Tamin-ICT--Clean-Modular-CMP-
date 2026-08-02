@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.Bot
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProblemPR
 
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.IllnessGroupPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
@@ -182,6 +183,11 @@ data class SelfDeclarationUiState(
     val currentStep: SelfDeclarationStep = SelfDeclarationStep.GATE,
     val isLoading: Boolean = false,
     val error: String? = null,
+    // Business-level problems from the last submit attempt (updatePatient,
+    // addSelfDeclarative, syncIllnessSelfDeclaratives, ...) - see
+    // HealthProfileViewModel.submitFullDeclaration(). Cleared at the start of
+    // every new submit attempt.
+    val submitProblems: List<HealthProblemPR> = emptyList(),
     val identity: IdentityStepState = IdentityStepState(),
     val personal: PersonalStepState = PersonalStepState(),
     val contact: ContactStepState = ContactStepState(),
@@ -262,6 +268,11 @@ data class HealthProfileUiState(
         data class BloodGroupUpdated(val bloodGroup: BloodGroupStepState) : PartialState
         data class LifestyleUpdated(val lifestyle: LifestyleStepState) : PartialState
         data class AllergyUpdated(val allergy: AllergyStepState) : PartialState
+
+        // ── Submission ────────────────────────────────────────────────────────
+        // Non-empty when a mutation call in submitFullDeclaration() came back
+        // with backend `problems` instead of throwing (see HealthMutationResult).
+        data class SubmitProblems(val problems: List<HealthProblemPR>) : PartialState
     }
 }
 

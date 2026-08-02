@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.useCases.health
 
+import com.tamin.taminhamrah.model.health.HealthProblemDN
 import com.tamin.taminhamrah.model.health.UpdatePatientDN
 import com.tamin.taminhamrah.model.health.UpdatePatientRequest
 import com.tamin.taminhamrah.repository.FakeHealthRepository
@@ -9,6 +10,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class UpdatePatientUseCaseTest : BaseUseCaseTest() {
 
@@ -49,7 +51,20 @@ class UpdatePatientUseCaseTest : BaseUseCaseTest() {
         repository.updatePatientResult = expected
 
         val result = useCase(buildRequest())
-        assertEquals(expected, result)
+        assertEquals(expected, result.data)
+        assertTrue(result.problems.isEmpty())
+        assertTrue(result.isSuccess)
+    }
+
+    @Test
+    fun `invoke should return business problems instead of throwing when backend flags them`() = runTest {
+        val expectedProblems = listOf(HealthProblemDN(code = 9001, message = "شناسه رکورد باید بزرگتر از 1 باشد."))
+        repository.updatePatientProblems = expectedProblems
+
+        val result = useCase(buildRequest())
+        assertEquals(null, result.data)
+        assertEquals(expectedProblems, result.problems)
+        assertTrue(!result.isSuccess)
     }
 
     @Test

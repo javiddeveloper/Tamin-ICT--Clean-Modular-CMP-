@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.mapper.health
 
 import com.tamin.taminhamrah.model.health.*
+import com.tamin.taminhamrah.tools.ProblemDTO
 
 fun PatientGeneralDTO.toDomain() = PatientGeneralDN(
     ptientID = ptientID,
@@ -258,6 +259,13 @@ fun UpdateSelfDeclarativeDTO.toDomain() = UpdateSelfDeclarativeDN(
     exerciseFreqTitle = exerciseFreqTitle,
     exerciseDesc = exerciseDesc,
     lastUpdateDate = lastUpdateDate
+)
+
+// --- Business problems (BaseDTO.problems envelope) ---
+
+fun ProblemDTO.toDomain() = HealthProblemDN(
+    code = errorCode,
+    message = errorMsg?.takeIf { it.isNotBlank() } ?: "خطای نامشخص"
 )
 
 // --- Domain request → DTO request converters ---

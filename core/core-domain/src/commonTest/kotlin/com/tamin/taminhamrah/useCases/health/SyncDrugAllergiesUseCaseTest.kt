@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.useCases.health
 
 import com.tamin.taminhamrah.model.health.DrugAllergyRequest
+import com.tamin.taminhamrah.model.health.HealthProblemDN
 import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequest
 import com.tamin.taminhamrah.model.health.SyncResultDN
 import com.tamin.taminhamrah.repository.FakeHealthRepository
@@ -10,6 +11,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class SyncDrugAllergiesUseCaseTest : BaseUseCaseTest() {
 
@@ -37,7 +39,8 @@ class SyncDrugAllergiesUseCaseTest : BaseUseCaseTest() {
         repository.syncDrugAllergiesResult = expected
 
         val result = useCase(buildRequest())
-        assertEquals(expected, result)
+        assertEquals(expected, result.data)
+        assertTrue(result.problems.isEmpty())
     }
 
     @Test
@@ -46,7 +49,17 @@ class SyncDrugAllergiesUseCaseTest : BaseUseCaseTest() {
         repository.syncDrugAllergiesResult = expected
 
         val result = useCase(buildRequest())
-        assertEquals(expected, result)
+        assertEquals(expected, result.data)
+    }
+
+    @Test
+    fun `invoke should return business problems instead of throwing when backend flags them`() = runTest {
+        val expectedProblems = listOf(HealthProblemDN(code = 9005, message = "شناسه دارو نامعتبر است."))
+        repository.syncDrugAllergiesProblems = expectedProblems
+
+        val result = useCase(buildRequest())
+        assertEquals(null, result.data)
+        assertEquals(expectedProblems, result.problems)
     }
 
     @Test

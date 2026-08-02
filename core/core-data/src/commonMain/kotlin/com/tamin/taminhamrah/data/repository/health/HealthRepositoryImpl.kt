@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
 import com.tamin.taminhamrah.model.health.BloodGroupDN
 import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
 import com.tamin.taminhamrah.model.health.DrugItemDN
+import com.tamin.taminhamrah.model.health.HealthMutationResult
 import com.tamin.taminhamrah.model.health.IllnessItemDN
 import com.tamin.taminhamrah.model.health.MaritalStatusDN
 import com.tamin.taminhamrah.model.health.PatientGeneralDN
@@ -212,30 +213,47 @@ internal class HealthRepositoryImpl(
 
     // --- Mutations (POST, remote-only) ---
 
-    override suspend fun updatePatient(request: UpdatePatientRequest): UpdatePatientDN {
-        return healthRemoteDataSource.updatePatient(request.toDTO())?.toDomain()
-            ?: throw IllegalStateException("updatePatient returned null")
+    // Mutations return HealthMutationResult: `data` is non-null on success; when the
+    // backend flags business `problems` (invalid record id, duplicate declaration,
+    // etc.) `data` is null and `problems` carries the mapped details instead of
+    // this call throwing - see HealthMutationResult / ApiOutcome docs.
+    override suspend fun updatePatient(request: UpdatePatientRequest): HealthMutationResult<UpdatePatientDN> {
+        val outcome = healthRemoteDataSource.updatePatient(request.toDTO())
+        return HealthMutationResult(
+            data = outcome.data?.toDomain(),
+            problems = outcome.problems.map { it.toDomain() }
+        )
     }
 
-    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): AddSelfDeclarativeDN {
-        return healthRemoteDataSource.addSelfDeclarative(request.toDTO())?.toDomain()
-            ?: throw IllegalStateException("addSelfDeclarative returned null")
+    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): HealthMutationResult<AddSelfDeclarativeDN> {
+        val outcome = healthRemoteDataSource.addSelfDeclarative(request.toDTO())
+        return HealthMutationResult(
+            data = outcome.data?.toDomain(),
+            problems = outcome.problems.map { it.toDomain() }
+        )
     }
 
-    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): UpdateSelfDeclarativeDN {
-        return healthRemoteDataSource.updateSelfDeclarative(request.toDTO())?.toDomain()
-            ?: throw IllegalStateException("updateSelfDeclarative returned null")
+    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): HealthMutationResult<UpdateSelfDeclarativeDN> {
+        val outcome = healthRemoteDataSource.updateSelfDeclarative(request.toDTO())
+        return HealthMutationResult(
+            data = outcome.data?.toDomain(),
+            problems = outcome.problems.map { it.toDomain() }
+        )
     }
 
-    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): SyncResultDN {
-        val message = healthRemoteDataSource.syncIllnessSelfDeclaratives(request.toDTO())
-            ?: throw IllegalStateException("syncIllnessSelfDeclaratives returned null")
-        return SyncResultDN(data = message)
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): HealthMutationResult<SyncResultDN> {
+        val outcome = healthRemoteDataSource.syncIllnessSelfDeclaratives(request.toDTO())
+        return HealthMutationResult(
+            data = outcome.data?.let { SyncResultDN(data = it) },
+            problems = outcome.problems.map { it.toDomain() }
+        )
     }
 
-    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): SyncResultDN {
-        val message = healthRemoteDataSource.syncDrugAllergies(request.toDTO())
-            ?: throw IllegalStateException("syncDrugAllergies returned null")
-        return SyncResultDN(data = message)
+    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): HealthMutationResult<SyncResultDN> {
+        val outcome = healthRemoteDataSource.syncDrugAllergies(request.toDTO())
+        return HealthMutationResult(
+            data = outcome.data?.let { SyncResultDN(data = it) },
+            problems = outcome.problems.map { it.toDomain() }
+        )
     }
 }
