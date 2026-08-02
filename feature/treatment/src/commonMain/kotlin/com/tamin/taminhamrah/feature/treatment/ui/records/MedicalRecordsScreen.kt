@@ -200,8 +200,7 @@ private fun periodLabel(period: RecordPeriod, customRange: Pair<String, String>?
 /**
  * Failure state for the records list: what went wrong and how to recover, nothing more.
  *
- * No retry button — the list is pull-to-refresh, so one gesture both reloads a good list and
- * recovers from a failure, instead of the screen offering two ways to do the same thing.
+ * No retry affordance: recovering from a failure means re-entering the screen.
  */
 @Composable
 private fun RecordsErrorState(message: String) {
@@ -306,8 +305,6 @@ fun MedicalRecordsScreen(
     // Set only by the تاریخ دلخواه picker; null means the selected preset decides the range.
     var customRange by remember { mutableStateOf<Pair<String, String>?>(null) }
     var searchCriteria by remember { mutableStateOf(RecordSearchCriteria()) }
-    // Incremented on pull-to-refresh to reset stagger entrance animations for newly fetched items.
-    var refreshCount by remember { mutableIntStateOf(0) }
 
     // Patient, period and category are all endpoint parameters, so any change re-queries.
     // Held until a patient resolves, so the shortcut path never fires a blank-code query.
@@ -338,17 +335,12 @@ fun MedicalRecordsScreen(
         selectedPeriod = selectedPeriod,
         customRange = customRange,
         selectedTab = selectedTab,
-        refreshCount = refreshCount,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
         onTabSelected = { selectedTab = it },
         onPatientSelected = { selectedPatient = it },
         onPeriodSelected = { selectedPeriod = it },
         onRecordSelected = { onOpenRecord(it, selectedPatient) },
-        onRetry = {
-            refreshCount++
-            viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
-        },
         onCustomRangePicked = { start, end ->
             customRange = start to end
             selectedPeriod = RecordPeriod.CUSTOM
@@ -400,13 +392,11 @@ fun MedicalRecordsContent(
     selectedPeriod: RecordPeriod,
     customRange: Pair<String, String>?,
     selectedTab: RecordTab,
-    refreshCount: Int = 0,
     onBack: () -> Unit,
     onTabSelected: (RecordTab) -> Unit,
     onPatientSelected: (String) -> Unit,
     onPeriodSelected: (RecordPeriod) -> Unit,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
-    onRetry: () -> Unit,
     onCustomRangePicked: (startDate: String, endDate: String) -> Unit,
     searchCriteria: RecordSearchCriteria,
     onSearchApplied: (RecordSearchCriteria) -> Unit,
@@ -477,7 +467,7 @@ fun MedicalRecordsContent(
         )
     }
 
-    val staggerState = rememberStaggeredEntranceState(key = Triple(selectedPatient to selectedPeriod, selectedTab, refreshCount))
+    val staggerState = rememberStaggeredEntranceState(key = selectedPatient to selectedPeriod to selectedTab)
 
     Scaffold(
         modifier = modifier,
@@ -565,7 +555,7 @@ fun MedicalRecordsContent(
                     item { RecordsShimmerSkeleton() }
 
                 // A failed request and a genuinely empty result read very differently, so they
-                // get different states. Both recover the same way: pull to refresh.
+                // get different states.
                 state.error != null -> item { RecordsErrorState(message = state.error) }
 
                 visibleRecords.isEmpty() -> item {
@@ -740,7 +730,6 @@ fun MedicalRecordsPreview() {
             onPatientSelected = {},
             onPeriodSelected = {},
             onRecordSelected = {},
-            onRetry = {},
             onCustomRangePicked = { _, _ -> },
             searchCriteria = RecordSearchCriteria(),
             onSearchApplied = {},

@@ -107,7 +107,7 @@ internal fun CertificateList(
             isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
 
             // A failed request and a genuinely empty result read very differently, so they get
-            // different states. Both recover the same way: pull to refresh.
+            // different states.
             error != null -> item { CostsErrorState(message = error) }
 
             certificates.isEmpty() -> item {
@@ -416,8 +416,7 @@ private fun CertificateAction(
 /**
  * Failure state: what went wrong and how to recover, nothing more.
  *
- * No retry button — the list is pull-to-refresh, so one gesture both reloads a good list and
- * recovers from a failure, instead of the screen offering two ways to do the same thing.
+ * No retry affordance: recovering from a failure means re-entering the screen.
  */
 @Composable
 private fun CostsErrorState(message: String) {
