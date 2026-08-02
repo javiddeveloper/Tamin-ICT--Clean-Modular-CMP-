@@ -434,7 +434,7 @@ private fun Modifier.animatedErrorBorder(
                 drawPath(
                     path = errorPath,
                     color = errorColor.copy(alpha = errorColorAlpha.value),
-                    style = Stroke(width = strokeWidthPx)
+                    style = Stroke(width = strokeWidthPx * 1.5f)
                 )
             }
         }
