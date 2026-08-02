@@ -818,31 +818,27 @@ class HealthProfileViewModel(
                     sd.lifestyle.copy(
                         isSmoking = isSmoking,
                         smokingStatusId = info.smokingStatus,
-                        smokingPattern = if (isSmoking == true) {
-                            info.smokingDesc.takeIf { it.isNotBlank() }
-                                ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label
-                        } else null,
+                        smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() }
+                            ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label
+                            ?: (if (isSmoking == false) SmokingStatus.NEVER_CONSUMED.type else null),
 
                         hasAddiction = hasAddiction,
                         substanceStatusId = info.substanceUsage,
-                        substancePattern = if (hasAddiction == true) {
-                            info.substanceDesc.takeIf { it.isNotBlank() }
-                                ?: currentState.actFrequencyOptions.find { it.id == info.substanceUsage }?.label
-                        } else null,
+                        substancePattern = info.substanceDesc.takeIf { it.isNotBlank() }
+                            ?: currentState.actFrequencyOptions.find { it.id == info.substanceUsage }?.label
+                            ?: (if (hasAddiction == false) LifeStyleStatus.NEVER.title else null),
 
                         isDrinking = isDrinking,
                         drinkingStatusId = info.alcoholUsage,
-                        drinkingPattern = if (isDrinking == true) {
-                            info.alcoholDesc.takeIf { it.isNotBlank() }
-                                ?: LifeStyleStatus.fromStyleId(info.alcoholUsage)?.title
-                        } else null,
+                        drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() }
+                            ?: LifeStyleStatus.fromStyleId(info.alcoholUsage)?.title
+                            ?: (if (isDrinking == false) LifeStyleStatus.NEVER.title else null),
 
                         isExercising = isExercising,
                         exerciseStatusId = info.exerciseFreq,
-                        exerciseFrequency = if (isExercising == true) {
-                            info.exerciseDesc.takeIf { it.isNotBlank() }
-                                ?: LifeStyleStatus.fromStyleId(info.exerciseFreq)?.title
-                        } else null
+                        exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() }
+                            ?: LifeStyleStatus.fromStyleId(info.exerciseFreq)?.title
+                            ?: (if (isExercising == false) LifeStyleStatus.NEVER.title else null)
                     )
                 }
             )

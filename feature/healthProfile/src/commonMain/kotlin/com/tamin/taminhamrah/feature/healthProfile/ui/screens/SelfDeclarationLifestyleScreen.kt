@@ -61,7 +61,8 @@ fun SelfDeclarationLifestyleScreen(
         stringResource(Res.string.health_option_no)
     )
 
-    val isNextEnabled = (state.isSmoking != null && (state.isSmoking == false || state.smokingStatusId != null)) &&
+    val isNextEnabled =
+        (state.isSmoking != null && (state.isSmoking == false || state.smokingStatusId != null)) &&
             (state.hasAddiction != null && (state.hasAddiction == false || state.substanceStatusId != null)) &&
             (state.isDrinking != null && (state.isDrinking == false || state.drinkingStatusId != null)) &&
             (state.isExercising != null && (state.isExercising == false || state.exerciseStatusId != null))
@@ -144,377 +145,397 @@ fun SelfDeclarationLifestyleScreen(
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
 
-            // ── Smoking ──────────────────────────────────────────────────────
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconBox(
-                        painter = painterResource(Res.drawable.ic_health_tobacco),
-                        backgroundColor = taminColors.warning.copy(alpha = 0.13f),
-                        contentDescription = null,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TaminText(
-                        text = annotatedSmoking,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = taminColors.textPrimary
-                    )
-                }
-
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = when (state.isSmoking) {
-                        true -> 0
-                        false -> 1
-                        null -> null
-                    },
-                    onOptionSelected = { idx ->
-                        val isYes = idx == 0
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    isSmoking = isYes,
-                                    smokingStatusId = if (isYes) state.smokingStatusId else null,
-                                    smokingPattern = if (isYes) state.smokingPattern else null
-                                )
-                            )
+                // ── Smoking ──────────────────────────────────────────────────────
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_tobacco),
+                            backgroundColor = taminColors.warning.copy(alpha = 0.13f),
+                            contentDescription = null,
                         )
-                        if (isYes) showSmokingBottomSheet = true
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            text = annotatedSmoking,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
                     }
-                )
 
-                if (state.isSmoking == true && state.smokingPattern != null) {
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showSmokingBottomSheet = true },
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
-                                .border(
-                                    1.dp,
-                                    taminColors.blueText.copy(alpha = 0.3f),
-                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
-                                )
-                                .padding(horizontal = 14.dp, vertical = 8.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_family_edit),
-                                    contentDescription = null,
-                                    tint = taminColors.blueText,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                TaminText(
-                                    text = "ویرایش",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = taminColors.blueText
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = when (state.isSmoking) {
+                            true -> 0
+                            false -> 1
+                            null -> null
+                        },
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 0
+                            onIntent(
+                                HealthProfileIntent.UpdateLifestyle(
+                                    state.copy(
+                                        isSmoking = isYes,
+                                        smokingStatusId = if (isYes) state.smokingStatusId else SmokingStatus.NEVER_CONSUMED.id,
+                                        smokingPattern = if (isYes) state.smokingPattern else (smokingStatusOptions.find { it.id == SmokingStatus.NEVER_CONSUMED.id }?.label
+                                            ?: SmokingStatus.NEVER_CONSUMED.type)
                                     )
                                 )
-                            }
+                            )
+                            if (isYes) showSmokingBottomSheet = true
                         }
-                        CustomChip(
-                            text = state.smokingPattern,
-                            containerColor = taminColors.dangerBg,
-                            textColor = taminColors.dangerText,
-                            border = BorderStroke(
-                                1.dp,
-                                taminColors.dangerText.copy(alpha = 0.3f)
-                            )
-                        )
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconBox(
-                        painter = painterResource(Res.drawable.ic_health_addiction),
-                        backgroundColor = taminColors.dangerText.copy(alpha = 0.13f),
-                        contentDescription = null,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TaminText(
-                        text = annotatedAddiction,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = taminColors.textPrimary
-                    )
-                }
 
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = when (state.hasAddiction) {
-                        true -> 0
-                        false -> 1
-                        null -> null
-                    },
-                    onOptionSelected = { idx ->
-                        val isYes = idx == 0
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    hasAddiction = isYes,
-                                    substanceStatusId = if (isYes) state.substanceStatusId else null,
-                                    substancePattern = if (isYes) state.substancePattern else null
-                                )
-                            )
-                        )
-                        if (isYes) showAddictionBottomSheet = true
-                    }
-                )
-
-                if (state.hasAddiction == true && state.substancePattern != null) {
-                    androidx.compose.foundation.layout.FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showAddictionBottomSheet = true },
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Edit button chip
-                        Box(
+                    if (state.smokingPattern != null) {
+                        FlowRow(
                             modifier = Modifier
-                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
-                                .border(
-                                    1.dp,
-                                    taminColors.blueText.copy(alpha = 0.3f),
-                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
-                                )
-                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                                .fillMaxWidth()
+                                .clickable { showSmokingBottomSheet = true },
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        taminColors.blueBg,
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        taminColors.blueText.copy(alpha = 0.3f),
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
                             ) {
-                                androidx.compose.material3.Icon(
-                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
-                                    contentDescription = null,
-                                    tint = taminColors.blueText,
-                                    modifier = Modifier.size(14.dp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_family_edit),
+                                        contentDescription = null,
+                                        tint = taminColors.blueText,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    TaminText(
+                                        text = "ویرایش",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = taminColors.blueText
+                                        )
+                                    )
+                                }
+                            }
+                            CustomChip(
+                                text = state.smokingPattern,
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
                                 )
-                                TaminText(
-                                    text = "ویرایش",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = taminColors.blueText
+                            )
+                        }
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_addiction),
+                            backgroundColor = taminColors.dangerText.copy(alpha = 0.13f),
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            text = annotatedAddiction,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
+                    }
+
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = when (state.hasAddiction) {
+                            true -> 0
+                            false -> 1
+                            null -> null
+                        },
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 0
+                            onIntent(
+                                HealthProfileIntent.UpdateLifestyle(
+                                    state.copy(
+                                        hasAddiction = isYes,
+                                        substanceStatusId = if (isYes) state.substanceStatusId else LifeStyleStatus.NEVER.id,
+                                        substancePattern = if (isYes) state.substancePattern else (actFrequencyOptions.find { it.id == LifeStyleStatus.NEVER.id }?.label
+                                            ?: LifeStyleStatus.NEVER.title)
                                     )
                                 )
-                            }
+                            )
+                            if (isYes) showAddictionBottomSheet = true
                         }
-                        CustomChip(
-                            text = state.substancePattern,
-                            containerColor = taminColors.dangerBg,
-                            textColor = taminColors.dangerText,
-                            border = BorderStroke(
-                                1.dp,
-                                taminColors.dangerText.copy(alpha = 0.3f)
-                            )
-                        )
-                    }
-                }
-
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconBox(
-                        painter = painterResource(Res.drawable.ic_health_alcohol),
-                        backgroundColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
-                        contentDescription = null,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TaminText(
-                        text = annotatedAlcohol,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = taminColors.textPrimary
-                    )
-                }
 
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = when (state.isDrinking) {
-                        true -> 0
-                        false -> 1
-                        null -> null
-                    },
-                    onOptionSelected = { idx ->
-                        val isYes = idx == 0
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    isDrinking = isYes,
-                                    drinkingStatusId = if (isYes) state.drinkingStatusId else null,
-                                    drinkingPattern = if (isYes) state.drinkingPattern else null,
-                                )
-                            )
-                        )
-                        if (isYes) showAlcoholBottomSheet = true
-                    }
-                )
-
-                if (state.isDrinking == true && state.drinkingPattern != null) {
-                    androidx.compose.foundation.layout.FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showAlcoholBottomSheet = true },
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Edit button chip
-                        Box(
+                    if (state.substancePattern != null) {
+                        androidx.compose.foundation.layout.FlowRow(
                             modifier = Modifier
-                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
-                                .border(
-                                    1.dp,
-                                    taminColors.blueText.copy(alpha = 0.3f),
-                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
-                                )
-                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                                .fillMaxWidth()
+                                .clickable { showAddictionBottomSheet = true },
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            // Edit button chip
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        taminColors.blueBg,
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        taminColors.blueText.copy(alpha = 0.3f),
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
                             ) {
-                                androidx.compose.material3.Icon(
-                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
-                                    contentDescription = null,
-                                    tint = taminColors.blueText,
-                                    modifier = Modifier.size(14.dp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    androidx.compose.material3.Icon(
+                                        painter = org.jetbrains.compose.resources.painterResource(
+                                            taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit
+                                        ),
+                                        contentDescription = null,
+                                        tint = taminColors.blueText,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    TaminText(
+                                        text = "ویرایش",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = taminColors.blueText
+                                        )
+                                    )
+                                }
+                            }
+                            CustomChip(
+                                text = state.substancePattern,
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
                                 )
-                                TaminText(
-                                    text = "ویرایش",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = taminColors.blueText
+                            )
+                        }
+                    }
+
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_alcohol),
+                            backgroundColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            text = annotatedAlcohol,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
+                    }
+
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = when (state.isDrinking) {
+                            true -> 0
+                            false -> 1
+                            null -> null
+                        },
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 0
+                            onIntent(
+                                HealthProfileIntent.UpdateLifestyle(
+                                    state.copy(
+                                        isDrinking = isYes,
+                                        drinkingStatusId = if (isYes) state.drinkingStatusId else LifeStyleStatus.NEVER.id,
+                                        drinkingPattern = if (isYes) state.drinkingPattern else LifeStyleStatus.NEVER.title,
                                     )
                                 )
-                            }
+                            )
+                            if (isYes) showAlcoholBottomSheet = true
                         }
-                        CustomChip(
-                            text = state.drinkingPattern,
-                            containerColor = taminColors.dangerBg,
-                            textColor = taminColors.dangerText,
-                            border = BorderStroke(
-                                1.dp,
-                                taminColors.dangerText.copy(alpha = 0.3f)
-                            )
-                        )
-                    }
-                }
-
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconBox(
-                        painter = painterResource(Res.drawable.ic_health_exercise),
-                        backgroundColor = taminColors.greenText.copy(alpha = 0.13f),
-                        contentDescription = null,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TaminText(
-                        text = annotatedExercise,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = taminColors.textPrimary
-                    )
-                }
 
-                SegmentedControl(
-                    options = optionsYesNo,
-                    selectedIndex = when (state.isExercising) {
-                        true -> 0
-                        false -> 1
-                        null -> null
-                    },
-                    onOptionSelected = { idx ->
-                        val isYes = idx == 0
-                        onIntent(
-                            HealthProfileIntent.UpdateLifestyle(
-                                state.copy(
-                                    isExercising = isYes,
-                                    exerciseStatusId = if (isYes) state.exerciseStatusId else null,
-                                    exerciseFrequency = if (isYes) state.exerciseFrequency else null,
-                                )
-                            )
-                        )
-                        if (isYes) showExerciseBottomSheet = true
-                    }
-                )
-
-                if (state.isExercising == true && state.exerciseFrequency != null) {
-                    androidx.compose.foundation.layout.FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showExerciseBottomSheet = true },
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Edit button chip
-                        Box(
+                    if (state.drinkingPattern != null) {
+                        androidx.compose.foundation.layout.FlowRow(
                             modifier = Modifier
-                                .background(taminColors.blueBg, androidx.compose.foundation.shape.RoundedCornerShape(100.dp))
-                                .border(
-                                    1.dp,
-                                    taminColors.blueText.copy(alpha = 0.3f),
-                                    androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
-                                )
-                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                                .fillMaxWidth()
+                                .clickable { showAlcoholBottomSheet = true },
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            // Edit button chip
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        taminColors.blueBg,
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        taminColors.blueText.copy(alpha = 0.3f),
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
                             ) {
-                                androidx.compose.material3.Icon(
-                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
-                                    contentDescription = null,
-                                    tint = taminColors.blueText,
-                                    modifier = Modifier.size(14.dp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    androidx.compose.material3.Icon(
+                                        painter = org.jetbrains.compose.resources.painterResource(
+                                            taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit
+                                        ),
+                                        contentDescription = null,
+                                        tint = taminColors.blueText,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    TaminText(
+                                        text = "ویرایش",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = taminColors.blueText
+                                        )
+                                    )
+                                }
+                            }
+                            CustomChip(
+                                text = state.drinkingPattern,
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
                                 )
-                                TaminText(
-                                    text = "ویرایش",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = taminColors.blueText
+                            )
+                        }
+                    }
+
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBox(
+                            painter = painterResource(Res.drawable.ic_health_exercise),
+                            backgroundColor = taminColors.greenText.copy(alpha = 0.13f),
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TaminText(
+                            text = annotatedExercise,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
+                    }
+
+                    SegmentedControl(
+                        options = optionsYesNo,
+                        selectedIndex = when (state.isExercising) {
+                            true -> 0
+                            false -> 1
+                            null -> null
+                        },
+                        onOptionSelected = { idx ->
+                            val isYes = idx == 0
+                            onIntent(
+                                HealthProfileIntent.UpdateLifestyle(
+                                    state.copy(
+                                        isExercising = isYes,
+                                        exerciseStatusId = if (isYes) state.exerciseStatusId else LifeStyleStatus.NEVER.id,
+                                        exerciseFrequency = if (isYes) state.exerciseFrequency else LifeStyleStatus.NEVER.title,
                                     )
                                 )
-                            }
-                        }
-                        CustomChip(
-                            text = state.exerciseFrequency,
-                            containerColor = taminColors.dangerBg,
-                            textColor = taminColors.dangerText,
-                            border = BorderStroke(
-                                1.dp,
-                                taminColors.dangerText.copy(alpha = 0.3f)
                             )
-                        )
+                            if (isYes) showExerciseBottomSheet = true
+                        }
+                    )
+
+                    if (state.exerciseFrequency != null) {
+                        androidx.compose.foundation.layout.FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showExerciseBottomSheet = true },
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Edit button chip
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        taminColors.blueBg,
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        taminColors.blueText.copy(alpha = 0.3f),
+                                        androidx.compose.foundation.shape.RoundedCornerShape(100.dp)
+                                    )
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    androidx.compose.material3.Icon(
+                                        painter = org.jetbrains.compose.resources.painterResource(
+                                            taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit
+                                        ),
+                                        contentDescription = null,
+                                        tint = taminColors.blueText,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    TaminText(
+                                        text = "ویرایش",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = taminColors.blueText
+                                        )
+                                    )
+                                }
+                            }
+                            CustomChip(
+                                text = state.exerciseFrequency,
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
+                                )
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
         }
     }
@@ -536,7 +557,16 @@ fun SelfDeclarationLifestyleScreen(
             ),
             onDismissRequest = {
                 if (state.smokingStatusId == null) {
-                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isSmoking = false)))
+                    onIntent(
+                        HealthProfileIntent.UpdateLifestyle(
+                            state.copy(
+                                isSmoking = false,
+                                smokingStatusId = SmokingStatus.NEVER_CONSUMED.id,
+                                smokingPattern = smokingStatusOptions.find { it.id == SmokingStatus.NEVER_CONSUMED.id }?.label
+                                    ?: "هرگز مصرف نشده"
+                            )
+                        )
+                    )
                 }
                 showSmokingBottomSheet = false
             },
@@ -574,7 +604,16 @@ fun SelfDeclarationLifestyleScreen(
             ),
             onDismissRequest = {
                 if (state.substanceStatusId == null) {
-                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(hasAddiction = false)))
+                    onIntent(
+                        HealthProfileIntent.UpdateLifestyle(
+                            state.copy(
+                                hasAddiction = false,
+                                substanceStatusId = LifeStyleStatus.NEVER.id,
+                                substancePattern = actFrequencyOptions.find { it.id == LifeStyleStatus.NEVER.id }?.label
+                                    ?: LifeStyleStatus.NEVER.title
+                            )
+                        )
+                    )
                 }
                 showAddictionBottomSheet = false
             },
@@ -612,7 +651,15 @@ fun SelfDeclarationLifestyleScreen(
             ),
             onDismissRequest = {
                 if (state.drinkingStatusId == null) {
-                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isDrinking = false)))
+                    onIntent(
+                        HealthProfileIntent.UpdateLifestyle(
+                            state.copy(
+                                isDrinking = false,
+                                drinkingStatusId = LifeStyleStatus.NEVER.id,
+                                drinkingPattern = LifeStyleStatus.NEVER.title
+                            )
+                        )
+                    )
                 }
                 showAlcoholBottomSheet = false
             },
@@ -650,7 +697,15 @@ fun SelfDeclarationLifestyleScreen(
             ),
             onDismissRequest = {
                 if (state.exerciseStatusId == null) {
-                    onIntent(HealthProfileIntent.UpdateLifestyle(state.copy(isExercising = false)))
+                    onIntent(
+                        HealthProfileIntent.UpdateLifestyle(
+                            state.copy(
+                                isExercising = false,
+                                exerciseStatusId = LifeStyleStatus.NEVER.id,
+                                exerciseFrequency = LifeStyleStatus.NEVER.title
+                            )
+                        )
+                    )
                 }
                 showExerciseBottomSheet = false
             },
