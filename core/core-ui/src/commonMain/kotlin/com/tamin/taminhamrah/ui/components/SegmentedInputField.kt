@@ -23,6 +23,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
+import com.tamin.taminhamrah.util.toPersianDigits
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Path
@@ -327,7 +328,7 @@ private fun DigitSlot(
         ) {
             if (currentDigit != null) {
                 Text(
-                    text = currentDigit.toString(),
+                    text = currentDigit.toString().toPersianDigits(),
                     style = MaterialTheme.typography.titleLarge,
                     color = textColor
                 )
