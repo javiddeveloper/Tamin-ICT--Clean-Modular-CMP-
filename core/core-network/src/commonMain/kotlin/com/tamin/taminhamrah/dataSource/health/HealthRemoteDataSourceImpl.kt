@@ -57,9 +57,10 @@ internal class HealthRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getPatientGeneral(natCode: String): PatientGeneralDTO? = safeCall("getPatientGeneral") {
-        apiService.getPatientGeneral(natCode).extractData()
-    }
+    override suspend fun getPatientGeneral(natCode: String): PatientGeneralDTO? =
+        safeCall("getPatientGeneral") {
+            apiService.getPatientGeneral(natCode).extractData()
+        }
 
     override suspend fun getPatientSelfDeclarative(
         natCode: String,
@@ -79,28 +80,40 @@ internal class HealthRemoteDataSourceImpl(
         natCode: String,
         patientID: Int
     ): ListData<PatientHospitalizationsDTO>? = safeCall("getPatientHospitalizations") {
-        apiService.getPatientHospitalize(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
+        apiService.getPatientHospitalize(
+            mapOf(
+                "natCode" to natCode,
+                "patientID" to patientID.toString()
+            )
+        ).extractData()
     }
 
     override suspend fun getPatientVisits(
         natCode: String,
         patientID: Int
     ): ListData<PatientVisitDTO>? = safeCall("getPatientVisits") {
-        apiService.getPatientVisit(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
+        apiService.getPatientVisit(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
+            .extractData()
     }
 
     override suspend fun getPatientLabs(
         natCode: String,
         patientID: Int
     ): ListData<PatientLabDTO>? = safeCall("getPatientLabs") {
-        apiService.getPatientLab(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
+        apiService.getPatientLab(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
+            .extractData()
     }
 
     override suspend fun getPatientImaging(
         natCode: String,
         patientID: Int
     ): ListData<PatientImagingDTO>? = safeCall("getPatientImaging") {
-        apiService.getPatientImaging(mapOf("natCode" to natCode, "patientID" to patientID.toString())).extractData()
+        apiService.getPatientImaging(
+            mapOf(
+                "natCode" to natCode,
+                "patientID" to patientID.toString()
+            )
+        ).extractData()
     }
 
     // --- Location ---
@@ -109,9 +122,10 @@ internal class HealthRemoteDataSourceImpl(
         apiService.getAllProvinces().extractData()
     }
 
-    override suspend fun getProvinceCities(provinceID: Int): ProvinceCitiesDTO? = safeCall("getProvinceCities") {
-        apiService.getProvinceCities(provinceID).extractData()
-    }
+    override suspend fun getProvinceCities(provinceID: Int): ProvinceCitiesDTO? =
+        safeCall("getProvinceCities") {
+            apiService.getProvinceCities(provinceID).extractData()
+        }
 
     // --- Lookup ---
 
@@ -119,27 +133,32 @@ internal class HealthRemoteDataSourceImpl(
         apiService.getBloodGroups()
     }
 
-    override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? = safeCall("getMaritalStatus") {
-        apiService.getMaritalStatus()
-    }
+    override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? =
+        safeCall("getMaritalStatus") {
+            apiService.getMaritalStatus()
+        }
 
-    override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? = safeCall("getSmokingStatus") {
-        apiService.getSmokingStatus()
-    }
+    override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? =
+        safeCall("getSmokingStatus") {
+            apiService.getSmokingStatus()
+        }
 
-    override suspend fun getActFrequencies(): List<ActFrequencyDTO>? = safeCall("getActFrequencies") {
-        apiService.getActFrequencies()
-    }
+    override suspend fun getActFrequencies(): List<ActFrequencyDTO>? =
+        safeCall("getActFrequencies") {
+            apiService.getActFrequencies()
+        }
 
     // --- Illnesses ---
 
-    override suspend fun getSelfDeclarableIllnesses(): DeclarableIllnessesDTO? = safeCall("getSelfDeclarableIllnesses") {
-        apiService.getSelfDeclarableIllnesses().extractData()
-    }
+    override suspend fun getSelfDeclarableIllnesses(): DeclarableIllnessesDTO? =
+        safeCall("getSelfDeclarableIllnesses") {
+            apiService.getSelfDeclarableIllnesses().extractData()
+        }
 
-    override suspend fun getSelfDeclarableIllnessesByGroup(): SelfDeclarableIllnessesByGroupDTO? = safeCall("getSelfDeclarableIllnessesByGroup") {
-        apiService.getSelfDeclarableIllnessesByGroup().extractData()
-    }
+    override suspend fun getSelfDeclarableIllnessesByGroup(): SelfDeclarableIllnessesByGroupDTO? =
+        safeCall("getSelfDeclarableIllnessesByGroup") {
+            apiService.getSelfDeclarableIllnessesByGroup().extractData()
+        }
 
     // --- Drug master list ---
 
