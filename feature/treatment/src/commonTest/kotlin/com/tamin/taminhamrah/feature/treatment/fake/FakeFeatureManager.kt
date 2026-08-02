@@ -15,4 +15,6 @@ class FakeFeatureManager(
 
     override suspend fun isFeatureEnabled(flag: FeatureFlag): Boolean =
         status is FeatureStatus.Enabled
+
+    override suspend fun getDisabledMessage(flag: FeatureFlag): String? = null
 }

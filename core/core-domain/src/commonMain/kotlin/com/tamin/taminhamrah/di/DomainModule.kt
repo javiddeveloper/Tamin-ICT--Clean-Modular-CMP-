@@ -41,6 +41,7 @@ import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
+import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -102,6 +103,20 @@ import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationa
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
+import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
+import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCaseImpl
+import com.tamin.taminhamrah.useCases.agent.ObserveCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.PruneEmptyAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionsUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
+import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
@@ -110,6 +125,9 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
 
 val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
@@ -174,6 +192,22 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    // Agent
+    factoryOf(::SendAgentPromptUseCase)
+    factoryOf(::CheckChatAllowedUseCase)
+    // Agent conversation cache
+    factory<GetCurrentUserNationalCodeUseCase> { GetCurrentUserNationalCodeUseCaseImpl(get()) }
+    factoryOf(::PruneEmptyAgentSessionUseCase)
+    factoryOf(::GetAgentSessionsUseCase)
+    factoryOf(::GetAgentSessionUseCase)
+    factoryOf(::StartAgentSessionUseCase)
+    factoryOf(::SaveCachedMessageUseCase)
+    factoryOf(::GetCachedMessagesUseCase)
+    factoryOf(::ObserveCachedMessagesUseCase)
+    factoryOf(::DeletePendingAgentMessagesUseCase)
+    factoryOf(::DeleteAgentSessionUseCase)
+    factoryOf(::UpdateAgentSessionUseCase)
+
     factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetRolesUseCase)
 
@@ -197,6 +231,9 @@ val domainModule = module {
     factoryOf(::GetWorkshopRecentlyAddedMembersUseCase)
     factoryOf(::GetWorkshopsDebtsListUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetTreatmentCostsUseCase)
+    factoryOf(::GetTreatmentCostsPDFUseCase)
+    factoryOf(::SendToInboxTreatmentCostsUseCase)
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)
@@ -206,6 +243,7 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+    factoryOf(::SetThemeUseCase)
     factoryOf(::GetAllProvincesUseCase)
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)

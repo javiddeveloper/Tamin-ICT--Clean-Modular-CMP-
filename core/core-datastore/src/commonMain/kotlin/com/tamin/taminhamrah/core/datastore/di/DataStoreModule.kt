@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.core.datastore.di
 
 import com.russhwolf.settings.Settings
-import com.tamin.taminhamrah.core.datastore.UserPreferencesRepository
+import com.tamin.taminhamrah.repository.UserPreferencesRepository
 import com.tamin.taminhamrah.core.datastore.UserPreferencesRepositoryImpl
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.core.datastore.token.TokenStoreManagerImpl

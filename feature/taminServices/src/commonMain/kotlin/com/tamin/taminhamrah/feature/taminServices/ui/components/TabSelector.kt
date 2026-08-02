@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.model.RolePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -58,7 +59,7 @@ fun TabSelector(
 
             Box(
                 modifier = Modifier
-                    .offset(x = indicatorOffset)
+                    .offset { IntOffset(x = indicatorOffset.roundToPx(), y = 0) }
                     .width(tabWidth)
                     .fillMaxHeight()
                     .shadow(elevation = 2.dp, shape = MaterialTheme.shapes.large)

@@ -25,6 +25,9 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_call
 
 /**
  * Components for the contracted-centres screen: the search field that lives in the teal
@@ -166,7 +169,7 @@ private fun CenterActionRow(
                 )
             }
             Text(
-                text = "تماس",
+                text = stringResource(Res.string.action_call),
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.teal,
             )

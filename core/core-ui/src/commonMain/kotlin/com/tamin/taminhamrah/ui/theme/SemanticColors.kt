@@ -17,8 +17,10 @@ data class TaminColors(
     val iconGradientSecondary: Brush,
     val iconGradientNeutral: Brush,
     val iconGradientDanger: Brush,
+    val iconGradientSuccess: Brush,
     val iconGlassShine: Brush,
     val iconGlassBorder: Brush,
+    val validationCardGradient: Brush,
 
     // Text
     val textPrimary: Color,
@@ -29,6 +31,7 @@ data class TaminColors(
 
     // Status pills (background + foreground pairs)
     val greenBg: Color,
+    val greenBorder: Color,
     val greenText: Color,
     val blueBg: Color,
     val blueText: Color,
@@ -41,6 +44,9 @@ data class TaminColors(
 
     // Medical / Teal
     val teal: Color,
+
+    // Shadows
+    val shadowPrimary: Color,
 
     // Glass / tab-bar tokens (translucency layers for the bottom nav)
     val glassA1: Color,
@@ -55,6 +61,10 @@ data class TaminColors(
     val tabbarShine: Color,
     val tabActiveBg: Color,
 
+    val txtNameProfile: Color,
+    val txtNatProfile: Color,
+    val shadowAvatarProfile: Color,
+
     // Brand gradients (hero headers, feature cards)
     val heroGradient: Brush,
     val medicalGradient: Brush,
@@ -62,13 +72,17 @@ data class TaminColors(
     // Top app bar. Held as stops rather than a Brush so the bar owns its sweep
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
+    val profileGradientStops: List<Color>,
     val aiAssistantGradient: Brush,
     val grey900 : Color,
 
     val hawkesBlue : Color,
     val chipBg: Color,
     val warning: Color,
-    val fuchsiaBlue: Color
+    val fuchsiaBlue: Color ,
+    // Solid tint derived from the AI-assistant gradient family — used for blur tints
+    // and fallbacks where a single color (not a Brush) is required.
+    val aiAssistantTint: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -83,6 +97,7 @@ val LightTaminColors = TaminColors(
     textMuted = TaminLightTextMuted,
     chevron = Gray300,
     greenBg = Secondary50,
+    greenBorder = TaminDarkGreenAlpha,
     greenText = TaminLightSuccess,
     blueBg = Primary50,
     blueText = TaminLightInfo,
@@ -112,6 +127,7 @@ val LightTaminColors = TaminColors(
         )
     ),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
+    iconGradientSuccess = Brush.verticalGradient(listOf(TaminGreen, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(
         listOf(
             Color.White.copy(alpha = 0.40f),
@@ -124,6 +140,7 @@ val LightTaminColors = TaminColors(
             Color.White.copy(alpha = 0.05f)
         )
     ),
+    validationCardGradient = Brush.verticalGradient(listOf(Color(0xADFFFFFF), Color(0x6BFFFFFF))),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8CFFFFFF),
     glassA2 = Color(0x52FFFFFF),
@@ -140,9 +157,16 @@ val LightTaminColors = TaminColors(
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
     // Same stops as the quick-access card; the bar just sweeps the other way.
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
+    profileGradientStops = listOf(TaminNavy900, TaminNavy700),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
+    aiAssistantTint = TaminPurple900,
+    shadowPrimary = Primary700.copy(alpha = 0.5f),
+
+    txtNameProfile = TaminLightSurface,
+    txtNatProfile = TaminLightTextSubProfile,
+    shadowAvatarProfile = Color.Black,
     hawkesBlue = Color(0xFFDCE7FB),
     chipBg = Color(0xFFEFF6FF),
     grey900 = Color(0xFFE2E8F0),
@@ -162,6 +186,7 @@ val DarkTaminColors = TaminColors(
     textMuted = TaminDarkTextMuted,
     chevron = TaminDarkChevron,
     greenBg = TaminDarkGreenBg,
+    greenBorder = TaminDarkGreenAlpha,
     greenText = TaminDarkSuccess,
     blueBg = TaminDarkBlueBg,
     blueText = TaminDarkInfo,
@@ -191,6 +216,7 @@ val DarkTaminColors = TaminColors(
         )
     ),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
+    iconGradientSuccess = Brush.verticalGradient(listOf(TaminDarkSuccess, TaminGreenDark)),
     iconGlassShine = Brush.verticalGradient(
         listOf(
             Color.White.copy(alpha = 0.40f),
@@ -201,6 +227,12 @@ val DarkTaminColors = TaminColors(
         listOf(
             Color.White.copy(alpha = 0.60f),
             Color.White.copy(alpha = 0.05f)
+        )
+    ),
+    validationCardGradient = Brush.horizontalGradient(
+        listOf(
+            TaminTeal700.copy(alpha = 0.35f),
+            TaminTeal700.copy(alpha = 0.15f)
         )
     ),
     disabledAlpha = 0.38f,
@@ -220,12 +252,20 @@ val DarkTaminColors = TaminColors(
     // Dark mode overrides every hero to the same teal-to-blue wash, status bar included,
     // so the bar and the strip above it join into one continuous band.
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
+    profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
-    grey900 = Color(0xFFE2E8F0),
-    hawkesBlue = Color(0xFFDCE7FB),
+
+    hawkesBlue = TaminDarkOuterBorder,
     chipBg = Color(0x293B82F6),
+    shadowPrimary = Color.Black.copy(alpha = 0.4f),
+    txtNameProfile = TaminLightSurface,
+    txtNatProfile = TaminLightTextSubProfile,
+    shadowAvatarProfile = Color.Black,
+    aiAssistantTint = TaminPurple900,
+    grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFFBBF24),
     fuchsiaBlue = Color(0xFFB79AEE)
 )
+

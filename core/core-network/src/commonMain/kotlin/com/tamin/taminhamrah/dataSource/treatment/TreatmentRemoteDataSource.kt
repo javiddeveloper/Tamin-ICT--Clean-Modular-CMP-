@@ -43,4 +43,11 @@ interface TreatmentRemoteDataSource {
         noteHeadEprescID: String?,
         currentUserNationalCode: String?
     ): PdfDownloadDTO
+
+    suspend fun getTreatmentCosts(params: Map<String, String>): ListData<TreatmentCostDTO>?
+
+    suspend fun getTreatmentCostsPDF(repId: String): PdfDownloadDTO
+
+    /** Queues the certificate for the person's inbox; returns the service's acknowledgement. */
+    suspend fun sendToInboxTreatmentCosts(repId: String): String
 }

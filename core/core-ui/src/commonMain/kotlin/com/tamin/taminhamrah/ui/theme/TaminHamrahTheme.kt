@@ -9,6 +9,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import com.tamin.taminhamrah.ui.LocalThemeRevealController
+import com.tamin.taminhamrah.ui.ThemeRevealHost
+import com.tamin.taminhamrah.ui.rememberThemeRevealController
 
 val LocalTaminColors = compositionLocalOf { LightTaminColors }
 
@@ -57,16 +60,22 @@ fun TaminHamrahTheme(
 ) {
     val extendedColors = if (darkTheme) DarkTaminColors else LightTaminColors
     val materialColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val revealController = rememberThemeRevealController()
 
     CompositionLocalProvider(
         LocalTaminColors provides extendedColors,
         LocalLayoutDirection provides LayoutDirection.Rtl,
+        LocalThemeRevealController provides revealController,
     ) {
         MaterialTheme(
             colorScheme = materialColorScheme,
             typography = taminHamrahTypography(),
             shapes = TaminHamrahShapes,
-            content = content
-        )
+        ) {
+            ThemeRevealHost(
+                controller = revealController,
+                content = { content() }
+            )
+        }
     }
 }

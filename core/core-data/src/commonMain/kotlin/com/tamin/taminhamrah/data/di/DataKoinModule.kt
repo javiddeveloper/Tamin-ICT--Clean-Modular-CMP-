@@ -4,7 +4,9 @@ import com.tamin.taminhamrah.data.feature.FeatureManagerImpl
 import com.tamin.taminhamrah.data.repository.UserRepositoryImpl
 import com.tamin.taminhamrah.data.repository.CityProvinceRepositoryImpl
 import com.tamin.taminhamrah.data.repository.RecipientRepositoryImpl
+import com.tamin.taminhamrah.data.repository.agent.AgentChatCacheRepositoryImpl
 import com.tamin.taminhamrah.data.repository.common.CommonRepositoryImpl
+import com.tamin.taminhamrah.repository.AgentChatCacheRepository
 import com.tamin.taminhamrah.data.repository.treatment.TreatmentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personalInbox.PersonalInboxRepositoryImpl
 import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
@@ -42,6 +44,7 @@ val dataKoinModule = module {
     singleOf(::PensionRepositoryImpl) { bind<PensionRepository>() }
     singleOf(::HistoryRepositoryImpl) { bind<HistoryRepository>() }
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
+    singleOf(::AgentChatCacheRepositoryImpl) { bind<AgentChatCacheRepository>() }
     singleOf(::WorkShopsRepositoryImpl) { bind<WorkShopsRepository>() }
     singleOf(::PersonalInboxRepositoryImpl) { bind<PersonalInboxRepository>() }
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }

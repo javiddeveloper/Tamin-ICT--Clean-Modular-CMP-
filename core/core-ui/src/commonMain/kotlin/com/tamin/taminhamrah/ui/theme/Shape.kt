@@ -38,6 +38,8 @@ object Spacing {
     val page = 18.dp
     val cardGap = 11.dp
     val tabSelector = 6.dp
+    val badgeVertical = 5.dp
+    val highlightHeight = 36.5.dp
 }
 
 object CornerRadius {
@@ -47,7 +49,9 @@ object CornerRadius {
     val md = 8.dp
     val lg = 12.dp
     val xl = 16.dp
+    val xlg = 17.dp
     val x2l = 24.dp
+    val x3l = 40.dp
     val full = 9999.dp
 
     val avatarTile = 10.dp
@@ -65,9 +69,11 @@ object Elevation {
     val xxs = 1.dp
     val xs = 2.dp
     val sm = 4.dp
+    val smPlus = 5.dp
     val md = 6.dp
     val lg = 12.dp
     val xl = 24.dp
+    val xxl = 30.dp
 }
 
 object IconSize {
@@ -75,7 +81,17 @@ object IconSize {
     val small = 16.dp
     val medium = 24.dp
     val large = 38.dp
+    val largePlus = 42.dp
     val xlarge = 48.dp
     val xxlarge = 56.dp
     val navBar = 24.dp
+}
+
+/**
+ * Placeholder sizes for a value that has not arrived, so a shimmering figure occupies roughly what
+ * the real one will and nothing resizes when it lands.
+ */
+object ShimmerSize {
+    val valueWidth = 56.dp
+    val valueHeight = 14.dp
 }

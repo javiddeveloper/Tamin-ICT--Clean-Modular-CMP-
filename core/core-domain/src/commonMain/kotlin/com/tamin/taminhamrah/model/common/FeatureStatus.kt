@@ -68,7 +68,11 @@ enum class FeatureFlag(val id: Int) {
     INSTALLMENT_DEBT(1009),
     CONSTRUCTION_INSURANCE(1010),
     OCCURRENCE(1011),
-    LAWS(1012);
+    LAWS(1012),
+
+    // ─── AI Assistant / Chatbot ──────────────────────────────────────────────
+    /** Controls the entry point for the Agent and chatbot access */
+    AGENT(2000);
 
     companion object {
         fun fromId(id: Int?) = entries.find { it.id == id }

@@ -9,7 +9,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
@@ -26,34 +29,66 @@ import taminx.core.core_ui.ic_tamin_cross
 /**
  * Full-screen PDF viewer, used wherever a downloaded PDF is shown.
  *
- * It drains the download's channel **once** (a [io.ktor.utils.io.ByteReadChannel] is single-use),
- * then uses the same bytes for both things the user wants on «دریافت»: it renders every page inline
- * ([PdfPagesView]) and saves the file to the device + posts a notification ([rememberPdfSaver]).
- * Feature modules just pass the [PdfDownloadPR] and never touch ktor.
+ * It decides whether the download is needed at all. A PDF saved under [fileName] by an earlier run
+ * is rendered straight off the device — [onRequestDownload] is never called, nothing is written a
+ * second time, and the person is told it was already downloaded. Otherwise, it asks for the file,
+ * drains the download's channel **once** (a [io.ktor.utils.io.ByteReadChannel] is single-use) and
+ * uses those bytes for both jobs: rendering every page inline ([PdfPagesView]) and saving to the
+ * device with a notification ([rememberPdfSaver]).
+ *
+ * Callers own the file's name and how it is fetched; they never touch ktor or the file system.
+ *
+ * @param pdf the fetched download, or null until [onRequestDownload] has produced one.
+ * @param downloadFailed the requested download came back with nothing, so stop waiting for it.
  */
 @Composable
 fun TaminPdfViewer(
-    pdf: PdfDownloadPR?,
     fileName: String,
+    pdf: PdfDownloadPR?,
+    downloadFailed: Boolean,
+    onRequestDownload: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
     val saver = rememberPdfSaver()
-    val bytes by produceState<ByteArray?>(initialValue = null, pdf) {
+    val requestDownload by rememberUpdatedState(onRequestDownload)
+
+    // null while the bytes are still being found, empty when there is nothing renderable.
+    var bytes by remember(fileName) { mutableStateOf<ByteArray?>(null) }
+    // Guards against an earlier screen's PDF still sitting in state: nothing is drained until this
+    // viewer is the one that asked for a download.
+    var awaitingDownload by remember(fileName) { mutableStateOf(false) }
+
+    LaunchedEffect(fileName) {
+        val saved = saver.load(fileName)
+        if (saved == null) {
+            awaitingDownload = true
+            requestDownload()
+        } else {
+            bytes = saved
+            // Nothing to write — this only reports that the file was downloaded before.
+            saver.save(fileName, saved)
+        }
+    }
+
+    LaunchedEffect(pdf, downloadFailed, awaitingDownload) {
+        if (!awaitingDownload) return@LaunchedEffect
+        if (pdf == null) {
+            // The fetch came back empty-handed; say so rather than spin forever.
+            if (downloadFailed) bytes = ByteArray(0)
+            return@LaunchedEffect
+        }
         val drained = try {
-            pdf?.pdf?.pdf?.let { withContext(Dispatchers.Default) { it.toByteArray() } }
+            pdf.pdf?.pdf?.let { withContext(Dispatchers.Default) { it.toByteArray() } }
         } catch (_: Throwable) {
             null
         }
         // A failed download can still answer 200 with a body that isn't a PDF (an HTML/JSON error
         // page). Rendering that crashes the renderer and saving it writes garbage, so a non-PDF
         // body is treated exactly like "no file at all": the message below, no render, no save.
-        value = drained?.takeIf { it.looksLikePdf() } ?: ByteArray(0)
-    }
-
-    // As soon as the bytes are ready, save to the device — the download runs alongside rendering.
-    LaunchedEffect(bytes, fileName) {
-        bytes?.takeIf { it.isNotEmpty() }?.let { saver.save(fileName, it) }
+        val usable = drained?.takeIf { it.looksLikePdf() }
+        bytes = usable ?: ByteArray(0)
+        usable?.let { saver.save(fileName, it) }
     }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {

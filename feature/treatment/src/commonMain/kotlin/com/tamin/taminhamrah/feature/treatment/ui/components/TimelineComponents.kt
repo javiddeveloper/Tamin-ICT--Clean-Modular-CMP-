@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Spacer
@@ -19,12 +20,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_user
+import taminx.core.core_ui.records_details
+import taminx.core.core_ui.search_advanced_cd
+import taminx.core.core_ui.share_yours
+import taminx.core.core_ui.unit_rial
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,6 +64,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * Components for the medical-records timeline: the record card and its date-group
@@ -74,7 +82,8 @@ fun MedicalRecordCard(
     date: String,
     title: String,
     subtitle: String,
-    shareAmount: String,
+    /** `null` until this record's price arrives, which is a separate request from the list. */
+    shareAmount: String?,
     accentColor: Color,
     accentContainerColor: Color,
     onClick: () -> Unit,
@@ -128,7 +137,7 @@ fun MedicalRecordCard(
  * Paints the 4dp category stripe down the card's leading edge — the right side under
  * the app's right-to-left layout, the left side if it is ever rendered left-to-right.
  */
-private fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
+internal fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
     val barWidth = TreatmentDimens.accentBarWidth.toPx()
     val x = if (layoutDirection == LayoutDirection.Rtl) size.width - barWidth else 0f
     drawRect(
@@ -139,7 +148,7 @@ private fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
 }
 
 @Composable
-private fun MedicalRecordFooter(shareAmount: String) {
+private fun MedicalRecordFooter(shareAmount: String?) {
     val colors = LocalTaminColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -151,7 +160,7 @@ private fun MedicalRecordFooter(shareAmount: String) {
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
-                text = "سهم شما",
+                text = stringResource(Res.string.share_yours),
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textMuted,
             )
@@ -161,13 +170,21 @@ private fun MedicalRecordFooter(shareAmount: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
             ) {
-                NumericText(
-                    text = shareAmount,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.textPrimary,
-                )
+                if (shareAmount == null) {
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(TreatmentDimens.recordShareShimmerWidth)
+                            .height(TreatmentDimens.recordShareShimmerHeight),
+                    )
+                } else {
+                    NumericText(
+                        text = shareAmount,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.textPrimary,
+                    )
+                }
                 Text(
-                    text = "ریال",
+                    text = stringResource(Res.string.unit_rial),
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.textPrimary,
                 )
@@ -182,7 +199,7 @@ private fun MedicalRecordFooter(shareAmount: String) {
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Text(
-                text = "جزئیات",
+                text = stringResource(Res.string.records_details),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
             )
@@ -242,7 +259,7 @@ fun TreatmentFilterChip(
 /** Horizontally scrollable strip of category filters above the timeline with auto-scrolling. */
 @Composable
 fun TreatmentFilterChipRow(
-    categories: List<String>,
+    categories: ImmutableList<String>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -295,6 +312,10 @@ fun TimelineFilterBar(
     // Which chooser is open, so its chevron can point the other way.
     personExpanded: Boolean = false,
     dateExpanded: Boolean = false,
+    // Each chooser's menu is composed beside the chip that opens it, so the menu anchors there
+    // instead of floating somewhere the trigger has no relationship with.
+    personMenu: @Composable () -> Unit = {},
+    dateMenu: @Composable () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -303,22 +324,28 @@ fun TimelineFilterBar(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        FilterTrigger(
-            label = personLabel,
-            leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
-            trailingIcon = dropdownIcon,
-            onClick = onPersonClick,
-            modifier = Modifier.weight(1f),
-            expanded = personExpanded,
-        )
-        FilterTrigger(
-            label = dateLabel,
-            leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
-            trailingIcon = dropdownIcon,
-            onClick = onDateClick,
-            modifier = Modifier.weight(1f),
-            expanded = dateExpanded,
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            FilterTrigger(
+                label = personLabel,
+                leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
+                trailingIcon = dropdownIcon,
+                onClick = onPersonClick,
+                modifier = Modifier.fillMaxWidth(),
+                expanded = personExpanded,
+            )
+            personMenu()
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            FilterTrigger(
+                label = dateLabel,
+                leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
+                trailingIcon = dropdownIcon,
+                onClick = onDateClick,
+                modifier = Modifier.fillMaxWidth(),
+                expanded = dateExpanded,
+            )
+            dateMenu()
+        }
         Box(
             modifier = Modifier
                 .size(38.dp)
@@ -329,7 +356,7 @@ fun TimelineFilterBar(
         ) {
             Icon(
                 imageVector = searchIcon,
-                contentDescription = "جست‌وجوی پیشرفته",
+                contentDescription = stringResource(Res.string.search_advanced_cd),
                 tint = Color.White,
                 modifier = Modifier.size(IconSize.small),
             )
@@ -405,11 +432,12 @@ private const val CHEVRON_ROTATION_EXPANDED = -90f
 @Composable
 fun CostTotalsBar(
     insuredShareLabel: String,
-    insuredShareAmount: String,
+    /** `null` for a figure still being fetched; that tile shimmers on its own. */
+    insuredShareAmount: String?,
     organizationShareLabel: String,
-    organizationShareAmount: String,
+    organizationShareAmount: String?,
     totalLabel: String,
-    totalAmount: String,
+    totalAmount: String?,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current

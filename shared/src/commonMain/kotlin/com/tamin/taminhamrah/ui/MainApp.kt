@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,9 +43,6 @@ fun MainApp(
         darkTheme = darkTheme
     ) {
         AppToastHost {
-            // App-wide default: dark icons over the light theme's pale surfaces, light ones
-            // over the dark theme's. A screen that puts a dark header behind the status bar
-            // can override this for as long as it is shown.
             StatusBarIcons(darkIcons = !darkTheme)
             RequestNotificationPermissionOnLogin(isLoggedIn = uiState.isLoggedIn)
             Box(modifier = Modifier.fillMaxSize()) {
@@ -61,6 +59,5 @@ fun MainApp(
                 }
             }
         }
-
     }
 }

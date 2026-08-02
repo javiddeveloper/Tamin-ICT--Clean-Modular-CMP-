@@ -28,6 +28,7 @@ data class DeservedTreatmentDTO(
     @SerialName("regWorkshopName") val regWorkshopName: String? = null,
     @SerialName("risuid") val risuid: String? = null,
     @SerialName("message") val message: String? = null,
+    @SerialName("finalDesc") val finalDesc: String? = null,
     @SerialName("illness") val illness: String? = null,
     @SerialName("trackingCode") val trackingCode: String? = null
 )

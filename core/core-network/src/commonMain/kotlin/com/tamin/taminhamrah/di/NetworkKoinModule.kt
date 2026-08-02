@@ -106,13 +106,30 @@ val networkModule = module {
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
         )
     }
+
+    // AI HTTP Client
+    single(named("aiHttpClient")) {
+        createHttpClient(
+            engine = get(),
+            authRepository = get<AuthRepository>(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = NetworkConstants.AI_BASE_URL
+        ).config {
+            install(com.tamin.taminhamrah.apiService.agent.AiChatTokenPlugin) {
+                this.json = get<Json>()
+                this.aiBaseUrl = NetworkConstants.AI_BASE_URL
+            }
+        }
+    }
 }
 
 private fun createHttpClient(
     engine: HttpClientEngine,
     authRepository: AuthRepository,
     json: Json,
-    timeoutMillis: Long
+    timeoutMillis: Long,
+    baseUrl: String = NetworkConstants.BASE_URL
 ): HttpClient {
     return HttpClient(engine) {
         expectSuccess = false
@@ -172,7 +189,7 @@ private fun createHttpClient(
         }
 
         defaultRequest {
-            url(NetworkConstants.BASE_URL)
+            url(baseUrl)
             header(HttpHeaders.Accept, "*/*")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }

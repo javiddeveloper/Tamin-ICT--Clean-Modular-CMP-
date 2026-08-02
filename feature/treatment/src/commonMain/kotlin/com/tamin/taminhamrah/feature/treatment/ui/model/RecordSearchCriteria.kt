@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
+import com.tamin.taminhamrah.util.currentTimeMillis
+import com.tamin.taminhamrah.util.getOneMonthAgoTimestamp
 
 /**
  * What the advanced search asks for.
@@ -29,6 +31,20 @@ data class RecordSearchCriteria(
     /** Whether a cost bound was given, which is what makes the per-record price lookup worth doing. */
     val filtersOnAmount: Boolean
         get() = minAmount.toAmountOrNull() != null || maxAmount.toAmountOrNull() != null
+
+    /**
+     * The range to query, with a half-set one completed.
+     *
+     * Picking only one end still means a range, so the missing end is filled rather than the whole
+     * range being dropped: no «تا» means up to today, no «از» means from a month back. Returns null
+     * only when neither end was given, which hands the query back to the period preset.
+     */
+    fun resolvedRange(): Pair<String, String>? = when {
+        startDate != null && endDate != null -> startDate to endDate
+        startDate != null -> startDate to currentTimeMillis().toString()
+        endDate != null -> getOneMonthAgoTimestamp() to endDate
+        else -> null
+    }
 
     /**
      * Whether a record survives the client-side part of the search.

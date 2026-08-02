@@ -17,6 +17,9 @@ import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.util.getCurrentTimestamp
 import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
@@ -40,7 +43,7 @@ class PrescriptionsViewModel(
             is PrescriptionsIntent.ClearSelectedPrescription -> flow { emit(PartialState.PrescriptionCleared) }
             is PrescriptionsIntent.DownloadPdf -> downloadPdf(intent)
             is PrescriptionsIntent.DownloadLabResult -> downloadLabResult(intent)
-            is PrescriptionsIntent.TogglePdfDialog -> flow { emit(PartialState.TogglePdfDialog(intent.show)) }
+            is PrescriptionsIntent.DismissPdfViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
             is PrescriptionsIntent.LoadRecordPrices -> loadRecordPrices(intent)
         }
     }
@@ -60,7 +63,7 @@ class PrescriptionsViewModel(
     }
 
     private fun loadList(intent: PrescriptionsIntent.LoadList): Flow<PartialState> = flow {
-        emit(PartialState.Reset)
+        // Emit Loading(true) while retaining existing list during refresh so PullToRefresh overlay renders cleanly without screen flickers.
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
         // Defaults to the «۶ ماه اخیر» period the records filter advertises.
@@ -142,30 +145,37 @@ class PrescriptionsViewModel(
             emit(PartialState.LoadingPrices(false))
         }
 
+    /**
+     * Fetches the prescription PDF. Only reached when the viewer finds no copy already on the
+     * device, so an export the person has downloaded before costs no request at all.
+     */
     private fun downloadPdf(intent: PrescriptionsIntent.DownloadPdf): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
+        emit(PartialState.ViewerPdfChanged(null))
         try {
-            // Opens the viewer, which renders the PDF and saves it to the device with a notification.
             getPrescriptionPdfFileUseCase(intent.prescriptionID).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation(), "prescription_${intent.prescriptionID}.pdf"))
+                emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
+            emit(PartialState.ViewerDownloadFailed)
         }
     }
 
     private fun downloadLabResult(intent: PrescriptionsIntent.DownloadLabResult): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
+        emit(PartialState.ViewerPdfChanged(null))
         val patientID = intent.patientID ?: ""
         val noteHeadEprescID = intent.noteHeadEprescID ?: ""
         val currentUserNationalCode = getLoggedNationalCode()
 
         try {
             downloadLabResultPdfUseCase(patientID, noteHeadEprescID, currentUserNationalCode).collect { pdfDn ->
-                emit(PartialState.PdfLoaded(pdfDn.toPresentation(), "lab_result_$noteHeadEprescID.pdf"))
+                emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
+            emit(PartialState.ViewerDownloadFailed)
         }
     }
 
@@ -178,23 +188,25 @@ class PrescriptionsViewModel(
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.PrescriptionsLoaded -> currentState.copy(isLoading = false, prescriptionList = partialState.list)
         is PartialState.PrescriptionDetailsLoaded -> currentState.copy(isLoading = false, prescriptionDetailList = partialState.list)
-        is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list)
-        is PartialState.PdfLoaded -> currentState.copy(
+        is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list.toImmutableList())
+        is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,
             viewerPdf = partialState.pdf,
-            viewerFileName = partialState.fileName,
-            showPdfDialog = true,
+            viewerDownloadFailed = false,
         )
-        is PartialState.TogglePdfDialog -> currentState.copy(showPdfDialog = partialState.show)
+        is PartialState.ViewerDownloadFailed -> currentState.copy(
+            isLoading = false,
+            viewerDownloadFailed = true,
+        )
         is PartialState.PrescriptionSelected -> currentState.copy(selectedNoteHeadId = partialState.noteHeadID)
         is PartialState.RecordPricesLoaded -> currentState.copy(
-            recordPrices = currentState.recordPrices + partialState.prices,
+            recordPrices = (currentState.recordPrices + partialState.prices).toImmutableMap(),
         )
         is PartialState.LoadingPrices -> currentState.copy(isLoadingPrices = partialState.isLoading)
         is PartialState.PrescriptionCleared -> currentState.copy(
             selectedNoteHeadId = null,
             prescriptionDetailList = emptyList(),
-            prescriptionPriceList = emptyList()
+            prescriptionPriceList = persistentListOf()
         )
     }
 

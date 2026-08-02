@@ -54,9 +54,27 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.btn_close
 import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.records_date_from
+import taminx.core.core_ui.records_date_to
+import taminx.core.core_ui.search_amount_range
+import taminx.core.core_ui.search_apply
+import taminx.core.core_ui.search_clear
+import taminx.core.core_ui.search_custom_range
+import taminx.core.core_ui.search_doctor_hint
+import taminx.core.core_ui.search_doctor_or_center
+import taminx.core.core_ui.search_from_placeholder
+import taminx.core.core_ui.search_from_prefix
+import taminx.core.core_ui.search_max
+import taminx.core.core_ui.search_min
+import taminx.core.core_ui.search_service_type
+import taminx.core.core_ui.search_title
+import taminx.core.core_ui.search_to_placeholder
+import taminx.core.core_ui.search_to_prefix
 
 /** Which date field the picker is currently filling, if any. */
 private enum class DateField { NONE, FROM, TO }
@@ -120,7 +138,7 @@ fun RecordSearchSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "جستجوی پیشرفته",
+                    text = stringResource(Res.string.search_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary,
@@ -132,7 +150,7 @@ fun RecordSearchSheet(
                 ) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-                        contentDescription = "بستن",
+                        contentDescription = stringResource(Res.string.btn_close),
                         tint = colors.textSecondary,
                         modifier = Modifier.size(18.dp),
                     )
@@ -140,7 +158,7 @@ fun RecordSearchSheet(
             }
 
             // Section 1: Service Type (نوع خدمت)
-            SectionHeader(text = "نوع خدمت")
+            SectionHeader(text = stringResource(Res.string.search_service_type))
             LazyRow(
                 state = lazyListState,
                 modifier = Modifier.fillMaxWidth(),
@@ -167,7 +185,7 @@ fun RecordSearchSheet(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = tab.label,
+                            text = stringResource(tab.label),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) Color.White else colors.textSecondary,
@@ -177,21 +195,21 @@ fun RecordSearchSheet(
             }
 
             // Section 2: Custom Date Range (بازهٔ تاریخ دلخواه)
-            SectionHeader(text = "بازهٔ تاریخ دلخواه")
+            SectionHeader(text = stringResource(Res.string.search_custom_range))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 DateFieldButton(
-                    placeholder = "از (۱۴۰۴/۰۱/۰۱)",
-                    prefix = "از",
+                    placeholder = stringResource(Res.string.search_from_placeholder),
+                    prefix = stringResource(Res.string.search_from_prefix),
                     value = criteria.startDate,
                     onClick = { editingDate = DateField.FROM },
                     modifier = Modifier.weight(1f),
                 )
                 DateFieldButton(
-                    placeholder = "تا (۱۴۰۴/۱۲/۲۹)",
-                    prefix = "تا",
+                    placeholder = stringResource(Res.string.search_to_placeholder),
+                    prefix = stringResource(Res.string.search_to_prefix),
                     value = criteria.endDate,
                     onClick = { editingDate = DateField.TO },
                     modifier = Modifier.weight(1f),
@@ -199,13 +217,13 @@ fun RecordSearchSheet(
             }
 
             // Section 3: Doctor or Center Name (نام پزشک یا مرکز)
-            SectionHeader(text = "نام پزشک یا مرکز")
+            SectionHeader(text = stringResource(Res.string.search_doctor_or_center))
             OutlinedTextField(
                 value = criteria.nameQuery,
                 onValueChange = { criteria = criteria.copy(nameQuery = it) },
                 placeholder = {
                     Text(
-                        text = "مثلاً دکتر محمدی یا آزمایشگاه مرکزی",
+                        text = stringResource(Res.string.search_doctor_hint),
                         color = colors.textMuted,
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -217,7 +235,7 @@ fun RecordSearchSheet(
             )
 
             // Section 4: Cost Range (بازهٔ مبلغ هزینه (ریال))
-            SectionHeader(text = "بازهٔ مبلغ هزینه (ریال)")
+            SectionHeader(text = stringResource(Res.string.search_amount_range))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -227,7 +245,7 @@ fun RecordSearchSheet(
                     onValueChange = { criteria = criteria.copy(minAmount = it) },
                     placeholder = {
                         Text(
-                            text = "حداقل",
+                            text = stringResource(Res.string.search_min),
                             color = colors.textMuted,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -243,7 +261,7 @@ fun RecordSearchSheet(
                     onValueChange = { criteria = criteria.copy(maxAmount = it) },
                     placeholder = {
                         Text(
-                            text = "حداکثر",
+                            text = stringResource(Res.string.search_max),
                             color = colors.textMuted,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -274,7 +292,7 @@ fun RecordSearchSheet(
                         .height(52.dp),
                 ) {
                     Text(
-                        text = "پاک کردن",
+                        text = stringResource(Res.string.search_clear),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = colors.textSecondary,
@@ -291,7 +309,7 @@ fun RecordSearchSheet(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "اعمال جستجو",
+                        text = stringResource(Res.string.search_apply),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -304,7 +322,9 @@ fun RecordSearchSheet(
     if (editingDate != DateField.NONE) {
         val isFrom = editingDate == DateField.FROM
         TaminJalaliDatePicker(
-            title = if (isFrom) "از تاریخ" else "تا تاریخ",
+            title = stringResource(
+            if (isFrom) Res.string.records_date_from else Res.string.records_date_to,
+        ),
             onDismiss = { editingDate = DateField.NONE },
             onConfirm = { y, m, d ->
                 val millis = PersianDateFormatter.toEpochMillis(y, m, d).toString()

@@ -135,26 +135,30 @@ class PrescriptionsViewModelTest {
     }
 
     @Test
-    fun testDownloadPdf_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
+    fun testDownloadPdf_setsViewerPdf() = runTest(testDispatcher) {
         viewModel.uiState.test {
             awaitItem() // initial
             viewModel.sendIntent(PrescriptionsIntent.DownloadPdf("presc1"))
             var state = awaitItem()
             while (state.viewerPdf == null) state = awaitItem()
             assertNotNull(state.viewerPdf)
-            assertTrue(state.showPdfDialog)
+
+            // Closing drops it: the payload is a single-use stream, so keeping it would make the
+            // next open render an empty file.
+            viewModel.sendIntent(PrescriptionsIntent.DismissPdfViewer)
+            while (state.viewerPdf != null) state = awaitItem()
+            assertNull(state.viewerPdf)
         }
     }
 
     @Test
-    fun testDownloadLabResult_setsViewerPdfAndShowsDialog() = runTest(testDispatcher) {
+    fun testDownloadLabResult_setsViewerPdf() = runTest(testDispatcher) {
         viewModel.uiState.test {
             awaitItem() // initial
             viewModel.sendIntent(PrescriptionsIntent.DownloadLabResult(patientID = "0", noteHeadEprescID = "100"))
             var state = awaitItem()
             while (state.viewerPdf == null) state = awaitItem()
             assertNotNull(state.viewerPdf)
-            assertTrue(state.showPdfDialog)
         }
     }
 }

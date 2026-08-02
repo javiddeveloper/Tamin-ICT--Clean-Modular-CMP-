@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
@@ -63,4 +64,19 @@ internal interface TreatmentApiService {
         @Path("noteHeadEprescID") noteHeadEprescID: String = "",
         @Path("currentUserNationalCode") currentUserNationalCode: String = ""
     ): HttpStatement
+
+    @GET("health/tcr-price-certificate")
+    suspend fun getTreatmentCosts(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<TreatmentCostDTO>>
+
+    @GET("health/tcr-price-certificate/report/{repId}")
+    suspend fun getTreatmentCostsPDF(
+        @Path("repId") repId: String
+    ): HttpStatement
+
+    @GET("health/tcr-price-certificate/announcement/{repId}")
+    suspend fun sendToInboxTreatmentCosts(
+        @Path("repId") repId: String
+    ): BaseDTO<String>
 }

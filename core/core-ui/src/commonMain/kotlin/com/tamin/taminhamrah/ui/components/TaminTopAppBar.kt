@@ -30,6 +30,11 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 
 private val HEADER_BUTTON_SIZE = 36.dp
 
@@ -56,6 +61,7 @@ fun TaminTopAppBar(
     action: @Composable (() -> Unit)? = null,
     centerTitle: Boolean = true,
     background: Brush = taminTopAppBarGradient(),
+    cornerRadius: Dp = CornerRadius.sheet,
     bottomPadding: Dp = Spacing.page,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -65,8 +71,8 @@ fun TaminTopAppBar(
             .background(
                 brush = background,
                 shape = RoundedCornerShape(
-                    bottomStart = CornerRadius.sheet,
-                    bottomEnd = CornerRadius.sheet,
+                    bottomStart = cornerRadius,
+                    bottomEnd = cornerRadius,
                 ),
             )
             // One painted area covering the status bar and the bar below it, so the two
@@ -169,4 +175,76 @@ private fun HeaderSlot(content: @Composable () -> Unit) {
         contentAlignment = Alignment.Center,
         content = { content() },
     )
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminTopAppBarTitleOnlyPreview() {
+    PreviewRtlThemeContent {
+        TaminTopAppBar(
+            title = "عنوان صفحه",
+            centerTitle = true
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminTopAppBarFullPreview() {
+    PreviewRtlThemeContent {
+        TaminTopAppBar(
+            title = "عنوان صفحه",
+            centerTitle = true,
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "بازگشت",
+                    onClick = {}
+                )
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = Icons.Default.MoreVert,
+                    contentDescription = "بیشتر",
+                    onClick = {}
+                )
+            }
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminTopAppBarTitleOnlyPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        TaminTopAppBar(
+            title = "عنوان صفحه",
+            centerTitle = true
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminTopAppBarFullPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        TaminTopAppBar(
+            title = "عنوان صفحه",
+            centerTitle = true,
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "بازگشت",
+                    onClick = {}
+                )
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = Icons.Default.MoreVert,
+                    contentDescription = "بیشتر",
+                    onClick = {}
+                )
+            }
+        )
+    }
 }
