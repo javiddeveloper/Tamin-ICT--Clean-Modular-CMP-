@@ -52,7 +52,7 @@ import com.tamin.taminhamrah.ui.theme.applicationFont
 fun SegmentedControl(
     modifier: Modifier = Modifier,
     options: List<String>,
-    selectedIndex: Int,
+    selectedIndex: Int?,
     onOptionSelected: (Int) -> Unit,
     activeColor: Color = Color.White,
     activeBgColor: Color = LocalTaminColors.current.blueText
@@ -63,33 +63,33 @@ fun SegmentedControl(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.divider, RoundedCornerShape(13.dp))
-//            .border(0.5.dp, taminColors.border.copy(alpha = 0.5f), RoundedCornerShape(13.dp))
             .padding(4.dp)
             .height(42.dp)
     ) {
         val width = maxWidth
         val tabWidth = width / options.size
 
-        // Animated slider background capsule
-        val indicatorOffset by animateDpAsState(
-            targetValue = tabWidth * selectedIndex,
-            animationSpec = tween(300),
-            label = "tabSlide"
-        )
+        if (selectedIndex != null && selectedIndex in options.indices) {
+            val indicatorOffset by animateDpAsState(
+                targetValue = tabWidth * selectedIndex,
+                animationSpec = tween(300),
+                label = "tabSlide"
+            )
 
-        Box(
-            modifier = Modifier
-                .offset(x = indicatorOffset)
-                .width(tabWidth)
-                .fillMaxHeight()
-                .shadow(
-                    elevation = 4.dp,
-                    shape = RoundedCornerShape(10.dp),
-                    spotColor = activeBgColor.copy(alpha = 0.25f),
-                    ambientColor = activeBgColor.copy(alpha = 0.25f)
-                )
-                .background(activeBgColor, RoundedCornerShape(10.dp))
-        )
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .width(tabWidth)
+                    .fillMaxHeight()
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        spotColor = activeBgColor.copy(alpha = 0.25f),
+                        ambientColor = activeBgColor.copy(alpha = 0.25f)
+                    )
+                    .background(activeBgColor, RoundedCornerShape(10.dp))
+            )
+        }
 
         Row(modifier = Modifier.fillMaxSize()) {
             options.forEachIndexed { index, label ->
@@ -119,6 +119,7 @@ fun SegmentedControl(
         }
     }
 }
+
 
 /**
  * Interactive filter choice chips wrapping nicely inside containers.

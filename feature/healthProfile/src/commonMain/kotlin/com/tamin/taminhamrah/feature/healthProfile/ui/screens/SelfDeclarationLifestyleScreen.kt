@@ -165,7 +165,11 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.isSmoking == true) 0 else 1,
+                    selectedIndex = when (state.isSmoking) {
+                        true -> 0
+                        false -> 1
+                        null -> null
+                    },
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
                         onIntent(
@@ -252,7 +256,11 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.hasAddiction == true) 0 else 1,
+                    selectedIndex = when (state.hasAddiction) {
+                        true -> 0
+                        false -> 1
+                        null -> null
+                    },
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
                         onIntent(
@@ -341,7 +349,11 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.isDrinking == true) 0 else 1,
+                    selectedIndex = when (state.isDrinking) {
+                        true -> 0
+                        false -> 1
+                        null -> null
+                    },
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
                         onIntent(
@@ -430,7 +442,11 @@ fun SelfDeclarationLifestyleScreen(
 
                 SegmentedControl(
                     options = optionsYesNo,
-                    selectedIndex = if (state.isExercising == true) 0 else 1,
+                    selectedIndex = when (state.isExercising) {
+                        true -> 0
+                        false -> 1
+                        null -> null
+                    },
                     onOptionSelected = { idx ->
                         val isYes = idx == 0
                         onIntent(

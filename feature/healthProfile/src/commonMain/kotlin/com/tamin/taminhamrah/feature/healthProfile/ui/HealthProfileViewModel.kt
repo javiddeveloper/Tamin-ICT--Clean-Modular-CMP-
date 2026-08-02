@@ -786,12 +786,27 @@ class HealthProfileViewModel(
         info: com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativePR
     ): HealthProfileUiState {
         val sd = currentState.selfDeclaration
-        fun isActive(code: Int?) =
-            code != null && LifeStyleStatus.fromStyleId(code) != LifeStyleStatus.NEVER
+
+        fun mapSmoking(code: Int?): Boolean? = when (code) {
+            null -> null
+            SmokingStatus.NONE.id, SmokingStatus.NEVER_CONSUMED.id -> false
+            else -> true
+        }
+
+        fun mapLifestyle(code: Int?): Boolean? = when (code) {
+            null -> null
+            0, LifeStyleStatus.NEVER.id -> false
+            else -> true
+        }
 
         val hasLocalLifestyleEdit = with(sd.lifestyle) {
             isSmoking != null || hasAddiction != null || isDrinking != null || isExercising != null
         }
+
+        val isSmoking = mapSmoking(info.smokingStatus)
+        val hasAddiction = mapLifestyle(info.substanceUsage)
+        val isDrinking = mapLifestyle(info.alcoholUsage)
+        val isExercising = mapLifestyle(info.exerciseFreq)
 
         return currentState.copy(
             isLoading = false,
@@ -801,30 +816,39 @@ class HealthProfileViewModel(
                     sd.lifestyle
                 } else {
                     sd.lifestyle.copy(
-                        isSmoking = info.smokingStatus != null && info.smokingStatus != SmokingStatus.NONE.id && info.smokingStatus != SmokingStatus.NEVER_CONSUMED.id,
+                        isSmoking = isSmoking,
                         smokingStatusId = info.smokingStatus,
-                        smokingPattern = info.smokingDesc.takeIf { it.isNotBlank() }
-                            ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label,
+                        smokingPattern = if (isSmoking == true) {
+                            info.smokingDesc.takeIf { it.isNotBlank() }
+                                ?: currentState.smokingStatusOptions.find { it.id == info.smokingStatus }?.label
+                        } else null,
 
-                        hasAddiction = isActive(info.substanceUsage),
+                        hasAddiction = hasAddiction,
                         substanceStatusId = info.substanceUsage,
-                        substancePattern = info.substanceDesc.takeIf { it.isNotBlank() }
-                            ?: currentState.actFrequencyOptions.find { it.id == info.substanceUsage }?.label,
+                        substancePattern = if (hasAddiction == true) {
+                            info.substanceDesc.takeIf { it.isNotBlank() }
+                                ?: currentState.actFrequencyOptions.find { it.id == info.substanceUsage }?.label
+                        } else null,
 
-                        isDrinking = isActive(info.alcoholUsage),
+                        isDrinking = isDrinking,
                         drinkingStatusId = info.alcoholUsage,
-                        drinkingPattern = info.alcoholDesc.takeIf { it.isNotBlank() }
-                            ?: LifeStyleStatus.fromStyleId(info.alcoholUsage)?.title,
+                        drinkingPattern = if (isDrinking == true) {
+                            info.alcoholDesc.takeIf { it.isNotBlank() }
+                                ?: LifeStyleStatus.fromStyleId(info.alcoholUsage)?.title
+                        } else null,
 
-                        isExercising = isActive(info.exerciseFreq),
+                        isExercising = isExercising,
                         exerciseStatusId = info.exerciseFreq,
-                        exerciseFrequency = info.exerciseDesc.takeIf { it.isNotBlank() }
-                            ?: LifeStyleStatus.fromStyleId(info.exerciseFreq)?.title
+                        exerciseFrequency = if (isExercising == true) {
+                            info.exerciseDesc.takeIf { it.isNotBlank() }
+                                ?: LifeStyleStatus.fromStyleId(info.exerciseFreq)?.title
+                        } else null
                     )
                 }
             )
         )
     }
+
 
     private fun reduceAllergiesLoaded(
         currentState: HealthProfileUiState,
