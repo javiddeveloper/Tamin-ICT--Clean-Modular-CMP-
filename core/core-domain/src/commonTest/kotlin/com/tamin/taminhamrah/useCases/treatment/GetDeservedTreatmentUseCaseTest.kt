@@ -47,6 +47,7 @@ class GetDeservedTreatmentUseCaseTest : BaseUseCaseTest() {
                 regWorkshopName = "Workshop",
                 risuid = "4",
                 message = "Success",
+                finalDesc = null,
                 illness = "None",
                 trackingCode = "999"
             )
