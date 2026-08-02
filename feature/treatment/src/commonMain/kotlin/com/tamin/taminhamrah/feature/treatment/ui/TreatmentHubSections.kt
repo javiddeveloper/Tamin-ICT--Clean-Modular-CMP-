@@ -32,7 +32,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
 import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItemPR
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
@@ -91,7 +91,7 @@ import taminx.core.core_ui.share_organization
  */
 @Composable
 internal fun PatientCarousel(
-    cards: ImmutableList<PatientCardItem>,
+    cards: ImmutableList<PatientCardItemPR>,
     isLoading: Boolean,
     error: String?,
     pagerState: PagerState,

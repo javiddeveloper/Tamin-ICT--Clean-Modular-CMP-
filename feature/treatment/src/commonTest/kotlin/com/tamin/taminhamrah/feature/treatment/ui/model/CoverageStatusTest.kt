@@ -5,13 +5,13 @@ import kotlin.test.assertEquals
 
 class CoverageStatusTest {
 
-    private val mainPatient = PatientItem(
+    private val mainPatient = PatientItemPR(
         nationalId = "1234567890",
         fullName = "رضا احمدی",
         isDependent = false,
     )
 
-    private val dependantPatient = PatientItem(
+    private val dependantPatient = PatientItemPR(
         nationalId = "0987654321",
         fullName = "سارا احمدی",
         isDependent = true,

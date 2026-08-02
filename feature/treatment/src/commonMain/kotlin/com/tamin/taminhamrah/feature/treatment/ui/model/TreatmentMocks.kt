@@ -6,7 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 object TreatmentMocks {
-    val patientMain = PatientItem(
+    val patientMain = PatientItemPR(
         nationalId = "1234567890",
         fullName = "رضا احمدی",
         isDependent = false,

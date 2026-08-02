@@ -7,7 +7,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @Immutable
-data class PatientItem(
+data class PatientItemPR(
     val nationalId: String,
     val fullName: String,
     val isDependent: Boolean,
@@ -41,11 +41,11 @@ data class PatientItem(
 fun TreatmentUiState.toPatientList(
     mainInsuredFallback: String,
     dependantRelation: String,
-): ImmutableList<PatientItem> = buildList {
+): ImmutableList<PatientItemPR> = buildList {
     mainUserNationalCode?.let { nationalCode ->
         val mainRecord = deservedList.firstOrNull()
         add(
-            PatientItem(
+            PatientItemPR(
                 nationalId = nationalCode,
                 fullName = mainRecord?.fullName ?: mainInsuredFallback,
                 isDependent = false,
@@ -56,7 +56,7 @@ fun TreatmentUiState.toPatientList(
     }
     dependantList.forEach { dependant ->
         add(
-            PatientItem(
+            PatientItemPR(
                 nationalId = dependant.nationalId,
                 fullName = dependant.fullName,
                 isDependent = true,
@@ -74,18 +74,18 @@ fun TreatmentUiState.toPatientList(
  * entitlement rule nor rescans the list for the color ordinal.
  */
 @Immutable
-data class PatientCardItem(
-    val patient: PatientItem,
+data class PatientCardItemPR(
+    val patient: PatientItemPR,
     val coverage: CoverageStatus,
     val dependantOrdinal: Int,
 )
 
-fun List<PatientItem>.toCardItems(
+fun List<PatientItemPR>.toCardItems(
     deservedList: List<DeservedTreatmentPR>,
-): ImmutableList<PatientCardItem> {
+): ImmutableList<PatientCardItemPR> {
     var dependants = 0
     return map { patient ->
-        PatientCardItem(
+        PatientCardItemPR(
             patient = patient,
             coverage = coverageStatusOf(patient, deservedList),
             // Position among dependants only, so each keeps its own color whether or not

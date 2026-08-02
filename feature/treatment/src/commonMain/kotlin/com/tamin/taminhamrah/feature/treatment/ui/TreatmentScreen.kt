@@ -30,11 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
@@ -43,9 +42,8 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.PullToRefreshBox
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
-import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -168,7 +166,6 @@ fun TreatmentContent(
     // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
     // only inside the card morph's layout/draw lambdas, so the fold never recomposes the hub.
     val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
-    val headerProgress = remember(collapse) { { collapse.progress } }
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
     // =================================================================================
@@ -189,59 +186,45 @@ fun TreatmentContent(
     val handleShowEntitlementReason = remember { { reason: String -> entitlementReason = reason } }
     val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
 
-    val density = LocalDensity.current
-    val headerHeightDp = remember(headerHeightPx, density) {
-        with(density) { headerHeightPx.toDp() }
-    }
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(LocalTaminColors.current.bgPage),
     ) {
-        // Pull-to-refresh container wraps only the scrollable body content below the insurance card
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
-            onRefresh = handleRetry,
-            indicatorTopPadding = headerHeightDp + Spacing.xs,
-            modifier = Modifier.fillMaxSize(),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                // The body's drag first folds the header, then scrolls the sections, and only what
+                // neither wanted reaches the rubber band — so the fold always wins over the bounce.
+                .nestedScroll(collapse.nestedScrollConnection)
+                .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    // The body's drag first folds the header, then scrolls the sections, and only what
-                    // neither wanted reaches the rubber band — so the fold always wins over the bounce.
-                    .nestedScroll(collapse.nestedScrollConnection)
-                    .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
-            ) {
-                // Stands in for the floating header, which is measured rather than fixed.
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-                Spacer(modifier = Modifier.height(Spacing.lg))
-                TreatmentQuickAccess(
-                    healthProfileCompleted = state.healthProfileCompleted,
-                    onOpenMedicalRecords = handleOpenMedicalRecords,
-                    onOpenHealthProfile = handleOpenHealthProfile,
-                )
-                Spacer(modifier = Modifier.height(Spacing.lg))
-                TreatmentCategories(
-                    onOpenPrescriptions = handleOpenPrescriptions,
-                    onOpenMiscClaims = handleOpenMiscClaims,
-                )
-                Spacer(modifier = Modifier.height(Spacing.lg))
-                TreatmentCostSummary(
-                    insuredShare = state.insuredShareTotal,
-                    organizationShare = state.organizationShareTotal,
-                    isLoading = state.isLoading,
-                )
-                // Clears the floating navigation bar, as the pre-collapse layout did.
-                Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
-            }
+            // Stands in for the floating header, which is measured rather than fixed.
+            Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            TreatmentQuickAccess(
+                healthProfileCompleted = state.healthProfileCompleted,
+                onOpenMedicalRecords = handleOpenMedicalRecords,
+                onOpenHealthProfile = handleOpenHealthProfile,
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            TreatmentCategories(
+                onOpenPrescriptions = handleOpenPrescriptions,
+                onOpenMiscClaims = handleOpenMiscClaims,
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            TreatmentCostSummary(
+                insuredShare = state.insuredShareTotal,
+                organizationShare = state.organizationShareTotal,
+                isLoading = state.isLoading,
+            )
+            // Clears the floating navigation bar, as the pre-collapse layout did.
+            Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
         }
 
         // The header floats on top so that as content scrolls up, it passes underneath the header.
-        // It stays completely fixed during pull-to-refresh.
         TreatmentHubHeader(
-            progress = headerProgress,
+            progress = collapse.progressProvider,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
@@ -253,7 +236,7 @@ fun TreatmentContent(
                 pagerState = pagerState,
                 onShowEntitlementReason = handleShowEntitlementReason,
                 onRetry = handleRetry,
-                collapseProgress = headerProgress,
+                collapseProgress = collapse.progressProvider,
             )
         }
     }
@@ -273,7 +256,7 @@ fun TreatmentContent(
 @Composable
 private fun SyncPagerWithSelection(
     selectedNationalCode: String?,
-    patients: ImmutableList<PatientItem>,
+    patients: ImmutableList<PatientItemPR>,
     pagerState: PagerState,
     onIntent: (TreatmentIntent) -> Unit,
 ) {

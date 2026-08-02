@@ -36,7 +36,7 @@ private const val NOT_ENTITLED_MARKER = "عدم"
  * their own, so only the main person is ever pending or rejected.
  */
 fun coverageStatusOf(
-    patient: PatientItem,
+    patient: PatientItemPR,
     deservedList: List<DeservedTreatmentPR>,
 ): CoverageStatus {
     if (patient.isDependent) return CoverageStatus.Covered

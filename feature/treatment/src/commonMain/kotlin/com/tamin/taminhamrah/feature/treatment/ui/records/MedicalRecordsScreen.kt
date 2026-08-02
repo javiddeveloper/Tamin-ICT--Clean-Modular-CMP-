@@ -28,7 +28,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import com.tamin.taminhamrah.ui.components.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,7 +52,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
@@ -396,7 +395,7 @@ fun HandleRecordsEvents(
 @Composable
 fun MedicalRecordsContent(
     state: PrescriptionsUiState,
-    patients: ImmutableList<PatientItem>,
+    patients: ImmutableList<PatientItemPR>,
     selectedPatient: String,
     selectedPeriod: RecordPeriod,
     customRange: Pair<String, String>?,
@@ -548,11 +547,6 @@ fun MedicalRecordsContent(
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
-            onRefresh = onRetry,
-            modifier = Modifier.fillMaxSize(),
-        ) {
         // Lazy: a long history composes only the cards on screen, and a price arriving redraws
         // just the rows that show it.
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -593,8 +587,6 @@ fun MedicalRecordsContent(
                 )
             }
         }
-        }
-
         }
     }
 }

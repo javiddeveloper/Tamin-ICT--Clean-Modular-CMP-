@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
 import com.tamin.taminhamrah.ui.components.vanishOnCollapse
@@ -376,7 +376,7 @@ private fun InsuranceCardFooter(
  */
 @Composable
 internal fun PatientCard(
-    patient: PatientItem,
+    patient: PatientItemPR,
     status: CoverageStatus,
     dependantOrdinal: Int,
     onShowEntitlementReason: (String) -> Unit,

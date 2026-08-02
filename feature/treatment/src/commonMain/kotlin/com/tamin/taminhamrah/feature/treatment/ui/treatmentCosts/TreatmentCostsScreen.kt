@@ -1,11 +1,11 @@
 package com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import com.tamin.taminhamrah.ui.components.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -111,11 +111,7 @@ fun TreatmentCostsScreen(
             )
         },
     ) { padding ->
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
-            onRefresh = { onIntent(CostsIntent.LoadList) },
-            modifier = Modifier.fillMaxSize().padding(padding),
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             CertificateList(
                 certificates = certificates,
                 isLoading = state.isLoading,
