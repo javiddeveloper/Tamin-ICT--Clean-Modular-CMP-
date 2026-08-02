@@ -43,7 +43,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
-import com.tamin.taminhamrah.ui.components.rememberJelloOverscroll
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -166,7 +166,6 @@ fun TreatmentContent(
     // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
     // only inside the card morph's layout/draw lambdas, so the fold never recomposes the hub.
     val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
-    val headerProgress = remember(collapse) { { collapse.progress } }
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
     // Hoisted so the section lambdas below capture one string rather than the whole state —
@@ -184,7 +183,7 @@ fun TreatmentContent(
                 // The body's drag first folds the header, then scrolls the sections, and only what
                 // neither wanted reaches the rubber band — so the fold always wins over the bounce.
                 .nestedScroll(collapse.nestedScrollConnection)
-                .verticalScroll(scrollState, overscrollEffect = rememberJelloOverscroll()),
+                .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
             // Stands in for the floating header, which is measured rather than fixed.
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
@@ -216,7 +215,7 @@ fun TreatmentContent(
 
         // The header floats on top so that as content scrolls up, it passes underneath the header.
         TreatmentHubHeader(
-            progress = headerProgress,
+            progress = collapse.progressProvider,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
@@ -228,7 +227,7 @@ fun TreatmentContent(
                 pagerState = pagerState,
                 onShowEntitlementReason = { entitlementReason = it },
                 onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
-                collapseProgress = headerProgress,
+                collapseProgress = collapse.progressProvider,
             )
         }
     }

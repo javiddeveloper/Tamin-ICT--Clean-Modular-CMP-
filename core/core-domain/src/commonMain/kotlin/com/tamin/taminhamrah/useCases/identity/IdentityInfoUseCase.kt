@@ -27,32 +27,34 @@ class IdentityInfoUseCase(
 
     fun getProvinces(): Flow<List<ProvinceDN>> = cityProvinceRepository.getProvinces()
 
+    /**
+     * Names the two cities separately.
+     *
+     * They are usually the same place, so an equal pair is looked up once and reused — but they
+     * genuinely can differ, and resolving only one of them and labeling both with it reports the
+     * wrong place of issue for anyone who moved.
+     */
     private suspend fun resolveCityNames(identity: IdentityInfoDN): IdentityInfoDN {
-        val cityId = identity.cityOfBirthId ?: identity.cityOfIssueId ?: ""
-        if (cityId.isEmpty()) {
-            return identity.apply {
-                cityOfBirthName = cityOfBirthName ?: UNKNOWN_CITY
-                cityOfIssueName = cityOfIssueName ?: UNKNOWN_CITY
-            }
-        }
+        val birthId = identity.cityOfBirthId.orEmpty()
+        val issueId = identity.cityOfIssueId.orEmpty()
+        val birthName = cityNameOf(birthId)
+        val issueName = if (issueId == birthId) birthName else cityNameOf(issueId)
 
-        return try {
-            val city = cityProvinceRepository.getCity(cityId).firstOrNull()
-
-            identity.apply {
-                cityOfBirthName = city?.cityName ?: cityOfBirthName ?: UNKNOWN_CITY
-                cityOfIssueName = city?.cityName ?: cityOfIssueName ?: UNKNOWN_CITY
-            }
-
-        } catch (_: Exception) {
-            identity.apply {
-                cityOfBirthName = cityOfBirthName ?: UNKNOWN_CITY
-                cityOfIssueName = cityOfIssueName ?: UNKNOWN_CITY
-            }
+        // Left null when the lookup finds nothing: naming it is the screen's job, so the
+        // wording stays in the string resources rather than hard-coded down here.
+        return identity.apply {
+            cityOfBirthName = birthName ?: cityOfBirthName
+            cityOfIssueName = issueName ?: cityOfIssueName
         }
     }
 
-    private companion object {
-        const val UNKNOWN_CITY = "نامشخص"
+    /** The city's name, or null when it has no code or the lookup fails. */
+    private suspend fun cityNameOf(cityId: String): String? {
+        if (cityId.isEmpty()) return null
+        return try {
+            cityProvinceRepository.getCity(cityId).firstOrNull()?.cityName
+        } catch (_: Exception) {
+            null
+        }
     }
 }
