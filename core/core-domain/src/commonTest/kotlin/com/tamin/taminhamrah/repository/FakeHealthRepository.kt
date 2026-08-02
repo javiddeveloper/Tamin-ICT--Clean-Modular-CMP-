@@ -6,6 +6,8 @@ import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
 import com.tamin.taminhamrah.model.health.BloodGroupDN
 import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
 import com.tamin.taminhamrah.model.health.DrugItemDN
+import com.tamin.taminhamrah.model.health.HealthMutationResult
+import com.tamin.taminhamrah.model.health.HealthProblemDN
 import com.tamin.taminhamrah.model.health.IllnessItemDN
 import com.tamin.taminhamrah.model.health.MaritalStatusDN
 import com.tamin.taminhamrah.model.health.PatientGeneralDN
@@ -57,6 +59,14 @@ class FakeHealthRepository : HealthRepository {
     var updateSelfDeclarativeResult: UpdateSelfDeclarativeDN = UpdateSelfDeclarativeDN(null, null, null, null, null, null, null, null, null, null, null, null, null, null)
     var syncIllnessesResult: SyncResultDN = SyncResultDN(null)
     var syncDrugAllergiesResult: SyncResultDN = SyncResultDN(null)
+
+    // Set any of these non-empty to make the matching mutation method return
+    // HealthMutationResult(data = null, problems = ...) instead of its *Result value.
+    var updatePatientProblems: List<HealthProblemDN> = emptyList()
+    var addSelfDeclarativeProblems: List<HealthProblemDN> = emptyList()
+    var updateSelfDeclarativeProblems: List<HealthProblemDN> = emptyList()
+    var syncIllnessesProblems: List<HealthProblemDN> = emptyList()
+    var syncDrugAllergiesProblems: List<HealthProblemDN> = emptyList()
 
     // --- Existing methods ---
     override suspend fun getPatientGeneral(natCode: String): Flow<PatientGeneralDN> = flow {
@@ -140,28 +150,33 @@ class FakeHealthRepository : HealthRepository {
         emit(getAllDrugsResult)
     }
 
-    override suspend fun updatePatient(request: UpdatePatientRequest): UpdatePatientDN {
+    override suspend fun updatePatient(request: UpdatePatientRequest): HealthMutationResult<UpdatePatientDN> {
         if (shouldThrowError) throw error
-        return updatePatientResult
+        if (updatePatientProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = updatePatientProblems)
+        return HealthMutationResult(data = updatePatientResult)
     }
 
-    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): AddSelfDeclarativeDN {
+    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): HealthMutationResult<AddSelfDeclarativeDN> {
         if (shouldThrowError) throw error
-        return addSelfDeclarativeResult
+        if (addSelfDeclarativeProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = addSelfDeclarativeProblems)
+        return HealthMutationResult(data = addSelfDeclarativeResult)
     }
 
-    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): UpdateSelfDeclarativeDN {
+    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): HealthMutationResult<UpdateSelfDeclarativeDN> {
         if (shouldThrowError) throw error
-        return updateSelfDeclarativeResult
+        if (updateSelfDeclarativeProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = updateSelfDeclarativeProblems)
+        return HealthMutationResult(data = updateSelfDeclarativeResult)
     }
 
-    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): SyncResultDN {
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): HealthMutationResult<SyncResultDN> {
         if (shouldThrowError) throw error
-        return syncIllnessesResult
+        if (syncIllnessesProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = syncIllnessesProblems)
+        return HealthMutationResult(data = syncIllnessesResult)
     }
 
-    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): SyncResultDN {
+    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): HealthMutationResult<SyncResultDN> {
         if (shouldThrowError) throw error
-        return syncDrugAllergiesResult
+        if (syncDrugAllergiesProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = syncDrugAllergiesProblems)
+        return HealthMutationResult(data = syncDrugAllergiesResult)
     }
 }

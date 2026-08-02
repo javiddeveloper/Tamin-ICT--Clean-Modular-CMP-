@@ -28,8 +28,11 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.ApiOutcome
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractDataOrProblems
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.extractMessageOrProblems
 import co.touchlab.kermit.Logger
 import com.tamin.taminhamrah.model.health.ActFrequencyDTO
 
@@ -146,23 +149,23 @@ internal class HealthRemoteDataSourceImpl(
 
     // --- Mutations (POST) ---
 
-    override suspend fun updatePatient(request: UpdatePatientRequestDTO): UpdatePatientDTO? = safeCall("updatePatient") {
-        apiService.updatePatient(request).extractData()
+    override suspend fun updatePatient(request: UpdatePatientRequestDTO): ApiOutcome<UpdatePatientDTO> = safeCall("updatePatient") {
+        apiService.updatePatient(request).extractDataOrProblems()
     }
 
-    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): AddSelfDeclarativeDTO? = safeCall("addSelfDeclarative") {
-        apiService.addSelfDeclarative(request).extractData()
+    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): ApiOutcome<AddSelfDeclarativeDTO> = safeCall("addSelfDeclarative") {
+        apiService.addSelfDeclarative(request).extractDataOrProblems()
     }
 
-    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): UpdateSelfDeclarativeDTO? = safeCall("updateSelfDeclarative") {
-        apiService.updateSelfDeclarative(request).extractData()
+    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): ApiOutcome<UpdateSelfDeclarativeDTO> = safeCall("updateSelfDeclarative") {
+        apiService.updateSelfDeclarative(request).extractDataOrProblems()
     }
 
-    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): String? = safeCall("syncIllnessSelfDeclaratives") {
-        apiService.syncIllnessSelfDeclaratives(request).extractMessage()
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): ApiOutcome<String> = safeCall("syncIllnessSelfDeclaratives") {
+        apiService.syncIllnessSelfDeclaratives(request).extractMessageOrProblems()
     }
 
-    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): String? = safeCall("syncDrugAllergies") {
-        apiService.syncDrugAllergies(request).extractMessage()
+    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): ApiOutcome<String> = safeCall("syncDrugAllergies") {
+        apiService.syncDrugAllergies(request).extractMessageOrProblems()
     }
 }

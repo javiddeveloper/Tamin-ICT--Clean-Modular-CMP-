@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.mapper
 
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
+import com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProblemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.IllnessGroupPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralPR
@@ -8,6 +9,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarati
 import com.tamin.taminhamrah.model.health.BloodGroupDN
 import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
 import com.tamin.taminhamrah.model.health.DrugItemDN
+import com.tamin.taminhamrah.model.health.HealthProblemDN
 import com.tamin.taminhamrah.model.health.IllnessItemDN
 import com.tamin.taminhamrah.model.health.MaritalStatusDN
 import com.tamin.taminhamrah.model.health.PatientGeneralDN
@@ -131,4 +133,13 @@ fun SelfDeclarableIllnessGroupDN.toPresentation(): IllnessGroupPR = IllnessGroup
     groupTitle = groupTitle ?: "",
     forFamily = forFamily ?: false,
     illnesses = illnessList?.map { it.toPresentation() } ?: emptyList()
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mutation business problems (submit-time validation errors from the backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+fun HealthProblemDN.toPresentation(): HealthProblemPR = HealthProblemPR(
+    code = code,
+    message = message
 )

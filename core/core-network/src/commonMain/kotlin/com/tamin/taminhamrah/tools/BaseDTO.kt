@@ -133,3 +133,42 @@ private fun <T> BaseDTO<T>.handleCommonErrors(): Nothing {
     println("BaseDTO: $errorPrefix: $reason")
     throw TaminErrorUriException(ErrorUri.fromString("$errorPrefix: $reason"))
 }
+
+/**
+ * Outcome of a [BaseDTO] extraction that does not throw when the backend
+ * responded with a non-empty `problems` list. [data] is non-null on success;
+ * when [problems] is non-empty [data] is null and the caller decides how to
+ * surface the individual business/validation problems instead of collapsing
+ * them into a single generic exception.
+ */
+data class ApiOutcome<out T>(
+    val data: T?,
+    val problems: List<ProblemDTO> = emptyList()
+)
+
+/**
+ * Like [extractData], but when the backend sent a non-empty `problems` list
+ * this returns them via [ApiOutcome] instead of throwing. Every other failure
+ * mode (network errors, generic status-range client/server errors, or
+ * `hasError=true` with no `problems` detail) still throws exactly like
+ * [extractData], since there is nothing structured to hand back in those cases.
+ */
+fun <T> BaseDTO<T>.extractDataOrProblems(): ApiOutcome<T> {
+    if (!problems.isNullOrEmpty()) {
+        println("BaseDTO: Returning ${problems.size} problem(s) instead of throwing: $problems")
+        return ApiOutcome(data = null, problems = problems)
+    }
+    return ApiOutcome(data = extractData(), problems = emptyList())
+}
+
+/**
+ * [extractMessageOrProblems] is the non-throwing counterpart of [extractMessage],
+ * used by the same "bare success message" endpoints (see [extractMessage] docs).
+ */
+fun BaseDTO<JsonElement?>.extractMessageOrProblems(): ApiOutcome<String> {
+    if (!problems.isNullOrEmpty()) {
+        println("BaseDTO: Returning ${problems.size} problem(s) instead of throwing: $problems")
+        return ApiOutcome(data = null, problems = problems)
+    }
+    return ApiOutcome(data = extractMessage(), problems = emptyList())
+}

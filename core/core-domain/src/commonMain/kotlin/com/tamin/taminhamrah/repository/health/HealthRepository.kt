@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.health
 
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeDN
+import com.tamin.taminhamrah.model.health.HealthMutationResult
 import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
 import com.tamin.taminhamrah.model.health.BloodGroupDN
 import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
@@ -56,10 +57,13 @@ interface HealthRepository {
     suspend fun getAllDrugs(): Flow<List<DrugItemDN>>
 
     // --- Mutations (POST) ---
-    suspend fun updatePatient(request: UpdatePatientRequest): UpdatePatientDN
-    suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): AddSelfDeclarativeDN
-    suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): UpdateSelfDeclarativeDN
-    suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): SyncResultDN
-    suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): SyncResultDN
+    // Return HealthMutationResult so business-level `problems` from the backend
+    // (invalid record id, duplicate declaration, etc.) reach the caller instead
+    // of only surfacing as a thrown exception - see HealthMutationResult docs.
+    suspend fun updatePatient(request: UpdatePatientRequest): HealthMutationResult<UpdatePatientDN>
+    suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): HealthMutationResult<AddSelfDeclarativeDN>
+    suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): HealthMutationResult<UpdateSelfDeclarativeDN>
+    suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): HealthMutationResult<SyncResultDN>
+    suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): HealthMutationResult<SyncResultDN>
 }
 

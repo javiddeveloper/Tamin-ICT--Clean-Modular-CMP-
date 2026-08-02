@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.useCases.health
 
+import com.tamin.taminhamrah.model.health.HealthProblemDN
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeRequest
 import com.tamin.taminhamrah.repository.FakeHealthRepository
@@ -9,6 +10,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class UpdateSelfDeclarativeUseCaseTest : BaseUseCaseTest() {
 
@@ -39,7 +41,18 @@ class UpdateSelfDeclarativeUseCaseTest : BaseUseCaseTest() {
         repository.updateSelfDeclarativeResult = expected
 
         val result = useCase(buildRequest())
-        assertEquals(expected, result)
+        assertEquals(expected, result.data)
+        assertTrue(result.problems.isEmpty())
+    }
+
+    @Test
+    fun `invoke should return business problems instead of throwing when backend flags them`() = runTest {
+        val expectedProblems = listOf(HealthProblemDN(code = 9003, message = "شناسه رکورد یافت نشد."))
+        repository.updateSelfDeclarativeProblems = expectedProblems
+
+        val result = useCase(buildRequest())
+        assertEquals(null, result.data)
+        assertEquals(expectedProblems, result.problems)
     }
 
     @Test

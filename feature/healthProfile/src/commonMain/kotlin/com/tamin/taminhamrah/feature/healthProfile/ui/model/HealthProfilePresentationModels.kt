@@ -80,3 +80,14 @@ data class IllnessGroupPR(
     val forFamily: Boolean,         // true → shown in FamilyScreen, false → DiseasesScreen
     val illnesses: List<LookupItemPR>
 )
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A business-level problem surfaced by a mutation call (updatePatient,
+// addSelfDeclarative, syncIllnessSelfDeclaratives, ...), mapped from
+// HealthProblemDN. Carried in SelfDeclarationUiState.submitProblems so the
+// wizard can show the backend's own (already localized) validation message.
+// ─────────────────────────────────────────────────────────────────────────────
+data class HealthProblemPR(
+    val code: Int?,
+    val message: String
+)

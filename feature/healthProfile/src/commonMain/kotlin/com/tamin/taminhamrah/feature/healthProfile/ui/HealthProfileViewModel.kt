@@ -12,6 +12,19 @@ import com.tamin.taminhamrah.useCases.health.*
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.*
 
+/**
+ * Outcome of [HealthProfileViewModel.submitFullDeclaration]. `Problems` keeps the
+ * backend's business-level errors (see HealthMutationResult/ApiOutcome in the
+ * domain and network layers) distinct from a hard `Failure` (network error,
+ * unexpected exception), so the caller can push them into
+ * SelfDeclarationUiState.submitProblems instead of just showing a generic toast.
+ */
+private sealed interface SubmitOutcome {
+    data object Success : SubmitOutcome
+    data class Problems(val problems: List<HealthProblemPR>) : SubmitOutcome
+    data class Failure(val message: String) : SubmitOutcome
+}
+
 class HealthProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
     private val getPatientGeneralUseCase: GetPatientGeneralUseCase,
@@ -51,14 +64,19 @@ class HealthProfileViewModel(
             is HealthProfileIntent.ChangeStep -> flow {
                 if (intent.step == SelfDeclarationStep.SUCCESS) {
                     emit(PartialState.Loading(true))
-                    val success = submitFullDeclaration()
+                    emit(PartialState.SubmitProblems(emptyList()))
+                    val outcome = submitFullDeclaration()
                     emit(PartialState.Loading(false))
-                    if (success) emit(
-                        PartialState.StepChanged(
-                            SelfDeclarationStep.SUCCESS,
-                            intent.isEditMode
+                    when (outcome) {
+                        is SubmitOutcome.Success -> emit(
+                            PartialState.StepChanged(
+                                SelfDeclarationStep.SUCCESS,
+                                intent.isEditMode
+                            )
                         )
-                    )
+                        is SubmitOutcome.Problems -> emit(PartialState.SubmitProblems(outcome.problems))
+                        is SubmitOutcome.Failure -> Unit
+                    }
                 } else {
                     emit(PartialState.StepChanged(intent.step, intent.isEditMode))
                 }
@@ -66,9 +84,14 @@ class HealthProfileViewModel(
 
             is HealthProfileIntent.SubmitDeclaration -> flow {
                 emit(PartialState.Loading(true))
-                val success = submitFullDeclaration()
+                emit(PartialState.SubmitProblems(emptyList()))
+                val outcome = submitFullDeclaration()
                 emit(PartialState.Loading(false))
-                if (success) emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
+                when (outcome) {
+                    is SubmitOutcome.Success -> emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
+                    is SubmitOutcome.Problems -> emit(PartialState.SubmitProblems(outcome.problems))
+                    is SubmitOutcome.Failure -> Unit
+                }
             }
 
             is HealthProfileIntent.UpdateIdentity -> flow { emit(PartialState.IdentityUpdated(intent.identity)) }
@@ -445,7 +468,7 @@ class HealthProfileViewModel(
     private fun FamilyStepState.toIllnessRequests(relation: Int = 1): List<IllnessSelfDeclareRequest> =
         (familyDiseaseIds.toList() + familyCancerIds.toList()).map { IllnessSelfDeclareRequest(it, relation, null) }
 
-    private suspend fun submitFullDeclaration(): Boolean {
+    private suspend fun submitFullDeclaration(): SubmitOutcome {
         if (currentPatientId == 0 || currentPatientNatCode.isBlank()) {
             sendEvent(
                 HealthProfileEvent.ShowToast(
@@ -453,7 +476,7 @@ class HealthProfileViewModel(
                     isError = true
                 )
             )
-            return false
+            return SubmitOutcome.Failure("اطلاعات شناسایی بیمار یا کد ملی یافت نشد.")
         }
 
         return try {
@@ -486,7 +509,8 @@ class HealthProfileViewModel(
                 emergencyCityID = null
             )
             Logger.d("HealthProfile", "Updating Patient: $updatePatientReq")
-            updatePatientUseCase(updatePatientReq)
+            val updatePatientResult = updatePatientUseCase(updatePatientReq)
+            if (updatePatientResult.problems.isNotEmpty()) return reportSubmitProblems(updatePatientResult.problems)
 
             // 2. Sync Illnesses (Diseases + Family)
             val illnessList = selfDecState.diseases.toIllnessRequests() + selfDecState.family.toIllnessRequests()
@@ -498,7 +522,8 @@ class HealthProfileViewModel(
                     illnessSelfDeclareList = illnessList
                 )
                 Logger.d("HealthProfile", "Syncing Illnesses: $syncIllnessReq")
-                syncIllnessSelfDeclarativesUseCase(syncIllnessReq)
+                val syncIllnessResult = syncIllnessSelfDeclarativesUseCase(syncIllnessReq)
+                if (syncIllnessResult.problems.isNotEmpty()) return reportSubmitProblems(syncIllnessResult.problems)
             }
 
             // 3. Sync Drug Allergies
@@ -512,7 +537,8 @@ class HealthProfileViewModel(
                     drugAllergyList = allergyList
                 )
                 Logger.d("HealthProfile", "Syncing Drug Allergies: $syncAllergyReq")
-                syncDrugAllergiesUseCase(syncAllergyReq)
+                val syncAllergyResult = syncDrugAllergiesUseCase(syncAllergyReq)
+                if (syncAllergyResult.problems.isNotEmpty()) return reportSubmitProblems(syncAllergyResult.problems)
             }
 
             // 4. Add or Update Self Declarative (Lifestyle)
@@ -529,7 +555,8 @@ class HealthProfileViewModel(
                     exerciseFrequency = if (lifestyle.isExercising == true) lifestyle.exerciseStatusId else LifeStyleStatus.NEVER.id,
                 )
                 Logger.d("HealthProfile", "Updating Lifestyle: $updateLifestyleReq")
-                updateSelfDeclarativeUseCase(updateLifestyleReq)
+                val updateLifestyleResult = updateSelfDeclarativeUseCase(updateLifestyleReq)
+                if (updateLifestyleResult.problems.isNotEmpty()) return reportSubmitProblems(updateLifestyleResult.problems)
             } else {
                 val addLifestyleReq = AddSelfDeclarativeRequest(
                     natCode = currentPatientNatCode,
@@ -540,7 +567,8 @@ class HealthProfileViewModel(
                     exerciseFrequency = if (lifestyle.isExercising == true) lifestyle.exerciseStatusId else LifeStyleStatus.NEVER.id,
                 )
                 Logger.d("HealthProfile", "Adding Lifestyle: $addLifestyleReq")
-                addSelfDeclarativeUseCase(addLifestyleReq)
+                val addLifestyleResult = addSelfDeclarativeUseCase(addLifestyleReq)
+                if (addLifestyleResult.problems.isNotEmpty()) return reportSubmitProblems(addLifestyleResult.problems)
             }
 
             sendEvent(
@@ -549,7 +577,7 @@ class HealthProfileViewModel(
                     isError = false
                 )
             )
-            true
+            SubmitOutcome.Success
         } catch (e: Exception) {
             Logger.e("HealthProfile", "Error in submitFullDeclaration: ${e.message}")
             sendEvent(
@@ -558,8 +586,28 @@ class HealthProfileViewModel(
                     isError = true
                 )
             )
-            false
+            SubmitOutcome.Failure(e.message ?: "خطا در ثبت اطلاعات")
         }
+    }
+
+    /**
+     * Maps backend business problems to presentation models, surfaces them via
+     * the existing toast event (screens are unchanged), and stops
+     * submitFullDeclaration() from proceeding to the next mutation call.
+     */
+    private fun reportSubmitProblems(problems: List<HealthProblemDN>): SubmitOutcome.Problems {
+        val prProblems = problems.map { it.toPresentation() }
+        Logger.e(
+            "HealthProfile",
+            "submitFullDeclaration stopped by backend problems: ${prProblems.joinToString { it.message }}"
+        )
+        sendEvent(
+            HealthProfileEvent.ShowToast(
+                prProblems.joinToString(separator = "\n") { it.message },
+                isError = true
+            )
+        )
+        return SubmitOutcome.Problems(prProblems)
     }
 
 
@@ -716,6 +764,12 @@ class HealthProfileViewModel(
         is PartialState.AllergyUpdated -> currentState.copy(
             selfDeclaration = currentState.selfDeclaration.copy(
                 allergy = partialState.allergy
+            )
+        )
+
+        is PartialState.SubmitProblems -> currentState.copy(
+            selfDeclaration = currentState.selfDeclaration.copy(
+                submitProblems = partialState.problems
             )
         )
     }
