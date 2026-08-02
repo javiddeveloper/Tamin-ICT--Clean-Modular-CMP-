@@ -95,7 +95,6 @@ internal fun PatientCarousel(
     isLoading: Boolean,
     error: String?,
     pagerState: PagerState,
-    onShowEntitlementReason: (String) -> Unit,
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
 ) {
@@ -117,14 +116,13 @@ internal fun PatientCarousel(
         )
 
         else -> {
-            val cardLambda: @Composable (Int) -> Unit = remember(cards, onShowEntitlementReason, collapseProgress) {
+            val cardLambda: @Composable (Int) -> Unit = remember(cards, collapseProgress) {
                 { page ->
                     cards.getOrNull(page)?.let { card ->
                         PatientCard(
                             patient = card.patient,
                             status = card.coverage,
                             dependantOrdinal = card.dependantOrdinal,
-                            onShowEntitlementReason = onShowEntitlementReason,
                             collapseProgress = collapseProgress,
                         )
                     }

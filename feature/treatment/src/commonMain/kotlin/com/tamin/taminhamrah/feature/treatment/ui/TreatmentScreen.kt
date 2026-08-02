@@ -10,18 +10,14 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -52,8 +48,6 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.action_confirm
-import taminx.core.core_ui.coverage_reason_dialog_title
 import taminx.core.core_ui.patient_dependant_relation
 import taminx.core.core_ui.patient_main_insured_fallback
 
@@ -152,7 +146,6 @@ fun TreatmentContent(
         state.toPatientList(mainInsuredFallback, dependantRelation)
     }
     val cards = remember(patients, state.deservedList) { patients.toCardItems(state.deservedList) }
-    var entitlementReason by remember { mutableStateOf<String?>(null) }
     val pagerState = rememberPagerState(pageCount = { cards.size })
     val scrollState = rememberScrollState()
 
@@ -183,7 +176,6 @@ fun TreatmentContent(
     }
     val handleOpenPrescriptions = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) } }
     val handleOpenMiscClaims = remember { { currentOnOpenMiscClaims() } }
-    val handleShowEntitlementReason = remember { { reason: String -> entitlementReason = reason } }
     val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
 
     Box(
@@ -234,19 +226,12 @@ fun TreatmentContent(
                 isLoading = state.isLoading,
                 error = state.error,
                 pagerState = pagerState,
-                onShowEntitlementReason = handleShowEntitlementReason,
                 onRetry = handleRetry,
                 collapseProgress = collapse.progressProvider,
             )
         }
     }
 
-    entitlementReason?.let { reason ->
-        EntitlementReasonDialog(
-            reason = reason,
-            onDismiss = { entitlementReason = null },
-        )
-    }
 }
 
 /**
@@ -278,21 +263,6 @@ private fun SyncPagerWithSelection(
             }
         }
     }
-}
-
-@Composable
-private fun EntitlementReasonDialog(
-    reason: String,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_confirm)) }
-        },
-        title = { Text(stringResource(Res.string.coverage_reason_dialog_title)) },
-        text = { Text(reason) },
-    )
 }
 
 @PreviewRtlTheme

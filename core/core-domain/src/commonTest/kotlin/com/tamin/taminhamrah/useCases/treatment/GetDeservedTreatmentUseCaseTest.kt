@@ -77,7 +77,7 @@ class GetDeservedTreatmentUseCaseTest : BaseUseCaseTest() {
         repository.getDeservedTreatmentResult = emptyList()
 
         useCase("1234567890").test {
-            assertEquals(emptyList<DeservedTreatmentDN>(), awaitItem())
+            assertEquals(emptyList(), awaitItem())
             awaitComplete()
         }
     }

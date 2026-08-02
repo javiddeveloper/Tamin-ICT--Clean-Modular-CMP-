@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -65,7 +64,6 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
 import com.tamin.taminhamrah.ui.theme.TaminRed
-import com.tamin.taminhamrah.ui.theme.TaminRedDark
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -75,7 +73,6 @@ import taminx.core.core_ui.card_org_name
 import taminx.core.core_ui.card_subtitle
 import taminx.core.core_ui.coverage_covered
 import taminx.core.core_ui.coverage_pending
-import taminx.core.core_ui.coverage_reason_action
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_ejtemaei_logo
@@ -382,7 +379,6 @@ internal fun PatientCard(
     patient: PatientItemPR,
     status: CoverageStatus,
     dependantOrdinal: Int,
-    onShowEntitlementReason: (String) -> Unit,
     collapseProgress: () -> Float = { 0f },
 ) {
     val style = status.cardStyle(
@@ -395,9 +391,6 @@ internal fun PatientCard(
         coverageLabel = style.label,
         background = style.background,
         coverageBadge = style.badge,
-        footerAction = (status as? CoverageStatus.Rejected)?.let { rejected ->
-            { EntitlementReasonChip(onClick = { onShowEntitlementReason(rejected.reason) }) }
-        },
         collapseProgress = collapseProgress,
     )
 }
@@ -427,15 +420,13 @@ private fun CoverageStatus.cardStyle(
         )
 
         is CoverageStatus.Rejected -> CoverageCardStyle(
-            // The service's own wording rather than a generic "فاقد استحقاق درمان": it names the
-            // cause, which is the one thing the person needs in order to act on it.
             label = reason,
-            background = Brush.verticalGradient(listOf(TaminRedDark, TaminRed)),
+            background = insuranceCardGradient(isDependent, dependantOrdinal),
             badge = {
                 CoverageBadge(
                     icon = vectorResource(Res.drawable.ic_tamin_cross),
-                    containerColor = Color.White,
-                    contentColor = TaminRedDark,
+                    containerColor = TaminRed,
+                    contentColor = Color.White,
                 )
             },
         )
@@ -452,19 +443,6 @@ private fun CoverageStatus.cardStyle(
             },
         )
     }
-}
-
-@Composable
-private fun EntitlementReasonChip(onClick: () -> Unit) {
-    Text(
-        text = stringResource(Res.string.coverage_reason_action),
-        style = MaterialTheme.typography.labelMedium,
-        color = Color.White,
-        modifier = Modifier
-            .background(Color.White.copy(alpha = 0.22f), CircleShape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
-    )
 }
 
 /**
