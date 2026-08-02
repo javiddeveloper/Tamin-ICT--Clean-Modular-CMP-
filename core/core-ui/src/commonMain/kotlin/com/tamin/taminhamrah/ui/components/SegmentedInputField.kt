@@ -371,7 +371,7 @@ private fun Modifier.animatedErrorBorder(
             borderProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 1200,
+                    durationMillis = 2000,
                     easing = FastOutSlowInEasing
                 )
             )
