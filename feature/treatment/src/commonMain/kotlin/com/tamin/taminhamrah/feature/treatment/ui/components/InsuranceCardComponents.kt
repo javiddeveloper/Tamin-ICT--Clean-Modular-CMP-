@@ -76,7 +76,6 @@ import taminx.core.core_ui.card_subtitle
 import taminx.core.core_ui.coverage_covered
 import taminx.core.core_ui.coverage_pending
 import taminx.core.core_ui.coverage_reason_action
-import taminx.core.core_ui.coverage_rejected
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_ejtemaei_logo
@@ -362,6 +361,10 @@ private fun InsuranceCardFooter(
             text = coverageLabel,
             style = MaterialTheme.typography.labelMedium,
             color = Color.White,
+            // A refusal reason is a sentence, not a status word, so it gets a second line before
+            // being cut — the chip beside it still opens the full text.
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         action?.invoke()
@@ -424,7 +427,9 @@ private fun CoverageStatus.cardStyle(
         )
 
         is CoverageStatus.Rejected -> CoverageCardStyle(
-            label = stringResource(Res.string.coverage_rejected),
+            // The service's own wording rather than a generic "فاقد استحقاق درمان": it names the
+            // cause, which is the one thing the person needs in order to act on it.
+            label = reason,
             background = Brush.verticalGradient(listOf(TaminRedDark, TaminRed)),
             badge = {
                 CoverageBadge(

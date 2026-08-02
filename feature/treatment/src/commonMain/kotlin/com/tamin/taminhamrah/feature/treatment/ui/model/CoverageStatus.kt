@@ -24,13 +24,19 @@ sealed interface CoverageStatus {
 }
 
 /**
- * The service reports a refusal as free text rather than a flag, and marks it by negating
- * the entitlement wording ("عدم استحقاق").
+ * Some refusals are worded only in [DeservedTreatmentPR.message], by negating the entitlement
+ * wording ("عدم استحقاق"), without a `finalDesc` to go with them.
  */
 private const val NOT_ENTITLED_MARKER = "عدم"
 
 /**
- * Resolves [patient]'s entitlement from the deserved-treatment records.
+ * Resolves [patient]'s entitlement from the entitlement records.
+ *
+ * The endpoint behind these (`booklet-req/lackEntitlement`) returns the person's record either
+ * way — an entitled person comes back with `finalDesc` and `message` both null, and a refused one
+ * with `finalDesc` spelling out why. So the verdict is whether there is a refusal *worded*, not
+ * whether a record exists: an entitled record carries plenty of other data (branch, insurance
+ * type, booklet dates) that the card displays.
  *
  * Dependants are covered by the main insured person's entitlement and have no record of
  * their own, so only the main person is ever pending or rejected.
@@ -43,9 +49,16 @@ fun coverageStatusOf(
 
     val mainRecord = deservedList.firstOrNull() ?: return CoverageStatus.Pending
 
-    return if (mainRecord.message.contains(NOT_ENTITLED_MARKER)) {
-        CoverageStatus.Rejected(reason = mainRecord.message)
-    } else {
-        CoverageStatus.Covered
+    // finalDesc first: it is the verdict, and it is worded for the insured person to read.
+    // message is the fallback, and only when it actually negates — it otherwise describes the
+    // event behind a refusal rather than being one.
+    return when {
+        mainRecord.finalDesc.isNotBlank() ->
+            CoverageStatus.Rejected(reason = mainRecord.finalDesc)
+
+        mainRecord.message.contains(NOT_ENTITLED_MARKER) ->
+            CoverageStatus.Rejected(reason = mainRecord.message)
+
+        else -> CoverageStatus.Covered
     }
 }

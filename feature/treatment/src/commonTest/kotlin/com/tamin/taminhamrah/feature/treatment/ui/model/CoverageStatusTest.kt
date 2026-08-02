@@ -17,8 +17,34 @@ class CoverageStatusTest {
         isDependent = true,
     )
 
-    private fun recordWith(message: String) =
-        TreatmentMocks.deservedTreatment.copy(message = message)
+    private fun recordWith(message: String = "", finalDesc: String = "") =
+        TreatmentMocks.deservedTreatment.copy(message = message, finalDesc = finalDesc)
+
+    @Test
+    fun `a refusal worded only in finalDesc is rejected and carries it as the reason`() {
+        // Verbatim from booklet-req/lackEntitlement/0017312213, who the card wrongly showed as
+        // entitled: the refusal is in finalDesc and the message never says "عدم", so matching on
+        // the message alone read this as covered.
+        val finalDesc = "بدليل مختومه‌شدن قرارداد مشاغل آزاد، برخورداري از درمان ميسر نمي‌باشد."
+        val message =
+            " بيمه شده تبعي در تاريخ  1400/01/01 در شعبه  سيزده تهران بدون ثبت دليل  از کفالت خارج شده است "
+
+        assertEquals(
+            CoverageStatus.Rejected(reason = finalDesc),
+            coverageStatusOf(mainPatient, listOf(recordWith(message = message, finalDesc = finalDesc))),
+        )
+    }
+
+    @Test
+    fun `a record with neither field worded is covered`() {
+        // Verbatim shape of booklet-req/lackEntitlement/0946168113, who is entitled: the endpoint
+        // still returns a record, with message and finalDesc both null. Presence of a record is
+        // therefore not itself a refusal.
+        assertEquals(
+            CoverageStatus.Covered,
+            coverageStatusOf(mainPatient, listOf(recordWith())),
+        )
+    }
 
     @Test
     fun `main insured with no record yet is pending`() {

@@ -38,6 +38,7 @@ object TreatmentMocks {
         regWorkshopName = "شرکت تست",
         risuid = "67890",
         message = "مشمول حمایت درمانی",
+        finalDesc = "",
         illness = "",
         trackingCode = ""
     )

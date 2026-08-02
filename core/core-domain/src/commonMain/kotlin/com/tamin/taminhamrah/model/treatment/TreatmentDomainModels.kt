@@ -24,6 +24,8 @@ data class DeservedTreatmentDN(
     val regWorkshopName: String?,
     val risuid: String?,
     val message: String?,
+    /** Blank/null while treatment support is active; the refusal reason when it is not. */
+    val finalDesc: String?,
     val illness: String?,
     val trackingCode: String?
 )
