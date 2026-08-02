@@ -43,6 +43,7 @@ object TreatmentTestData {
         regWorkshopName = null,
         risuid = null,
         message = null,
+        finalDesc = null,
         illness = null,
         trackingCode = null
     )

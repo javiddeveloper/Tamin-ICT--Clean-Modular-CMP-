@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -97,12 +99,15 @@ internal fun CertificateList(
     onOpenCertificate: (String) -> Unit,
     onSendToInbox: (String) -> Unit,
 ) {
+    // Remembers completed entrance animations across list scrolls to avoid re-triggering entrance animations on already-visible items.
+    val staggerState = rememberStaggeredEntranceState()
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
 
             // A failed request and a genuinely empty result read very differently, so they get
-            // different states. Both recover the same way: pull to refresh.
+            // different states.
             error != null -> item { CostsErrorState(message = error) }
 
             certificates.isEmpty() -> item {
@@ -115,6 +120,7 @@ internal fun CertificateList(
                     onOpenCertificate = onOpenCertificate,
                     onSendToInbox = onSendToInbox,
                     modifier = Modifier
+                        .staggeredItemEntrance(index = index, key = item.repId, state = staggerState)
                         .padding(horizontal = Spacing.page)
                         .padding(
                             top = if (index == 0) Spacing.md else 0.dp,
@@ -410,8 +416,7 @@ private fun CertificateAction(
 /**
  * Failure state: what went wrong and how to recover, nothing more.
  *
- * No retry button — the list is pull-to-refresh, so one gesture both reloads a good list and
- * recovers from a failure, instead of the screen offering two ways to do the same thing.
+ * No retry affordance: recovering from a failure means re-entering the screen.
  */
 @Composable
 private fun CostsErrorState(message: String) {

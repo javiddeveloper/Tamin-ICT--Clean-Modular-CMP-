@@ -3,9 +3,10 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
 import com.tamin.taminhamrah.model.treatment.*
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 object TreatmentMocks {
-    val patientMain = PatientItem(
+    val patientMain = PatientItemPR(
         nationalId = "1234567890",
         fullName = "رضا احمدی",
         isDependent = false,
@@ -37,6 +38,7 @@ object TreatmentMocks {
         regWorkshopName = "شرکت تست",
         risuid = "67890",
         message = "مشمول حمایت درمانی",
+        finalDesc = "",
         illness = "",
         trackingCode = ""
     )
@@ -111,7 +113,8 @@ object TreatmentMocks {
     )
 
     val mainUiState = TreatmentUiState(
-        deservedList = listOf(deservedTreatment),
+        // Converted to ImmutableList for state stability in previews and unit tests
+        deservedList = listOf(deservedTreatment).toImmutableList(),
         dependantList = listOf(
             DependantUserUnderEighteenPR(
                 id = "1",
@@ -120,7 +123,7 @@ object TreatmentMocks {
                 fullName = "سارا احمدی",
                 nationalId = "0987654321"
             )
-        ),
+        ).toImmutableList(),
         mainUserNationalCode = "1234567890",
         selectedNationalCode = "1234567890",
         selectedPatientName = "رضا احمدی",

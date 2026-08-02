@@ -45,8 +45,7 @@ internal class TreatmentRepositoryImpl(
         try {
             val result = treatmentRemoteDataSource.getDeservedTreatment(nationalCode)
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearDeservedTreatment(nationalCode)
-            treatmentDao.insertDeservedTreatment(remote.map { it.toEntity(nationalCode) })
+            treatmentDao.replaceDeservedTreatment(nationalCode, remote.map { it.toEntity(nationalCode) })
         } catch (e: Exception) {
             if (localDeservedTreatment.isEmpty()) throw e
         }
@@ -76,8 +75,8 @@ internal class TreatmentRepositoryImpl(
                 treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearElectronicPrescriptions(patientCode, requestTypeId)
-            treatmentDao.insertElectronicPrescriptions(remote.map { it.toEntity(patientCode) })
+            // Atomically replace local Room cache within a single transaction to prevent UI flicker
+            treatmentDao.replaceElectronicPrescriptions(patientCode, requestTypeId, remote.map { it.toEntity(patientCode) })
         } catch (e: Exception) {
             if (localElectronicPrescriptionList.isEmpty()) throw e
         }
@@ -110,8 +109,7 @@ internal class TreatmentRepositoryImpl(
                 treatmentQuery(limit = PRESCRIPTION_DETAIL_PAGE_SIZE)
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearElectronicPrescriptionDetails(noteHeadID)
-            treatmentDao.insertElectronicPrescriptionDetails(remote.map { it.toEntity(noteHeadID) })
+            treatmentDao.replaceElectronicPrescriptionDetails(noteHeadID, remote.map { it.toEntity(noteHeadID) })
         } catch (e: Exception) {
             if (localElectronicPrescriptionDetail.isEmpty()) throw e
         }
@@ -133,8 +131,7 @@ internal class TreatmentRepositoryImpl(
                 treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearElectronicPrescriptionPrices(noteHeadID)
-            treatmentDao.insertElectronicPrescriptionPrices(remote.map { it.toEntity(noteHeadID) })
+            treatmentDao.replaceElectronicPrescriptionPrices(noteHeadID, remote.map { it.toEntity(noteHeadID) })
         } catch (e: Exception) {
             if (localElectronicPrescriptionPrice.isEmpty()) throw e
         }
@@ -154,8 +151,7 @@ internal class TreatmentRepositoryImpl(
                 treatmentQuery()
             )
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearDependantsUnderEighteen(nationalCode)
-            treatmentDao.insertDependantsUnderEighteen(remote.map { it.toEntity(nationalCode) })
+            treatmentDao.replaceDependantsUnderEighteen(nationalCode, remote.map { it.toEntity(nationalCode) })
         } catch (e: Exception) {
             if (localDependantUnderEighteen.isEmpty()) throw e
         }
@@ -184,8 +180,7 @@ internal class TreatmentRepositoryImpl(
         try {
             val result = treatmentRemoteDataSource.getTreatmentCosts(treatmentQuery())
             val remote = result?.list?.map { it.toDomain() } ?: emptyList()
-            treatmentDao.clearTreatmentCosts()
-            treatmentDao.insertTreatmentCosts(remote.map { it.toEntity() })
+            treatmentDao.replaceTreatmentCosts(remote.map { it.toEntity() })
         } catch (e: Exception) {
             if (localTreatmentCosts.isEmpty()) throw e
         }

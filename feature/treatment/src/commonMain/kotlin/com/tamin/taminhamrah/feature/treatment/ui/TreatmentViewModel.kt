@@ -16,6 +16,8 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -115,7 +117,8 @@ class TreatmentViewModel(
 
         val deservedFlow: Flow<PartialState> = getDeservedTreatmentUseCase(nationalCode)
             .transform { list ->
-                val presentationList = list.toPresentation()
+                // Map presentation list to ImmutableList for Compose state stability
+                val presentationList = list.toPresentation().toImmutableList()
                 val fullName = presentationList.firstOrNull()?.fullName ?: "کاربر اصلی"
                 emit(PartialState.DeservedLoaded(presentationList))
                 emit(PartialState.PatientSelected(nationalCode, fullName))
@@ -125,7 +128,8 @@ class TreatmentViewModel(
             }
 
         val dependantFlow: Flow<PartialState> = getDependantUnderEighteenUseCase(nationalCode)
-            .map { list -> PartialState.DependantsLoaded(list.toPresentation()) }
+            // Map presentation list to ImmutableList for Compose state stability
+            .map { list -> PartialState.DependantsLoaded(list.toPresentation().toImmutableList()) }
             .catch { e ->
                 sendEvent(
                     TreatmentEvent.ShowMessage(
@@ -133,7 +137,7 @@ class TreatmentViewModel(
                         TreatmentMessageType.OPERATION_FAILED
                     )
                 )
-                emit(PartialState.DependantsLoaded(emptyList()))
+                emit(PartialState.DependantsLoaded(persistentListOf()))
             }
 
         emitAll(merge(deservedFlow, dependantFlow))

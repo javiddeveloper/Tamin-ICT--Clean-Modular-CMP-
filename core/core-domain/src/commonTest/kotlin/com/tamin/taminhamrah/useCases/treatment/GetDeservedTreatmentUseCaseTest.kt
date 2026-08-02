@@ -47,6 +47,7 @@ class GetDeservedTreatmentUseCaseTest : BaseUseCaseTest() {
                 regWorkshopName = "Workshop",
                 risuid = "4",
                 message = "Success",
+                finalDesc = null,
                 illness = "None",
                 trackingCode = "999"
             )
@@ -76,7 +77,7 @@ class GetDeservedTreatmentUseCaseTest : BaseUseCaseTest() {
         repository.getDeservedTreatmentResult = emptyList()
 
         useCase("1234567890").test {
-            assertEquals(emptyList<DeservedTreatmentDN>(), awaitItem())
+            assertEquals(emptyList(), awaitItem())
             awaitComplete()
         }
     }

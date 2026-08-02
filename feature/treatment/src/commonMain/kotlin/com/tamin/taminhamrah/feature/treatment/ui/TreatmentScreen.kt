@@ -10,18 +10,14 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -33,7 +29,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
@@ -49,13 +45,11 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.action_confirm
-import taminx.core.core_ui.coverage_reason_dialog_title
 import taminx.core.core_ui.patient_dependant_relation
 import taminx.core.core_ui.patient_main_insured_fallback
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * Treatment hub: the insured person's electronic health-insurance cards, the quick-access
@@ -152,7 +146,6 @@ fun TreatmentContent(
         state.toPatientList(mainInsuredFallback, dependantRelation)
     }
     val cards = remember(patients, state.deservedList) { patients.toCardItems(state.deservedList) }
-    var entitlementReason by remember { mutableStateOf<String?>(null) }
     val pagerState = rememberPagerState(pageCount = { cards.size })
     val scrollState = rememberScrollState()
 
@@ -168,9 +161,22 @@ fun TreatmentContent(
     val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
-    // Hoisted so the section lambdas below capture one string rather than the whole state —
-    // capturing `state` would make them a new instance on every load and defeat skipping.
+    // =================================================================================
+    // MEMOIZED CALLBACK LAMBDAS
+    // Hoisted and wrapped in `remember` so child composables (TreatmentQuickAccess, TreatmentCategories)
+    // receive stable function references and completely skip recomposition when patient cards are swiped.
+    // =================================================================================
     val mainUserNationalCode = state.mainUserNationalCode
+    val currentOnOpenHealthProfile by rememberUpdatedState(onOpenHealthProfile)
+    val currentOnOpenMiscClaims by rememberUpdatedState(onOpenMiscClaims)
+
+    val handleOpenMedicalRecords = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) } }
+    val handleOpenHealthProfile = remember(mainUserNationalCode) {
+        { mainUserNationalCode?.let { currentOnOpenHealthProfile(it) } ?: Unit }
+    }
+    val handleOpenPrescriptions = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) } }
+    val handleOpenMiscClaims = remember { { currentOnOpenMiscClaims() } }
+    val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
 
     Box(
         modifier = modifier
@@ -190,18 +196,13 @@ fun TreatmentContent(
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
-                // Records are feature-flag gated, so the tap fires an intent; the emitted
-                // NavigateToRecords event carries the selected patient's national code.
-                onOpenMedicalRecords = { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) },
-                // "پروندهٔ سلامت من" is always the main insured person's profile, regardless of
-                // which patient card is in view. No-op until the main code is known.
-                onOpenHealthProfile = { mainUserNationalCode?.let(onOpenHealthProfile) },
+                onOpenMedicalRecords = handleOpenMedicalRecords,
+                onOpenHealthProfile = handleOpenHealthProfile,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
-                onOpenPrescriptions = { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) },
-                // Not feature-flag gated like the records, so the tap navigates straight away.
-                onOpenMiscClaims = onOpenMiscClaims,
+                onOpenPrescriptions = handleOpenPrescriptions,
+                onOpenMiscClaims = handleOpenMiscClaims,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCostSummary(
@@ -225,19 +226,12 @@ fun TreatmentContent(
                 isLoading = state.isLoading,
                 error = state.error,
                 pagerState = pagerState,
-                onShowEntitlementReason = { entitlementReason = it },
-                onRetry = { onIntent(TreatmentIntent.InitTreatmentFlow) },
+                onRetry = handleRetry,
                 collapseProgress = collapse.progressProvider,
             )
         }
     }
 
-    entitlementReason?.let { reason ->
-        EntitlementReasonDialog(
-            reason = reason,
-            onDismiss = { entitlementReason = null },
-        )
-    }
 }
 
 /**
@@ -247,7 +241,7 @@ fun TreatmentContent(
 @Composable
 private fun SyncPagerWithSelection(
     selectedNationalCode: String?,
-    patients: ImmutableList<PatientItem>,
+    patients: ImmutableList<PatientItemPR>,
     pagerState: PagerState,
     onIntent: (TreatmentIntent) -> Unit,
 ) {
@@ -269,21 +263,6 @@ private fun SyncPagerWithSelection(
             }
         }
     }
-}
-
-@Composable
-private fun EntitlementReasonDialog(
-    reason: String,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_confirm)) }
-        },
-        title = { Text(stringResource(Res.string.coverage_reason_dialog_title)) },
-        text = { Text(reason) },
-    )
 }
 
 @PreviewRtlTheme

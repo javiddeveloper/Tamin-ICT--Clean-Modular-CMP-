@@ -38,6 +38,7 @@ fun DeservedTreatmentDTO.toDomain() = DeservedTreatmentDN(
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
 )

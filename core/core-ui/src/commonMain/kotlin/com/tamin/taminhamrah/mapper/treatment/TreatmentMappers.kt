@@ -29,6 +29,7 @@ fun DeservedTreatmentDN.toPresentation(): DeservedTreatmentPR {
         regWorkshopName = regWorkshopName ?: "",
         risuid = risuid ?: "",
         message = message ?: "",
+        finalDesc = finalDesc ?: "",
         illness = illness ?: "",
         trackingCode = trackingCode ?: ""
     )

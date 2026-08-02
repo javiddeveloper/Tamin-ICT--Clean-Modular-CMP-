@@ -83,6 +83,9 @@
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
     <string name="action_confirm">تایید</string>
+    <string name="action_cancel">انصراف</string>
+    <string name="date_picker_today">امروز</string>
+    <string name="date_picker_confirm">تأیید تاریخ</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
     <string name="action_show_details">نمایش جزئیات</string>
@@ -119,10 +122,7 @@
     <string name="card_subtitle">کارت الکترونیک بیمهٔ درمان</string>
     <string name="card_national_code">کد ملی</string>
     <string name="coverage_pending">در حال استعلام وضعیت استحقاق…</string>
-    <string name="coverage_rejected">فاقد استحقاق درمان</string>
     <string name="coverage_covered">وضعیت حمایت‌های درمانی: برخوردار هستید</string>
-    <string name="coverage_reason_action">علت</string>
-    <string name="coverage_reason_dialog_title">علت عدم استحقاق درمان</string>
 
     <!-- Medical records -->
     <string name="records_title">سوابق درمانی</string>
