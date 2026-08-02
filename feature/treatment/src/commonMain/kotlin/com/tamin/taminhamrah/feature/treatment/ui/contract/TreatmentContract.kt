@@ -5,14 +5,19 @@ import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+
 @Immutable
 data class TreatmentUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
 
-    val deservedList: List<DeservedTreatmentPR> = emptyList(),
+    // Using ImmutableList instead of standard List allows the Kotlin Compose compiler to mark
+    // TreatmentUiState as 100% @Immutable, enabling child composables to skip recomposition cleanly.
+    val deservedList: ImmutableList<DeservedTreatmentPR> = persistentListOf(),
     /** Under-18 dependants — the only ones with their own insurance card. */
-    val dependantList: List<DependantUserUnderEighteenPR> = emptyList(),
+    val dependantList: ImmutableList<DependantUserUnderEighteenPR> = persistentListOf(),
     val mainUserNationalCode: String? = null,
 
     val selectedNationalCode: String? = null,
@@ -32,8 +37,8 @@ data class TreatmentUiState(
         data class Error(val message: String?) : PartialState()
         data object Reset : PartialState()
 
-        data class DeservedLoaded(val list: List<DeservedTreatmentPR>) : PartialState()
-        data class DependantsLoaded(val list: List<DependantUserUnderEighteenPR>) : PartialState()
+        data class DeservedLoaded(val list: ImmutableList<DeservedTreatmentPR>) : PartialState()
+        data class DependantsLoaded(val list: ImmutableList<DependantUserUnderEighteenPR>) : PartialState()
         data class MainUserNationalCodeLoaded(val nationalCode: String) : PartialState()
         data class PatientSelected(val nationalCode: String, val fullName: String) : PartialState()
         data class HealthProfileStatusLoaded(val isCompleted: Boolean) : PartialState()

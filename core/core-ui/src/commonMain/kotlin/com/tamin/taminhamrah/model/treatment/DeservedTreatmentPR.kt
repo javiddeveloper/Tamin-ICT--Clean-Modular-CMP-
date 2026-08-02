@@ -29,6 +29,7 @@ data class DeservedTreatmentPR(
     val regWorkshopName: String,
     val risuid: String,
     val message: String,
+    val finalDesc: String,
     val illness: String,
     val trackingCode: String
 )

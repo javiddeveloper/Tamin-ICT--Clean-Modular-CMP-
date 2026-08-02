@@ -39,6 +39,7 @@ fun DeservedTreatmentDN.toEntity(nationalCode: String) = DeservedTreatmentEntity
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
 )
@@ -67,6 +68,7 @@ fun DeservedTreatmentEntity.toDomain() = DeservedTreatmentDN(
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
 )

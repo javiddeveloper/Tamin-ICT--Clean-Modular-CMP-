@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +32,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
 import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItemPR
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
@@ -90,11 +91,10 @@ import taminx.core.core_ui.share_organization
  */
 @Composable
 internal fun PatientCarousel(
-    cards: ImmutableList<PatientCardItem>,
+    cards: ImmutableList<PatientCardItemPR>,
     isLoading: Boolean,
     error: String?,
     pagerState: PagerState,
-    onShowEntitlementReason: (String) -> Unit,
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
 ) {
@@ -115,17 +115,23 @@ internal fun PatientCarousel(
             onRetry = onRetry,
         )
 
-        else -> InsuranceCardCarousel(
-            pageCount = cards.size,
-            pagerState = pagerState,
-        ) { page ->
-            val card = cards[page]
-            PatientCard(
-                patient = card.patient,
-                status = card.coverage,
-                dependantOrdinal = card.dependantOrdinal,
-                onShowEntitlementReason = onShowEntitlementReason,
-                collapseProgress = collapseProgress,
+        else -> {
+            val cardLambda: @Composable (Int) -> Unit = remember(cards, collapseProgress) {
+                { page ->
+                    cards.getOrNull(page)?.let { card ->
+                        PatientCard(
+                            patient = card.patient,
+                            status = card.coverage,
+                            dependantOrdinal = card.dependantOrdinal,
+                            collapseProgress = collapseProgress,
+                        )
+                    }
+                }
+            }
+            InsuranceCardCarousel(
+                pageCount = cards.size,
+                pagerState = pagerState,
+                card = cardLambda,
             )
         }
     }

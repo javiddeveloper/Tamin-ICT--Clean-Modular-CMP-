@@ -16,6 +16,9 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -25,11 +28,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,7 +52,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
-import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItem
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
@@ -197,8 +200,7 @@ private fun periodLabel(period: RecordPeriod, customRange: Pair<String, String>?
 /**
  * Failure state for the records list: what went wrong and how to recover, nothing more.
  *
- * No retry button — the list is pull-to-refresh, so one gesture both reloads a good list and
- * recovers from a failure, instead of the screen offering two ways to do the same thing.
+ * No retry affordance: recovering from a failure means re-entering the screen.
  */
 @Composable
 private fun RecordsErrorState(message: String) {
@@ -241,6 +243,9 @@ private fun retryIntent(
     startDate = customRange?.first ?: period.startTimestamp(),
     endDate = customRange?.second,
 )
+
+/** Where the period filter starts, and what clearing a custom range falls back to. */
+private val DefaultRecordPeriod = RecordPeriod.LAST_SIX_MONTHS
 
 /** Shown while a total has not loaded, so a blank never reads as zero spend. */
 private const val UNKNOWN_AMOUNT = "—"
@@ -295,7 +300,7 @@ fun MedicalRecordsScreen(
     }
 
     var selectedPatient by remember(effectiveNationalCode) { mutableStateOf(effectiveNationalCode) }
-    var selectedPeriod by remember { mutableStateOf(RecordPeriod.LAST_SIX_MONTHS) }
+    var selectedPeriod by remember { mutableStateOf(DefaultRecordPeriod) }
     var selectedTab by remember(initialTab) { mutableStateOf(initialTab) }
     // Set only by the تاریخ دلخواه picker; null means the selected preset decides the range.
     var customRange by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -336,22 +341,33 @@ fun MedicalRecordsScreen(
         onPatientSelected = { selectedPatient = it },
         onPeriodSelected = { selectedPeriod = it },
         onRecordSelected = { onOpenRecord(it, selectedPatient) },
-        onRetry = {
-            viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
-        },
         onCustomRangePicked = { start, end ->
             customRange = start to end
             selectedPeriod = RecordPeriod.CUSTOM
         },
         searchCriteria = searchCriteria,
         onSearchApplied = { criteria ->
-            searchCriteria = criteria
             selectedTab = criteria.tab
-            // A searched date range replaces the period preset, so both cannot disagree.
-            if (criteria.startDate != null && criteria.endDate != null) {
-                customRange = criteria.startDate to criteria.endDate
-                selectedPeriod = RecordPeriod.CUSTOM
+            // A searched range replaces the period preset, so the two can never disagree — and
+            // clearing it hands control back to the preset. Without that second branch a range
+            // cleared in the sheet keeps filtering the list with nothing on screen saying so.
+            val range = criteria.resolvedRange()
+            when {
+                range != null -> {
+                    customRange = range
+                    selectedPeriod = RecordPeriod.CUSTOM
+                }
+
+                selectedPeriod == RecordPeriod.CUSTOM -> {
+                    customRange = null
+                    selectedPeriod = DefaultRecordPeriod
+                }
             }
+            // Keep the end that was filled in, so reopening the sheet shows the range actually
+            // being queried rather than the half of it the person typed.
+            searchCriteria = range
+                ?.let { criteria.copy(startDate = it.first, endDate = it.second) }
+                ?: criteria
         },
     )
 }
@@ -371,7 +387,7 @@ fun HandleRecordsEvents(
 @Composable
 fun MedicalRecordsContent(
     state: PrescriptionsUiState,
-    patients: ImmutableList<PatientItem>,
+    patients: ImmutableList<PatientItemPR>,
     selectedPatient: String,
     selectedPeriod: RecordPeriod,
     customRange: Pair<String, String>?,
@@ -381,7 +397,6 @@ fun MedicalRecordsContent(
     onPatientSelected: (String) -> Unit,
     onPeriodSelected: (RecordPeriod) -> Unit,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
-    onRetry: () -> Unit,
     onCustomRangePicked: (startDate: String, endDate: String) -> Unit,
     searchCriteria: RecordSearchCriteria,
     onSearchApplied: (RecordSearchCriteria) -> Unit,
@@ -405,6 +420,14 @@ fun MedicalRecordsContent(
     val visibleRecords = remember(state.prescriptionList, searchCriteria, state.recordPrices) {
         state.prescriptionList.filter { searchCriteria.matches(it, state.recordPrices) }
     }
+    // The totals bar sums what is actually on screen, so it agrees with the cards above it. Keyed
+    // on the same inputs as the list, so filtering re-totals and nothing else does.
+    val visibleRecordPrices = remember(visibleRecords, state.recordPrices) {
+        visibleRecords
+            .mapNotNull { state.recordPrices[it.noteHeadEprescID] }
+            .toImmutableList()
+    }
+
     val recordGroups = remember(visibleRecords, monthNames) {
         visibleRecords.groupBy { it.prescDate.toJalaliMonthLabel(monthNames) }
     }
@@ -443,6 +466,8 @@ fun MedicalRecordsContent(
             },
         )
     }
+
+    val staggerState = rememberStaggeredEntranceState(key = selectedPatient to selectedPeriod to selectedTab)
 
     Scaffold(
         modifier = modifier,
@@ -505,17 +530,13 @@ fun MedicalRecordsContent(
         },
         bottomBar = {
             RecordsTotals(
-                prices = state.prescriptionPriceList,
-                isLoading = state.isLoading,
+                prices = visibleRecordPrices,
+                hasRecords = visibleRecords.isNotEmpty(),
+                isLoadingPrices = state.isLoadingPrices,
             )
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
-            onRefresh = onRetry,
-            modifier = Modifier.fillMaxSize(),
-        ) {
         // Lazy: a long history composes only the cards on screen, and a price arriving redraws
         // just the rows that show it.
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -534,7 +555,7 @@ fun MedicalRecordsContent(
                     item { RecordsShimmerSkeleton() }
 
                 // A failed request and a genuinely empty result read very differently, so they
-                // get different states. Both recover the same way: pull to refresh.
+                // get different states.
                 state.error != null -> item { RecordsErrorState(message = state.error) }
 
                 visibleRecords.isEmpty() -> item {
@@ -552,11 +573,10 @@ fun MedicalRecordsContent(
                     prices = state.recordPrices,
                     isLoadingPrices = state.isLoadingPrices,
                     onRecordSelected = onRecordSelected,
+                    staggerState = staggerState,
                 )
             }
         }
-        }
-
         }
     }
 }
@@ -567,6 +587,7 @@ private fun LazyListScope.recordTimeline(
     prices: Map<String, ElectronicPrescriptionPricePR>,
     isLoadingPrices: Boolean,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
+    staggerState: StaggeredEntranceState? = null,
 ) {
     groups.forEach { (monthLabel, monthRecords) ->
         item(key = monthLabel) { RecordGroupHeader(text = monthLabel) }
@@ -600,6 +621,7 @@ private fun LazyListScope.recordTimeline(
                 onClick = { onRecordSelected(record) },
                 // Gap between cards only, as the group's spacedBy arrangement gave before.
                 modifier = Modifier
+                    .staggeredItemEntrance(index = index, key = record.noteHeadEprescID, state = staggerState)
                     .padding(horizontal = Spacing.page)
                     .padding(bottom = if (index == monthRecords.lastIndex) 0.dp else Spacing.cardGap),
             )
@@ -609,16 +631,21 @@ private fun LazyListScope.recordTimeline(
     }
 }
 
-/** Totals pinned under the list; hidden until a price lookup has returned. */
+/**
+ * Totals pinned under the list, summing exactly the records on screen.
+ *
+ * Kept mounted for as long as there are records so it never appears and disappears mid-scroll:
+ * while the per-record prices are still arriving it shimmers in place, and the figures fill in
+ * underneath. With no records at all there is nothing to total, so it stands down entirely.
+ */
 @Composable
 private fun RecordsTotals(
     prices: ImmutableList<ElectronicPrescriptionPricePR>,
-    isLoading: Boolean,
+    hasRecords: Boolean,
+    isLoadingPrices: Boolean,
 ) {
-    // Nothing to total and nothing on its way: the bar stays away rather than showing three
-    // dashes. While the request is out it shows itself shimmering, so the bar does not pop in.
-    if (prices.isEmpty() && !isLoading) return
-    val pending = prices.isEmpty()
+    if (!hasRecords) return
+    val pending = prices.isEmpty() && isLoadingPrices
     CostTotalsBar(
         insuredShareLabel = stringResource(Res.string.share_insured),
         insuredShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
@@ -703,7 +730,6 @@ fun MedicalRecordsPreview() {
             onPatientSelected = {},
             onPeriodSelected = {},
             onRecordSelected = {},
-            onRetry = {},
             onCustomRangePicked = { _, _ -> },
             searchCriteria = RecordSearchCriteria(),
             onSearchApplied = {},

@@ -34,7 +34,7 @@ class TreatmentCostsViewModel(
     }
 
     private fun loadList(): Flow<PartialState> = flow {
-        emit(PartialState.Reset)
+        // Emit Loading(true) while retaining existing list during refresh so PullToRefresh overlay renders cleanly without screen flickers.
         emit(PartialState.Loading(true))
         try {
             getTreatmentCostsUseCase().collect { list ->

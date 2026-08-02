@@ -54,6 +54,12 @@ class CollapsingHeaderState(private val maxCollapsePx: Float) {
             (offsetPx / maxCollapsePx).coerceIn(-OVERSHOOT, 1f + OVERSHOOT)
         }
 
+    /**
+     * [progress] as the lambda the layout and draw modifiers take. Allocated once with the state,
+     * so handing it down costs no call site a `remember` of its own.
+     */
+    val progressProvider: () -> Float = { progress }
+
     val nestedScrollConnection: NestedScrollConnection = object : NestedScrollConnection {
 
         // Dragging the content up folds the header first, before the content itself scrolls.
@@ -140,6 +146,21 @@ fun Modifier.reservedHeight(heightPx: () -> Int): Modifier = layout { measurable
 fun Modifier.vanishOnCollapse(progress: () -> Float, rate: Float = 2f): Modifier = graphicsLayer {
     alpha = (1f - progress() * rate).coerceIn(0f, 1f)
 }
+
+/**
+ * Like [vanishOnCollapse], but the piece also gives back the space it holds as it goes, so what
+ * follows it closes up over the fade instead of jumping once the piece is gone.
+ *
+ * For a label that only belongs to the expanded state and sits next to something that stays.
+ */
+fun Modifier.collapseAway(progress: () -> Float, rate: Float = 2f): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val fade = (1f - progress() * rate).coerceIn(0f, 1f)
+        layout((placeable.width * fade).roundToInt(), (placeable.height * fade).roundToInt()) {
+            placeable.placeRelativeWithLayer(0, 0) { alpha = fade }
+        }
+    }
 
 /**
  * Shrinks a piece toward [minScale] as it travels, anchored to its start edge so it keeps its

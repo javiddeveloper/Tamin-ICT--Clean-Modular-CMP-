@@ -1,0 +1,24 @@
+<!-- Shield with a check, as the identity card's brand tile draws it. Traced from the design
+     export, so the viewport is the artwork's own size rather than a square. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="28dp"
+    android:viewportWidth="11.334"
+    android:viewportHeight="13.067">
+    <group
+        android:translateX="1"
+        android:translateY="1">
+        <path
+            android:pathData="M4.667,0 L9.334,2 V5.333 C9.334,8.4 7.334,10.133 4.667,11.067 C2,10.133 0,8.4 0,5.333 V2 L4.667,0 Z"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.125"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M2.667,6 L4,7.333 L6.667,4.667"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.125"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

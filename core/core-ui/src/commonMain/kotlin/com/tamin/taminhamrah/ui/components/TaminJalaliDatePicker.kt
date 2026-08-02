@@ -1,57 +1,81 @@
 package com.tamin.taminhamrah.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_chevron_forward
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.distinctUntilChanged
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.date_picker_confirm
+import taminx.core.core_ui.date_picker_today
 
-/** شنبه-first, matching how Persian calendars are read. */
-private val WEEKDAY_LABELS = listOf("ش", "ی", "د", "س", "چ", "پ", "ج")
+/** The wheel shows this many rows; the middle one is the selection. Must stay odd. */
+private const val VISIBLE_ROWS = 5
 
-private const val DAYS_PER_WEEK = 7
-private val DAY_CELL_SIZE = 40.dp
+private val ROW_HEIGHT = 44.dp
+private val WHEEL_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
+
+/** Where the top and bottom fades give way to clear glass — one row's worth at each end. */
+private const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
 
 /**
- * A Jalali date picker in the app's own styling.
+ * The span of years the year wheel offers. 1300 is the conventional floor for Jalali pickers in
+ * Iranian apps, and a little headroom past today covers forward-dated entries.
+ */
+private const val FIRST_YEAR = 1300
+private const val YEARS_AHEAD = 5
+
+/**
+ * A Jalali date picker: three snapping wheels for day, month and year, read right to left in the
+ * order the date is written.
  *
- * Deliberately plain: a month to page through and a grid of days, no year carousel or range
- * selection. Callers that need a range show it twice, which keeps this usable anywhere a single
- * date is wanted.
+ * The selection is the row parked in the middle. Each wheel reports its own settled index through
+ * a `snapshotFlow`, so dragging costs no recomposition of the surrounding dialog — only the wheel
+ * whose center row changed redraws.
  *
- * [initial] is the date the grid opens on, defaulting to today. [onConfirm] reports the chosen
+ * [initial] is the date the wheels open on, defaulting to today. [onConfirm] reports the chosen
  * Jalali year/month/day; use [PersianDateFormatter.toEpochMillis] to send it to an endpoint.
  */
 @Composable
@@ -62,181 +86,271 @@ fun TaminJalaliDatePicker(
     initial: Triple<Int, Int, Int> = PersianDateFormatter.today(),
 ) {
     val colors = LocalTaminColors.current
-    var year by remember { mutableStateOf(initial.first) }
-    var month by remember { mutableStateOf(initial.second) }
-    var day by remember { mutableStateOf(initial.third) }
+    var year by remember { mutableIntStateOf(initial.first) }
+    var month by remember { mutableIntStateOf(initial.second) }
+    var day by remember { mutableIntStateOf(initial.third) }
+
+    val lastYear = remember { PersianDateFormatter.currentJalaliYear() + YEARS_AHEAD }
+    val years = remember(lastYear) {
+        (FIRST_YEAR..lastYear).map { it.toString().toPersianDigits() }.toImmutableList()
+    }
+    val months = remember { PersianDateFormatter.monthNames.toImmutableList() }
+    // Rebuilt only when the month's length can actually differ, so spinning the day wheel inside
+    // one month never reallocates the list under it.
+    val daysInMonth = PersianDateFormatter.daysInMonth(year, month)
+    val days = remember(daysInMonth) {
+        (1..daysInMonth).map { it.toString().toPersianDigits() }.toImmutableList()
+    }
+
+    // A short month cannot hold the day standing on it. Clamped on the way out rather than written
+    // back during composition: the wheel reports the row it lands on and corrects `day` itself, and
+    // stepping over a short month and back leaves the original day intact.
+    val clampedDay = day.coerceAtMost(daysInMonth)
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(CornerRadius.card),
+            shape = RoundedCornerShape(CornerRadius.sheet),
             color = colors.bgSurface,
         ) {
-            Column(modifier = Modifier.padding(Spacing.lg)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = colors.textPrimary,
-                )
-
-                MonthHeader(
+            Column(
+                modifier = Modifier.padding(Spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+            ) {
+                PickerHeader(
+                    title = title,
                     year = year,
                     month = month,
-                    onPrevious = {
-                        if (month == 1) {
-                            month = 12
-                            year -= 1
-                        } else {
-                            month -= 1
-                        }
-                        // The previous month may be shorter, so keep the day inside it.
-                        day = day.coerceAtMost(PersianDateFormatter.daysInMonth(year, month))
-                    },
-                    onNext = {
-                        if (month == 12) {
-                            month = 1
-                            year += 1
-                        } else {
-                            month += 1
-                        }
-                        day = day.coerceAtMost(PersianDateFormatter.daysInMonth(year, month))
+                    day = clampedDay,
+                    onToday = {
+                        val today = PersianDateFormatter.today()
+                        year = today.first
+                        month = today.second
+                        day = today.third
                     },
                 )
 
-                WeekdayRow()
-
-                DayGrid(
-                    year = year,
-                    month = month,
-                    selectedDay = day,
-                    onSelect = { day = it },
+                DateWheels(
+                    days = days,
+                    months = months,
+                    years = years,
+                    dayIndex = clampedDay - 1,
+                    monthIndex = month - 1,
+                    yearIndex = year - FIRST_YEAR,
+                    onDayIndex = { day = it + 1 },
+                    onMonthIndex = { month = it + 1 },
+                    onYearIndex = { year = FIRST_YEAR + it },
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(text = "انصراف", color = colors.textSecondary)
-                    }
-                    TextButton(onClick = { onConfirm(year, month, day) }) {
-                        Text(text = "تایید", color = colors.teal)
-                    }
+                // انصراف first so that right-to-left puts it on the right and the wide blue
+                // تأیید تاریخ on the left, as the design has them.
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                    CancelButton(
+                        text = stringResource(Res.string.action_cancel),
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TaminPrimaryButton(
+                        text = stringResource(Res.string.date_picker_confirm),
+                        onClick = { onConfirm(year, month, clampedDay) },
+                        // The button's default is the app bar's gradient, which is teal. This
+                        // dialog is blue throughout, so it takes the same blue as the wheels.
+                        background = SolidColor(colors.blueText),
+                        modifier = Modifier.weight(2f),
+                    )
                 }
             }
         }
     }
 }
 
+/** The caller's wording on one side, the date the wheels currently spell out, and a way back to today. */
 @Composable
-private fun MonthHeader(
+private fun PickerHeader(
+    title: String,
     year: Int,
     month: Int,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
+    day: Int,
+    onToday: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-            contentDescription = "ماه قبل",
-            tint = colors.textSecondary,
-            modifier = Modifier
-                .size(IconSize.medium)
-                .clip(CircleShape)
-                .clickable(onClick = onPrevious),
-        )
-        Text(
-            text = "${PersianDateFormatter.monthNames[month - 1]} ${year.toString().toPersianDigits()}",
-            style = MaterialTheme.typography.titleSmall,
-            color = colors.textPrimary,
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-            contentDescription = "ماه بعد",
-            tint = colors.textSecondary,
-            modifier = Modifier
-                .size(IconSize.medium)
-                .clip(CircleShape)
-                .clickable(onClick = onNext),
-        )
-    }
-}
-
-@Composable
-private fun WeekdayRow() {
-    val colors = LocalTaminColors.current
-    Row(modifier = Modifier.fillMaxWidth()) {
-        WEEKDAY_LABELS.forEach { label ->
+        Column(horizontalAlignment = Alignment.Start) {
             Text(
-                text = label,
+                text = title,
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textTertiary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.size(DAY_CELL_SIZE).padding(top = Spacing.sm),
+            )
+            Text(
+                text = "${day.toString().toPersianDigits()} " +
+                    "${PersianDateFormatter.monthNames[month - 1]} " +
+                    year.toString().toPersianDigits(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = colors.blueText,
             )
         }
+        Text(
+            text = stringResource(Res.string.date_picker_today),
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.blueText,
+            modifier = Modifier
+                .clip(RoundedCornerShape(CornerRadius.full))
+                .background(colors.blueBg)
+                .clickable(onClick = onToday)
+                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        )
     }
 }
 
+/**
+ * The three wheels on their shared panel.
+ *
+ * Day sits first so that in the app's right-to-left layout it lands on the right, and the columns
+ * read «۱۱ مرداد ۱۴۰۵» across — the same order the date is written.
+ */
 @Composable
-private fun DayGrid(
-    year: Int,
-    month: Int,
-    selectedDay: Int,
-    onSelect: (Int) -> Unit,
-) {
-    val dayCount = PersianDateFormatter.daysInMonth(year, month)
-    val leadingBlanks = PersianDateFormatter.firstWeekdayOfMonth(year, month)
-    // Blank cells before the 1st keep each date under the right weekday column.
-    val cells = List(leadingBlanks) { null } + (1..dayCount).toList()
-
-    Column {
-        cells.chunked(DAYS_PER_WEEK).forEach { week ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                week.forEach { dayNumber ->
-                    DayCell(
-                        day = dayNumber,
-                        isSelected = dayNumber == selectedDay,
-                        onSelect = onSelect,
-                    )
-                }
-                // Pad the final row so it stays aligned with the ones above.
-                repeat(DAYS_PER_WEEK - week.size) {
-                    Box(modifier = Modifier.size(DAY_CELL_SIZE))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DayCell(
-    day: Int?,
-    isSelected: Boolean,
-    onSelect: (Int) -> Unit,
+private fun DateWheels(
+    days: ImmutableList<String>,
+    months: ImmutableList<String>,
+    years: ImmutableList<String>,
+    dayIndex: Int,
+    monthIndex: Int,
+    yearIndex: Int,
+    onDayIndex: (Int) -> Unit,
+    onMonthIndex: (Int) -> Unit,
+    onYearIndex: (Int) -> Unit,
 ) {
     val colors = LocalTaminColors.current
     Box(
         modifier = Modifier
-            .size(DAY_CELL_SIZE)
-            .padding(Spacing.xxs)
-            .clip(CircleShape)
-            .background(if (isSelected) colors.teal else colors.bgSurface)
-            .then(
-                if (day == null) Modifier else Modifier.clickable { onSelect(day) },
-            ),
+            .fillMaxWidth()
+            .height(WHEEL_HEIGHT)
+            .clip(RoundedCornerShape(CornerRadius.cardCompact))
+            .background(colors.bgPage),
         contentAlignment = Alignment.Center,
     ) {
-        if (day != null) {
+        // The selection is a place, not a row: it stays put while the numbers move through it.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ROW_HEIGHT)
+                .padding(horizontal = Spacing.sm)
+                .clip(RoundedCornerShape(CornerRadius.chip))
+                .background(colors.bgSurface)
+                .border(1.dp, colors.blueText.copy(alpha = SELECTION_BORDER_ALPHA), RoundedCornerShape(CornerRadius.chip)),
+        )
+
+        Row(modifier = Modifier.fillMaxSize()) {
+            WheelColumn(items = days, selectedIndex = dayIndex, onSelected = onDayIndex, modifier = Modifier.weight(1f))
+            WheelColumn(items = months, selectedIndex = monthIndex, onSelected = onMonthIndex, modifier = Modifier.weight(1f))
+            WheelColumn(items = years, selectedIndex = yearIndex, onSelected = onYearIndex, modifier = Modifier.weight(1f))
+        }
+
+        // Fades the rows away from the middle instead of tinting each one: a static overlay costs
+        // one draw, where per-row alpha would have to read the scroll offset on every frame.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        0f to colors.bgPage,
+                        EDGE_FADE_STOP to Color.Transparent,
+                        1f - EDGE_FADE_STOP to Color.Transparent,
+                        1f to colors.bgPage,
+                    ),
+                ),
+        )
+    }
+}
+
+/**
+ * One wheel.
+ *
+ * Half a wheel of padding above and below lets the first and last entries reach the middle. With
+ * that padding the centred row is exactly `firstVisibleItemIndex`, so the selection needs no
+ * arithmetic over the scroll offset.
+ */
+@Suppress("FrequentlyChangingValue")
+@Composable
+private fun WheelColumn(
+    items: ImmutableList<String>,
+    selectedIndex: Int,
+    onSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val state = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex.coerceAtLeast(0))
+
+    // Reports the row that settled in the middle. Read through a snapshotFlow rather than during
+    // composition, so a spin never recomposes the dialog.
+    LaunchedEffect(state, items) {
+        snapshotFlow { state.firstVisibleItemIndex }.distinctUntilChanged().collect(onSelected)
+    }
+
+    // Follows the caller when the date moves for a reason other than this wheel — «امروز», or a
+    // day clamped by a shorter month.
+    LaunchedEffect(selectedIndex) {
+        if (!state.isScrollInProgress && state.firstVisibleItemIndex != selectedIndex) {
+            state.scrollToItem(selectedIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0)))
+        }
+    }
+
+    LazyColumn(
+        state = state,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = ROW_HEIGHT * (VISIBLE_ROWS / 2)),
+        flingBehavior = rememberSnapFlingBehavior(state),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        itemsIndexed(items, key = { index, _ -> index }) { index, label ->
+            // Read here rather than in the surrounding wheel: only the rows redraw when the center
+            // moves, and only when it crosses a row rather than on every pixel of the drag.
+            val isSelected = index == state.firstVisibleItemIndex
             Text(
-                text = day.toString().toPersianDigits(),
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isSelected) colors.bgSurface else colors.textPrimary,
+                text = label,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) colors.blueText else colors.textSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ROW_HEIGHT)
+                    .padding(top = ROW_TEXT_TOP_PADDING),
             )
         }
     }
 }
+
+/** The bordered outline beside the primary action. */
+@Composable
+private fun CancelButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    Box(
+        modifier = modifier
+            .height(CANCEL_BUTTON_HEIGHT)
+            .clip(RoundedCornerShape(CornerRadius.iconTile))
+            .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.iconTile))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            color = colors.textSecondary,
+        )
+    }
+}
+
+private const val SELECTION_BORDER_ALPHA = 0.35f
+
+/** Nudges the glyph off the row's top edge so it sits optically centred. */
+private val ROW_TEXT_TOP_PADDING = 10.dp
+private val CANCEL_BUTTON_HEIGHT = 52.dp

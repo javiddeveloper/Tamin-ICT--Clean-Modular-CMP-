@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.material3.Scaffold
@@ -159,6 +161,8 @@ fun RecordDetailContent(
     val colors = LocalTaminColors.current
     val record = state.prescriptionList.firstOrNull { it.noteHeadEprescID == noteHeadId }
     val price = state.prescriptionPriceList.firstOrNull()
+    // Remembers item entrance animations for prescription items, keyed on the prescription note head ID.
+    val staggerState = rememberStaggeredEntranceState(key = noteHeadId)
 
     // Which export is on screen. Opening the viewer no longer means a download has happened: it
     // decides for itself whether the file needs fetching, so the tap only says which one to show.
@@ -224,7 +228,7 @@ fun RecordDetailContent(
                         )
 
                         SectionLabel(text = stringResource(Res.string.prescription_items))
-                        state.prescriptionDetailList.forEach { item ->
+                        state.prescriptionDetailList.forEachIndexed { index, item ->
                             PrescriptionItemCard(
                                 name = item.serviceName,
                                 dose = item.drugInstruction.ifBlank { item.drugAmount },
@@ -235,6 +239,7 @@ fun RecordDetailContent(
                                 itemTotal = item.sumPriceItem.toPriceFormat(),
                                 patientShare = item.ssoPayment.toPriceFormat(),
                                 organizationShare = item.insurancePayment.toPriceFormat(),
+                                modifier = Modifier.staggeredItemEntrance(index = index, key = item, state = staggerState),
                             )
                         }
 

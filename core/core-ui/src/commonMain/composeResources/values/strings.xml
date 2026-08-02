@@ -83,6 +83,9 @@
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
     <string name="action_confirm">تایید</string>
+    <string name="action_cancel">انصراف</string>
+    <string name="date_picker_today">امروز</string>
+    <string name="date_picker_confirm">تأیید تاریخ</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
     <string name="action_show_details">نمایش جزئیات</string>
@@ -119,10 +122,7 @@
     <string name="card_subtitle">کارت الکترونیک بیمهٔ درمان</string>
     <string name="card_national_code">کد ملی</string>
     <string name="coverage_pending">در حال استعلام وضعیت استحقاق…</string>
-    <string name="coverage_rejected">فاقد استحقاق درمان</string>
     <string name="coverage_covered">وضعیت حمایت‌های درمانی: برخوردار هستید</string>
-    <string name="coverage_reason_action">علت</string>
-    <string name="coverage_reason_dialog_title">علت عدم استحقاق درمان</string>
 
     <!-- Medical records -->
     <string name="records_title">سوابق درمانی</string>
@@ -229,6 +229,49 @@
         <item>بهمن</item>
         <item>اسفند</item>
     </string-array>
+
+    <!-- ===================== Identity information ===================== -->
+    <string name="identity_title">اطلاعات هویتی</string>
+    <string name="identity_back">بازگشت</string>
+    <string name="identity_verified_notice">اطلاعات از سازمان ثبت احوال استعلام و تأیید شده است</string>
+
+    <!-- The card -->
+    <string name="identity_card_org">سازمان تامین اجتماعی</string>
+    <string name="identity_card_type">کارت بیمه‌شده</string>
+    <string name="identity_ssn_label">شماره تامین اجتماعی</string>
+    <!-- father name, gender, nationality -->
+    <string name="identity_lineage">فرزند %1$s · %2$s · %3$s</string>
+    <string name="identity_nationality_value">ایرانی</string>
+
+    <!-- Sections -->
+    <string name="identity_section_personal">اطلاعات فردی</string>
+    <string name="identity_section_identifier">شماره شناسایی</string>
+    <string name="identity_section_birth_certificate">اطلاعات شناسنامه</string>
+    <string name="identity_section_contact">اطلاعات تماس</string>
+
+    <!-- Fields -->
+    <string name="identity_field_first_name">نام</string>
+    <string name="identity_field_last_name">نام خانوادگی</string>
+    <string name="identity_field_father_name">نام پدر</string>
+    <string name="identity_field_gender">جنسیت</string>
+    <string name="identity_field_birth_date">تاریخ تولد</string>
+    <string name="identity_field_nationality">ملیت</string>
+    <string name="identity_field_national_code">کد ملی</string>
+    <string name="identity_field_id_number">شماره شناسنامه</string>
+    <string name="identity_field_id_series">سری شناسنامه</string>
+    <string name="identity_field_id_serial">سریال شناسنامه</string>
+    <string name="identity_field_birth_city">شهر محل تولد</string>
+    <string name="identity_field_issue_city">شهر محل صدور</string>
+    <string name="identity_field_mobile">شماره تلفن همراه</string>
+    <string name="identity_field_email">پست الکترونیک</string>
+
+    <!-- Shown where the service returned nothing for a field -->
+    <string name="identity_value_not_registered">ثبت نشده</string>
+
+    <!-- Gender, named from the civil-registry code the service sends -->
+    <string name="identity_gender_male">مرد</string>
+    <string name="identity_gender_female">زن</string>
+    <string name="identity_gender_unknown">نامشخص</string>
 
 </resources>
 
