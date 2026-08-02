@@ -142,6 +142,21 @@ fun Modifier.vanishOnCollapse(progress: () -> Float, rate: Float = 2f): Modifier
 }
 
 /**
+ * Like [vanishOnCollapse], but the piece also gives back the space it holds as it goes, so what
+ * follows it closes up over the fade instead of jumping once the piece is gone.
+ *
+ * For a label that only belongs to the expanded state and sits next to something that stays.
+ */
+fun Modifier.collapseAway(progress: () -> Float, rate: Float = 2f): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val fade = (1f - progress() * rate).coerceIn(0f, 1f)
+        layout((placeable.width * fade).roundToInt(), (placeable.height * fade).roundToInt()) {
+            placeable.placeRelativeWithLayer(0, 0) { alpha = fade }
+        }
+    }
+
+/**
  * Shrinks a piece toward [minScale] as it travels, anchored to its start edge so it keeps its
  * place in the collapsed bar rather than drifting toward the middle.
  */

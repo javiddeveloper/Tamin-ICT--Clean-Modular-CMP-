@@ -38,7 +38,7 @@ import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityDimens
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
+import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -271,19 +271,17 @@ private fun CardNameRow(
     collapseProgress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
-    val fade = (1f - collapseProgress() * 2f).coerceIn(0f, 1f)
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (fade > 0f) {
-            Text(
-                text = stringResource(Res.string.identity_field_first_name),
-                style = MaterialTheme.typography.labelSmall,
-                color = TaminIdentityCardMuted.copy(alpha = fade),
-            )
-        }
+        Text(
+            text = stringResource(Res.string.identity_field_first_name),
+            style = MaterialTheme.typography.labelSmall,
+            color = TaminIdentityCardMuted,
+            modifier = Modifier.collapseAway(collapseProgress, IdentityDimens.VANISH_RATE),
+        )
         Text(
             text = fullName,
             style = MaterialTheme.typography.titleSmall,
@@ -377,18 +375,16 @@ private fun CardSsn(
     collapseProgress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
-    val fade = (1f - collapseProgress() * 2f).coerceIn(0f, 1f)
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.Start,
     ) {
-        if (fade > 0f) {
-            Text(
-                text = stringResource(Res.string.identity_ssn_label),
-                style = MaterialTheme.typography.labelSmall,
-                color = TaminIdentityCardMuted.copy(alpha = fade),
-            )
-        }
+        Text(
+            text = stringResource(Res.string.identity_ssn_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = TaminIdentityCardMuted,
+            modifier = Modifier.collapseAway(collapseProgress, IdentityDimens.VANISH_RATE),
+        )
         NumericText(
             text = ssn.toPersianDigits(),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
