@@ -64,6 +64,7 @@ fun SelfDeclarationAllergyScreen(
     drugOptions: List<LookupItemPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -83,7 +84,8 @@ fun SelfDeclarationAllergyScreen(
                 title = stringResource(Res.string.health_allergy_title),
                 currentStep = 10,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {

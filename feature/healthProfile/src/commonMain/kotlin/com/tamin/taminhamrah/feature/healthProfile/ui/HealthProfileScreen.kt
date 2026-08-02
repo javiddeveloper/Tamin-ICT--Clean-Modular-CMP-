@@ -203,7 +203,8 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.INTRO -> {
                     SelfDeclarationIntroScreen(
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -213,7 +214,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -224,7 +226,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -242,7 +245,8 @@ fun HealthProfileMainContent(
                         isProvincesLoading = state.isProvincesLoading,
                         isCitiesLoading = state.isCitiesLoading,
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -252,7 +256,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -262,7 +267,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -273,7 +279,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.BLOOD_GROUPS),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -289,7 +296,8 @@ fun HealthProfileMainContent(
                             ErrorSource.ACT_FREQUENCIES
                         ),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -300,7 +308,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         onIntent = wrappedOnIntent,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -311,7 +320,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         onIntent = wrappedOnIntent,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -322,7 +332,8 @@ fun HealthProfileMainContent(
                         isLoading = combinedLoading,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.DRUGS),
                         onIntent = wrappedOnIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -331,7 +342,8 @@ fun HealthProfileMainContent(
                         state = state,
                         isLoading = combinedLoading,
                         onIntent = onIntent,
-                        onBackClicked = navigateBack
+                        onBackClicked = navigateBack,
+                        onCloseClicked = onBackClicked
                     )
                 }
 
@@ -353,7 +365,8 @@ fun HealthProfileMainContent(
                         topBar = {
                             HealthTopAppBar(
                                 title = "پروندهٔ سلامت",
-                                onBackClicked = onBackClicked
+                                onBackClicked = onBackClicked,
+                                onCloseClicked = onBackClicked
                             )
                         }
                     ) { paddingValues ->

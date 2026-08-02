@@ -38,6 +38,7 @@ fun SelfDeclarationReviewScreen(
     state: HealthProfileUiState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
 ) {
     val selfDecState = state.selfDeclaration
@@ -49,7 +50,8 @@ fun SelfDeclarationReviewScreen(
         topBar = {
             HealthTopAppBar(
                 title = stringResource(Res.string.health_review_title),
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {

@@ -39,12 +39,14 @@ import taminx.feature.healthprofile.generated.resources.*
 fun SelfDeclarationIntroScreen(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     SelfDeclarationIntroContent(
         onIntent = onIntent,
         onBackClicked = onBackClicked,
+        onCloseClicked = onCloseClicked,
         isLoading = isLoading,
         modifier = modifier
     )
@@ -54,6 +56,7 @@ fun SelfDeclarationIntroScreen(
 fun SelfDeclarationIntroContent(
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -66,7 +69,8 @@ fun SelfDeclarationIntroContent(
             topBar = {
                 HealthTopAppBar(
                     title = stringResource(Res.string.health_intro_title),
-                    onBackClicked = onBackClicked
+                    onBackClicked = onBackClicked,
+                    onCloseClicked = onCloseClicked
                 )
             },
             bottomBar = {

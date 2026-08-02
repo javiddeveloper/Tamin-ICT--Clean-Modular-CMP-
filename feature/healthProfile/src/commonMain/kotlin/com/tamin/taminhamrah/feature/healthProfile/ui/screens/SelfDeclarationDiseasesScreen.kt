@@ -58,6 +58,7 @@ fun SelfDeclarationDiseasesScreen(
     illnessGroups: List<IllnessGroupPR>,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -81,7 +82,8 @@ fun SelfDeclarationDiseasesScreen(
                 title = stringResource(Res.string.health_diseases_title),
                 currentStep = 8,
                 totalSteps = 10,
-                onBackClicked = onBackClicked
+                onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked
             )
         },
         bottomBar = {

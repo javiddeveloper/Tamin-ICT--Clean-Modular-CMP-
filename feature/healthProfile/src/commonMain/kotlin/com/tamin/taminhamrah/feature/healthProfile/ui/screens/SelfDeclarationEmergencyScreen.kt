@@ -27,6 +27,7 @@ fun SelfDeclarationEmergencyScreen(
     state: EmergencyStepState,
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
     error: String? = null
 ) {
@@ -47,6 +48,7 @@ fun SelfDeclarationEmergencyScreen(
                 currentStep = 4,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked,
                 title = stringResource(Res.string.health_emergency_title)
             )
         },

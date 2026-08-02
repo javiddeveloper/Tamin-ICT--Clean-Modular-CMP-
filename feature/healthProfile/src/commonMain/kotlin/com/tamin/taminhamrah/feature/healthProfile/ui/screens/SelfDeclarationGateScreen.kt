@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
@@ -92,13 +93,45 @@ fun SelfDeclarationGateContent(
                         )
                     },
                     navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.health_gate_btn_back),
-                            tint = Color.White
-                        )
+                        Box(
+                            modifier = Modifier.background(
+                                color = Color.White.copy(alpha = 0.3f),
+                                shape = MaterialTheme.shapes.medium
+                            ).border(
+                                width = 1.dp,
+                                shape = MaterialTheme.shapes.medium,
+                                color = Color.White.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Icon(
+                                modifier = modifier.rotate(180f).padding(8.dp),
+                                painter = painterResource(Res.drawable.ic_health_back),
+                                contentDescription = stringResource(Res.string.health_gate_btn_back),
+                                tint = Color.White
+                            )
+                        }
                     },
                     onNavigationClick = onBackClicked,
+                    actionIcon = {
+                        Box(
+                            modifier = Modifier.background(
+                                color = Color.White.copy(alpha = 0.3f),
+                                shape = MaterialTheme.shapes.medium
+                            ).border(
+                                width = 1.dp,
+                                shape = MaterialTheme.shapes.medium,
+                                color = Color.White.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Icon(
+                                modifier = Modifier.padding(8.dp),
+                                painter = painterResource(Res.drawable.ic_health_close),
+                                contentDescription = "بستن",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    onActionClick = onBackClicked,
                     backgroundColor = Color.Transparent,
                     contentColor = Color.White,
                     modifier = Modifier.statusBarsPadding()
@@ -128,7 +161,7 @@ fun SelfDeclarationGateContent(
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                     border = BorderStroke(1.dp, taminColors.border),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp )
                 ) {
                     Column(
                         modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),

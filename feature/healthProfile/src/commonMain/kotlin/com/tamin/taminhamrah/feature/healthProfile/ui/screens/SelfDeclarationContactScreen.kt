@@ -49,7 +49,8 @@ fun SelfDeclarationContactScreen (
     isProvincesLoading: Boolean = false,
     isCitiesLoading: Boolean = false,
     onIntent: (HealthProfileIntent) -> Unit,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
@@ -87,6 +88,7 @@ fun SelfDeclarationContactScreen (
                 currentStep = 3,
                 totalSteps = 10,
                 onBackClicked = onBackClicked,
+                onCloseClicked = onCloseClicked,
                 title = stringResource(Res.string.health_contact_title)
             )
         },
