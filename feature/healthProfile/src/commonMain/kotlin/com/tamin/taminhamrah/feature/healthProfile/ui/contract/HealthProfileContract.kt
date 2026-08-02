@@ -150,19 +150,19 @@ data class BloodGroupStepState(
 // Step 9: Lifestyle
 // smokingStatusId is from API lookup; patterns are still free local chips for now
 data class LifestyleStepState(
-    val isSmoking: Boolean? = null,
+    val isSmoking: Boolean? = false,
     val smokingStatusId: Int? = null,
     val smokingPattern: String? = null,
 
-    val hasAddiction: Boolean? = null,
+    val hasAddiction: Boolean? = false,
     val substanceStatusId: Int? = null,
     val substancePattern: String? = null,
 
-    val isDrinking: Boolean? = null,
+    val isDrinking: Boolean? = false,
     val drinkingStatusId: Int? = null,
     val drinkingPattern: String? = null,
 
-    val isExercising: Boolean? = null,
+    val isExercising: Boolean? = false,
     val exerciseStatusId: Int? = null,
     val exerciseFrequency: String? = null
 )
