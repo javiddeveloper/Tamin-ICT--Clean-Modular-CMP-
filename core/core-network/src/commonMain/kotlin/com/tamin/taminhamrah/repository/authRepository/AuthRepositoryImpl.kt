@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository.authRepository
 
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.repository.LocalDataClearer
 import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +12,8 @@ import co.touchlab.kermit.Logger
 
 class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
-    private val tokenStoreManager: TokenStoreManager
+    private val tokenStoreManager: TokenStoreManager,
+    private val localDataClearer: LocalDataClearer
 ) : AuthRepository {
 
     private val logger = Logger.withTag("AuthRepository")
@@ -73,7 +75,9 @@ class AuthRepositoryImpl(
         revokeToken()
         tokenStoreManager.saveToken(null)
         tokenStoreManager.saveRefreshToken(null)
+        tokenStoreManager.saveUserId(null)
         tokenStoreManager.setTokenValid(false)
+        localDataClearer.clearAll()
         logger.d { "logout() completed. Tokens cleared." }
     }
 

@@ -40,8 +40,7 @@ class MainActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent?) {
         intent?.data?.toString()?.let { uri ->
             lifecycleScope.launch {
-                val success = handleAuthDeepLinkUseCase(uri)
-                if (success) { tokenStoreManager.getToken() }
+                handleAuthDeepLinkUseCase(uri)
             }
         }
     }
