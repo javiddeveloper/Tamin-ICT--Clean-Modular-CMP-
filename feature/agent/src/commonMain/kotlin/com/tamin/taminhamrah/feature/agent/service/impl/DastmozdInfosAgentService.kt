@@ -104,14 +104,12 @@ class DastmozdInfosAgentService(
                 allDetails.add("نوع سابقه" to (info.historytypedesc ?: "-"))
                 allDetails.add("نام شعبه" to (info.brhname ?: "-"))
 
-                val monthNames = listOf("فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند")
-
                 // Map monthly wage details
                 info.wageDetails.forEachIndexed { index, detail ->
                     val amount = detail.wage ?: return@forEachIndexed
                     if (amount == "0") return@forEachIndexed
-                    
-                    val monthName = monthNames.getOrNull(index) ?: return@forEachIndexed
+
+                    val monthName = MONTH_NAMES.getOrNull(index) ?: return@forEachIndexed
                     val formattedAmount = amount.toRialAmount().toPersianDigits()
                     allDetails.add("مبلغ دستمزد $monthName" to formattedAmount)
                 }
@@ -136,5 +134,14 @@ class DastmozdInfosAgentService(
                 cause = e
             )
         }
+    }
+
+    private companion object {
+        /** Persian month names in order — allocated once, shared across all execute() calls. */
+        val MONTH_NAMES = listOf(
+            "فروردین", "اردیبهشت", "خرداد", "تیر",
+            "مرداد", "شهریور", "مهر", "آبان",
+            "آذر", "دی", "بهمن", "اسفند"
+        )
     }
 }
