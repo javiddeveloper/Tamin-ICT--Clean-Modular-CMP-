@@ -83,6 +83,9 @@
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
     <string name="action_confirm">تایید</string>
+    <string name="action_cancel">انصراف</string>
+    <string name="date_picker_today">امروز</string>
+    <string name="date_picker_confirm">تأیید تاریخ</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
     <string name="action_show_details">نمایش جزئیات</string>
