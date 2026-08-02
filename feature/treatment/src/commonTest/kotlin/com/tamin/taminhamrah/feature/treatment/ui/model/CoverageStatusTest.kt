@@ -36,6 +36,41 @@ class CoverageStatusTest {
     }
 
     @Test
+    fun `the reason is unpadded and single-spaced for the card to print`() {
+        // The service pads its text and doubles spaces inside it; the card shows this verbatim.
+        assertEquals(
+            CoverageStatus.Rejected(reason = "بدليل مختومه‌شدن قرارداد، برخورداري ميسر نمي‌باشد."),
+            coverageStatusOf(
+                mainPatient,
+                listOf(recordWith(finalDesc = "  بدليل مختومه‌شدن قرارداد،  برخورداري  ميسر نمي‌باشد. ")),
+            ),
+        )
+    }
+
+    @Test
+    fun `a message containing عدم inside an ordinary word is not a refusal`() {
+        // «عدم» is a substring of everyday words, so matching it alone would refuse someone who
+        // is covered. Only the full «عدم استحقاق» counts.
+        assertEquals(
+            CoverageStatus.Covered,
+            coverageStatusOf(mainPatient, listOf(recordWith(message = "پس از آن مساعدم کردند"))),
+        )
+    }
+
+    @Test
+    fun `a message narrating an event is not itself a refusal`() {
+        // Verbatim from 0017312213, minus the finalDesc: the message describes leaving sponsorship
+        // and never says «عدم استحقاق», so on its own it decides nothing.
+        assertEquals(
+            CoverageStatus.Covered,
+            coverageStatusOf(
+                mainPatient,
+                listOf(recordWith(message = " بيمه شده تبعي در تاريخ  1400/01/01 از کفالت خارج شده است ")),
+            ),
+        )
+    }
+
+    @Test
     fun `a record with neither field worded is covered`() {
         // Verbatim shape of booklet-req/lackEntitlement/0946168113, who is entitled: the endpoint
         // still returns a record, with message and finalDesc both null. Presence of a record is

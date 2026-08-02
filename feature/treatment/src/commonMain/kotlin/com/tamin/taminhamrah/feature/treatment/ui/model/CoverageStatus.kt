@@ -24,10 +24,40 @@ sealed interface CoverageStatus {
 }
 
 /**
- * Some refusals are worded only in [DeservedTreatmentPR.message], by negating the entitlement
- * wording ("عدم استحقاق"), without a `finalDesc` to go with them.
+ * The wording the service uses when it refuses in [DeservedTreatmentPR.message] instead of in
+ * `finalDesc`.
+ *
+ * Matched as a whole phrase rather than on «عدم» alone: that fragment also sits inside ordinary
+ * words — «بعدم», «مساعدم», «متقاعدم» — so a bare substring test can refuse someone who is covered.
  */
-private const val NOT_ENTITLED_MARKER = "عدم"
+private const val NOT_ENTITLED_PHRASE = "عدم استحقاق"
+
+/**
+ * The service pads its text and leaves double spaces inside it, and the card now prints the
+ * refusal verbatim, so whichever field wins is tidied before it is shown.
+ */
+private val WHITESPACE_RUN = Regex("\\s+")
+
+/**
+ * What this record says the refusal is, or null when it states none.
+ *
+ * `finalDesc` is the verdict field and is already phrased for the insured person to read, so it
+ * decides. `message` narrates the event behind a refusal rather than being one — «…از کفالت خارج
+ * شده است» is not itself a refusal — so it only counts when it carries [NOT_ENTITLED_PHRASE].
+ *
+ * What has actually been seen from the endpoint: an entitled person comes back with both fields
+ * null, a refused one with `finalDesc` filled. A refusal worded only in `message` has not been
+ * observed — the branch stays because reading a refusal as covered is the exact failure this rule
+ * exists to prevent, and it costs one comparison.
+ *
+ * Both branches test for content before returning, so the result is never blank — which is what
+ * lets [CoverageStatus.Rejected.reason] be non-null.
+ */
+private fun DeservedTreatmentPR.refusalOrNull(): String? = when {
+    finalDesc.isNotBlank() -> finalDesc
+    message.contains(NOT_ENTITLED_PHRASE) -> message
+    else -> null
+}?.replace(WHITESPACE_RUN, " ")?.trim()
 
 /**
  * Resolves [patient]'s entitlement from the entitlement records.
@@ -49,16 +79,5 @@ fun coverageStatusOf(
 
     val mainRecord = deservedList.firstOrNull() ?: return CoverageStatus.Pending
 
-    // finalDesc first: it is the verdict, and it is worded for the insured person to read.
-    // message is the fallback, and only when it actually negates — it otherwise describes the
-    // event behind a refusal rather than being one.
-    return when {
-        mainRecord.finalDesc.isNotBlank() ->
-            CoverageStatus.Rejected(reason = mainRecord.finalDesc)
-
-        mainRecord.message.contains(NOT_ENTITLED_MARKER) ->
-            CoverageStatus.Rejected(reason = mainRecord.message)
-
-        else -> CoverageStatus.Covered
-    }
+    return mainRecord.refusalOrNull()?.let(CoverageStatus::Rejected) ?: CoverageStatus.Covered
 }
