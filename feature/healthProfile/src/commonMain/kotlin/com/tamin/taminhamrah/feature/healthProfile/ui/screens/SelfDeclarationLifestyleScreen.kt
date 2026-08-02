@@ -221,8 +221,12 @@ fun SelfDeclarationLifestyleScreen(
                         }
                         CustomChip(
                             text = state.smokingPattern,
-                            containerColor = taminColors.warning.copy(alpha = 0.13f),
-                            textColor = taminColors.textPrimary
+                            containerColor = taminColors.dangerBg,
+                            textColor = taminColors.dangerText,
+                            border = BorderStroke(
+                                1.dp,
+                                taminColors.dangerText.copy(alpha = 0.3f)
+                            )
                         )
                     }
                 }
@@ -305,8 +309,12 @@ fun SelfDeclarationLifestyleScreen(
                         }
                         CustomChip(
                             text = state.substancePattern,
-                            containerColor = taminColors.dangerText.copy(alpha = 0.13f),
-                            textColor = taminColors.textPrimary
+                            containerColor = taminColors.dangerBg,
+                            textColor = taminColors.dangerText,
+                            border = BorderStroke(
+                                1.dp,
+                                taminColors.dangerText.copy(alpha = 0.3f)
+                            )
                         )
                     }
                 }
@@ -390,8 +398,12 @@ fun SelfDeclarationLifestyleScreen(
                         }
                         CustomChip(
                             text = state.drinkingPattern,
-                            containerColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
-                            textColor = taminColors.textPrimary
+                            containerColor = taminColors.dangerBg,
+                            textColor = taminColors.dangerText,
+                            border = BorderStroke(
+                                1.dp,
+                                taminColors.dangerText.copy(alpha = 0.3f)
+                            )
                         )
                     }
                 }
@@ -475,8 +487,12 @@ fun SelfDeclarationLifestyleScreen(
                         }
                         CustomChip(
                             text = state.exerciseFrequency,
-                            containerColor = taminColors.greenText.copy(alpha = 0.13f),
-                            textColor = taminColors.textPrimary
+                            containerColor = taminColors.dangerBg,
+                            textColor = taminColors.dangerText,
+                            border = BorderStroke(
+                                1.dp,
+                                taminColors.dangerText.copy(alpha = 0.3f)
+                            )
                         )
                     }
                 }

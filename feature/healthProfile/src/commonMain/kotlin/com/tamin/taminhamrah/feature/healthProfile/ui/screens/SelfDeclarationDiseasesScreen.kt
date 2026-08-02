@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -232,8 +233,12 @@ fun SelfDeclarationDiseasesScreen(
                         selectedItems.forEach { item ->
                             CustomChip(
                                 text = item.label,
-                                containerColor = LocalTaminColors.current.hawkesBlue.copy(alpha = 0.6f),
-                                textColor = taminColors.textPrimary
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
+                                )
                             )
                         }
                     }
@@ -319,8 +324,12 @@ fun SelfDeclarationDiseasesScreen(
                         selectedItems.forEach { item ->
                             CustomChip(
                                 text = item.label,
-                                containerColor = taminColors.fuchsiaBlue.copy(alpha = 0.13f),
-                                textColor = taminColors.textPrimary
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
+                                )
                             )
                         }
                     }
@@ -404,8 +413,12 @@ fun SelfDeclarationDiseasesScreen(
                         selectedItems.forEach { item ->
                             CustomChip(
                                 text = item.label,
-                                containerColor = taminColors.dangerText.copy(alpha = 0.13f),
-                                textColor = taminColors.textPrimary
+                                containerColor = taminColors.dangerBg,
+                                textColor = taminColors.dangerText,
+                                border = BorderStroke(
+                                    1.dp,
+                                    taminColors.dangerText.copy(alpha = 0.3f)
+                                )
                             )
                         }
                     }
