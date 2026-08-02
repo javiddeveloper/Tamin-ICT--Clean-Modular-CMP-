@@ -109,7 +109,7 @@ fun TaminJalaliDatePicker(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(CornerRadius.xl),
+            shape = RoundedCornerShape(CornerRadius.sheet),
             color = colors.bgSurface,
         ) {
             Column(
@@ -229,7 +229,7 @@ private fun DateWheels(
         modifier = Modifier
             .fillMaxWidth()
             .height(WHEEL_HEIGHT)
-            .clip(RoundedCornerShape(CornerRadius.xl))
+            .clip(RoundedCornerShape(CornerRadius.cardCompact))
             .background(colors.bgPage),
         contentAlignment = Alignment.Center,
     ) {
@@ -239,9 +239,9 @@ private fun DateWheels(
                 .fillMaxWidth()
                 .height(ROW_HEIGHT)
                 .padding(horizontal = Spacing.sm)
-                .clip(RoundedCornerShape(CornerRadius.lg))
+                .clip(RoundedCornerShape(CornerRadius.chip))
                 .background(colors.bgSurface)
-                .border(1.dp, colors.blueText.copy(alpha = SELECTION_BORDER_ALPHA), RoundedCornerShape(CornerRadius.lg)),
+                .border(1.dp, colors.blueText.copy(alpha = SELECTION_BORDER_ALPHA), RoundedCornerShape(CornerRadius.chip)),
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
