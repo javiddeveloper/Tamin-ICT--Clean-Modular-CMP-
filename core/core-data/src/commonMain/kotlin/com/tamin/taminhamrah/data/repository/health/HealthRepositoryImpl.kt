@@ -228,12 +228,14 @@ internal class HealthRepositoryImpl(
     }
 
     override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): SyncResultDN {
-        return healthRemoteDataSource.syncIllnessSelfDeclaratives(request.toDTO())?.toDomain()
+        val message = healthRemoteDataSource.syncIllnessSelfDeclaratives(request.toDTO())
             ?: throw IllegalStateException("syncIllnessSelfDeclaratives returned null")
+        return SyncResultDN(data = message)
     }
 
     override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): SyncResultDN {
-        return healthRemoteDataSource.syncDrugAllergies(request.toDTO())?.toDomain()
+        val message = healthRemoteDataSource.syncDrugAllergies(request.toDTO())
             ?: throw IllegalStateException("syncDrugAllergies returned null")
+        return SyncResultDN(data = message)
     }
 }

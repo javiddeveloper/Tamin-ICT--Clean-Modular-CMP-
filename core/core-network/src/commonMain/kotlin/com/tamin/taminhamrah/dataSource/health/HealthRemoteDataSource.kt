@@ -18,9 +18,7 @@ import com.tamin.taminhamrah.model.health.ProvinceCitiesDTO
 import com.tamin.taminhamrah.model.health.ProvincesDTO
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessesByGroupDTO
 import com.tamin.taminhamrah.model.health.SmokingStatusDTO
-import com.tamin.taminhamrah.model.health.SyncDrugAllergiesDTO
 import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequestDTO
-import com.tamin.taminhamrah.model.health.SyncIllnessSelfDeclarativesDTO
 import com.tamin.taminhamrah.model.health.SyncIllnessesSelfDecRequestDTO
 import com.tamin.taminhamrah.model.health.UpdatePatientDTO
 import com.tamin.taminhamrah.model.health.UpdatePatientRequestDTO
@@ -60,7 +58,8 @@ interface HealthRemoteDataSource {
     suspend fun updatePatient(request: UpdatePatientRequestDTO): UpdatePatientDTO?
     suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): AddSelfDeclarativeDTO?
     suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): UpdateSelfDeclarativeDTO?
-    suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): SyncIllnessSelfDeclarativesDTO?
-    suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): SyncDrugAllergiesDTO?
+    /** Returns the server's success message; see HealthApiService for why this is a String. */
+    suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): String?
+    suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): String?
 }
 

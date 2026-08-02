@@ -37,6 +37,11 @@ class HealthProfileViewModel(
     private var currentPatientNatCode: String = ""
     private var currentPatientId: Int = 0
 
+    // Guards against overlapping RetryStep calls (e.g. the auto-retry-on-navigation
+    // effect firing at the same time as a manual retry tap) so they don't both hit
+    // the network concurrently for the same step.
+    private var isRefreshingStep = false
+
     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
         return when (intent) {
             is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile(intent.nationalCode)
@@ -167,36 +172,10 @@ class HealthProfileViewModel(
 
             is HealthProfileIntent.UpdateFamily -> flow { emit(PartialState.FamilyUpdated(intent.family)) }
             is HealthProfileIntent.UpdateBloodGroup -> flow {
-                Logger.d("BloodGroupUpdate", "User updated blood group")
-                Logger.d(
-                    "BloodGroupUpdate",
-                    "selectedBloodGroupId: ${intent.bloodGroup.selectedBloodGroupId}"
-                )
-                Logger.d(
-                    "BloodGroupUpdate",
-                    "selectedBloodGroupLetter: ${intent.bloodGroup.selectedBloodGroupLetter}"
-                )
-                Logger.d(
-                    "BloodGroupUpdate",
-                    "selectedBloodGroupRh: ${intent.bloodGroup.selectedBloodGroupRh}"
-                )
-                Logger.d(
-                    "BloodGroupUpdate",
-                    "isBloodGroupUnknown: ${intent.bloodGroup.isBloodGroupUnknown}"
-                )
                 emit(PartialState.BloodGroupUpdated(intent.bloodGroup))
             }
 
             is HealthProfileIntent.UpdateLifestyle -> flow {
-                Logger.d("LifestyleUpdate", "User updated lifestyle section")
-                Logger.d(
-                    "LifestyleUpdate", """
-                    isSmoking: ${intent.lifestyle.isSmoking}, smokingStatusId: ${intent.lifestyle.smokingStatusId}, smokingPattern: ${intent.lifestyle.smokingPattern}
-                    hasAddiction: ${intent.lifestyle.hasAddiction}, substanceStatusId: ${intent.lifestyle.substanceStatusId}, substancePattern: ${intent.lifestyle.substancePattern}
-                    isDrinking: ${intent.lifestyle.isDrinking}, drinkingStatusId: ${intent.lifestyle.drinkingStatusId}, drinkingPattern: ${intent.lifestyle.drinkingPattern}
-                    isExercising: ${intent.lifestyle.isExercising}, exerciseStatusId: ${intent.lifestyle.exerciseStatusId}, exerciseFrequency: ${intent.lifestyle.exerciseFrequency}
-                """.trimIndent()
-                )
                 emit(PartialState.LifestyleUpdated(intent.lifestyle))
             }
 
@@ -213,42 +192,60 @@ class HealthProfileViewModel(
     }
         .onCompletion { emit(PartialState.Loading(false)) }
 
-    private fun handleRefreshStep(): Flow<PartialState> = flow {
-        val step = uiState.value.selfDeclaration.currentStep
-        val natCode = currentPatientNatCode.takeIf { it.isNotBlank() }
-            ?: tokenStoreManager.getUserId() ?: ""
-        val patientId = currentPatientId
+    private fun handleRefreshStep(): Flow<PartialState> {
+        // Re-entrancy guard: ignore a RetryStep that arrives while one is already
+        // running (e.g. auto-retry-on-navigation racing a manual retry tap).
+        if (isRefreshingStep) return emptyFlow()
+        isRefreshingStep = true
 
-        emit(PartialState.Loading(true))
-        when (step) {
-            SelfDeclarationStep.COMPLETED -> {
-                fetchPatientData(natCode).collect { emit(it) }
-            }
+        return flow {
+            val step = uiState.value.selfDeclaration.currentStep
+            val natCode = currentPatientNatCode.takeIf { it.isNotBlank() }
+                ?: tokenStoreManager.getUserId() ?: ""
+            val patientId = currentPatientId
+            // Only the sources that actually failed get re-fetched — a step with
+            // multiple lookups (CONTACT, LIFESTYLE) no longer re-pulls data that
+            // already loaded successfully just because a sibling source failed.
+            val failedSources = uiState.value.errors.keys
 
-            SelfDeclarationStep.CONTACT -> {
-                val provinceId = uiState.value.selfDeclaration.contact.provinceId
-                merge(
-                    fetchProvinces(),
-                    provinceId?.let { handleLoadCities(it) } ?: emptyFlow()
-                ).collect { emit(it) }
-            }
+            emit(PartialState.Loading(true))
+            when (step) {
+                SelfDeclarationStep.COMPLETED -> {
+                    fetchPatientData(natCode).collect { emit(it) }
+                }
 
-            SelfDeclarationStep.PERSONAL -> fetchMaritalStatus().collect { emit(it) }
-            SelfDeclarationStep.BLOOD -> fetchBloodGroups().collect { emit(it) }
-            SelfDeclarationStep.LIFESTYLE -> {
-                merge(fetchSmokingStatus(), fetchActFrequencies()).collect { emit(it) }
-            }
+                SelfDeclarationStep.CONTACT -> {
+                    val provinceId = uiState.value.selfDeclaration.contact.provinceId
+                    val provincesFlow =
+                        if (ErrorSource.PROVINCES in failedSources) fetchProvinces() else emptyFlow()
+                    val citiesFlow =
+                        if (ErrorSource.CITIES in failedSources && provinceId != null) {
+                            handleLoadCities(provinceId)
+                        } else emptyFlow()
+                    merge(provincesFlow, citiesFlow).collect { emit(it) }
+                }
 
-            SelfDeclarationStep.DISEASES, SelfDeclarationStep.FAMILY -> {
-                fetchIllnessGroups().collect { emit(it) }
-            }
+                SelfDeclarationStep.PERSONAL -> fetchMaritalStatus().collect { emit(it) }
+                SelfDeclarationStep.BLOOD -> fetchBloodGroups().collect { emit(it) }
+                SelfDeclarationStep.LIFESTYLE -> {
+                    val smokingFlow =
+                        if (ErrorSource.SMOKING_STATUS in failedSources) fetchSmokingStatus() else emptyFlow()
+                    val actFreqFlow =
+                        if (ErrorSource.ACT_FREQUENCIES in failedSources) fetchActFrequencies() else emptyFlow()
+                    merge(smokingFlow, actFreqFlow).collect { emit(it) }
+                }
 
-            SelfDeclarationStep.ALLERGY -> fetchDrugs().collect { emit(it) }
-            else -> {
-                handleLoadHealthProfile(natCode).collect { emit(it) }
+                SelfDeclarationStep.DISEASES, SelfDeclarationStep.FAMILY -> {
+                    fetchIllnessGroups().collect { emit(it) }
+                }
+
+                SelfDeclarationStep.ALLERGY -> fetchDrugs().collect { emit(it) }
+                else -> {
+                    handleLoadHealthProfile(natCode).collect { emit(it) }
+                }
             }
-        }
-        emit(PartialState.Loading(false))
+            emit(PartialState.Loading(false))
+        }.onCompletion { isRefreshingStep = false }
     }
 
     private fun fetchLookupLists(): Flow<PartialState> = merge(

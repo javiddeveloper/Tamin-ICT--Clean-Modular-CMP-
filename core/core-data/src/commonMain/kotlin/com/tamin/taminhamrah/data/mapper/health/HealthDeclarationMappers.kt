@@ -260,10 +260,6 @@ fun UpdateSelfDeclarativeDTO.toDomain() = UpdateSelfDeclarativeDN(
     lastUpdateDate = lastUpdateDate
 )
 
-fun SyncIllnessSelfDeclarativesDTO.toDomain() = SyncResultDN(data = data)
-
-fun SyncDrugAllergiesDTO.toDomain() = SyncResultDN(data = data)
-
 // --- Domain request → DTO request converters ---
 
 fun UpdatePatientRequest.toDTO() = UpdatePatientRequestDTO(

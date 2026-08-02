@@ -215,7 +215,7 @@ fun SelfDeclarationDiseasesScreen(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 androidx.compose.material3.Icon(
-                                    painter = org.jetbrains.compose.resources.painterResource(taminx.feature.healthprofile.generated.resources.Res.drawable.ic_family_edit),
+                                    painter = painterResource(Res.drawable.ic_family_edit),
                                     contentDescription = null,
                                     tint = taminColors.blueText,
                                     modifier = Modifier.size(14.dp)

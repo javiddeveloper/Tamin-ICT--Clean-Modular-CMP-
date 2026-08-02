@@ -431,11 +431,6 @@ data class DrugAllergyDTO(
 )
 
 @Serializable
-data class SyncDrugAllergiesDTO(
-    @SerialName("data") val data: String? = null
-)
-
-@Serializable
 data class SyncIllnessesSelfDecRequestDTO(
     @SerialName("illnessSelfDeclareList") val illnessSelfDeclareList: List<IllnessSelfDeclareDTO>? = null,
     @SerialName("natCode") val natCode: String? = null,
@@ -447,11 +442,6 @@ data class IllnessSelfDeclareDTO(
     @SerialName("illnessComments") val illnessComments: String? = null,
     @SerialName("illnessID") val illnessID: Int? = null,
     @SerialName("relation") val relation: Int? = null
-)
-
-@Serializable
-data class SyncIllnessSelfDeclarativesDTO(
-    @SerialName("data") val data: String? = null
 )
 
 @Serializable

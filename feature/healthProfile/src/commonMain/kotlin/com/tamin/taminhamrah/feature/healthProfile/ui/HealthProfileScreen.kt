@@ -14,10 +14,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileShimmerSkeleton
@@ -33,7 +31,6 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativePR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.LocalIsEditMode
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
@@ -103,10 +100,6 @@ fun HandleHealthProfileEvents(
                     toaster.success(event.message)
                 }
             }
-
-            else -> {
-                // todo
-            }
         }
     }
 }
@@ -143,6 +136,48 @@ fun HealthProfileMainContent(
     fun getError(vararg allowedSources: ErrorSource): String? {
         val matchingSource = allowedSources.firstOrNull { it in errors }
         return matchingSource?.let { errors[it] } ?: errors[ErrorSource.PATIENT_GENERAL]
+    }
+
+    // Sources whose failure blocks each step. Used to auto-retry once when the
+    // user navigates onto a step that already failed to load, instead of leaving
+    // them stuck on a dead error screen until they notice and tap retry manually.
+    fun errorSourcesFor(step: SelfDeclarationStep): Array<ErrorSource> = when (step) {
+        SelfDeclarationStep.IDENTITY,
+        SelfDeclarationStep.EMERGENCY,
+        SelfDeclarationStep.PHYSICAL -> arrayOf(ErrorSource.PATIENT_GENERAL)
+
+        SelfDeclarationStep.PERSONAL -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS)
+
+        SelfDeclarationStep.CONTACT -> arrayOf(
+            ErrorSource.PATIENT_GENERAL,
+            ErrorSource.PROVINCES,
+            ErrorSource.CITIES
+        )
+
+        SelfDeclarationStep.BLOOD -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.BLOOD_GROUPS)
+
+        SelfDeclarationStep.LIFESTYLE -> arrayOf(
+            ErrorSource.PATIENT_GENERAL,
+            ErrorSource.SMOKING_STATUS,
+            ErrorSource.ACT_FREQUENCIES
+        )
+
+        SelfDeclarationStep.DISEASES,
+        SelfDeclarationStep.FAMILY -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS)
+
+        SelfDeclarationStep.ALLERGY -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.DRUGS)
+
+        else -> emptyArray()
+    }
+
+    // Runs once per fresh visit to a step (LaunchedEffect is keyed on currentStep,
+    // not on every recomposition) so it can't loop: if the retry also fails, the
+    // error stays and the manual retry button in HealthProfileErrorWrapper takes over.
+    LaunchedEffect(currentStep) {
+        val sources = errorSourcesFor(currentStep)
+        if (sources.isNotEmpty() && !combinedLoading && getError(*sources) != null) {
+            onIntent(HealthProfileIntent.RetryStep)
+        }
     }
 
     val wrappedOnIntent: (HealthProfileIntent) -> Unit = { intent ->

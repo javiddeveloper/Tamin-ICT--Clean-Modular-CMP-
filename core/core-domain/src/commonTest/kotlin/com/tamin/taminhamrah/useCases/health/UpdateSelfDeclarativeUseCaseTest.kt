@@ -22,9 +22,9 @@ class UpdateSelfDeclarativeUseCaseTest : BaseUseCaseTest() {
     }
 
     private fun buildRequest() = UpdateSelfDeclarativeRequest(
-        patientID = 1, objectID = 5, smoking = 2, smokeDesc = "Heavy",
-        alcoholUse = 0, alcoholUseDesc = null, substanceUse = 0, substanceUseDesc = null,
-        exerciseFrequency = 1, exerciseDesc = "Once/week"
+        patientID = 1, objectID = 5, smoking = 2,
+        alcoholUse = 0,  substanceUse = 0,
+        exerciseFrequency = 1,
     )
 
     @Test

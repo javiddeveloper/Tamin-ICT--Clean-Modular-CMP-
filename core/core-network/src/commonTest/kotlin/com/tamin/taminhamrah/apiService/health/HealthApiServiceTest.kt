@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.apiService.health
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.HealthTestData
 import kotlinx.coroutines.test.runTest
@@ -258,7 +259,7 @@ class HealthApiServiceTest : BaseApiTest() {
             illnessSelfDeclareList = null, natCode = null, patientID = null
         )
         val response = apiService.syncIllnessSelfDeclaratives(request)
-        assertNotNull(response.extractData())
+        assertEquals("Success", response.extractMessage())
     }
 
     @Test
@@ -270,7 +271,7 @@ class HealthApiServiceTest : BaseApiTest() {
             drugAllergyList = null, natCode = null, patientID = null
         )
         val response = apiService.syncDrugAllergies(request)
-        assertNotNull(response.extractData())
+        assertEquals("Success", response.extractMessage())
     }
 
     @Test
