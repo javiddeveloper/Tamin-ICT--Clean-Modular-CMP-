@@ -24,9 +24,9 @@ class AddSelfDeclarativeUseCaseTest : BaseUseCaseTest() {
     }
 
     private fun buildRequest() = AddSelfDeclarativeRequest(
-        natCode = "1234567890", patientID = 1, smoking = 1, smokeDesc = "Light",
-        alcoholUse = 0, alcoholUseDesc = null, substanceUse = 0, substanceUseDesc = null,
-        exerciseFrequency = 2, exerciseDesc = "3 times/week"
+        natCode = "1234567890", patientID = 1, smoking = 1,
+        alcoholUse = 0,  substanceUse = 0,
+        exerciseFrequency = 2,
     )
 
     @Test
