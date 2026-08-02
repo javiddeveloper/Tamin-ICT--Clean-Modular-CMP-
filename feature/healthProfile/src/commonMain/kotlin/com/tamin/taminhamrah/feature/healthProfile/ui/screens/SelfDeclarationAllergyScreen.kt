@@ -4,8 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -179,15 +181,20 @@ fun SelfDeclarationAllergyScreen(
 
                             AnimatedVisibility(
                                 visibleState = visibleState,
-                                enter = fadeIn(tween(300)) + slideInVertically(
-                                    initialOffsetY = { fullHeight -> fullHeight / 3 }
-                                ),
-                                exit = fadeOut(tween(200)) + shrinkVertically(
-                                    animationSpec = tween(250)
-                                ) + slideOutVertically(
-                                    targetOffsetY = { fullHeight -> -fullHeight / 4 }
-                                ),
-                                modifier = Modifier.animateContentSize()
+                                enter = fadeIn(tween(300)) +
+                                    scaleIn(
+                                        animationSpec = tween(300),
+                                        initialScale = 0.95f
+                                    ) +
+                                    expandVertically(
+                                        animationSpec = tween(300),
+                                        expandFrom = Alignment.Top
+                                    ),
+                                exit = fadeOut(tween(200)) +
+                                    shrinkVertically(
+                                        animationSpec = tween(250),
+                                        shrinkTowards = Alignment.Top
+                                    )
                             ) {
                                 DynamicItemCard(
                                     title = allergy.drugName,
