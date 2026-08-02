@@ -139,7 +139,6 @@ fun SelfDeclarationFamilyScreen(
                 )
             }
 
-            HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
 
             // Group 6: Family Cancer
             familyCancerGroup?.let { group ->
