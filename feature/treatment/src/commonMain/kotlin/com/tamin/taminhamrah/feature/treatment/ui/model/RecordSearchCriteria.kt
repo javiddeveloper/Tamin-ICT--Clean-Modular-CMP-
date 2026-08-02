@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.model
 
-import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.util.currentTimeMillis
@@ -13,7 +12,6 @@ import com.tamin.taminhamrah.util.getOneMonthAgoTimestamp
  * type and a date range and nothing else. [nameQuery] and the cost bounds are applied to the
  * returned list by [matches], so they narrow what was fetched rather than what is fetched.
  */
-@Immutable
 data class RecordSearchCriteria(
     val tab: RecordTab = RecordTab.Default,
     /** Epoch millis, or null to fall back to the selected period. */
