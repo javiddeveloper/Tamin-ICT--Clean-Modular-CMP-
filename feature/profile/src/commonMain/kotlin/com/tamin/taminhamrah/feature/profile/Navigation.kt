@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.tamin.taminhamrah.feature.profile.ui.ChangeMobileScreen
+
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.profile.ui.IdentityScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
@@ -24,8 +24,6 @@ sealed interface ProfileRoute {
     @Serializable
     data class Identity(val userId: String? = null) : ProfileRoute
 
-    @Serializable
-    data object ChangeMobile : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -59,10 +57,6 @@ fun NavGraphBuilder.profileGraph(
                 viewModel = viewModel,
                 onBackClicked = onBack
             )
-        }
-
-        composableWithFadeTransitions<ProfileRoute.ChangeMobile> {
-            ChangeMobileScreen(onBack = onBack)
         }
     }
 }

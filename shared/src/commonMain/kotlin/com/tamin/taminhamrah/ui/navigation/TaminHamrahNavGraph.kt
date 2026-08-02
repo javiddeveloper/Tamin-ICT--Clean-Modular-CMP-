@@ -60,6 +60,8 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
+import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
+import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.HistoryRoute
@@ -334,10 +336,14 @@ internal fun TaminHamrahNavGraph(
                         navController.navigate(ProfileRoute.Identity(userId))
                     },
                     onNavigateToChangeMobile = {
-                        navController.navigate(ProfileRoute.ChangeMobile)
+                        navController.navigateToChangeMobile()
                     },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
+                )
+
+                changeMobileScreen(
+                    onBack = { navController.popBackStack() },
                 )
 
                 cartableGraph(
