@@ -15,8 +15,13 @@ import com.tamin.taminhamrah.model.agent.AgentActionKey
  * Only actions whose destination screen actually exists in this app are mapped
  * (see [AgentDestination]); the host maps the destination id to a real route.
  *
- * Note: PatientHistoryAgentService now handles PATIENT_HISTORY / PATIENT_HISTORY_LAST
- * with real data fetching, so those keys are no longer mapped here.
+ * A key belongs here only if no other service answers it with real data. The registry
+ * resolves a key with `firstOrNull`, so a key claimed twice would be silently decided by
+ * registration order — AgentServiceKeyCoverageTest guards against that.
+ *
+ * Deliberately not mapped: PATIENT_HISTORY (PatientHistoryAgentService fetches the real
+ * prescriptions), BOOKLET (MedicalEntitlementAgentService returns the entitlement rows)
+ * and MESSAGE (GeneralResponseAgentService renders the assistant's own text).
  */
 class DeepLinkAgentService : AgentServiceUseCase {
 
@@ -98,11 +103,6 @@ class DeepLinkAgentService : AgentServiceUseCase {
             ),
 
             // ── Health ─────────────────────────────────────────────────────
-            AgentActionKey.BOOKLET to Target(
-                destination = AgentDestination.DESERVED_TREATMENT,
-                actionText  = "درمان مستقیم",
-                description = "برای مشاهده درمان مستقیم خود، روی دکمه زیر بزنید."
-            ),
             AgentActionKey.CONFIRMATION_MEDICAL_AUTHORITIES to Target(
                 destination = AgentDestination.MEDICAL_AUTHORITIES,
                 actionText  = "تأیید مراجع درمانی",
@@ -131,13 +131,6 @@ class DeepLinkAgentService : AgentServiceUseCase {
                 destination = AgentDestination.WORKERS_PAYMENT,
                 actionText  = "پرداخت بیمه کارگران",
                 description = "برای مشاهده پرداخت بیمه کارگران، روی دکمه زیر بزنید."
-            ),
-
-            // ── Inbox ──────────────────────────────────────────────────────
-            AgentActionKey.MESSAGE to Target(
-                destination = AgentDestination.PERSONAL_INBOX,
-                actionText  = "صندوق پیام شخصی",
-                description = "برای مشاهده پیام‌های صندوق شخصی، روی دکمه زیر بزنید."
             )
         )
     }

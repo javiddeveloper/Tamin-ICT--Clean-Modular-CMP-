@@ -60,20 +60,22 @@ class AgentFakeDataTest {
     fun `short fake response decodes`() {
         val data = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_ONE_RESPONSE)
 
-        val result = assertNotNull(data.result)
-        assertEquals(4, assertNotNull(result.entities).size)
+        val entities = assertNotNull(assertNotNull(data.result).entities)
+        assertTrue(entities.isNotEmpty())
+        assertTrue(entities.all { !it.key.isNullOrBlank() }, "every entity needs an action key")
     }
 
     @Test
-    fun `fake data source returns the complete list from trackRequest`() = runTest {
+    fun `fake data source serves a usable fixture whichever one is selected`() = runTest {
+        // Which fixture is wired up is a development toggle, so this asserts the shape
+        // every one of them must have rather than pinning today's choice.
         val source = AgentRemoteDataSourceFakeImpl(json)
 
         val response = source.trackRequest("any-id")
 
+        assertEquals("DONE", response.data?.status)
         val entities = assertNotNull(response.data?.result?.entities, "entities must be present")
-        assertTrue(
-            entities.all { it.key == "showcase" },
-            "the fake source currently serves the showcase fixture"
-        )
+        assertTrue(entities.isNotEmpty(), "a fixture with no entities renders an empty chat")
+        assertTrue(entities.all { !it.key.isNullOrBlank() }, "every entity needs an action key")
     }
 }

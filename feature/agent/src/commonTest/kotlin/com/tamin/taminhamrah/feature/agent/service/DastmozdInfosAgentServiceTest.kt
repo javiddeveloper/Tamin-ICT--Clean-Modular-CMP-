@@ -60,9 +60,10 @@ class DastmozdInfosAgentServiceTest {
         val keyValueBubble = assertIs<ChatBubbleContent.KeyValue>(success.bubbles[0])
         assertEquals("This is a test message", keyValueBubble.title)
 
-        // Assert some key values
+        // Amounts are presented to the user, so they carry Persian digits, a thousands
+        // separator and the currency unit rather than the raw figure.
         val amountPair = keyValueBubble.items.find { it.key == "مبلغ دستمزد فروردین" }
-        assertEquals("1000", amountPair?.value)
+        assertEquals("۱٬۰۰۰ ریال", amountPair?.value)
 
         val companyPair = keyValueBubble.items.find { it.key == "نام کارگاه" }
         assertEquals("Test Company", companyPair?.value)

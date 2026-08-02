@@ -80,6 +80,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
@@ -399,6 +401,11 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                             AgentDestination.CONTRACTS -> navController.navigateToContracts()
                             AgentDestination.WORKSHOPS -> navController.navigateToWorkshops()
                             AgentDestination.PRESCRIPTION -> navController.navigateToPrescription()
+                            AgentDestination.DESERVED_TREATMENT -> navController.navigateToDeservedTreatment()
+                            AgentDestination.PENSION_SURVIVOR -> navController.navigateToPensionSurvivor()
+                            // Remaining AgentDestination ids have no screen in this app yet.
+                            // Until they do, the assistant must not offer a button for them —
+                            // see DeepLinkAgentService.
                             else -> Unit
                         }
                     }
