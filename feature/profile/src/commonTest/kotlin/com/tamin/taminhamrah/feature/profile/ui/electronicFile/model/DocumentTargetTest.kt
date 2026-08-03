@@ -60,4 +60,37 @@ class DocumentTargetTest {
         assertNull(record("").documentTarget())
         assertNull(record("   ").documentTarget())
     }
+
+    @Test
+    fun `a pdf mentioned in the query string does not make an image a pdf`() {
+        val target = record("https://host/erecords/thumbs/1.jpg?ref=archive.pdf").documentTarget()
+
+        assertEquals(
+            DocumentTarget.Image(
+                url = "https://host/erecords/full/1.jpg?ref=archive.pdf",
+                title = "کارت ملی",
+            ),
+            target,
+        )
+    }
+
+    @Test
+    fun `the extension is matched regardless of case`() {
+        val target = record("https://host/erecords/thumbs/1.PDF").documentTarget()
+
+        assertEquals(
+            DocumentTarget.Pdf(url = "https://host/erecords/full-pdf/1.PDF", fileName = "کارت ملی"),
+            target,
+        )
+    }
+
+    @Test
+    fun `a tiff is served as pdf just as a tif is`() {
+        val target = record("https://host/erecords/thumbs/1.tiff").documentTarget()
+
+        assertEquals(
+            DocumentTarget.Pdf(url = "https://host/erecords/full-pdf/1.tiff", fileName = "کارت ملی"),
+            target,
+        )
+    }
 }
