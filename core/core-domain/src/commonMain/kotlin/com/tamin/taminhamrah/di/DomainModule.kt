@@ -134,6 +134,7 @@ import org.koin.dsl.module
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 
 val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
@@ -249,6 +250,7 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+    factoryOf(::GetVersionHistoryUseCase)
     factoryOf(::SetThemeUseCase)
     factoryOf(::GetAllProvincesUseCase)
     factoryOf(::GetProvinceCitiesUseCase)

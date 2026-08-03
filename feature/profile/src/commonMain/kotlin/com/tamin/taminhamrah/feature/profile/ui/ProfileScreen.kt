@@ -122,6 +122,7 @@ fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
+    onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
@@ -143,6 +144,7 @@ fun ProfileScreen(
     HandleProfileEvents(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
+        onNavigateToVersionHistory = onNavigateToVersionHistory,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
@@ -163,6 +165,7 @@ fun ProfileScreen(
 fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
+    onNavigateToVersionHistory: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -179,6 +182,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()
+            }
+
+            ProfileEvent.NavigateToVersionHistory -> {
+                onNavigateToVersionHistory()
             }
 
             is ProfileEvent.OpenUrl -> {
