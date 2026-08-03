@@ -13,7 +13,6 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import co.touchlab.kermit.Logger
 
 internal class HealthRemoteDataSourceImpl(
     private val apiService: HealthApiService,
@@ -27,7 +26,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientGeneral failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
@@ -42,7 +40,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientSelfDeclarative failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
@@ -57,7 +54,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientDrugAllergies failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
@@ -72,7 +68,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientHospitalizations failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
@@ -87,7 +82,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientVisits failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
@@ -102,7 +96,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientLabs failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
@@ -117,7 +110,6 @@ internal class HealthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("HealthDS") { "getPatientImaging failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }

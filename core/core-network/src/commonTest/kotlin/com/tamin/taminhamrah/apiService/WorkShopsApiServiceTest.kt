@@ -24,7 +24,7 @@ class WorkShopsApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<WorkShopsApiService>()
+        val apiService = ktorfit.createWorkShopsApiService()
 
         val response = apiService.getWorkshopDebit(
             workshopId = "1071410004", 
@@ -63,7 +63,7 @@ class WorkShopsApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<WorkShopsApiService>()
+        val apiService = ktorfit.createWorkShopsApiService()
 
         val response = apiService.getWorkshopDebtInquiry(
             workshopId = "1071410004",

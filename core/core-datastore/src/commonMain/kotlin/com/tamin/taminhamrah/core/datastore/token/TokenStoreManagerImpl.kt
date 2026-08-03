@@ -8,12 +8,9 @@ package com.tamin.taminhamrah.core.datastore.token
 
 import com.russhwolf.settings.Settings
 import com.tamin.taminhamrah.repository.TokenStoreManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.runBlocking
 
 
 class TokenStoreManagerImpl(
@@ -27,10 +24,10 @@ class TokenStoreManagerImpl(
     private val tokenValidation = "TOKEN_VALID"
 
     private val _tokenValidFlow = MutableStateFlow(
-        runBlocking(Dispatchers.IO) {
-            settings.getBoolean(tokenValidation, false)
-        }
+        settings.getBoolean(tokenValidation, false)
     )
+
+    private val _isAuthProcessing = MutableStateFlow(false)
 
     override fun saveToken(token: String?) {
         if (token == null) {
@@ -87,5 +84,13 @@ class TokenStoreManagerImpl(
     override suspend fun setTokenValid(isValid: Boolean) {
         settings.putBoolean(tokenValidation, isValid)
         _tokenValidFlow.value = isValid
+    }
+
+    override fun isAuthProcessingFlow(): Flow<Boolean> {
+        return _isAuthProcessing.asStateFlow()
+    }
+
+    override fun setAuthProcessing(isProcessing: Boolean) {
+        _isAuthProcessing.value = isProcessing
     }
 }

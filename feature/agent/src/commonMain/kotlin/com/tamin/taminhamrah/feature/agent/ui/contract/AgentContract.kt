@@ -189,6 +189,10 @@ sealed interface AgentIntent {
         val payload: kotlinx.serialization.json.JsonElement? = null
     ) : AgentIntent
 
+    // ── Interaction ──
+    /** Share text content */
+    data class ShareContent(val text: String) : AgentIntent
+
     // ── Conversation history ──
     /** Opens the history sheet and refreshes the saved conversation list. */
     object OpenChatHistory : AgentIntent
@@ -226,5 +230,6 @@ sealed interface AgentEvent {
     data class ShowError(val message: String) : AgentEvent
     data class NavigateToDeepLink(val destination: String) : AgentEvent
     data class NavigateToWebView(val url: String) : AgentEvent
+    data class ShareText(val text: String) : AgentEvent
     object ScrollToBottom : AgentEvent
 }

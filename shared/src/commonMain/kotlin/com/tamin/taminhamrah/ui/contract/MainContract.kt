@@ -12,6 +12,7 @@ data class MainUiState(
     sealed class PartialState {
         data class SetDarkThemeConfig(val config: DarkThemeConfig) : PartialState()
         data class SetLoginStatus(val isLoggedIn: Boolean) : PartialState()
+        data class SetAuthProcessing(val isProcessing: Boolean) : PartialState()
         data object Loading : PartialState()
     }
 }
@@ -19,7 +20,8 @@ data class MainUiState(
 sealed class MainIntent {
     data class UpdateDarkThemeConfig(val config: DarkThemeConfig) : MainIntent()
     data object Login : MainIntent()
-    data object CheckAuthStatus : MainIntent()
+    data class SetAuthStatus(val isLoggedIn: Boolean) : MainIntent()
+    data class SetAuthProcessing(val isProcessing: Boolean) : MainIntent()
 }
 
 sealed class MainEvent {
