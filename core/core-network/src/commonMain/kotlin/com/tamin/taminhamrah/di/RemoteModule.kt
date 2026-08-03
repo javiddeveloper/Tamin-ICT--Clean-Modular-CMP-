@@ -162,4 +162,11 @@ val remoteModule = module {
             remoteDataSource = get()
         )
     }
+
+    single<com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource> {
+        com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl(
+            apiService = get(),
+            errorParser = get()
+        )
+    }
 }

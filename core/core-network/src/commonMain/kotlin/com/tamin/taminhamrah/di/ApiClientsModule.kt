@@ -9,6 +9,8 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
+import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
 import com.tamin.taminhamrah.apiService.agent.AgentApiService
 import com.tamin.taminhamrah.apiService.agent.createAgentApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
@@ -129,6 +131,11 @@ val ApiClientsModule = module {
     single<AgentApiService>(named("agentApiService")) {
         val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
+    }
+
+    single<com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createAddDependentApiService()
     }
 
 }
