@@ -260,6 +260,14 @@
 
     <string name="i_dont_know">نمی دانم</string>
     <string name="i_dont_knoww">نمیدانم</string>
+
+
+    <!-- Exit Confirmation Modal -->
+    <string name="health_exit_confirmation_title">فرم را رها می‌کنید؟</string>
+    <string name="health_exit_confirmation_desc">فقط چند قدم تا تکمیل پرونده سلامتتان باقی مانده است. در صورت خروج، اطلاعات واردشده ذخیره نمی‌شود.</string>
+    <string name="health_exit_confirmation_confirm">ادامه تکمیل فرم</string>
+    <string name="health_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
+
 </resources>
 
 
