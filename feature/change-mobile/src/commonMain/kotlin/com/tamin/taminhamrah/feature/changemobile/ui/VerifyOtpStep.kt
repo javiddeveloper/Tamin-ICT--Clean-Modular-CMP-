@@ -53,23 +53,6 @@ fun VerifyOtpStep(
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
     val taminColors = LocalTaminColors.current
-    var timerTrigger by remember { mutableStateOf(0) }
-    var timeLeft by remember { mutableStateOf(120) }
-
-    LaunchedEffect(timerTrigger) {
-        timeLeft = 120
-        while (timeLeft > 0) {
-            delay(1000.milliseconds)
-            timeLeft--
-        }
-    }
-
-    val minutes = timeLeft / 60
-    val seconds = timeLeft % 60
-    val timeString = "${minutes.toString().padStart(2, '0')}:${
-        seconds.toString().padStart(2, '0')
-    }".toPersianDigits()
-    val isResendEnabled = timeLeft == 0
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -135,52 +118,11 @@ fun VerifyOtpStep(
                 leadingIcon = Icons.Outlined.Lock
             )
             Spacer(modifier = Modifier.height(Spacing.md))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "ارسال مجدد کد ",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isResendEnabled) taminColors.blueText else taminColors.textMuted,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable(enabled = isResendEnabled) {
-                        onIntent(ChangeMobileIntent.GetOtpCode)
-                        timerTrigger++
-                    }
-                )
-                if (!isResendEnabled) {
-                    Row {
-                        timeString.reversed().forEachIndexed { index, char ->
-                            AnimatedContent(
-                                modifier = if (index == 2) Modifier else Modifier.width(12.dp),
-                                targetState = char,
-                                contentAlignment = Alignment.Center,
-                                transitionSpec = {
-                                    slideInVertically { height -> -height } + fadeIn() togetherWith
-                                        slideOutVertically { height -> height } + fadeOut()
-                                },
-                                label = "CharAnimation$index"
-                            ) { targetChar ->
-                                Text(
-                                    text = targetChar.toString(),
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontFeatureSettings = "tnum"
-                                    ),
-                                    color = taminColors.textMuted,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
+            ResendTimer(
+                onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) }
+            )
             Spacer(modifier = Modifier.height(Spacing.xl))
         }
-
         item {
             val isLoading = uiStateState.value.isLoading
             val otpCode = uiStateState.value.otpCode
@@ -192,6 +134,72 @@ fun VerifyOtpStep(
                 enabled = !isLoading && otpCode.length == 5,
                 isLoading = isLoading
             )
+        }
+    }
+}
+
+@Composable
+private fun ResendTimer(
+    onResendClick: () -> Unit
+) {
+    var timerTrigger by remember { mutableStateOf(0) }
+    var timeLeft by remember { mutableStateOf(120) }
+
+    LaunchedEffect(timerTrigger) {
+        timeLeft = 120
+        while (timeLeft > 0) {
+            delay(1000.milliseconds)
+            timeLeft--
+        }
+    }
+
+    val minutes = timeLeft / 60
+    val seconds = timeLeft % 60
+    val timeString = "${minutes.toString().padStart(2, '0')}:${
+        seconds.toString().padStart(2, '0')
+    }".toPersianDigits()
+    val isResendEnabled = timeLeft == 0
+    val taminColors = LocalTaminColors.current
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "ارسال مجدد کد ",
+            style = MaterialTheme.typography.labelLarge,
+            color = if (isResendEnabled) taminColors.blueText else taminColors.textMuted,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable(enabled = isResendEnabled) {
+                onResendClick()
+                timerTrigger++
+            }
+        )
+        if (!isResendEnabled) {
+            Row {
+                timeString.reversed().forEachIndexed { index, char ->
+                    AnimatedContent(
+                        modifier = if (index == 2) Modifier else Modifier.width(12.dp),
+                        targetState = char,
+                        contentAlignment = Alignment.Center,
+                        transitionSpec = {
+                            slideInVertically { height -> -height } + fadeIn() togetherWith
+                                slideOutVertically { height -> height } + fadeOut()
+                        },
+                        label = "CharAnimation$index"
+                    ) { targetChar ->
+                        Text(
+                            text = targetChar.toString(),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontFeatureSettings = "tnum"
+                            ),
+                            color = taminColors.textMuted,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 }
