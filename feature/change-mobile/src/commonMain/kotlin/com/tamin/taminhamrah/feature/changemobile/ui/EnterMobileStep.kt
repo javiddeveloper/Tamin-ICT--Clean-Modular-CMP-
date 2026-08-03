@@ -123,14 +123,13 @@ fun EnterMobileStep(
         }
 
         item {
-            val isLoading = uiStateState.value.isLoading
             LoadingButton(
                 text = stringResource(Res.string.profile_get_otp_code),
                 onClick = {
                     onIntent(ChangeMobileIntent.GetOtpCode)
                 },
-                enabled = !isLoading,
-                isLoading = isLoading,
+                enabled = uiStateState.value.newMobile.isNotEmpty() && !uiStateState.value.isLoading,
+                isLoading = uiStateState.value.isLoading && uiStateState.value.newMobile.isNotEmpty(),
                 icon = vectorResource(Res.drawable.ic_send)
             )
         }
