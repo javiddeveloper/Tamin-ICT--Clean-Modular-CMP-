@@ -15,7 +15,7 @@ class HistoryApiServicesTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<HistoryApiServices>()
+        val apiService = ktorfit.createHistoryApiServices()
 
         val parameters = mapOf("param1" to "value1")
         val response = apiService.getDastmozdInfos(parameters)
@@ -36,7 +36,7 @@ class HistoryApiServicesTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<HistoryApiServices>()
+        val apiService = ktorfit.createHistoryApiServices()
 
         val parameters = mapOf("param1" to "value1")
         val response = apiService.getDastmozdInfos(parameters)
@@ -55,7 +55,7 @@ class HistoryApiServicesTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<HistoryApiServices>()
+        val apiService = ktorfit.createHistoryApiServices()
 
         val parameters = mapOf("param1" to "value1")
         val response = apiService.getTalfighInfos(parameters)
@@ -76,7 +76,7 @@ class HistoryApiServicesTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<HistoryApiServices>()
+        val apiService = ktorfit.createHistoryApiServices()
 
         val parameters = mapOf("param1" to "value1")
         val response = apiService.getTalfighInfos(parameters)

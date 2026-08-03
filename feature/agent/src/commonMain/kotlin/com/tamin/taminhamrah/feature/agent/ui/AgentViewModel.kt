@@ -172,6 +172,9 @@ class AgentViewModel(
                 )
             )
         }
+        is AgentIntent.ShareContent -> flow {
+            sendEvent(AgentEvent.ShareText(intent.text))
+        }
     }
 
     // ─── Intent Handlers ──────────────────────────────────────────────────────

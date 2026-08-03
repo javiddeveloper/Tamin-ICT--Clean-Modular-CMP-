@@ -61,7 +61,7 @@ class PersonalApiServiceTest : BaseApiTest() {
 
             val statement = apiService.getFinalSurvivorPensionPDF()
             val ktorfit = createMockKtorfit(jsonResponse)
-            val apiService = ktorfit.create<PersonalApiService>()
+            val apiService = ktorfit.createPersonalApiService()
 
             statement.execute { response ->
                 assertEquals(200, response.status.value)
@@ -87,7 +87,7 @@ class PersonalApiServiceTest : BaseApiTest() {
 
                 val statement = apiService.getFinalSurvivorPensionPDF()
                 val ktorfit = createMockKtorfit(jsonResponse)
-                val apiService = ktorfit.create<PersonalApiService>()
+                val apiService = ktorfit.createPersonalApiService()
 
                 statement.execute { response ->
                     assertEquals(500, response.status.value)
