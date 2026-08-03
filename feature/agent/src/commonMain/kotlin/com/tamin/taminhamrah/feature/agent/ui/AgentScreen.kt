@@ -1684,7 +1684,8 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
     var liked    by rememberSaveable { mutableStateOf<Boolean?>(null) }
     var copied   by rememberSaveable { mutableStateOf(false) }
 
-    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+    @Suppress("DEPRECATION")
+                    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
     val iconTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
     val activeTint = MaterialTheme.colorScheme.primary
