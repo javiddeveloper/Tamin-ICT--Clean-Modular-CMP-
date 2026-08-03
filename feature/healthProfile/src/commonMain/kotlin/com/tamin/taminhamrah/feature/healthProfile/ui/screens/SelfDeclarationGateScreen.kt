@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
@@ -30,8 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.feature.healthprofile.generated.resources.*
 
 /**
@@ -94,14 +99,15 @@ fun SelfDeclarationGateContent(
                     },
                     navigationIcon = {
                         Box(
-                            modifier = Modifier.background(
-                                color = Color.White.copy(alpha = 0.3f),
-                                shape = MaterialTheme.shapes.medium
-                            ).border(
-                                width = 1.dp,
-                                shape = MaterialTheme.shapes.medium,
-                                color = Color.White.copy(alpha = 0.5f)
-                            )
+                            modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                                .background(Color.White.copy(alpha = 0.125f))
+                                .then(
+                                    Modifier.border(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.2f),
+                                        MaterialTheme.shapes.medium
+                                    ),
+                                )
                         ) {
                             Icon(
                                 modifier = modifier.rotate(180f).padding(8.dp),
@@ -113,15 +119,17 @@ fun SelfDeclarationGateContent(
                     },
                     onNavigationClick = onBackClicked,
                     actionIcon = {
+
                         Box(
-                            modifier = Modifier.background(
-                                color = Color.White.copy(alpha = 0.3f),
-                                shape = MaterialTheme.shapes.medium
-                            ).border(
-                                width = 1.dp,
-                                shape = MaterialTheme.shapes.medium,
-                                color = Color.White.copy(alpha = 0.5f)
-                            )
+                            modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                                .background(Color.White.copy(alpha = 0.125f))
+                                .then(
+                                    Modifier.border(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.2f),
+                                        MaterialTheme.shapes.medium
+                                    ),
+                                )
                         ) {
                             Icon(
                                 modifier = Modifier.padding(8.dp),
@@ -161,7 +169,7 @@ fun SelfDeclarationGateContent(
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                     border = BorderStroke(1.dp, taminColors.border),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp )
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                 ) {
                     Column(
                         modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),
