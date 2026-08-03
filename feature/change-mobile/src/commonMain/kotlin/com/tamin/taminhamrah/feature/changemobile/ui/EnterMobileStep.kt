@@ -14,6 +14,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -51,9 +54,6 @@ fun EnterMobileStep(
     uiStateState: State<ChangeMobileUiState>,
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
-    val taminColors = LocalTaminColors.current
-    val uiState = uiStateState.value
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,72 +61,100 @@ fun EnterMobileStep(
             .padding(Spacing.lg)
     ) {
         SectionHeaderTitle(title = "شماره همراه فعلی")
-        Box(
-            contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            ListGroupView(
-                containerBackgroundColor = taminColors.verifiedContainerBg,
-                containerBorder = BorderStroke(1.dp, taminColors.verifiedContainerBorder),
-                items = persistentListOf(
-                    ListItemData(
-                        title = uiState.currentMobile.toPersianDigits(),
-                        leadingIconPainter = painterResource(Res.drawable.ic_privacy),
-                        leadingIconElevation = Elevation.xs,
-                        colors = ListItemColors(
-                            leadingIconBackgroundGradient = taminColors.verifiedIconGradient,
-                            leadingIconBackgroundColor = taminColors.verifiedIconBg,
-                            leadingIconTintColor = taminColors.verifiedIconTint,
-                            titleColor = taminColors.springGreenText
-                        ),
-                        showArrow = false,
-                        badge = ListItemBadge(
-                            text = "تأییدشده",
-                            backgroundColor = taminColors.verifiedBadgeBg,
-                            textColor = taminColors.greenText
-                        ),
-                        titleStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                )
-            )
-            AnimatedIconBadge(
-                icon = painterResource(Res.drawable.ic_arrow_down),
-                modifier = Modifier.offset(y = 16.dp)
-            )
-        }
+        CurrentMobileSection(uiStateState)
         Spacer(modifier = Modifier.height(Spacing.xl))
-
-        SectionHeaderTitle(
-            title = "شماره همراه جدید",
-            color = taminColors.blueText,
-        )
-        PhoneNumberField(
-            value = uiState.newMobile,
-            onValueChange = {
-                onIntent(ChangeMobileIntent.NewMobileChanged(it))
-            },
-            leadingIcon = vectorResource(Res.drawable.ic_mobile),
-            error = uiState.isMobileError,
-            showClearButton = true,
-            errorMessage = if (uiState.isMobileError) "شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود." else null,
-        )
+        NewMobileSection(uiStateState, onIntent)
         Spacer(modifier = Modifier.height(Spacing.xl))
-
         BannerCard(
             message = stringResource(Res.string.profile_change_mobile_banner_info),
             type = BannerType.Info
         )
         Spacer(modifier = Modifier.height(Spacing.xl))
+        SubmitOtpButton(uiStateState, onIntent)
+    }
+}
 
-        LoadingButton(
-            text = stringResource(Res.string.profile_get_otp_code),
-            onClick = {
-                onIntent(ChangeMobileIntent.GetOtpCode)
-            },
-            enabled = uiState.newMobile.isNotEmpty() && !uiState.isLoading,
-            isLoading = uiState.isLoading && uiState.newMobile.isNotEmpty(),
-            icon = vectorResource(Res.drawable.ic_send),
-            modifier = Modifier.fillMaxWidth()
+@Composable
+private fun CurrentMobileSection(uiStateState: State<ChangeMobileUiState>) {
+    val taminColors = LocalTaminColors.current
+    val currentMobile by remember { derivedStateOf { uiStateState.value.currentMobile } }
+
+    Box(
+        contentAlignment = Alignment.BottomCenter,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ListGroupView(
+            containerBackgroundColor = taminColors.verifiedContainerBg,
+            containerBorder = BorderStroke(1.dp, taminColors.verifiedContainerBorder),
+            items = persistentListOf(
+                ListItemData(
+                    title = currentMobile.toPersianDigits(),
+                    leadingIconPainter = painterResource(Res.drawable.ic_privacy),
+                    leadingIconElevation = Elevation.xs,
+                    colors = ListItemColors(
+                        leadingIconBackgroundGradient = taminColors.verifiedIconGradient,
+                        leadingIconBackgroundColor = taminColors.verifiedIconBg,
+                        leadingIconTintColor = taminColors.verifiedIconTint,
+                        titleColor = taminColors.springGreenText
+                    ),
+                    showArrow = false,
+                    badge = ListItemBadge(
+                        text = "تأییدشده",
+                        backgroundColor = taminColors.verifiedBadgeBg,
+                        textColor = taminColors.greenText
+                    ),
+                    titleStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            )
+        )
+        AnimatedIconBadge(
+            icon = painterResource(Res.drawable.ic_arrow_down),
+            modifier = Modifier.offset(y = 16.dp)
         )
     }
+}
+
+@Composable
+private fun NewMobileSection(
+    uiStateState: State<ChangeMobileUiState>,
+    onIntent: (ChangeMobileIntent) -> Unit
+) {
+    val taminColors = LocalTaminColors.current
+    val newMobile by remember { derivedStateOf { uiStateState.value.newMobile } }
+    val isMobileError by remember { derivedStateOf { uiStateState.value.isMobileError } }
+
+    SectionHeaderTitle(
+        title = "شماره همراه جدید",
+        color = taminColors.blueText,
+    )
+    PhoneNumberField(
+        value = newMobile,
+        onValueChange = {
+            onIntent(ChangeMobileIntent.NewMobileChanged(it))
+        },
+        leadingIcon = vectorResource(Res.drawable.ic_mobile),
+        error = isMobileError,
+        showClearButton = true,
+        errorMessage = if (isMobileError) "شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود." else null,
+    )
+}
+
+@Composable
+private fun SubmitOtpButton(
+    uiStateState: State<ChangeMobileUiState>,
+    onIntent: (ChangeMobileIntent) -> Unit
+) {
+    val newMobile by remember { derivedStateOf { uiStateState.value.newMobile } }
+    val isLoading by remember { derivedStateOf { uiStateState.value.isLoading } }
+
+    LoadingButton(
+        text = stringResource(Res.string.profile_get_otp_code),
+        onClick = {
+            onIntent(ChangeMobileIntent.GetOtpCode)
+        },
+        enabled = newMobile.isNotEmpty() && !isLoading,
+        isLoading = isLoading && newMobile.isNotEmpty(),
+        icon = vectorResource(Res.drawable.ic_send),
+        modifier = Modifier.fillMaxWidth()
+    )
 }

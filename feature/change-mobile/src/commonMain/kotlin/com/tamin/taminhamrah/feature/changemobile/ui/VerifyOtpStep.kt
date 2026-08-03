@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,9 +53,6 @@ fun VerifyOtpStep(
     uiStateState: State<ChangeMobileUiState>,
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
-    val taminColors = LocalTaminColors.current
-    val uiState = uiStateState.value
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,75 +60,101 @@ fun VerifyOtpStep(
             .padding(Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val newMobile = uiState.newMobile
-        Text(
-            text = "کد پیامک ‌شده به شمارهٔ زیر را وارد کنید",
-            style = MaterialTheme.typography.bodyMedium,
-            color = taminColors.textMuted
-        )
-        Spacer(modifier = Modifier.height(Spacing.sm))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = newMobile,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = taminColors.textPrimary
-            )
-            Spacer(modifier = Modifier.width(Spacing.sm))
-            Row(
-                modifier = Modifier
-                    .clickable { onIntent(ChangeMobileIntent.BackToPreviousStep) }
-                    .padding(Spacing.xs),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "ویرایش",
-                    tint = taminColors.blueText,
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = "ویرایش",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = taminColors.blueText,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+        MobileHeaderSection(uiStateState, onIntent)
         Spacer(modifier = Modifier.height(Spacing.xl))
-
-        val otpCode = uiState.otpCode
-        val error = uiState.error
-        OtpInputField(
-            value = otpCode,
-            onValueChange = {
-                onIntent(ChangeMobileIntent.OtpChanged(it))
-            },
-            error = error != null,
-            errorMessage = error,
-            showClearButton = true,
-            leadingIcon = Icons.Outlined.Lock
-        )
+        OtpSection(uiStateState, onIntent)
         Spacer(modifier = Modifier.height(Spacing.md))
-        ResendTimer(
-            onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) }
-        )
+        ResendTimer(onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) })
         Spacer(modifier = Modifier.height(Spacing.xl))
-
-        LoadingButton(
-            text = "تأیید و ادامه",
-            onClick = {
-                onIntent(ChangeMobileIntent.VerifyOtp)
-            },
-            enabled = !uiState.isLoading && uiState.otpCode.length == 5,
-            isLoading = uiState.isLoading,
-            modifier = Modifier.fillMaxWidth()
-        )
+        SubmitVerifyButton(uiStateState, onIntent)
     }
+}
+
+@Composable
+private fun MobileHeaderSection(
+    uiStateState: State<ChangeMobileUiState>,
+    onIntent: (ChangeMobileIntent) -> Unit
+) {
+    val taminColors = LocalTaminColors.current
+    val newMobile by remember { derivedStateOf { uiStateState.value.newMobile } }
+
+    Text(
+        text = "کد پیامک ‌شده به شمارهٔ زیر را وارد کنید",
+        style = MaterialTheme.typography.bodyMedium,
+        color = taminColors.textMuted
+    )
+    Spacer(modifier = Modifier.height(Spacing.sm))
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = newMobile,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = taminColors.textPrimary
+        )
+        Spacer(modifier = Modifier.width(Spacing.sm))
+        Row(
+            modifier = Modifier
+                .clickable { onIntent(ChangeMobileIntent.BackToPreviousStep) }
+                .padding(Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "ویرایش",
+                tint = taminColors.blueText,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = "ویرایش",
+                style = MaterialTheme.typography.labelLarge,
+                color = taminColors.blueText,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun OtpSection(
+    uiStateState: State<ChangeMobileUiState>,
+    onIntent: (ChangeMobileIntent) -> Unit
+) {
+    val otpCode by remember { derivedStateOf { uiStateState.value.otpCode } }
+    val error by remember { derivedStateOf { uiStateState.value.error } }
+
+    OtpInputField(
+        value = otpCode,
+        onValueChange = {
+            onIntent(ChangeMobileIntent.OtpChanged(it))
+        },
+        error = error != null,
+        errorMessage = error,
+        showClearButton = true,
+        leadingIcon = Icons.Outlined.Lock
+    )
+}
+
+@Composable
+private fun SubmitVerifyButton(
+    uiStateState: State<ChangeMobileUiState>,
+    onIntent: (ChangeMobileIntent) -> Unit
+) {
+    val isLoading by remember { derivedStateOf { uiStateState.value.isLoading } }
+    val isOtpComplete by remember { derivedStateOf { uiStateState.value.otpCode.length == 5 } }
+
+    LoadingButton(
+        text = "تأیید و ادامه",
+        onClick = {
+            onIntent(ChangeMobileIntent.VerifyOtp)
+        },
+        enabled = !isLoading && isOtpComplete,
+        isLoading = isLoading,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable
