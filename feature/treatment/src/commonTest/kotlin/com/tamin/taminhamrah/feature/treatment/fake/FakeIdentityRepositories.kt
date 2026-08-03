@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
@@ -64,7 +65,14 @@ class FakeUserRepository : UserRepository {
             mobile = "09123456789"
         )
     )
+    override suspend fun getElectronicFilePage(
+        page: Int,
+        limit: Int,
+        filters: List<ApiFilterDN>
+    ): List<ElectronicFileDN> = emptyList()
 
+    override suspend fun downloadDocument(url: String): PdfDownloadDN =
+        PdfDownloadDN()
 }
 
 /** Minimal fake [CityProvinceRepository] dependency of `IdentityInfoUseCase`. */

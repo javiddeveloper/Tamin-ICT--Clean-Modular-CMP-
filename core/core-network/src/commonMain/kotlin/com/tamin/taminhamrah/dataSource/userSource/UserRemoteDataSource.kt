@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
@@ -47,6 +48,8 @@ interface UserRemoteDataSource {
     suspend fun getElectronicFile(
         query: ApiQueryParamDN
     ): ListData<ElectronicFileDTO>?
+
+    suspend fun downloadDocument(url: String): PdfDownloadDTO
 
     suspend fun getUserProfile(): UserProfileDto?
 }

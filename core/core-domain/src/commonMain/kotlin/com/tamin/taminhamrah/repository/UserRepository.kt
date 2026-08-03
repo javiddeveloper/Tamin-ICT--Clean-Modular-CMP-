@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
@@ -48,6 +49,9 @@ interface UserRepository {
         limit: Int,
         filters: List<ApiFilterDN> = emptyList(),
     ): List<ElectronicFileDN>
+
+    /** The document's PDF download stream. */
+    suspend fun downloadDocument(url: String): PdfDownloadDN
 
     suspend fun getUserProfile(): Flow<UserProfileDN>
 
