@@ -74,8 +74,18 @@ class HealthProfileViewModel(
                                 intent.isEditMode
                             )
                         )
-                        is SubmitOutcome.Problems -> emit(PartialState.SubmitProblems(outcome.problems))
-                        is SubmitOutcome.Failure -> Unit
+                        is SubmitOutcome.Problems -> {
+                            emit(PartialState.SubmitProblems(outcome.problems))
+                            sendEvent(HealthProfileEvent.OpenSubmitErrorsBottomSheet)
+                        }
+                        is SubmitOutcome.Failure -> {
+                            emit(
+                                PartialState.SubmitProblems(
+                                    listOf(HealthProblemPR(code = null, message = outcome.message))
+                                )
+                            )
+                            sendEvent(HealthProfileEvent.OpenSubmitErrorsBottomSheet)
+                        }
                     }
                 } else {
                     emit(PartialState.StepChanged(intent.step, intent.isEditMode))
@@ -83,14 +93,24 @@ class HealthProfileViewModel(
             }
 
             is HealthProfileIntent.SubmitDeclaration -> flow {
-                emit(PartialState.Loading(true))
+                emit(PartialState.SubmitLoading(true))
                 emit(PartialState.SubmitProblems(emptyList()))
                 val outcome = submitFullDeclaration()
-                emit(PartialState.Loading(false))
+                emit(PartialState.SubmitLoading(false))
                 when (outcome) {
                     is SubmitOutcome.Success -> emit(PartialState.StepChanged(SelfDeclarationStep.SUCCESS))
-                    is SubmitOutcome.Problems -> emit(PartialState.SubmitProblems(outcome.problems))
-                    is SubmitOutcome.Failure -> Unit
+                    is SubmitOutcome.Problems -> {
+                        emit(PartialState.SubmitProblems(outcome.problems))
+                        sendEvent(HealthProfileEvent.OpenSubmitErrorsBottomSheet)
+                    }
+                    is SubmitOutcome.Failure -> {
+                        emit(
+                            PartialState.SubmitProblems(
+                                listOf(HealthProblemPR(code = null, message = outcome.message))
+                            )
+                        )
+                        sendEvent(HealthProfileEvent.OpenSubmitErrorsBottomSheet)
+                    }
                 }
             }
 
@@ -580,19 +600,12 @@ class HealthProfileViewModel(
             SubmitOutcome.Success
         } catch (e: Exception) {
             Logger.e("HealthProfile", "Error in submitFullDeclaration: ${e.message}")
-            sendEvent(
-                HealthProfileEvent.ShowToast(
-                    "خطا در ثبت اطلاعات: ${e.message}",
-                    isError = true
-                )
-            )
             SubmitOutcome.Failure(e.message ?: "خطا در ثبت اطلاعات")
         }
     }
 
     /**
-     * Maps backend business problems to presentation models, surfaces them via
-     * the existing toast event (screens are unchanged), and stops
+     * Maps backend business problems to presentation models and stops
      * submitFullDeclaration() from proceeding to the next mutation call.
      */
     private fun reportSubmitProblems(problems: List<HealthProblemDN>): SubmitOutcome.Problems {
@@ -600,12 +613,6 @@ class HealthProfileViewModel(
         Logger.e(
             "HealthProfile",
             "submitFullDeclaration stopped by backend problems: ${prProblems.joinToString { it.message }}"
-        )
-        sendEvent(
-            HealthProfileEvent.ShowToast(
-                prProblems.joinToString(separator = "\n") { it.message },
-                isError = true
-            )
         )
         return SubmitOutcome.Problems(prProblems)
     }
@@ -617,6 +624,12 @@ class HealthProfileViewModel(
     ): HealthProfileUiState = when (partialState) {
         is PartialState.Loading -> {
             currentState.copy(isLoading = partialState.isLoading)
+        }
+
+        is PartialState.SubmitLoading -> {
+            currentState.copy(
+                selfDeclaration = currentState.selfDeclaration.copy(isSubmitLoading = partialState.isSubmitLoading)
+            )
         }
 
         PartialState.ClearAllErrors -> {

@@ -106,6 +106,7 @@ fun SelfDeclarationAllergyScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     CardsListShimmerSkeleton()
@@ -199,7 +200,7 @@ fun SelfDeclarationAllergyScreen(
                                     )
                             ) {
                                 DynamicItemCard(
-                                    title = allergy.drugName,
+                                    title = allergy.drugName.trim(),
                                     description = allergy.allergyComments,
                                     onDelete = { visibleState.targetState = false }
                                 )

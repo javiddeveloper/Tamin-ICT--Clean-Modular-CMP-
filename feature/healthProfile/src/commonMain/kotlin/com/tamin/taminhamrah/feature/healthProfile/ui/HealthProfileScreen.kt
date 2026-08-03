@@ -69,13 +69,20 @@ fun HealthProfileScreen(
         viewModel.sendIntent(HealthProfileIntent.LoadHealthProfile(nationalCode))
     }
 
+    var openSubmitErrorsBottomSheetTrigger by remember { mutableStateOf(false) }
+
     HandleHealthProfileEvents(
         events = viewModel.events,
-        onBackClicked = onBackClicked
+        onBackClicked = onBackClicked,
+        onOpenSubmitErrorsBottomSheet = {
+            openSubmitErrorsBottomSheetTrigger = true
+        }
     )
 
     HealthProfileMainContent(
         state = uiState,
+        openSubmitErrorsBottomSheetTrigger = openSubmitErrorsBottomSheetTrigger,
+        onResetSubmitErrorsTrigger = { openSubmitErrorsBottomSheetTrigger = false },
         onIntent = viewModel::sendIntent,
         onBackClicked = onBackClicked
     )
@@ -84,7 +91,8 @@ fun HealthProfileScreen(
 @Composable
 fun HandleHealthProfileEvents(
     events: Flow<HealthProfileEvent>,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onOpenSubmitErrorsBottomSheet: () -> Unit
 ) {
     val toaster = LocalToaster.current
     events.collectWithLifecycleAware(key = onBackClicked) { event ->
@@ -100,6 +108,10 @@ fun HandleHealthProfileEvents(
                     toaster.success(event.message)
                 }
             }
+
+            HealthProfileEvent.OpenSubmitErrorsBottomSheet -> {
+                onOpenSubmitErrorsBottomSheet()
+            }
         }
     }
 }
@@ -107,6 +119,8 @@ fun HandleHealthProfileEvents(
 @Composable
 fun HealthProfileMainContent(
     state: HealthProfileUiState,
+    openSubmitErrorsBottomSheetTrigger: Boolean = false,
+    onResetSubmitErrorsTrigger: () -> Unit = {},
     onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -341,6 +355,8 @@ fun HealthProfileMainContent(
                     SelfDeclarationReviewScreen(
                         state = state,
                         isLoading = combinedLoading,
+                        openSubmitErrorsBottomSheetTrigger = openSubmitErrorsBottomSheetTrigger,
+                        onResetSubmitErrorsTrigger = onResetSubmitErrorsTrigger,
                         onIntent = onIntent,
                         onBackClicked = navigateBack,
                         onCloseClicked = onBackClicked

@@ -111,6 +111,7 @@ fun SelfDeclarationContactScreen (
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     FormFieldsShimmerSkeleton(fieldCount = 6)
@@ -181,6 +182,15 @@ fun SelfDeclarationContactScreen (
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(modifier = Modifier.weight(1f)) {
                         StyledSelectField(
+                            value = state.provinceLabel,
+                            label = stringResource(Res.string.health_contact_province_label),
+                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
+                            isLoading = isProvincesLoading,
+                            onClick = { showProvinceBottomSheet = true }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        StyledSelectField(
                             value = state.cityLabel,
                             label = stringResource(Res.string.health_contact_city_label),
                             placeholder = stringResource(Res.string.health_contact_city_placeholder),
@@ -192,15 +202,6 @@ fun SelfDeclarationContactScreen (
                                 }
                                 showCityBottomSheet = true
                             }
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        StyledSelectField(
-                            value = state.provinceLabel,
-                            label = stringResource(Res.string.health_contact_province_label),
-                            placeholder = stringResource(Res.string.health_contact_province_placeholder),
-                            isLoading = isProvincesLoading,
-                            onClick = { showProvinceBottomSheet = true }
                         )
                     }
                 }
