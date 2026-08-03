@@ -111,6 +111,7 @@ fun SelfDeclarationContactScreen (
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     FormFieldsShimmerSkeleton(fieldCount = 6)

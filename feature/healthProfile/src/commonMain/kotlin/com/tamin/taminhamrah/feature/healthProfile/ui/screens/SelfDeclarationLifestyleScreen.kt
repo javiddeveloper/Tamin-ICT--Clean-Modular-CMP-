@@ -127,6 +127,7 @@ fun SelfDeclarationLifestyleScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     LifestyleShimmerSkeleton()

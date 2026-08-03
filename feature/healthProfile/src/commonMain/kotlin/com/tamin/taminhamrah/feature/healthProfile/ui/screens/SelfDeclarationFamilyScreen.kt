@@ -93,6 +93,7 @@ fun SelfDeclarationFamilyScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     CardsListShimmerSkeleton()

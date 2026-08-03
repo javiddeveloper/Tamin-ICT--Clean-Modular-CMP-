@@ -77,6 +77,7 @@ fun SelfDeclarationPersonalScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     FormFieldsShimmerSkeleton(fieldCount = 4)
