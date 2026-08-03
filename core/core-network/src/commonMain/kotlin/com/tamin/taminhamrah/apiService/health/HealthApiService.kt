@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.apiService.health
 import com.tamin.taminhamrah.model.health.*
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import kotlinx.serialization.json.JsonElement
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Body
@@ -105,15 +106,19 @@ internal interface HealthApiService {
         @Body updatePatientRequest: UpdatePatientRequestDTO
     ): BaseDTO<UpdatePatientDTO>
 
+    // These two endpoints return a bare success message, not an object payload.
+    // BaseDTO<JsonElement?> + extractMessage() is the app-wide idiom for that
+    // (see PersonalApiService / PensionApiService) and tolerates a null or
+    // object "data" by falling back to the envelope's "reason" field.
     @POST("patient/PatientSelfDeclarative/v1/SyncIllnessSelfDeclaratives")
     suspend fun syncIllnessSelfDeclaratives(
         @Body syncIllnessesRequest: SyncIllnessesSelfDecRequestDTO
-    ): BaseDTO<SyncIllnessSelfDeclarativesDTO>
+    ): BaseDTO<JsonElement?>
 
     @POST("patient/PatientSelfDeclarative/v1/SyncDrugAllergies")
     suspend fun syncDrugAllergies(
         @Body syncDrugAllergiesRequest: SyncDrugAllergiesRequestDTO
-    ): BaseDTO<SyncDrugAllergiesDTO>
+    ): BaseDTO<JsonElement?>
 
     @POST("patient/PatientSelfDeclarative/v1/AddSelfDeclarative")
     suspend fun addSelfDeclarative(
@@ -148,7 +153,7 @@ internal interface HealthApiService {
     suspend fun getGenderTypes(): BaseDTO<List<GenderTypeDTO>>
 
     @GET("UIServices/Lookup/GetMaritalStatus")
-    suspend fun getMaritalStatus(): BaseDTO<List<MaritalStatusDTO>>
+    suspend fun getMaritalStatus(): List<MaritalStatusDTO>
 
     @GET("UIServices/Lookup/GetRelationTypes")
     suspend fun getRelationTypes(): BaseDTO<List<RelationTypeDTO>>
@@ -157,11 +162,11 @@ internal interface HealthApiService {
     suspend fun getIllnessGroups(): BaseDTO<List<IllnessGroupDTO>>
 
     @GET("UIServices/Lookup/GetActFrequencies")
-    suspend fun getActFrequencies(): BaseDTO<List<ActFrequencyDTO>>
+    suspend fun getActFrequencies(): List<ActFrequencyDTO>
 
     @GET("UIServices/Lookup/GetSmokingStatus")
-    suspend fun getSmokingStatus(): BaseDTO<List<SmokingStatusDTO>>
+    suspend fun getSmokingStatus(): List<SmokingStatusDTO>
 
     @GET("UIServices/Lookup/GetBloodGroups")
-    suspend fun getBloodGroups(): BaseDTO<List<BloodGroupDTO>>
+    suspend fun getBloodGroups(): List<BloodGroupDTO>
 }

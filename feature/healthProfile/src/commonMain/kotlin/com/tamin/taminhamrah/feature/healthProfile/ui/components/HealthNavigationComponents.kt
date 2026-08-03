@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.components
 
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 
 import androidx.compose.foundation.background
@@ -28,6 +29,16 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.draw.rotate
+import com.tamin.taminhamrah.ui.components.IconPosition
+import taminx.feature.healthprofile.generated.resources.*
+
+val LocalIsEditMode = staticCompositionLocalOf { false }
 
 /**
  * Static Top Bar for Health Profile screens with status bar inset padding.
@@ -36,27 +47,63 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 fun HealthTopAppBar(
     title: String = "خوداظهاری سلامت",
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
+    currentStep: Int? = null,
+    totalSteps: Int = 10,
     modifier: Modifier = Modifier
 ) {
-    TaminTopAppBar(
-        modifier = modifier.statusBarsPadding(),
-        title = {
-            TaminText(
-                text = title,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+    val taminColors = LocalTaminColors.current
+    Surface(
+        color = taminColors.bgSurface,
+        shadowElevation = 0.dp
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+        ) {
+            TaminTopAppBar(
+                title = {
+                    TaminText(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    )
+                },
+                navigationIcon = {
+                    Icon(
+                        modifier = modifier.rotate(180f),
+                        painter = painterResource(Res.drawable.ic_health_back),
+                        contentDescription = "بازگشت",
+                        tint = taminColors.textPrimary
+                    )
+                },
+                onNavigationClick = onBackClicked,
+                actionIcon = onCloseClicked?.let {
+                    {
+                        Icon(
+
+                            painter = painterResource(Res.drawable.ic_health_close),
+                            contentDescription = "بستن",
+                            tint = taminColors.textPrimary
+                        )
+                    }
+                },
+                onActionClick = onCloseClicked
+            )
+            if (currentStep != null && currentStep > 0 && !LocalIsEditMode.current) {
+                HealthProgressBar(
+                    currentStep = currentStep,
+                    totalSteps = totalSteps,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 )
-            )
-        },
-        navigationIcon = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "بازگشت"
-            )
-        },
-        onNavigationClick = onBackClicked
-    )
+            }
+        }
+    }
 }
 
 /**
@@ -64,32 +111,60 @@ fun HealthTopAppBar(
  *
  * @param currentStep The current step index (1-based).
  * @param totalSteps The total number of steps.
+ * @param showStepText Whether to display step text on top of the progress bar.
  */
 @Composable
 fun HealthProgressBar(
     modifier: Modifier = Modifier,
     currentStep: Int,
-    totalSteps: Int = 9
+    totalSteps: Int = 9,
+    showStepText: Boolean = true
 ) {
     val taminColors = LocalTaminColors.current
 
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        for (i in 1..totalSteps) {
-            val isActive = i <= currentStep
-            val segmentColor = if (isActive) taminColors.blueText else taminColors.border
+        if (showStepText) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TaminText(
+                    text = stringResource(
+                        Res.string.health_step_format,
+                        currentStep.toString().toPersianDigits(),
+                        totalSteps.toString().toPersianDigits()
+                    ),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.blueText
+                    )
+                )
+            }
+        }
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .background(segmentColor, RoundedCornerShape(100.dp))
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            for (i in 1..totalSteps) {
+                val isActive = i <= currentStep
+                val segmentColor = if (isActive) taminColors.blueText else taminColors.border
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(4.dp)
+                        .background(segmentColor, RoundedCornerShape(100.dp))
+                )
+            }
         }
     }
 }
@@ -124,65 +199,67 @@ fun HealthIrritateNavigationBar(
                 bottom = 14.dp + bottomInset
             )
     ) {
+        val isEditMode = LocalIsEditMode.current
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Optional Secondary outlined button
-            if (secondaryText != null && onSecondaryClick != null) {
-                Box(
-                    modifier = Modifier
-                        .size(54.dp)
-                        .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
-                        .clip(RoundedCornerShape(15.dp))
-                        .clickable { onSecondaryClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            // Primary Solid Button
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(54.dp)
-                    .background(
-                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    TaminText(
-                        text = primaryText,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 15.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (primaryEnabled) Color.White else taminColors.textMuted
+            if (isEditMode) {
+                if (onSecondaryClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .height(54.dp)
+                            .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
+                            .clip(RoundedCornerShape(15.dp))
+                            .clickable { onSecondaryClick() }
+                            .padding(horizontal = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TaminText(
+                            text = "انصراف",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textSecondary
                         )
-                    )
-                    if (showChevron) {
-                        Spacer(modifier = Modifier.width(9.dp))
+                    }
+                }
+
+                TaminFilledButton(
+                    text = "ثبت ویرایش",
+                    onClick = onPrimaryClick,
+                    enabled = primaryEnabled,
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Check,
+                    iconPosition = IconPosition.End
+                )
+            } else {
+                // Optional Secondary outlined button
+                if (secondaryText != null && onSecondaryClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
+                            .clip(RoundedCornerShape(15.dp))
+                            .clickable { onSecondaryClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = null,
-                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
+
+                // Primary Solid Button
+                TaminFilledButton(
+                    text = primaryText,
+                    onClick = onPrimaryClick,
+                    enabled = primaryEnabled,
+                    modifier = Modifier.weight(1f),
+                    icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
+                )
             }
         }
     }
@@ -219,49 +296,13 @@ fun HealthNavigationBar(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .background(
-                        brush = if (primaryEnabled) taminColors.heroGradient else Brush.linearGradient(listOf(taminColors.border, taminColors.border)),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .clip(RoundedCornerShape(15.dp))
-                    .clickable(enabled = primaryEnabled) { onPrimaryClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    TaminText(
-                        text = primaryText,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 15.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (primaryEnabled) Color.White else taminColors.textMuted
-                        )
-                    )
-                    if (primaryIconPainter != null) {
-                        Spacer(modifier = Modifier.width(9.dp))
-                        Icon(
-                            painter = primaryIconPainter,
-                            contentDescription = null,
-                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    } else if (showChevron) {
-                        Spacer(modifier = Modifier.width(9.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = if (primaryEnabled) Color.White else taminColors.textMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
+            TaminFilledButton(
+                text = primaryText,
+                onClick = onPrimaryClick,
+                enabled = primaryEnabled,
+                painter = primaryIconPainter,
+                icon = if (primaryIconPainter == null && showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
+            )
 
             if (secondaryText != null && onSecondaryClick != null) {
                 Spacer(modifier = Modifier.height(10.dp))

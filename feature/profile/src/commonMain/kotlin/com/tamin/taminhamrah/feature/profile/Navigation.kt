@@ -15,6 +15,9 @@ import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
+import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
+import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
+
 @Serializable
 sealed interface ProfileRoute {
     @Serializable
@@ -28,6 +31,9 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object ElectronicFile : ProfileRoute
+
+    @Serializable
+    data object VersionHistory : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -47,6 +53,7 @@ fun NavGraphBuilder.profileGraph(
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToElectronicFile = onNavigateToElectronicFile,
+                onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -67,6 +74,15 @@ fun NavGraphBuilder.profileGraph(
             ElectronicFileRoute(
                 viewModel = viewModel,
                 onBackClicked = onBack
+            )
+        }
+
+        composable<ProfileRoute.VersionHistory> {
+            val viewModel = koinViewModel<VersionHistoryViewModel>()
+
+            VersionHistoryRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
             )
         }
     }

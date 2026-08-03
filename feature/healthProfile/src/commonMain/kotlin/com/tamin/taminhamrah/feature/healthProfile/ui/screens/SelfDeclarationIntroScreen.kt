@@ -7,18 +7,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.PlaylistAddCheck
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,18 +19,16 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.FlashOn
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
+import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
 
@@ -46,21 +37,27 @@ import taminx.feature.healthprofile.generated.resources.*
  */
 @Composable
 fun SelfDeclarationIntroScreen(
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     SelfDeclarationIntroContent(
         onIntent = onIntent,
         onBackClicked = onBackClicked,
+        onCloseClicked = onCloseClicked,
+        isLoading = isLoading,
         modifier = modifier
     )
 }
 
 @Composable
 fun SelfDeclarationIntroContent(
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    onCloseClicked: (() -> Unit)? = null,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -72,13 +69,15 @@ fun SelfDeclarationIntroContent(
             topBar = {
                 HealthTopAppBar(
                     title = stringResource(Res.string.health_intro_title),
-                    onBackClicked = onBackClicked
+                    onBackClicked = onBackClicked,
+                    onCloseClicked = onCloseClicked
                 )
             },
             bottomBar = {
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_intro_btn_next),
-                    onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
+                    primaryIconPainter = painterResource(Res.drawable.ic_health_gate_button),
+                    onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.IDENTITY)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
                 )
@@ -104,9 +103,9 @@ fun SelfDeclarationIntroContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.PlaylistAddCheck,
+                        painter = painterResource(Res.drawable.ic_health_intro_hero),
                         contentDescription = null,
-                        tint = taminColors.blueText,
+                        tint = Color.Unspecified,
                         modifier = Modifier.size(54.dp)
                     )
                 }
@@ -147,7 +146,7 @@ fun SelfDeclarationIntroContent(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
                         InstructionFeatureItem(
-                            icon = Icons.Default.FlashOn,
+                            painter = painterResource(Res.drawable.ic_health_intro_fast),
                             message = stringResource(Res.string.health_intro_fast),
                             iconBgColor = taminColors.blueBg,
                             iconColor = taminColors.blueText,
@@ -155,7 +154,7 @@ fun SelfDeclarationIntroContent(
                         )
                         HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
                         InstructionFeatureItem(
-                            icon = Icons.Default.EditNote,
+                            painter = painterResource(Res.drawable.ic_health_intro_update),
                             message = stringResource(Res.string.health_intro_update),
                             iconBgColor = taminColors.orangeBg,
                             iconColor = taminColors.orangeText,
@@ -163,7 +162,7 @@ fun SelfDeclarationIntroContent(
                         )
                         HorizontalDivider(color = taminColors.divider, thickness = 1.dp)
                         InstructionFeatureItem(
-                            icon = Icons.Default.Shield,
+                            painter = painterResource(Res.drawable.ic_health_intro_privacy),
                             message = stringResource(Res.string.health_intro_privacy),
                             iconBgColor = taminColors.greenBg,
                             iconColor = taminColors.greenText,
@@ -179,7 +178,7 @@ fun SelfDeclarationIntroContent(
 
 @Composable
 private fun InstructionFeatureItem(
-    icon: ImageVector,
+    painter: androidx.compose.ui.graphics.painter.Painter,
     message: String,
     iconBgColor: androidx.compose.ui.graphics.Color,
     iconColor: androidx.compose.ui.graphics.Color,
@@ -201,7 +200,7 @@ private fun InstructionFeatureItem(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = icon,
+                painter = painter,
                 contentDescription = null,
                 tint = iconColor,
                 modifier = Modifier.size(19.dp)

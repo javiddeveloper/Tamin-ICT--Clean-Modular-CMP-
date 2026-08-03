@@ -61,6 +61,7 @@ object CornerRadius {
     val cardCompact = 20.dp
     val card = 22.dp
     val sheet = 28.dp
+    val max = 100.dp
 }
 
 object Elevation {

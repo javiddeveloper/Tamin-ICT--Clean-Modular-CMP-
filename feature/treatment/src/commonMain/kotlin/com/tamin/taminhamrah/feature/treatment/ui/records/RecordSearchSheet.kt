@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +83,6 @@ private enum class DateField { NONE, FROM, TO }
  * Advanced search bottom sheet for سوابق درمانی.
  * Features title on the right, cross icon on the left, gradient chosen chips, and theme adaptation.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordSearchSheet(
     initial: RecordSearchCriteria,

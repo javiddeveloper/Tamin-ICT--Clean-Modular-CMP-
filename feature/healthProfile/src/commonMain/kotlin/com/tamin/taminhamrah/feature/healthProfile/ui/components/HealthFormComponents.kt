@@ -5,8 +5,9 @@ import com.tamin.taminhamrah.ui.components.TaminText
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-
-
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -26,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -50,10 +52,10 @@ import com.tamin.taminhamrah.ui.theme.applicationFont
 fun SegmentedControl(
     modifier: Modifier = Modifier,
     options: List<String>,
-    selectedIndex: Int,
+    selectedIndex: Int?,
     onOptionSelected: (Int) -> Unit,
-    activeColor: Color = LocalTaminColors.current.blueText,
-    activeBgColor: Color = LocalTaminColors.current.bgSurface
+    activeColor: Color = Color.White,
+    activeBgColor: Color = LocalTaminColors.current.blueText
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -61,34 +63,39 @@ fun SegmentedControl(
         modifier = modifier
             .fillMaxWidth()
             .background(taminColors.divider, RoundedCornerShape(13.dp))
-            .border(1.5.dp, taminColors.border.copy(alpha = 0.5f), RoundedCornerShape(13.dp))
             .padding(4.dp)
             .height(42.dp)
     ) {
         val width = maxWidth
         val tabWidth = width / options.size
 
-        // Animated slider background capsule
-        val indicatorOffset by animateDpAsState(
-            targetValue = tabWidth * selectedIndex,
-            animationSpec = tween(300),
-            label = "tabSlide"
-        )
+        if (selectedIndex != null && selectedIndex in options.indices) {
+            val indicatorOffset by animateDpAsState(
+                targetValue = tabWidth * selectedIndex,
+                animationSpec = tween(300),
+                label = "tabSlide"
+            )
 
-        Box(
-            modifier = Modifier
-                .offset(x = indicatorOffset)
-                .width(tabWidth)
-                .fillMaxHeight()
-                .background(activeBgColor, RoundedCornerShape(10.dp))
-                .border(1.5.dp, taminColors.border, RoundedCornerShape(10.dp))
-        )
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .width(tabWidth)
+                    .fillMaxHeight()
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        spotColor = activeBgColor.copy(alpha = 0.25f),
+                        ambientColor = activeBgColor.copy(alpha = 0.25f)
+                    )
+                    .background(activeBgColor, RoundedCornerShape(10.dp))
+            )
+        }
 
         Row(modifier = Modifier.fillMaxSize()) {
             options.forEachIndexed { index, label ->
                 val isSelected = index == selectedIndex
                 val textColor by animateColorAsState(
-                    targetValue = if (isSelected) activeColor else taminColors.textTertiary,
+                    targetValue = if (isSelected) activeColor else taminColors.textSecondary,
                     label = "textColor"
                 )
 
@@ -113,6 +120,7 @@ fun SegmentedControl(
     }
 }
 
+
 /**
  * Interactive filter choice chips wrapping nicely inside containers.
  */
@@ -124,7 +132,7 @@ fun InteractiveChoiceChips(
     selectedIndices: Set<Int>,
     onSelectionChanged: (Set<Int>) -> Unit,
     activeColor: Color = LocalTaminColors.current.blueText,
-    activeBgColor: Color = LocalTaminColors.current.blueBg
+    activeBgColor: Color = LocalTaminColors.current.blueBg,
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -162,7 +170,7 @@ fun InteractiveChoiceChips(
                 contentAlignment = Alignment.Center
             ) {
                 TaminText(
-                    text = label,
+                    text = label.replace(Regex("\\r?\\n"), " ").trim(),
                     fontSize = 12.5.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     color = chipTextColor
@@ -171,6 +179,8 @@ fun InteractiveChoiceChips(
         }
     }
 }
+
+
 
 /**
  * Custom stylized text input with validation ticks, prefix icons, and error states.
@@ -182,11 +192,18 @@ fun StyledTextField(
     label: String,
     placeholder: String,
     leadingIcon: ImageVector? = null,
+    leadingIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
+    trailingIcon: ImageVector? = null,
+    trailingIconPainter: androidx.compose.ui.graphics.painter.Painter? = null,
     isValid: Boolean? = null,
     errorText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     modifier: Modifier = Modifier,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    readOnly: Boolean = false,
+    isRequired: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -199,94 +216,144 @@ fun StyledTextField(
     }
 
     val leadingIconColor = if (isFocused) taminColors.blueText else taminColors.textMuted
+    val trailingIconColor = if (isFocused) taminColors.blueText else taminColors.textSecondary
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        TaminText(
-            text = label,
-            fontSize = 12.5.sp,
-            fontWeight = FontWeight.Bold,
-            color = taminColors.textTertiary,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
-                .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
-                .onFocusChanged { isFocused = it.isFocused }
-                .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Leading Icon
-            if (leadingIcon != null) {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    tint = leadingIconColor,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
+    val annotatedLabel = buildAnnotatedString {
+        append(label)
+        if (isRequired) {
+            withStyle(SpanStyle(color = taminColors.dangerText)) {
+                append(" *")
             }
+        }
+    }
 
-            // Input field
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = singleLine,
-                keyboardOptions = keyboardOptions,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = taminColors.textPrimary,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = applicationFont()
-                ),
-                modifier = Modifier.weight(1f),
-                decorationBox = { innerTextField ->
-                    if (value.isEmpty()) {
-                        TaminText(
-                            text = placeholder,
-                            fontSize = 13.5.sp,
-                            color = taminColors.textMuted,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
-                    innerTextField()
-                }
+    Box(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            TaminText(
+                text = annotatedLabel,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textTertiary,
+                modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // Suffix validation / status checkmark
-            if (isValid == true) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "معتبر",
-                    tint = taminColors.greenText,
-                    modifier = Modifier.size(19.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
+                    .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
+                    .onFocusChanged { focusState ->
+                        isFocused = focusState.isFocused
+                        onFocusChanged?.invoke(focusState.isFocused)
+                    }
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Leading Icon
+                if (leadingIconPainter != null) {
+                    Icon(
+                        painter = leadingIconPainter,
+                        contentDescription = null,
+                        tint = leadingIconColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else if (leadingIcon != null) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = leadingIconColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+
+                // Input field
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = singleLine,
+                    readOnly = readOnly || onClick != null,
+                    keyboardOptions = keyboardOptions,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = taminColors.textPrimary,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = applicationFont()
+                    ),
+                    modifier = Modifier.weight(1f),
+                    decorationBox = { innerTextField ->
+                        if (value.isEmpty()) {
+                            TaminText(
+                                text = placeholder,
+                                fontSize = 13.5.sp,
+                                color = taminColors.textMuted,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                        innerTextField()
+                    }
                 )
+
+                // Suffix validation / status checkmark or trailing icon
+                if (isValid == true) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "معتبر",
+                        tint = taminColors.greenText,
+                        modifier = Modifier.size(19.dp)
+                    )
+                } else if (trailingIconPainter != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        painter = trailingIconPainter,
+                        contentDescription = null,
+                        tint = trailingIconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else if (trailingIcon != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = null,
+                        tint = trailingIconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            // Error message below
+            if (isValid == false && !errorText.isNullOrEmpty()) {
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = "خطا",
+                        tint = taminColors.dangerText,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    TaminText(
+                        text = errorText,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.dangerText
+                    )
+                }
             }
         }
 
-        // Error message below
-        if (isValid == false && !errorText.isNullOrEmpty()) {
-            Row(
-                modifier = Modifier.padding(top = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Error,
-                    contentDescription = "خطا",
-                    tint = taminColors.dangerText,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                TaminText(
-                    text = errorText,
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.dangerText
-                )
-            }
+        // Overlay transparent Box over entire field when onClick != null
+        if (onClick != null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(13.dp))
+                    .clickable { onClick() }
+            )
         }
     }
 }
@@ -324,6 +391,43 @@ fun InfoBanner(
             fontSize = 12.5.sp,
             fontWeight = FontWeight.Medium,
             color = taminColors.blueText,
+            lineHeight = 18.sp,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+
+@Composable
+fun WarningBanner(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(taminColors.orangeBg, RoundedCornerShape(13.dp))
+            .border(1.dp, taminColors.blueText.copy(alpha = 0.2f), RoundedCornerShape(13.dp))
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = "هشدار",
+            tint = taminColors.warning,
+            modifier = Modifier
+                .size(18.dp)
+                .align(Alignment.Top)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        TaminText(
+            text = message,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Medium,
+            color = taminColors.warning,
             lineHeight = 18.sp,
             modifier = Modifier.weight(1f)
         )
@@ -407,7 +511,6 @@ fun DynamicItemCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
         border = BorderStroke(1.dp, taminColors.border),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -629,6 +732,9 @@ private fun HealthFormComponentsPreview() {
 
             TaminText("Info Banner", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             InfoBanner(message = "این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح با پشتیبانی تماس بگیرید.")
+
+            TaminText("Warning Banner", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
+            WarningBanner(message = "این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح با پشتیبانی تماس بگیرید.")
 
             TaminText("Dashed Add Button", fontWeight = FontWeight.Bold, color = LocalTaminColors.current.textPrimary)
             DashedAddButton(
