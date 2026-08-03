@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,7 +67,9 @@ fun ChangeMobileScreen(
     viewModel: ChangeMobileViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
+    val taminColors = LocalTaminColors.current
     val uiStateState = viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val onIntent = remember(viewModel) {
         { intent: ChangeMobileIntent -> viewModel.sendIntent(intent) }
     }
@@ -79,14 +83,14 @@ fun ChangeMobileScreen(
             }
         }
     }
-    val taminColors = LocalTaminColors.current
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
 
     HandleChangeMobileEvents(
         events = viewModel.events,
-        onBack = onBack
+        onBack = onBack,
+        snackbarHostState = snackbarHostState
     )
 
     ChangeMobileContent(
@@ -95,18 +99,23 @@ fun ChangeMobileScreen(
         onBack = handleBack,
         profileGradientBrush = profileGradientBrush,
         onIntent = onIntent,
-        onNavigateBack = onBack
+        onNavigateBack = onBack,
+        snackbarHostState = snackbarHostState
     )
 }
 
 @Composable
 fun HandleChangeMobileEvents(
     events: Flow<ChangeMobileEvent>,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is ChangeMobileEvent.NavigateBack -> onBack()
+            is ChangeMobileEvent.ShowError -> {
+                snackbarHostState.showSnackbar(event.message)
+            }
         }
     }
 }
@@ -119,12 +128,14 @@ fun ChangeMobileContent(
     profileGradientBrush: Brush,
     onIntent: (ChangeMobileIntent) -> Unit,
     onNavigateBack: () -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.profile_change_mobile),
@@ -265,7 +276,8 @@ private fun ChangeMobileScreenPreview() {
             onBack = {},
             profileGradientBrush = profileGradientBrush,
             onIntent = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
+            snackbarHostState = remember { SnackbarHostState() }
         )
     }
 }
@@ -285,7 +297,8 @@ private fun ChangeMobileScreenPreviewDark() {
             onBack = {},
             profileGradientBrush = profileGradientBrush,
             onIntent = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
+            snackbarHostState = remember { SnackbarHostState() }
         )
     }
 }

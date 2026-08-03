@@ -3,14 +3,16 @@ package com.tamin.taminhamrah.feature.changemobile.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,91 +49,90 @@ fun SuccessStep(
     onFinish: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Spacing.lg),
+    val uiState = uiStateState.value
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item {
-            val newMobile = uiStateState.value.newMobile
-            Spacer(modifier = Modifier.height(Spacing.lg))
-
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .coloredShadow(
-                        color = taminColors.greenText.copy(alpha = 0.25f),
-                        borderRadius = 50.dp,
-                        blurRadius = 30.dp,
-                        offsetY = 10.dp
-                    )
-                    .clip(CircleShape)
-                    .background(taminColors.iconGradientSuccess),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_tamin_check),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(48.dp)
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .coloredShadow(
+                    color = taminColors.greenText.copy(alpha = 0.25f),
+                    borderRadius = 50.dp,
+                    blurRadius = 30.dp,
+                    offsetY = 10.dp
                 )
-            }
-
-            Spacer(modifier = Modifier.height(Spacing.xxl))
-
-            Text(
-                text = "شمارهٔ موبایل با موفقیت تغییر کرد",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.textPrimary
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            Text(
-                text = "از این پس اطلاعیه‌ها و کدهای ورود به شمارهٔ زیر پیامک می‌شود.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = taminColors.textMuted,
-                textAlign = TextAlign.Center,
-                lineHeight = 24.sp
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.xlg))
-
-            ListGroupView(
-                containerBackgroundColor = taminColors.verifiedContainerBg,
-                containerBorder = BorderStroke(1.dp, taminColors.verifiedContainerBorder),
-                items = persistentListOf(
-                    ListItemData(
-                        title = newMobile.toPersianDigits(),
-                        leadingIconPainter = painterResource(Res.drawable.ic_mobile),
-                        leadingIconElevation = Elevation.xs,
-                        colors = ListItemColors(
-                            leadingIconBackgroundGradient = taminColors.verifiedIconGradient,
-                            leadingIconBackgroundColor = taminColors.verifiedIconBg,
-                            leadingIconTintColor = taminColors.verifiedIconTint,
-                            titleColor = taminColors.springGreenText
-                        ),
-                        showArrow = false,
-                        badge = ListItemBadge(
-                            text = "فعال",
-                            backgroundColor = taminColors.verifiedBadgeBg,
-                            textColor = taminColors.greenText
-                        ),
-                        titleStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                )
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
-
-            LoadingButton(
-                text = "بازگشت به حساب کاربری",
-                onClick = onFinish,
-                modifier = Modifier.fillMaxWidth()
+                .clip(CircleShape)
+                .background(taminColors.iconGradientSuccess),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_tamin_check),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(48.dp)
             )
         }
+
+        Spacer(modifier = Modifier.height(Spacing.xxl))
+
+        Text(
+            text = "شمارهٔ موبایل با موفقیت تغییر کرد",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textPrimary
+            ),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        Text(
+            text = "از این پس اطلاعیه‌ها و کدهای ورود به شمارهٔ زیر پیامک می‌شود.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = taminColors.textMuted,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xlg))
+
+        ListGroupView(
+            containerBackgroundColor = taminColors.verifiedContainerBg,
+            containerBorder = BorderStroke(1.dp, taminColors.verifiedContainerBorder),
+            items = persistentListOf(
+                ListItemData(
+                    title = uiState.newMobile.toPersianDigits(),
+                    leadingIconPainter = painterResource(Res.drawable.ic_mobile),
+                    leadingIconElevation = Elevation.xs,
+                    colors = ListItemColors(
+                        leadingIconBackgroundGradient = taminColors.verifiedIconGradient,
+                        leadingIconBackgroundColor = taminColors.verifiedIconBg,
+                        leadingIconTintColor = taminColors.verifiedIconTint,
+                        titleColor = taminColors.springGreenText
+                    ),
+                    showArrow = false,
+                    badge = ListItemBadge(
+                        text = "فعال",
+                        backgroundColor = taminColors.verifiedBadgeBg,
+                        textColor = taminColors.greenText
+                    ),
+                    titleStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            )
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        LoadingButton(
+            text = "بازگشت به حساب کاربری",
+            onClick = onFinish,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

@@ -9,7 +9,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Lock
@@ -53,88 +53,83 @@ fun VerifyOtpStep(
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
     val taminColors = LocalTaminColors.current
+    val uiState = uiStateState.value
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Spacing.lg)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(Spacing.lg),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item {
-            val newMobile = uiStateState.value.newMobile
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+        val newMobile = uiState.newMobile
+        Text(
+            text = "کد پیامک ‌شده به شمارهٔ زیر را وارد کنید",
+            style = MaterialTheme.typography.bodyMedium,
+            color = taminColors.textMuted
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = newMobile,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textPrimary
+            )
+            Spacer(modifier = Modifier.width(Spacing.sm))
+            Row(
+                modifier = Modifier
+                    .clickable { onIntent(ChangeMobileIntent.BackToPreviousStep) }
+                    .padding(Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = "کد پیامک ‌شده به شمارهٔ زیر را وارد کنید",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = taminColors.textMuted
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "ویرایش",
+                    tint = taminColors.blueText,
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = newMobile,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = taminColors.textPrimary
-                    )
-                    Spacer(modifier = Modifier.width(Spacing.sm))
-                    Row(
-                        modifier = Modifier
-                            .clickable { onIntent(ChangeMobileIntent.BackToPreviousStep) }
-                            .padding(Spacing.xs),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "ویرایش",
-                            tint = taminColors.blueText,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = "ویرایش",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = taminColors.blueText,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+                Text(
+                    text = "ویرایش",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = taminColors.blueText,
+                    fontWeight = FontWeight.Bold
+                )
             }
-            Spacer(modifier = Modifier.height(Spacing.xl))
+        }
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
-            val otpCode = uiStateState.value.otpCode
-            val error = uiStateState.value.error
-            OtpInputField(
-                value = otpCode,
-                onValueChange = {
-                    onIntent(ChangeMobileIntent.OtpChanged(it))
-                },
-                error = error != null,
-                errorMessage = error,
-                showClearButton = true,
-                leadingIcon = Icons.Outlined.Lock
-            )
-            Spacer(modifier = Modifier.height(Spacing.md))
-            ResendTimer(
-                onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) }
-            )
-            Spacer(modifier = Modifier.height(Spacing.xl))
-        }
-        item {
-            val isLoading = uiStateState.value.isLoading
-            val otpCode = uiStateState.value.otpCode
-            LoadingButton(
-                text = "تأیید و ادامه",
-                onClick = {
-                    onIntent(ChangeMobileIntent.VerifyOtp)
-                },
-                enabled = !isLoading && otpCode.length == 5,
-                isLoading = isLoading
-            )
-        }
+        val otpCode = uiState.otpCode
+        val error = uiState.error
+        OtpInputField(
+            value = otpCode,
+            onValueChange = {
+                onIntent(ChangeMobileIntent.OtpChanged(it))
+            },
+            error = error != null,
+            errorMessage = error,
+            showClearButton = true,
+            leadingIcon = Icons.Outlined.Lock
+        )
+        Spacer(modifier = Modifier.height(Spacing.md))
+        ResendTimer(
+            onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) }
+        )
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        LoadingButton(
+            text = "تأیید و ادامه",
+            onClick = {
+                onIntent(ChangeMobileIntent.VerifyOtp)
+            },
+            enabled = !uiState.isLoading && uiState.otpCode.length == 5,
+            isLoading = uiState.isLoading,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

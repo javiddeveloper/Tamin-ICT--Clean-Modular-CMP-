@@ -37,4 +37,5 @@ sealed interface ChangeMobileIntent {
 
 sealed interface ChangeMobileEvent {
     data object NavigateBack : ChangeMobileEvent
+    data class ShowError(val message: String) : ChangeMobileEvent
 }
