@@ -201,7 +201,6 @@ private fun IdentityHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = stringResource(Res.string.identity_back),
                     onClick = onBack,
-                    modifier = Modifier.clip(CircleShape),
                 )
             },
             bottomPadding = IdentityDimens.cardOverlap + IdentityDimens.cardHeaderGap,

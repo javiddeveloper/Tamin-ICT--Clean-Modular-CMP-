@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.repository.AgentChatCacheRepository
 import com.tamin.taminhamrah.data.repository.treatment.TreatmentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personalInbox.PersonalInboxRepositoryImpl
 import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
+import com.tamin.taminhamrah.data.repository.VersionHistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.contract.ContractsRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pension.PensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.userRequests.UserRequestRepositoryImpl
@@ -27,6 +28,7 @@ import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
+import com.tamin.taminhamrah.repository.VersionHistoryRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
@@ -51,4 +53,5 @@ val dataKoinModule = module {
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
     singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
+    singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
 }
