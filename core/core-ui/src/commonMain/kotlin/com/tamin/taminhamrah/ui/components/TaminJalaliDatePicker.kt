@@ -184,10 +184,17 @@ private fun PickerHeader(
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textTertiary,
             )
+            val headerDateText = remember(day, month, year) {
+                buildString {
+                    append(day.toString().toPersianDigits())
+                    append(' ')
+                    append(PersianDateFormatter.monthNames.getOrElse(month - 1) { "" })
+                    append(' ')
+                    append(year.toString().toPersianDigits())
+                }
+            }
             Text(
-                text = "${day.toString().toPersianDigits()} " +
-                    "${PersianDateFormatter.monthNames[month - 1]} " +
-                    year.toString().toPersianDigits(),
+                text = headerDateText,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colors.blueText,
