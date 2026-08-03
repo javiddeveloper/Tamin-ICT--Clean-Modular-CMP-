@@ -21,17 +21,22 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.contract.EmergencyStepStat
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PhysicalStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.BloodGroupStepState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import androidx.compose.ui.draw.clip
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitConfirmationDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Lock
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitErrorBanner
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitLoadingDialog
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.SubmitErrorsBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.healthprofile.generated.resources.*
@@ -460,17 +465,50 @@ fun SelfDeclarationReviewScreen(
     }
 
     if (showConfirmDialog) {
-        SubmitConfirmationDialog(
-            onConfirm = {
-                showConfirmDialog = false
-                onIntent(HealthProfileIntent.SubmitDeclaration)
+        val taminColors = LocalTaminColors.current
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.health_review_confirm_modal_text),
+            description = stringResource(Res.string.health_review_confirm_modal_desc),
+            onDismissRequest = { showConfirmDialog = false },
+            icon = Icons.Outlined.Lock,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.health_review_confirm_modal_btn_text),
+                    icon = Icons.Default.Check,
+                    onClick = {
+                        showConfirmDialog = false
+                        onIntent(HealthProfileIntent.SubmitDeclaration)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp)
+                )
             },
-            onDismiss = { showConfirmDialog = false }
+            dismissButton = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .border(1.dp, taminColors.border, RoundedCornerShape(14.dp))
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { showConfirmDialog = false },
+                    contentAlignment = Alignment.Center
+                ) {
+                    TaminText(
+                        text = stringResource(Res.string.health_btn_cancel),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        ),
+                        color = taminColors.textSecondary
+                    )
+                }
+            }
         )
     }
 
     if (selfDecState.isSubmitLoading) {
-        SubmitLoadingDialog()
+        SubmitLoadingDialog(message = stringResource(Res.string.health_review_submit_loading_text))
     }
 
     if (showErrorBottomSheet && selfDecState.submitProblems.isNotEmpty()) {
