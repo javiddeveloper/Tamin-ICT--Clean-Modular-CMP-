@@ -232,7 +232,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     Scaffold(contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = isHomeRoute && isAgentEnabled,
                 enter = androidx.compose.animation.scaleIn(),
                 exit = androidx.compose.animation.scaleOut()
@@ -347,6 +347,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     navController = navController,
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
+                    },
+                    onNavigateToElectronicFile = {
+                        navController.navigate(ProfileRoute.ElectronicFile)
                     },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
@@ -737,7 +740,7 @@ private fun AgentFab(onClick: () -> Unit) {
         initialValue = 0.4f,
         targetValue = 0.9f,
         animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween<Float>(1200),
+            animation = androidx.compose.animation.core.tween(1200),
             repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
         ),
         label = "glow"
@@ -746,7 +749,7 @@ private fun AgentFab(onClick: () -> Unit) {
         initialValue = 1f,
         targetValue = 1.08f,
         animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween<Float>(1200),
+            animation = androidx.compose.animation.core.tween(1200),
             repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
         ),
         label = "scale"
@@ -756,15 +759,15 @@ private fun AgentFab(onClick: () -> Unit) {
         content = {
             androidx.compose.foundation.Canvas(modifier = Modifier.size(72.dp)) {
                 drawCircle(
-                    color = androidx.compose.ui.graphics.Color(0xFF1A73E8).copy(alpha = glowAlpha * 0.4f),
+                    color = Color(0xFF1A73E8).copy(alpha = glowAlpha * 0.4f),
                     radius = size.minDimension / 2f * 1.3f
                 )
             }
             FloatingActionButton(
                 onClick = onClick,
                 modifier = Modifier.size(56.dp),
-                containerColor = androidx.compose.ui.graphics.Color(0xFF1A73E8),
-                contentColor = androidx.compose.ui.graphics.Color.White,
+                containerColor = Color(0xFF1A73E8),
+                contentColor = Color.White,
                 elevation = FloatingActionButtonDefaults.elevation(
                     defaultElevation = 8.dp,
                     pressedElevation = 4.dp
@@ -774,7 +777,7 @@ private fun AgentFab(onClick: () -> Unit) {
                     text = "AI",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = androidx.compose.ui.graphics.Color.White
+                        color = Color.White
                     )
                 )
             }
