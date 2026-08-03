@@ -1,16 +1,49 @@
 package com.tamin.taminhamrah.model.health
 
 data class PatientGeneralDN(
-    val ptientID: Int?,
-    val patientName: String?,
-    val patientFamily: String?,
-    val patientNatCode: String?,
-    val patientAge: String?,
-    val patientGender: String?,
-    val patientBirthDate: String?,
-    val patientMobile: String?,
-    val patientAddress: String?,
-    val patientFather: String?
+    val ptientID: Int? = null,
+    val patientName: String? = null,
+    val patientFamily: String? = null,
+    val patientNatCode: String? = null,
+    val patientAge: String? = null,
+    val patientGender: String? = null,
+    val patientBirthDate: String? = null,
+    val patientMobile: String? = null,
+    val patientAddress: String? = null,
+    val patientFather: String? = null,
+    val emergencyAddress: String? = null,
+    val emergencyArea: String? = null,
+    val emergencyCity: String? = null,
+    val emergencyCityCode: Int? = null,
+    val emergencyEmail: String? = null,
+    val emergencyFamily: String? = null,
+    val emergencyMobile: String? = null,
+    val emergencyName: String? = null,
+    val emergencyProvince: String? = null,
+    val emergencyProvinceCode: Int? = null,
+    val emergencyRelation: String? = null,
+    val emergencyRelationshipCode: Int? = null,
+    val lastUpdateDate: String? = null,
+    val lastVisitDate: String? = null,
+    val patientArea: String? = null,
+    val patientBMI: String? = null,
+    val patientBloodGroup: String? = null,
+    val patientBloodGroupCode: Int? = null,
+    val patientCitizenship: String? = null,
+    val patientCity: String? = null,
+    val patientCityCode: Int? = null,
+    val patientEmail: String? = null,
+    val patientGenderCode: Int? = null,
+    val patientHeight: String? = null,
+    val patientInsurance: String? = null,
+    val patientInsuranceCode: Int? = null,
+    val patientJob: String? = null,
+    val patientMarriage: String? = null,
+    val patientMarriageCode: Int? = null,
+    val patientNationality: String? = null,
+    val patientProvince: String? = null,
+    val patientProvinceCode: Int? = null,
+    val patientWeight: String? = null
 )
 
 data class PatientSelfDeclarativeDN(
@@ -111,3 +144,142 @@ data class PatientImagingDN(
     val visitDate: String?,
     val visitType: String?
 )
+
+// --- Location ---
+
+data class ProvinceItemDN(
+    val id: Int?,
+    val name: String?
+)
+
+data class ProvinceCityItemDN(
+    val id: Int?,
+    val name: String?
+)
+
+// --- Lookup ---
+
+data class BloodGroupDN(
+    val key: Int?,
+    val value: String?
+)
+
+data class MaritalStatusDN(
+    val key: Int?,
+    val value: String?
+)
+
+data class SmokingStatusDN(
+    val key: Int?,
+    val value: String?
+)
+
+data class ActFrequencyDN(
+    val key: Int?,
+    val value: String?
+)
+
+// --- Illness ---
+
+data class IllnessItemDN(
+    val illnessID: Int?,
+    val illnessDesc: String?
+)
+
+data class SelfDeclarableIllnessGroupDN(
+    val groupId: Int?,
+    val groupTitle: String?,
+    val forFamily: Boolean?,
+    val illnessList: List<IllnessItemDN>?
+)
+
+// --- Drug ---
+
+data class DrugItemDN(
+    val drugID: Int?,
+    val drugName: String?
+)
+
+// --- Mutation results ---
+
+data class UpdatePatientDN(
+    val ptientID: Int? = null,
+    val patientName: String? = null,
+    val patientFamily: String? = null,
+    val patientNatCode: String? = null,
+    val patientAge: String? = null,
+    val patientGender: String? = null,
+    val patientBirthDate: String? = null,
+    val patientMobile: String? = null,
+    val patientAddress: String? = null,
+    val patientFather: String? = null,
+    val emergencyAddress: String? = null,
+    val emergencyArea: String? = null,
+    val emergencyCity: String? = null,
+    val emergencyCityCode: Int? = null,
+    val emergencyEmail: String? = null,
+    val emergencyFamily: String? = null,
+    val emergencyMobile: String? = null,
+    val emergencyName: String? = null,
+    val emergencyProvince: String? = null,
+    val emergencyProvinceCode: Int? = null,
+    val emergencyRelation: String? = null,
+    val emergencyRelationshipCode: Int? = null,
+    val lastUpdateDate: String? = null,
+    val lastVisitDate: String? = null,
+    val patientArea: String? = null,
+    val patientBMI: String? = null,
+    val patientBloodGroup: String? = null,
+    val patientBloodGroupCode: Int? = null,
+    val patientCitizenship: String? = null,
+    val patientCity: String? = null,
+    val patientCityCode: Int? = null,
+    val patientEmail: String? = null,
+    val patientGenderCode: Int? = null,
+    val patientHeight: String? = null,
+    val patientInsurance: String? = null,
+    val patientInsuranceCode: Int? = null,
+    val patientJob: String? = null,
+    val patientMarriage: String? = null,
+    val patientMarriageCode: Int? = null,
+    val patientNationality: String? = null,
+    val patientProvince: String? = null,
+    val patientProvinceCode: Int? = null,
+    val patientWeight: String? = null
+)
+
+data class AddSelfDeclarativeDN(
+    val objectID: Int?,
+    val smokingStatus: Int?,
+    val smokingStatusTitle: String?,
+    val smokingDesc: String?,
+    val alcoholUsage: Int?,
+    val alcoholUsageTitle: String?,
+    val alcoholDesc: String?,
+    val substanceUsage: Int?,
+    val substanceUsageTitle: String?,
+    val substanceDesc: String?,
+    val exerciseFreq: Int?,
+    val exerciseFreqTitle: String?,
+    val exerciseDesc: String?,
+    val lastUpdateDate: String?
+)
+
+data class UpdateSelfDeclarativeDN(
+    val objectID: Int?,
+    val smokingStatus: Int?,
+    val smokingStatusTitle: String?,
+    val smokingDesc: String?,
+    val alcoholUsage: Int?,
+    val alcoholUsageTitle: String?,
+    val alcoholDesc: String?,
+    val substanceUsage: Int?,
+    val substanceUsageTitle: String?,
+    val substanceDesc: String?,
+    val exerciseFreq: Int?,
+    val exerciseFreqTitle: String?,
+    val exerciseDesc: String?,
+    val lastUpdateDate: String?
+)
+
+data class SyncResultDN(val data: String?)

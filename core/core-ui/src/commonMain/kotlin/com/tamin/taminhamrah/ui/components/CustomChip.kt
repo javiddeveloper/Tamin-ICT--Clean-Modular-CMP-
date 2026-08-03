@@ -27,7 +27,7 @@ fun CustomChip(
     textColor: Color = MaterialTheme.colorScheme.primary,
     border: BorderStroke? = null,
 ) {
-    val shape = RoundedCornerShape(CornerRadius.lg)
+    val shape = RoundedCornerShape(CornerRadius.max)
 
     Box(
         modifier = modifier
@@ -39,7 +39,7 @@ fun CustomChip(
                 }
             )
             .background(containerColor, shape)
-            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         contentAlignment = Alignment.Center
     ) {
         Text(

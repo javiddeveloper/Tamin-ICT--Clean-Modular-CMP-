@@ -1,12 +1,32 @@
 package com.tamin.taminhamrah.repository
 
-import com.tamin.taminhamrah.model.health.PatientGeneralDN
-import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
+import com.tamin.taminhamrah.model.health.ActFrequencyDN
+import com.tamin.taminhamrah.model.health.AddSelfDeclarativeDN
+import com.tamin.taminhamrah.model.health.AddSelfDeclarativeRequest
+import com.tamin.taminhamrah.model.health.BloodGroupDN
 import com.tamin.taminhamrah.model.health.DrugItemAllergiesDN
+import com.tamin.taminhamrah.model.health.DrugItemDN
+import com.tamin.taminhamrah.model.health.HealthMutationResult
+import com.tamin.taminhamrah.model.health.HealthProblemDN
+import com.tamin.taminhamrah.model.health.IllnessItemDN
+import com.tamin.taminhamrah.model.health.MaritalStatusDN
+import com.tamin.taminhamrah.model.health.PatientGeneralDN
 import com.tamin.taminhamrah.model.health.PatientHospitalizationsDN
-import com.tamin.taminhamrah.model.health.PatientVisitDN
-import com.tamin.taminhamrah.model.health.PatientLabDN
 import com.tamin.taminhamrah.model.health.PatientImagingDN
+import com.tamin.taminhamrah.model.health.PatientLabDN
+import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
+import com.tamin.taminhamrah.model.health.PatientVisitDN
+import com.tamin.taminhamrah.model.health.ProvinceCityItemDN
+import com.tamin.taminhamrah.model.health.ProvinceItemDN
+import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessGroupDN
+import com.tamin.taminhamrah.model.health.SmokingStatusDN
+import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequest
+import com.tamin.taminhamrah.model.health.SyncIllnessSelfDeclarativesRequest
+import com.tamin.taminhamrah.model.health.SyncResultDN
+import com.tamin.taminhamrah.model.health.UpdatePatientDN
+import com.tamin.taminhamrah.model.health.UpdatePatientRequest
+import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeDN
+import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeRequest
 import com.tamin.taminhamrah.repository.health.HealthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -15,6 +35,7 @@ class FakeHealthRepository : HealthRepository {
     var shouldThrowError = false
     var error: Throwable = RuntimeException("Fake Health Repository Error")
 
+    // --- Existing results ---
     var getPatientGeneralResult: PatientGeneralDN = PatientGeneralDN(0, "", "", "", "", "", "", null, null, null)
     var getPatientSelfDeclarativeResult: PatientSelfDeclarativeDN = PatientSelfDeclarativeDN(null, null, null, null, null, null, null, 0, null, null, null, null, null, null)
     var getPatientDrugAllergiesResult: List<DrugItemAllergiesDN> = emptyList()
@@ -23,6 +44,31 @@ class FakeHealthRepository : HealthRepository {
     var getPatientLabsResult: List<PatientLabDN> = emptyList()
     var getPatientImagingResult: List<PatientImagingDN> = emptyList()
 
+    // --- New results ---
+    var getAllProvincesResult: List<ProvinceItemDN> = emptyList()
+    var getProvinceCitiesResult: List<ProvinceCityItemDN> = emptyList()
+    var getBloodGroupsResult: List<BloodGroupDN> = emptyList()
+    var getMaritalStatusResult: List<MaritalStatusDN> = emptyList()
+    var getSmokingStatusResult: List<SmokingStatusDN> = emptyList()
+    var getActFrequenciesResult: List<ActFrequencyDN> = emptyList()
+    var getSelfDeclarableIllnessesResult: List<IllnessItemDN> = emptyList()
+    var getSelfDeclarableIllnessesByGroupResult: List<SelfDeclarableIllnessGroupDN> = emptyList()
+    var getAllDrugsResult: List<DrugItemDN> = emptyList()
+    var updatePatientResult: UpdatePatientDN = UpdatePatientDN(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null)
+    var addSelfDeclarativeResult: AddSelfDeclarativeDN = AddSelfDeclarativeDN(null, null, null, null, null, null, null, null, null, null, null, null, null, null)
+    var updateSelfDeclarativeResult: UpdateSelfDeclarativeDN = UpdateSelfDeclarativeDN(null, null, null, null, null, null, null, null, null, null, null, null, null, null)
+    var syncIllnessesResult: SyncResultDN = SyncResultDN(null)
+    var syncDrugAllergiesResult: SyncResultDN = SyncResultDN(null)
+
+    // Set any of these non-empty to make the matching mutation method return
+    // HealthMutationResult(data = null, problems = ...) instead of its *Result value.
+    var updatePatientProblems: List<HealthProblemDN> = emptyList()
+    var addSelfDeclarativeProblems: List<HealthProblemDN> = emptyList()
+    var updateSelfDeclarativeProblems: List<HealthProblemDN> = emptyList()
+    var syncIllnessesProblems: List<HealthProblemDN> = emptyList()
+    var syncDrugAllergiesProblems: List<HealthProblemDN> = emptyList()
+
+    // --- Existing methods ---
     override suspend fun getPatientGeneral(natCode: String): Flow<PatientGeneralDN> = flow {
         if (shouldThrowError) throw error
         emit(getPatientGeneralResult)
@@ -56,5 +102,81 @@ class FakeHealthRepository : HealthRepository {
     override suspend fun getPatientImaging(natCode: String, patientID: Int): Flow<List<PatientImagingDN>> = flow {
         if (shouldThrowError) throw error
         emit(getPatientImagingResult)
+    }
+
+    // --- New methods ---
+    override suspend fun getAllProvinces(): Flow<List<ProvinceItemDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getAllProvincesResult)
+    }
+
+    override suspend fun getProvinceCities(provinceID: Int): Flow<List<ProvinceCityItemDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getProvinceCitiesResult)
+    }
+
+    override suspend fun getBloodGroups(): Flow<List<BloodGroupDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getBloodGroupsResult)
+    }
+
+    override suspend fun getMaritalStatus(): Flow<List<MaritalStatusDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getMaritalStatusResult)
+    }
+
+    override suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getSmokingStatusResult)
+    }
+
+    override suspend fun getActFrequencies(): Flow<List<ActFrequencyDN>> = flow{
+        if (shouldThrowError) throw error
+        emit(getActFrequenciesResult)
+    }
+
+    override suspend fun getSelfDeclarableIllnesses(): Flow<List<IllnessItemDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getSelfDeclarableIllnessesResult)
+    }
+
+    override suspend fun getSelfDeclarableIllnessesByGroup(): Flow<List<SelfDeclarableIllnessGroupDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getSelfDeclarableIllnessesByGroupResult)
+    }
+
+    override suspend fun getAllDrugs(): Flow<List<DrugItemDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getAllDrugsResult)
+    }
+
+    override suspend fun updatePatient(request: UpdatePatientRequest): HealthMutationResult<UpdatePatientDN> {
+        if (shouldThrowError) throw error
+        if (updatePatientProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = updatePatientProblems)
+        return HealthMutationResult(data = updatePatientResult)
+    }
+
+    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequest): HealthMutationResult<AddSelfDeclarativeDN> {
+        if (shouldThrowError) throw error
+        if (addSelfDeclarativeProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = addSelfDeclarativeProblems)
+        return HealthMutationResult(data = addSelfDeclarativeResult)
+    }
+
+    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequest): HealthMutationResult<UpdateSelfDeclarativeDN> {
+        if (shouldThrowError) throw error
+        if (updateSelfDeclarativeProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = updateSelfDeclarativeProblems)
+        return HealthMutationResult(data = updateSelfDeclarativeResult)
+    }
+
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessSelfDeclarativesRequest): HealthMutationResult<SyncResultDN> {
+        if (shouldThrowError) throw error
+        if (syncIllnessesProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = syncIllnessesProblems)
+        return HealthMutationResult(data = syncIllnessesResult)
+    }
+
+    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequest): HealthMutationResult<SyncResultDN> {
+        if (shouldThrowError) throw error
+        if (syncDrugAllergiesProblems.isNotEmpty()) return HealthMutationResult(data = null, problems = syncDrugAllergiesProblems)
+        return HealthMutationResult(data = syncDrugAllergiesResult)
     }
 }

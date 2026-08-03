@@ -38,7 +38,7 @@ android {
         buildConfigField("String", "AI_BASE_URL", "\"https://sw.tamin.ir/\"")
         buildConfigField("String", "AI_BASE_IP", "\"http://172.16.15.54:9001/\"")
         buildConfigField("String", "CLIENT_ID", "\"${getApiKey("OPERATIONAL_API_KEY")}\"")
-
+        buildConfigField("String", "HEALTH_PROFILE", "\"http://172.16.14.115:5700/api/\"")
         // Feature Gate
         buildConfigField("boolean", "FEATURE_SIMILARITY_SEARCH", "false")
     }

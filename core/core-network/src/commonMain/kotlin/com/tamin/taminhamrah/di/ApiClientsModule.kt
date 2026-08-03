@@ -30,6 +30,7 @@ import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
+import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -55,6 +56,14 @@ val ApiClientsModule = module {
     single(named("aiKtorfit")) {
         Ktorfit.Builder()
             .httpClient(get<HttpClient>(named("aiHttpClient")))
+            .build()
+    }
+
+    // Health Ktorfit instance (uses HTTP base IP 172.16.14.115:5700)
+    single(named("healthKtorfit")) {
+        Ktorfit.Builder()
+            .baseUrl(NetworkConstants.BASE_URL_HEALTH_PROFILE)
+            .httpClient(get<HttpClient>(named("healthHttpClient")))
             .build()
     }
 
@@ -109,7 +118,7 @@ val ApiClientsModule = module {
     }
 
     single<HealthApiService> {
-        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        val ktorfit: Ktorfit = get(named("healthKtorfit"))
         ktorfit.createHealthApiService()
     }
     single<ContractsApiService>(named("contractsApiService")) {

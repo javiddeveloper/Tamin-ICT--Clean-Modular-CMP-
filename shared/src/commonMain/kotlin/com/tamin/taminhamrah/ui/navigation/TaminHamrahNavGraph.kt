@@ -257,8 +257,11 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         .fillMaxWidth()
                         .background(brush = AppBarScrim.bottomGradient)
                 ) {
+                    val selectedIndex = remember(currentTab) { navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0) }
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
+                        selectedIndex = selectedIndex,
+                        itemCount = navigationItems.size,
                         isBlurEnabled = isBottomBarVisible
                     ) {
 

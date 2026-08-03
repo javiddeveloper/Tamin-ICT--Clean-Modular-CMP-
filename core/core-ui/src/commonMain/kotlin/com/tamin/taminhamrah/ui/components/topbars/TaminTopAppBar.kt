@@ -45,7 +45,7 @@ fun TaminTopAppBar(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 4.dp)
+                .padding(horizontal = 16.dp , vertical = 12.dp)
         ) {
             // Navigation Icon (Start / Left in LTR)
             navigationIcon?.let { iconCompos ->
@@ -56,8 +56,7 @@ fun TaminTopAppBar(
                             if (onNavigationClick != null) {
                                 Modifier.clickable(onClick = onNavigationClick)
                             } else Modifier
-                        )
-                        .padding(12.dp),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     iconCompos()
@@ -83,8 +82,7 @@ fun TaminTopAppBar(
                             if (onActionClick != null) {
                                 Modifier.clickable(onClick = onActionClick)
                             } else Modifier
-                        )
-                        .padding(12.dp),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     actionCompos()

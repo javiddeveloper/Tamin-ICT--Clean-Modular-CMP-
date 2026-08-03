@@ -88,6 +88,15 @@ val networkModule = module {
         )
     }
 
+    // Health HTTP Client (No Auth plugin, specific for health services)
+    single(named("healthHttpClient")) {
+        createHealthHttpClient(
+            engine = get(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
+        )
+    }
+
     // Upload HTTP Client (5 minutes timeout)
     single(named("uploadHttpClient")) {
         createHttpClient(
@@ -181,6 +190,42 @@ private fun createHttpClient(
 
         defaultRequest {
             url(baseUrl)
+            header(HttpHeaders.Accept, "*/*")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }
+    }
+}
+
+private fun createHealthHttpClient(
+    engine: HttpClientEngine,
+    json: Json,
+    timeoutMillis: Long
+): HttpClient {
+    return HttpClient(engine) {
+        expectSuccess = false
+
+        install(ContentNegotiation) {
+            json(json, contentType = ContentType.Any)
+        }
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = timeoutMillis
+            connectTimeoutMillis = timeoutMillis
+            socketTimeoutMillis = timeoutMillis
+        }
+
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
+            logger = object : Logger {
+                override fun log(message: String) {
+                    KermitLogger.d(tag = "KtorHealthClient", messageString = message)
+                }
+            }
+        }
+
+        defaultRequest {
+            url(NetworkConstants.BASE_URL_HEALTH_PROFILE)
             header(HttpHeaders.Accept, "*/*")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }

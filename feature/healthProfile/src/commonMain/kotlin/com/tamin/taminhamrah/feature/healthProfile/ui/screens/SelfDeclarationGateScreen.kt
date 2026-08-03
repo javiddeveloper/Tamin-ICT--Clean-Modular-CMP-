@@ -10,8 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,17 +21,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthNavigationBar
-import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationIntent
+import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.feature.healthprofile.generated.resources.*
 
 /**
@@ -41,21 +44,24 @@ import taminx.feature.healthprofile.generated.resources.*
  */
 @Composable
 fun SelfDeclarationGateScreen(
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     SelfDeclarationGateContent(
         onIntent = onIntent,
         onBackClicked = onBackClicked,
+        isLoading = isLoading,
         modifier = modifier
     )
 }
 
 @Composable
 fun SelfDeclarationGateContent(
-    onIntent: (SelfDeclarationIntent) -> Unit,
+    onIntent: (HealthProfileIntent) -> Unit,
     onBackClicked: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -92,13 +98,48 @@ fun SelfDeclarationGateContent(
                         )
                     },
                     navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.health_gate_btn_back),
-                            tint = Color.White
-                        )
+                        Box(
+                            modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                                .background(Color.White.copy(alpha = 0.125f))
+                                .then(
+                                    Modifier.border(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.2f),
+                                        MaterialTheme.shapes.medium
+                                    ),
+                                )
+                        ) {
+                            Icon(
+                                modifier = modifier.rotate(180f).padding(8.dp),
+                                painter = painterResource(Res.drawable.ic_health_back),
+                                contentDescription = stringResource(Res.string.health_gate_btn_back),
+                                tint = Color.White
+                            )
+                        }
                     },
                     onNavigationClick = onBackClicked,
+                    actionIcon = {
+
+                        Box(
+                            modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                                .background(Color.White.copy(alpha = 0.125f))
+                                .then(
+                                    Modifier.border(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.2f),
+                                        MaterialTheme.shapes.medium
+                                    ),
+                                )
+                        ) {
+                            Icon(
+                                modifier = Modifier.padding(8.dp),
+                                painter = painterResource(Res.drawable.ic_health_close),
+                                contentDescription = "بستن",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    onActionClick = onBackClicked,
                     backgroundColor = Color.Transparent,
                     contentColor = Color.White,
                     modifier = Modifier.statusBarsPadding()
@@ -108,7 +149,7 @@ fun SelfDeclarationGateContent(
                 HealthNavigationBar(
                     primaryText = stringResource(Res.string.health_gate_btn_start),
                     primaryIconPainter = painterResource(Res.drawable.ic_health_gate_button),
-                    onPrimaryClick = { onIntent(SelfDeclarationIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
+                    onPrimaryClick = { onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.INTRO)) },
                     secondaryText = stringResource(Res.string.health_gate_btn_back),
                     onSecondaryClick = onBackClicked
                 )
@@ -128,7 +169,7 @@ fun SelfDeclarationGateContent(
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                     border = BorderStroke(1.dp, taminColors.border),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                 ) {
                     Column(
                         modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),
