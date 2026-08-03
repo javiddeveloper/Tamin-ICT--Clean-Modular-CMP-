@@ -157,6 +157,16 @@ val remoteModule = module {
         )
     }
 
+    single<com.tamin.taminhamrah.apiService.VersionHistoryApiService> {
+        com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl()
+    }
+
+    single<com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSource> {
+        com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSourceImpl(
+            apiService = get()
+        )
+    }
+
     single<AgentRepository> {
         AgentRepositoryImpl(
             remoteDataSource = get()

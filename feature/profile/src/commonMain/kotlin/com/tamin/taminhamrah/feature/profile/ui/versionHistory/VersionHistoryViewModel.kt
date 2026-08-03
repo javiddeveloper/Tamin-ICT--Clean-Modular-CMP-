@@ -3,17 +3,20 @@ package com.tamin.taminhamrah.feature.profile.ui.versionHistory
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract.VersionHistoryEvent
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract.VersionHistoryIntent
-import com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract.VersionHistoryItem
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract.VersionHistoryUiState
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract.VersionHistoryUiState.PartialState
+import com.tamin.taminhamrah.mapper.versionHistory.toPresentation
+import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
-class VersionHistoryViewModel : BaseViewModel<VersionHistoryUiState, PartialState, VersionHistoryEvent, VersionHistoryIntent>(
-    initialState = VersionHistoryUiState(
-        items = getMockVersionHistory()
-    )
+class VersionHistoryViewModel(
+    private val getVersionHistoryUseCase: GetVersionHistoryUseCase
+) : BaseViewModel<VersionHistoryUiState, PartialState, VersionHistoryEvent, VersionHistoryIntent>(
+    initialState = VersionHistoryUiState()
 ) {
 
     override fun handleIntent(intent: VersionHistoryIntent): Flow<PartialState> {
@@ -26,8 +29,16 @@ class VersionHistoryViewModel : BaseViewModel<VersionHistoryUiState, PartialStat
 
     private fun handleLoadVersionHistory(): Flow<PartialState> = flow {
         emit(PartialState.SetLoading(true))
-        emit(PartialState.SetItems(getMockVersionHistory()))
-        emit(PartialState.SetLoading(false))
+        getVersionHistoryUseCase()
+            .map { dnList ->
+                val prList = dnList.map { it.toPresentation() }.toImmutableList()
+                PartialState.SetItems(prList)
+            }
+            .catch { emit(PartialState.SetLoading(false)) }
+            .collect {
+                emit(it)
+                emit(PartialState.SetLoading(false))
+            }
     }
 
     override fun reduceState(
@@ -35,10 +46,14 @@ class VersionHistoryViewModel : BaseViewModel<VersionHistoryUiState, PartialStat
         partialState: PartialState
     ): VersionHistoryUiState = when (partialState) {
         is PartialState.SetLoading -> currentState.copy(isLoading = partialState.isLoading)
-        is PartialState.SetItems -> currentState.copy(items = partialState.items)
+        is PartialState.SetItems -> currentState.copy(
+            isLoading = false,
+            items = partialState.items,
+            lastUpdatedDate = partialState.items.firstOrNull { it.isLatest }?.releaseDate ?: currentState.lastUpdatedDate
+        )
         is PartialState.ToggleExpand -> {
             val updatedItems = currentState.items.map { item ->
-                if (item.version == partialState.version) {
+                if (item.versionName == partialState.version) {
                     item.copy(isExpanded = !item.isExpanded)
                 } else {
                     item
@@ -50,43 +65,4 @@ class VersionHistoryViewModel : BaseViewModel<VersionHistoryUiState, PartialStat
 
     override fun createErrorState(message: String): PartialState =
         PartialState.SetLoading(false)
-
-    companion object {
-        private fun getMockVersionHistory() = listOf(
-            VersionHistoryItem(
-                version = "1.12.3",
-                releaseDate = "یکشنبه ۳۰ فروردین ۱۴۰۵",
-                isLatest = true,
-                categoryTitle = "رفع اشکال و بهینه‌سازی",
-                changes = listOf(
-                    "بهبود فرایند ورود به اپلیکیشن",
-                    "بهبود رابط کاربری",
-                    "رفع برخی مشکلات گزارش‌شده"
-                ),
-                isExpanded = true
-            ),
-            VersionHistoryItem(
-                version = "1.12.2",
-                releaseDate = "شنبه ۴ بهمن ۱۴۰۴",
-                isLatest = false,
-                categoryTitle = "بهینه‌سازی و بهبود کارایی",
-                changes = listOf(
-                    "افزایش سرعت دریافت استعلام‌ها",
-                    "بهبود پایداری اتصال به سامانه"
-                ),
-                isExpanded = false
-            ),
-            VersionHistoryItem(
-                version = "1.12.0",
-                releaseDate = "یکشنبه ۱۰ تیر ۱۴۰۴",
-                isLatest = false,
-                categoryTitle = "ارائه خدمات جدید",
-                changes = listOf(
-                    "افزودن امکان پیگیری پرونده الکترونیک",
-                    "بهبود و توسعه خدمات سلامت و درمان"
-                ),
-                isExpanded = false
-            )
-        ).toImmutableList()
-    }
 }

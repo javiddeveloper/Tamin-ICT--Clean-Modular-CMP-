@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.profile.ui.versionHistory.components
 
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -14,14 +15,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.painterResource
@@ -39,7 +44,9 @@ internal fun VersionHistoryHeader(
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
+    val isDark = taminColors == DarkTaminColors
 
+    val topBarGradient = remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -51,15 +58,15 @@ internal fun VersionHistoryHeader(
         TaminTopAppBar(
             title = stringResource(Res.string.profile_version_history),
             centerTitle = true,
-            background = null,
+            background = topBarGradient,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
-                    modifier = Modifier.clip(CircleShape)
+                    modifier = Modifier
                 )
-            }
+            },
         )
 
         Spacer(modifier = Modifier.height(Spacing.md))
@@ -110,3 +117,15 @@ internal fun VersionHistoryHeader(
         )
     }
 }
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun PreviewVersionHistoryHeader() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        VersionHistoryHeader(
+            lastUpdatedDate = "۳۰ فروردین ۱۴۰۵",
+            onBackClicked = {}
+        )
+    }
+}
+

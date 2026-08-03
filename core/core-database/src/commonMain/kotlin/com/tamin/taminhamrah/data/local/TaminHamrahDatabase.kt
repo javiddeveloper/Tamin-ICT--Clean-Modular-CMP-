@@ -48,7 +48,9 @@ import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.MedicalAuthoritiesEntity
 import com.tamin.taminhamrah.data.local.entity.AgentSessionEntity
 import com.tamin.taminhamrah.data.local.entity.AgentMessageEntity
+import com.tamin.taminhamrah.data.local.entity.VersionHistoryEntity
 import com.tamin.taminhamrah.data.local.dao.AgentChatDao
+import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
 import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -84,6 +86,7 @@ import kotlinx.coroutines.IO
         MedicalAuthoritiesEntity::class,
         AgentSessionEntity::class,
         AgentMessageEntity::class,
+        VersionHistoryEntity::class,
     ],
     version = 2,
 )
@@ -104,6 +107,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun treatmentDao(): TreatmentDao
     abstract fun healthDao(): HealthDao
     abstract fun agentChatDao(): AgentChatDao
+    abstract fun versionHistoryDao(): VersionHistoryDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

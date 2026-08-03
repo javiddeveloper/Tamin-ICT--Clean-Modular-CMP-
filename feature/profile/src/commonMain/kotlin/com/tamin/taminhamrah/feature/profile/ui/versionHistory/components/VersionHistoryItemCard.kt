@@ -36,7 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract.VersionHistoryItem
+import com.tamin.taminhamrah.model.versionHistory.VersionHistoryPR
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -45,7 +45,7 @@ import com.tamin.taminhamrah.util.toPersianDigits
 
 @Composable
 internal fun VersionHistoryItemCard(
-    item: VersionHistoryItem,
+    item: VersionHistoryPR,
     onToggleExpand: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -82,7 +82,7 @@ internal fun VersionHistoryItemCard(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
                         Text(
-                            text = "نسخه ${item.version.toPersianDigits()}",
+                            text = "نسخه ${item.versionName.toPersianDigits()}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = taminColors.blueText
@@ -123,7 +123,7 @@ internal fun VersionHistoryItemCard(
 
             // Expanded Details Section
             AnimatedVisibility(
-                visible = item.isExpanded,
+                visible = item.isExpanded && (item.newFeatures.isNotEmpty() || item.debug.isNotEmpty()),
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
@@ -135,42 +135,44 @@ internal fun VersionHistoryItemCard(
                 ) {
                     TaminDivider(modifier = Modifier.padding(bottom = Spacing.md))
 
-                    item.categoryTitle?.let { title ->
+                    var itemCounter = 1
+
+                    // New Features Section
+                    if (item.newFeatures.isNotEmpty()) {
                         Text(
-                            text = title,
+                            text = "ویژگی‌های جدید",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = taminColors.teal
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.sm))
+
+                        item.newFeatures.forEach { featureText ->
+                            ChangesRow(
+                                number = itemCounter++,
+                                text = featureText
+                            )
+                        }
+                    }
+
+                    if (item.newFeatures.isNotEmpty() && item.debug.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(Spacing.md))
+                    }
+
+                    // Bug Fixes & Improvements Section
+                    if (item.debug.isNotEmpty()) {
+                        Text(
+                            text = "رفع اشکال و بهینه‌سازی",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = taminColors.orangeText
                         )
-                        Spacer(modifier = Modifier.height(Spacing.md))
-                    }
+                        Spacer(modifier = Modifier.height(Spacing.sm))
 
-                    item.changes.forEachIndexed { index, changeText ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = Spacing.xs),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                        ) {
-                            // Number Badge
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .background(taminColors.blueBg, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                NumericText(
-                                    text = (index + 1).toString().toPersianDigits(),
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = taminColors.blueText
-                                )
-                            }
-
-                            Text(
-                                text = changeText,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = taminColors.textPrimary
+                        item.debug.forEach { debugText ->
+                            ChangesRow(
+                                number = itemCounter++,
+                                text = debugText
                             )
                         }
                     }
@@ -189,6 +191,42 @@ internal fun VersionHistoryItemCard(
 }
 
 @Composable
+private fun ChangesRow(
+    number: Int,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        // Number Badge
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .background(taminColors.blueBg, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            NumericText(
+                text = number.toString().toPersianDigits(),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = taminColors.blueText
+            )
+        }
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = taminColors.textPrimary
+        )
+    }
+}
+
+@Composable
 private fun LatestBadge(modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     Box(
@@ -202,6 +240,48 @@ private fun LatestBadge(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = taminColors.greenText
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun PreviewVersionHistoryItemCardExpanded() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        VersionHistoryItemCard(
+            item = VersionHistoryPR(
+                versionName = "1.12.3",
+                versionCode = 53,
+                releaseDate = "یکشنبه - 30 فروردین 1405",
+                isLatest = true,
+                newFeatures = listOf("افزودن بخش جدید"),
+                debug = listOf(
+                    "بهبود فرایند ورود به اپلیکیشن",
+                    "بهبود رابط کاربری",
+                    "رفع برخی مشکلات گزارش شده"
+                ),
+                isExpanded = true
+            ),
+            onToggleExpand = {}
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun PreviewVersionHistoryItemCardCollapsed() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        VersionHistoryItemCard(
+            item = VersionHistoryPR(
+                versionName = "1.12.2",
+                versionCode = 52,
+                releaseDate = "شنبه - 04 بهمن 1404",
+                isLatest = false,
+                newFeatures = emptyList(),
+                debug = emptyList(),
+                isExpanded = false
+            ),
+            onToggleExpand = {}
         )
     }
 }

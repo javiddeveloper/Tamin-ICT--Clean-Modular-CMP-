@@ -1,29 +1,20 @@
 package com.tamin.taminhamrah.feature.profile.ui.versionHistory.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.model.versionHistory.VersionHistoryPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-
-@Immutable
-data class VersionHistoryItem(
-    val version: String,
-    val releaseDate: String,
-    val isLatest: Boolean = false,
-    val categoryTitle: String? = null,
-    val changes: List<String> = emptyList(),
-    val isExpanded: Boolean = false
-)
 
 @Immutable
 data class VersionHistoryUiState(
     val isLoading: Boolean = false,
     val lastUpdatedDate: String = "۳۰ فروردین ۱۴۰۵",
-    val items: ImmutableList<VersionHistoryItem> = persistentListOf(),
+    val items: ImmutableList<VersionHistoryPR> = persistentListOf(),
     val error: String? = null
 ) {
     sealed interface PartialState {
         data class SetLoading(val isLoading: Boolean) : PartialState
-        data class SetItems(val items: ImmutableList<VersionHistoryItem>) : PartialState
+        data class SetItems(val items: ImmutableList<VersionHistoryPR>) : PartialState
         data class ToggleExpand(val version: String) : PartialState
     }
 }

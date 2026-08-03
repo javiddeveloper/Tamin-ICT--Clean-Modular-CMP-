@@ -41,6 +41,10 @@ fun VersionHistoryRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.sendIntent(VersionHistoryIntent.LoadVersionHistory)
+    }
+
     HandleVersionHistoryEvents(
         events = viewModel.events,
         onBackClicked = onBackClicked
@@ -99,11 +103,11 @@ fun VersionHistoryScreen(
                 ) {
                     items(
                         items = state.items,
-                        key = { it.version }
+                        key = { it.versionName }
                     ) { item ->
                         VersionHistoryItemCard(
                             item = item,
-                            onToggleExpand = { onIntent(VersionHistoryIntent.ToggleExpand(item.version)) }
+                            onToggleExpand = { onIntent(VersionHistoryIntent.ToggleExpand(item.versionName)) }
                         )
                     }
                 }
@@ -114,11 +118,76 @@ fun VersionHistoryScreen(
 
 @PreviewRtlTheme
 @Composable
-private fun PreviewVersionHistoryScreen() {
+private fun PreviewVersionHistoryScreenLight() {
     PreviewRtlThemeContent {
         VersionHistoryScreen(
-            state = VersionHistoryUiState(),
+            state = VersionHistoryUiState(
+                items = PreviewMockVersionHistory
+            ),
             onIntent = {}
         )
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewVersionHistoryScreenDark() {
+    com.tamin.taminhamrah.ui.theme.TaminHamrahTheme(darkTheme = true) {
+        VersionHistoryScreen(
+            state = VersionHistoryUiState(
+                items = PreviewMockVersionHistory
+            ),
+            onIntent = {}
+        )
+    }
+}
+
+private val PreviewMockVersionHistory = kotlinx.collections.immutable.persistentListOf(
+    com.tamin.taminhamrah.model.versionHistory.VersionHistoryPR(
+        versionName = "1.12.3",
+        versionCode = 53,
+        releaseDate = "یکشنبه - 30 فروردین 1405",
+        isLatest = true,
+        newFeatures = emptyList(),
+        debug = listOf(
+            "بهبود فرایند ورود به اپلیکیشن",
+            "بهبود رابط کاربری",
+            "رفع برخی مشکلات گزارش شده"
+        ),
+        isExpanded = true
+    ),
+    com.tamin.taminhamrah.model.versionHistory.VersionHistoryPR(
+        versionName = "1.12.2",
+        versionCode = 52,
+        releaseDate = "شنبه - 04 بهمن 1404",
+        isLatest = false,
+        newFeatures = listOf(
+            "پرداخت حق بیمه کارگران ساختمانی",
+            "اعلام حادثه"
+        ),
+        debug = listOf(
+            "نمایش دلیل عدم استحقاق درمان در تب درمان",
+            "بهبود فرایند ورود به برنامه برای مدت زمان طولانی",
+            "ورود با اثر انگشت"
+        ),
+        isExpanded = false
+    ),
+    com.tamin.taminhamrah.model.versionHistory.VersionHistoryPR(
+        versionName = "1.12.0",
+        versionCode = 50,
+        releaseDate = "یک شنبه - 01 تیر 1404",
+        isLatest = false,
+        newFeatures = listOf(
+            "افزودن بخش قوانین و مقررات تامین اجتماعی"
+        ),
+        debug = listOf(
+            "اصلاح بخش پرداخت",
+            "رفع برخی مشکلات گزارش شده",
+            "بهبود ظاهر و عملکرد برنامه"
+        ),
+        isExpanded = false
+    )
+)
+
+
+
