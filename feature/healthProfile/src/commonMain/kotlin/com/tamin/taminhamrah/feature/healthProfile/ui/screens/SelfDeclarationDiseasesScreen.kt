@@ -104,6 +104,7 @@ fun SelfDeclarationDiseasesScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .background(taminColors.bgPage)
                 ) {
                     CardsListShimmerSkeleton()

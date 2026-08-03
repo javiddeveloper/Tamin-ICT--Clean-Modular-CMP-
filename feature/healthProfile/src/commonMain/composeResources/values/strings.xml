@@ -231,6 +231,13 @@
     <string name="health_identity_section_family_title">سلامتی خانواده درجه یک</string>
     <string name="health_identity_section_allergy_title">حساسیت‌های دارویی</string>
     <string name="health_identity_section_allergy_drugs">داروهای آلرژیک:</string>
+    <string name="health_review_confirm_modal_text">ثبت نهایی اطلاعات</string>
+    <string name="health_review_confirm_modal_desc">آیا از صحت اطلاعات واردشده اطمینان دارید؟ پس از ثبت نهایی، امکان ویرایش برخی اطلاعات محدود خواهد بود.</string>
+    <string name="health_review_confirm_modal_btn_text">تأیید و ثبت نهایی</string>
+    <string name="health_review_submit_loading_text">در حال ثبت اطلاعات...</string>
+    <string name="health_review_error_banner_title">ثبت انجام نشد</string>
+    <string name="health_review_error_banner_btn_text">مشاهدهٔ پیام‌های خطا</string>
+    <string name="error_count_message">سامانه %1$s پیام خطا برگرداند.</string>
 
 
 
