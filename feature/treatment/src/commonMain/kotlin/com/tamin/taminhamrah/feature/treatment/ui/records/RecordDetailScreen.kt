@@ -44,6 +44,7 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -52,6 +53,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.lab_result_viewer_title
+import taminx.core.core_ui.prescription_viewer_title
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.amount_total
 import taminx.core.core_ui.detail_doctor
@@ -267,6 +270,11 @@ fun RecordDetailContent(
     showing?.let { export ->
         TaminPdfViewer(
             fileName = export.fileName(noteHeadId),
+            title = when (export) {
+                PdfExport.PRESCRIPTION -> stringResource(Res.string.prescription_viewer_title)
+                PdfExport.LAB_RESULT -> stringResource(Res.string.lab_result_viewer_title)
+            },
+            background = taminTopAppBarGradient(colors.topAppBarStops),
             pdf = state.viewerPdf,
             downloadFailed = state.viewerDownloadFailed,
             onRequestDownload = {
