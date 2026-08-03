@@ -6,18 +6,22 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 
+import androidx.compose.ui.graphics.Color
+
 private const val SHIMMER_DURATION_MS = 1200
 
-@Composable
-fun Modifier.shimmer(): Modifier {
+fun Modifier.shimmer(
+    colorBase: Color = Color.Unspecified,
+    colorHighlight: Color = Color.Unspecified,
+): Modifier = composed {
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateX by transition.animateFloat(
         initialValue = -1f,
@@ -29,14 +33,15 @@ fun Modifier.shimmer(): Modifier {
         label = "shimmerTranslateX",
     )
 
-    val colorBase = MaterialTheme.colorScheme.surfaceVariant
-    val colorHighlight = MaterialTheme.colorScheme.surface
+    val base = if (colorBase != Color.Unspecified) colorBase else MaterialTheme.colorScheme.surfaceVariant
+    val highlight = if (colorHighlight != Color.Unspecified) colorHighlight else MaterialTheme.colorScheme.surface
 
-    val brush = Brush.linearGradient(
-        colors = listOf(colorBase, colorHighlight, colorBase),
-        start = Offset(translateX * 1000f, 0f),
-        end = Offset(translateX * 1000f + 1000f, 0f),
-    )
-
-    return this.background(brush)
+    drawBehind {
+        val brush = Brush.linearGradient(
+            colors = listOf(base, highlight, base),
+            start = Offset(translateX * size.width, 0f),
+            end = Offset(translateX * size.width + size.width, 0f),
+        )
+        drawRect(brush = brush)
+    }
 }

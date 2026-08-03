@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -25,7 +27,7 @@ fun UserAvatar(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    val shape = RoundedCornerShape(CornerRadius.card)
+    val shape = remember { RoundedCornerShape(CornerRadius.card) }
     val taminColors = LocalTaminColors.current
     Box(
         modifier = modifier
@@ -35,7 +37,14 @@ fun UserAvatar(
         contentAlignment = Alignment.Center,
     ) {
         if (isLoading) {
-            Box(modifier = Modifier.matchParentSize().shimmer())
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .shimmer(
+                        colorBase = Color.White.copy(alpha = 0.15f),
+                        colorHighlight = Color.White.copy(alpha = 0.05f)
+                    )
+            )
         } else {
             LoadAsyncImage(
                 model = model,
@@ -66,4 +75,3 @@ private fun UserAvatarDark() {
         )
     }
 }
-
