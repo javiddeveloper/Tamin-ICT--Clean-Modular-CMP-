@@ -24,6 +24,8 @@ data class DeservedTreatmentDN(
     val regWorkshopName: String?,
     val risuid: String?,
     val message: String?,
+    /** Blank/null while treatment support is active; the refusal reason when it is not. */
+    val finalDesc: String?,
     val illness: String?,
     val trackingCode: String?
 )
@@ -72,4 +74,34 @@ data class DependantUserUnderEighteenDN(
     val lastName: String?,
     val nationalId: String?,
     val id: Long?
+)
+
+data class TreatmentCostDN(
+    val accountNumber: String?,
+    val bimeCode: String?,
+    val datePaz: String?,
+    val famil: String?,
+    val healthcenterName: String?,
+    val mainNational: String?,
+    val maliCode: String?,
+    val name: String?,
+    val nameAsli: String?,
+    val nameFamil: String?,
+    val noPazir: String?,
+    val payNatCode: String?,
+    val payOtherService: String?,
+    val payPrice: String?,
+    val payService: String?,
+    val payStatus: String?,
+    val payType: String?,
+    val province: String?,
+    val rahgiriCode: String?,
+    val releaseDate: String?,
+    val repId: Int?,
+    val serviceDate: String?,
+    val status: String?,
+    val statusDesc: String?,
+    val payStatusDesc: String?,
+    val estimatePayDate: String?,
+    val returnReason: String?
 )

@@ -12,13 +12,20 @@ class HandleAuthDeepLinkUseCaseImpl(
     override suspend fun invoke(uriString: String): Boolean {
         if (!deepLinkManager.isAuthLogin(uriString)) return false
         val code = deepLinkManager.extractAuthCode(uriString) ?: return false
-        val success = exchangeCodeForTokensUseCase(
-            code = code,
-            audience = NetworkConstants.DEFAULT_AUDIENCE,
-            redirectUri = NetworkConstants.REDIRECT_URI,
-            clientId = NetworkConstants.CLIENT_ID,
-            codeVerifier = tokenStoreManager.getCodeVerifier().orEmpty(),
-        )
+
+        tokenStoreManager.setAuthProcessing(true)
+
+        val success = try {
+            exchangeCodeForTokensUseCase(
+                code = code,
+                audience = NetworkConstants.DEFAULT_AUDIENCE,
+                redirectUri = NetworkConstants.REDIRECT_URI,
+                clientId = NetworkConstants.CLIENT_ID,
+                codeVerifier = tokenStoreManager.getCodeVerifier().orEmpty(),
+            )
+        } finally {
+            tokenStoreManager.setAuthProcessing(false)
+        }
         return success
     }
 }

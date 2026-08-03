@@ -6,13 +6,18 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.Dp
 
 import androidx.compose.ui.graphics.Color
 
@@ -44,4 +49,18 @@ fun Modifier.shimmer(
         )
         drawRect(brush = brush)
     }
+}
+
+/**
+ * A shimmering block standing in for something that has not arrived yet.
+ *
+ * Sized by the caller, so the same thing stands in for a line of digits or for a whole card, and
+ * a skeleton is a handful of these rather than a bespoke box each time.
+ */
+@Composable
+fun ShimmerBlock(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = CornerRadius.sm,
+) {
+    Box(modifier.clip(RoundedCornerShape(cornerRadius)).shimmer())
 }

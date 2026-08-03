@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.mapper.treatment
 
+import com.tamin.taminhamrah.ui.toLongStringOrZero
 import com.tamin.taminhamrah.model.treatment.*
 import kotlin.jvm.JvmName
 
@@ -28,6 +29,7 @@ fun DeservedTreatmentDN.toPresentation(): DeservedTreatmentPR {
         regWorkshopName = regWorkshopName ?: "",
         risuid = risuid ?: "",
         message = message ?: "",
+        finalDesc = finalDesc ?: "",
         illness = illness ?: "",
         trackingCode = trackingCode ?: ""
     )
@@ -98,6 +100,7 @@ fun List<ElectronicPrescriptionPriceDN>.toPresentation(): List<ElectronicPrescri
     return this.map { it.toPresentation() }
 }
 
+
 fun DependantUserUnderEighteenDN.toPresentation(): DependantUserUnderEighteenPR {
     return DependantUserUnderEighteenPR(
         id = id?.toString() ?: "",
@@ -112,3 +115,41 @@ fun DependantUserUnderEighteenDN.toPresentation(): DependantUserUnderEighteenPR 
 fun List<DependantUserUnderEighteenDN>.toPresentation(): List<DependantUserUnderEighteenPR> {
     return this.map { it.toPresentation() }
 }
+
+fun TreatmentCostDN.toPresentation(): TreatmentCostPR {
+    return TreatmentCostPR(
+        repId = repId?.toString() ?: "",
+        nameFamil = nameFamil ?: "نامشخص",
+        healthcenterName = healthcenterName ?: "نامشخص",
+        payPrice = payPrice.toLongStringOrZero(),
+        payStatusDesc = payStatusDesc ?: "نامشخص",
+        estimatePayDate = estimatePayDate ?: "-",
+        rahgiriCode = rahgiriCode ?: "",
+        serviceDate = serviceDate ?: "",
+        statusDesc = statusDesc ?: "نامشخص",
+        accountNumber = accountNumber ?: "",
+        bimeCode = bimeCode ?: "",
+        datePaz = datePaz ?: "",
+        famil = famil ?: "",
+        mainNational = mainNational ?: "",
+        maliCode = maliCode ?: "",
+        name = name ?: "",
+        nameAsli = nameAsli ?: "",
+        noPazir = noPazir ?: "",
+        payNatCode = payNatCode ?: "",
+        payOtherService = payOtherService ?: "",
+        payService = payService ?: "",
+        payStatus = payStatus ?: "",
+        payType = payType ?: "",
+        province = province ?: "",
+        releaseDate = releaseDate ?: "",
+        status = status ?: "",
+        returnReason = returnReason ?: ""
+    )
+}
+@JvmName("toCostPresentation")
+fun List<TreatmentCostDN>.toPresentation(): List<TreatmentCostPR> {
+    return this.map { it.toPresentation() }
+}
+
+

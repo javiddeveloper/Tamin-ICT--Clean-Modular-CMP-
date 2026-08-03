@@ -15,7 +15,7 @@ class UserApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.getIdentityInfo()
 
@@ -33,7 +33,7 @@ class UserApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.changeMobile(
             referer = "https://profile.tamin.ir/main/change-phone-number",
@@ -50,7 +50,7 @@ class UserApiServiceTest : BaseApiTest() {
     fun `getUserProfile should return user profile`() = runTest {
         val jsonResponse = """{"status":200,"family":"SUCCESS","reason":"OK","data":{"entityId":"1","login":"user","firstName":"John","lastName":"Doe","email":"john@example.com","nationalCode":"1234567890","mobile":"09123456789"}}"""
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.getUserProfile()
 
@@ -66,7 +66,7 @@ class UserApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.checkUserIsNew("0000000000")
 

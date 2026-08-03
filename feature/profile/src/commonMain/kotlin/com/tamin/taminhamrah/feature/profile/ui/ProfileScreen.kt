@@ -1,37 +1,28 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
 
+import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.ic_sun
-import taminx.core.core_ui.ic_moon
-import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.UserAvatar
-import com.tamin.taminhamrah.ui.theme.DarkTaminColors
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,68 +30,70 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.lerp as dpLerp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.animation.rememberSplineBasedDecay
-
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-
+import com.tamin.taminhamrah.ui.LocalThemeRevealController
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.ui.components.ListGroupView
-import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
-import com.tamin.taminhamrah.ui.LocalThemeRevealController
+import com.tamin.taminhamrah.ui.components.ListItemData
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.components.ValidationStatusCard
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.motionFade
 import com.tamin.taminhamrah.ui.motion.motionParallax
 import com.tamin.taminhamrah.ui.motion.motionScale
-import com.tamin.taminhamrah.ui.motion.ScrollMotionState
-import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
 import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
+import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
+import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_identity
-import taminx.core.core_ui.ic_person
 import taminx.core.core_ui.ic_communication
-import taminx.core.core_ui.ic_request
-import taminx.core.core_ui.ic_number
-import taminx.core.core_ui.ic_mobile
-import taminx.core.core_ui.ic_inbox
-import taminx.core.core_ui.ic_privacy
-import taminx.core.core_ui.ic_setting
-import taminx.core.core_ui.ic_support
-import taminx.core.core_ui.ic_send
-import taminx.core.core_ui.ic_share
-import taminx.core.core_ui.ic_history
 import taminx.core.core_ui.ic_exit
+import taminx.core.core_ui.ic_history
+import taminx.core.core_ui.ic_identity
+import taminx.core.core_ui.ic_inbox
+import taminx.core.core_ui.ic_mobile
+import taminx.core.core_ui.ic_moon
+import taminx.core.core_ui.ic_number
+import taminx.core.core_ui.ic_person
+import taminx.core.core_ui.ic_privacy
+import taminx.core.core_ui.ic_request
+import taminx.core.core_ui.ic_send
+import taminx.core.core_ui.ic_setting
+import taminx.core.core_ui.ic_share
+import taminx.core.core_ui.ic_sun
+import taminx.core.core_ui.ic_support
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable
@@ -117,17 +110,19 @@ import taminx.core.core_ui.profile_requests
 import taminx.core.core_ui.profile_security
 import taminx.core.core_ui.profile_security_settings
 import taminx.core.core_ui.profile_settings
-import taminx.core.core_ui.profile_title
 import taminx.core.core_ui.profile_share
 import taminx.core.core_ui.profile_support
 import taminx.core.core_ui.profile_support_section
+import taminx.core.core_ui.profile_title
 import taminx.core.core_ui.profile_version_history
+import androidx.compose.ui.unit.lerp as dpLerp
 
 @Composable
 fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
+    onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
@@ -150,6 +145,7 @@ fun ProfileScreen(
     HandleProfileEvents(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
+        onNavigateToVersionHistory = onNavigateToVersionHistory,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
@@ -171,6 +167,7 @@ fun ProfileScreen(
 fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
+    onNavigateToVersionHistory: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
@@ -188,6 +185,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()
+            }
+
+            ProfileEvent.NavigateToVersionHistory -> {
+                onNavigateToVersionHistory()
             }
 
             ProfileEvent.NavigateToChangeMobile -> {
@@ -307,8 +308,10 @@ fun ProfileContent(
                                         style = MaterialTheme.typography.titleMedium,
                                         color = taminColors.txtNameProfile
                                     )
-                                    Text(
-                                        text = state.identityInfo?.nationalId ?: "22222222",
+                                    NumericText(
+                                        text = state.identityInfo?.nationalId
+                                            ?.toPersianDigits()
+                                            .orEmpty(),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = taminColors.txtNatProfile
                                     )
@@ -335,6 +338,9 @@ fun ProfileContent(
         LazyColumn(
             state = lazyListState,
             flingBehavior = snapFlingBehavior,
+            // Same rubber band as the treatment hub: what the list cannot scroll bends instead
+            // of stopping dead at the edge.
+            overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),

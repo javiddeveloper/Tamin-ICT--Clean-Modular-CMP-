@@ -85,10 +85,38 @@ import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
+import com.tamin.taminhamrah.useCases.health.GetAllProvincesUseCase
+import com.tamin.taminhamrah.useCases.health.GetProvinceCitiesUseCase
+import com.tamin.taminhamrah.useCases.health.GetBloodGroupsUseCase
+import com.tamin.taminhamrah.useCases.health.GetMaritalStatusUseCase
+import com.tamin.taminhamrah.useCases.health.GetSmokingStatusUseCase
+import com.tamin.taminhamrah.useCases.health.GetSelfDeclarableIllnessesUseCase
+import com.tamin.taminhamrah.useCases.health.GetSelfDeclarableIllnessesByGroupUseCase
+import com.tamin.taminhamrah.useCases.health.GetAllDrugsUseCase
+import com.tamin.taminhamrah.useCases.health.UpdatePatientUseCase
+import com.tamin.taminhamrah.useCases.health.AddSelfDeclarativeUseCase
+import com.tamin.taminhamrah.useCases.health.UpdateSelfDeclarativeUseCase
+import com.tamin.taminhamrah.useCases.health.SyncIllnessSelfDeclarativesUseCase
+import com.tamin.taminhamrah.useCases.health.SyncDrugAllergiesUseCase
+import com.tamin.taminhamrah.useCases.health.GetActFrequenciesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
+import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
+import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
+import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCaseImpl
+import com.tamin.taminhamrah.useCases.agent.ObserveCachedMessagesUseCase
+import com.tamin.taminhamrah.useCases.agent.PruneEmptyAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionsUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
+import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
@@ -97,6 +125,10 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 
 val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
@@ -161,6 +193,22 @@ val domainModule = module {
     factoryOf(::GetWorkshopDebitUseCase)
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    // Agent
+    factoryOf(::SendAgentPromptUseCase)
+    factoryOf(::CheckChatAllowedUseCase)
+    // Agent conversation cache
+    factory<GetCurrentUserNationalCodeUseCase> { GetCurrentUserNationalCodeUseCaseImpl(get()) }
+    factoryOf(::PruneEmptyAgentSessionUseCase)
+    factoryOf(::GetAgentSessionsUseCase)
+    factoryOf(::GetAgentSessionUseCase)
+    factoryOf(::StartAgentSessionUseCase)
+    factoryOf(::SaveCachedMessageUseCase)
+    factoryOf(::GetCachedMessagesUseCase)
+    factoryOf(::ObserveCachedMessagesUseCase)
+    factoryOf(::DeletePendingAgentMessagesUseCase)
+    factoryOf(::DeleteAgentSessionUseCase)
+    factoryOf(::UpdateAgentSessionUseCase)
+
     factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetRolesUseCase)
 
@@ -184,6 +232,9 @@ val domainModule = module {
     factoryOf(::GetWorkshopRecentlyAddedMembersUseCase)
     factoryOf(::GetWorkshopsDebtsListUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetTreatmentCostsUseCase)
+    factoryOf(::GetTreatmentCostsPDFUseCase)
+    factoryOf(::SendToInboxTreatmentCostsUseCase)
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)
@@ -193,5 +244,21 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+    factoryOf(::GetVersionHistoryUseCase)
     factoryOf(::SetThemeUseCase)
+    factoryOf(::GetAllProvincesUseCase)
+    factoryOf(::GetProvinceCitiesUseCase)
+    factoryOf(::GetBloodGroupsUseCase)
+    factoryOf(::GetMaritalStatusUseCase)
+    factoryOf(::GetSmokingStatusUseCase)
+    factoryOf(::GetSelfDeclarableIllnessesUseCase)
+    factoryOf(::GetSelfDeclarableIllnessesByGroupUseCase)
+    factoryOf(::GetAllDrugsUseCase)
+    factoryOf(::UpdatePatientUseCase)
+    factoryOf(::AddSelfDeclarativeUseCase)
+    factoryOf(::UpdateSelfDeclarativeUseCase)
+    factoryOf(::SyncIllnessSelfDeclarativesUseCase)
+    factoryOf(::SyncDrugAllergiesUseCase)
+    factoryOf(::GetActFrequenciesUseCase)
 }
+

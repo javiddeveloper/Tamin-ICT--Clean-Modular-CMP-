@@ -206,7 +206,6 @@ internal class UserRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("UserDS") { "getUserProfile failed: ${e::class.simpleName} - ${e.message}" }
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }

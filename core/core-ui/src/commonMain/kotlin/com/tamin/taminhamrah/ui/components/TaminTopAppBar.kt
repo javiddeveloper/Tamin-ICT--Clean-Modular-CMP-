@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.ui.graphics.Shape
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 
@@ -65,6 +66,7 @@ fun TaminTopAppBar(
         bottomStart = CornerRadius.sheet,
         bottomEnd = CornerRadius.sheet,
     ),
+    cornerRadius: Dp = CornerRadius.sheet,
     bottomPadding: Dp = Spacing.page,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -141,8 +143,9 @@ fun TaminTopAppBarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     bordered: Boolean = false,
+    shape : Shape =  RoundedCornerShape(CornerRadius.chip)
 ) {
-    val shape = RoundedCornerShape(CornerRadius.chip)
+
     Box(
         modifier = modifier
             .size(HEADER_BUTTON_SIZE)

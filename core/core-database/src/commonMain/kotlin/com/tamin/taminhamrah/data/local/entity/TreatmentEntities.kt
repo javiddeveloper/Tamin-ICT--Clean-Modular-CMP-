@@ -30,6 +30,7 @@ data class DeservedTreatmentEntity(
     val regWorkshopName: String?,
     val risuid: String?,
     val message: String?,
+    val finalDesc: String?,
     val illness: String?,
     val trackingCode: String?
 )
@@ -120,6 +121,7 @@ data class TreatmentCostEntity(
     val status: String?,
     val statusDesc: String?,
     val payStatusDesc: String?,
+    val estimatePayDate: String?,
     val returnReason: String?
 )
 

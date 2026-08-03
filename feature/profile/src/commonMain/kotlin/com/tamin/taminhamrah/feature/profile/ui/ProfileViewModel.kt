@@ -106,6 +106,11 @@ class ProfileViewModel(
     }
 
     private fun handleLogout(): Flow<PartialState> = flow {
+        // Trigger browser/WebView sign out to clear SSO session cookies FIRST
+        val signOutUrl = getSignOutUrlUseCase()
+        sendEvent(ProfileEvent.OpenUrl(signOutUrl))
+        sendEvent(ProfileEvent.NavigateBack)
+
         val token = tokenStoreManager.getToken()
         if (token != null) {
             // Background sign out (invalidates token on server and clears local tokens)
@@ -116,13 +121,9 @@ class ProfileViewModel(
             // If no token, just perform local logout
             tokenStoreManager.saveToken(null)
             tokenStoreManager.saveRefreshToken(null)
+            tokenStoreManager.saveUserId(null)
             tokenStoreManager.setTokenValid(isValid = false)
         }
-
-        // Trigger browser/WebView sign out to clear SSO session cookies
-        val signOutUrl = getSignOutUrlUseCase()
-        sendEvent(ProfileEvent.OpenUrl(signOutUrl))
-        sendEvent(ProfileEvent.NavigateBack)
     }
 
     private fun handleItemClick(item: ProfileMenuItem): Flow<PartialState> {
@@ -130,6 +131,7 @@ class ProfileViewModel(
             ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
             ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
+            ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)
             ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }

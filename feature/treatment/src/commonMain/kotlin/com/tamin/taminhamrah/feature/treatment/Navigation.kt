@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
+import com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts.TreatmentCostsRoute
 import kotlinx.serialization.Serializable
 
 /**
@@ -41,6 +42,10 @@ sealed interface TreatmentRoute {
         val nationalCode: String = "",
         val tab: RecordTab = RecordTab.Default
     ) : TreatmentRoute
+
+    /** «خسارت متفرقه» — the miscellaneous-claim certificates and their PDF exports. */
+    @Serializable
+    data object TreatmentCosts : TreatmentRoute
 
     /** One record: prescribed items, cost breakdown and the PDF exports. */
     @Serializable
@@ -75,7 +80,12 @@ fun NavGraphBuilder.treatmentGraph(
                     navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
                 },
                 onOpenHealthProfile = onNavigateToHealthProfile,
+                onOpenMiscClaims = { navController.navigate(TreatmentRoute.TreatmentCosts) },
             )
+        }
+
+        composable<TreatmentRoute.TreatmentCosts> {
+            TreatmentCostsRoute(onBackClicked = onBack)
         }
 
         composableWithFadeTransitions<TreatmentRoute.MedicalRecords> { backStackEntry ->

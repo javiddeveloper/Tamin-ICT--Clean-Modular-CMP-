@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">172.16.14.115</domain>
+        <domain includeSubdomains="true">172.16.15.54</domain>
+        <domain includeSubdomains="true">medical.test.org</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

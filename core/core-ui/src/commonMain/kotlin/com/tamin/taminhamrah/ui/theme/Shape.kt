@@ -63,6 +63,7 @@ object CornerRadius {
     val cardCompact = 20.dp
     val card = 22.dp
     val sheet = 28.dp
+    val max = 100.dp
     val textFieldIcon = 11.dp
 }
 
@@ -117,4 +118,13 @@ object IconSize {
 object Thickness {
     val border = 1.dp
     val medium = 2.dp
+}
+
+/**
+ * Placeholder sizes for a value that has not arrived, so a shimmering figure occupies roughly what
+ * the real one will and nothing resizes when it lands.
+ */
+object ShimmerSize {
+    val valueWidth = 56.dp
+    val valueHeight = 14.dp
 }

@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
+import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 
 // --- Deserved Treatment ---
 fun DeservedTreatmentDN.toEntity(nationalCode: String) = DeservedTreatmentEntity(
@@ -37,6 +39,7 @@ fun DeservedTreatmentDN.toEntity(nationalCode: String) = DeservedTreatmentEntity
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
 )
@@ -65,6 +68,7 @@ fun DeservedTreatmentEntity.toDomain() = DeservedTreatmentDN(
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
 )
@@ -168,3 +172,66 @@ fun DependantUserUnderEighteenEntity.toDomain() = DependantUserUnderEighteenDN(
     nationalId = nationalId,
     id = id
 )
+
+
+// --- Treatment Costs ---
+fun TreatmentCostDN.toEntity() = TreatmentCostEntity(
+    accountNumber = accountNumber,
+    bimeCode = bimeCode,
+    datePaz = datePaz,
+    famil = famil,
+    healthcenterName = healthcenterName,
+    mainNational = mainNational,
+    maliCode = maliCode,
+    name = name,
+    nameAsli = nameAsli,
+    nameFamil = nameFamil,
+    noPazir = noPazir,
+    payNatCode = payNatCode,
+    payOtherService = payOtherService,
+    payPrice = payPrice,
+    payService = payService,
+    payStatus = payStatus,
+    payType = payType,
+    province = province,
+    rahgiriCode = rahgiriCode,
+    releaseDate = releaseDate,
+    repId = repId,
+    serviceDate = serviceDate,
+    status = status,
+    statusDesc = statusDesc,
+    payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
+    returnReason = returnReason
+)
+
+fun TreatmentCostEntity.toDomain() = TreatmentCostDN(
+    accountNumber = accountNumber,
+    bimeCode = bimeCode,
+    datePaz = datePaz,
+    famil = famil,
+    healthcenterName = healthcenterName,
+    mainNational = mainNational,
+    maliCode = maliCode,
+    name = name,
+    nameAsli = nameAsli,
+    nameFamil = nameFamil,
+    noPazir = noPazir,
+    payNatCode = payNatCode,
+    payOtherService = payOtherService,
+    payPrice = payPrice,
+    payService = payService,
+    payStatus = payStatus,
+    payType = payType,
+    province = province,
+    rahgiriCode = rahgiriCode,
+    releaseDate = releaseDate,
+    repId = repId,
+    serviceDate = serviceDate,
+    status = status,
+    statusDesc = statusDesc,
+    payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
+    returnReason = returnReason
+)
+

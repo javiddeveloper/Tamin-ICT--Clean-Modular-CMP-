@@ -42,10 +42,15 @@ import com.tamin.taminhamrah.data.local.entity.PatientImagingEntity
 import com.tamin.taminhamrah.data.local.entity.DeservedTreatmentEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionEntity
 import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionDetailEntity
-import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
 import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.MedicalAuthoritiesEntity
+import com.tamin.taminhamrah.data.local.entity.AgentSessionEntity
+import com.tamin.taminhamrah.data.local.entity.AgentMessageEntity
+import com.tamin.taminhamrah.data.local.entity.VersionHistoryEntity
+import com.tamin.taminhamrah.data.local.dao.AgentChatDao
+import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
 import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -79,8 +84,11 @@ import kotlinx.coroutines.IO
         DependantUserUnderEighteenEntity::class,
         TreatmentCostEntity::class,
         MedicalAuthoritiesEntity::class,
+        AgentSessionEntity::class,
+        AgentMessageEntity::class,
+        VersionHistoryEntity::class,
     ],
-    version = 1,
+    version = 2,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)
@@ -98,6 +106,8 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun menuDao(): MenuDao
     abstract fun treatmentDao(): TreatmentDao
     abstract fun healthDao(): HealthDao
+    abstract fun agentChatDao(): AgentChatDao
+    abstract fun versionHistoryDao(): VersionHistoryDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

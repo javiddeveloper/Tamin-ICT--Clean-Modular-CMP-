@@ -10,6 +10,10 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
+import com.tamin.taminhamrah.repository.AgentRepository
+import com.tamin.taminhamrah.repository.agentRepository.AgentRepositoryImpl
 import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
@@ -137,6 +141,35 @@ val remoteModule = module {
             contractsApiService = get(named("contractsApiService")),
             apiQueryBuilder = get(),
             errorParser = get()
+        )
+    }
+
+    single<AgentRemoteDataSource> {
+        // Fake agent responses while the real API is being finished.
+        // Swap to the AgentRemoteDataSourceImpl below to hit the live service:
+        //   AgentRemoteDataSourceImpl(
+        //       agentApiService = get(named("agentApiService")),
+        //       errorParser = get(),
+        //       json = get()
+        //   )
+        com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl(
+            json = get()
+        )
+    }
+
+    single<com.tamin.taminhamrah.apiService.VersionHistoryApiService> {
+        com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl()
+    }
+
+    single<com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSource> {
+        com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSourceImpl(
+            apiService = get()
+        )
+    }
+
+    single<AgentRepository> {
+        AgentRepositoryImpl(
+            remoteDataSource = get()
         )
     }
 }

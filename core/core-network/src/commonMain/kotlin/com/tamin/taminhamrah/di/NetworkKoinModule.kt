@@ -88,6 +88,15 @@ val networkModule = module {
         )
     }
 
+    // Health HTTP Client (No Auth plugin, specific for health services)
+    single(named("healthHttpClient")) {
+        createHealthHttpClient(
+            engine = get(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
+        )
+    }
+
     // Upload HTTP Client (5 minutes timeout)
     single(named("uploadHttpClient")) {
         createHttpClient(
@@ -97,13 +106,30 @@ val networkModule = module {
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
         )
     }
+
+    // AI HTTP Client
+    single(named("aiHttpClient")) {
+        createHttpClient(
+            engine = get(),
+            authRepository = get<AuthRepository>(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = NetworkConstants.AI_BASE_URL
+        ).config {
+            install(com.tamin.taminhamrah.apiService.agent.AiChatTokenPlugin) {
+                this.json = get<Json>()
+                this.aiBaseUrl = NetworkConstants.AI_BASE_URL
+            }
+        }
+    }
 }
 
 private fun createHttpClient(
     engine: HttpClientEngine,
     authRepository: AuthRepository,
     json: Json,
-    timeoutMillis: Long
+    timeoutMillis: Long,
+    baseUrl: String = NetworkConstants.BASE_URL
 ): HttpClient {
     return HttpClient(engine) {
         expectSuccess = false
@@ -163,7 +189,43 @@ private fun createHttpClient(
         }
 
         defaultRequest {
-            url(NetworkConstants.BASE_URL)
+            url(baseUrl)
+            header(HttpHeaders.Accept, "*/*")
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }
+    }
+}
+
+private fun createHealthHttpClient(
+    engine: HttpClientEngine,
+    json: Json,
+    timeoutMillis: Long
+): HttpClient {
+    return HttpClient(engine) {
+        expectSuccess = false
+
+        install(ContentNegotiation) {
+            json(json, contentType = ContentType.Any)
+        }
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = timeoutMillis
+            connectTimeoutMillis = timeoutMillis
+            socketTimeoutMillis = timeoutMillis
+        }
+
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
+            logger = object : Logger {
+                override fun log(message: String) {
+                    KermitLogger.d(tag = "KtorHealthClient", messageString = message)
+                }
+            }
+        }
+
+        defaultRequest {
+            url(NetworkConstants.BASE_URL_HEALTH_PROFILE)
             header(HttpHeaders.Accept, "*/*")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }

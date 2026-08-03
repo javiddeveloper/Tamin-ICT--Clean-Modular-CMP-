@@ -139,6 +139,13 @@ fun Modifier.animatePlacement(): Modifier = composed {
         }
 }
 
+/**
+ * A field the service left empty reads as [fallback], never as a blank line.
+ *
+ * The fallback is passed in rather than fixed here so the wording stays in the string resources.
+ */
+fun String?.orAbsent(fallback: String): String = if (isNullOrBlank()) fallback else this
+
 fun String.iSValidForSearch(): Boolean = this.trim().length > 2
 
 fun String.iSValidForSearchHashtag(): Boolean = this.trim().length > 1
@@ -196,6 +203,24 @@ fun String.toPriceFormat(): String {
 
 /** Formats a [Long] amount as a thousands-grouped price. */
 fun Long.toPriceFormat(): String = groupThousands(this.toString())
+
+/**
+ * Normalizes a numeric amount string (digits only) to a plain Long string, defaulting to "0".
+ *
+ * The services send amounts as free-form text, so this is what makes an amount safe to hand to
+ * [toPriceFormat], which rejects anything that is not a digit.
+ */
+fun String?.toLongStringOrZero(): String = this?.toLongOrNull()?.toString() ?: "0"
+
+/**
+ * An amount with its unit, the way every money line in the app reads it: grouped digits, then
+ * «ریال».
+ *
+ * A value the service did not send formats as [fallback] on its own — a missing amount must never
+ * read as a real zero.
+ */
+fun String.toRialAmount(fallback: String = "—"): String =
+    toLongOrNull()?.let { "${it.toPriceFormat()} ریال" } ?: fallback
 
 /**
  * Formats a [Double] amount as a thousands-grouped price.
