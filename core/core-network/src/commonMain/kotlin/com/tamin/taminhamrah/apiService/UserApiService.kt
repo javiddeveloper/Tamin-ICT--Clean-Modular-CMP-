@@ -93,14 +93,14 @@ internal interface UserApiService {
 
     @GET
     suspend fun changeMobile(
-        @Header("Referer") referer: String,
+//        @Header("Referer") referer: String,
         @Url url: String,
         @Query("mobile") mobile: String
     ): BaseDTO<EditMobileResponseDto>
 
     @POST
     suspend fun verifyChangeMobileCode(
-        @Header("Referer") referer: String,
+//        @Header("Referer") referer: String,
         @Url url:String,
         @Body loginRequest: VerifyMobileRequest,
     ): BaseDTO<String>
