@@ -182,6 +182,7 @@ data class AllergyStepState(
 data class SelfDeclarationUiState(
     val currentStep: SelfDeclarationStep = SelfDeclarationStep.GATE,
     val isLoading: Boolean = false,
+    val isSubmitLoading : Boolean = false,
     val error: String? = null,
     // Business-level problems from the last submit attempt (updatePatient,
     // addSelfDeclarative, syncIllnessSelfDeclaratives, ...) - see
@@ -234,6 +235,7 @@ data class HealthProfileUiState(
     sealed interface PartialState {
         // ── Loading / Error ───────────────────────────────────────────────────
         data class Loading(val isLoading: Boolean) : PartialState
+        data class SubmitLoading(val isSubmitLoading: Boolean) : PartialState
         data object ClearAllErrors : PartialState
         data class ProvincesLoading(val isLoading: Boolean) : PartialState
         data class CitiesLoading(val isLoading: Boolean) : PartialState
@@ -332,5 +334,6 @@ sealed interface HealthProfileIntent {
 
 sealed interface HealthProfileEvent {
     data object NavigateBack : HealthProfileEvent
-    data class ShowToast(val message: String,val isError: Boolean) : HealthProfileEvent
+    data class ShowToast(val message: String, val isError: Boolean) : HealthProfileEvent
+    data object OpenSubmitErrorsBottomSheet : HealthProfileEvent
 }

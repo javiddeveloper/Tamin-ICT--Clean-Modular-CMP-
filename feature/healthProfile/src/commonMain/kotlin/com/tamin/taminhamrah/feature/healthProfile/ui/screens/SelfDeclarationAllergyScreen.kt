@@ -199,7 +199,7 @@ fun SelfDeclarationAllergyScreen(
                                     )
                             ) {
                                 DynamicItemCard(
-                                    title = allergy.drugName,
+                                    title = allergy.drugName.trim(),
                                     description = allergy.allergyComments,
                                     onDelete = { visibleState.targetState = false }
                                 )

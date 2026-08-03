@@ -25,9 +25,12 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitConfirmationDialog
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitErrorBanner
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitLoadingDialog
+import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.SubmitErrorsBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
-
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -40,24 +43,36 @@ fun SelfDeclarationReviewScreen(
     onBackClicked: () -> Unit,
     onCloseClicked: (() -> Unit)? = null,
     isLoading: Boolean = false,
+    openSubmitErrorsBottomSheetTrigger: Boolean = false,
+    onResetSubmitErrorsTrigger: () -> Unit = {},
 ) {
     val selfDecState = state.selfDeclaration
     val illnessGroups = state.illnessGroups
     val taminColors = LocalTaminColors.current
     val scrollState = rememberScrollState()
 
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var showErrorBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(openSubmitErrorsBottomSheetTrigger) {
+        if (openSubmitErrorsBottomSheetTrigger) {
+            showErrorBottomSheet = true
+            onResetSubmitErrorsTrigger()
+        }
+    }
+
     Scaffold(
         topBar = {
             HealthTopAppBar(
                 title = stringResource(Res.string.health_review_title),
                 onBackClicked = onBackClicked,
-                onCloseClicked = onCloseClicked
+                onCloseClicked = onCloseClicked,
             )
         },
         bottomBar = {
             HealthIrritateNavigationBar(
                 primaryText = stringResource(Res.string.health_confirm_info_btn),
-                onPrimaryClick = { onIntent(HealthProfileIntent.SubmitDeclaration) },
+                onPrimaryClick = { showConfirmDialog = true },
                 secondaryText = stringResource(Res.string.health_gate_btn_back),
                 onSecondaryClick = onBackClicked
             )
@@ -82,6 +97,13 @@ fun SelfDeclarationReviewScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
+                if (selfDecState.submitProblems.isNotEmpty()) {
+                    SubmitErrorBanner(
+                        errorCount = selfDecState.submitProblems.size,
+                        onShowErrorsClick = { showErrorBottomSheet = true }
+                    )
+                }
 
                 WarningBanner(
                     message = stringResource(Res.string.health_warning_banner_desc)
@@ -436,6 +458,27 @@ fun SelfDeclarationReviewScreen(
             }
         }
     }
+
+    if (showConfirmDialog) {
+        SubmitConfirmationDialog(
+            onConfirm = {
+                showConfirmDialog = false
+                onIntent(HealthProfileIntent.SubmitDeclaration)
+            },
+            onDismiss = { showConfirmDialog = false }
+        )
+    }
+
+    if (selfDecState.isSubmitLoading) {
+        SubmitLoadingDialog()
+    }
+
+    if (showErrorBottomSheet && selfDecState.submitProblems.isNotEmpty()) {
+        SubmitErrorsBottomSheet(
+            problems = selfDecState.submitProblems,
+            onDismiss = { showErrorBottomSheet = false }
+        )
+    }
 }
 
 @Composable
@@ -485,33 +528,78 @@ private fun ReviewSection(
     }
 }
 
-    @PreviewRtlTheme
-    @Preview
-    @Composable
-    fun SelfDeclarationReviewScreenPreview() {
-        PreviewRtlThemeContent {
-            SelfDeclarationReviewScreen(
-                state = HealthProfileUiState(
-                    selfDeclaration = SelfDeclarationUiState(
-                        personal = PersonalStepState(maritalStatusLabel = "متاهل", job = "کارمند"),
-                        contact = ContactStepState(
-                            cityLabel = "تهران",
-                            provinceLabel = "تهران",
-                            address = "میدان ونک"
+@PreviewRtlTheme
+@Preview
+@Composable
+fun SelfDeclarationReviewScreenPreview() {
+    PreviewRtlThemeContent {
+        SelfDeclarationReviewScreen(
+            state = HealthProfileUiState(
+                selfDeclaration = SelfDeclarationUiState(
+                    personal = PersonalStepState(maritalStatusLabel = "متاهل", job = "کارمند"),
+                    contact = ContactStepState(
+                        cityLabel = "تهران",
+                        provinceLabel = "تهران",
+                        address = "میدان ونک"
+                    ),
+                    emergency = EmergencyStepState(
+                        emergencyName = "محمد",
+                        emergencyRelation = "پدر"
+                    ),
+                    physical = PhysicalStepState(height = 180, weight = 80),
+                    bloodGroup = BloodGroupStepState(
+                        selectedBloodGroupLetter = "AB",
+                        selectedBloodGroupRh = "+"
+                    )
+                )
+            ),
+            onIntent = {},
+            onBackClicked = {}
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Preview
+@Composable
+fun SelfDeclarationReviewScreenWithErrorsPreview() {
+    PreviewRtlThemeContent {
+        SelfDeclarationReviewScreen(
+            state = HealthProfileUiState(
+                selfDeclaration = SelfDeclarationUiState(
+                    personal = PersonalStepState(maritalStatusLabel = "متاهل", job = "کارمند"),
+                    contact = ContactStepState(
+                        cityLabel = "تهران",
+                        provinceLabel = "تهران",
+                        address = "میدان ونک"
+                    ),
+                    emergency = EmergencyStepState(
+                        emergencyName = "محمد",
+                        emergencyRelation = "پدر"
+                    ),
+                    physical = PhysicalStepState(height = 180, weight = 80),
+                    bloodGroup = BloodGroupStepState(
+                        selectedBloodGroupLetter = "AB",
+                        selectedBloodGroupRh = "+"
+                    ),
+                    submitProblems = listOf(
+                        com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProblemPR(
+                            code = 1,
+                            message = "کد ملی وارد شده در سامانه استعلام یافت نشد."
                         ),
-                        emergency = EmergencyStepState(
-                            emergencyName = "محمد",
-                            emergencyRelation = "پدر"
+                        com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProblemPR(
+                            code = 2,
+                            message = "شمارهٔ موبایل با شمارهٔ ثبت‌شدهٔ بیمه‌شده مطابقت ندارد."
                         ),
-                        physical = PhysicalStepState(height = 180, weight = 80),
-                        bloodGroup = BloodGroupStepState(
-                            selectedBloodGroupLetter = "AB",
-                            selectedBloodGroupRh = "+"
+                        com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProblemPR(
+                            code = 3,
+                            message = "تاریخ تولد با مدارک هویتی ثبت‌شده هم‌خوانی ندارد."
                         )
                     )
-                ),
-                onIntent = {},
-                onBackClicked = {}
-            )
-        }
+                )
+            ),
+            onIntent = {},
+            onBackClicked = {}
+        )
     }
+}
