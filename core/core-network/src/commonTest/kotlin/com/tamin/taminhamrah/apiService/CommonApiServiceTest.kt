@@ -16,7 +16,7 @@ class CommonApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<CommonApiService>()
+        val apiService = ktorfit.createCommonApiService()
 
         val response = apiService.getJobTitle(emptyMap())
 
@@ -29,7 +29,7 @@ class CommonApiServiceTest : BaseApiTest() {
     @Test
     fun `getRegistrationDeclarationForm should return HttpStatement`() = runTest {
         val ktorfit = createMockKtorfit(ApiTestUtils.createJsonResponse(dataJson = ""))
-        val apiService = ktorfit.create<CommonApiService>()
+        val apiService = ktorfit.createCommonApiService()
 
         val response = apiService.getRegistrationDeclarationForm()
         assertNotNull(response)

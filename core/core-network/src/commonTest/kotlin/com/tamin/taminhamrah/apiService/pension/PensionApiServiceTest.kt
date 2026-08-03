@@ -40,7 +40,7 @@ class PensionApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<PensionApiService>()
+        val apiService = ktorfit.createPensionApiService()
 
         val response = apiService.getPensionerPayRoll("filter-json")
 
