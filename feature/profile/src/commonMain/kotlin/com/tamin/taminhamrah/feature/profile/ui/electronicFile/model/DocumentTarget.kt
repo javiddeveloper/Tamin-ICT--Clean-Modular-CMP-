@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.profile.ui.electronicFile.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
+import com.tamin.taminhamrah.ui.documentExtension
+import com.tamin.taminhamrah.ui.forFullDocument
 
 /** What opens when a document card is tapped. */
 @Immutable
@@ -14,7 +16,6 @@ sealed interface DocumentTarget {
 }
 
 /** Thumbnail URLs carry this segment; the full document lives under a sibling of it. */
-private const val THUMBS_SEGMENT = "thumbs"
 private const val FULL_PDF_SEGMENT = "full-pdf"
 private const val FULL_IMAGE_SEGMENT = "full"
 
@@ -22,32 +23,21 @@ private const val FULL_IMAGE_SEGMENT = "full"
 private val PDF_EXTENSIONS = setOf("pdf", "tif", "tiff")
 
 /**
- * The extension of the file this URL points at, lowercased, or empty when it has none.
- *
- * Query and fragment are dropped first: a `.pdf` mentioned in a query parameter says nothing about
- * the document itself, and treating it as if it did sends an image to the PDF viewer.
- */
-private fun String.fileExtension(): String =
-    substringBefore('?')
-        .substringBefore('#')
-        .substringAfterLast('.', missingDelimiterValue = "")
-        .lowercase()
-
-/**
  * Where this document's full version lives, or null when there is no thumbnail to derive it from.
  *
- * The server decides the shape: a thumbnail ending `.pdf` or `.tif` is served as a PDF under
- * `full-pdf`, anything else as an image under `full`. Both are the thumbnail URL with its
- * `thumbs` segment swapped, so the host, path and query are the server's, untouched.
+ * The server decides the shape: a thumbnail whose own extension is `.pdf`, `.tif` or `.tiff` is
+ * served as a PDF under `full-pdf`; everything else is an image under `full`. Both swap the
+ * `thumbs` segment, leaving host, path and query as the server built them.
+ *
+ * Image is the default rather than PDF, matching the previous app: it is what an unrecognized
+ * extension was treated as there, and sending an image to the PDF downloader fails to open.
  */
 fun ElectronicFilePR.documentTarget(): DocumentTarget? {
     if (thumb.isBlank()) return null
 
-    val servedAsPdf = thumb.fileExtension() in PDF_EXTENSIONS
-
-    return if (servedAsPdf) {
-        DocumentTarget.Pdf(url = thumb.replace(THUMBS_SEGMENT, FULL_PDF_SEGMENT), fileName = name)
+    return if (thumb.documentExtension() in PDF_EXTENSIONS) {
+        DocumentTarget.Pdf(url = thumb.forFullDocument(FULL_PDF_SEGMENT), fileName = name)
     } else {
-        DocumentTarget.Image(url = thumb.replace(THUMBS_SEGMENT, FULL_IMAGE_SEGMENT), title = name)
+        DocumentTarget.Image(url = thumb.forFullDocument(FULL_IMAGE_SEGMENT), title = name)
     }
 }
