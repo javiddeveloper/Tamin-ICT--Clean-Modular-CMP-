@@ -25,6 +25,7 @@ class FakeUserRepository : UserRepository {
     var insuredActiveBranchResult: List<InsuredActiveBranchDN> = emptyList()
     var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
     var electronicFileResult: List<ElectronicFileDN> = emptyList()
+    var electronicFilePages: List<List<ElectronicFileDN>> = emptyList()
     var userProfileResult: UserProfileDN? = null
 
     var shouldThrowError = false
@@ -81,6 +82,15 @@ class FakeUserRepository : UserRepository {
     ): Flow<List<ElectronicFileDN>> = flow {
         if (shouldThrowError) throw error
         emit(electronicFileResult)
+    }
+
+    override suspend fun getElectronicFilePage(
+        page: Int,
+        limit: Int,
+        filters: List<ApiFilterDN>,
+    ): List<ElectronicFileDN> {
+        if (shouldThrowError) throw error
+        return electronicFilePages.getOrElse(page) { emptyList() }
     }
 
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {

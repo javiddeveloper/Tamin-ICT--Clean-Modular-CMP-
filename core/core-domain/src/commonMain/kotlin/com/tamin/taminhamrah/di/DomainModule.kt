@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
+import com.tamin.taminhamrah.useCases.file.GetElectronicFilePageUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
@@ -140,6 +141,7 @@ val domainModule = module {
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
     factoryOf(::GetElectronicFileUseCase)
+    factoryOf(::GetElectronicFilePageUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)
     factoryOf(::GetDeceasedInfoUseCase)
