@@ -9,6 +9,7 @@ fun ElectronicFileDN.toPresentation(): ElectronicFilePR = ElectronicFilePR(
     name = name ?: "",
     categoryName = categoryName ?: "",
     thumb = thumb ?: "",
+    contentServer = contentServer ?: "",
     type = type ?: "",
 )
 

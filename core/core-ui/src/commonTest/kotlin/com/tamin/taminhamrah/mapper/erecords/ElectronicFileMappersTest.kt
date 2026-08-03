@@ -14,6 +14,7 @@ class ElectronicFileMappersTest {
         assertEquals("", result.name)
         assertEquals("", result.categoryName)
         assertEquals("", result.thumb)
+        assertEquals("", result.contentServer)
     }
 
     @Test
@@ -23,6 +24,7 @@ class ElectronicFileMappersTest {
             name = "کارت ملی",
             categoryName = "هویتی",
             thumb = "https://host/erecords/thumbs/42.jpg",
+            contentServer = "https://host/erecords/full/42.jpg",
             type = "image",
         )
 
@@ -32,6 +34,7 @@ class ElectronicFileMappersTest {
         assertEquals("کارت ملی", result.name)
         assertEquals("هویتی", result.categoryName)
         assertEquals("https://host/erecords/thumbs/42.jpg", result.thumb)
+        assertEquals("https://host/erecords/full/42.jpg", result.contentServer)
         assertEquals("image", result.type)
     }
 }
