@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "113f498fc79f053dd618922f09ea97b4",
+    "identityHash": "f1af9ab607d8e770303c1f6521439bcc",
     "entities": [
       {
         "tableName": "test_table",
@@ -2103,7 +2103,7 @@
       },
       {
         "tableName": "treatment_costs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `accountNumber` TEXT, `bimeCode` TEXT, `datePaz` TEXT, `famil` TEXT, `healthcenterName` TEXT, `mainNational` TEXT, `maliCode` TEXT, `name` TEXT, `nameAsli` TEXT, `nameFamil` TEXT, `noPazir` TEXT, `payNatCode` TEXT, `payOtherService` TEXT, `payPrice` TEXT, `payService` TEXT, `payStatus` TEXT, `payType` TEXT, `province` TEXT, `rahgiriCode` TEXT, `releaseDate` TEXT, `repId` INTEGER, `serviceDate` TEXT, `status` TEXT, `statusDesc` TEXT, `payStatusDesc` TEXT, `returnReason` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `accountNumber` TEXT, `bimeCode` TEXT, `datePaz` TEXT, `famil` TEXT, `healthcenterName` TEXT, `mainNational` TEXT, `maliCode` TEXT, `name` TEXT, `nameAsli` TEXT, `nameFamil` TEXT, `noPazir` TEXT, `payNatCode` TEXT, `payOtherService` TEXT, `payPrice` TEXT, `payService` TEXT, `payStatus` TEXT, `payType` TEXT, `province` TEXT, `rahgiriCode` TEXT, `releaseDate` TEXT, `repId` INTEGER, `serviceDate` TEXT, `status` TEXT, `statusDesc` TEXT, `payStatusDesc` TEXT, `estimatePayDate` TEXT, `returnReason` TEXT)",
         "fields": [
           {
             "fieldPath": "localId",
@@ -2234,6 +2234,11 @@
           {
             "fieldPath": "payStatusDesc",
             "columnName": "payStatusDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "estimatePayDate",
+            "columnName": "estimatePayDate",
             "affinity": "TEXT"
           },
           {
@@ -2511,7 +2516,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '113f498fc79f053dd618922f09ea97b4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f1af9ab607d8e770303c1f6521439bcc')"
     ]
   }
 }

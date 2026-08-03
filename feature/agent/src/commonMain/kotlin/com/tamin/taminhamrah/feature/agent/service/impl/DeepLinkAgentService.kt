@@ -10,16 +10,18 @@ import com.tamin.taminhamrah.model.agent.AgentActionKey
 
 /**
  * Entry-point services that hand the user off to a full screen instead of
- * answering inline — old_Android modelled these as `ServiceData.Clickable`
- * with a local deep link.
+ * answering inline.
  *
  * Only actions whose destination screen actually exists in this app are mapped
  * (see [AgentDestination]); the host maps the destination id to a real route.
  *
- * These are deliberately *not* the generative-form flows: the multi-step form
- * services (wedding present, funeral allowance, occurrence report, education
- * inquiry, dependent cancellation, edit phone/bank) still need dedicated
- * handlers and are intentionally left unregistered.
+ * A key belongs here only if no other service answers it with real data. The registry
+ * resolves a key with `firstOrNull`, so a key claimed twice would be silently decided by
+ * registration order — AgentServiceKeyCoverageTest guards against that.
+ *
+ * Deliberately not mapped: PATIENT_HISTORY (PatientHistoryAgentService fetches the real
+ * prescriptions), BOOKLET (MedicalEntitlementAgentService returns the entitlement rows)
+ * and MESSAGE (GeneralResponseAgentService renders the assistant's own text).
  */
 class DeepLinkAgentService : AgentServiceUseCase {
 
@@ -42,7 +44,6 @@ class DeepLinkAgentService : AgentServiceUseCase {
         )
     }
 
-    /** A screen the assistant can send the user to. */
     private data class Target(
         val destination: String,
         val actionText: String,
@@ -51,35 +52,85 @@ class DeepLinkAgentService : AgentServiceUseCase {
 
     private companion object {
         val DESTINATIONS: Map<AgentActionKey, Target> = mapOf(
+
+            // ── Contracts & Legal ──────────────────────────────────────────
             AgentActionKey.DISABILITY_PENSION to Target(
                 destination = AgentDestination.DISABILITY_PENSION,
-                actionText = "برقراری مستمری از کارافتادگی",
+                actionText  = "برقراری مستمری از کارافتادگی",
                 description = "برای ثبت درخواست برقراری مستمری از کارافتادگی، روی دکمه زیر بزنید."
             ),
             AgentActionKey.DEFFERED_INSTALLMENT_CERTIFICATE to Target(
                 destination = AgentDestination.DEFERRED_INSTALLMENT,
-                actionText = "گواهی اقساط معوق",
+                actionText  = "گواهی اقساط معوق",
                 description = "برای دریافت گواهی اقساط معوق، روی دکمه زیر بزنید."
             ),
             AgentActionKey.REGISTER_CONTRACT to Target(
                 destination = AgentDestination.CONTRACTS,
-                actionText = "انعقاد قرارداد بیمه",
+                actionText  = "انعقاد قرارداد بیمه",
                 description = "برای انعقاد قرارداد بیمه، روی دکمه زیر بزنید."
             ),
             AgentActionKey.COMPLETE_INFO_OF_REAL_WORKSHOP to Target(
                 destination = AgentDestination.WORKSHOPS,
-                actionText = "اطلاعات کارگاه",
+                actionText  = "اطلاعات کارگاه",
                 description = "برای مشاهده و تکمیل اطلاعات کارگاه، روی دکمه زیر بزنید."
             ),
-            AgentActionKey.PATIENT_HISTORY to Target(
-                destination = AgentDestination.PRESCRIPTION,
-                actionText = "نسخه الکترونیک",
-                description = "برای مشاهده نسخه‌های الکترونیک خود، روی دکمه زیر بزنید."
+
+            // ── Social Benefits ────────────────────────────────────────────
+            AgentActionKey.WEDDING_PRESENT to Target(
+                destination = AgentDestination.WEDDING_PRESENT,
+                actionText  = "کمک هزینه ازدواج",
+                description = "برای دریافت کمک هزینه ازدواج، روی دکمه زیر بزنید."
             ),
-            AgentActionKey.PATIENT_HISTORY_LAST to Target(
-                destination = AgentDestination.PRESCRIPTION,
-                actionText = "آخرین نسخه الکترونیک",
-                description = "برای مشاهده آخرین نسخه الکترونیک خود، روی دکمه زیر بزنید."
+            AgentActionKey.FUNERAL_ALLOWANCE_GET to Target(
+                destination = AgentDestination.FUNERAL_ALLOWANCE,
+                actionText  = "کمک هزینه کفن و دفن",
+                description = "برای دریافت کمک هزینه کفن و دفن، روی دکمه زیر بزنید."
+            ),
+            AgentActionKey.PREGNANCY_PAY to Target(
+                destination = AgentDestination.PREGNANCY_PAY,
+                actionText  = "غرامت بارداری و زایمان",
+                description = "برای دریافت غرامت بارداری و زایمان، روی دکمه زیر بزنید."
+            ),
+            AgentActionKey.SHORT_TERM_ORTHOSIS to Target(
+                destination = AgentDestination.SHORT_TERM_ORTHOSIS,
+                actionText  = "ارتز و پرتز کوتاه‌مدت",
+                description = "برای درخواست ارتز و پرتز کوتاه‌مدت، روی دکمه زیر بزنید."
+            ),
+            AgentActionKey.OCCURRENCE_REPORT to Target(
+                destination = AgentDestination.OCCURRENCE_REPORT,
+                actionText  = "گزارش حادثه ناشی از کار",
+                description = "برای ثبت گزارش حادثه ناشی از کار، روی دکمه زیر بزنید."
+            ),
+
+            // ── Health ─────────────────────────────────────────────────────
+            AgentActionKey.CONFIRMATION_MEDICAL_AUTHORITIES to Target(
+                destination = AgentDestination.MEDICAL_AUTHORITIES,
+                actionText  = "تأیید مراجع درمانی",
+                description = "برای مشاهده تأییدیه مراجع درمانی، روی دکمه زیر بزنید."
+            ),
+
+            // ── Profile Edits ──────────────────────────────────────────────
+            AgentActionKey.EDIT_PHONE_NUMBER to Target(
+                destination = AgentDestination.EDIT_PHONE,
+                actionText  = "ویرایش شماره موبایل",
+                description = "برای ویرایش شماره موبایل، روی دکمه زیر بزنید."
+            ),
+            AgentActionKey.EDIT_BANK_ACCOUNT_NUMBER to Target(
+                destination = AgentDestination.EDIT_BANK_ACCOUNT,
+                actionText  = "ویرایش شماره حساب بانکی",
+                description = "برای ویرایش شماره حساب بانکی، روی دکمه زیر بزنید."
+            ),
+            AgentActionKey.EXTEND_EDUCATION to Target(
+                destination = AgentDestination.EXTEND_EDUCATION,
+                actionText  = "استعلام ادامه تحصیل",
+                description = "برای ثبت استعلام ادامه تحصیل، روی دکمه زیر بزنید."
+            ),
+
+            // ── Workers ────────────────────────────────────────────────────
+            AgentActionKey.WORKER_PAYMENT to Target(
+                destination = AgentDestination.WORKERS_PAYMENT,
+                actionText  = "پرداخت بیمه کارگران",
+                description = "برای مشاهده پرداخت بیمه کارگران، روی دکمه زیر بزنید."
             )
         )
     }

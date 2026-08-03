@@ -62,7 +62,7 @@ internal class AgentRemoteDataSourceFakeImpl(
         //   FAKE_AGENT_SHOWCASE_RESPONSE — one of every bubble type, arriving one by one
         //   FAKE_AGENT_RESPONSE          — every supported action key
         //   FAKE_AGENT_ONE_RESPONSE      — short 4-entity smoke test
-        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_SHOWCASE_RESPONSE)
+        val fakeData = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_ONE_RESPONSE)
         return PollingResponseDTO(
             status = 200,
             family = "SUCCESSFUL",

@@ -19,4 +19,6 @@ interface TokenStoreManager {
     fun getCodeVerifier(): String?
     fun tokenValidFlow(): Flow<Boolean>
     suspend fun setTokenValid(isValid: Boolean)
+    fun isAuthProcessingFlow(): Flow<Boolean>
+    fun setAuthProcessing(isProcessing: Boolean)
 }
