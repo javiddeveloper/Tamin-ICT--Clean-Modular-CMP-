@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -33,7 +34,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 
 @Composable
 fun GlassIconTile(
-    icon: Painter,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -53,7 +54,7 @@ fun GlassIconTile(
                 .background(taminColors.glassIconTileShine)
         )
         Icon(
-            painter = icon,
+            imageVector = icon,
             contentDescription = null,
             tint = taminColors.glassIconTileIconTint,
             modifier = Modifier.size(IconSize.tileInner)
@@ -96,7 +97,7 @@ private fun RippleRing(
 
 @Composable
 fun AnimatedRingHeaderIcon(
-    icon: Painter,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
