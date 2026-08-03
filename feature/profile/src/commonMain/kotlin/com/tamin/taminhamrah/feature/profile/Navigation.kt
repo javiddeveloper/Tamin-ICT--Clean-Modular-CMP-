@@ -7,6 +7,8 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
+import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileRoute
+import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
 import com.tamin.taminhamrah.ui.sharedViewModel
@@ -23,11 +25,15 @@ sealed interface ProfileRoute {
 
     @Serializable
     data class Identity(val userId: String? = null) : ProfileRoute
+
+    @Serializable
+    data object ElectronicFile : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
+    onNavigateToElectronicFile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -40,6 +46,7 @@ fun NavGraphBuilder.profileGraph(
                 userId = route.userId,
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
+                onNavigateToElectronicFile = onNavigateToElectronicFile,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -49,6 +56,15 @@ fun NavGraphBuilder.profileGraph(
             val viewModel = koinViewModel<IdentityInViewModel>()
 
             IdentityInRoute(
+                viewModel = viewModel,
+                onBackClicked = onBack
+            )
+        }
+
+        composable<ProfileRoute.ElectronicFile> {
+            val viewModel = koinViewModel<ElectronicFileViewModel>()
+
+            ElectronicFileRoute(
                 viewModel = viewModel,
                 onBackClicked = onBack
             )

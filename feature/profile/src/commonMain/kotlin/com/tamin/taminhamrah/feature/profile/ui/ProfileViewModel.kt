@@ -1,38 +1,36 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
-import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
+import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
-import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
-import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
+import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
+import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
+import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
-import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
-import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
-import com.tamin.taminhamrah.util.HeaderConstant
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-
+import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
+import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
-import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
-import com.tamin.taminhamrah.util.Logger
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -131,6 +129,7 @@ class ProfileViewModel(
             ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
             ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
+            ProfileMenuItem.ELECTRONIC_FILE -> sendEvent(ProfileEvent.NavigateToElectronicFile)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()

@@ -15,5 +15,6 @@ data class ElectronicFilePR(
     val name: String,
     val categoryName: String,
     val thumb: String,
+    val contentServer: String,
     val type: String,
 )
