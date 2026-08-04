@@ -16,9 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.changemobile.ui.contract.ChangeMobileIntent
@@ -78,39 +83,61 @@ fun EnterMobileStep(
 private fun CurrentMobileSection(uiStateState: State<ChangeMobileUiState>) {
     val taminColors = LocalTaminColors.current
     val currentMobile by remember { derivedStateOf { uiStateState.value.currentMobile } }
+    val isLoading by remember { derivedStateOf { uiStateState.value.isLoading } }
 
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier.fillMaxWidth()
     ) {
-        ListGroupView(
-            containerBackgroundColor = taminColors.verifiedContainerBg,
-            containerBorder = BorderStroke(1.dp, taminColors.verifiedContainerBorder),
-            items = persistentListOf(
-                ListItemData(
-                    title = currentMobile.toPersianDigits(),
-                    leadingIconPainter = painterResource(Res.drawable.ic_privacy),
-                    leadingIconElevation = Elevation.xs,
-                    colors = ListItemColors(
-                        leadingIconBackgroundGradient = taminColors.verifiedIconGradient,
-                        leadingIconBackgroundColor = taminColors.verifiedIconBg,
-                        leadingIconTintColor = taminColors.verifiedIconTint,
-                        titleColor = taminColors.springGreenText
-                    ),
-                    showArrow = false,
-                    badge = ListItemBadge(
-                        text = "تأییدشده",
-                        backgroundColor = taminColors.verifiedBadgeBg,
-                        textColor = taminColors.greenText
-                    ),
-                    titleStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+        AnimatedContent(
+            targetState = currentMobile.isEmpty() && isLoading,
+            label = "CurrentMobileLoadingState"
+        ) { loading ->
+            if (loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(72.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shimmer(
+                            colorBase = taminColors.border,
+                            colorHighlight = taminColors.bgSurface
+                        )
                 )
+            } else {
+                ListGroupView(
+                    containerBackgroundColor = taminColors.verifiedContainerBg,
+                    containerBorder = BorderStroke(1.dp, taminColors.verifiedContainerBorder),
+                    items = persistentListOf(
+                        ListItemData(
+                            title = currentMobile.toPersianDigits(),
+                            leadingIconPainter = painterResource(Res.drawable.ic_privacy),
+                            leadingIconElevation = Elevation.xs,
+                            colors = ListItemColors(
+                                leadingIconBackgroundGradient = taminColors.verifiedIconGradient,
+                                leadingIconBackgroundColor = taminColors.verifiedIconBg,
+                                leadingIconTintColor = taminColors.verifiedIconTint,
+                                titleColor = taminColors.springGreenText
+                            ),
+                            showArrow = false,
+                            badge = ListItemBadge(
+                                text = "تأییدشده",
+                                backgroundColor = taminColors.verifiedBadgeBg,
+                                textColor = taminColors.greenText
+                            ),
+                            titleStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    )
+                )
+            }
+        }
+
+        if (currentMobile.isNotEmpty() || !isLoading) {
+            AnimatedIconBadge(
+                icon = painterResource(Res.drawable.ic_arrow_down),
+                modifier = Modifier.offset(y = 16.dp)
             )
-        )
-        AnimatedIconBadge(
-            icon = painterResource(Res.drawable.ic_arrow_down),
-            modifier = Modifier.offset(y = 16.dp)
-        )
+        }
     }
 }
 
