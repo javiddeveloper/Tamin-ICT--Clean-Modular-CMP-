@@ -3,17 +3,21 @@ package com.tamin.taminhamrah.repository.authRepository
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.repository.LocalDataClearer
+import com.tamin.taminhamrah.repository.AuthTokenInvalidator
 import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.repository.AuthRepository
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import co.touchlab.kermit.Logger
 
 class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
     private val tokenStoreManager: TokenStoreManager,
-    private val localDataClearer: LocalDataClearer
+    private val localDataClearer: LocalDataClearer,
+    private val authTokenInvalidator: AuthTokenInvalidator
 ) : AuthRepository {
 
     private val logger = Logger.withTag("AuthRepository")
@@ -45,6 +49,7 @@ class AuthRepositoryImpl(
             tokenStoreManager.saveToken(response.accessToken)
             tokenStoreManager.saveRefreshToken(response.refreshToken)
             tokenStoreManager.setTokenValid(true)
+            authTokenInvalidator.invalidateAll()
             true
         } catch (e: Exception) {
             print(e)
@@ -72,33 +77,55 @@ class AuthRepositoryImpl(
 
     override suspend fun logout() {
         logger.d { "logout() called. Revoking and clearing tokens." }
+        // revokeToken() never throws (AuthRemoteDataSourceImpl.revokeToken swallows its own
+        // errors), but localDataClearer.clearAll() can (e.g. a DB error) — and it used to run
+        // unguarded, so a failure there would abort logout() before the tokens further down
+        // this chain (server-side sign-out call, browser SSO cookie clear) ever ran, even
+        // though the tokens above had already been wiped. Each step below is now best-effort
+        // so one failing step can never block the rest of the logout sequence.
         revokeToken()
         tokenStoreManager.saveToken(null)
         tokenStoreManager.saveRefreshToken(null)
         tokenStoreManager.saveUserId(null)
         tokenStoreManager.setTokenValid(false)
-        localDataClearer.clearAll()
+        authTokenInvalidator.invalidateAll()
+        try {
+            localDataClearer.clearAll()
+        } catch (e: Exception) {
+            logger.e(e) { "logout() localDataClearer.clearAll() failed, tokens are still cleared." }
+        }
         logger.d { "logout() completed. Tokens cleared." }
     }
 
     override suspend fun signOut(token: String): Flow<String> = flow {
         logger.d { "signOut() flow started." }
-        try {
-            val result = authRemoteDataSource.signOut(token)
-            emit(result)
-            logger.d { "signOut() emitted result: $result. Proceeding to logout." }
-        } catch (e: Exception) {
-            logger.e(e) { "signOut() API call failed, but proceeding with local logout." }
-            emit("FAILED_BUT_LOGGED_OUT")
-        } finally {
-            logout()
+        val result = withContext(NonCancellable) {
+            try {
+                logout()
+            } catch (e: Exception) {
+                logger.e(e) { "signOut() logout() step failed unexpectedly, still attempting server sign-out." }
+            }
+            try {
+                authRemoteDataSource.signOut(token)
+            } catch (e: Exception) {
+                logger.e(e) { "signOut() API call failed after local logout completed." }
+                "FAILED_BUT_LOGGED_OUT"
+            }
         }
+        logger.d { "signOut() emitting result: $result." }
+        emit(result)
     }
 
     override suspend fun revokeToken(): Boolean {
         val accessToken = tokenStoreManager.getToken()
         val refreshToken = tokenStoreManager.getRefreshToken()
-        logger.d { "revokeToken() - AccessToken: ${accessToken?.take(10)}..., RefreshToken: ${refreshToken?.take(10)}..." }
+        logger.d {
+            "revokeToken() - AccessToken: ${accessToken?.take(10)}..., RefreshToken: ${
+                refreshToken?.take(
+                    10
+                )
+            }..."
+        }
         val result = authRemoteDataSource.revokeToken(
             accessToken = accessToken,
             refreshToken = refreshToken

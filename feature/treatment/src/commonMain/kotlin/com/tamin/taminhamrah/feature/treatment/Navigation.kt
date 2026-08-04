@@ -1,14 +1,11 @@
 package com.tamin.taminhamrah.feature.treatment
 
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentScreen
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
@@ -75,7 +72,7 @@ fun NavGraphBuilder.treatmentGraph(
     onNavigateToHealthProfile: (nationalCode: String) -> Unit,
 ) {
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
-        composable<TreatmentRoute.Main> {
+        composableWithFadeTransitions<TreatmentRoute.Main> {
             TreatmentScreen(
                 onOpenMedicalRecords = { nationalCode ->
                     navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.Default))
@@ -92,7 +89,7 @@ fun NavGraphBuilder.treatmentGraph(
             TreatmentCostsRoute(onBackClicked = onBack)
         }
 
-        composable<TreatmentRoute.MedicalRecords> { backStackEntry ->
+        composableWithFadeTransitions<TreatmentRoute.MedicalRecords> { backStackEntry ->
             val route = backStackEntry.toRoute<TreatmentRoute.MedicalRecords>()
             MedicalRecordsScreen(
                 nationalCode = route.nationalCode,
@@ -114,18 +111,7 @@ fun NavGraphBuilder.treatmentGraph(
             )
         }
 
-        composable<TreatmentRoute.RecordDetail>(
-            // A short slide+fade in from the side, so opening a record reads as a push forward
-            // rather than a hard cut. The reverse plays on back.
-            enterTransition = {
-                slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn()
-            },
-            exitTransition = { fadeOut() },
-            popEnterTransition = { fadeIn() },
-            popExitTransition = {
-                slideOutHorizontally(targetOffsetX = { it / 4 }) + fadeOut()
-            },
-        ) { backStackEntry ->
+        composableWithFadeTransitions<TreatmentRoute.RecordDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<TreatmentRoute.RecordDetail>()
             RecordDetailScreen(
                 nationalCode = route.nationalCode,
