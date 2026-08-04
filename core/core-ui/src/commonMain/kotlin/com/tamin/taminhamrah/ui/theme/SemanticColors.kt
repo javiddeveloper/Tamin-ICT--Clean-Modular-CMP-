@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.ui.theme
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+@Immutable
 data class TaminColors(
     // Backgrounds / surfaces
     val bgPage: Color,
@@ -20,6 +22,12 @@ data class TaminColors(
     val iconGradientSuccess: Brush,
     val iconGlassShine: Brush,
     val iconGlassBorder: Brush,
+    val glassIconTileBg: Color,
+    val glassIconTileBorder: Color,
+    val glassIconTileShine: Brush,
+    val glassIconTileIconTint: Color,
+    val glassIconRipple1: Color,
+    val glassIconRipple2: Color,
     val validationCardGradient: Brush,
 
     // Text
@@ -27,12 +35,14 @@ data class TaminColors(
     val textSecondary: Color,
     val textTertiary: Color,
     val textMuted: Color,
+    val textHeaderSubtitle: Color,
     val chevron: Color,
 
     // Status pills (background + foreground pairs)
     val greenBg: Color,
     val greenBorder: Color,
     val greenText: Color,
+    val springGreenText: Color,
     val blueBg: Color,
     val blueText: Color,
     val orangeBg: Color,
@@ -47,6 +57,7 @@ data class TaminColors(
 
     // Shadows
     val shadowPrimary: Color,
+    val shadowSubtle: Color,
 
     // Glass / tab-bar tokens (translucency layers for the bottom nav)
     val glassA1: Color,
@@ -83,6 +94,16 @@ data class TaminColors(
     // Solid tint derived from the AI-assistant gradient family — used for blur tints
     // and fallbacks where a single color (not a Brush) is required.
     val aiAssistantTint: Color,
+    val verifiedBadgeBg: Color,
+    val buttonGradient: Brush,
+    val buttonDisabledGradient: Brush,
+
+    // Verified Status Tokens
+    val verifiedContainerBg: Color,
+    val verifiedContainerBorder: Color,
+    val verifiedIconGradient: Brush?,
+    val verifiedIconBg: Color,
+    val verifiedIconTint: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -95,6 +116,7 @@ val LightTaminColors = TaminColors(
     textSecondary = TaminLightTextSecondary,
     textTertiary = Gray400,
     textMuted = TaminLightTextMuted,
+    textHeaderSubtitle = TaminLightTextSubProfile,
     chevron = Gray300,
     greenBg = Secondary50,
     greenBorder = TaminDarkGreenAlpha,
@@ -140,6 +162,17 @@ val LightTaminColors = TaminColors(
             Color.White.copy(alpha = 0.05f)
         )
     ),
+    glassIconTileBg = Color.White.copy(alpha = 0.12f),
+    glassIconTileBorder = Color.White.copy(alpha = 0.227f),
+    glassIconTileShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.26f),
+            Color.Transparent
+        )
+    ),
+    glassIconTileIconTint = Color.White,
+    glassIconRipple1 = Color.White.copy(alpha = 0.1f),
+    glassIconRipple2 = Color.White.copy(alpha = 0.16f),
     validationCardGradient = Brush.verticalGradient(listOf(Color(0xADFFFFFF), Color(0x6BFFFFFF))),
     disabledAlpha = 0.38f,
     glassA1 = Color(0x8CFFFFFF),
@@ -163,6 +196,7 @@ val LightTaminColors = TaminColors(
     ),
     aiAssistantTint = TaminPurple900,
     shadowPrimary = Primary700.copy(alpha = 0.5f),
+    shadowSubtle = Gray900.copy(alpha = 0.1f),
 
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
@@ -172,6 +206,20 @@ val LightTaminColors = TaminColors(
     grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFC97E0A),
     fuchsiaBlue = Color(0xFF7C4BC0),
+    springGreenText = TaminSpringGreen,
+    verifiedBadgeBg = TaminLightSurface,
+    buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    buttonDisabledGradient = Brush.horizontalGradient(
+        listOf(
+            TaminLightTextMuted.copy(alpha = 0.4f),
+            TaminLightTextMuted.copy(alpha = 0.6f)
+        )
+    ),
+    verifiedContainerBg = Secondary50, // greenBg
+    verifiedContainerBorder = TaminLightSuccess.copy(alpha = 0.2f),
+    verifiedIconGradient = null,
+    verifiedIconBg = TaminLightSurface,
+    verifiedIconTint = TaminLightSuccess, // greenText
 )
 
 val DarkTaminColors = TaminColors(
@@ -184,6 +232,7 @@ val DarkTaminColors = TaminColors(
     textSecondary = TaminDarkTextSecondary,
     textTertiary = TaminDarkTextSecondary,
     textMuted = TaminDarkTextMuted,
+    textHeaderSubtitle = TaminDarkTextSubProfile,
     chevron = TaminDarkChevron,
     greenBg = TaminDarkGreenBg,
     greenBorder = TaminDarkGreenAlpha,
@@ -217,6 +266,17 @@ val DarkTaminColors = TaminColors(
     ),
     iconGradientDanger = Brush.verticalGradient(listOf(IconGradientRedStart, IconGradientRedEnd)),
     iconGradientSuccess = Brush.verticalGradient(listOf(TaminDarkSuccess, TaminGreenDark)),
+    glassIconTileBg = Color.White.copy(alpha = 0.12f),
+    glassIconTileBorder = Color.White.copy(alpha = 0.227f),
+    glassIconTileShine = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.26f),
+            Color.Transparent
+        )
+    ),
+    glassIconTileIconTint = Color.White,
+    glassIconRipple1 = Color.White.copy(alpha = 0.1f),
+    glassIconRipple2 = Color.White.copy(alpha = 0.16f),
     iconGlassShine = Brush.verticalGradient(
         listOf(
             Color.White.copy(alpha = 0.40f),
@@ -260,12 +320,27 @@ val DarkTaminColors = TaminColors(
     hawkesBlue = TaminDarkOuterBorder,
     chipBg = Color(0x293B82F6),
     shadowPrimary = Color.Black.copy(alpha = 0.4f),
+    shadowSubtle = Color.Black.copy(alpha = 0.3f),
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
     aiAssistantTint = TaminPurple900,
     grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFFBBF24),
-    fuchsiaBlue = Color(0xFFB79AEE)
+    fuchsiaBlue = Color(0xFFB79AEE),
+    springGreenText = TaminDarkSuccess,
+    verifiedBadgeBg = TaminDarkGreenBg,
+    buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    buttonDisabledGradient = Brush.horizontalGradient(
+        listOf(
+            TaminDarkTextMuted.copy(alpha = 0.4f),
+            TaminDarkTextMuted.copy(alpha = 0.6f)
+        )
+    ),
+    verifiedContainerBg = TaminDarkSurface, // bgSurface
+    verifiedContainerBorder = TaminDarkSuccess.copy(alpha = 0.15f),
+    verifiedIconGradient = null,
+    verifiedIconBg = TaminDarkGreenBg, // greenBg
+    verifiedIconTint = TaminDarkSuccess, // greenText
 )
 

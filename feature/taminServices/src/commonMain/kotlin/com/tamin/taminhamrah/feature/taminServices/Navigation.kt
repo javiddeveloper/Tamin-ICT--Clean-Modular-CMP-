@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.taminServices.ui.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -22,7 +22,7 @@ fun NavGraphBuilder.taminServicesScreen(
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
-    composable<TaminServicesRoute> {
+    composableWithFadeTransitions<TaminServicesRoute> {
         val TaminServicesViewModel: TamminServicesViewModel = koinViewModel()
         TaminServicesRoute(
             viewModel = TaminServicesViewModel,

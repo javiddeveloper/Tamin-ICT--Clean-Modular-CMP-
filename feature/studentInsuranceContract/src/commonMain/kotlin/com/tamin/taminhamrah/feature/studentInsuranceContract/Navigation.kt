@@ -2,8 +2,8 @@ package com.tamin.taminhamrah.feature.studentInsuranceContract
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.studentInsuranceContract.ui.StudentInsuranceContractScreen
 import com.tamin.taminhamrah.model.studentContract.InsuranceContractKind
 import kotlinx.serialization.Serializable
@@ -32,7 +32,7 @@ fun NavController.navigateToHousewifeInsuranceContract() {
 }
 
 fun NavGraphBuilder.studentInsuranceContractScreen(onBack: () -> Unit) {
-    composable<StudentInsuranceContractRoute> { backStackEntry ->
+    composableWithFadeTransitions<StudentInsuranceContractRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<StudentInsuranceContractRoute>()
         val contractKind = InsuranceContractKind.entries
             .firstOrNull { it.name == route.kind }

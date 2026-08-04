@@ -4,8 +4,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.cartable.ui.CartableScreen
 import com.tamin.taminhamrah.feature.cartable.ui.UserRequestsScreen
 import com.tamin.taminhamrah.feature.cartable.ui.PersonalInboxScreen
@@ -40,7 +40,7 @@ fun NavGraphBuilder.cartableGraph(
     onBack: () -> Unit,
 ) {
     navigation<CartableRoute.Graph>(startDestination = CartableRoute.Main) {
-        composable<CartableRoute.Main> {
+        composableWithFadeTransitions<CartableRoute.Main> {
             CartableScreen(
                 onNavigateToMyRequests = onNavigateToMyRequests,
                 onNavigateToPersonalInbox = onNavigateToPersonalInbox,
@@ -48,11 +48,11 @@ fun NavGraphBuilder.cartableGraph(
             )
         }
 
-        composable<CartableRoute.UserRequests> {
+        composableWithFadeTransitions<CartableRoute.UserRequests> {
             UserRequestsScreen(onBackClicked = onBack)
         }
 
-        composable<CartableRoute.PersonalInbox> {
+        composableWithFadeTransitions<CartableRoute.PersonalInbox> {
             PersonalInboxScreen(onBackClicked = onBack)
         }
     }
