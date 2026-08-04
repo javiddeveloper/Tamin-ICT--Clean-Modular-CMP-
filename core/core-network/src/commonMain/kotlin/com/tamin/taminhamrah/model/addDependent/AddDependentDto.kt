@@ -124,3 +124,13 @@ data class GeneralResponseDto(
     @SerialName("message") val message: String? = null,
     @SerialName("code") val code: Int? = null
 )
+
+@Serializable
+data class DependentInfoDto(
+    @SerialName("id") val id: String? = null,
+    @SerialName("nationalId") val nationalId: String? = null,
+    @SerialName("fullName") val fullName: String? = null,
+    @SerialName("relationshipDesc") val relationshipDesc: String? = null,
+    @SerialName("isInsuranceActive") val isInsuranceActive: Boolean? = null,
+    @SerialName("birthDatePersian") val birthDatePersian: String? = null
+)

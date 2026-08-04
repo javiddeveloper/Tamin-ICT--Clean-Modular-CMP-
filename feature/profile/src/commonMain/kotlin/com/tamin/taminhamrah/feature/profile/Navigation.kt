@@ -29,6 +29,12 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object VersionHistory : ProfileRoute
+
+    @Serializable
+    data object AddDependent : ProfileRoute
+
+    @Serializable
+    data object DependentsList : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -65,6 +71,23 @@ fun NavGraphBuilder.profileGraph(
             val viewModel = koinViewModel<VersionHistoryViewModel>()
 
             VersionHistoryRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.DependentsList> {
+            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel>()
+            com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute(
+                viewModel = viewModel,
+                onNavigateToAddDependent = { navController.navigate(ProfileRoute.AddDependent) },
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.AddDependent> {
+            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.addDependent.AddDependentViewModel>()
+            com.tamin.taminhamrah.feature.profile.ui.addDependent.AddDependentRoute(
                 viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() }
             )

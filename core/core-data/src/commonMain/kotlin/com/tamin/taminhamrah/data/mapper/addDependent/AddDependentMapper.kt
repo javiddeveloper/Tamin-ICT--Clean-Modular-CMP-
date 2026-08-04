@@ -19,6 +19,17 @@ import com.tamin.taminhamrah.model.addDependent.RequestFileDto
 import com.tamin.taminhamrah.model.addDependent.RequestFileDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
+
+internal fun DependentInfoDto.toDomain(): DependentInfoDN = DependentInfoDN(
+    id = id.orEmpty(),
+    nationalId = nationalId.orEmpty(),
+    fullName = fullName.orEmpty(),
+    relationshipDesc = relationshipDesc.orEmpty(),
+    isInsuranceActive = isInsuranceActive ?: true,
+    birthDatePersian = birthDatePersian.orEmpty()
+)
 
 internal fun BranchDto.toDomain(): BranchDN = BranchDN(
     branchCode = branchCode,

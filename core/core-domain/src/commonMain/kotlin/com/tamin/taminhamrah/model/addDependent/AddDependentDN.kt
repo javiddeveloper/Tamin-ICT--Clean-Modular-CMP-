@@ -63,3 +63,12 @@ data class RequestFileDN(
     val id: String? = null,
     val personal: String? = null
 )
+
+data class DependentInfoDN(
+    val id: String = "",
+    val nationalId: String = "",
+    val fullName: String = "",
+    val relationshipDesc: String = "",
+    val isInsuranceActive: Boolean = true,
+    val birthDatePersian: String = ""
+)

@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
@@ -268,6 +269,7 @@ val domainModule = module {
     factoryOf(::GetActFrequenciesUseCase)
 
     // Add Dependent UseCases
+    factoryOf(::GetDependentInfoUseCase)
     factoryOf(::GetActiveBranchesUseCase)
     factoryOf(::GetFamilyRelationshipsUseCase)
     factoryOf(::InquiryRegistryUseCase)

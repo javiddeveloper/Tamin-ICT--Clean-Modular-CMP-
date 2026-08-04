@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.mapper.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.BranchDN
 import com.tamin.taminhamrah.model.addDependent.BranchPR
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
+import com.tamin.taminhamrah.model.addDependent.DependentInfoPR
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
@@ -15,6 +17,15 @@ import com.tamin.taminhamrah.model.addDependent.RequestFileDN
 import com.tamin.taminhamrah.model.addDependent.RequestFilePR
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
 import com.tamin.taminhamrah.model.addDependent.UploadImagePR
+
+fun DependentInfoDN.toPresentation(): DependentInfoPR = DependentInfoPR(
+    id = id,
+    nationalId = nationalId,
+    fullName = fullName,
+    relationshipDesc = relationshipDesc,
+    isInsuranceActive = isInsuranceActive,
+    birthDatePersian = birthDatePersian
+)
 
 fun BranchDN.toPresentation(): BranchPR = BranchPR(
     branchCode = branchCode,

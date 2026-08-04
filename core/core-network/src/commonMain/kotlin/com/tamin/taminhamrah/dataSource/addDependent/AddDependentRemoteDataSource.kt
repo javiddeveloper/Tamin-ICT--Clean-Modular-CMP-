@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.BranchDto
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
@@ -8,6 +9,7 @@ import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
 
 interface AddDependentRemoteDataSource {
+    suspend fun getDependentInfo(): List<DependentInfoDto>
     suspend fun getActiveBranches(): List<BranchDto>
     suspend fun getFamilyRelationships(
         queryJson: String? = null

@@ -83,3 +83,14 @@ data class RequestFilePR(
     val id: String? = null,
     val personal: String? = null
 )
+
+@Immutable
+@Serializable
+data class DependentInfoPR(
+    val id: String = "",
+    val nationalId: String = "",
+    val fullName: String = "",
+    val relationshipDesc: String = "",
+    val isInsuranceActive: Boolean = true,
+    val birthDatePersian: String = ""
+)

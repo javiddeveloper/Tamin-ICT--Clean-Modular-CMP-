@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.apiService.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.BranchDto
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
@@ -14,6 +15,9 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 
 internal interface AddDependentApiService {
+
+    @GET("services/dependent-info")
+    suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDto>>
 
     @GET("services/active-branches")
     suspend fun getActiveBranches(): BaseDTO<List<BranchDto>>

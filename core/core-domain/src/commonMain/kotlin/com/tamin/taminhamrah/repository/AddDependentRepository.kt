@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.addDependent.BranchDN
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
@@ -9,6 +10,7 @@ import com.tamin.taminhamrah.model.addDependent.UploadImageDN
 import kotlinx.coroutines.flow.Flow
 
 interface AddDependentRepository {
+    fun getDependentInfo(): Flow<List<DependentInfoDN>>
     fun getActiveBranches(): Flow<List<BranchDN>>
     fun getFamilyRelationships(
         queryJson: String? = null

@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.dataSource.addDependent
 
 import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
 import com.tamin.taminhamrah.model.addDependent.BranchDto
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
@@ -16,6 +17,19 @@ internal class AddDependentRemoteDataSourceImpl(
     private val apiService: AddDependentApiService,
     private val errorParser: ErrorParser
 ) : AddDependentRemoteDataSource {
+
+    override suspend fun getDependentInfo(): List<DependentInfoDto> {
+        return try {
+            val response = apiService.getDependentInfo()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 
     override suspend fun getActiveBranches(): List<BranchDto> {
         return try {

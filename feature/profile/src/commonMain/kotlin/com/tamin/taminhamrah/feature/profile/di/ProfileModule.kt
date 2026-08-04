@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.profile.di
 
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.AddDependentViewModel
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -10,5 +12,7 @@ val profileModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::IdentityInViewModel)
     viewModelOf(::VersionHistoryViewModel)
+    viewModelOf(::AddDependentViewModel)
+    viewModelOf(::DependentsListViewModel)
 }
 

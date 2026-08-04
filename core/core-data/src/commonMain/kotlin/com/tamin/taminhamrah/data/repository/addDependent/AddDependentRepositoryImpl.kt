@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.data.mapper.addDependent.toDomain
 import com.tamin.taminhamrah.data.mapper.addDependent.toDto
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.model.addDependent.BranchDN
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
@@ -16,6 +17,11 @@ import kotlinx.coroutines.flow.flow
 internal class AddDependentRepositoryImpl(
     private val remoteDataSource: AddDependentRemoteDataSource
 ) : AddDependentRepository {
+
+    override fun getDependentInfo(): Flow<List<DependentInfoDN>> = flow {
+        val result = remoteDataSource.getDependentInfo().map { it.toDomain() }
+        emit(result)
+    }
 
     override fun getActiveBranches(): Flow<List<BranchDN>> = flow {
         val result = remoteDataSource.getActiveBranches().map { it.toDomain() }

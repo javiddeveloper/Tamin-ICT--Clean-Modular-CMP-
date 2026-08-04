@@ -1,0 +1,164 @@
+diff --git a/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileViewModel.kt b/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileViewModel.kt
+--- a/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileViewModel.kt
++++ b/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileViewModel.kt
+@@ -37,6 +37,11 @@
+     private var currentPatientNatCode: String = ""
+     private var currentPatientId: Int = 0
+ 
++    // Guards against overlapping RetryStep calls (e.g. the auto-retry-on-navigation
++    // effect firing at the same time as a manual retry tap) so they don't both hit
++    // the network concurrently for the same step.
++    private var isRefreshingStep = false
++
+     override fun handleIntent(intent: HealthProfileIntent): Flow<PartialState> {
+         return when (intent) {
+             is HealthProfileIntent.LoadHealthProfile -> handleLoadHealthProfile(intent.nationalCode)
+@@ -213,42 +218,60 @@
+     }
+         .onCompletion { emit(PartialState.Loading(false)) }
+ 
+-    private fun handleRefreshStep(): Flow<PartialState> = flow {
+-        val step = uiState.value.selfDeclaration.currentStep
+-        val natCode = currentPatientNatCode.takeIf { it.isNotBlank() }
+-            ?: tokenStoreManager.getUserId() ?: ""
+-        val patientId = currentPatientId
+-
+-        emit(PartialState.Loading(true))
+-        when (step) {
+-            SelfDeclarationStep.COMPLETED -> {
+-                fetchPatientData(natCode).collect { emit(it) }
+-            }
+-
+-            SelfDeclarationStep.CONTACT -> {
+-                val provinceId = uiState.value.selfDeclaration.contact.provinceId
+-                merge(
+-                    fetchProvinces(),
+-                    provinceId?.let { handleLoadCities(it) } ?: emptyFlow()
+-                ).collect { emit(it) }
+-            }
+-
+-            SelfDeclarationStep.PERSONAL -> fetchMaritalStatus().collect { emit(it) }
+-            SelfDeclarationStep.BLOOD -> fetchBloodGroups().collect { emit(it) }
+-            SelfDeclarationStep.LIFESTYLE -> {
+-                merge(fetchSmokingStatus(), fetchActFrequencies()).collect { emit(it) }
+-            }
+-
+-            SelfDeclarationStep.DISEASES, SelfDeclarationStep.FAMILY -> {
+-                fetchIllnessGroups().collect { emit(it) }
+-            }
+-
+-            SelfDeclarationStep.ALLERGY -> fetchDrugs().collect { emit(it) }
+-            else -> {
+-                handleLoadHealthProfile(natCode).collect { emit(it) }
+-            }
+-        }
+-        emit(PartialState.Loading(false))
++    private fun handleRefreshStep(): Flow<PartialState> {
++        // Re-entrancy guard: ignore a RetryStep that arrives while one is already
++        // running (e.g. auto-retry-on-navigation racing a manual retry tap).
++        if (isRefreshingStep) return emptyFlow()
++        isRefreshingStep = true
++
++        return flow {
++            val step = uiState.value.selfDeclaration.currentStep
++            val natCode = currentPatientNatCode.takeIf { it.isNotBlank() }
++                ?: tokenStoreManager.getUserId() ?: ""
++            val patientId = currentPatientId
++            // Only the sources that actually failed get re-fetched — a step with
++            // multiple lookups (CONTACT, LIFESTYLE) no longer re-pulls data that
++            // already loaded successfully just because a sibling source failed.
++            val failedSources = uiState.value.errors.keys
++
++            emit(PartialState.Loading(true))
++            when (step) {
++                SelfDeclarationStep.COMPLETED -> {
++                    fetchPatientData(natCode).collect { emit(it) }
++                }
++
++                SelfDeclarationStep.CONTACT -> {
++                    val provinceId = uiState.value.selfDeclaration.contact.provinceId
++                    val provincesFlow =
++                        if (ErrorSource.PROVINCES in failedSources) fetchProvinces() else emptyFlow()
++                    val citiesFlow =
++                        if (ErrorSource.CITIES in failedSources && provinceId != null) {
++                            handleLoadCities(provinceId)
++                        } else emptyFlow()
++                    merge(provincesFlow, citiesFlow).collect { emit(it) }
++                }
++
++                SelfDeclarationStep.PERSONAL -> fetchMaritalStatus().collect { emit(it) }
++                SelfDeclarationStep.BLOOD -> fetchBloodGroups().collect { emit(it) }
++                SelfDeclarationStep.LIFESTYLE -> {
++                    val smokingFlow =
++                        if (ErrorSource.SMOKING_STATUS in failedSources) fetchSmokingStatus() else emptyFlow()
++                    val actFreqFlow =
++                        if (ErrorSource.ACT_FREQUENCIES in failedSources) fetchActFrequencies() else emptyFlow()
++                    merge(smokingFlow, actFreqFlow).collect { emit(it) }
++                }
++
++                SelfDeclarationStep.DISEASES, SelfDeclarationStep.FAMILY -> {
++                    fetchIllnessGroups().collect { emit(it) }
++                }
++
++                SelfDeclarationStep.ALLERGY -> fetchDrugs().collect { emit(it) }
++                else -> {
++                    handleLoadHealthProfile(natCode).collect { emit(it) }
++                }
++            }
++            emit(PartialState.Loading(false))
++        }.onCompletion { isRefreshingStep = false }
+     }
+ 
+     private fun fetchLookupLists(): Flow<PartialState> = merge(
+diff --git a/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileScreen.kt b/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileScreen.kt
+--- a/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileScreen.kt
++++ b/feature/healthProfile/src/commonMain/kotlin/com/tamin/taminhamrah/feature/healthProfile/ui/HealthProfileScreen.kt
+@@ -145,6 +145,48 @@
+         return matchingSource?.let { errors[it] } ?: errors[ErrorSource.PATIENT_GENERAL]
+     }
+ 
++    // Sources whose failure blocks each step. Used to auto-retry once when the
++    // user navigates onto a step that already failed to load, instead of leaving
++    // them stuck on a dead error screen until they notice and tap retry manually.
++    fun errorSourcesFor(step: SelfDeclarationStep): Array<ErrorSource> = when (step) {
++        SelfDeclarationStep.IDENTITY,
++        SelfDeclarationStep.EMERGENCY,
++        SelfDeclarationStep.PHYSICAL -> arrayOf(ErrorSource.PATIENT_GENERAL)
++
++        SelfDeclarationStep.PERSONAL -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS)
++
++        SelfDeclarationStep.CONTACT -> arrayOf(
++            ErrorSource.PATIENT_GENERAL,
++            ErrorSource.PROVINCES,
++            ErrorSource.CITIES
++        )
++
++        SelfDeclarationStep.BLOOD -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.BLOOD_GROUPS)
++
++        SelfDeclarationStep.LIFESTYLE -> arrayOf(
++            ErrorSource.PATIENT_GENERAL,
++            ErrorSource.SMOKING_STATUS,
++            ErrorSource.ACT_FREQUENCIES
++        )
++
++        SelfDeclarationStep.DISEASES,
++        SelfDeclarationStep.FAMILY -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS)
++
++        SelfDeclarationStep.ALLERGY -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.DRUGS)
++
++        else -> emptyArray()
++    }
++
++    // Runs once per fresh visit to a step (LaunchedEffect is keyed on currentStep,
++    // not on every recomposition) so it can't loop: if the retry also fails, the
++    // error stays and the manual retry button in HealthProfileErrorWrapper takes over.
++    LaunchedEffect(currentStep) {
++        val sources = errorSourcesFor(currentStep)
++        if (sources.isNotEmpty() && !combinedLoading && getError(*sources) != null) {
++            onIntent(HealthProfileIntent.RetryStep)
++        }
++    }
++
+     val wrappedOnIntent: (HealthProfileIntent) -> Unit = { intent ->
+         if (selfDecState.isEditMode && intent is HealthProfileIntent.ChangeStep) {
+             onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.REVIEW, isEditMode = false))
