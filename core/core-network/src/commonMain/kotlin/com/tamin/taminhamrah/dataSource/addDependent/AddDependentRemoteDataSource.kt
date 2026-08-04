@@ -10,8 +10,6 @@ import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
 interface AddDependentRemoteDataSource {
     suspend fun getActiveBranches(): List<BranchDto>
     suspend fun getFamilyRelationships(
-        page: Int = 1,
-        pageSize: Int = 10,
         queryJson: String? = null
     ): List<FamilyRelationshipDto>
     suspend fun inquiryRegistry(

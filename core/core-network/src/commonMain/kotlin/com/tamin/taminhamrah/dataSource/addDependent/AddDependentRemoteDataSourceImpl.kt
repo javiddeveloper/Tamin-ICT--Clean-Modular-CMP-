@@ -31,16 +31,10 @@ internal class AddDependentRemoteDataSourceImpl(
     }
 
     override suspend fun getFamilyRelationships(
-        page: Int,
-        pageSize: Int,
         queryJson: String?
     ): List<FamilyRelationshipDto> {
         return try {
-            val queryParams = mutableMapOf<String, String>()
-            queryParams["page"] = page.toString()
-            queryParams["pageSize"] = pageSize.toString()
-            queryJson?.let { queryParams["query"] = it }
-            val response = apiService.getFamilyRelationships(queryParams)
+            val response = apiService.getFamilyRelationships(queryJson)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

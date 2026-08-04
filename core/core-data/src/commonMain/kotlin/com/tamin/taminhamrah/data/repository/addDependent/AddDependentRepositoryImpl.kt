@@ -23,11 +23,9 @@ internal class AddDependentRepositoryImpl(
     }
 
     override fun getFamilyRelationships(
-        page: Int,
-        pageSize: Int,
         queryJson: String?
     ): Flow<List<FamilyRelationshipDN>> = flow {
-        val result = remoteDataSource.getFamilyRelationships(page, pageSize, queryJson).map { it.toDomain() }
+        val result = remoteDataSource.getFamilyRelationships(queryJson).map { it.toDomain() }
         emit(result)
     }
 

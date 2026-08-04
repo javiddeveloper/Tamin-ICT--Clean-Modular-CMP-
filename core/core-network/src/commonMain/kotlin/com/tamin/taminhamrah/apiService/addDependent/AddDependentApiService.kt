@@ -20,7 +20,7 @@ internal interface AddDependentApiService {
 
     @GET("services/family-relationships")
     suspend fun getFamilyRelationships(
-        @QueryMap parameters: Map<String, String>
+        @Query("query") queryJson: String? = null
     ): BaseDTO<List<FamilyRelationshipDto>>
 
     @GET("services/inquiry-registry")

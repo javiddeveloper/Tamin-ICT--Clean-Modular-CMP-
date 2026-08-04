@@ -19,10 +19,8 @@ class GetFamilyRelationshipsUseCase(
     private val repository: AddDependentRepository
 ) {
     operator fun invoke(
-        page: Int = 1,
-        pageSize: Int = 10,
         queryJson: String? = null
-    ): Flow<List<FamilyRelationshipDN>> = repository.getFamilyRelationships(page, pageSize, queryJson)
+    ): Flow<List<FamilyRelationshipDN>> = repository.getFamilyRelationships(queryJson)
 }
 
 class InquiryRegistryUseCase(

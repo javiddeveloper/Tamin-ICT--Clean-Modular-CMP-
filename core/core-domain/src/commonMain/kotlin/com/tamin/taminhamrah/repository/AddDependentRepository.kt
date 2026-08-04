@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.Flow
 interface AddDependentRepository {
     fun getActiveBranches(): Flow<List<BranchDN>>
     fun getFamilyRelationships(
-        page: Int = 1,
-        pageSize: Int = 10,
         queryJson: String? = null
     ): Flow<List<FamilyRelationshipDN>>
     fun inquiryRegistry(
