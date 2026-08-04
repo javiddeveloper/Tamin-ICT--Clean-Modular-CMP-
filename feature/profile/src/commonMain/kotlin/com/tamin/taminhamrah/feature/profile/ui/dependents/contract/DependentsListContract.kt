@@ -1,17 +1,17 @@
 package com.tamin.taminhamrah.feature.profile.ui.dependents.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.model.addDependent.DependentInfoPR
+import com.tamin.taminhamrah.model.subdominant.SubdominantItemPR
 
 @Immutable
 data class DependentsListState(
     val isLoading: Boolean = false,
-    val dependentsList: List<DependentInfoPR> = emptyList(),
+    val dependentsList: List<SubdominantItemPR> = emptyList(),
     val error: String? = null
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
-        data class DependentsLoaded(val dependents: List<DependentInfoPR>) : PartialState()
+        data class DependentsLoaded(val dependents: List<SubdominantItemPR>) : PartialState()
         data class Error(val message: String) : PartialState()
     }
 }

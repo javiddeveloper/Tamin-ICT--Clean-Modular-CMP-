@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
-import com.tamin.taminhamrah.util.Logger
 
 class ProfileViewModel(
     private val tokenStoreManager: TokenStoreManager,
@@ -145,14 +144,10 @@ class ProfileViewModel(
             }
     }
 
-    //todo it should removed from here this is only test
+
     private fun handleLoadSubDominants(): Flow<PartialState> {
         return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            subdominantUseCase.invoke(
-            ).collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
+            sendEvent(ProfileEvent.NavigateToDependentsList)
         }
     }
 

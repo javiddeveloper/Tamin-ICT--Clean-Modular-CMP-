@@ -5,15 +5,15 @@ import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsLi
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListIntent
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListState
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListState.PartialState
-import com.tamin.taminhamrah.mapper.addDependent.toPresentation
-import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
+import com.tamin.taminhamrah.mapper.subdominant.toPresentation
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class DependentsListViewModel(
-    private val getDependentInfoUseCase: GetDependentInfoUseCase
+    private val subdominantUseCase: SubdominantUseCase
 ) : BaseViewModel<DependentsListState, PartialState, DependentsListEvent, DependentsListIntent>(
     initialState = DependentsListState()
 ) {
@@ -30,9 +30,9 @@ class DependentsListViewModel(
 
     private fun loadDependentsList(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        getDependentInfoUseCase()
-            .map { list ->
-                val prList = list.map { it.toPresentation() }
+        subdominantUseCase()
+            .map { subdominantDN ->
+                val prList = subdominantDN.toPresentation().list
                 PartialState.DependentsLoaded(prList) as PartialState
             }
             .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست افراد تبعی")) }

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListEvent
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListIntent
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListState
-import com.tamin.taminhamrah.model.addDependent.DependentInfoPR
+import com.tamin.taminhamrah.model.subdominant.SubdominantItemPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
@@ -153,7 +153,7 @@ fun DependentsListScreen(
                     ) {
                         items(
                             items = state.dependentsList,
-                            key = { it.id.ifBlank { it.nationalId } }
+                            key = { it.id }
                         ) { dependent ->
                             DependentItemCard(dependent = dependent)
                         }
@@ -191,10 +191,11 @@ fun DependentsListScreen(
 
 @Composable
 private fun DependentItemCard(
-    dependent: DependentInfoPR,
+    dependent: SubdominantItemPR,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalTaminColors.current
+    val isActive = dependent.status.contains("فعال", true) || dependent.status == "1"
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -218,9 +219,9 @@ private fun DependentItemCard(
                     fontWeight = FontWeight.Bold
                 )
                 StatusPill(
-                    text = if (dependent.isInsuranceActive) "فعال" else "غیرفعال",
-                    containerColor = if (dependent.isInsuranceActive) colors.greenBg else colors.dangerBg,
-                    contentColor = if (dependent.isInsuranceActive) colors.greenText else colors.dangerText
+                    text = dependent.status.ifBlank { if (isActive) "فعال" else "غیرفعال" },
+                    containerColor = if (isActive) colors.greenBg else colors.dangerBg,
+                    contentColor = if (isActive) colors.greenText else colors.dangerText
                 )
             }
 
@@ -229,7 +230,7 @@ private fun DependentItemCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "نسبت: ${dependent.relationshipDesc.ifBlank { "-" }}",
+                    text = "نسبت: ${dependent.relationDescription.ifBlank { "-" }}",
                     color = colors.textSecondary,
                     fontSize = 14.sp
                 )
@@ -240,7 +241,7 @@ private fun DependentItemCard(
                         fontSize = 14.sp
                     )
                     NumericText(
-                        text = dependent.nationalId,
+                        text = dependent.nationalCode,
                         style = androidx.compose.ui.text.TextStyle(fontSize = 14.sp),
                         color = colors.textPrimary
                     )
