@@ -27,13 +27,12 @@ fun UserAvatar(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    val shape = remember { RoundedCornerShape(CornerRadius.card) }
     val taminColors = LocalTaminColors.current
     Box(
         modifier = modifier
             .size(size)
-            .clip(shape)
-            .border(1.dp, taminColors.bgIconProfile, shape),
+            .clip(RoundedCornerShape(CornerRadius.card))
+            .border(1.dp, taminColors.bgIconProfile, RoundedCornerShape(CornerRadius.card)),
         contentAlignment = Alignment.Center,
     ) {
         if (isLoading) {
