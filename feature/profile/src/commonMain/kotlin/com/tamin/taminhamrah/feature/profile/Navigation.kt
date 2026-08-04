@@ -34,6 +34,7 @@ sealed interface ProfileRoute {
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
+    onNavigateToMyInbox: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -47,6 +48,7 @@ fun NavGraphBuilder.profileGraph(
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
+                onNavigateToMyInbox = onNavigateToMyInbox,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
