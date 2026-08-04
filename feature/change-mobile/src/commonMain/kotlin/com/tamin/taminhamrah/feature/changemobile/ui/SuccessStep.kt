@@ -45,11 +45,10 @@ import taminx.core.core_ui.ic_tamin_check
 
 @Composable
 fun SuccessStep(
-    uiStateState: State<ChangeMobileUiState>,
+    uiState: ChangeMobileUiState,
     onFinish: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
-    val uiState = uiStateState.value
 
     Column(
         modifier = Modifier

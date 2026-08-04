@@ -243,17 +243,17 @@ fun ChangeMobileContent(
                 when (step) {
                     ChangeMobileStep.EnterMobile -> {
                         EnterMobileStep(
-                            uiStateState = uiStateState,
+                            uiState = uiStateState.value,
                             onIntent = onIntent
                         )
                     }
 
                     ChangeMobileStep.VerifyOtp -> {
-                        VerifyOtpStep(uiStateState, onIntent)
+                        VerifyOtpStep(uiStateState.value, onIntent)
                     }
 
                     ChangeMobileStep.Success -> {
-                        SuccessStep(uiStateState, onNavigateBack)
+                        SuccessStep(uiStateState.value, onNavigateBack)
                     }
                 }
             }

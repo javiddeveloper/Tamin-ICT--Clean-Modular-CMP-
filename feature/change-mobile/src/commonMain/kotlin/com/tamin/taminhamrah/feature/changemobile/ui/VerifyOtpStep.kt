@@ -50,7 +50,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun VerifyOtpStep(
-    uiStateState: State<ChangeMobileUiState>,
+    uiState: ChangeMobileUiState,
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
     Column(
@@ -60,23 +60,33 @@ fun VerifyOtpStep(
             .padding(Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        MobileHeaderSection(uiStateState, onIntent)
+        MobileHeaderSection(
+            newMobile = uiState.newMobile,
+            onEditClick = { onIntent(ChangeMobileIntent.BackToPreviousStep) }
+        )
         Spacer(modifier = Modifier.height(Spacing.xl))
-        OtpSection(uiStateState, onIntent)
+        OtpSection(
+            otpCode = uiState.otpCode,
+            error = uiState.error,
+            onOtpChanged = { onIntent(ChangeMobileIntent.OtpChanged(it)) }
+        )
         Spacer(modifier = Modifier.height(Spacing.md))
         ResendTimer(onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) })
         Spacer(modifier = Modifier.height(Spacing.xl))
-        SubmitVerifyButton(uiStateState, onIntent)
+        SubmitVerifyButton(
+            isLoading = uiState.isLoading,
+            isOtpComplete = uiState.otpCode.length == 5,
+            onSubmit = { onIntent(ChangeMobileIntent.VerifyOtp) }
+        )
     }
 }
 
 @Composable
 private fun MobileHeaderSection(
-    uiStateState: State<ChangeMobileUiState>,
-    onIntent: (ChangeMobileIntent) -> Unit
+    newMobile: String,
+    onEditClick: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
-    val newMobile by remember { derivedStateOf { uiStateState.value.newMobile } }
 
     Text(
         text = "کد پیامک ‌شده به شمارهٔ زیر را وارد کنید",
@@ -97,7 +107,7 @@ private fun MobileHeaderSection(
         Spacer(modifier = Modifier.width(Spacing.sm))
         Row(
             modifier = Modifier
-                .clickable { onIntent(ChangeMobileIntent.BackToPreviousStep) }
+                .clickable { onEditClick() }
                 .padding(Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -120,17 +130,13 @@ private fun MobileHeaderSection(
 
 @Composable
 private fun OtpSection(
-    uiStateState: State<ChangeMobileUiState>,
-    onIntent: (ChangeMobileIntent) -> Unit
+    otpCode: String,
+    error: String?,
+    onOtpChanged: (String) -> Unit
 ) {
-    val otpCode by remember { derivedStateOf { uiStateState.value.otpCode } }
-    val error by remember { derivedStateOf { uiStateState.value.error } }
-
     OtpInputField(
         value = otpCode,
-        onValueChange = {
-            onIntent(ChangeMobileIntent.OtpChanged(it))
-        },
+        onValueChange = onOtpChanged,
         error = error != null,
         errorMessage = error,
         showClearButton = true,
@@ -140,17 +146,13 @@ private fun OtpSection(
 
 @Composable
 private fun SubmitVerifyButton(
-    uiStateState: State<ChangeMobileUiState>,
-    onIntent: (ChangeMobileIntent) -> Unit
+    isLoading: Boolean,
+    isOtpComplete: Boolean,
+    onSubmit: () -> Unit
 ) {
-    val isLoading by remember { derivedStateOf { uiStateState.value.isLoading } }
-    val isOtpComplete by remember { derivedStateOf { uiStateState.value.otpCode.length == 5 } }
-
     LoadingButton(
         text = "تأیید و ادامه",
-        onClick = {
-            onIntent(ChangeMobileIntent.VerifyOtp)
-        },
+        onClick = onSubmit,
         enabled = !isLoading && isOtpComplete,
         isLoading = isLoading,
         modifier = Modifier.fillMaxWidth()

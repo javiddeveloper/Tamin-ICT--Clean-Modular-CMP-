@@ -56,7 +56,7 @@ import taminx.core.core_ui.profile_get_otp_code
 
 @Composable
 fun EnterMobileStep(
-    uiStateState: State<ChangeMobileUiState>,
+    uiState: ChangeMobileUiState,
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
     Column(
@@ -66,24 +66,36 @@ fun EnterMobileStep(
             .padding(Spacing.lg)
     ) {
         SectionHeaderTitle(title = "شماره همراه فعلی")
-        CurrentMobileSection(uiStateState)
+        CurrentMobileSection(
+            currentMobile = uiState.currentMobile,
+            isLoading = uiState.isLoading
+        )
         Spacer(modifier = Modifier.height(Spacing.xl))
-        NewMobileSection(uiStateState, onIntent)
+        NewMobileSection(
+            newMobile = uiState.newMobile,
+            isMobileError = uiState.isMobileError,
+            onMobileChanged = { onIntent(ChangeMobileIntent.NewMobileChanged(it)) }
+        )
         Spacer(modifier = Modifier.height(Spacing.xl))
         BannerCard(
             message = stringResource(Res.string.profile_change_mobile_banner_info),
             type = BannerType.Info
         )
         Spacer(modifier = Modifier.height(Spacing.xl))
-        SubmitOtpButton(uiStateState, onIntent)
+        SubmitOtpButton(
+            newMobile = uiState.newMobile,
+            isLoading = uiState.isLoading,
+            onSubmit = { onIntent(ChangeMobileIntent.GetOtpCode) }
+        )
     }
 }
 
 @Composable
-private fun CurrentMobileSection(uiStateState: State<ChangeMobileUiState>) {
+private fun CurrentMobileSection(
+    currentMobile: String,
+    isLoading: Boolean
+) {
     val taminColors = LocalTaminColors.current
-    val currentMobile by remember { derivedStateOf { uiStateState.value.currentMobile } }
-    val isLoading by remember { derivedStateOf { uiStateState.value.isLoading } }
 
     Box(
         contentAlignment = Alignment.BottomCenter,
@@ -143,12 +155,11 @@ private fun CurrentMobileSection(uiStateState: State<ChangeMobileUiState>) {
 
 @Composable
 private fun NewMobileSection(
-    uiStateState: State<ChangeMobileUiState>,
-    onIntent: (ChangeMobileIntent) -> Unit
+    newMobile: String,
+    isMobileError: Boolean,
+    onMobileChanged: (String) -> Unit
 ) {
     val taminColors = LocalTaminColors.current
-    val newMobile by remember { derivedStateOf { uiStateState.value.newMobile } }
-    val isMobileError by remember { derivedStateOf { uiStateState.value.isMobileError } }
 
     SectionHeaderTitle(
         title = "شماره همراه جدید",
@@ -156,9 +167,7 @@ private fun NewMobileSection(
     )
     PhoneNumberField(
         value = newMobile,
-        onValueChange = {
-            onIntent(ChangeMobileIntent.NewMobileChanged(it))
-        },
+        onValueChange = onMobileChanged,
         leadingIcon = vectorResource(Res.drawable.ic_mobile),
         error = isMobileError,
         showClearButton = true,
@@ -168,17 +177,13 @@ private fun NewMobileSection(
 
 @Composable
 private fun SubmitOtpButton(
-    uiStateState: State<ChangeMobileUiState>,
-    onIntent: (ChangeMobileIntent) -> Unit
+    newMobile: String,
+    isLoading: Boolean,
+    onSubmit: () -> Unit
 ) {
-    val newMobile by remember { derivedStateOf { uiStateState.value.newMobile } }
-    val isLoading by remember { derivedStateOf { uiStateState.value.isLoading } }
-
     LoadingButton(
         text = stringResource(Res.string.profile_get_otp_code),
-        onClick = {
-            onIntent(ChangeMobileIntent.GetOtpCode)
-        },
+        onClick = onSubmit,
         enabled = newMobile.isNotEmpty() && !isLoading,
         isLoading = isLoading && newMobile.isNotEmpty(),
         icon = vectorResource(Res.drawable.ic_send),
