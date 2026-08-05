@@ -55,4 +55,5 @@ sealed class ProfileEvent {
     data object NavigateToChangeMobile : ProfileEvent()
     data class OpenUrl(val url: String) : ProfileEvent()
     data class ShowToast(val message: String) : ProfileEvent()
+    data object NavigateToBankAccount : ProfileEvent()
 }
