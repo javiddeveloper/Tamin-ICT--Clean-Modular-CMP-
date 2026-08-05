@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.feature.workshops
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsScreen
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitScreen
@@ -72,7 +72,7 @@ fun NavController.navigateToWorkshops() {
 
 fun NavGraphBuilder.workshopsScreen(navController: NavController) {
 
-    composable<WorkshopsRoute> {
+    composableWithFadeTransitions<WorkshopsRoute> {
         WorkshopsScreen(
             navigateToPaymentSheets = { workshopId, branchCode ->
                 navController.navigate(PaymentSheetsRoute(workshopId, branchCode))
@@ -101,7 +101,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<PaymentSheetsRoute> { backStackEntry ->
+    composableWithFadeTransitions<PaymentSheetsRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<PaymentSheetsRoute>()
         PaymentSheetsScreen(
             workshopId = route.workshopId,
@@ -109,7 +109,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<WorkshopDebitRoute> { backStackEntry ->
+    composableWithFadeTransitions<WorkshopDebitRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkshopDebitRoute>()
         WorkshopDebitScreen(
             workshopId = route.workshopId,
@@ -117,7 +117,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<WorkshopDebtInquiryRoute> { backStackEntry ->
+    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkshopDebtInquiryRoute>()
         WorkshopDebtInquiryScreen(
             workshopId = route.workshopId,
@@ -125,7 +125,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<ObjectionableDebitRoute> { backStackEntry ->
+    composableWithFadeTransitions<ObjectionableDebitRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<ObjectionableDebitRoute>()
         ObjectionableDebitScreen(
             workshopId = route.workshopId,
@@ -133,7 +133,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<ManagementDebitRoute> { backStackEntry ->
+    composableWithFadeTransitions<ManagementDebitRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<ManagementDebitRoute>()
         ManagementDebitScreen(
             workshopId = route.workshopId,
@@ -141,7 +141,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<WorkshopMembersRoute> { backStackEntry ->
+    composableWithFadeTransitions<WorkshopMembersRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkshopMembersRoute>()
         WorkshopMembersScreen(
             workshopId = route.workshopId,
@@ -149,7 +149,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<WorkshopStackholdersRoute> { backStackEntry ->
+    composableWithFadeTransitions<WorkshopStackholdersRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkshopStackholdersRoute>()
         WorkshopStackholdersScreen(
             workshopId = route.workshopId,
@@ -157,7 +157,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composable<WorkshopRecentlyAddedMembersRoute> { backStackEntry ->
+    composableWithFadeTransitions<WorkshopRecentlyAddedMembersRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkshopRecentlyAddedMembersRoute>()
         WorkshopRecentlyAddedMembersScreen(
             workshopId = route.workshopId,

@@ -124,6 +124,7 @@ fun ProfileScreen(
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToDependentsList: () -> Unit = {},
+    onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
@@ -146,6 +147,7 @@ fun ProfileScreen(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToVersionHistory = onNavigateToVersionHistory,
+        onNavigateToChangeMobile = onNavigateToChangeMobile,
         onNavigateToDependentsList = onNavigateToDependentsList,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
@@ -169,6 +171,7 @@ fun HandleProfileEvents(
     onNavigateToIdentity: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
     onNavigateToDependentsList: () -> Unit,
+    onNavigateToChangeMobile: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -193,6 +196,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToDependentsList -> {
                 onNavigateToDependentsList()
+            }
+
+            ProfileEvent.NavigateToChangeMobile -> {
+                onNavigateToChangeMobile()
             }
 
             is ProfileEvent.OpenUrl -> {

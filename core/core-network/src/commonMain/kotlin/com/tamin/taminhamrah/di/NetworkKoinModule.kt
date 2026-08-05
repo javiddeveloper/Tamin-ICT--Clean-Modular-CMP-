@@ -5,7 +5,9 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AuthRepository
+import com.tamin.taminhamrah.repository.AuthTokenInvalidator
 import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
+import com.tamin.taminhamrah.repository.authRepository.AuthTokenInvalidatorImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -13,7 +15,9 @@ import com.tamin.taminhamrah.util.AppConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -57,6 +61,7 @@ val networkModule = module {
     }
 
     // Repositories
+    single<AuthTokenInvalidator> { AuthTokenInvalidatorImpl() }
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
 
     // JSON Serializer
@@ -83,6 +88,7 @@ val networkModule = module {
         createHttpClient(
             engine = get(),
             authRepository = get<AuthRepository>(),
+            authTokenInvalidator = get(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
         )
@@ -102,6 +108,7 @@ val networkModule = module {
         createHttpClient(
             engine = get(),
             authRepository = get<AuthRepository>(),
+            authTokenInvalidator = get(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
         )
@@ -112,6 +119,7 @@ val networkModule = module {
         createHttpClient(
             engine = get(),
             authRepository = get<AuthRepository>(),
+            authTokenInvalidator = get(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
             baseUrl = NetworkConstants.AI_BASE_URL
@@ -127,11 +135,12 @@ val networkModule = module {
 private fun createHttpClient(
     engine: HttpClientEngine,
     authRepository: AuthRepository,
+    authTokenInvalidator: AuthTokenInvalidator,
     json: Json,
     timeoutMillis: Long,
     baseUrl: String = NetworkConstants.BASE_URL
 ): HttpClient {
-    return HttpClient(engine) {
+    val client = HttpClient(engine) {
         expectSuccess = false
 
         install(ContentNegotiation) {
@@ -194,6 +203,15 @@ private fun createHttpClient(
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
     }
+
+    // The Auth plugin's bearer provider caches its BearerTokens after the first authenticated
+    // request and won't call loadTokens() again on its own (see AuthTokenInvalidator KDoc), so
+    // register a way for AuthRepository to force it to drop the cached token on logout/login.
+    client.authProviders.filterIsInstance<BearerAuthProvider>().forEach { provider ->
+        authTokenInvalidator.registerClearAction { provider.clearToken() }
+    }
+
+    return client
 }
 
 private fun createHealthHttpClient(

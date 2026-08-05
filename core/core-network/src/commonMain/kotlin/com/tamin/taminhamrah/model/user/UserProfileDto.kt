@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserProfileDto(
-    @SerialName("entityId") val entityId: String?,
-    @SerialName("login") val login: String?,
-    @SerialName("firstName") val firstName: String?,
-    @SerialName("lastName") val lastName: String?,
-    @SerialName("email") val email: String?,
-    @SerialName("nationalCode") val nationalCode: String?,
-    @SerialName("mobile") val mobile: String?
+    @SerialName("entityId") val entityId: String? = null,
+    @SerialName("login") val login: String? = null,
+    @SerialName("firstName") val firstName: String? = null,
+    @SerialName("lastName") val lastName: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("nationalCode") val nationalCode: String? = null,
+    @SerialName("mobile") val mobile: String? = null
 )
 
 @Serializable
