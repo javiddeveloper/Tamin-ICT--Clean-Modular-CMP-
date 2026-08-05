@@ -8,6 +8,7 @@ fun ActiveRelationDN.toUiModel(): ActiveRelationPR {
         id = id ?: workshopName?.hashCode()?:0,
         organizationName = organizationName ?: "—",
         insuranceId = insuranceId ?: "—",
+        branchCode = organizationId ?: "",
         relationStatus = relationDescription ?: "—",
         startDate = startDate ?: "—",
         endDate = endDate,

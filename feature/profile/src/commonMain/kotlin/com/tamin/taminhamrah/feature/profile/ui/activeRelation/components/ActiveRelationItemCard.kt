@@ -37,7 +37,17 @@ import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import com.tamin.taminhamrah.util.toFormattedDate
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.active_relation_active
+import taminx.core.core_ui.active_relation_disconnected_badge
+import taminx.core.core_ui.active_relation_inactive
+import taminx.core.core_ui.active_relation_insurance_number
+import taminx.core.core_ui.active_relation_org_name
+import taminx.core.core_ui.active_relation_send_certificate
+import taminx.core.core_ui.active_relation_start_date
+import taminx.core.core_ui.active_relation_status
+import taminx.core.core_ui.active_relation_verified_badge
 import taminx.core.core_ui.ic_send
 
 @Composable
@@ -97,7 +107,7 @@ internal fun ActiveRelationItemCard(
                             )
                     )
                     Text(
-                        text = if (item.isActive) "دارای ارتباط فعال" else "فاقد ارتباط فعال",
+                        text = if (item.isActive) stringResource(Res.string.active_relation_active) else stringResource(Res.string.active_relation_inactive),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = if (item.isActive) taminColors.springGreenText else taminColors.textMuted
@@ -124,19 +134,19 @@ internal fun ActiveRelationItemCard(
                     .padding(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                InfoRow(label = "نام واحد سازمانی", value = item.organizationName)
+                InfoRow(label = stringResource(Res.string.active_relation_org_name), value = item.organizationName)
                 TaminDivider()
                 InfoRow(
-                    label = "شمارهٔ بیمه",
+                    label = stringResource(Res.string.active_relation_insurance_number),
                     value = item.insuranceId.toPersianDigits(),
                     isNumeric = true
                 )
                 TaminDivider()
-                InfoRow(label = "وضعیت ارتباط", value = if(item.isActive) item.relationStatus else "فاقد ارتباط فعال")
+                InfoRow(label = stringResource(Res.string.active_relation_status), value = if(item.isActive) item.relationStatus else stringResource(Res.string.active_relation_inactive))
                 if (item.isActive) {
                     TaminDivider()
                     InfoRow(
-                        label = "از تاریخ",
+                        label = stringResource(Res.string.active_relation_start_date),
                         value = item.startDate.toFormattedDate(),
                         isNumeric = true
                     )
@@ -161,27 +171,13 @@ internal fun ActiveRelationItemCard(
                     )
                     Spacer(modifier = Modifier.size(Spacing.sm))
                     Text(
-                        text = "ارسال گواهی",
+                        text = stringResource(Res.string.active_relation_send_certificate),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.blueText
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    taminColors.greenBorder.copy(alpha = 0.1f),
-                                    taminColors.greenText.copy(alpha = 1f),
-                                    taminColors.greenBorder.copy(alpha = 0.1f)
-                                )
-                            )
-                        )
-                )
             }
         }
     }
@@ -226,7 +222,7 @@ private fun InfoRow(
 private fun VerifiedBadge(modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     CustomChip(
-        text = "تأیید سازمان",
+        text = stringResource(Res.string.active_relation_verified_badge),
         modifier = modifier,
         containerColor = taminColors.bgSurface,
         textColor = taminColors.springGreenText,
@@ -238,7 +234,7 @@ private fun VerifiedBadge(modifier: Modifier = Modifier) {
 private fun InactiveBadge(modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     CustomChip(
-        text = "قطع شده",
+        text = stringResource(Res.string.active_relation_disconnected_badge),
         modifier = modifier,
         containerColor = taminColors.bgPage,
         textColor = taminColors.textMuted,
@@ -255,6 +251,7 @@ private fun PreviewActiveRelationItemCard() {
                 id = 1,
                 organizationName = "شعبه ۴ تبریز",
                 insuranceId = "۰۰۴۱۷۳۶۲۲۷",
+                branchCode = "5750",
                 relationStatus = "اصلی - بیمه‌پرداز - اجتماعی خاص - کارگران ساختمانی",
                 startDate = "۱۴۰۵/۰۴/۰۱",
                 endDate = null,
@@ -275,6 +272,7 @@ private fun PreviewInactiveRelationItemCard() {
                 id = 2,
                 organizationName = "شعبه ۶ تبریز",
                 insuranceId = "۰۰۴۱۷۳۶۲۲۷",
+                branchCode = "5751",
                 relationStatus = "فاقد ارتباط فعال",
                 startDate = "۱۴۰۲/۰۱/۰۱",
                 endDate = "۱۴۰۴/۰۱/۰۱",
@@ -295,6 +293,7 @@ private fun PreviewActiveRelationIItemCardDark() {
                 id = 1,
                 organizationName = "شعبه ۴ تبریز",
                 insuranceId = "۰۰۴۱۷۳۶۲۲۷",
+                branchCode = "5750",
                 relationStatus = "اصلی - بیمه‌پرداز - اجتماعی خاص - کارگران ساختمانی",
                 startDate = "۱۴۰۵/۰۴/۰۱",
                 endDate = null,
@@ -315,6 +314,7 @@ private fun PreviewInActiveRelationIItemCardDark() {
                 id = 2,
                 organizationName = "شعبه ۶ تبریز",
                 insuranceId = "۰۰۴۱۷۳۶۲۲۷",
+                branchCode = "5751",
                 relationStatus = "فاقد ارتباط فعال",
                 startDate = "۱۴۰۲/۰۱/۰۱",
                 endDate = "۱۴۰۴/۰۱/۰۱",

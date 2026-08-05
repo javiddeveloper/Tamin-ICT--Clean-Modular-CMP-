@@ -26,6 +26,16 @@ fun String.toFormattedDate(): String =
         this
     }
 
+/**
+ * Converts a Persian date string (possibly with slashes and Persian digits)
+ * to a clean ASCII "yyyyMMdd" format for API consumption.
+ */
+fun String.toApiDateFormat(): String = this
+    .replace("/", "")
+    .map { char ->
+        if (char in PERSIAN_ZERO..PERSIAN_ZERO + 9) '0' + (char - PERSIAN_ZERO) else char
+    }.joinToString("")
+
 fun currentTime(): String {
     val now = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault())

@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
+import com.tamin.taminhamrah.model.certificate.StatusCertificateReportDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
@@ -40,4 +42,12 @@ interface UserRepository {
     suspend fun getUserProfile(): Flow<UserProfileDN>
 
     fun checkUserIsNew(nationalId: String): Flow<Boolean>
+
+    suspend fun getStatusCertificateReport(
+        filters: List<ApiFilterDN> = emptyList()
+    ): Flow<StatusCertificateReportDN>
+
+    suspend fun getRecipients(
+        filters: List<ApiFilterDN> = emptyList()
+    ): Flow<List<RecipientDN>>
 }

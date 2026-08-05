@@ -7,6 +7,7 @@ data class ActiveRelationPR(
     val id: Int,
     val organizationName: String,
     val insuranceId: String,
+    val branchCode: String,
     val relationStatus: String,
     val startDate: String,
     val endDate: String?,

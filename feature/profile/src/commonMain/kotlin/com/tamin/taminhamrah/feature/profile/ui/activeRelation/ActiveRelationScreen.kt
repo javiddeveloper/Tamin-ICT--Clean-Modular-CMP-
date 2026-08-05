@@ -15,6 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.ActiveRelationHeader
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.ActiveRelationItemCard
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.CertificateBottomSheet
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.CertificateSuccessDialog
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.RecipientsBottomSheet
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.contract.ActiveRelationEvent
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.contract.ActiveRelationIntent
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.contract.ActiveRelationUiState
@@ -23,6 +26,9 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.ToasterState
+import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
@@ -35,27 +41,32 @@ internal fun ActiveRelationRoute(
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val toaster = LocalToaster.current
 
     ActiveRelationEvents(
         events = viewModel.events,
-        onBackClicked = onBackClicked
+        onBackClicked = onBackClicked,
+        toaster = toaster
     )
 
     ActiveRelationScreen(
         uiState = uiState,
-        onIntent = viewModel::sendIntent
+        onIntent = viewModel::sendIntent,
     )
 }
 
 @Composable
 fun ActiveRelationEvents(
     events: Flow<ActiveRelationEvent>,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    toaster: ToasterState,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             ActiveRelationEvent.NavigateBack -> onBackClicked()
-            is ActiveRelationEvent.ShowToast -> {}
+            is ActiveRelationEvent.ShowToast -> {
+                toaster.error(event.message)
+            }
         }
     }
 }
@@ -63,7 +74,7 @@ fun ActiveRelationEvents(
 @Composable
 internal fun ActiveRelationScreen(
     uiState: ActiveRelationUiState,
-    onIntent: (ActiveRelationIntent) -> Unit
+    onIntent: (ActiveRelationIntent) -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -94,7 +105,7 @@ internal fun ActiveRelationScreen(
                     ActiveRelationItemCard(
                         item = item,
                         onSendCertificateClicked = {
-                            // TODO: Implement send certificate action
+                            onIntent(ActiveRelationIntent.OnSendCertificateClicked(item))
                         }
                     )
                 }
@@ -104,6 +115,31 @@ internal fun ActiveRelationScreen(
                 LoadingStateOverlay()
             }
         }
+    }
+
+    if (uiState.showCertificateSheet && uiState.selectedItem != null) {
+        CertificateBottomSheet(
+            state = uiState,
+            onRecipientClick = { onIntent(ActiveRelationIntent.OnSelectRecipientClicked) },
+            onBranchNameChange = { onIntent(ActiveRelationIntent.OnBranchNameChanged(it)) },
+            onIssueClick = { onIntent(ActiveRelationIntent.OnIssueCertificateClicked(uiState.selectedItem)) },
+            onDismiss = { onIntent(ActiveRelationIntent.OnDismissCertificateSheet) }
+        )
+    }
+
+    if (uiState.showRecipientsSheet) {
+        RecipientsBottomSheet(
+            state = uiState,
+            onSearchQueryChange = { onIntent(ActiveRelationIntent.OnSearchRecipients(it)) },
+            onRecipientSelected = { onIntent(ActiveRelationIntent.OnRecipientSelected(it)) },
+            onDismiss = { onIntent(ActiveRelationIntent.OnDismissRecipientsSheet) }
+        )
+    }
+
+    if (uiState.showSuccessDialog) {
+        CertificateSuccessDialog(
+            onDismiss = { onIntent(ActiveRelationIntent.OnDismissSuccessDialog) }
+        )
     }
 }
 
@@ -118,7 +154,7 @@ private fun PreviewActiveRelationScreenLight() {
                 inactiveCount = 1,
                 lastCheckTime = "۱۰:۲۴"
             ),
-            onIntent = {}
+            onIntent = {},
         )
     }
 }
@@ -134,7 +170,7 @@ private fun PreviewActiveRelationScreenDark() {
                 inactiveCount = 1,
                 lastCheckTime = "۱۰:۲۴"
             ),
-            onIntent = {}
+            onIntent = {},
         )
     }
 }
@@ -144,6 +180,7 @@ private val PreviewMockActiveRelations = persistentListOf(
         id = 2,
         organizationName = "شعبه شهرری",
         insuranceId = "۰۰۲۲۱۶۶۱۳۱",
+        branchCode = "5750",
         relationStatus = "فاقد ارتباط فعال",
         startDate = "—",
         endDate = null,
@@ -154,6 +191,7 @@ private val PreviewMockActiveRelations = persistentListOf(
         id = 4,
         organizationName = "شعبه لاهیجان",
         insuranceId = "۰۰۱۵۷۴۲۳۷۱",
+        branchCode = "5751",
         relationStatus = "کارفرما - عدم بیمه‌پرداز",
         startDate = "۱۴۰۰/۱۱/۲۰",
         endDate = "۱۴۰۵/۰۵/۱۴",

@@ -33,6 +33,11 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.active_relation_header_active_count
+import taminx.core.core_ui.active_relation_header_check_time
+import taminx.core.core_ui.active_relation_header_inactive_count
+import taminx.core.core_ui.active_relation_header_status_error
+import taminx.core.core_ui.active_relation_header_status_ok
 import taminx.core.core_ui.ic_communication
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.profile_active_relation
@@ -85,7 +90,7 @@ internal fun ActiveRelationHeader(
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 
-        val statusText = if (activeCount > 0) "ارتباط شما برقرار است" else "ارتباط شما برقرار نیست"
+        val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
         val statusColor =
             if (activeCount > 0) taminColors.springGreenText else taminColors.dangerText
 
@@ -110,9 +115,9 @@ internal fun ActiveRelationHeader(
             )
         }
 
-        val activeText = "${activeCount.toString().toPersianDigits()} ارتباط فعال"
-        val inactiveText = "${inactiveCount.toString().toPersianDigits()} ارتباط غیرفعال"
-        val checkTimeText = "بررسی: امروز $lastCheckTime"
+        val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
+        val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
+        val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
 
         Text(
             text = "$activeText · $inactiveText · $checkTimeText",

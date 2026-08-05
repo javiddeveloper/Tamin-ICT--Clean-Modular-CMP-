@@ -37,6 +37,8 @@ import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
+import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
+import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
@@ -154,6 +156,8 @@ val domainModule = module {
     factoryOf(::GetBankAccountListUseCase)
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
+    factoryOf(::GetStatusCertificateReportUseCase)
+    factoryOf(::GetRecipientsUseCase)
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)

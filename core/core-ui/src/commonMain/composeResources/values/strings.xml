@@ -283,5 +283,30 @@
     <string name="identity_gender_female">زن</string>
     <string name="identity_gender_unknown">نامشخص</string>
 
+    <!-- Active Relation -->
+    <string name="active_relation_active">دارای ارتباط فعال</string>
+    <string name="active_relation_inactive">فاقد ارتباط فعال</string>
+    <string name="active_relation_verified_badge">تأیید سازمان</string>
+    <string name="active_relation_disconnected_badge">قطع شده</string>
+    <string name="active_relation_org_name">نام واحد سازمانی</string>
+    <string name="active_relation_insurance_number">شمارهٔ بیمه</string>
+    <string name="active_relation_status">وضعیت ارتباط</string>
+    <string name="active_relation_start_date">از تاریخ</string>
+    <string name="active_relation_send_certificate">ارسال گواهی</string>
+    <string name="active_relation_select_recipient">انتخاب بانک/مؤسسه/نهاد</string>
+    <string name="active_relation_recipient_branch_placeholder">نام شعبه دریافت‌کننده گواهی</string>
+    <string name="active_relation_issue_and_send">صدور و ارسال به صندوق شخصی</string>
+    <string name="active_relation_select_recipient_title">لطفا بانک/موسسه/نهاد را انتخاب نمایید</string>
+    <string name="active_relation_search_placeholder">جستجو</string>
+    <string name="active_relation_success_title">درخواست شما با موفقیت ثبت شد</string>
+    <string name="active_relation_success_description">پیام تایید ارسال گواهی استعلام وضعیت ، برای شماره همراه شما ارسال گردید. گواهی استعلام وضعیت شما به صندوق شخصی شما ارسال شده است.</string>
+    <string name="active_relation_success_button">متوجه شدم</string>
+
+    <string name="active_relation_header_status_ok">ارتباط شما برقرار است</string>
+    <string name="active_relation_header_status_error">ارتباط شما برقرار نیست</string>
+    <string name="active_relation_header_active_count">%1$s ارتباط فعال</string>
+    <string name="active_relation_header_inactive_count">%1$s ارتباط غیرفعال</string>
+    <string name="active_relation_header_check_time">بررسی: امروز %1$s</string>
+
 </resources>
 
