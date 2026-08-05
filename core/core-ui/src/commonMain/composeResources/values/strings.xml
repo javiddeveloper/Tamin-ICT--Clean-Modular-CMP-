@@ -92,6 +92,8 @@
 
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
+    <string name="action_close">بستن</string>
+    <string name="error_title">خطا در دریافت اطلاعات</string>
     <string name="action_confirm">تایید</string>
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
@@ -107,7 +109,6 @@
     <string name="amount_total">جمع کل</string>
     <!-- Stands in for an amount that has not loaded; must never read as a real figure. -->
     <string name="amount_unknown">—</string>
-    <string name="error_pull_to_retry">برای تلاش دوباره، صفحه را به پایین بکشید.</string>
 
     <!-- Treatment hub -->
     <string name="hub_empty_patients">بیمه‌شده‌ای برای نمایش وجود ندارد</string>

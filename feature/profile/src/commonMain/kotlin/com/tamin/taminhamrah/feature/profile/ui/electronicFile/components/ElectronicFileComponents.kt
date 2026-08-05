@@ -98,16 +98,14 @@ fun DocumentGrid(
 ) {
     val refresh = documents.loadState.refresh
 
+    ErrorStateView(
+        message = (refresh as? LoadState.Error)?.error?.message,
+        onRetry = documents::retry,
+    )
+
     when {
         refresh is LoadState.Loading && documents.itemCount == 0 ->
             DocumentGridSkeleton(modifier = modifier)
-
-        refresh is LoadState.Error && documents.itemCount == 0 ->
-            ErrorStateView(
-                message = refresh.error.message.orEmpty(),
-                onRetry = documents::retry,
-                modifier = modifier,
-            )
 
         documents.itemCount == 0 ->
             TaminEmptyState(

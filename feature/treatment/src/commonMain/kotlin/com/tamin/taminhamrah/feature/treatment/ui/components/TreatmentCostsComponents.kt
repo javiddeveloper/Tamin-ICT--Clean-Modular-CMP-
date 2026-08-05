@@ -38,14 +38,15 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.isActionable
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.taminSurface
-import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -74,9 +75,7 @@ import taminx.core.core_ui.costs_refund_date
 import taminx.core.core_ui.costs_return_reason
 import taminx.core.core_ui.costs_send_to_inbox
 import taminx.core.core_ui.costs_view_certificate
-import taminx.core.core_ui.error_pull_to_retry
 import taminx.core.core_ui.ic_tamin_chevron_forward
-import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_download
 import taminx.core.core_ui.ic_tamin_misc_claims
 import taminx.core.core_ui.unit_rial
@@ -98,17 +97,18 @@ internal fun CertificateList(
     error: String?,
     onOpenCertificate: (String) -> Unit,
     onSendToInbox: (String) -> Unit,
+    onRetry: () -> Unit,
 ) {
     // Remembers completed entrance animations across list scrolls to avoid re-triggering entrance animations on already-visible items.
     val staggerState = rememberStaggeredEntranceState()
 
+    // A failed request and a genuinely empty result read very differently: the dialog says what
+    // went wrong, the list underneath falls through to its empty state.
+    ErrorStateView(message = error, onRetry = onRetry)
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
-
-            // A failed request and a genuinely empty result read very differently, so they get
-            // different states.
-            error != null -> item { CostsErrorState(message = error) }
 
             certificates.isEmpty() -> item {
                 TaminEmptyState(message = stringResource(Res.string.costs_empty))
@@ -413,39 +413,6 @@ private fun CertificateAction(
     }
 }
 
-/**
- * Failure state: what went wrong and how to recover, nothing more.
- *
- * No retry affordance: recovering from a failure means re-entering the screen.
- */
-@Composable
-private fun CostsErrorState(message: String) {
-    val colors = LocalTaminColors.current
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(Spacing.page),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-            contentDescription = null,
-            tint = colors.dangerText,
-            modifier = Modifier.size(IconSize.large),
-        )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = stringResource(Res.string.error_pull_to_retry),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textSecondary,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
 
 @Composable
 private fun CostsShimmerSkeleton() {

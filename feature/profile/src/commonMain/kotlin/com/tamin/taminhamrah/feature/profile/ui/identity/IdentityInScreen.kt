@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentityCard
@@ -140,11 +138,6 @@ fun IdentityInScreen(
             when {
                 state.isLoading && sections == null -> LoadingStateOverlay()
 
-                state.error != null -> ErrorStateView(
-                    message = state.error,
-                    onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
-                )
-
                 sections != null -> {
                     RegistryVerifiedNotice(
                         modifier = Modifier.padding(horizontal = Spacing.page),
@@ -158,6 +151,11 @@ fun IdentityInScreen(
 
             Spacer(modifier = Modifier.height(Spacing.xxl))
         }
+
+        ErrorStateView(
+            message = state.error,
+            onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
+        )
 
         // The header floats on top so the body passes underneath it as it scrolls away.
         IdentityHeader(

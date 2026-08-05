@@ -118,6 +118,7 @@ fun TreatmentCostsScreen(
                 error = state.error,
                 onOpenCertificate = { repId -> showingRepId = repId },
                 onSendToInbox = { repId -> onIntent(CostsIntent.SendToInbox(repId)) },
+                onRetry = { onIntent(CostsIntent.LoadList) },
             )
         }
     }
