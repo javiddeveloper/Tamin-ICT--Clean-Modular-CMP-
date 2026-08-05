@@ -28,6 +28,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
+private const val STEP_INQUIRY = 1
+private const val STEP_VERIFICATION = 2
+private const val STEP_DOCUMENTS = 3
+private const val STEP_SUCCESS = 4
+
 class AddDependentViewModel(
     private val getActiveBranchesUseCase: GetActiveBranchesUseCase,
     private val getFamilyRelationshipsUseCase: GetFamilyRelationshipsUseCase,
@@ -74,7 +79,7 @@ class AddDependentViewModel(
             }
             is AddDependentIntent.OnNextStepClicked -> onNextStepClicked()
             is AddDependentIntent.OnPreviousStepClicked -> flow {
-                val prevStep = (uiState.value.currentStep - 1).coerceAtLeast(1)
+                val prevStep = (uiState.value.currentStep - 1).coerceAtLeast(STEP_INQUIRY)
                 emit(PartialState.StepChanged(prevStep))
             }
             is AddDependentIntent.SubmitFinalRequest -> submitFinalRequest()
@@ -91,6 +96,15 @@ class AddDependentViewModel(
             }
             .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شعب")) }
             .collect { emit(it) }
+
+        getFamilyRelationshipsUseCase()
+            .map { relationships ->
+                PartialState.FamilyRelationshipsLoaded(relationships.map { it.toPresentation() }) as PartialState
+            }
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت نسبت‌های خانوادگی")) }
+            .collect { emit(it) }
+
+        emit(PartialState.Loading(false))
     }
 
     private fun submitInquiryRegistry(): Flow<PartialState> = flow {
@@ -125,6 +139,9 @@ class AddDependentViewModel(
             emit(PartialState.Error(it.message ?: "خطا در استعلام ثبت احوال"))
         }.collect {
             emit(it)
+            if (it is PartialState.RegistryInquirySuccess) {
+                emit(PartialState.StepChanged(STEP_VERIFICATION))
+            }
         }
     }
 
@@ -185,42 +202,32 @@ class AddDependentViewModel(
     private fun onNextStepClicked(): Flow<PartialState> = flow {
         val state = uiState.value
         when (state.currentStep) {
-            1 -> {
-                if (state.needCallInquiryRegistry) {
-                    submitInquiryRegistry().collect { emit(it) }
-                } else {
-                    emit(PartialState.StepChanged(2))
+            STEP_VERIFICATION -> {
+                if (state.selectedCityBirth == null || state.selectedCityIssuance == null || state.selectedBranch == null) {
+                    sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید"))
+                    return@flow
                 }
-            }
-            2 -> {
                 when (state.stepperMode) {
                     StepperMode.SON_MODE -> {
                         if (state.needCallInquiryEducation) {
                             submitInquiryEducation().collect { emit(it) }
                         } else {
-                            emit(PartialState.StepChanged(3))
+                            emit(PartialState.StepChanged(STEP_DOCUMENTS))
                         }
                     }
                     StepperMode.DAUGHTER_MODE -> {
                         if (!state.isDaughterCommitmentChecked) {
                             sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "تایید تعهدنامه الزامی است"))
                         } else {
-                            emit(PartialState.StepChanged(3))
+                            emit(PartialState.StepChanged(STEP_DOCUMENTS))
                         }
                     }
                     StepperMode.DEFAULT_MODE -> {
-                        emit(PartialState.StepChanged(3))
+                        emit(PartialState.StepChanged(STEP_DOCUMENTS))
                     }
                 }
             }
-            3 -> {
-                if (state.selectedCityBirth == null || state.selectedCityIssuance == null || state.selectedBranch == null) {
-                    sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید"))
-                } else {
-                    emit(PartialState.StepChanged(4))
-                }
-            }
-            4 -> {
+            STEP_DOCUMENTS -> {
                 val activeDocTypes = state.requiredDocTypes.filter { !it.isDisabled }
                 val uploadedTypes = state.uploadedDocuments.map { it.docType }.toSet()
                 val isAllUploaded = activeDocTypes.all { docType -> uploadedTypes.contains(docType.code) }
@@ -259,13 +266,14 @@ class AddDependentViewModel(
         )
 
         addNewDependentUseCase(requestPR.toDomain())
-            .map { resultDN ->
-                sendEvent(AddDependentEvent.ShowSuccessDialog(resultDN.message ?: "کفالت با موفقیت ثبت شد"))
-                sendEvent(AddDependentEvent.NavigateBack)
-                PartialState.Loading(false) as PartialState
+            .map {
+                PartialState.StepChanged(STEP_SUCCESS) as PartialState
             }
             .catch { emit(PartialState.Error(it.message ?: "خطا در ثبت نهایی درخواست")) }
-            .collect { emit(it) }
+            .collect {
+                emit(PartialState.Loading(false))
+                emit(it)
+            }
     }
 
     private fun evaluateStepperMode(data: RegistryDataPR, relationCode: String): StepperMode {
@@ -322,6 +330,11 @@ class AddDependentViewModel(
             isLoading = false,
             activeBranches = partialState.branches,
             selectedBranch = currentState.selectedBranch ?: partialState.autoSelectedBranch,
+            error = null
+        )
+        is PartialState.FamilyRelationshipsLoaded -> currentState.copy(
+            isLoading = false,
+            familyRelationships = partialState.relationships,
             error = null
         )
         is PartialState.NationalIdChanged -> {
@@ -389,7 +402,8 @@ class AddDependentViewModel(
             uploadedDocuments = currentState.uploadedDocuments.filter { it.docType != partialState.docType }
         )
         is PartialState.StepChanged -> currentState.copy(
-            currentStep = partialState.step
+            currentStep = partialState.step,
+            isLoading = false
         )
         is PartialState.Error -> currentState.copy(
             isLoading = false,

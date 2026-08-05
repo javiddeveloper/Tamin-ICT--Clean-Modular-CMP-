@@ -25,6 +25,9 @@ class DependentsListViewModel(
             is DependentsListIntent.OnAddDependentClicked -> flow {
                 sendEvent(DependentsListEvent.NavigateToAddDependentWizard)
             }
+            is DependentsListIntent.OnDependentCardToggled -> flow {
+                emit(PartialState.ExpandedToggled(intent.id))
+            }
         }
     }
 
@@ -48,6 +51,13 @@ class DependentsListViewModel(
             isLoading = false,
             dependentsList = partialState.dependents,
             error = null
+        )
+        is PartialState.ExpandedToggled -> currentState.copy(
+            expandedIds = if (partialState.id in currentState.expandedIds) {
+                currentState.expandedIds - partialState.id
+            } else {
+                currentState.expandedIds + partialState.id
+            }
         )
         is PartialState.Error -> currentState.copy(
             isLoading = false,

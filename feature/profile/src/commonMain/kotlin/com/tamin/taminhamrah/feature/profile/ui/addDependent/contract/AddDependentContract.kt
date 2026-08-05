@@ -33,6 +33,7 @@ data class AddDependentState(
     val stepperMode: StepperMode = StepperMode.DEFAULT_MODE,
     val isLoading: Boolean = false,
     val activeBranches: List<BranchPR> = emptyList(),
+    val familyRelationships: List<FamilyRelationshipPR> = emptyList(),
     val dependentNationalId: String = "",
     val birthDateGregorian: String = "",
     val birthDateTimeStamp: String = "",
@@ -57,6 +58,7 @@ data class AddDependentState(
             val branches: List<BranchPR>,
             val autoSelectedBranch: BranchPR?
         ) : PartialState()
+        data class FamilyRelationshipsLoaded(val relationships: List<FamilyRelationshipPR>) : PartialState()
         data class NationalIdChanged(val id: String) : PartialState()
         data class BirthDateSelected(
             val persianDate: String,
@@ -127,6 +129,5 @@ sealed interface AddDependentIntent {
 sealed interface AddDependentEvent {
     data class ShowToast(val message: String) : AddDependentEvent
     data class ShowErrorDialog(val title: String, val message: String) : AddDependentEvent
-    data class ShowSuccessDialog(val message: String) : AddDependentEvent
     data object NavigateBack : AddDependentEvent
 }
