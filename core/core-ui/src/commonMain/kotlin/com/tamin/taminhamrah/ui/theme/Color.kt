@@ -201,37 +201,43 @@ val TaminIdentityAvatarGlass = Brush.verticalGradient(
 /* ---- Bank cards ---------------------------------------------------------------------------- */
 
 /**
- * Brand palettes, identical in both themes: a bank's colours belong to the bank, not to the app,
- * so these are the one group here that does not have a light and a dark variant.
+ * Bank card palettes, taken from the final design.
+ *
+ * Identical in light and dark: a bank's colours belong to the bank, so these are the one group here
+ * with no per-theme variant. Each card is a pale two-stop wash with the brand carried by the ink,
+ * and the account number has its own tone — رفاه writes its name in navy but its number in magenta.
  */
-val TaminBankRefahStart = Color(0xFF2B3C9A)
-val TaminBankRefahMid = Color(0xFF8E2A82)
-val TaminBankRefahEnd = Color(0xFFCC0267)
+val TaminBankRefahSurfaceTop = Color(0xFFFFFFFF)
+val TaminBankRefahSurfaceBottom = Color(0xFFDFE5F1)
+val TaminBankRefahInk = Color(0xFF23378B)
+val TaminBankRefahNumberInk = Color(0xFF98104F)
 
-val TaminBankMelliStart = Color(0xFFEBD08A)
-val TaminBankMelliMid = Color(0xFFD8B45C)
-val TaminBankMelliEnd = Color(0xFFB98F34)
+val TaminBankMelliSurfaceTop = Color(0xFFFFF8E8)
+val TaminBankMelliSurfaceBottom = Color(0xFFE8CE93)
+val TaminBankMelliInk = Color(0xFF4A3512)
+val TaminBankMelliNumberInk = Color(0xFF3B2A0B)
 
-val TaminBankMellatStart = Color(0xFFE5468A)
-val TaminBankMellatMid = Color(0xFFC61E6E)
-val TaminBankMellatEnd = Color(0xFF9A0F55)
+val TaminBankMellatSurfaceTop = Color(0xFFFFFFFF)
+val TaminBankMellatSurfaceBottom = Color(0xFFF4D5D0)
+val TaminBankMellatInk = Color(0xFF7E1B15)
+val TaminBankMellatNumberInk = Color(0xFF8E1A12)
 
-val TaminBankTejaratStart = Color(0xFF2E9BE0)
-val TaminBankTejaratMid = Color(0xFF1477C2)
-val TaminBankTejaratEnd = Color(0xFF0C5798)
+val TaminBankTejaratSurfaceTop = Color(0xFFF8FCFF)
+val TaminBankTejaratSurfaceBottom = Color(0xFFCBE4F3)
+val TaminBankTejaratInk = Color(0xFF17557E)
+val TaminBankTejaratNumberInk = Color(0xFF0F4569)
 
-val TaminBankSaderatStart = Color(0xFF2E71C4)
-val TaminBankSaderatMid = Color(0xFF154E9E)
-val TaminBankSaderatEnd = Color(0xFF0B3B82)
+val TaminBankSaderatSurfaceTop = Color(0xFFF7FBFF)
+val TaminBankSaderatSurfaceBottom = Color(0xFFC6DDF3)
+val TaminBankSaderatInk = Color(0xFF00457A)
+val TaminBankSaderatNumberInk = Color(0xFF004D86)
 
-val TaminBankSepahStart = Color(0xFF3A5CBE)
-val TaminBankSepahMid = Color(0xFF213F92)
-val TaminBankSepahEnd = Color(0xFF152C6E)
+val TaminBankSepahSurfaceTop = Color(0xFFFFF7EC)
+val TaminBankSepahSurfaceBottom = Color(0xFFFFCE90)
+val TaminBankSepahInk = Color(0xFF2E3192)
+val TaminBankSepahNumberInk = Color(0xFF242678)
 
 /** A bank the service returns that the app has no palette for still has to draw a card. */
-val TaminBankUnknownStart = TaminNavy300
-val TaminBankUnknownMid = Color(0xFF24509C)
-val TaminBankUnknownEnd = TaminNavy900
-
-/** ملی is the only light card; every other card writes in white. */
-val TaminBankInkOnLight = Color(0xFF43340F)
+val TaminBankUnknownSurfaceTop = Color(0xFFFFFFFF)
+val TaminBankUnknownSurfaceBottom = Color(0xFFDFE5F1)
+val TaminBankUnknownInk = TaminNavy900
