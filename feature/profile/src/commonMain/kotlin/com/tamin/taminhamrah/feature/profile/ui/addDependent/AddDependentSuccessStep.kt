@@ -29,15 +29,19 @@ import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_user
+import taminx.core.core_ui.success_badge_text
+import taminx.core.core_ui.success_dependent_fallback
+import taminx.core.core_ui.success_desc
+import taminx.core.core_ui.success_title
 
 @Composable
 fun AddDependentSuccessStep(
@@ -47,7 +51,7 @@ fun AddDependentSuccessStep(
     val dependentName = state.registryData
         ?.let { "${it.firstName} ${it.lastName}".trim() }
         ?.ifBlank { null }
-        ?: "فرد تبعی"
+        ?: stringResource(Res.string.success_dependent_fallback)
     val relationLabel = state.selectedRelationship?.relationDesc.orEmpty()
 
     Column(
@@ -81,7 +85,7 @@ fun AddDependentSuccessStep(
         Spacer(modifier = Modifier.height(Spacing.xxl))
 
         Text(
-            text = "ثبت فرد تبعی تکمیل شد",
+            text = stringResource(Res.string.success_title),
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary
@@ -92,7 +96,7 @@ fun AddDependentSuccessStep(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         Text(
-            text = "درخواست شما ثبت شد و پس از بررسی مدارک، پوشش بیمه‌ای فرد تبعی فعال می‌شود.",
+            text = stringResource(Res.string.success_desc),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.textMuted,
             textAlign = TextAlign.Center,
@@ -116,7 +120,7 @@ fun AddDependentSuccessStep(
                     ),
                     showArrow = false,
                     badge = ListItemBadge(
-                        text = "ثبت شد",
+                        text = stringResource(Res.string.success_badge_text),
                         backgroundColor = colors.verifiedBadgeBg,
                         textColor = colors.greenText
                     ),

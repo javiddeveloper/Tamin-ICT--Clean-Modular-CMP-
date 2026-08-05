@@ -19,6 +19,7 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
     private lateinit var repository: FakeAddDependentRepository
     private lateinit var getActiveBranchesUseCase: GetActiveBranchesUseCase
     private lateinit var getFamilyRelationshipsUseCase: GetFamilyRelationshipsUseCase
+    private lateinit var getFamilyRelationshipsFromProxyUseCase: GetFamilyRelationshipsFromProxyUseCase
     private lateinit var inquiryRegistryUseCase: InquiryRegistryUseCase
     private lateinit var inquiryEducationCodeUseCase: InquiryEducationCodeUseCase
     private lateinit var uploadDependentImageUseCase: UploadDependentImageUseCase
@@ -29,6 +30,7 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
         repository = FakeAddDependentRepository()
         getActiveBranchesUseCase = GetActiveBranchesUseCase(repository)
         getFamilyRelationshipsUseCase = GetFamilyRelationshipsUseCase(repository)
+        getFamilyRelationshipsFromProxyUseCase = GetFamilyRelationshipsFromProxyUseCase(repository)
         inquiryRegistryUseCase = InquiryRegistryUseCase(repository)
         inquiryEducationCodeUseCase = InquiryEducationCodeUseCase(repository)
         uploadDependentImageUseCase = UploadDependentImageUseCase(repository)
@@ -56,6 +58,19 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
         repository.familyRelationshipsResult = expectedRelationships
 
         getFamilyRelationshipsUseCase(queryJson = null).test {
+            assertEquals(expectedRelationships, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `GetFamilyRelationshipsFromProxyUseCase should return relationships from repository`() = runTest {
+        val expectedRelationships = listOf(
+            FamilyRelationshipDN(id = 2, relationCode = "REL_2", relationDesc = "پسر", bailCode = "BAIL_01")
+        )
+        repository.familyRelationshipsFromProxyResult = expectedRelationships
+
+        getFamilyRelationshipsFromProxyUseCase().test {
             assertEquals(expectedRelationships, awaitItem())
             awaitComplete()
         }

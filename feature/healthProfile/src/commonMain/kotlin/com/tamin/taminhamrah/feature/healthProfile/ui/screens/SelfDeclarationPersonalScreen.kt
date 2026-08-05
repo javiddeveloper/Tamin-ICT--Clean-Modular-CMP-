@@ -12,10 +12,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.PersonalStepState
@@ -139,7 +139,7 @@ fun SelfDeclarationPersonalScreen(
                     leadingIconPainter = painterResource(Res.drawable.ic_personal_nationality)
                 )
 
-                // Marital Status — Clickable field opening HealthBottomSheet
+                // Marital Status — Clickable field opening TaminBottomSheet
                 StyledTextField(
                     value = selectedMaritalLabel,
                     onValueChange = {},
@@ -157,18 +157,18 @@ fun SelfDeclarationPersonalScreen(
 
     if (showMaritalBottomSheet) {
         val bottomSheetItems = maritalStatusOptions.map { option ->
-            BottomSheetItem(
+            TaminBottomSheetItem(
                 id = option.id,
                 title = option.label,
                 isSelected = option.id == state.maritalStatusId
             )
         }
 
-        HealthBottomSheet(
-            config = BottomSheetConfig(
+        TaminBottomSheet(
+            config = TaminBottomSheetConfig(
                 title = stringResource(Res.string.health_personal_marital_status),
                 subtitle = "در قسمت زیر می‌توانید وضعیت تأهل خود را انتخاب کنید",
-                type = BottomSheetType.MARITAL_STATUS,
+                type = TaminBottomSheetType.MARITAL_STATUS,
                 singleSelection = true,
                 items = bottomSheetItems
             ),

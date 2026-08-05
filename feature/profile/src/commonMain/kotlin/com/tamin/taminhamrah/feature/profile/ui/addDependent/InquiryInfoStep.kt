@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +25,17 @@ import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_down
 import taminx.core.core_ui.ic_number
 import taminx.core.core_ui.ic_tamin_calendar
+import taminx.core.core_ui.inquiry_birth_date_placeholder
+import taminx.core.core_ui.inquiry_date_picker_title
+import taminx.core.core_ui.inquiry_national_id_label
+import taminx.core.core_ui.inquiry_relationship_placeholder
+import taminx.core.core_ui.inquiry_title
 
 @Composable
 fun InquiryInfoStep(
@@ -42,7 +46,7 @@ fun InquiryInfoStep(
 
     if (showDatePicker) {
         TaminJalaliDatePicker(
-            title = "انتخاب تاریخ تولد",
+            title = stringResource(Res.string.inquiry_date_picker_title),
             onDismiss = { showDatePicker = false },
             onConfirm = { year, month, day ->
                 val dateStr = "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
@@ -60,9 +64,9 @@ fun InquiryInfoStep(
             .padding(Spacing.lg)
     ) {
 
-        StepSectionTitle(title = "دریافت اطلاعات از ثبت احوال")
+        StepSectionTitle(title = stringResource(Res.string.inquiry_title))
         Spacer(modifier = Modifier.height(Spacing.md))
-        Text("کد ملی" , style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(Res.string.inquiry_national_id_label), style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(Spacing.sm))
         NationalIdField(
             value = state.dependentNationalId,
@@ -72,16 +76,16 @@ fun InquiryInfoStep(
 
         SelectableFieldRow(
             value = state.birthDatePersian,
-            placeholder = "تاریخ تولد را انتخاب کنید",
+            placeholder = stringResource(Res.string.inquiry_birth_date_placeholder),
             trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
             onClick = { showDatePicker = true }
         )
         Spacer(modifier = Modifier.height(Spacing.smd))
 
         RelationshipDropdown(
-            relationships = state.familyRelationships,
             selectedRelationship = state.selectedRelationship,
-            onRelationshipSelected = { onIntent(AddDependentIntent.OnRelationshipSelected(it)) }
+            onShowPicker = { onIntent(AddDependentIntent.ShowRelationshipPicker) },
+            enabled = state.familyRelationships.isNotEmpty()
         )
     }
 }
@@ -102,32 +106,18 @@ private fun NationalIdField(
 
 @Composable
 private fun RelationshipDropdown(
-    relationships: List<FamilyRelationshipPR>,
     selectedRelationship: FamilyRelationshipPR?,
-    onRelationshipSelected: (FamilyRelationshipPR) -> Unit
+    onShowPicker: () -> Unit,
+    enabled: Boolean
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Box {
         SelectableFieldRow(
             value = selectedRelationship?.relationDesc.orEmpty(),
-            placeholder = "نسبت خانوادگی را انتخاب کنید",
+            placeholder = stringResource(Res.string.inquiry_relationship_placeholder),
             trailingIcon = vectorResource(Res.drawable.ic_arrow_down),
-            onClick = { if (relationships.isNotEmpty()) expanded = true },
-            enabled = relationships.isNotEmpty()
+            onClick = { if (enabled) onShowPicker() },
+            enabled = enabled
         )
-
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            relationships.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(item.relationDesc.orEmpty()) },
-                    onClick = {
-                        onRelationshipSelected(item)
-                        expanded = false
-                    }
-                )
-            }
-        }
     }
 }
 
@@ -135,5 +125,5 @@ private fun RelationshipDropdown(
 @Composable
 fun InquiryInfoStepPreview(){
 
-    InquiryInfoStepPreview()
+    // InquiryInfoStepPreview()
 }

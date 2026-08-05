@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.dataSource.addDependent
 import com.tamin.taminhamrah.model.addDependent.BranchDto
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
@@ -14,6 +15,7 @@ interface AddDependentRemoteDataSource {
     suspend fun getFamilyRelationships(
         queryJson: String? = null
     ): List<FamilyRelationshipDto>
+    suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto>
     suspend fun inquiryRegistry(
         dependentNationalId: String,
         birthDateTimeStamp: String,

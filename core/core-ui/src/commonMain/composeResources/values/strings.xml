@@ -283,5 +283,70 @@
     <string name="identity_gender_female">زن</string>
     <string name="identity_gender_unknown">نامشخص</string>
 
+    <!-- ===================== Add Dependent ===================== -->
+    <string name="add_dependent_title">افزودن فرد تبعی جدید</string>
+    <string name="add_dependent_subtitle">ثبت اطلاعات فرد تحت پوشش جدید</string>
+    <string name="add_dependent_close">بستن</string>
+
+    <string name="step_get_info">دریافت اطلاعات</string>
+    <string name="step_verify_info">تأیید اطلاعات</string>
+    <string name="step_upload_docs">بارگذاری مدارک</string>
+    <string name="step_complete">تکمیل</string>
+
+    <string name="inquiry_title">دریافت اطلاعات از ثبت احوال</string>
+    <string name="inquiry_national_id_label">کد ملی</string>
+    <string name="inquiry_birth_date_placeholder">تاریخ تولد را انتخاب کنید</string>
+    <string name="inquiry_relationship_placeholder">نسبت خانوادگی را انتخاب کنید</string>
+    <string name="inquiry_submit_button">استعلام اطلاعات</string>
+    <string name="inquiry_date_picker_title">انتخاب تاریخ تولد</string>
+
+    <string name="verify_section_new_info">اطلاعات تبعی جدید</string>
+    <string name="verify_banner_success">اطلاعات هویتی با سازمان ثبت‌احوال تطبیق داده شد.</string>
+    <string name="verify_section_additional_info">اطلاعات تکمیلی</string>
+    <string name="verify_birth_place_label">محل تولد</string>
+    <string name="verify_issue_place_label">محل صدور</string>
+    <string name="verify_branch_placeholder">شعبه تامین اجتماعی را انتخاب کنید</string>
+    <string name="verify_education_inquiry_title">استعلام کد تحصیلی</string>
+    <string name="verify_education_submit">استعلام</string>
+    <string name="verify_university_label">محل تحصیل: %1$s</string>
+    <string name="verify_daughter_commitment_title">تعهدنامه فرزند دختر</string>
+    <string name="verify_daughter_commitment_text">اینجانب عدم ازدواج و عدم اشتغال فرزند دختر خود را تایید مینمایم.</string>
+    <string name="verify_next_step">مرحلهٔ بعدی</string>
+
+    <string name="upload_title">بارگذاری مدارک</string>
+    <string name="upload_desc">مدارک زیر بر اساس نسبت انتخابی به صورت خودکار تعیین شده‌اند. روی هر مورد ضربه بزنید تا تصویر آن را بارگذاری کنید.</string>
+    <string name="upload_banner_no_need">اطلاعات ثبت احوال تایید شده است. نیازی به بارگذاری مدرک نیست.</string>
+    <string name="upload_banner_warning">حجم هر فایل باید کمتر از ۲ مگابایت باشد (JPG یا PDF).</string>
+    <string name="upload_banner_error">لطفاً تمامی مدارک درخواستی را بارگذاری نمایید.</string>
+    <string name="upload_slot_placeholder">برای انتخاب فایل ضربه بزنید</string>
+    <string name="upload_slot_success">بارگذاری شد</string>
+    <string name="upload_submit_final">تأیید و ثبت نهایی</string>
+
+    <string name="success_title">ثبت فرد تبعی تکمیل شد</string>
+    <string name="success_desc">درخواست شما ثبت شد و پس از بررسی مدارک، پوشش بیمه‌ای فرد تبعی فعال می‌شود.</string>
+    <string name="success_dependent_fallback">فرد تبعی</string>
+    <string name="success_badge_text">ثبت شد</string>
+    <string name="success_view_list">مشاهدهٔ فهرست افراد تبعی</string>
+
+    <string name="error_invalid_national_id">کد ملی معتبر نیست</string>
+    <string name="error_select_birth_date">لطفا تاریخ تولد را انتخاب کنید</string>
+    <string name="error_select_relationship">لطفا نسبت خانوادگی را انتخاب کنید</string>
+    <string name="error_inquiry_registry_failed">خطا در استعلام ثبت احوال</string>
+    <string name="error_enter_education_code">لطفا کد استعلام تحصیلی را وارد کنید</string>
+    <string name="error_inquiry_education_failed">خطا در استعلام کد تحصیلی</string>
+    <string name="error_upload_failed">خطا در آپلود مدرک</string>
+    <string name="error_complete_additional_info">لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید</string>
+    <string name="error_daughter_commitment_required">تایید تعهدنامه الزامی است</string>
+    <string name="error_upload_all_docs">لطفا تمامی مدارک الزامی را بارگذاری کنید</string>
+    <string name="error_final_submit_failed">خطا در ثبت نهایی درخواست</string>
+    <string name="error_load_branches_failed">خطا در دریافت لیست شعب</string>
+    <string name="error_load_relationships_failed">خطا در دریافت نسبت‌های خانوادگی</string>
+    <string name="error_load_cities_failed">خطا در دریافت لیست شهرها</string>
+
+    <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
+    <string name="picker_birth_place_title">انتخاب محل تولد</string>
+    <string name="picker_issue_place_title">انتخاب محل صدور</string>
+    <string name="picker_branch_title">انتخاب شعبه</string>
+
 </resources>
 

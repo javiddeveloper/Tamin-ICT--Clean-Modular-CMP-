@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
@@ -19,6 +20,7 @@ import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
@@ -171,6 +173,7 @@ val domainModule = module {
     factoryOf(::CheckGirlSurvivorConditionsUseCase)
     factoryOf(::GetConfirmSurvivorsListUseCase)
     factoryOf(::GetAgeUseCase)
+    factoryOf(::GetCitiesUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
@@ -274,6 +277,7 @@ val domainModule = module {
     factoryOf(::GetDependentInfoUseCase)
     factoryOf(::GetActiveBranchesUseCase)
     factoryOf(::GetFamilyRelationshipsUseCase)
+    factoryOf(::GetFamilyRelationshipsFromProxyUseCase)
     factoryOf(::InquiryRegistryUseCase)
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)

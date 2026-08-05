@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.addDependent.DependencyDto
 import com.tamin.taminhamrah.model.addDependent.DependentTypeDto
 import com.tamin.taminhamrah.model.addDependent.DocumentFileDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
@@ -50,6 +51,13 @@ internal fun RegistryDataDto.toDomain(): RegistryDataDN = RegistryDataDN(
 )
 
 internal fun FamilyRelationshipDto.toDomain(): FamilyRelationshipDN = FamilyRelationshipDN(
+    id = id,
+    relationCode = relationCode,
+    relationDesc = relationDesc,
+    bailCode = bailCode
+)
+
+internal fun FamilyRelationshipProxyDto.toDomain(): FamilyRelationshipDN = FamilyRelationshipDN(
     id = id,
     relationCode = relationCode,
     relationDesc = relationDesc,

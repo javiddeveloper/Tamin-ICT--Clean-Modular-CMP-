@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.BranchDN
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
@@ -14,6 +15,8 @@ class FakeAddDependentRepository : AddDependentRepository {
 
     var activeBranchesResult: List<BranchDN> = emptyList()
     var familyRelationshipsResult: List<FamilyRelationshipDN> = emptyList()
+    var familyRelationshipsFromProxyResult: List<FamilyRelationshipDN> = emptyList()
+    var dependentInfoResult: List<DependentInfoDN> = emptyList()
     var registryDataResult: RegistryDataDN = RegistryDataDN()
     var educationCodeResult: String = ""
     var uploadImageResult: UploadImageDN = UploadImageDN()
@@ -27,6 +30,11 @@ class FakeAddDependentRepository : AddDependentRepository {
     var lastUploadedFileName: String? = null
     var lastAddedRequest: RequestAddDependentDN? = null
 
+    override fun getDependentInfo(): Flow<List<DependentInfoDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(dependentInfoResult)
+    }
+
     override fun getActiveBranches(): Flow<List<BranchDN>> = flow {
         if (shouldThrowError) throw error
         emit(activeBranchesResult)
@@ -35,6 +43,11 @@ class FakeAddDependentRepository : AddDependentRepository {
     override fun getFamilyRelationships(queryJson: String?): Flow<List<FamilyRelationshipDN>> = flow {
         if (shouldThrowError) throw error
         emit(familyRelationshipsResult)
+    }
+
+    override fun getFamilyRelationshipsFromProxy(): Flow<List<FamilyRelationshipDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(familyRelationshipsFromProxyResult)
     }
 
     override fun inquiryRegistry(

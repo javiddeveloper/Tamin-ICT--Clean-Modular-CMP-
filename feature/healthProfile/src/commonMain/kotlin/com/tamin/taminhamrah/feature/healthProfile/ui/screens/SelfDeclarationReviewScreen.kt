@@ -32,8 +32,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Lock
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitErrorBanner
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.SubmitLoadingDialog
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.SubmitErrorsBottomSheet
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -328,16 +328,16 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_health_question)
                 ) {
                     val highRik =
-                        illnessGroups.findGroup(BottomSheetType.RISK_FACTOR)?.illnesses?.filter { it.id in selfDecState.diseases.riskFactorIds }
+                        illnessGroups.findGroup(TaminBottomSheetType.RISK_FACTOR)?.illnesses?.filter { it.id in selfDecState.diseases.riskFactorIds }
                             ?.joinToString { it.label } ?: ""
                     val chronicGroup =
-                        illnessGroups.findGroup(BottomSheetType.ILLNESS_HISTORY)?.illnesses?.filter { it.id in selfDecState.diseases.chronicDiseaseIds }
+                        illnessGroups.findGroup(TaminBottomSheetType.ILLNESS_HISTORY)?.illnesses?.filter { it.id in selfDecState.diseases.chronicDiseaseIds }
                             ?.joinToString { it.label } ?: ""
                     val mental =
-                        illnessGroups.findGroup(BottomSheetType.MENTAL)?.illnesses?.filter { it.id in selfDecState.diseases.mentalIllnessIds }
+                        illnessGroups.findGroup(TaminBottomSheetType.MENTAL)?.illnesses?.filter { it.id in selfDecState.diseases.mentalIllnessIds }
                             ?.joinToString { it.label } ?: ""
                     val cancer =
-                        illnessGroups.findGroup(BottomSheetType.CANCER)?.illnesses?.filter { it.id in selfDecState.diseases.cancerIds }
+                        illnessGroups.findGroup(TaminBottomSheetType.CANCER)?.illnesses?.filter { it.id in selfDecState.diseases.cancerIds }
                             ?.joinToString { it.label } ?: ""
 
                     val yesText = stringResource(Res.string.health_option_yes)
@@ -402,7 +402,7 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_family)
                 ) {
                     val cancer = illnessGroups.findGroup(
-                        BottomSheetType.FAMILY_CANCER,
+                        TaminBottomSheetType.FAMILY_CANCER,
                         forFamily = true
                     )?.illnesses?.filter { it.id in selfDecState.family.familyCancerIds }
                         ?.joinToString { it.label } ?: ""

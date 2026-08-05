@@ -18,17 +18,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,20 +41,21 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_down
-import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_chevron_forward
-
-/** Static province-capital list — no city lookup endpoint exists yet on [com.tamin.taminhamrah.repository.AddDependentRepository]. */
-private val sampleCities = listOf(
-    CityPR(cityCode = "01", cityName = "تهران"),
-    CityPR(cityCode = "02", cityName = "مشهد"),
-    CityPR(cityCode = "03", cityName = "اصفهان"),
-    CityPR(cityCode = "04", cityName = "شیراز"),
-    CityPR(cityCode = "05", cityName = "تبریز")
-)
+import taminx.core.core_ui.verify_banner_success
+import taminx.core.core_ui.verify_birth_place_label
+import taminx.core.core_ui.verify_branch_placeholder
+import taminx.core.core_ui.verify_daughter_commitment_text
+import taminx.core.core_ui.verify_daughter_commitment_title
+import taminx.core.core_ui.verify_education_inquiry_title
+import taminx.core.core_ui.verify_education_submit
+import taminx.core.core_ui.verify_issue_place_label
+import taminx.core.core_ui.verify_section_additional_info
+import taminx.core.core_ui.verify_section_new_info
+import taminx.core.core_ui.verify_university_label
 
 @Composable
 fun VerificationStep(
@@ -73,12 +68,12 @@ fun VerificationStep(
             .verticalScroll(rememberScrollState())
             .padding(Spacing.lg)
     ) {
-        StepSectionTitle(title = "اطلاعات تبعی جدید")
+        StepSectionTitle(title = stringResource(Res.string.verify_section_new_info))
         Spacer(modifier = Modifier.height(Spacing.md))
 
         state.registryData?.let { registry ->
             BannerCard(
-                message = "اطلاعات هویتی با سازمان ثبت‌احوال تطبیق داده شد.",
+                message = stringResource(Res.string.verify_banner_success),
                 type = BannerType.Success
             )
             Spacer(modifier = Modifier.height(Spacing.smd))
@@ -90,25 +85,25 @@ fun VerificationStep(
         }
 
         Spacer(modifier = Modifier.height(Spacing.lg))
-        StepSectionTitle(title = "اطلاعات تکمیلی")
+        StepSectionTitle(title = stringResource(Res.string.verify_section_additional_info))
         Spacer(modifier = Modifier.height(Spacing.smd))
 
         CityDropdown(
-            label = "محل تولد",
+            label = stringResource(Res.string.verify_birth_place_label),
             selectedCity = state.selectedCityBirth,
-            onCitySelected = { onIntent(AddDependentIntent.OnCityBirthSelected(it)) }
+            onShowPicker = { onIntent(AddDependentIntent.ShowCityBirthPicker) }
         )
         Spacer(modifier = Modifier.height(Spacing.smd))
         CityDropdown(
-            label = "محل صدور",
+            label = stringResource(Res.string.verify_issue_place_label),
             selectedCity = state.selectedCityIssuance,
-            onCitySelected = { onIntent(AddDependentIntent.OnCityIssuanceSelected(it)) }
+            onShowPicker = { onIntent(AddDependentIntent.ShowCityIssuancePicker) }
         )
         Spacer(modifier = Modifier.height(Spacing.smd))
         BranchDropdown(
-            activeBranches = state.activeBranches,
             selectedBranch = state.selectedBranch,
-            onBranchSelected = { onIntent(AddDependentIntent.OnBranchSelected(it)) }
+            onShowPicker = { onIntent(AddDependentIntent.ShowBranchPicker) },
+            enabled = state.activeBranches.isNotEmpty()
         )
 
         when (state.stepperMode) {
@@ -177,8 +172,8 @@ private fun RegistryFieldCell(label: String, value: String, modifier: Modifier =
 }
 
 private fun formatGender(gender: String): String = when {
-    gender.equals("MAN", true) || gender == "M" || gender.contains("مرد") -> "مرد"
-    gender.equals("WOMAN", true) || gender == "F" || gender.contains("زن") -> "زن"
+    gender.equals("MAN", true) || gender == "1" || gender == "M" || gender.contains("مرد") -> "مرد"
+    gender.equals("WOMAN", true) || gender == "2" || gender == "F" || gender.contains("زن") -> "زن"
     else -> gender.ifBlank { "-" }
 }
 
@@ -186,58 +181,32 @@ private fun formatGender(gender: String): String = when {
 private fun CityDropdown(
     label: String,
     selectedCity: CityPR?,
-    onCitySelected: (CityPR) -> Unit
+    onShowPicker: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Box {
         SelectableFieldRow(
             value = selectedCity?.cityName?.let { "$label: $it" }.orEmpty(),
-            placeholder = "$label را انتخاب کنید",
+            placeholder = label,
             trailingIcon = vectorResource(Res.drawable.ic_arrow_down),
-            onClick = { expanded = true }
+            onClick = { onShowPicker() }
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            sampleCities.forEach { city ->
-                DropdownMenuItem(
-                    text = { Text(city.cityName) },
-                    onClick = {
-                        onCitySelected(city)
-                        expanded = false
-                    }
-                )
-            }
-        }
     }
 }
 
 @Composable
 private fun BranchDropdown(
-    activeBranches: List<BranchPR>,
     selectedBranch: BranchPR?,
-    onBranchSelected: (BranchPR) -> Unit
+    onShowPicker: () -> Unit,
+    enabled: Boolean
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Box {
         SelectableFieldRow(
             value = selectedBranch?.let { branch -> branch.branchName.ifBlank { branch.branchCode } }.orEmpty(),
-            placeholder = "شعبه تامین اجتماعی را انتخاب کنید",
+            placeholder = stringResource(Res.string.verify_branch_placeholder),
             trailingIcon = vectorResource(Res.drawable.ic_arrow_down),
-            onClick = { if (activeBranches.size > 1) expanded = true },
-            enabled = activeBranches.size > 1
+            onClick = { if (enabled) onShowPicker() },
+            enabled = enabled
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            activeBranches.forEach { branch ->
-                DropdownMenuItem(
-                    text = { Text(branch.branchName.ifBlank { branch.branchCode }) },
-                    onClick = {
-                        onBranchSelected(branch)
-                        expanded = false
-                    }
-                )
-            }
-        }
     }
 }
 
@@ -249,7 +218,7 @@ private fun EducationInquirySection(
     val colors = LocalTaminColors.current
 
     Column {
-        StepSectionTitle(title = "استعلام کد تحصیلی")
+        StepSectionTitle(title = stringResource(Res.string.verify_education_inquiry_title))
         Spacer(modifier = Modifier.height(Spacing.smd))
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.smd)) {
             Box(
@@ -262,7 +231,7 @@ private fun EducationInquirySection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "استعلام",
+                    text = stringResource(Res.string.verify_education_submit),
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
@@ -284,7 +253,7 @@ private fun EducationInquirySection(
         if (state.universityName.isNotBlank()) {
             Spacer(modifier = Modifier.height(Spacing.smd))
             BannerCard(
-                message = "محل تحصیل: ${state.universityName}",
+                message = stringResource(Res.string.verify_university_label, state.universityName),
                 type = BannerType.Success
             )
         }
@@ -299,7 +268,7 @@ private fun DaughterCommitmentSection(
     val colors = LocalTaminColors.current
 
     Column {
-        StepSectionTitle(title = "تعهدنامه فرزند دختر")
+        StepSectionTitle(title = stringResource(Res.string.verify_daughter_commitment_title))
         Spacer(modifier = Modifier.height(Spacing.smd))
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -320,7 +289,7 @@ private fun DaughterCommitmentSection(
             )
             Spacer(modifier = Modifier.width(Spacing.xs))
             Text(
-                text = "اینجانب عدم ازدواج و عدم اشتغال فرزند دختر خود را تایید مینمایم.",
+                text = stringResource(Res.string.verify_daughter_commitment_text),
                 color = colors.textPrimary,
                 style = MaterialTheme.typography.bodySmall
             )

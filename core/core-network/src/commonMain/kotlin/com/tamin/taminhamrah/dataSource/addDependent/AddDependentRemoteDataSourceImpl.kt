@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
 import com.tamin.taminhamrah.model.addDependent.BranchDto
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
@@ -49,6 +50,19 @@ internal class AddDependentRemoteDataSourceImpl(
     ): List<FamilyRelationshipDto> {
         return try {
             val response = apiService.getFamilyRelationships(queryJson)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto> {
+        return try {
+            val response = apiService.getFamilyRelationshipsFromProxy()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

@@ -41,9 +41,16 @@ import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.upload_banner_error
+import taminx.core.core_ui.upload_banner_no_need
+import taminx.core.core_ui.upload_banner_warning
+import taminx.core.core_ui.upload_desc
+import taminx.core.core_ui.upload_slot_placeholder
+import taminx.core.core_ui.upload_slot_success
+import taminx.core.core_ui.upload_title
 
 @Composable
 fun DocumentUploadStep(
@@ -63,10 +70,10 @@ fun DocumentUploadStep(
             .verticalScroll(rememberScrollState())
             .padding(Spacing.lg)
     ) {
-        StepSectionTitle(title = "بارگذاری مدارک")
+        StepSectionTitle(title = stringResource(Res.string.upload_title))
         Spacer(modifier = Modifier.height(Spacing.xs))
         Text(
-            text = "مدارک زیر بر اساس نسبت انتخابی به صورت خودکار تعیین شده‌اند. روی هر مورد ضربه بزنید تا تصویر آن را بارگذاری کنید.",
+            text = stringResource(Res.string.upload_desc),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textMuted
         )
@@ -74,12 +81,12 @@ fun DocumentUploadStep(
 
         if (activeDocTypes.isEmpty()) {
             BannerCard(
-                message = "اطلاعات ثبت احوال تایید شده است. نیازی به بارگذاری مدرک نیست.",
+                message = stringResource(Res.string.upload_banner_no_need),
                 type = BannerType.Success
             )
         } else {
             BannerCard(
-                message = "حجم هر فایل باید کمتر از ۲ مگابایت باشد (JPG یا PDF).",
+                message = stringResource(Res.string.upload_banner_warning),
                 type = BannerType.Warning
             )
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -105,7 +112,7 @@ fun DocumentUploadStep(
             if (!allUploaded) {
                 Spacer(modifier = Modifier.height(Spacing.md))
                 BannerCard(
-                    message = "لطفاً تمامی مدارک درخواستی را بارگذاری نمایید.",
+                    message = stringResource(Res.string.upload_banner_error),
                     type = BannerType.Error
                 )
             }
@@ -142,7 +149,7 @@ private fun DocumentSlotCard(
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = if (uploaded != null) "بارگذاری شد" else "برای انتخاب فایل ضربه بزنید",
+                text = if (uploaded != null) stringResource(Res.string.upload_slot_success) else stringResource(Res.string.upload_slot_placeholder),
                 color = if (uploaded != null) colors.greenText else colors.textMuted,
                 style = MaterialTheme.typography.labelSmall
             )
@@ -164,7 +171,7 @@ private fun DocumentSlotCard(
         ) {
             Icon(
                 imageVector = if (uploaded != null) Icons.Filled.CheckCircle else Icons.Filled.Add,
-                contentDescription = if (uploaded != null) "حذف مدرک" else "بارگذاری مدرک",
+                contentDescription = null,
                 tint = if (uploaded != null) Color.White else colors.blueText,
                 modifier = Modifier.size(21.dp)
             )

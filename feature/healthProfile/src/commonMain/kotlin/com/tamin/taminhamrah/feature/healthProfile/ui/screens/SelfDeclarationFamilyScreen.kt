@@ -11,10 +11,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.ui.components.InteractiveChoiceChips
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.FamilyStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
@@ -54,8 +55,8 @@ fun SelfDeclarationFamilyScreen(
 
     // Lookup family groups via Enum mapping (forFamily = true)
     val familyDiseasesGroup =
-        illnessGroups.findGroup(BottomSheetType.FAMILY_DISEASES, forFamily = true)
-    val familyCancerGroup = illnessGroups.findGroup(BottomSheetType.FAMILY_CANCER, forFamily = true)
+        illnessGroups.findGroup(TaminBottomSheetType.FAMILY_DISEASES, forFamily = true)
+    val familyCancerGroup = illnessGroups.findGroup(TaminBottomSheetType.FAMILY_CANCER, forFamily = true)
 
     // Selected cancer names for display when fallback textfield is shown
     val selectedCancerNames = remember(familyCancerGroup, state.familyCancerIds) {
@@ -249,18 +250,18 @@ fun SelfDeclarationFamilyScreen(
 
     if (showCancerSheet) {
         val bottomSheetItems = familyCancerGroup?.illnesses?.map { option ->
-            BottomSheetItem(
+            TaminBottomSheetItem(
                 id = option.id,
                 title = option.label,
                 isSelected = state.familyCancerIds.contains(option.id)
             )
         } ?: emptyList()
 
-        HealthBottomSheet(
-            config = BottomSheetConfig(
+        TaminBottomSheet(
+            config = TaminBottomSheetConfig(
                 title = familyCancerGroup?.groupTitle ?: stringResource(Res.string.health_family_cancer_bs_title),
                 subtitle = stringResource(Res.string.health_family_cancer_bs_subtitle),
-                type = BottomSheetType.FAMILY_CANCER,
+                type = TaminBottomSheetType.FAMILY_CANCER,
                 singleSelection = false,
                 items = bottomSheetItems
             ),

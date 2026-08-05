@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.addDependent.BranchPR
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
 import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 
 enum class StepperMode {
     DEFAULT_MODE,
@@ -48,8 +49,10 @@ data class AddDependentState(
     val selectedBranch: BranchPR? = null,
     val requiredDocTypes: List<DocType> = emptyList(),
     val uploadedDocuments: List<UploadedDocument> = emptyList(),
+    val cities: List<CityPR> = emptyList(),
     val needCallInquiryRegistry: Boolean = true,
     val needCallInquiryEducation: Boolean = true,
+    val bottomSheetConfig: TaminBottomSheetConfig? = null,
     val error: String? = null
 ) {
     sealed class PartialState {
@@ -59,6 +62,7 @@ data class AddDependentState(
             val autoSelectedBranch: BranchPR?
         ) : PartialState()
         data class FamilyRelationshipsLoaded(val relationships: List<FamilyRelationshipPR>) : PartialState()
+        data class CitiesLoaded(val cities: List<CityPR>) : PartialState()
         data class NationalIdChanged(val id: String) : PartialState()
         data class BirthDateSelected(
             val persianDate: String,
@@ -80,6 +84,7 @@ data class AddDependentState(
         data class DocumentUploaded(val document: UploadedDocument) : PartialState()
         data class DocumentDeleted(val docType: String) : PartialState()
         data class StepChanged(val step: Int) : PartialState()
+        data class BottomSheetStateChanged(val config: TaminBottomSheetConfig?) : PartialState()
         data class Error(val message: String) : PartialState()
     }
 }
@@ -97,6 +102,11 @@ sealed interface AddDependentIntent {
     data class OnEducationCodeChanged(val code: String) : AddDependentIntent
     data object SubmitInquiryEducation : AddDependentIntent
     data class OnDaughterCommitmentToggled(val isChecked: Boolean) : AddDependentIntent
+    data object ShowRelationshipPicker : AddDependentIntent
+    data object ShowCityBirthPicker : AddDependentIntent
+    data object ShowCityIssuancePicker : AddDependentIntent
+    data object ShowBranchPicker : AddDependentIntent
+    data object DismissBottomSheet : AddDependentIntent
     data class OnCityBirthSelected(val city: CityPR) : AddDependentIntent
     data class OnCityIssuanceSelected(val city: CityPR) : AddDependentIntent
     data class OnBranchSelected(val branch: BranchPR) : AddDependentIntent

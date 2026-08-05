@@ -6,12 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,17 +49,36 @@ import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.add_dependent_close
+import taminx.core.core_ui.add_dependent_subtitle
+import taminx.core.core_ui.add_dependent_title
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.ic_tamin_user
+import taminx.core.core_ui.inquiry_submit_button
+import taminx.core.core_ui.picker_branch_title
+import taminx.core.core_ui.picker_relationship_title
+import taminx.core.core_ui.step_complete
+import taminx.core.core_ui.step_get_info
+import taminx.core.core_ui.step_upload_docs
+import taminx.core.core_ui.step_verify_info
+import taminx.core.core_ui.success_view_list
+import taminx.core.core_ui.upload_submit_final
+import taminx.core.core_ui.verify_birth_place_label
+import taminx.core.core_ui.verify_next_step
 
 private const val STEP_INQUIRY = 1
 private const val STEP_VERIFICATION = 2
@@ -100,6 +112,52 @@ fun AddDependentRoute(
         onIntent = onIntent,
         snackbarHostState = snackbarHostState
     )
+
+    val birthTitle = stringResource(Res.string.verify_birth_place_label)
+    val relTitle = stringResource(Res.string.picker_relationship_title)
+    val branchTitle = stringResource(Res.string.picker_branch_title)
+
+    uiStateState.value.bottomSheetConfig?.let { config ->
+        TaminBottomSheet(
+            config = config,
+            onDismissRequest = { onIntent(AddDependentIntent.DismissBottomSheet) },
+            onSubmit = { result ->
+                handleBottomSheetResult(result, uiStateState.value, onIntent, birthTitle, relTitle, branchTitle)
+            }
+        )
+    }
+}
+
+private fun handleBottomSheetResult(
+    result: TaminBottomSheetResult,
+    state: AddDependentState,
+    onIntent: (AddDependentIntent) -> Unit,
+    birthTitle: String,
+    relTitle: String,
+    branchTitle: String
+) {
+    val selectedId = result.selectedItemIds.firstOrNull() ?: return
+
+    when (result.type) {
+        TaminBottomSheetType.CITY -> {
+            val cityName = state.bottomSheetConfig?.items?.find { it.id == selectedId }?.title.orEmpty()
+            if (state.bottomSheetConfig?.title?.contains(birthTitle) == true) {
+                onIntent(AddDependentIntent.OnCityBirthSelected(com.tamin.taminhamrah.model.common.CityPR(selectedId.toString().padStart(2, '0'), cityName)))
+            } else {
+                onIntent(AddDependentIntent.OnCityIssuanceSelected(com.tamin.taminhamrah.model.common.CityPR(selectedId.toString().padStart(2, '0'), cityName)))
+            }
+        }
+        TaminBottomSheetType.CUSTOM -> {
+            if (state.bottomSheetConfig?.title?.contains(relTitle) == true) {
+                val relationship = state.familyRelationships.find { it.id == selectedId }
+                relationship?.let { onIntent(AddDependentIntent.OnRelationshipSelected(it)) }
+            } else if (state.bottomSheetConfig?.title?.contains(branchTitle) == true) {
+                val branch = state.activeBranches.find { it.branchCode.toIntOrNull() == selectedId }
+                branch?.let { onIntent(AddDependentIntent.OnBranchSelected(it)) }
+            }
+        }
+        else -> {}
+    }
 }
 
 @Composable
@@ -136,14 +194,14 @@ fun AddDependentContent(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TaminTopAppBar(
-                title = "افزودن فرد تبعی جدید",
+                title = stringResource(Res.string.add_dependent_title),
                 background = profileGradientBrush,
                 bottomPadding = Spacing.xl,
                 shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = "بستن",
+                        contentDescription = stringResource(Res.string.add_dependent_close),
                         onClick = onBackClicked,
                         bordered = true
                     )
@@ -162,7 +220,7 @@ fun AddDependentContent(
                         AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_user))
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Text(
-                            text = "ثبت اطلاعات فرد تحت پوشش جدید",
+                            text = stringResource(Res.string.add_dependent_subtitle),
                             style = MaterialTheme.typography.labelLarge,
                             color = taminColors.textHeaderSubtitle
                         )
@@ -181,9 +239,8 @@ fun AddDependentContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .navigationBarsPadding()
-                .imePadding()
+                .padding(padding)
+
         ) {
             StepIndicator(
                 steps = rememberAddDependentSteps(state.currentStep),
@@ -231,13 +288,14 @@ private fun AddDependentBottomBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
             .padding(Spacing.lg)
+            .navigationBarsPadding()
+            .imePadding()
     ) {
         when (state.currentStep) {
             STEP_INQUIRY -> {
                 LoadingButton(
-                    text = "استعلام اطلاعات",
+                    text = stringResource(Res.string.inquiry_submit_button),
                     onClick = { onIntent(AddDependentIntent.SubmitInquiryRegistry) },
                     isLoading = state.isLoading,
                     icon = vectorResource(Res.drawable.ic_tamin_search),
@@ -246,17 +304,18 @@ private fun AddDependentBottomBar(
             }
             STEP_VERIFICATION -> {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    LoadingButton(
-                        text = "مرحلهٔ بعدی",
-                        onClick = { onIntent(AddDependentIntent.OnNextStepClicked) },
-                        isLoading = state.isLoading,
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        modifier = Modifier.weight(1f)
-                    )
                     SquareIconButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         onClick = { onIntent(AddDependentIntent.OnPreviousStepClicked) }
                     )
+                    LoadingButton(
+                        text = stringResource(Res.string.verify_next_step),
+                        onClick = { onIntent(AddDependentIntent.OnNextStepClicked) },
+                        isLoading = state.isLoading,
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                        modifier = Modifier.weight(1f)
+                    )
+
                 }
             }
             STEP_DOCUMENTS -> {
@@ -265,23 +324,23 @@ private fun AddDependentBottomBar(
                 val allUploaded = activeDocTypes.all { uploadedTypes.contains(it.code) }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                    SquareIconButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        onClick = { onIntent(AddDependentIntent.OnPreviousStepClicked) }
+                    )
                     LoadingButton(
-                        text = "تأیید و ثبت نهایی",
+                        text = stringResource(Res.string.upload_submit_final),
                         onClick = { onIntent(AddDependentIntent.OnNextStepClicked) },
                         enabled = allUploaded,
                         isLoading = state.isLoading,
                         icon = Icons.Filled.CheckCircle,
                         modifier = Modifier.weight(1f)
                     )
-                    SquareIconButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        onClick = { onIntent(AddDependentIntent.OnPreviousStepClicked) }
-                    )
                 }
             }
             STEP_SUCCESS -> {
                 TaminFilledButton(
-                    text = "مشاهدهٔ فهرست افراد تبعی",
+                    text = stringResource(Res.string.success_view_list),
                     onClick = onFinish,
                     background = colors.iconGradientSuccess,
                     modifier = Modifier.fillMaxWidth()
@@ -293,16 +352,21 @@ private fun AddDependentBottomBar(
 
 @Composable
 private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndicatorModel> {
-    return remember(currentStep) {
-        val documentsTitle = if (currentStep >= STEP_SUCCESS) "تکمیل" else "بارگذاری مدارک"
+    val getInfoTitle = stringResource(Res.string.step_get_info)
+    val verifyInfoTitle = stringResource(Res.string.step_verify_info)
+    val uploadDocsTitle = stringResource(Res.string.step_upload_docs)
+    val completeTitle = stringResource(Res.string.step_complete)
+
+    return remember(currentStep, getInfoTitle, verifyInfoTitle, uploadDocsTitle, completeTitle) {
+        val documentsTitle = if (currentStep >= STEP_SUCCESS) completeTitle else uploadDocsTitle
         persistentListOf(
             StepIndicatorModel(
-                title = "دریافت اطلاعات",
+                title = getInfoTitle,
                 stepNumber = "۱",
                 state = if (currentStep <= STEP_INQUIRY) StepState.Active else StepState.Completed
             ),
             StepIndicatorModel(
-                title = "تأیید اطلاعات",
+                title = verifyInfoTitle,
                 stepNumber = "۲",
                 state = when {
                     currentStep == STEP_VERIFICATION -> StepState.Active
@@ -327,7 +391,7 @@ private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndic
 @Composable
 private fun AddDependentScreenPreview() {
     PreviewRtlThemeContent {
-        val uiStateState = remember { mutableStateOf(AddDependentState()) }
+        val uiStateState = androidx.compose.runtime.mutableStateOf(AddDependentState())
         AddDependentContent(
             uiStateState = uiStateState,
             onBackClicked = {},
@@ -341,7 +405,7 @@ private fun AddDependentScreenPreview() {
 @Composable
 private fun AddDependentScreenPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
-        val uiStateState = remember { mutableStateOf(AddDependentState(currentStep = STEP_VERIFICATION)) }
+        val uiStateState = androidx.compose.runtime.mutableStateOf(AddDependentState(currentStep = STEP_VERIFICATION))
         AddDependentContent(
             uiStateState = uiStateState,
             onBackClicked = {},

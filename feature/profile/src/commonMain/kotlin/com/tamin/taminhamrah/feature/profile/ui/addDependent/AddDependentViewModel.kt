@@ -10,18 +10,24 @@ import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.StepperMod
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.UploadedDocument
 import com.tamin.taminhamrah.mapper.addDependent.toDomain
 import com.tamin.taminhamrah.mapper.addDependent.toPresentation
+import com.tamin.taminhamrah.mapper.common.toCityPresentation
+import com.tamin.taminhamrah.mapper.common.toPresentation
 import com.tamin.taminhamrah.model.addDependent.BranchPR
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentPR
 import com.tamin.taminhamrah.model.addDependent.RequestFilePR
 import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
-import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.util.ValidationUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -35,11 +41,12 @@ private const val STEP_SUCCESS = 4
 
 class AddDependentViewModel(
     private val getActiveBranchesUseCase: GetActiveBranchesUseCase,
-    private val getFamilyRelationshipsUseCase: GetFamilyRelationshipsUseCase,
+    private val getFamilyRelationshipsFromProxyUseCase: GetFamilyRelationshipsFromProxyUseCase,
     private val inquiryRegistryUseCase: InquiryRegistryUseCase,
     private val inquiryEducationCodeUseCase: InquiryEducationCodeUseCase,
     private val uploadDependentImageUseCase: UploadDependentImageUseCase,
-    private val addNewDependentUseCase: AddNewDependentUseCase
+    private val addNewDependentUseCase: AddNewDependentUseCase,
+    private val getCitiesUseCase: GetCitiesUseCase
 ) : BaseViewModel<AddDependentState, PartialState, AddDependentEvent, AddDependentIntent>(
     initialState = AddDependentState()
 ) {
@@ -55,6 +62,7 @@ class AddDependentViewModel(
             }
             is AddDependentIntent.OnRelationshipSelected -> flow {
                 emit(PartialState.RelationshipSelected(intent.relationship))
+                emit(PartialState.BottomSheetStateChanged(null))
             }
             is AddDependentIntent.SubmitInquiryRegistry -> submitInquiryRegistry()
             is AddDependentIntent.OnEducationCodeChanged -> flow {
@@ -66,12 +74,85 @@ class AddDependentViewModel(
             }
             is AddDependentIntent.OnCityBirthSelected -> flow {
                 emit(PartialState.CityBirthSelected(intent.city))
+                emit(PartialState.BottomSheetStateChanged(null))
             }
             is AddDependentIntent.OnCityIssuanceSelected -> flow {
                 emit(PartialState.CityIssuanceSelected(intent.city))
+                emit(PartialState.BottomSheetStateChanged(null))
             }
             is AddDependentIntent.OnBranchSelected -> flow {
                 emit(PartialState.BranchSelected(intent.branch))
+                emit(PartialState.BottomSheetStateChanged(null))
+            }
+            is AddDependentIntent.ShowRelationshipPicker -> flow {
+                val state = uiState.value
+                val config = TaminBottomSheetConfig(
+                    title = "انتخاب نسبت خانوادگی",
+                    type = TaminBottomSheetType.CUSTOM,
+                    items = state.familyRelationships.map {
+                        TaminBottomSheetItem(
+                            id = it.id ?: 0,
+                            title = it.relationDesc.orEmpty(),
+                            isSelected = it.id == state.selectedRelationship?.id
+                        )
+                    },
+                    singleSelection = true
+                )
+                emit(PartialState.BottomSheetStateChanged(config))
+            }
+            is AddDependentIntent.ShowCityBirthPicker -> flow {
+                val state = uiState.value
+                val config = TaminBottomSheetConfig(
+                    title = "انتخاب محل تولد",
+                    type = TaminBottomSheetType.CITY,
+                    items = state.cities.map {
+                        TaminBottomSheetItem(
+                            id = it.cityCode.toIntOrNull() ?: 0,
+                            title = it.cityName,
+                            isSelected = it.cityCode == state.selectedCityBirth?.cityCode
+                        )
+                    },
+                    singleSelection = true,
+                    showSearchInput = true
+                )
+                emit(PartialState.BottomSheetStateChanged(config))
+            }
+            is AddDependentIntent.ShowCityIssuancePicker -> flow {
+                val state = uiState.value
+                val config = TaminBottomSheetConfig(
+                    title = "انتخاب محل صدور",
+                    type = TaminBottomSheetType.CITY,
+                    items = state.cities.map {
+                        TaminBottomSheetItem(
+                            id = it.cityCode.toIntOrNull() ?: 0,
+                            title = it.cityName,
+                            isSelected = it.cityCode == state.selectedCityIssuance?.cityCode
+                        )
+                    },
+                    singleSelection = true,
+                    showSearchInput = true
+                )
+                emit(PartialState.BottomSheetStateChanged(config))
+            }
+            is AddDependentIntent.ShowBranchPicker -> flow {
+                val state = uiState.value
+                val config = TaminBottomSheetConfig(
+                    title = "انتخاب شعبه",
+                    type = TaminBottomSheetType.CUSTOM,
+                    items = state.activeBranches.map {
+                        TaminBottomSheetItem(
+                            id = it.branchCode.toIntOrNull() ?: 0,
+                            title = it.branchName.ifBlank { it.branchCode },
+                            isSelected = it.branchCode == state.selectedBranch?.branchCode
+                        )
+                    },
+                    singleSelection = true,
+                    showSearchInput = true
+                )
+                emit(PartialState.BottomSheetStateChanged(config))
+            }
+            is AddDependentIntent.DismissBottomSheet -> flow {
+                emit(PartialState.BottomSheetStateChanged(null))
             }
             is AddDependentIntent.UploadDocument -> uploadDocument(intent.fileBytes, intent.fileName, intent.docType)
             is AddDependentIntent.DeleteDocument -> flow {
@@ -97,11 +178,18 @@ class AddDependentViewModel(
             .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شعب")) }
             .collect { emit(it) }
 
-        getFamilyRelationshipsUseCase()
+        getFamilyRelationshipsFromProxyUseCase()
             .map { relationships ->
                 PartialState.FamilyRelationshipsLoaded(relationships.map { it.toPresentation() }) as PartialState
             }
             .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت نسبت‌های خانوادگی")) }
+            .collect { emit(it) }
+
+        getCitiesUseCase()
+            .map { cities ->
+                PartialState.CitiesLoaded(cities.toCityPresentation()) as PartialState
+            }
+            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شهرها")) }
             .collect { emit(it) }
 
         emit(PartialState.Loading(false))
@@ -337,6 +425,11 @@ class AddDependentViewModel(
             familyRelationships = partialState.relationships,
             error = null
         )
+        is PartialState.CitiesLoaded -> currentState.copy(
+            isLoading = false,
+            cities = partialState.cities,
+            error = null
+        )
         is PartialState.NationalIdChanged -> {
             val hasInquired = !currentState.needCallInquiryRegistry || currentState.registryData != null
             currentState.copy(
@@ -404,6 +497,9 @@ class AddDependentViewModel(
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,
             isLoading = false
+        )
+        is PartialState.BottomSheetStateChanged -> currentState.copy(
+            bottomSheetConfig = partialState.config
         )
         is PartialState.Error -> currentState.copy(
             isLoading = false,

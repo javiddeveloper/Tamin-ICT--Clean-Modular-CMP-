@@ -176,10 +176,10 @@ val remoteModule = module {
     single<com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource> {
         // Mock implementation for testing UI flows without needing live API accounts.
         // Swap to AddDependentRemoteDataSourceImpl below for live API endpoint integration:
-        // com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl(
-        //     apiService = get(),
-        //     errorParser = get()
-        // )
-        com.tamin.taminhamrah.dataSource.addDependent.MockAddDependentRemoteDataSourceImpl()
+         com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl(
+             apiService = get(),
+             errorParser = get()
+         )
+//        com.tamin.taminhamrah.dataSource.addDependent.MockAddDependentRemoteDataSourceImpl()
     }
 }

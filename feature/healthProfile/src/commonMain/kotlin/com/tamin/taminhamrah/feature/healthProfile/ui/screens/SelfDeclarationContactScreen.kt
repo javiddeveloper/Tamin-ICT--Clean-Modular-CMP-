@@ -27,10 +27,10 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -265,17 +265,17 @@ fun SelfDeclarationContactScreen (
     }
 
     if (showProvinceBottomSheet) {
-            HealthBottomSheet(
-                config = BottomSheetConfig(
+            TaminBottomSheet(
+                config = TaminBottomSheetConfig(
                     title = stringResource(Res.string.health_contact_province_bs_title),
                     subtitle = stringResource(Res.string.health_contact_province_bs_subtitle),
-                    type = BottomSheetType.PROVINCE,
+                    type = TaminBottomSheetType.PROVINCE,
                     showSearchInput = true,
                     searchInputHint = stringResource(Res.string.health_contact_province_bs_search_hint),
                     singleSelection = true,
                     isLoading = isProvincesLoading,
                     items = provinceOptions.map {
-                        BottomSheetItem(
+                        TaminBottomSheetItem(
                             id = it.id,
                             title = it.label,
                             isSelected = it.id == state.provinceId
@@ -307,17 +307,17 @@ fun SelfDeclarationContactScreen (
         }
 
         if (showCityBottomSheet) {
-            HealthBottomSheet(
-                config = BottomSheetConfig(
+            TaminBottomSheet(
+                config = TaminBottomSheetConfig(
                     title = stringResource(Res.string.health_contact_city_bs_title),
                     subtitle = stringResource(Res.string.health_contact_city_bs_subtitle),
-                    type = BottomSheetType.CITY,
+                    type = TaminBottomSheetType.CITY,
                     showSearchInput = true,
                     searchInputHint = stringResource(Res.string.health_contact_city_bs_search_hint),
                     singleSelection = true,
                     isLoading = isCitiesLoading,
                     items = cityOptions.map {
-                        BottomSheetItem(
+                        TaminBottomSheetItem(
                             id = it.id,
                             title = it.label,
                             isSelected = it.id == state.cityId

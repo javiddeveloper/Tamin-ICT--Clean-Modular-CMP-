@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui.contract
 
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.HealthProblemPR
@@ -97,27 +97,27 @@ data class DiseasesStepState(
     val mentalIllnessIds: Set<Int> = emptySet(),
     val hasCancer: Boolean? = null,
     val cancerIds: Set<Int> = emptySet(),
-    val activeBottomSheet: BottomSheetType? = null
+    val activeBottomSheet: TaminBottomSheetType? = null
 ) {
     fun buildBottomSheetConfig(
-        type: BottomSheetType,
+        type: TaminBottomSheetType,
         illnessGroups: List<IllnessGroupPR>
-    ): BottomSheetConfig? {
+    ): TaminBottomSheetConfig? {
         val group = illnessGroups.findGroup(type) ?: return null
         val (subtitle, selectedIds) = when (type) {
-            BottomSheetType.ILLNESS_HISTORY -> "نوع بیماری خود را انتخاب کنید:" to chronicDiseaseIds
-            BottomSheetType.MENTAL          -> "نوع عارضه را انتخاب کنید:" to mentalIllnessIds
-            BottomSheetType.CANCER          -> "نوع سرطان را انتخاب کنید:" to cancerIds
+            TaminBottomSheetType.ILLNESS_HISTORY -> "نوع بیماری خود را انتخاب کنید:" to chronicDiseaseIds
+            TaminBottomSheetType.MENTAL          -> "نوع عارضه را انتخاب کنید:" to mentalIllnessIds
+            TaminBottomSheetType.CANCER          -> "نوع سرطان را انتخاب کنید:" to cancerIds
             else                            -> "" to emptySet()
         }
 
-        return BottomSheetConfig(
+        return TaminBottomSheetConfig(
             title = group.groupTitle,
             subtitle = subtitle,
             type = type,
             singleSelection = false,
             items = group.illnesses.map { item ->
-                BottomSheetItem(
+                TaminBottomSheetItem(
                     id = item.id,
                     title = item.label,
                     isSelected = selectedIds.contains(item.id)
@@ -317,10 +317,10 @@ sealed interface HealthProfileIntent {
     data class UpdateEmergency(val emergency: EmergencyStepState) : HealthProfileIntent
     data class UpdatePhysical(val physical: PhysicalStepState) : HealthProfileIntent
     data class UpdateDiseases(val diseases: DiseasesStepState) : HealthProfileIntent
-    data class OpenDiseaseBottomSheet(val type: BottomSheetType) : HealthProfileIntent
+    data class OpenDiseaseBottomSheet(val type: TaminBottomSheetType) : HealthProfileIntent
     data object CloseDiseaseBottomSheet : HealthProfileIntent
-    data class SetDiseaseAnswer(val type: BottomSheetType, val isYes: Boolean) : HealthProfileIntent
-    data class UpdateDiseaseSelections(val type: BottomSheetType, val selectedIds: Set<Int>) : HealthProfileIntent
+    data class SetDiseaseAnswer(val type: TaminBottomSheetType, val isYes: Boolean) : HealthProfileIntent
+    data class UpdateDiseaseSelections(val type: TaminBottomSheetType, val selectedIds: Set<Int>) : HealthProfileIntent
     data class UpdateFamily(val family: FamilyStepState) : HealthProfileIntent
     data class UpdateBloodGroup(val bloodGroup: BloodGroupStepState) : HealthProfileIntent
     data class UpdateLifestyle(val lifestyle: LifestyleStepState) : HealthProfileIntent

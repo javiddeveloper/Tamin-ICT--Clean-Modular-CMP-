@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.apiService.addDependent
 import com.tamin.taminhamrah.model.addDependent.BranchDto
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
@@ -26,6 +27,9 @@ internal interface AddDependentApiService {
     suspend fun getFamilyRelationships(
         @Query("query") queryJson: String? = null
     ): BaseDTO<List<FamilyRelationshipDto>>
+
+    @GET("proxy/models/dependency")
+    suspend fun getFamilyRelationshipsFromProxy(): BaseDTO<List<FamilyRelationshipProxyDto>>
 
     @GET("services/inquiry-registry")
     suspend fun inquiryRegistry(
