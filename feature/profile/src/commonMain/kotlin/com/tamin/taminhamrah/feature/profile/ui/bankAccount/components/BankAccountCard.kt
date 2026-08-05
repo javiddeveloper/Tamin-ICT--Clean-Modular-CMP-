@@ -37,12 +37,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
 import com.tamin.taminhamrah.model.bankAccount.cardGradient
-import com.tamin.taminhamrah.model.bankAccount.cardGradientMidStop
-import com.tamin.taminhamrah.model.bankAccount.ink
+import com.tamin.taminhamrah.model.bankAccount.cardInk
+import com.tamin.taminhamrah.model.bankAccount.cardNumberInk
 import com.tamin.taminhamrah.model.bankAccount.pillBackground
 import com.tamin.taminhamrah.model.bankAccount.subInk
 import com.tamin.taminhamrah.model.bankAccount.watermarkAlpha
-import com.tamin.taminhamrah.model.bankAccount.watermarkGlow
 import com.tamin.taminhamrah.ui.theme.TaminGreen
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -60,7 +59,6 @@ private val BadgeSize = 40.dp
 private val BadgeCorner = 11.dp
 private val BadgeLogoSize = 29.dp
 private val WatermarkSize = 158.dp
-private val HaloSize = 210.dp
 
 // The design positions these from the card's own edges, so the offsets undo the card padding.
 private val PillTop = 52.dp - CardPaddingY
@@ -71,8 +69,6 @@ private val DatesBottom = 16.dp - CardPaddingY
 // 200dp card clears the corner radius and still leaves the dates their row.
 private val WatermarkX = -CardPaddingX
 private val WatermarkY = CardPaddingY
-private val HaloX = WatermarkX - (HaloSize - WatermarkSize) / 2
-private val HaloY = WatermarkY + (HaloSize - WatermarkSize) / 2
 
 /**
  * One registered account.
@@ -95,42 +91,23 @@ fun BankAccountCard(
 ) {
     val bank = account.bank
     val gradient = bank.cardGradient
-    val midStop = bank.cardGradientMidStop
-    val ink = bank.ink
+    val ink = bank.cardInk
     val subInk = bank.subInk
 
-    val surface = remember(gradient, midStop) {
-        Brush.linearGradient(
-            0f to gradient.first(),
-            midStop to gradient[1],
-            1f to gradient.last(),
-        )
-    }
-    // The design's directional light: a bright corner falling to a dark one.
-    val sheen = remember {
-        Brush.linearGradient(
-            0f to Color.White.copy(alpha = 0.14f),
-            0.38f to Color.Transparent,
-            1f to Color.Black.copy(alpha = 0.10f),
-        )
-    }
-    val halo = remember(bank) {
-        Brush.radialGradient(listOf(bank.watermarkGlow, Color.Transparent))
-    }
+    // Two stops on the 135deg diagonal, exactly as the design writes it.
+    val surface = remember(gradient) { Brush.linearGradient(gradient) }
+
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(CardHeight)
             .clip(RoundedCornerShape(CardCorner))
-            .drawBehind {
-                drawRect(surface)
-                drawRect(sheen)
-            }
+            .drawBehind { drawRect(surface) }
             .padding(horizontal = CardPaddingX, vertical = CardPaddingY),
     ) {
         if (bank != null) {
-            Watermark(logoAlpha = bank.watermarkAlpha, halo = halo, account = account)
+            Watermark(logoAlpha = bank.watermarkAlpha, account = account)
         }
 
         // Top row: name follows the reading direction, status sits opposite it.
@@ -204,7 +181,7 @@ fun BankAccountCard(
             Text(
                 text = account.accountNumber,
                 style = MaterialTheme.typography.headlineSmall,
-                color = ink,
+                color = bank.cardNumberInk,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxSize().wrapContentHeight(Alignment.CenterVertically),
             )
@@ -237,16 +214,8 @@ fun BankAccountCard(
  * right edge, which would throw the watermark across the card and put it under the account number.
  */
 @Composable
-private fun BoxScope.Watermark(logoAlpha: Float, halo: Brush, account: BankAccountPR) {
+private fun BoxScope.Watermark(logoAlpha: Float, account: BankAccountPR) {
     val bank = account.bank ?: return
-    Box(
-        modifier = Modifier
-            .align(AbsoluteAlignment.BottomLeft)
-            .offset(x = HaloX, y = HaloY)
-            .size(HaloSize)
-            .clip(CircleShape)
-            .drawBehind { drawCircle(halo) },
-    )
     Image(
         painter = painterResource(bank.logo),
         contentDescription = null,
