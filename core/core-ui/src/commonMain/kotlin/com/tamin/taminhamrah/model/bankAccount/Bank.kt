@@ -155,3 +155,4 @@ val Bank?.watermarkGlow: Color
     else Color.White.copy(alpha = 0.22f)
 
 val Bank?.watermarkAlpha: Float get() = if (this?.isLight == true) 0.20f else 0.13f
+
