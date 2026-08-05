@@ -248,7 +248,10 @@ private fun DateWheels(
                 .padding(horizontal = Spacing.sm)
                 .clip(RoundedCornerShape(CornerRadius.chip))
                 .background(colors.bgSurface)
-                .border(1.dp, colors.blueText.copy(alpha = SELECTION_BORDER_ALPHA), RoundedCornerShape(CornerRadius.chip)),
+                // Ink rather than the accent: the row is a window the numbers pass through, and a
+                // crisp dark edge reads as that far better than a tinted one. Follows the theme,
+                // so it inverts to near-white on a dark surface instead of disappearing.
+                .border(1.dp, colors.textPrimary, RoundedCornerShape(CornerRadius.chip)),
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
@@ -356,7 +359,6 @@ private fun CancelButton(
     }
 }
 
-private const val SELECTION_BORDER_ALPHA = 0.35f
 
 /** Nudges the glyph off the row's top edge so it sits optically centred. */
 private val ROW_TEXT_TOP_PADDING = 10.dp
