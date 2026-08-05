@@ -197,3 +197,41 @@ val TaminIdentityCardShine = Brush.linearGradient(
 val TaminIdentityAvatarGlass = Brush.verticalGradient(
     listOf(Color.White.copy(alpha = 0.125f), Color.White.copy(alpha = 0.05f)),
 )
+
+/* ---- Bank cards ---------------------------------------------------------------------------- */
+
+/**
+ * Brand palettes, identical in both themes: a bank's colours belong to the bank, not to the app,
+ * so these are the one group here that does not have a light and a dark variant.
+ */
+val TaminBankRefahStart = Color(0xFF2B3C9A)
+val TaminBankRefahMid = Color(0xFF8E2A82)
+val TaminBankRefahEnd = Color(0xFFCC0267)
+
+val TaminBankMelliStart = Color(0xFFEBD08A)
+val TaminBankMelliMid = Color(0xFFD8B45C)
+val TaminBankMelliEnd = Color(0xFFB98F34)
+
+val TaminBankMellatStart = Color(0xFFE5468A)
+val TaminBankMellatMid = Color(0xFFC61E6E)
+val TaminBankMellatEnd = Color(0xFF9A0F55)
+
+val TaminBankTejaratStart = Color(0xFF2E9BE0)
+val TaminBankTejaratMid = Color(0xFF1477C2)
+val TaminBankTejaratEnd = Color(0xFF0C5798)
+
+val TaminBankSaderatStart = Color(0xFF2E71C4)
+val TaminBankSaderatMid = Color(0xFF154E9E)
+val TaminBankSaderatEnd = Color(0xFF0B3B82)
+
+val TaminBankSepahStart = Color(0xFF3A5CBE)
+val TaminBankSepahMid = Color(0xFF213F92)
+val TaminBankSepahEnd = Color(0xFF152C6E)
+
+/** A bank the service returns that the app has no palette for still has to draw a card. */
+val TaminBankUnknownStart = TaminNavy300
+val TaminBankUnknownMid = Color(0xFF24509C)
+val TaminBankUnknownEnd = TaminNavy900
+
+/** ملی is the only light card; every other card writes in white. */
+val TaminBankInkOnLight = Color(0xFF43340F)

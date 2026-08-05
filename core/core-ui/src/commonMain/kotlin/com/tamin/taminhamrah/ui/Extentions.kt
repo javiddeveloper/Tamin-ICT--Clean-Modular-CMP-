@@ -228,3 +228,37 @@ fun String.toRialAmount(fallback: String = "—"): String =
  */
 fun Double.toPriceFormat(): String = groupThousands(this.toLong().toString())
 
+
+/**
+ * Digits as arithmetic sees them: everything that is not a digit is dropped, and Persian and
+ * Arabic-Indic digits are folded onto ASCII first.
+ *
+ * [Char.isDigit] is true for all three alphabets, so filtering before folding would keep characters
+ * that no `toLong` can read.
+ */
+fun String.digitsOnly(): String = buildString(length) {
+    for (char in this@digitsOnly) {
+        when (char) {
+            in '0'..'9' -> append(char)
+            in '۰'..'۹' -> append('0' + (char - '۰'))
+            in '٠'..'٩' -> append('0' + (char - '٠'))
+        }
+    }
+}
+
+/**
+ * Breaks a run of characters into fixed-size groups the way a card number is printed —
+ * left to right, unlike [groupThousands], which counts from the end.
+ *
+ * The receiver should already be [digitsOnly]: a stray separator would otherwise be counted as one
+ * of the four.
+ */
+fun String.grouped(size: Int = 4, separator: Char = ' '): String {
+    if (isEmpty() || size <= 0) return this
+    return buildString(length + (length - 1) / size) {
+        this@grouped.forEachIndexed { index, char ->
+            if (index > 0 && index % size == 0) append(separator)
+            append(char)
+        }
+    }
+}
