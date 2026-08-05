@@ -335,6 +335,7 @@
     <!-- Validation -->
     <string name="bank_account_error_incomplete">لطفاً بانک، نوع حساب، تاریخ و شمارهٔ حساب را کامل وارد کنید.</string>
     <string name="bank_account_error_length">شمارهٔ حساب باید %1$s رقم باشد.</string>
+    <string name="bank_account_error_title">خطا در دریافت اطلاعات</string>
     <string name="bank_account_registered">حساب بانکی با موفقیت ثبت شد.</string>
 
 </resources>

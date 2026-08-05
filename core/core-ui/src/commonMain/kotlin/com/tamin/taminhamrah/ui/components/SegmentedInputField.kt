@@ -352,7 +352,12 @@ private fun Char.isPersianDigit(): Boolean {
     return this in '۰'..'۹'
 }
 
-private fun Modifier.animatedErrorBorder(
+/**
+ * The field-error treatment used across the app: the border animates to the danger colour and back
+ * rather than snapping. Public so rows that are not text fields -- pickers, date rows -- report a
+ * problem the same way the inputs beside them do.
+ */
+fun Modifier.animatedErrorBorder(
     isError: Boolean,
     errorColor: Color,
     normalColor: Color,
