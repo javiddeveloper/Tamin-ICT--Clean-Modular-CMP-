@@ -124,6 +124,7 @@ fun ProfileScreen(
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
+    onNavigateToBankAccount: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
@@ -147,6 +148,7 @@ fun ProfileScreen(
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToVersionHistory = onNavigateToVersionHistory,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
+        onNavigateToBankAccount = onNavigateToBankAccount,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
@@ -169,6 +171,7 @@ fun HandleProfileEvents(
     onNavigateToIdentity: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
+    onNavigateToBankAccount: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -193,6 +196,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToChangeMobile -> {
                 onNavigateToChangeMobile()
+            }
+
+            ProfileEvent.NavigateToBankAccount -> {
+                onNavigateToBankAccount()
             }
 
             is ProfileEvent.OpenUrl -> {
@@ -410,7 +417,7 @@ fun ProfileContent(
                                     leadingIconBackgroundGradient = taminColors.iconGradientPrimary
                                 ),
                                 showArrow = true,
-                                onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.BANK_ACCOUNTS)) }
                             ),
                             ListItemData(
                                 title = stringResource(Res.string.profile_change_mobile),
