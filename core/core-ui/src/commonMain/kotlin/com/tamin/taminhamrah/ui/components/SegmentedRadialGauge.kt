@@ -51,6 +51,7 @@ fun SegmentedRadialGauge(
     segmentCount: Int = 25,
     progressColor: Color = Color(0xFF00C4B4),
     backgroundColor: Color = Color(0xFFE2E8F0),
+    expandedAspectRatio: Float = 1.9f,
     progressGradient: Brush? = null,
     inactiveGradient: Brush? = null,
     padding: Dp = 16.dp,
@@ -87,27 +88,31 @@ fun SegmentedRadialGauge(
 
                 val bottomMargin = heightPx / 2f + glowMaxSpreadPx + innerPaddingPx
 
-                // حداکثر شعاع مجاز از دید عرض
                 val rFromWidth = (usableWidth / 2f) - heightPx / 2f - innerPaddingPx
-                // حداکثر شعاع مجاز از دید ارتفاع (تا طاق برش نخوره)
-                val rFromHeight = usableHeight - glowMaxSpreadPx - heightPx / 2f - bottomMargin
+                val referenceHeight = usableWidth / expandedAspectRatio
+                val rFromHeightRef = referenceHeight - glowMaxSpreadPx - heightPx / 2f - bottomMargin
+                val r = minOf(rFromWidth, rFromHeightRef).coerceAtLeast(0f)
+                val centerArc = Offset(
+                    x = usableWidth / 2f,
+                    y = referenceHeight - bottomMargin
+                )
 
-                val r = minOf(rFromWidth, rFromHeight).coerceAtLeast(0f)
-
-                val center = Offset(
+                val centerLine = Offset(
                     x = usableWidth / 2f,
                     y = usableHeight - bottomMargin
                 )
 
-                // --- بقیه‌ی کد دقیقاً همون قبلیه ---
                 val angleStep = if (segmentCount > 1) {
                     sweepAngle / (segmentCount - 1).toFloat()
                 } else 0f
 
-                val linearSpacing = r * ((angleStep * kotlin.math.PI) / 180.0).toFloat()
+                val linearSpacing = if (segmentCount > 1) {
+                    (rFromWidth * 2f) / (segmentCount - 1)
+                } else 0f
+
                 val totalWidth = linearSpacing * (segmentCount - 1)
-                val startX = center.x - totalWidth / 2f
-                val y_B = center.y
+                val startX = centerLine.x - totalWidth / 2f
+                val y_B = centerLine.y
 
                 val baseCapsulePath = Path().apply {
                     addRoundRect(
@@ -128,8 +133,9 @@ fun SegmentedRadialGauge(
                     val angle = startAngle + (index * angleStep)
                     val originalRot = angle - 90f
                     val originalRotRad = ((originalRot * kotlin.math.PI) / 180.0).toFloat()
-                    val x_A = center.x - r * kotlin.math.sin(originalRotRad)
-                    val y_A = center.y + r * kotlin.math.cos(originalRotRad)
+
+                    val x_A = centerArc.x - r * kotlin.math.sin(originalRotRad)
+                    val y_A = centerArc.y + r * kotlin.math.cos(originalRotRad)
                     val rot_A = angle - 270f
 
                     val x_B = startX + index * linearSpacing
