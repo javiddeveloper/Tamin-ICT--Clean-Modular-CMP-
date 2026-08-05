@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsLi
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListIntent
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListState
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListState.PartialState
+import com.tamin.taminhamrah.feature.profile.ui.model.MockSubdominantUseCase
 import com.tamin.taminhamrah.mapper.subdominant.toPresentation
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class DependentsListViewModel(
-    private val subdominantUseCase: SubdominantUseCase
+    private val subdominantUseCase: MockSubdominantUseCase
 ) : BaseViewModel<DependentsListState, PartialState, DependentsListEvent, DependentsListIntent>(
     initialState = DependentsListState()
 ) {
