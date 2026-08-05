@@ -524,7 +524,9 @@ fun MedicalRecordsContent(
                 state.isLoading && state.prescriptionList.isEmpty() ->
                     item { RecordsShimmerSkeleton() }
 
-                visibleRecords.isEmpty() -> item {
+                // Guarded on error: a failed request cannot tell an empty period from an
+                // unreachable one.
+                state.error == null && visibleRecords.isEmpty() -> item {
                     TaminEmptyState(
                         message = if (searchCriteria.nameQuery.isNotBlank()) {
                             stringResource(Res.string.records_empty_search, searchCriteria.nameQuery)

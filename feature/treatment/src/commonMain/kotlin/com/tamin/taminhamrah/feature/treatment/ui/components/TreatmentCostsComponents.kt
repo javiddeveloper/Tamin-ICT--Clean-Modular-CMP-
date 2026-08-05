@@ -110,7 +110,8 @@ internal fun CertificateList(
         when {
             isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
 
-            certificates.isEmpty() -> item {
+            // Guarded on error: "no claims" and "we could not ask" are different answers.
+            error == null && certificates.isEmpty() -> item {
                 TaminEmptyState(message = stringResource(Res.string.costs_empty))
             }
 

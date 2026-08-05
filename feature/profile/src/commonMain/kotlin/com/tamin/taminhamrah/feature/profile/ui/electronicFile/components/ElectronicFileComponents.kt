@@ -107,7 +107,8 @@ fun DocumentGrid(
         refresh is LoadState.Loading && documents.itemCount == 0 ->
             DocumentGridSkeleton(modifier = modifier)
 
-        documents.itemCount == 0 ->
+        // Guarded on error: a refresh that failed has no idea whether the person has documents.
+        refresh !is LoadState.Error && documents.itemCount == 0 ->
             TaminEmptyState(
                 message = stringResource(Res.string.electronic_file_empty),
                 modifier = modifier,
