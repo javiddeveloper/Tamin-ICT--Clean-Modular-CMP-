@@ -1,7 +1,10 @@
 package com.tamin.taminhamrah.feature.myinbox.ui.contract
 
+import com.tamin.taminhamrah.model.inbox.PersonalInboxItemPR
+
 data class MyInboxUiState(
     val isLoading: Boolean = false,
+    val items: List<PersonalInboxItemPR> = emptyList(),
     val error: String? = null
 ) {
     sealed interface PartialState {
