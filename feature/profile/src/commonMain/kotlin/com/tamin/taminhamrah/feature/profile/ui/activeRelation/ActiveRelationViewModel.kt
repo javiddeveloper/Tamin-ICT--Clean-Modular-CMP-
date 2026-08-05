@@ -63,7 +63,10 @@ class ActiveRelationViewModel(
         if (uiState.value.recipients.isEmpty()) {
             emit(PartialState.SetLoadingRecipients(true))
             getRecipientsUseCase()
-                .catch { emit(PartialState.SetError(it.message ?: "خطای نامشخص")) }
+                .catch {
+                    sendEvent(ActiveRelationEvent.ShowToast(it.message ?: "خطای نامشخص"))
+                    emit(PartialState.SetLoadingRecipients(false))
+                }
                 .collect { list ->
                     emit(PartialState.SetRecipients(list.toUiModelList().toImmutableList()))
                     emit(PartialState.SetLoadingRecipients(false))
@@ -88,7 +91,8 @@ class ActiveRelationViewModel(
 
         getStatusCertificateReportUseCase(filters)
             .catch {
-                emit(PartialState.SetError(it.message ?: "خطای نامشخص"))
+                sendEvent(ActiveRelationEvent.ShowToast(it.message ?: "خطای نامشخص"))
+                emit(PartialState.SetLoading(false))
             }
             .collect {
                 emit(PartialState.SetLoading(false))
