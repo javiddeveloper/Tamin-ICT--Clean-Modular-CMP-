@@ -32,6 +32,8 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
 import com.tamin.taminhamrah.model.user.UserProfileDto
+import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 internal interface UserApiService {
     @GET("central-reg/personal")
@@ -137,4 +139,13 @@ internal interface UserApiService {
     suspend fun checkUserIsNew(
         @Path("nationalId") nationalId: String
     ): BaseDTO<Boolean>
+
+    /**
+     * Registers an account. Note the path is `accounts`, not `personals/accounts` that the list
+     * uses — the previous app posted to the same asymmetric pair.
+     */
+    @POST("accounts")
+    suspend fun registerBankAccount(
+        @Body request: BankAccountRequestDTO,
+    ): BaseDTO<BankAccountCreatedDTO>
 }

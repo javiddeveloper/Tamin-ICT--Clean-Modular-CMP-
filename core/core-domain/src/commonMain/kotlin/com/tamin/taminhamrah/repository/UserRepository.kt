@@ -40,4 +40,11 @@ interface UserRepository {
     suspend fun getUserProfile(): Flow<UserProfileDN>
 
     fun checkUserIsNew(nationalId: String): Flow<Boolean>
+
+    suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?>
 }

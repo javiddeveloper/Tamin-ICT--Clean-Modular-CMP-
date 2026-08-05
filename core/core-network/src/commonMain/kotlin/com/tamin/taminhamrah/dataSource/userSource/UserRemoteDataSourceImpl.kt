@@ -27,6 +27,8 @@ import com.tamin.taminhamrah.util.NetworkConstants
 
 import com.tamin.taminhamrah.model.user.UserProfileDto
 import co.touchlab.kermit.Logger
+import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
@@ -217,6 +219,21 @@ internal class UserRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun registerBankAccount(
+        request: BankAccountRequestDTO,
+    ): BankAccountCreatedDTO? {
+        return try {
+            val response = userApiService.registerBankAccount(request)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 }

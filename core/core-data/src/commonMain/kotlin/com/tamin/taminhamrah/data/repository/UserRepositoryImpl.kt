@@ -25,6 +25,7 @@ import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 internal class UserRepositoryImpl(
     private val userRemoteDataSource: UserRemoteDataSource,
@@ -124,5 +125,26 @@ internal class UserRepositoryImpl(
     }
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {
         emit(userRemoteDataSource.checkUserIsNew(nationalId))
+    }
+
+    /**
+     * The millis-to-string conversion lives here rather than in the caller: which shape the wire
+     * wants is a data-layer concern, and the service reads `dateOfStart` as a string.
+     */
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flow {
+        val created = userRemoteDataSource.registerBankAccount(
+            BankAccountRequestDTO(
+                accountNumber = accountNumber,
+                bank = bankCode,
+                accountType = accountTypeCode,
+                dateOfStart = startDateMillis.toString(),
+            )
+        )
+        emit(created?.personal?.referenceCode)
     }
 }
