@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.DocumentGrid
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.ElectronicFileHeader
@@ -20,6 +21,7 @@ import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.Electron
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.model.DocumentTarget
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -93,6 +95,14 @@ fun ElectronicFileRoute(
             modifier = Modifier.fillMaxSize(),
         )
     }
+
+    // A failed refresh leaves the grid with nothing to show, so closing the dialog leaves the
+    // screen rather than a blank page.
+    ErrorStateView(
+        message = (documents.loadState.refresh as? LoadState.Error)?.error?.message,
+        onDismiss = onBackClicked,
+        onRetry = documents::retry,
+    )
 
     when (val target = state.openTarget) {
         is DocumentTarget.Image -> TaminImageViewer(

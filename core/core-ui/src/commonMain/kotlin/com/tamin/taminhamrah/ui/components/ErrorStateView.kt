@@ -2,10 +2,6 @@ package com.tamin.taminhamrah.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -29,25 +25,23 @@ import taminx.core.core_ui.ic_tamin_cross
  * inherits the dialog language the health screens already established and cannot drift from it.
  * [message] is the service's own wording and carries the detail; the title only names the state.
  *
+ * [onDismiss] is where closing the dialog leads, and every caller sends it back: acknowledging a
+ * failure should leave the screen, not strand the user on a page that never loaded.
+ *
  * [onRetry] is optional. Without it the dialog offers only a way out, which is right for a failure
- * that repeating cannot fix.
+ * that repeating cannot fix. It needs no dismissal of its own — every reducer clears `error` when a
+ * load begins, so the dialog closes itself and returns if the retry fails too.
  */
 @Composable
 fun ErrorStateView(
     message: String?,
+    onDismiss: () -> Unit,
     onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     if (message == null) return
 
-    // Keyed on the message, so dismissing one failure never swallows the next one. Kept here
-    // rather than in each screen: four screens hand-rolling the same flag is four chances to
-    // forget the key and leave a user staring at a page that silently failed.
-    var dismissed by remember(message) { mutableStateOf(false) }
-    if (dismissed) return
-
     val colors = LocalTaminColors.current
-    val onDismiss = { dismissed = true }
 
     TaminConfirmationDialog(
         title = stringResource(Res.string.error_title),
@@ -61,10 +55,7 @@ fun ErrorStateView(
             if (onRetry != null) {
                 TaminFilledButton(
                     text = stringResource(Res.string.action_retry),
-                    onClick = {
-                        onDismiss()
-                        onRetry()
-                    },
+                    onClick = onRetry,
                     background = SolidColor(colors.blueText),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -86,6 +77,7 @@ fun PreviewErrorStateViewWithRetry() {
     PreviewRtlThemeContent {
         ErrorStateView(
             message = "در دریافت اطلاعات مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
+            onDismiss = {},
             onRetry = {},
         )
     }
@@ -98,6 +90,7 @@ fun PreviewErrorStateViewWithoutRetry() {
     PreviewRtlThemeContent {
         ErrorStateView(
             message = "این سرویس در حال حاضر در دسترس نیست.",
+            onDismiss = {},
         )
     }
 }

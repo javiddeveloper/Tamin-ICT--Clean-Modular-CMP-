@@ -154,6 +154,7 @@ fun IdentityInScreen(
 
         ErrorStateView(
             message = state.error,
+            onDismiss = onBack,
             onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
         )
 

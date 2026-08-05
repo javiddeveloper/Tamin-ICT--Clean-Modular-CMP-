@@ -32,7 +32,6 @@ import androidx.paging.compose.LazyPagingItems
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
-import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -97,11 +96,6 @@ fun DocumentGrid(
     modifier: Modifier = Modifier,
 ) {
     val refresh = documents.loadState.refresh
-
-    ErrorStateView(
-        message = (refresh as? LoadState.Error)?.error?.message,
-        onRetry = documents::retry,
-    )
 
     when {
         refresh is LoadState.Loading && documents.itemCount == 0 ->

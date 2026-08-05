@@ -38,7 +38,6 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.isActionable
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
-import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -97,14 +96,9 @@ internal fun CertificateList(
     error: String?,
     onOpenCertificate: (String) -> Unit,
     onSendToInbox: (String) -> Unit,
-    onRetry: () -> Unit,
 ) {
     // Remembers completed entrance animations across list scrolls to avoid re-triggering entrance animations on already-visible items.
     val staggerState = rememberStaggeredEntranceState()
-
-    // A failed request and a genuinely empty result read very differently: the dialog says what
-    // went wrong, the list underneath falls through to its empty state.
-    ErrorStateView(message = error, onRetry = onRetry)
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {

@@ -437,7 +437,7 @@ fun MedicalRecordsContent(
 
     // Outside the list: a dialog cannot live in a LazyColumn item, and the failure is the only
     // thing worth attending to while it is up.
-    ErrorStateView(message = state.error, onRetry = onRetry)
+    ErrorStateView(message = state.error, onDismiss = onBack, onRetry = onRetry)
 
     Scaffold(
         modifier = modifier,

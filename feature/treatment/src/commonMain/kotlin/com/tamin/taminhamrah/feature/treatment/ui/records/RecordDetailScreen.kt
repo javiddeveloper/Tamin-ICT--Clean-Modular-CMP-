@@ -238,7 +238,7 @@ fun RecordDetailContent(
 
             // Over the page rather than instead of it: the body falls through to its empty
             // state, so dismissing the dialog does not leave a bare top bar behind.
-            ErrorStateView(message = state.error, onRetry = onRetry)
+            ErrorStateView(message = state.error, onDismiss = onBack, onRetry = onRetry)
 
             price?.let {
                 CostTotalsBar(
