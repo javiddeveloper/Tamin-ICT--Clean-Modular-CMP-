@@ -57,6 +57,8 @@ import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminNavy300
+import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -188,6 +190,8 @@ private fun ListView(
 ) {
     // Held across scrolls so a card that has already arrived does not fade in again.
     val staggerState = rememberStaggeredEntranceState(accounts.size)
+    // The design's own gradient for this button: diagonal, not the horizontal bar gradient.
+    val addButtonBrush = remember { Brush.linearGradient(listOf(TaminNavy300, TaminNavy900)) }
 
     // The add button is the first row of the list and scrolls with it, as in the design -- not a
     // floating bar, which would sit on top of the last card.
@@ -202,6 +206,8 @@ private fun ListView(
                 text = stringResource(Res.string.bank_account_add),
                 icon = Icons.Default.Add,
                 onClick = { onIntent(BankAccountIntent.OnAddClicked) },
+                background = addButtonBrush,
+                iconAtStart = true,
             )
         }
 
