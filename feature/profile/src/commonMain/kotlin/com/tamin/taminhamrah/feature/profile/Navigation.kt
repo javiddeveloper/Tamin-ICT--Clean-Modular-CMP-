@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileRoute
@@ -34,17 +35,19 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object VersionHistory : ProfileRoute
+
 }
 
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
     onNavigateToElectronicFile: () -> Unit,
+    onNavigateToChangeMobile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
     navigation<ProfileRoute.Graph>(startDestination = ProfileRoute.Main()) {
-        composable<ProfileRoute.Main> { backStackEntry ->
+        composableWithFadeTransitions<ProfileRoute.Main> { backStackEntry ->
             val route = backStackEntry.toRoute<ProfileRoute.Main>()
             val viewModel = backStackEntry.sharedViewModel<ProfileViewModel>(navController)
 
@@ -54,12 +57,13 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToElectronicFile = onNavigateToElectronicFile,
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
+                onNavigateToChangeMobile = onNavigateToChangeMobile,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
         }
 
-        composable<ProfileRoute.Identity> {
+        composableWithFadeTransitions<ProfileRoute.Identity> { backStackEntry ->
             val viewModel = koinViewModel<IdentityInViewModel>()
 
             IdentityInRoute(

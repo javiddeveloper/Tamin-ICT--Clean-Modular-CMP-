@@ -36,8 +36,8 @@ class UserApiServiceTest : BaseApiTest() {
         val apiService = ktorfit.createUserApiService()
 
         val response = apiService.changeMobile(
-            referer = "https://profile.tamin.ir/main/change-phone-number",
-            url = "https://profile.tamin.ir/api/v2.0/users/data/request-otp",
+//            referer = "https://profile.tamin.ir/main/change-phone-number",
+            url = "https://apim.tamin.ir/t/um-mobile-api.tamin.ir/change-mobile-number/request/v1",
             mobile = "09123456789"
         )
 

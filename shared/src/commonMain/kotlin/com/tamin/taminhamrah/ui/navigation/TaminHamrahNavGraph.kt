@@ -54,11 +54,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.FeatureManager
@@ -69,6 +67,8 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
+import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
+import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.historyScreen
@@ -107,6 +107,11 @@ import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import com.tamin.taminhamrah.feature.history.navigateToHistory
+import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
@@ -324,7 +329,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 navController = navController,
                 startDestination = Route.Home
             ) {
-                composable<Route.Home> {
+                composableWithFadeTransitions<Route.Home> {
                     HomeScreen(
                         onNavigateToService = { flag -> navController.navigateToFeature(flag) },
                         onNavigateToWeb = { url -> openUrl(url) },
@@ -351,8 +356,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToElectronicFile = {
                         navController.navigate(ProfileRoute.ElectronicFile)
                     },
+                    onNavigateToChangeMobile = {
+                        navController.navigateToChangeMobile()
+                    },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
+                )
+
+                changeMobileScreen(
+                    onBack = { navController.popBackStack() },
                 )
 
                 cartableGraph(

@@ -12,6 +12,7 @@ object Duration {
     const val fast = 150
     const val normal = 300
     const val slow = 500
+    const val extraSlow = 1000
 }
 
 // Easing tokens

@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.PensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.calculatePension.CalculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.PrescriptionScreen
@@ -100,67 +100,67 @@ fun NavController.navigateToDisabilityPension(navOptions: NavOptions? = null) {
 }
 
 fun NavGraphBuilder.pensionInquiryScreen() {
-    composable<PensionInquiryRoute> {
+    composableWithFadeTransitions<PensionInquiryRoute> {
         PensionInquiryScreen()
     }
 }
 
 fun NavGraphBuilder.calculatePensionScreen(onBack: () -> Unit) {
-    composable<CalculatePensionRoute> {
+    composableWithFadeTransitions<CalculatePensionRoute> {
         CalculatePensionScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.prescriptionScreen(onBack: () -> Unit) {
-    composable<PrescriptionRoute> {
+    composableWithFadeTransitions<PrescriptionRoute> {
         PrescriptionScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.deservedTreatmentScreen(onBack: () -> Unit) {
-    composable<DeservedTreatmentRoute> {
+    composableWithFadeTransitions<DeservedTreatmentRoute> {
         DeservedTreatmentScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.payrollScreen(onBack: () -> Unit) {
-    composable<PayRollRoute> {
+    composableWithFadeTransitions<PayRollRoute> {
         PayRollScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.edictScreen(onBack: () -> Unit) {
-    composable<EdictRoute> {
+    composableWithFadeTransitions<EdictRoute> {
         EdictScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
-    composable<IssuanceCertificateRoute> {
+    composableWithFadeTransitions<IssuanceCertificateRoute> {
         IssuanceCertificateScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.deferredInstallmentScreen(onBack: () -> Unit) {
-    composable<DeferredInstallmentRoute> {
+    composableWithFadeTransitions<DeferredInstallmentRoute> {
         DeferredInstallmentScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.girlSurvivorScreen(onBack: () -> Unit) {
-    composable<GirlSurvivorRoute> {
+    composableWithFadeTransitions<GirlSurvivorRoute> {
         GirlSurvivorScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.pensionSurvivorScreen(onBack: () -> Unit) {
-    composable<PensionSurvivorRoute> {
+    composableWithFadeTransitions<PensionSurvivorRoute> {
         PensionSurvivorScreen(onBack = onBack)
     }
 }
 
 fun NavGraphBuilder.disabilityPensionScreen(onBack: () -> Unit) {
-    composable<DisabilityPensionRoute> {
+    composableWithFadeTransitions<DisabilityPensionRoute> {
         DisabilityPensionScreen(onBack = onBack)
     }
 }

@@ -124,6 +124,7 @@ fun ProfileScreen(
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToElectronicFile: () -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
+    onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
@@ -147,6 +148,7 @@ fun ProfileScreen(
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToElectronicFile = onNavigateToElectronicFile,
         onNavigateToVersionHistory = onNavigateToVersionHistory,
+        onNavigateToChangeMobile = onNavigateToChangeMobile,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
@@ -169,6 +171,7 @@ fun HandleProfileEvents(
     onNavigateToIdentity: () -> Unit,
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
+    onNavigateToChangeMobile: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -193,6 +196,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToVersionHistory -> {
                 onNavigateToVersionHistory()
+            }
+
+            ProfileEvent.NavigateToChangeMobile -> {
+                onNavigateToChangeMobile()
             }
 
             is ProfileEvent.OpenUrl -> {

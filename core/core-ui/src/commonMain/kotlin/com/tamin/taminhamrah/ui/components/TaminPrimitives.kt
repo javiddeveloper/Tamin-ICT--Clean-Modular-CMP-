@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -504,4 +506,38 @@ fun TaminEmptyState(
             textAlign = TextAlign.Center,
         )
     }
+}
+
+/**
+ * A decorative circle with a radial gradient that can be placed anywhere without
+ * affecting the layout of other elements.
+ */
+@Composable
+fun DecorativeBackgroundCircle(
+    size: Dp,
+    xOffset: Dp,
+    yOffset: Dp,
+    modifier: Modifier = Modifier,
+    color: Color = Color.White.copy(alpha = 0.10f),
+) {
+    Box(
+        modifier = modifier
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(0, 0) {
+                    placeable.placeRelative(0, 0)
+                }
+            }
+            .size(size)
+            .offset(x = xOffset, y = yOffset)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        color,
+                        Color.Transparent
+                    )
+                )
+            )
+    )
 }
