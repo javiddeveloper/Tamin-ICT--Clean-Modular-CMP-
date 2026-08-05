@@ -71,11 +71,23 @@ object PersianDateFormatter {
         return (isoDayNumber + 1) % 7
     }
 
-    /** Midnight of a Jalali date, in epoch milliseconds, for the date-range endpoints. */
-    fun toEpochMillis(jy: Int, jm: Int, jd: Int): Long {
+    /**
+     * Midnight of a Jalali date, in epoch milliseconds, for the date-range endpoints.
+     *
+     * [timeZone] defaults to the device's, which is what the range filters want. Pass
+     * [TimeZone.UTC] for anything the service stores as a calendar day: the accounts endpoint
+     * returns midnight UTC, and a Tehran midnight is 20:30 UTC the *previous* day, so a date sent
+     * in local time is recorded one day early.
+     */
+    fun toEpochMillis(
+        jy: Int,
+        jm: Int,
+        jd: Int,
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    ): Long {
         val (gy, gm, gd) = jalaliToGregorian(jy, jm, jd)
         return LocalDate(gy, gm, gd)
-            .atStartOfDayIn(TimeZone.currentSystemDefault())
+            .atStartOfDayIn(timeZone)
             .toEpochMilliseconds()
     }
 
