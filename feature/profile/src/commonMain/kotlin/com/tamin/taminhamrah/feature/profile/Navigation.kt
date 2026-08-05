@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
@@ -31,6 +32,9 @@ sealed interface ProfileRoute {
     @Serializable
     data object VersionHistory : ProfileRoute
 
+    @Serializable
+    data object BankAccount : ProfileRoute
+
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -51,6 +55,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
+                onNavigateToBankAccount = { navController.navigate(ProfileRoute.BankAccount) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -71,6 +76,12 @@ fun NavGraphBuilder.profileGraph(
             VersionHistoryRoute(
                 viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composableWithFadeTransitions<ProfileRoute.BankAccount> {
+            BankAccountScreen(
+                onNavigateBack = { navController.popBackStack() },
             )
         }
     }
