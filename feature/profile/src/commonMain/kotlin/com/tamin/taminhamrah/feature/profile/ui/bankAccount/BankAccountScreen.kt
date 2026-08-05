@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.AccountTypePickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountCard
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountForm
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountListSkeleton
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankPickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.IbanExplainerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountEvent
@@ -77,6 +77,9 @@ import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
 import taminx.core.core_ui.ic_number
 import taminx.core.core_ui.ic_tamin_chevron_back
+
+private const val ADD_BUTTON_KEY = "add"
+private const val EMPTY_STATE_KEY = "empty"
 
 private val CardSpacing = 14.dp
 private val HeaderCorner = 40.dp
@@ -152,8 +155,7 @@ fun BankAccountScreen(
                 .navigationBarsPadding(),
         ) {
             when {
-                state.isLoading && state.accounts.isEmpty() ->
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                state.isLoading && state.accounts.isEmpty() -> BankAccountListSkeleton()
 
                 state.mode == BankAccountMode.ADD -> AddView(
                     draft = state.draft,
@@ -184,53 +186,51 @@ private fun ListView(
     hasError: Boolean,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (accounts.isEmpty()) {
-            // The empty state must not appear while an error is on screen: a failed load has
-            // nothing to say about whether the person has accounts.
-            if (!hasError) {
-                EmptyStateMessage(
-                    icon = vectorResource(Res.drawable.ic_number),
-                    title = stringResource(Res.string.bank_account_empty_title),
-                    subtitle = stringResource(Res.string.bank_account_empty_description),
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
-        } else {
-            // Held across scrolls so a card that has already arrived does not fade in again.
-            val staggerState = rememberStaggeredEntranceState(accounts.size)
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(Spacing.page),
-                verticalArrangement = Arrangement.spacedBy(CardSpacing),
-                overscrollEffect = rememberJellyOverscroll(),
-            ) {
-                itemsIndexed(accounts, key = { _, account -> account.id }) { index, account ->
-                    BankAccountCard(
-                        account = account,
-                        // Alpha and translation are driven through graphicsLayer, so the entrance
-                        // costs no recomposition per frame.
-                        modifier = Modifier.staggeredItemEntrance(
-                            index = index,
-                            key = account.id,
-                            state = staggerState,
-                        ),
-                    )
-                }
-            }
-        }
+    // Held across scrolls so a card that has already arrived does not fade in again.
+    val staggerState = rememberStaggeredEntranceState(accounts.size)
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(Spacing.page),
-        ) {
+    // The add button is the first row of the list and scrolls with it, as in the design -- not a
+    // floating bar, which would sit on top of the last card.
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(Spacing.page),
+        verticalArrangement = Arrangement.spacedBy(CardSpacing),
+        overscrollEffect = rememberJellyOverscroll(),
+    ) {
+        item(key = ADD_BUTTON_KEY) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.bank_account_add),
                 icon = Icons.Default.Add,
                 onClick = { onIntent(BankAccountIntent.OnAddClicked) },
             )
+        }
+
+        if (accounts.isEmpty()) {
+            // The empty state must not appear while an error is on screen: a failed load has
+            // nothing to say about whether the person has accounts.
+            if (!hasError) {
+                item(key = EMPTY_STATE_KEY) {
+                    EmptyStateMessage(
+                        icon = vectorResource(Res.drawable.ic_number),
+                        title = stringResource(Res.string.bank_account_empty_title),
+                        subtitle = stringResource(Res.string.bank_account_empty_description),
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl),
+                    )
+                }
+            }
+        } else {
+            itemsIndexed(accounts, key = { _, account -> account.id }) { index, account ->
+                BankAccountCard(
+                    account = account,
+                    // Alpha and translation are driven through graphicsLayer, so the entrance
+                    // costs no recomposition per frame.
+                    modifier = Modifier.staggeredItemEntrance(
+                        index = index,
+                        key = account.id,
+                        state = staggerState,
+                    ),
+                )
+            }
         }
     }
 }
