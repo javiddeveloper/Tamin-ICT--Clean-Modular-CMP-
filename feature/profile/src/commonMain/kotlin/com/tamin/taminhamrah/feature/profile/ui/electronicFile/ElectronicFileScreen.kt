@@ -72,6 +72,7 @@ fun ElectronicFileRoute(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = stringResource(Res.string.action_back),
                     onClick = onBack,
+                    bordered = true,
                 )
             },
         ) {
