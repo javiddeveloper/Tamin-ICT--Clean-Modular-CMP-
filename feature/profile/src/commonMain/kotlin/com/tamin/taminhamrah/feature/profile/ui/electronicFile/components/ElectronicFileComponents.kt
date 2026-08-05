@@ -6,27 +6,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
@@ -46,7 +44,6 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.electronic_file_category
 import taminx.core.core_ui.electronic_file_empty
-import taminx.core.core_ui.electronic_file_registered
 import taminx.core.core_ui.electronic_file_registered_subtitle
 import taminx.core.core_ui.ic_tamin_medical_records
 
@@ -55,50 +52,33 @@ private const val THUMB_ASPECT = 1.25f
 private const val SKELETON_CARDS = 6
 
 /**
- * Header info card inside the top app bar displaying registered document status.
+ * What sits under the title in the header: the document mark, ringed, over the gradient.
+ *
+ * Laid out exactly as the change-mobile header is — same ringed tile, same spacing, same subtitle
+ * treatment — so the two screens read as one family rather than two takes on the same idea.
  */
 @Composable
-fun ElectronicFileHeaderCard(
+fun ElectronicFileHeader(
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.card))
-            .background(Color.White.copy(alpha = 0.18f))
-            .padding(Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(CornerRadius.card))
-                .background(Color.White.copy(alpha = 0.22f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_medical_records),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp),
-            )
-        }
+    val colors = LocalTaminColors.current
+    Box(modifier = modifier.fillMaxWidth()) {
+        DecorativeBackgroundCircle(
+            size = 190.dp,
+            xOffset = 450.dp,
+            yOffset = (-150).dp,
+        )
+
         Column(
-            modifier = Modifier
-                .padding(start = Spacing.md)
-                .weight(1f),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(Res.string.electronic_file_registered),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
-            Spacer(modifier = Modifier.height(Spacing.xxs))
+            AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_medical_records))
+            Spacer(modifier = Modifier.height(Spacing.md))
             Text(
                 text = stringResource(Res.string.electronic_file_registered_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.85f),
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.textHeaderSubtitle,
             )
         }
     }

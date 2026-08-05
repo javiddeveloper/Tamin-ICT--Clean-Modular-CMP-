@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.DocumentGrid
-import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.ElectronicFileHeaderCard
+import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.ElectronicFileHeader
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.ElectronicFileEvent
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.ElectronicFileIntent
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.model.DocumentTarget
@@ -76,7 +76,7 @@ fun ElectronicFileRoute(
             },
         ) {
             Spacer(modifier = Modifier.height(Spacing.md))
-            ElectronicFileHeaderCard()
+            ElectronicFileHeader()
         }
 
         Text(
