@@ -57,6 +57,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
+                onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )

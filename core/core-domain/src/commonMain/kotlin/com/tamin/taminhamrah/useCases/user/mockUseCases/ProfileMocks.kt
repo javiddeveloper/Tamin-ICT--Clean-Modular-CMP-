@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.model
+package com.tamin.taminhamrah.useCases.user.mockUseCases
 
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantItemDN

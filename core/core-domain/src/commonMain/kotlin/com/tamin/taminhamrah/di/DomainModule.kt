@@ -135,6 +135,7 @@ import org.koin.dsl.module
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 
 val domainModule = module {
@@ -156,6 +157,7 @@ val domainModule = module {
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
+    factoryOf(::MockSubdominantUseCase)
     factoryOf(::SignOutUseCase)
     factoryOf(::GetSignOutUrlUseCase)
     factoryOf(::GetBankAccountListUseCase)
