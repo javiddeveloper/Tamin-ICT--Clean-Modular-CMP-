@@ -52,6 +52,7 @@ sealed class ProfileEvent {
     data object NavigateToSettings : ProfileEvent()
     data object NavigateToIdentity : ProfileEvent()
     data object NavigateToVersionHistory : ProfileEvent()
+    data object NavigateToActiveRelation : ProfileEvent()
     data object NavigateToChangeMobile : ProfileEvent()
     data class OpenUrl(val url: String) : ProfileEvent()
     data class ShowToast(val message: String) : ProfileEvent()

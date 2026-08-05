@@ -8,7 +8,6 @@ import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
-import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
@@ -21,6 +20,7 @@ import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActive
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.data.mapper.user.toDomain
+import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull

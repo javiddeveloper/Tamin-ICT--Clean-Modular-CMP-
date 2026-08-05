@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.util
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.atStartOfDayIn
@@ -17,6 +18,23 @@ private const val PERSIAN_ZERO = '۰'
 fun String.toPersianDigits(): String = map { char ->
     if (char in '0'..'9') PERSIAN_ZERO + (char - '0') else char
 }.joinToString("")
+
+fun String.toFormattedDate(): String =
+    if (length == 8) {
+        "${substring(0, 4)}/${substring(4, 6)}/${substring(6, 8)}"
+    } else {
+        this
+    }
+
+fun currentTime(): String {
+    val now = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+
+    val time = "${now.hour.toString().padStart(2, '0')}:" +
+        now.minute.toString().padStart(2, '0')
+
+    return time.toPersianDigits()
+}
 
 object PersianDateFormatter {
 
