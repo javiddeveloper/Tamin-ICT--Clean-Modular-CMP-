@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 
 class FakeUserRepository : UserRepository {
     var identityInfoResult: IdentityInfoDN? = null
@@ -103,4 +104,11 @@ class FakeUserRepository : UserRepository {
         if (shouldThrowError) throw error
         emit(checkUserIsNewResult)
     }
+
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flowOf(null)
 }
