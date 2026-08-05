@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.feature.profile.ui.bankAccount.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,14 +15,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +31,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -42,8 +46,6 @@ import com.tamin.taminhamrah.model.bankAccount.watermarkGlow
 import com.tamin.taminhamrah.ui.theme.TaminGreen
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.foundation.Image
-import androidx.compose.ui.platform.LocalLayoutDirection
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.bank_account_active
 import taminx.core.core_ui.bank_account_end_date
@@ -52,17 +54,35 @@ import taminx.core.core_ui.bank_account_start_date
 
 private val CardHeight = 200.dp
 private val CardCorner = 22.dp
+private val CardPaddingX = 20.dp
+private val CardPaddingY = 18.dp
 private val BadgeSize = 40.dp
+private val BadgeCorner = 11.dp
 private val BadgeLogoSize = 29.dp
 private val WatermarkSize = 158.dp
 private val HaloSize = 210.dp
 
+// The design positions these from the card's own edges, so the offsets undo the card padding.
+private val PillTop = 52.dp - CardPaddingY
+private val DatesBottom = 16.dp - CardPaddingY
+private val WatermarkX = (-18).dp - CardPaddingX
+private val WatermarkY = 24.dp + CardPaddingY
+private val HaloX = (-46).dp - CardPaddingX
+private val HaloY = 52.dp + CardPaddingY
+
 /**
  * One registered account.
  *
- * Every string arrives finished from the mapper, and the two gradients are remembered on the
- * palette rather than rebuilt per composition — a list of these scrolls, so nothing here may
- * allocate on the way past.
+ * Laid out the way the design does — absolutely, not as a column — because three of the four
+ * elements are pinned to the card's own edges rather than stacked.
+ *
+ * Sides are deliberate. The bank name and the status row follow the reading direction, so they
+ * flip with the locale; the logo watermark and the account-type pill are anchored to the *physical*
+ * left through [AbsoluteAlignment], which is where the design puts them regardless of direction,
+ * and the account number reads left-to-right like the number printed on the card.
+ *
+ * Every string arrives finished from the mapper and both gradients are remembered on the palette,
+ * so a list of these allocates nothing as it scrolls.
  */
 @Composable
 fun BankAccountCard(
@@ -103,115 +123,122 @@ fun BankAccountCard(
                 drawRect(surface)
                 drawRect(sheen)
             }
-            .padding(horizontal = 20.dp, vertical = 18.dp),
+            .padding(horizontal = CardPaddingX, vertical = CardPaddingY),
     ) {
         if (bank != null) {
-            BankWatermark(account = account, halo = halo)
+            Watermark(logoAlpha = bank.watermarkAlpha, halo = halo, account = account)
         }
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (bank != null) {
-                        Box(
-                            modifier = Modifier
-                                .size(BadgeSize)
-                                .clip(RoundedCornerShape(11.dp))
-                                .background(Color.White.copy(alpha = 0.94f)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Image(
-                                painter = painterResource(bank.logo),
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier.size(BadgeLogoSize),
-                            )
-                        }
-                        Spacer(Modifier.width(10.dp))
-                    }
-                    Text(
-                        text = bank?.label?.let { stringResource(it) }
-                            ?: account.bankNameFallback.orEmpty(),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = ink,
-                    )
-                }
-
-                if (account.isActive) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(7.dp)
-                                .clip(CircleShape)
-                                .background(TaminGreen),
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(Res.string.bank_account_active),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = subInk,
+        // Top row: name follows the reading direction, status sits opposite it.
+        Row(
+            modifier = Modifier.fillMaxWidth().align(Alignment.TopStart),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (bank != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(BadgeSize)
+                            .clip(RoundedCornerShape(BadgeCorner))
+                            .background(Color.White.copy(alpha = 0.94f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(bank.logo),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.size(BadgeLogoSize),
                         )
                     }
+                    Spacer(Modifier.width(10.dp))
                 }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            val typeLabel = account.accountType?.label?.let { stringResource(it) }
-                ?: account.accountTypeNameFallback
-            if (typeLabel != null) {
                 Text(
-                    text = typeLabel,
-                    style = MaterialTheme.typography.labelSmall,
+                    text = bank?.label?.let { stringResource(it) }
+                        ?: account.bankNameFallback.orEmpty(),
+                    style = MaterialTheme.typography.titleMedium,
                     color = ink,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(percent = 50))
-                        .background(bank.pillBackground)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
                 )
             }
 
-            // The number sits in the card's center, reading left-to-right like the printed one.
-            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            if (account.isActive) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(TaminGreen),
+                    )
+                    Spacer(Modifier.width(6.dp))
                     Text(
-                        text = account.accountNumber,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = ink,
-                        textAlign = TextAlign.Center,
+                        text = stringResource(Res.string.bank_account_active),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = subInk,
                     )
                 }
             }
+        }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(22.dp)) {
-                CardDate(
-                    label = stringResource(Res.string.bank_account_start_date),
-                    value = account.startDate,
-                    ink = ink,
-                    subInk = subInk,
-                )
-                CardDate(
-                    label = stringResource(Res.string.bank_account_end_date),
-                    value = account.endDate,
-                    ink = ink,
-                    subInk = subInk,
-                )
-            }
+        val typeLabel = account.accountType?.label?.let { stringResource(it) }
+            ?: account.accountTypeNameFallback
+        if (typeLabel != null) {
+            Text(
+                text = typeLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = ink,
+                modifier = Modifier
+                    .align(AbsoluteAlignment.TopLeft)
+                    .offset(y = PillTop)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(bank.pillBackground)
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
+
+        // Centred on the whole card, not on the space left over by the surrounding rows.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Text(
+                text = account.accountNumber,
+                style = MaterialTheme.typography.headlineSmall,
+                color = ink,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxSize().wrapContentHeight(Alignment.CenterVertically),
+            )
+        }
+
+        Row(
+            modifier = Modifier.align(Alignment.BottomStart).offset(y = -DatesBottom),
+            horizontalArrangement = Arrangement.spacedBy(22.dp),
+        ) {
+            CardDate(
+                label = stringResource(Res.string.bank_account_start_date),
+                value = account.startDate,
+                ink = ink,
+                subInk = subInk,
+            )
+            CardDate(
+                label = stringResource(Res.string.bank_account_end_date),
+                value = account.endDate,
+                ink = ink,
+                subInk = subInk,
+            )
         }
     }
 }
 
+/**
+ * The ghost logo behind the card, pinned to the physical bottom-left.
+ *
+ * [AbsoluteAlignment] rather than [Alignment.BottomStart]: in a right-to-left layout `Start` is the
+ * right edge, which would throw the watermark across the card and put it under the account number.
+ */
 @Composable
-private fun BoxScope.BankWatermark(account: BankAccountPR, halo: Brush) {
+private fun BoxScope.Watermark(logoAlpha: Float, halo: Brush, account: BankAccountPR) {
     val bank = account.bank ?: return
     Box(
         modifier = Modifier
-            .align(Alignment.BottomStart)
-            .offset(x = (-46).dp, y = 52.dp)
+            .align(AbsoluteAlignment.BottomLeft)
+            .offset(x = HaloX, y = HaloY)
             .size(HaloSize)
             .clip(CircleShape)
             .drawBehind { drawCircle(halo) },
@@ -220,10 +247,10 @@ private fun BoxScope.BankWatermark(account: BankAccountPR, halo: Brush) {
         painter = painterResource(bank.logo),
         contentDescription = null,
         contentScale = ContentScale.Fit,
-        alpha = bank.watermarkAlpha,
+        alpha = logoAlpha,
         modifier = Modifier
-            .align(Alignment.BottomStart)
-            .offset(x = (-18).dp, y = 24.dp)
+            .align(AbsoluteAlignment.BottomLeft)
+            .offset(x = WatermarkX, y = WatermarkY)
             .size(WatermarkSize),
     )
 }

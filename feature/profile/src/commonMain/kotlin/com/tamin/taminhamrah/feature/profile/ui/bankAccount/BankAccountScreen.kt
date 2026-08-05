@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -14,12 +17,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.AccountTypePickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountCard
@@ -34,6 +43,8 @@ import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountDra
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
 import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
@@ -44,6 +55,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
@@ -61,11 +73,16 @@ import taminx.core.core_ui.bank_account_iban_understood
 import taminx.core.core_ui.bank_account_picker_bank
 import taminx.core.core_ui.bank_account_picker_type
 import taminx.core.core_ui.bank_account_registered
+import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
 import taminx.core.core_ui.ic_number
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 private val CardSpacing = 14.dp
+private val HeaderCorner = 40.dp
+private val DecorCircleSize = 190.dp
+private val DecorCircleX = 450.dp
+private val DecorCircleY = (-150).dp
 
 @Composable
 fun BankAccountScreen(
@@ -83,22 +100,57 @@ fun BankAccountScreen(
     }
 
     val onIntent = viewModel::sendIntent
+    val taminColors = LocalTaminColors.current
+    val profileGradientBrush = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
 
-    // Each child takes the one or two fields it draws rather than the whole state, so a keystroke
-    // in the account number cannot invalidate the list, the top bar or the dialogs.
-    Column(modifier = Modifier.fillMaxSize()) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.bank_account_title),
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = stringResource(Res.string.action_back),
-                    onClick = { onIntent(BankAccountIntent.OnBackClicked) },
-                )
-            },
-        )
-
-        Box(modifier = Modifier.fillMaxSize()) {
+    // Same header as the change-mobile subpage, so the profile subpages read as one family.
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TaminTopAppBar(
+                title = stringResource(Res.string.bank_account_title),
+                background = profileGradientBrush,
+                bottomPadding = Spacing.xl,
+                shape = RoundedCornerShape(bottomStart = HeaderCorner, bottomEnd = HeaderCorner),
+                navigationIcon = {
+                    TaminTopAppBarButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        contentDescription = stringResource(Res.string.action_back),
+                        onClick = { onIntent(BankAccountIntent.OnBackClicked) },
+                        bordered = true,
+                    )
+                },
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    DecorativeBackgroundCircle(
+                        size = DecorCircleSize,
+                        xOffset = DecorCircleX,
+                        yOffset = DecorCircleY,
+                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_number))
+                        Spacer(Modifier.height(Spacing.md))
+                        Text(
+                            text = stringResource(Res.string.bank_account_subtitle),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = taminColors.textHeaderSubtitle,
+                        )
+                    }
+                }
+            }
+        },
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .navigationBarsPadding(),
+        ) {
             when {
                 state.isLoading && state.accounts.isEmpty() ->
                     CircularProgressIndicator(Modifier.align(Alignment.Center))
