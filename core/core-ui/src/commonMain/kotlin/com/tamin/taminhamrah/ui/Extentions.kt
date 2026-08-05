@@ -262,3 +262,24 @@ fun String.grouped(size: Int = 4, separator: Char = ' '): String {
         }
     }
 }
+
+/**
+ * Groups from the right in [size]s, folding a short leading group into the first one — the way an
+ * account number is printed: 13 digits read 4-3-3-3, 10 read 4-3-3, 9 read 3-3-3.
+ *
+ * Differs from [grouped], which counts from the left and so leaves the remainder at the end.
+ */
+fun String.groupedFromEnd(size: Int = 3, separator: Char = ' '): String {
+    if (size <= 0 || length <= size) return this
+    val remainder = length % size
+    val head = if (remainder == 0) size else remainder + size
+    return buildString(length + (length - 1) / size) {
+        append(this@groupedFromEnd, 0, head)
+        var index = head
+        while (index < this@groupedFromEnd.length) {
+            append(separator)
+            append(this@groupedFromEnd, index, index + size)
+            index += size
+        }
+    }
+}

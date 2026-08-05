@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.model.bankAccount
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import com.tamin.taminhamrah.ui.theme.TaminBankInkOnLight
 import com.tamin.taminhamrah.ui.theme.TaminBankMellatEnd
 import com.tamin.taminhamrah.ui.theme.TaminBankMellatMid
@@ -131,28 +132,42 @@ enum class Bank(
 private val UnknownGradient =
     persistentListOf(TaminBankUnknownStart, TaminBankUnknownMid, TaminBankUnknownEnd)
 
-val Bank?.cardGradient: ImmutableList<Color> get() = this?.gradient ?: UnknownGradient
+/** How much brand colour is left in the card's two ends once it is washed into white. */
+private const val SURFACE_TINT_TOP = 0.10f
+private const val SURFACE_TINT_BOTTOM = 0.28f
+
+/**
+ * The card surface: the bank's own colour washed almost out into white.
+ *
+ * The final design prints every card pale with the brand colour carried by the ink instead of the
+ * background, so the surface is derived from the palette rather than listed separately — one table
+ * still decides what a bank looks like.
+ */
+val Bank?.cardGradient: ImmutableList<Color>
+    get() {
+        val brand = this?.gradient?.get(1) ?: return UnknownGradient
+        return persistentListOf(
+            lerp(Color.White, brand, SURFACE_TINT_TOP),
+            lerp(Color.White, brand, SURFACE_TINT_BOTTOM),
+        )
+    }
 
 val Bank?.cardGradientMidStop: Float get() = this?.gradientMidStop ?: 0.55f
 
-val Bank?.ink: Color get() = if (this?.isLight == true) TaminBankInkOnLight else Color.White
+/** The bank's colour at full strength: the name, the number and the dates are all written in it. */
+val Bank?.ink: Color get() = this?.gradient?.last() ?: TaminBankInkOnLight
 
-val Bank?.subInk: Color
-    get() = if (this?.isLight == true) TaminBankInkOnLight.copy(alpha = 0.60f)
-    else Color.White.copy(alpha = 0.68f)
+val Bank?.subInk: Color get() = ink.copy(alpha = 0.60f)
 
-val Bank?.hairline: Color
-    get() = if (this?.isLight == true) TaminBankInkOnLight.copy(alpha = 0.16f)
-    else Color.White.copy(alpha = 0.20f)
+val Bank?.hairline: Color get() = ink.copy(alpha = 0.16f)
 
-val Bank?.pillBackground: Color
-    get() = if (this?.isLight == true) TaminBankInkOnLight.copy(alpha = 0.12f)
-    else Color.White.copy(alpha = 0.16f)
+val Bank?.pillBackground: Color get() = ink.copy(alpha = 0.12f)
 
-/** The halo behind the watermark, which keeps a dark logo legible on a dark card. */
-val Bank?.watermarkGlow: Color
-    get() = if (this?.isLight == true) Color.White.copy(alpha = 0.55f)
-    else Color.White.copy(alpha = 0.22f)
+/** No halo is needed now the card is pale; the mark reads against it on its own. */
+val Bank?.watermarkGlow: Color get() = Color.White.copy(alpha = 0.35f)
 
-val Bank?.watermarkAlpha: Float get() = if (this?.isLight == true) 0.20f else 0.13f
-
+/**
+ * How strongly the logo prints through the card. Low, because a pale card gives it far more
+ * contrast than the saturated one did — the number sits on top of it and must stay first.
+ */
+val Bank?.watermarkAlpha: Float get() = 0.18f

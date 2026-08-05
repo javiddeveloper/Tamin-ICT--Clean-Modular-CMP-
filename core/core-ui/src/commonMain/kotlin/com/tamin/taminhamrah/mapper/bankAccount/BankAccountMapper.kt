@@ -6,7 +6,7 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.ui.digitsOnly
-import com.tamin.taminhamrah.ui.grouped
+import com.tamin.taminhamrah.ui.groupedFromEnd
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlin.jvm.JvmName
 
@@ -23,7 +23,7 @@ fun BankAccountDN.toPresentation(): BankAccountPR {
         accountType = type,
         accountTypeNameFallback = accounType?.accountName?.takeIf { type == null },
         // Grouped as the design prints it, then converted, so the arithmetic stays on ASCII digits.
-        accountNumber = accountNumber.orEmpty().digitsOnly().grouped().toPersianDigits(),
+        accountNumber = accountNumber.orEmpty().digitsOnly().groupedFromEnd().toPersianDigits(),
         startDate = PersianDateFormatter.formatTimestamp(dateOfStart).takeIf { it.isNotEmpty() },
         endDate = PersianDateFormatter.formatTimestamp(dateOfFinish).takeIf { it.isNotEmpty() },
         // `isValidAccount` comes back null even for accounts the service lists as confirmed,
