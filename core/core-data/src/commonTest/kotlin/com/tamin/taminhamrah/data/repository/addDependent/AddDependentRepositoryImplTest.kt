@@ -2,12 +2,17 @@ package com.tamin.taminhamrah.data.repository.addDependent
 
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.model.addDependent.BranchDto
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
 import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -16,23 +21,37 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
+    var dependentInfoResult: List<DependentInfoDto> = emptyList()
     var activeBranchesResult: List<BranchDto> = emptyList()
     var familyRelationshipsResult: List<FamilyRelationshipDto> = emptyList()
+    var familyRelationshipsFromProxyResult: List<FamilyRelationshipProxyDto> = emptyList()
     var registryDataResult: RegistryDataDto = RegistryDataDto()
     var educationCodeResult: String = ""
     var uploadImageResult: UploadImageResponseDto = UploadImageResponseDto()
     var addNewDependentResult: GeneralResponseDto = GeneralResponseDto()
 
     var shouldThrowError: Exception? = null
+    var lastFamilyRelationshipsFilter: List<ApiFilterDN>? = null
+
+    override suspend fun getDependentInfo(): List<DependentInfoDto> {
+        shouldThrowError?.let { throw it }
+        return dependentInfoResult
+    }
 
     override suspend fun getActiveBranches(): List<BranchDto> {
         shouldThrowError?.let { throw it }
         return activeBranchesResult
     }
 
-    override suspend fun getFamilyRelationships(queryJson: String?): List<FamilyRelationshipDto> {
+    override suspend fun getFamilyRelationships(filter: List<ApiFilterDN>): List<FamilyRelationshipDto> {
         shouldThrowError?.let { throw it }
+        lastFamilyRelationshipsFilter = filter
         return familyRelationshipsResult
+    }
+
+    override suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto> {
+        shouldThrowError?.let { throw it }
+        return familyRelationshipsFromProxyResult
     }
 
     override suspend fun inquiryRegistry(
@@ -79,6 +98,18 @@ class AddDependentRepositoryImplTest {
     }
 
     @Test
+    fun getDependentInfo_emitsMappedDependentInfoDNList() = runTest {
+        remoteDataSource.dependentInfoResult = listOf(
+            DependentInfoDto(id = "1", fullName = "مریم حسینی")
+        )
+
+        val items = repository.getDependentInfo().first()
+
+        assertEquals(1, items.size)
+        assertEquals("1", items.first().id)
+    }
+
+    @Test
     fun getActiveBranches_emitsMappedBranchDNList() = runTest {
         remoteDataSource.activeBranchesResult = listOf(
             BranchDto(branchCode = "0101", branchName = "مرکزی", workshopCode = "001", workshopName = "کارگاه")
@@ -96,12 +127,26 @@ class AddDependentRepositoryImplTest {
         remoteDataSource.familyRelationshipsResult = listOf(
             FamilyRelationshipDto(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
         )
+        val filter = listOf(ApiFilterDN(property = FilterProperty.SERIAL_ID, value = "1", operator = FilterOperator.EQUAL))
 
-        val items = repository.getFamilyRelationships(queryJson = null).first()
+        val items = repository.getFamilyRelationships(filter).first()
 
         assertEquals(1, items.size)
         assertEquals("REL_01", items.first().relationCode)
         assertEquals("فرزند", items.first().relationDesc)
+        assertEquals(filter, remoteDataSource.lastFamilyRelationshipsFilter)
+    }
+
+    @Test
+    fun getFamilyRelationshipsFromProxy_emitsMappedFamilyRelationshipDNList() = runTest {
+        remoteDataSource.familyRelationshipsFromProxyResult = listOf(
+            FamilyRelationshipProxyDto(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
+        )
+
+        val items = repository.getFamilyRelationshipsFromProxy().first()
+
+        assertEquals(1, items.size)
+        assertEquals("REL_01", items.first().relationCode)
     }
 
     @Test

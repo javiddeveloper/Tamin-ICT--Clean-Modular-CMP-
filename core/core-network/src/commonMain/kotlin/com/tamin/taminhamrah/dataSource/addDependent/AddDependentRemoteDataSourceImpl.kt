@@ -9,13 +9,20 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 internal class AddDependentRemoteDataSourceImpl(
     private val apiService: AddDependentApiService,
+    private val apiQueryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser
 ) : AddDependentRemoteDataSource {
 
@@ -46,10 +53,15 @@ internal class AddDependentRemoteDataSourceImpl(
     }
 
     override suspend fun getFamilyRelationships(
-        queryJson: String?
+        filter: List<ApiFilterDN>
     ): List<FamilyRelationshipDto> {
         return try {
-            val response = apiService.getFamilyRelationships(queryJson)
+            val parameters = if (filter.isEmpty()) {
+                emptyMap()
+            } else {
+                mapOf("query" to apiQueryBuilder.buildFilterJson(filter))
+            }
+            val response = apiService.getFamilyRelationships(parameters)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -112,7 +124,7 @@ internal class AddDependentRemoteDataSourceImpl(
         mimeType: String
     ): UploadImageResponseDto {
         return try {
-            val response = apiService.uploadImage(imageBytes)
+            val response = apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -121,6 +133,21 @@ internal class AddDependentRemoteDataSourceImpl(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
+    }
+
+    private fun createUploadImageRequest(
+        imageBytes: ByteArray,
+        fileName: String,
+        mimeType: String
+    ): MultiPartFormDataContent {
+        return MultiPartFormDataContent(
+            formData {
+                append("file", imageBytes, Headers.build {
+                    append(HttpHeaders.ContentType, mimeType)
+                    append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                })
+            }
+        )
     }
 
     override suspend fun addNewDependent(request: RequestAddDependentDto): GeneralResponseDto {

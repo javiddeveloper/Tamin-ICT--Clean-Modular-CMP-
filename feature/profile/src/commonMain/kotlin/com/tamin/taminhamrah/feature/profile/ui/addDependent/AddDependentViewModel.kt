@@ -5,19 +5,21 @@ import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDepende
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState.PartialState
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.BottomSheetTarget
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.DocType
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_DOCUMENTS
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_INQUIRY
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_SUCCESS
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_VERIFICATION
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.StepperMode
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.UploadedDocument
 import com.tamin.taminhamrah.mapper.addDependent.toDomain
 import com.tamin.taminhamrah.mapper.addDependent.toPresentation
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
-import com.tamin.taminhamrah.mapper.common.toPresentation
-import com.tamin.taminhamrah.model.addDependent.BranchPR
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentPR
 import com.tamin.taminhamrah.model.addDependent.RequestFilePR
-import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
@@ -33,11 +35,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 
-private const val STEP_INQUIRY = 1
-private const val STEP_VERIFICATION = 2
-private const val STEP_DOCUMENTS = 3
-private const val STEP_SUCCESS = 4
+/** Documents larger than this are rejected outright — see [uploadDocument]. */
+private const val MAX_UPLOAD_SIZE_BYTES = 2_000_000
+
+private const val RELATION_CODE_SPOUSE = "01"
+private const val RELATION_CODE_SON = "02"
+private const val RELATION_CODE_DAUGHTER = "03"
+
+private const val SON_EDUCATION_AGE_THRESHOLD = 19
+private const val DAUGHTER_COMMITMENT_AGE_THRESHOLD = 18
+
+/** Registry flag meaning the birth certificate is already on file, so re-uploading it is not required. */
+private const val REGISTRY_STATE_ID_CARD_ON_FILE = "1"
 
 class AddDependentViewModel(
     private val getActiveBranchesUseCase: GetActiveBranchesUseCase,
@@ -62,7 +74,7 @@ class AddDependentViewModel(
             }
             is AddDependentIntent.OnRelationshipSelected -> flow {
                 emit(PartialState.RelationshipSelected(intent.relationship))
-                emit(PartialState.BottomSheetStateChanged(null))
+                emit(dismissBottomSheet())
             }
             is AddDependentIntent.SubmitInquiryRegistry -> submitInquiryRegistry()
             is AddDependentIntent.OnEducationCodeChanged -> flow {
@@ -74,85 +86,85 @@ class AddDependentViewModel(
             }
             is AddDependentIntent.OnCityBirthSelected -> flow {
                 emit(PartialState.CityBirthSelected(intent.city))
-                emit(PartialState.BottomSheetStateChanged(null))
+                emit(dismissBottomSheet())
             }
             is AddDependentIntent.OnCityIssuanceSelected -> flow {
                 emit(PartialState.CityIssuanceSelected(intent.city))
-                emit(PartialState.BottomSheetStateChanged(null))
+                emit(dismissBottomSheet())
             }
             is AddDependentIntent.OnBranchSelected -> flow {
                 emit(PartialState.BranchSelected(intent.branch))
-                emit(PartialState.BottomSheetStateChanged(null))
+                emit(dismissBottomSheet())
             }
             is AddDependentIntent.ShowRelationshipPicker -> flow {
                 val state = uiState.value
-                val config = TaminBottomSheetConfig(
-                    title = "انتخاب نسبت خانوادگی",
-                    type = TaminBottomSheetType.CUSTOM,
-                    items = state.familyRelationships.map {
-                        TaminBottomSheetItem(
-                            id = it.id ?: 0,
-                            title = it.relationDesc.orEmpty(),
-                            isSelected = it.id == state.selectedRelationship?.id
-                        )
-                    },
-                    singleSelection = true
+                emit(
+                    PartialState.BottomSheetStateChanged(
+                        config = TaminBottomSheetConfig(
+                            title = "انتخاب نسبت خانوادگی",
+                            type = TaminBottomSheetType.CUSTOM,
+                            items = state.familyRelationships.map {
+                                TaminBottomSheetItem(
+                                    id = it.id ?: 0,
+                                    title = it.relationDesc.orEmpty(),
+                                    isSelected = it.id == state.selectedRelationship?.id
+                                )
+                            },
+                            singleSelection = true
+                        ),
+                        target = BottomSheetTarget.RELATIONSHIP
+                    )
                 )
-                emit(PartialState.BottomSheetStateChanged(config))
             }
             is AddDependentIntent.ShowCityBirthPicker -> flow {
                 val state = uiState.value
-                val config = TaminBottomSheetConfig(
-                    title = "انتخاب محل تولد",
-                    type = TaminBottomSheetType.CITY,
-                    items = state.cities.map {
-                        TaminBottomSheetItem(
-                            id = it.cityCode.toIntOrNull() ?: 0,
-                            title = it.cityName,
-                            isSelected = it.cityCode == state.selectedCityBirth?.cityCode
-                        )
-                    },
-                    singleSelection = true,
-                    showSearchInput = true
+                emit(
+                    PartialState.BottomSheetStateChanged(
+                        config = cityPickerConfig(
+                            title = "انتخاب محل تولد",
+                            state = state,
+                            selectedCityCode = state.selectedCityBirth?.cityCode
+                        ),
+                        target = BottomSheetTarget.CITY_BIRTH
+                    )
                 )
-                emit(PartialState.BottomSheetStateChanged(config))
             }
             is AddDependentIntent.ShowCityIssuancePicker -> flow {
                 val state = uiState.value
-                val config = TaminBottomSheetConfig(
-                    title = "انتخاب محل صدور",
-                    type = TaminBottomSheetType.CITY,
-                    items = state.cities.map {
-                        TaminBottomSheetItem(
-                            id = it.cityCode.toIntOrNull() ?: 0,
-                            title = it.cityName,
-                            isSelected = it.cityCode == state.selectedCityIssuance?.cityCode
-                        )
-                    },
-                    singleSelection = true,
-                    showSearchInput = true
+                emit(
+                    PartialState.BottomSheetStateChanged(
+                        config = cityPickerConfig(
+                            title = "انتخاب محل صدور",
+                            state = state,
+                            selectedCityCode = state.selectedCityIssuance?.cityCode
+                        ),
+                        target = BottomSheetTarget.CITY_ISSUANCE
+                    )
                 )
-                emit(PartialState.BottomSheetStateChanged(config))
             }
             is AddDependentIntent.ShowBranchPicker -> flow {
                 val state = uiState.value
-                val config = TaminBottomSheetConfig(
-                    title = "انتخاب شعبه",
-                    type = TaminBottomSheetType.CUSTOM,
-                    items = state.activeBranches.map {
-                        TaminBottomSheetItem(
-                            id = it.branchCode.toIntOrNull() ?: 0,
-                            title = it.branchName.ifBlank { it.branchCode },
-                            isSelected = it.branchCode == state.selectedBranch?.branchCode
-                        )
-                    },
-                    singleSelection = true,
-                    showSearchInput = true
+                emit(
+                    PartialState.BottomSheetStateChanged(
+                        config = TaminBottomSheetConfig(
+                            title = "انتخاب شعبه",
+                            type = TaminBottomSheetType.CUSTOM,
+                            items = state.activeBranches.mapIndexed { index, branch ->
+                                TaminBottomSheetItem(
+                                    id = index,
+                                    title = branch.branchName.ifBlank { branch.branchCode },
+                                    isSelected = branch.branchCode == state.selectedBranch?.branchCode
+                                )
+                            },
+                            singleSelection = true,
+                            showSearchInput = true
+                        ),
+                        target = BottomSheetTarget.BRANCH
+                    )
                 )
-                emit(PartialState.BottomSheetStateChanged(config))
             }
             is AddDependentIntent.DismissBottomSheet -> flow {
-                emit(PartialState.BottomSheetStateChanged(null))
+                emit(dismissBottomSheet())
             }
             is AddDependentIntent.UploadDocument -> uploadDocument(intent.fileBytes, intent.fileName, intent.docType)
             is AddDependentIntent.DeleteDocument -> flow {
@@ -167,33 +179,57 @@ class AddDependentViewModel(
         }
     }
 
-    private fun initData(): Flow<PartialState> = flow {
-        emit(PartialState.Loading(true))
-        getActiveBranchesUseCase()
-            .map { branchList ->
-                val prBranches = branchList.map { it.toPresentation() }
-                val autoSelect = if (prBranches.size == 1) prBranches.first() else null
-                PartialState.ActiveBranchesLoaded(prBranches, autoSelect) as PartialState
-            }
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شعب")) }
-            .collect { emit(it) }
+    private fun dismissBottomSheet() = PartialState.BottomSheetStateChanged(config = null, target = null)
 
-        getFamilyRelationshipsFromProxyUseCase()
-            .map { relationships ->
-                PartialState.FamilyRelationshipsLoaded(relationships.map { it.toPresentation() }) as PartialState
-            }
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت نسبت‌های خانوادگی")) }
-            .collect { emit(it) }
+    /**
+     * Cities are matched back by list index rather than by numeric city code: codes are
+     * zero-padded strings ("0311") and round-tripping them through [Int] loses the padding.
+     */
+    private fun cityPickerConfig(
+        title: String,
+        state: AddDependentState,
+        selectedCityCode: String?
+    ) = TaminBottomSheetConfig(
+        title = title,
+        type = TaminBottomSheetType.CITY,
+        items = state.cities.mapIndexed { index, city ->
+            TaminBottomSheetItem(
+                id = index,
+                title = city.cityName,
+                isSelected = city.cityCode == selectedCityCode
+            )
+        },
+        singleSelection = true,
+        showSearchInput = true
+    )
 
-        getCitiesUseCase()
-            .map { cities ->
-                PartialState.CitiesLoaded(cities.toCityPresentation()) as PartialState
-            }
-            .catch { emit(PartialState.Error(it.message ?: "خطا در دریافت لیست شهرها")) }
-            .collect { emit(it) }
+    /**
+     * The three lookups are independent, so they run concurrently. Each carries its own
+     * `catch` so one failing source cannot blank out the others.
+     */
+    private fun initData(): Flow<PartialState> = merge(
+        loadActiveBranches(),
+        loadFamilyRelationships(),
+        loadCities()
+    ).onStart { emit(PartialState.Loading(true)) }
 
-        emit(PartialState.Loading(false))
-    }
+    private fun loadActiveBranches(): Flow<PartialState> = getActiveBranchesUseCase()
+        .map { branchList ->
+            val prBranches = branchList.map { it.toPresentation() }
+            val autoSelect = prBranches.singleOrNull()
+            PartialState.ActiveBranchesLoaded(prBranches, autoSelect) as PartialState
+        }
+        .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+
+    private fun loadFamilyRelationships(): Flow<PartialState> = getFamilyRelationshipsFromProxyUseCase()
+        .map { relationships ->
+            PartialState.FamilyRelationshipsLoaded(relationships.map { it.toPresentation() }) as PartialState
+        }
+        .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+
+    private fun loadCities(): Flow<PartialState> = getCitiesUseCase()
+        .map { cities -> PartialState.CitiesLoaded(cities.toCityPresentation()) as PartialState }
+        .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
     private fun submitInquiryRegistry(): Flow<PartialState> = flow {
         val state = uiState.value
@@ -220,11 +256,13 @@ class AddDependentViewModel(
             dependencyCode = relationshipCode
         ).map { registryDataDN ->
             val registryPR = registryDataDN.toPresentation()
-            val stepperMode = evaluateStepperMode(registryPR, relationshipCode)
-            val requiredDocTypes = evaluateDocumentRequirements(registryPR, relationshipCode)
-            PartialState.RegistryInquirySuccess(registryPR, stepperMode, requiredDocTypes) as PartialState
+            PartialState.RegistryInquirySuccess(
+                registryData = registryPR,
+                stepperMode = evaluateStepperMode(registryPR, relationshipCode),
+                requiredDocTypes = evaluateDocumentRequirements(registryPR, relationshipCode)
+            ) as PartialState
         }.catch {
-            emit(PartialState.Error(it.message ?: "خطا در استعلام ثبت احوال"))
+            emit(PartialState.Error(it.toSingleLineMessage()))
         }.collect {
             emit(it)
             if (it is PartialState.RegistryInquirySuccess) {
@@ -247,44 +285,51 @@ class AddDependentViewModel(
         ).map { resultString ->
             PartialState.EducationInquirySuccess(resultString) as PartialState
         }.catch {
-            emit(PartialState.Error(it.message ?: "خطا در استعلام کد تحصیلی"))
+            emit(PartialState.Error(it.toSingleLineMessage()))
         }.collect {
             emit(it)
         }
     }
 
     private fun uploadDocument(fileBytes: ByteArray, fileName: String, docType: String): Flow<PartialState> = flow {
-        val bytesToUpload = if (fileBytes.size >= 2_000_000) {
-            compressBytes(fileBytes)
-        } else {
-            fileBytes
-        }
-
-        val mimeType = when {
-            fileName.endsWith(".png", true) -> "image/png"
-            fileName.endsWith(".pdf", true) -> "application/pdf"
-            else -> "image/jpeg"
+        // Previously oversized files were truncated with copyOf(), which silently produced a
+        // corrupt image. Reject them instead and let the user pick a smaller file.
+        if (fileBytes.size > MAX_UPLOAD_SIZE_BYTES) {
+            sendEvent(
+                AddDependentEvent.ShowErrorDialog(
+                    "خطا",
+                    "حجم فایل انتخاب شده بیش از ۲ مگابایت است. لطفا فایل کوچک‌تری انتخاب کنید."
+                )
+            )
+            return@flow
         }
 
         emit(PartialState.Loading(true))
 
         uploadDependentImageUseCase(
-            imageBytes = bytesToUpload,
+            imageBytes = fileBytes,
             fileName = fileName,
-            mimeType = mimeType
+            mimeType = resolveMimeType(fileName)
         ).map { uploadDN ->
             val uploadPR = uploadDN.toPresentation()
-            val doc = UploadedDocument(
-                guid = uploadPR.guid,
-                docType = docType,
-                fileName = fileName
-            )
-            PartialState.DocumentUploaded(doc) as PartialState
+            PartialState.DocumentUploaded(
+                UploadedDocument(
+                    guid = uploadPR.guid,
+                    docType = docType,
+                    fileName = fileName
+                )
+            ) as PartialState
         }.catch {
-            emit(PartialState.Error(it.message ?: "خطا در آپلود مدرک"))
+            emit(PartialState.Error(it.toSingleLineMessage()))
         }.collect {
             emit(it)
         }
+    }
+
+    private fun resolveMimeType(fileName: String): String = when {
+        fileName.endsWith(".png", ignoreCase = true) -> "image/png"
+        fileName.endsWith(".pdf", ignoreCase = true) -> "application/pdf"
+        else -> "image/jpeg"
     }
 
     private fun onNextStepClicked(): Flow<PartialState> = flow {
@@ -297,6 +342,8 @@ class AddDependentViewModel(
                 }
                 when (state.stepperMode) {
                     StepperMode.SON_MODE -> {
+                        // First tap runs the education inquiry so the university name can be
+                        // confirmed; the following tap advances to the documents step.
                         if (state.needCallInquiryEducation) {
                             submitInquiryEducation().collect { emit(it) }
                         } else {
@@ -310,17 +357,11 @@ class AddDependentViewModel(
                             emit(PartialState.StepChanged(STEP_DOCUMENTS))
                         }
                     }
-                    StepperMode.DEFAULT_MODE -> {
-                        emit(PartialState.StepChanged(STEP_DOCUMENTS))
-                    }
+                    StepperMode.DEFAULT_MODE -> emit(PartialState.StepChanged(STEP_DOCUMENTS))
                 }
             }
             STEP_DOCUMENTS -> {
-                val activeDocTypes = state.requiredDocTypes.filter { !it.isDisabled }
-                val uploadedTypes = state.uploadedDocuments.map { it.docType }.toSet()
-                val isAllUploaded = activeDocTypes.all { docType -> uploadedTypes.contains(docType.code) }
-
-                if (!isAllUploaded) {
+                if (!areRequiredDocumentsUploaded(state)) {
                     sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا تمامی مدارک الزامی را بارگذاری کنید"))
                 } else {
                     submitFinalRequest().collect { emit(it) }
@@ -329,16 +370,16 @@ class AddDependentViewModel(
         }
     }
 
+    private fun areRequiredDocumentsUploaded(state: AddDependentState): Boolean {
+        val uploadedTypes = state.uploadedDocuments.mapTo(mutableSetOf()) { it.docType }
+        return state.requiredDocTypes
+            .filterNot { it.isDisabled }
+            .all { uploadedTypes.contains(it.code) }
+    }
+
     private fun submitFinalRequest(): Flow<PartialState> = flow {
         val state = uiState.value
         emit(PartialState.Loading(true))
-
-        val requestFiles = state.uploadedDocuments.map { doc ->
-            RequestFilePR(
-                documentFileId = doc.guid,
-                documentType = doc.docType
-            )
-        }
 
         val requestPR = RequestAddDependentPR(
             branchCode = state.selectedBranch?.branchCode,
@@ -350,63 +391,41 @@ class AddDependentViewModel(
             firstName = state.registryData?.firstName,
             lastName = state.registryData?.lastName,
             nationalId = state.dependentNationalId,
-            requestFileList = requestFiles
+            requestFileList = state.uploadedDocuments.map { doc ->
+                RequestFilePR(
+                    documentFileId = doc.guid,
+                    documentType = doc.docType
+                )
+            }
         )
 
         addNewDependentUseCase(requestPR.toDomain())
-            .map {
-                PartialState.StepChanged(STEP_SUCCESS) as PartialState
-            }
-            .catch { emit(PartialState.Error(it.message ?: "خطا در ثبت نهایی درخواست")) }
-            .collect {
-                emit(PartialState.Loading(false))
-                emit(it)
-            }
+            .map { PartialState.StepChanged(STEP_SUCCESS) as PartialState }
+            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .collect { emit(it) }
     }
 
-    private fun evaluateStepperMode(data: RegistryDataPR, relationCode: String): StepperMode {
-        val isMale = data.gender.equals("MAN", true) || data.gender == "1" || data.gender == "M" || data.gender.contains("مرد")
-        val isFemale = data.gender.equals("WOMAN", true) || data.gender == "2" || data.gender == "F" || data.gender.contains("زن")
-
-        val isSon = relationCode == "02" || relationCode.contains("پسر", true) || relationCode.contains("فرزند پسر", true)
-        val isDaughter = relationCode == "03" || relationCode.contains("دختر", true) || relationCode.contains("فرزند دختر", true)
-
-        return when {
-            data.age >= 19 && isMale && isSon -> StepperMode.SON_MODE
-            data.age >= 18 && isFemale && isDaughter -> StepperMode.DAUGHTER_MODE
-            else -> StepperMode.DEFAULT_MODE
-        }
+    private fun evaluateStepperMode(data: RegistryDataPR, relationCode: String): StepperMode = when {
+        relationCode == RELATION_CODE_SON && data.age >= SON_EDUCATION_AGE_THRESHOLD -> StepperMode.SON_MODE
+        relationCode == RELATION_CODE_DAUGHTER && data.age >= DAUGHTER_COMMITMENT_AGE_THRESHOLD -> StepperMode.DAUGHTER_MODE
+        else -> StepperMode.DEFAULT_MODE
     }
 
-    private fun evaluateDocumentRequirements(data: RegistryDataPR, relationCode: String): List<DocType> {
-        val isSpouse = relationCode == "01" || relationCode.contains("همسر", true)
-        val isSonOrDaughter = relationCode == "02" || relationCode == "03" || relationCode.contains("فرزند", true)
-
-        return if (isSpouse) {
-            listOf(
-                DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه", isDisabled = false),
-                DocType("ID_CARD_SPOUSE", "صفحه مشخصات همسر شناسنامه", isDisabled = false),
-                DocType("MARRIAGE_CERT", "عقدنامه", isDisabled = false)
-            )
-        } else if (isSonOrDaughter) {
-            val isDisabledIdCard = data.registryConfirmState == "1"
-            listOf(
-                DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه", isDisabled = isDisabledIdCard),
-                DocType("MARRIAGE_CERT", "عقدنامه", isDisabled = true)
-            )
-        } else {
-            listOf(
-                DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه", isDisabled = false)
-            )
-        }
-    }
-
-    private fun compressBytes(bytes: ByteArray): ByteArray {
-        return if (bytes.size > 2_000_000) {
-            bytes.copyOf(2_000_000)
-        } else {
-            bytes
-        }
+    private fun evaluateDocumentRequirements(data: RegistryDataPR, relationCode: String): List<DocType> = when (relationCode) {
+        RELATION_CODE_SPOUSE -> listOf(
+            DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه"),
+            DocType("ID_CARD_SPOUSE", "صفحه مشخصات همسر شناسنامه"),
+            DocType("MARRIAGE_CERT", "عقدنامه")
+        )
+        RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(
+            DocType(
+                code = "ID_CARD_PAGE_1",
+                title = "صفحه اول شناسنامه",
+                isDisabled = data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE
+            ),
+            DocType("MARRIAGE_CERT", "عقدنامه", isDisabled = true)
+        )
+        else -> listOf(DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه"))
     }
 
     override fun reduceState(
@@ -430,35 +449,17 @@ class AddDependentViewModel(
             cities = partialState.cities,
             error = null
         )
-        is PartialState.NationalIdChanged -> {
-            val hasInquired = !currentState.needCallInquiryRegistry || currentState.registryData != null
-            currentState.copy(
-                dependentNationalId = partialState.id,
-                needCallInquiryRegistry = true,
-                registryData = if (hasInquired) null else currentState.registryData,
-                uploadedDocuments = if (hasInquired) emptyList() else currentState.uploadedDocuments
-            )
-        }
-        is PartialState.BirthDateSelected -> {
-            val hasInquired = !currentState.needCallInquiryRegistry || currentState.registryData != null
-            currentState.copy(
-                birthDatePersian = partialState.persianDate,
-                birthDateGregorian = partialState.gregorianDate,
-                birthDateTimeStamp = partialState.timestamp,
-                needCallInquiryRegistry = true,
-                registryData = if (hasInquired) null else currentState.registryData,
-                uploadedDocuments = if (hasInquired) emptyList() else currentState.uploadedDocuments
-            )
-        }
-        is PartialState.RelationshipSelected -> {
-            val hasInquired = !currentState.needCallInquiryRegistry || currentState.registryData != null
-            currentState.copy(
-                selectedRelationship = partialState.relationship,
-                needCallInquiryRegistry = true,
-                registryData = if (hasInquired) null else currentState.registryData,
-                uploadedDocuments = if (hasInquired) emptyList() else currentState.uploadedDocuments
-            )
-        }
+        is PartialState.NationalIdChanged -> currentState.resetInquiry().copy(
+            dependentNationalId = partialState.id
+        )
+        is PartialState.BirthDateSelected -> currentState.resetInquiry().copy(
+            birthDatePersian = partialState.persianDate,
+            birthDateGregorian = partialState.gregorianDate,
+            birthDateTimeStamp = partialState.timestamp
+        )
+        is PartialState.RelationshipSelected -> currentState.resetInquiry().copy(
+            selectedRelationship = partialState.relationship
+        )
         is PartialState.RegistryInquirySuccess -> currentState.copy(
             isLoading = false,
             registryData = partialState.registryData,
@@ -483,27 +484,39 @@ class AddDependentViewModel(
         is PartialState.CityBirthSelected -> currentState.copy(selectedCityBirth = partialState.city)
         is PartialState.CityIssuanceSelected -> currentState.copy(selectedCityIssuance = partialState.city)
         is PartialState.BranchSelected -> currentState.copy(selectedBranch = partialState.branch)
-        is PartialState.DocumentUploaded -> {
-            val filteredDocs = currentState.uploadedDocuments.filter { it.docType != partialState.document.docType }
-            currentState.copy(
-                isLoading = false,
-                uploadedDocuments = filteredDocs + partialState.document,
-                error = null
-            )
-        }
+        is PartialState.DocumentUploaded -> currentState.copy(
+            isLoading = false,
+            uploadedDocuments = currentState.uploadedDocuments
+                .filterNot { it.docType == partialState.document.docType } + partialState.document,
+            error = null
+        )
         is PartialState.DocumentDeleted -> currentState.copy(
-            uploadedDocuments = currentState.uploadedDocuments.filter { it.docType != partialState.docType }
+            uploadedDocuments = currentState.uploadedDocuments.filterNot { it.docType == partialState.docType }
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,
             isLoading = false
         )
         is PartialState.BottomSheetStateChanged -> currentState.copy(
-            bottomSheetConfig = partialState.config
+            bottomSheetConfig = partialState.config,
+            bottomSheetTarget = partialState.target
         )
         is PartialState.Error -> currentState.copy(
             isLoading = false,
             error = partialState.message
+        )
+    }
+
+    /**
+     * Any change to the inquiry inputs invalidates a previously fetched registry result and
+     * the documents that were chosen based on it.
+     */
+    private fun AddDependentState.resetInquiry(): AddDependentState {
+        val hasInquired = !needCallInquiryRegistry || registryData != null
+        return copy(
+            needCallInquiryRegistry = true,
+            registryData = if (hasInquired) null else registryData,
+            uploadedDocuments = if (hasInquired) emptyList() else uploadedDocuments
         )
     }
 

@@ -3,6 +3,10 @@ package com.tamin.taminhamrah.apiService.addDependent
 import com.tamin.taminhamrah.apiService.BaseApiTest
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import de.jensklingenberg.ktorfit.Ktorfit
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -58,7 +62,7 @@ class AddDependentApiServiceTest : BaseApiTest() {
         val ktorfit: Ktorfit = createMockKtorfit(jsonResponse)
         val apiService = ktorfit.createAddDependentApiService()
 
-        val response = apiService.getFamilyRelationships(queryJson = null)
+        val response = apiService.getFamilyRelationships()
 
         assertEquals(200, response.status)
         assertNotNull(response.data)
@@ -138,7 +142,16 @@ class AddDependentApiServiceTest : BaseApiTest() {
         val ktorfit: Ktorfit = createMockKtorfit(jsonResponse)
         val apiService = ktorfit.createAddDependentApiService()
 
-        val response = apiService.uploadImage(byteArrayOf(1, 2, 3))
+        val multipartBody = MultiPartFormDataContent(
+            formData {
+                append("file", byteArrayOf(1, 2, 3), Headers.build {
+                    append(HttpHeaders.ContentType, "image/png")
+                    append(HttpHeaders.ContentDisposition, "filename=\"img.png\"")
+                })
+            }
+        )
+
+        val response = apiService.uploadImage(multipartBody)
 
         assertEquals(200, response.status)
         assertNotNull(response.data)

@@ -27,8 +27,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,12 +36,18 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentEvent
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
 import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.BottomSheetTarget
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_DOCUMENTS
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_INQUIRY
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_SUCCESS
+import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_VERIFICATION
+import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -51,7 +56,6 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -69,32 +73,21 @@ import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.ic_tamin_user
 import taminx.core.core_ui.inquiry_submit_button
-import taminx.core.core_ui.picker_branch_title
-import taminx.core.core_ui.picker_relationship_title
 import taminx.core.core_ui.step_complete
 import taminx.core.core_ui.step_get_info
 import taminx.core.core_ui.step_upload_docs
 import taminx.core.core_ui.step_verify_info
 import taminx.core.core_ui.success_view_list
 import taminx.core.core_ui.upload_submit_final
-import taminx.core.core_ui.verify_birth_place_label
 import taminx.core.core_ui.verify_next_step
-
-private const val STEP_INQUIRY = 1
-private const val STEP_VERIFICATION = 2
-private const val STEP_DOCUMENTS = 3
-private const val STEP_SUCCESS = 4
 
 @Composable
 fun AddDependentRoute(
     viewModel: AddDependentViewModel = koinViewModel(),
     onBackClicked: () -> Unit
 ) {
-    val uiStateState = viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val onIntent = remember(viewModel) {
-        { intent: AddDependentIntent -> viewModel.sendIntent(intent) }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(AddDependentIntent.InitData)
@@ -107,56 +100,53 @@ fun AddDependentRoute(
     )
 
     AddDependentContent(
-        uiStateState = uiStateState,
+        state = state,
         onBackClicked = onBackClicked,
-        onIntent = onIntent,
+        onIntent = viewModel::sendIntent,
         snackbarHostState = snackbarHostState
     )
 
-    val birthTitle = stringResource(Res.string.verify_birth_place_label)
-    val relTitle = stringResource(Res.string.picker_relationship_title)
-    val branchTitle = stringResource(Res.string.picker_branch_title)
-
-    uiStateState.value.bottomSheetConfig?.let { config ->
+    state.bottomSheetConfig?.let { config ->
         TaminBottomSheet(
             config = config,
-            onDismissRequest = { onIntent(AddDependentIntent.DismissBottomSheet) },
+            onDismissRequest = { viewModel.sendIntent(AddDependentIntent.DismissBottomSheet) },
             onSubmit = { result ->
-                handleBottomSheetResult(result, uiStateState.value, onIntent, birthTitle, relTitle, branchTitle)
+                resolvePickerSelection(result, state)?.let { viewModel.sendIntent(it) }
             }
         )
     }
 }
 
-private fun handleBottomSheetResult(
+/**
+ * Maps a bottom sheet selection back to the intent for whichever picker opened it.
+ *
+ * Selection ids are list indices (see the picker configs in the ViewModel) because branch and
+ * city codes are zero-padded strings that do not survive a round trip through [Int].
+ */
+private fun resolvePickerSelection(
     result: TaminBottomSheetResult,
-    state: AddDependentState,
-    onIntent: (AddDependentIntent) -> Unit,
-    birthTitle: String,
-    relTitle: String,
-    branchTitle: String
-) {
-    val selectedId = result.selectedItemIds.firstOrNull() ?: return
+    state: AddDependentState
+): AddDependentIntent? {
+    val selectedId = result.selectedItemIds.firstOrNull() ?: return null
 
-    when (result.type) {
-        TaminBottomSheetType.CITY -> {
-            val cityName = state.bottomSheetConfig?.items?.find { it.id == selectedId }?.title.orEmpty()
-            if (state.bottomSheetConfig?.title?.contains(birthTitle) == true) {
-                onIntent(AddDependentIntent.OnCityBirthSelected(com.tamin.taminhamrah.model.common.CityPR(selectedId.toString().padStart(2, '0'), cityName)))
-            } else {
-                onIntent(AddDependentIntent.OnCityIssuanceSelected(com.tamin.taminhamrah.model.common.CityPR(selectedId.toString().padStart(2, '0'), cityName)))
-            }
-        }
-        TaminBottomSheetType.CUSTOM -> {
-            if (state.bottomSheetConfig?.title?.contains(relTitle) == true) {
-                val relationship = state.familyRelationships.find { it.id == selectedId }
-                relationship?.let { onIntent(AddDependentIntent.OnRelationshipSelected(it)) }
-            } else if (state.bottomSheetConfig?.title?.contains(branchTitle) == true) {
-                val branch = state.activeBranches.find { it.branchCode.toIntOrNull() == selectedId }
-                branch?.let { onIntent(AddDependentIntent.OnBranchSelected(it)) }
-            }
-        }
-        else -> {}
+    return when (state.bottomSheetTarget) {
+        BottomSheetTarget.RELATIONSHIP ->
+            state.familyRelationships.find { it.id == selectedId }
+                ?.let { AddDependentIntent.OnRelationshipSelected(it) }
+
+        BottomSheetTarget.CITY_BIRTH ->
+            state.cities.getOrNull(selectedId)
+                ?.let { AddDependentIntent.OnCityBirthSelected(it) }
+
+        BottomSheetTarget.CITY_ISSUANCE ->
+            state.cities.getOrNull(selectedId)
+                ?.let { AddDependentIntent.OnCityIssuanceSelected(it) }
+
+        BottomSheetTarget.BRANCH ->
+            state.activeBranches.getOrNull(selectedId)
+                ?.let { AddDependentIntent.OnBranchSelected(it) }
+
+        null -> null
     }
 }
 
@@ -177,16 +167,27 @@ fun HandleAddDependentEvents(
 
 @Composable
 fun AddDependentContent(
-    uiStateState: State<AddDependentState>,
+    state: AddDependentState,
     onBackClicked: () -> Unit,
     onIntent: (AddDependentIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
-    val state = uiStateState.value
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
+    val errorMessage = state.error
+    // The initial lookups feed step 1; until they arrive there is nothing meaningful to show,
+    // so a failure there is blocking. Later failures must not wipe the data already entered.
+    val isInitialLoad = state.currentStep == STEP_INQUIRY && state.familyRelationships.isEmpty()
+    val showBlockingError = errorMessage != null && isInitialLoad
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage != null && !showBlockingError) {
+            snackbarHostState.showSnackbar(errorMessage)
+        }
     }
 
     Scaffold(
@@ -229,48 +230,60 @@ fun AddDependentContent(
             }
         },
         bottomBar = {
-            AddDependentBottomBar(
-                state = state,
-                onIntent = onIntent,
-                onFinish = onBackClicked
-            )
+            if (!showBlockingError) {
+                AddDependentBottomBar(
+                    state = state,
+                    onIntent = onIntent,
+                    onFinish = onBackClicked
+                )
+            }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-
         ) {
-            StepIndicator(
-                steps = rememberAddDependentSteps(state.currentStep),
-                modifier = Modifier.padding(
-                    start = Spacing.lg,
-                    end = Spacing.lg,
-                    top = Spacing.md,
-                    bottom = Spacing.md
-                )
-            )
+            when {
+                state.isLoading && isInitialLoad -> LoadingStateOverlay()
 
-            AnimatedContent(
-                targetState = state.currentStep,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        slideInHorizontally { -it } + fadeIn() togetherWith
-                            slideOutHorizontally { it } + fadeOut()
-                    } else {
-                        slideInHorizontally { it } + fadeIn() togetherWith
-                            slideOutHorizontally { -it } + fadeOut()
+                errorMessage != null && isInitialLoad -> ErrorStateView(
+                    message = errorMessage,
+                    onRetry = { onIntent(AddDependentIntent.InitData) }
+                )
+
+                else -> {
+                    StepIndicator(
+                        steps = rememberAddDependentSteps(state.currentStep),
+                        modifier = Modifier.padding(
+                            start = Spacing.lg,
+                            end = Spacing.lg,
+                            top = Spacing.md,
+                            bottom = Spacing.md
+                        )
+                    )
+
+                    AnimatedContent(
+                        targetState = state.currentStep,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                slideInHorizontally { -it } + fadeIn() togetherWith
+                                    slideOutHorizontally { it } + fadeOut()
+                            } else {
+                                slideInHorizontally { it } + fadeIn() togetherWith
+                                    slideOutHorizontally { -it } + fadeOut()
+                            }
+                        },
+                        label = "AddDependentStepTransition",
+                        modifier = Modifier.weight(1f)
+                    ) { step ->
+                        when (step) {
+                            STEP_INQUIRY -> InquiryInfoStep(state = state, onIntent = onIntent)
+                            STEP_VERIFICATION -> VerificationStep(state = state, onIntent = onIntent)
+                            STEP_DOCUMENTS -> DocumentUploadStep(state = state, onIntent = onIntent)
+                            else -> AddDependentSuccessStep(state = state)
+                        }
                     }
-                },
-                label = "AddDependentStepTransition",
-                modifier = Modifier.weight(1f)
-            ) { step ->
-                when (step) {
-                    STEP_INQUIRY -> InquiryInfoStep(state = state, onIntent = onIntent)
-                    STEP_VERIFICATION -> VerificationStep(state = state, onIntent = onIntent)
-                    STEP_DOCUMENTS -> DocumentUploadStep(state = state, onIntent = onIntent)
-                    else -> AddDependentSuccessStep(state = state)
                 }
             }
         }
@@ -315,13 +328,13 @@ private fun AddDependentBottomBar(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         modifier = Modifier.weight(1f)
                     )
-
                 }
             }
             STEP_DOCUMENTS -> {
-                val activeDocTypes = state.requiredDocTypes.filter { !it.isDisabled }
-                val uploadedTypes = state.uploadedDocuments.map { it.docType }.toSet()
-                val allUploaded = activeDocTypes.all { uploadedTypes.contains(it.code) }
+                val uploadedTypes = state.uploadedDocuments.mapTo(mutableSetOf()) { it.docType }
+                val allUploaded = state.requiredDocTypes
+                    .filterNot { it.isDisabled }
+                    .all { uploadedTypes.contains(it.code) }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                     SquareIconButton(
@@ -383,34 +396,6 @@ private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndic
                     else -> StepState.Inactive
                 }
             )
-        )
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun AddDependentScreenPreview() {
-    PreviewRtlThemeContent {
-        val uiStateState = androidx.compose.runtime.mutableStateOf(AddDependentState())
-        AddDependentContent(
-            uiStateState = uiStateState,
-            onBackClicked = {},
-            onIntent = {},
-            snackbarHostState = remember { SnackbarHostState() }
-        )
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun AddDependentScreenPreviewDark() {
-    PreviewRtlThemeContent(darkTheme = true) {
-        val uiStateState = androidx.compose.runtime.mutableStateOf(AddDependentState(currentStep = STEP_VERIFICATION))
-        AddDependentContent(
-            uiStateState = uiStateState,
-            onBackClicked = {},
-            onIntent = {},
-            snackbarHostState = remember { SnackbarHostState() }
         )
     }
 }

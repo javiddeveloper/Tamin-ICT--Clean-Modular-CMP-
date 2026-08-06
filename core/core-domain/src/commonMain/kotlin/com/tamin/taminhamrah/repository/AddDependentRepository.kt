@@ -7,13 +7,14 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 
 interface AddDependentRepository {
     fun getDependentInfo(): Flow<List<DependentInfoDN>>
     fun getActiveBranches(): Flow<List<BranchDN>>
     fun getFamilyRelationships(
-        queryJson: String? = null
+        filter: List<ApiFilterDN> = emptyList()
     ): Flow<List<FamilyRelationshipDN>>
     fun getFamilyRelationshipsFromProxy(): Flow<List<FamilyRelationshipDN>>
     fun inquiryRegistry(

@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -29,9 +30,9 @@ internal class AddDependentRepositoryImpl(
     }
 
     override fun getFamilyRelationships(
-        queryJson: String?
+        filter: List<ApiFilterDN>
     ): Flow<List<FamilyRelationshipDN>> = flow {
-        val result = remoteDataSource.getFamilyRelationships(queryJson).map { it.toDomain() }
+        val result = remoteDataSource.getFamilyRelationships(filter).map { it.toDomain() }
         emit(result)
     }
 

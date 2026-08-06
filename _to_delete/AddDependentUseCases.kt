@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -19,8 +20,8 @@ class GetFamilyRelationshipsUseCase(
     private val repository: AddDependentRepository
 ) {
     operator fun invoke(
-        queryJson: String? = null
-    ): Flow<List<FamilyRelationshipDN>> = repository.getFamilyRelationships(queryJson)
+        filter: List<ApiFilterDN> = emptyList()
+    ): Flow<List<FamilyRelationshipDN>> = repository.getFamilyRelationships(filter)
 }
 
 class InquiryRegistryUseCase(

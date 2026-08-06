@@ -7,6 +7,9 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.addDependent.FakeAddDependentRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
@@ -56,11 +59,14 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
             FamilyRelationshipDN(id = 1, relationCode = "REL_1", relationDesc = "همسر")
         )
         repository.familyRelationshipsResult = expectedRelationships
+        val filter = listOf(ApiFilterDN(property = FilterProperty.SERIAL_ID, value = "1", operator = FilterOperator.EQUAL))
 
-        getFamilyRelationshipsUseCase(queryJson = null).test {
+        getFamilyRelationshipsUseCase(filter).test {
             assertEquals(expectedRelationships, awaitItem())
             awaitComplete()
         }
+
+        assertEquals(filter, repository.lastFamilyRelationshipsFilter)
     }
 
     @Test

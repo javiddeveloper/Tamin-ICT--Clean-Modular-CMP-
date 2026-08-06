@@ -14,6 +14,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
+import io.ktor.client.request.forms.MultiPartFormDataContent
 
 internal interface AddDependentApiService {
 
@@ -25,7 +26,7 @@ internal interface AddDependentApiService {
 
     @GET("services/family-relationships")
     suspend fun getFamilyRelationships(
-        @Query("query") queryJson: String? = null
+        @QueryMap parameters: Map<String, String> = emptyMap()
     ): BaseDTO<List<FamilyRelationshipDto>>
 
     @GET("proxy/models/dependency")
@@ -46,7 +47,7 @@ internal interface AddDependentApiService {
 
     @POST("services/upload-image")
     suspend fun uploadImage(
-        @Body imageBytes: ByteArray
+        @Body body: MultiPartFormDataContent
     ): BaseDTO<UploadImageResponseDto>
 
     @POST("services/add-dependent")

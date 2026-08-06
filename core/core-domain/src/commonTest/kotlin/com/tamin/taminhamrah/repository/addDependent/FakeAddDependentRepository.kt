@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -29,6 +30,7 @@ class FakeAddDependentRepository : AddDependentRepository {
     var lastInquiryEducationCode: String? = null
     var lastUploadedFileName: String? = null
     var lastAddedRequest: RequestAddDependentDN? = null
+    var lastFamilyRelationshipsFilter: List<ApiFilterDN>? = null
 
     override fun getDependentInfo(): Flow<List<DependentInfoDN>> = flow {
         if (shouldThrowError) throw error
@@ -40,8 +42,9 @@ class FakeAddDependentRepository : AddDependentRepository {
         emit(activeBranchesResult)
     }
 
-    override fun getFamilyRelationships(queryJson: String?): Flow<List<FamilyRelationshipDN>> = flow {
+    override fun getFamilyRelationships(filter: List<ApiFilterDN>): Flow<List<FamilyRelationshipDN>> = flow {
         if (shouldThrowError) throw error
+        lastFamilyRelationshipsFilter = filter
         emit(familyRelationshipsResult)
     }
 

@@ -7,10 +7,26 @@ import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 
+const val STEP_INQUIRY = 1
+const val STEP_VERIFICATION = 2
+const val STEP_DOCUMENTS = 3
+const val STEP_SUCCESS = 4
+
 enum class StepperMode {
     DEFAULT_MODE,
     SON_MODE,
     DAUGHTER_MODE
+}
+
+/**
+ * Identifies which picker opened the shared bottom sheet, so the screen can route the
+ * selection back to the right intent without matching on the (localized) sheet title.
+ */
+enum class BottomSheetTarget {
+    RELATIONSHIP,
+    CITY_BIRTH,
+    CITY_ISSUANCE,
+    BRANCH
 }
 
 @Immutable
@@ -30,7 +46,7 @@ data class UploadedDocument(
 
 @Immutable
 data class AddDependentState(
-    val currentStep: Int = 1,
+    val currentStep: Int = STEP_INQUIRY,
     val stepperMode: StepperMode = StepperMode.DEFAULT_MODE,
     val isLoading: Boolean = false,
     val activeBranches: List<BranchPR> = emptyList(),
@@ -53,6 +69,7 @@ data class AddDependentState(
     val needCallInquiryRegistry: Boolean = true,
     val needCallInquiryEducation: Boolean = true,
     val bottomSheetConfig: TaminBottomSheetConfig? = null,
+    val bottomSheetTarget: BottomSheetTarget? = null,
     val error: String? = null
 ) {
     sealed class PartialState {
@@ -84,7 +101,10 @@ data class AddDependentState(
         data class DocumentUploaded(val document: UploadedDocument) : PartialState()
         data class DocumentDeleted(val docType: String) : PartialState()
         data class StepChanged(val step: Int) : PartialState()
-        data class BottomSheetStateChanged(val config: TaminBottomSheetConfig?) : PartialState()
+        data class BottomSheetStateChanged(
+            val config: TaminBottomSheetConfig?,
+            val target: BottomSheetTarget?
+        ) : PartialState()
         data class Error(val message: String) : PartialState()
     }
 }

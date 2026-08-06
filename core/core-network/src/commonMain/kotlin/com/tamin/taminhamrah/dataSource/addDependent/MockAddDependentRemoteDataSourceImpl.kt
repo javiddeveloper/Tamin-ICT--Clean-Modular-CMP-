@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.delay
 
 
@@ -42,7 +43,7 @@ class MockAddDependentRemoteDataSourceImpl : AddDependentRemoteDataSource {
         )
     }
 
-    override suspend fun getFamilyRelationships(queryJson: String?): List<FamilyRelationshipDto> {
+    override suspend fun getFamilyRelationships(filter: List<ApiFilterDN>): List<FamilyRelationshipDto> {
         delay(400)
         return listOf(
             FamilyRelationshipDto(id = 1, relationCode = "01", relationDesc = "همسر"),

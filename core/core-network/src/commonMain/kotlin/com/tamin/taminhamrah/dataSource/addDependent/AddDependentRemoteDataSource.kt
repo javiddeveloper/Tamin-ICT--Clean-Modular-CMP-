@@ -8,12 +8,13 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 
 interface AddDependentRemoteDataSource {
     suspend fun getDependentInfo(): List<DependentInfoDto>
     suspend fun getActiveBranches(): List<BranchDto>
     suspend fun getFamilyRelationships(
-        queryJson: String? = null
+        filter: List<ApiFilterDN> = emptyList()
     ): List<FamilyRelationshipDto>
     suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto>
     suspend fun inquiryRegistry(
