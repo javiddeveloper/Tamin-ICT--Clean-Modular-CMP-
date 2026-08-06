@@ -8,10 +8,12 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -30,13 +32,15 @@ internal interface AddDependentApiService {
     ): BaseDTO<List<FamilyRelationshipDto>>
 
     @GET("proxy/models/dependency")
-    suspend fun getFamilyRelationshipsFromProxy(): BaseDTO<List<FamilyRelationshipProxyDto>>
+    suspend fun getFamilyRelationshipsFromProxy(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<FamilyRelationshipProxyDto>>
 
-    @GET("services/inquiry-registry")
+    @GET("subdominants/getOfficeData/{nationalCode}/{timeStampBirthDay}/{dependencyCode}")
     suspend fun inquiryRegistry(
-        @Query("dependentNationalId") dependentNationalId: String,
-        @Query("birthDateTimeStamp") birthDateTimeStamp: String,
-        @Query("dependencyCode") dependencyCode: String
+        @Path("nationalCode") dependentNationalId: String,
+        @Path("timeStampBirthDay") birthDateTimeStamp: String,
+        @Path("dependencyCode") dependencyCode: String
     ): BaseDTO<RegistryDataDto>
 
     @GET("services/inquiry-education")

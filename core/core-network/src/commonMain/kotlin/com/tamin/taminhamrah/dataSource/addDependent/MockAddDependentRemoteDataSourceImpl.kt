@@ -52,8 +52,15 @@ class MockAddDependentRemoteDataSourceImpl : AddDependentRemoteDataSource {
         )
     }
 
-    override suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto> {
-        return emptyList()
+    override suspend fun getFamilyRelationshipsFromProxy(
+        filter: List<ApiFilterDN>
+    ): List<FamilyRelationshipProxyDto> {
+        delay(400)
+        return listOf(
+            FamilyRelationshipProxyDto(id = 1, relationCode = "01", relationDesc = "همسر"),
+            FamilyRelationshipProxyDto(id = 2, relationCode = "02", relationDesc = "فرزند پسر"),
+            FamilyRelationshipProxyDto(id = 3, relationCode = "03", relationDesc = "فرزند دختر")
+        )
     }
 
     override suspend fun inquiryRegistry(

@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
 import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -72,10 +74,15 @@ internal class AddDependentRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto> {
+    override suspend fun getFamilyRelationshipsFromProxy(
+        filter: List<ApiFilterDN>
+    ): List<FamilyRelationshipProxyDto> {
         return try {
-            val response = apiService.getFamilyRelationshipsFromProxy()
-            response.extractData()
+            val parameters = apiQueryBuilder.buildQuery(
+                ApiQueryParamDN(page = 1, filters = filter)
+            )
+            val response = apiService.getFamilyRelationshipsFromProxy(parameters)
+            response.extractData().list.orEmpty()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

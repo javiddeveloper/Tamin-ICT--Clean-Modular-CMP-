@@ -5,11 +5,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 
 /**
  * A flat, filled row used for tap-to-open selectors (dropdowns, date pickers) across every
@@ -102,5 +107,35 @@ internal fun SquareIconButton(
             tint = colors.textPrimary,
             modifier = Modifier.size(22.dp)
         )
+    }
+}
+
+/** Shimmer placeholder for the initial data loading in the "Add Dependent" flow. */
+@Composable
+internal fun AddDependentShimmer(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(Spacing.lg)
+    ) {
+        // Step title placeholder
+        ShimmerBlock(
+            modifier = Modifier
+                .width(200.dp)
+                .height(24.dp),
+            cornerRadius = 4.dp
+        )
+        Spacer(modifier = Modifier.height(Spacing.lg))
+
+        // Form fields placeholders
+        repeat(3) {
+            ShimmerBlock(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                cornerRadius = CornerRadius.lg
+            )
+            Spacer(modifier = Modifier.height(Spacing.smd))
+        }
     }
 }

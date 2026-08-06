@@ -31,6 +31,7 @@ class FakeAddDependentRepository : AddDependentRepository {
     var lastUploadedFileName: String? = null
     var lastAddedRequest: RequestAddDependentDN? = null
     var lastFamilyRelationshipsFilter: List<ApiFilterDN>? = null
+    var lastFamilyRelationshipsFromProxyFilter: List<ApiFilterDN>? = null
 
     override fun getDependentInfo(): Flow<List<DependentInfoDN>> = flow {
         if (shouldThrowError) throw error
@@ -48,8 +49,9 @@ class FakeAddDependentRepository : AddDependentRepository {
         emit(familyRelationshipsResult)
     }
 
-    override fun getFamilyRelationshipsFromProxy(): Flow<List<FamilyRelationshipDN>> = flow {
+    override fun getFamilyRelationshipsFromProxy(filter: List<ApiFilterDN>): Flow<List<FamilyRelationshipDN>> = flow {
         if (shouldThrowError) throw error
+        lastFamilyRelationshipsFromProxyFilter = filter
         emit(familyRelationshipsFromProxyResult)
     }
 

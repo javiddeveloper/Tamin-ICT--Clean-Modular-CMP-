@@ -19,6 +19,9 @@ import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentPR
 import com.tamin.taminhamrah.model.addDependent.RequestFilePR
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
@@ -50,6 +53,12 @@ private const val DAUGHTER_COMMITMENT_AGE_THRESHOLD = 18
 
 /** Registry flag meaning the birth certificate is already on file, so re-uploading it is not required. */
 private const val REGISTRY_STATE_ID_CARD_ON_FILE = "1"
+
+/**
+ * The relationship dropdown fetches everything ("**" LIKE match) rather than filtering by a
+ * user-typed term — see [showRelationshipPicker].
+ */
+private const val RELATIONSHIP_FILTER_WILDCARD = "**"
 
 class AddDependentViewModel(
     private val getActiveBranchesUseCase: GetActiveBranchesUseCase,
@@ -96,26 +105,7 @@ class AddDependentViewModel(
                 emit(PartialState.BranchSelected(intent.branch))
                 emit(dismissBottomSheet())
             }
-            is AddDependentIntent.ShowRelationshipPicker -> flow {
-                val state = uiState.value
-                emit(
-                    PartialState.BottomSheetStateChanged(
-                        config = TaminBottomSheetConfig(
-                            title = "انتخاب نسبت خانوادگی",
-                            type = TaminBottomSheetType.CUSTOM,
-                            items = state.familyRelationships.map {
-                                TaminBottomSheetItem(
-                                    id = it.id ?: 0,
-                                    title = it.relationDesc.orEmpty(),
-                                    isSelected = it.id == state.selectedRelationship?.id
-                                )
-                            },
-                            singleSelection = true
-                        ),
-                        target = BottomSheetTarget.RELATIONSHIP
-                    )
-                )
-            }
+            is AddDependentIntent.ShowRelationshipPicker -> showRelationshipPicker()
             is AddDependentIntent.ShowCityBirthPicker -> flow {
                 val state = uiState.value
                 emit(
@@ -204,12 +194,13 @@ class AddDependentViewModel(
     )
 
     /**
-     * The three lookups are independent, so they run concurrently. Each carries its own
+     * Active branches and cities are independent, so they run concurrently on screen open.
+     * Family relationships are intentionally NOT loaded here — that dropdown is fetched lazily
+     * when the user opens it, see [showRelationshipPicker]. Each source carries its own
      * `catch` so one failing source cannot blank out the others.
      */
     private fun initData(): Flow<PartialState> = merge(
         loadActiveBranches(),
-        loadFamilyRelationships(),
         loadCities()
     ).onStart { emit(PartialState.Loading(true)) }
 
@@ -221,23 +212,64 @@ class AddDependentViewModel(
         }
         .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
-    private fun loadFamilyRelationships(): Flow<PartialState> = getFamilyRelationshipsFromProxyUseCase()
-        .map { relationships ->
-            PartialState.FamilyRelationshipsLoaded(relationships.map { it.toPresentation() }) as PartialState
-        }
-        .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
-
     private fun loadCities(): Flow<PartialState> = getCitiesUseCase()
         .map { cities -> PartialState.CitiesLoaded(cities.toCityPresentation()) as PartialState }
         .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
+    /**
+     * Fetches the relationship list on demand, when the user opens the "Select Dependent"
+     * dropdown, instead of eagerly on screen init. Mirrors `GET proxy/models/dependency` with a
+     * `dependencyDesc LIKE "**"` filter (i.e. "match everything") and `page = 1`, matching the
+     * backend's real request shape. The bottom sheet only opens once the fresh data has arrived;
+     * a failure surfaces as an error instead of opening an empty sheet.
+     */
+    private fun showRelationshipPicker(): Flow<PartialState> = flow {
+        val state = uiState.value
+        emit(PartialState.Loading(true))
+
+        getFamilyRelationshipsFromProxyUseCase(
+            filter = listOf(
+                ApiFilterDN(
+                    property = FilterProperty.DEPENDENCY_DESC,
+                    value = RELATIONSHIP_FILTER_WILDCARD,
+                    operator = FilterOperator.LIKE
+                )
+            )
+        ).map { relationships ->
+            PartialState.FamilyRelationshipsLoaded(relationships.map { it.toPresentation() }) as PartialState
+        }.catch {
+            emit(PartialState.Error(it.toSingleLineMessage()))
+        }.collect { partialState ->
+            emit(partialState)
+            if (partialState is PartialState.FamilyRelationshipsLoaded) {
+                emit(
+                    PartialState.BottomSheetStateChanged(
+                        config = TaminBottomSheetConfig(
+                            title = "انتخاب نسبت خانوادگی",
+                            type = TaminBottomSheetType.CUSTOM,
+                            items = partialState.relationships.map {
+                                TaminBottomSheetItem(
+                                    id = it.id ?: 0,
+                                    title = it.relationDesc.orEmpty(),
+                                    isSelected = it.id == state.selectedRelationship?.id
+                                )
+                            },
+                            singleSelection = true
+                        ),
+                        target = BottomSheetTarget.RELATIONSHIP
+                    )
+                )
+            }
+        }
+    }
+
     private fun submitInquiryRegistry(): Flow<PartialState> = flow {
         val state = uiState.value
 
-        if (!ValidationUtils.isNationalIdValid(state.dependentNationalId)) {
-            sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "کد ملی معتبر نیست"))
-            return@flow
-        }
+//        if (!ValidationUtils.isNationalIdValid(state.dependentNationalId)) {
+//            sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "کد ملی معتبر نیست"))
+//            return@flow
+//        }
         if (state.birthDateTimeStamp.isBlank() && state.birthDatePersian.isBlank()) {
             sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا تاریخ تولد را انتخاب کنید"))
             return@flow

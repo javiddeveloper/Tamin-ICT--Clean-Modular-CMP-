@@ -36,8 +36,10 @@ internal class AddDependentRepositoryImpl(
         emit(result)
     }
 
-    override fun getFamilyRelationshipsFromProxy(): Flow<List<FamilyRelationshipDN>> = flow {
-        val result = remoteDataSource.getFamilyRelationshipsFromProxy().map { it.toDomain() }
+    override fun getFamilyRelationshipsFromProxy(
+        filter: List<ApiFilterDN>
+    ): Flow<List<FamilyRelationshipDN>> = flow {
+        val result = remoteDataSource.getFamilyRelationshipsFromProxy(filter).map { it.toDomain() }
         emit(result)
     }
 

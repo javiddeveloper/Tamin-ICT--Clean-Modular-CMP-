@@ -16,7 +16,9 @@ interface AddDependentRemoteDataSource {
     suspend fun getFamilyRelationships(
         filter: List<ApiFilterDN> = emptyList()
     ): List<FamilyRelationshipDto>
-    suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto>
+    suspend fun getFamilyRelationshipsFromProxy(
+        filter: List<ApiFilterDN> = emptyList()
+    ): List<FamilyRelationshipProxyDto>
     suspend fun inquiryRegistry(
         dependentNationalId: String,
         birthDateTimeStamp: String,

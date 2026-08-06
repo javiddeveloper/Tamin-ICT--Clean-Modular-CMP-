@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilderImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
@@ -29,7 +30,7 @@ class FakeAddDependentApiService : AddDependentApiService {
     var dependentInfoResult: BaseDTO<List<DependentInfoDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
     var activeBranchesResult: BaseDTO<List<BranchDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
     var familyRelationshipsResult: BaseDTO<List<FamilyRelationshipDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
-    var familyRelationshipsFromProxyResult: BaseDTO<List<FamilyRelationshipProxyDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
+    var familyRelationshipsFromProxyResult: BaseDTO<ListData<FamilyRelationshipProxyDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = emptyList()))
     var registryDataResult: BaseDTO<RegistryDataDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = RegistryDataDto())
     var educationCodeResult: BaseDTO<String> = BaseDTO(status = 200, family = "OK", reason = "OK", data = "OK")
     var uploadImageResult: BaseDTO<UploadImageResponseDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = UploadImageResponseDto())
@@ -37,6 +38,7 @@ class FakeAddDependentApiService : AddDependentApiService {
 
     var shouldThrowException: Exception? = null
     var lastFamilyRelationshipsParameters: Map<String, String>? = null
+    var lastFamilyRelationshipsFromProxyParameters: Map<String, String>? = null
 
     override suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDto>> {
         shouldThrowException?.let { throw it }
@@ -54,8 +56,9 @@ class FakeAddDependentApiService : AddDependentApiService {
         return familyRelationshipsResult
     }
 
-    override suspend fun getFamilyRelationshipsFromProxy(): BaseDTO<List<FamilyRelationshipProxyDto>> {
+    override suspend fun getFamilyRelationshipsFromProxy(parameters: Map<String, String>): BaseDTO<ListData<FamilyRelationshipProxyDto>> {
         shouldThrowException?.let { throw it }
+        lastFamilyRelationshipsFromProxyParameters = parameters
         return familyRelationshipsFromProxyResult
     }
 
@@ -148,11 +151,24 @@ class AddDependentRemoteDataSourceImplTest {
     @Test
     fun getFamilyRelationshipsFromProxy_success_returnsProxyList() = runTest {
         val expectedRelationships = listOf(FamilyRelationshipProxyDto(relationCode = "01", relationDesc = "فرزند"))
-        fakeApiService.familyRelationshipsFromProxyResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedRelationships)
+        fakeApiService.familyRelationshipsFromProxyResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = expectedRelationships))
 
         val result = dataSource.getFamilyRelationshipsFromProxy()
 
         assertEquals(expectedRelationships, result)
+    }
+
+    @Test
+    fun getFamilyRelationshipsFromProxy_buildsPageOneQueryWithFilter() = runTest {
+        val expectedRelationships = listOf(FamilyRelationshipProxyDto(relationCode = "01", relationDesc = "همسر"))
+        fakeApiService.familyRelationshipsFromProxyResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = expectedRelationships))
+        val filter = listOf(ApiFilterDN(property = FilterProperty.DEPENDENCY_DESC, value = "**", operator = FilterOperator.LIKE))
+
+        val result = dataSource.getFamilyRelationshipsFromProxy(filter)
+
+        assertEquals(expectedRelationships, result)
+        assertEquals("1", fakeApiService.lastFamilyRelationshipsFromProxyParameters?.get("page"))
+        assertEquals(setOf("page", "start", "limit", "filter", "sort"), fakeApiService.lastFamilyRelationshipsFromProxyParameters?.keys)
     }
 
     @Test

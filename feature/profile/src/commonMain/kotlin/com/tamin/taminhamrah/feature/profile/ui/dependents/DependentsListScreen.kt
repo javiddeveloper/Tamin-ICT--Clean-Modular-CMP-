@@ -308,6 +308,7 @@ private fun DependentCard(
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
                 DetailRow(label = "کد ملی", value = dependent.nationalCode, numeric = true)
+                DetailRow(label = "تاریخ تولد", value = dependent.birthDate.ifBlank { "-" }, numeric = true)
                 DetailRow(label = "نام پدر", value = dependent.fatherName.ifBlank { "-" }, numeric = false)
                 DetailRow(label = "شماره بیمه", value = dependent.insuranceId.ifBlank { "-" }, numeric = true)
                 DetailRow(label = "وضعیت", value = dependent.status.ifBlank { "-" }, numeric = false)

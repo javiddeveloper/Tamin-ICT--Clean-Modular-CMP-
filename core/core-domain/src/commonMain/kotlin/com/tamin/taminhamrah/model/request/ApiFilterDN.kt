@@ -67,6 +67,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
     @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
     @SerialName("paymentType") PAYMENT_TYPE("paymentType"),
+    @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
 }
 
 @Serializable

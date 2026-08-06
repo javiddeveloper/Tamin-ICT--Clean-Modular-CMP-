@@ -16,7 +16,9 @@ interface AddDependentRepository {
     fun getFamilyRelationships(
         filter: List<ApiFilterDN> = emptyList()
     ): Flow<List<FamilyRelationshipDN>>
-    fun getFamilyRelationshipsFromProxy(): Flow<List<FamilyRelationshipDN>>
+    fun getFamilyRelationshipsFromProxy(
+        filter: List<ApiFilterDN> = emptyList()
+    ): Flow<List<FamilyRelationshipDN>>
     fun inquiryRegistry(
         dependentNationalId: String,
         birthDateTimeStamp: String,

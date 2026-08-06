@@ -32,6 +32,7 @@ class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
 
     var shouldThrowError: Exception? = null
     var lastFamilyRelationshipsFilter: List<ApiFilterDN>? = null
+    var lastFamilyRelationshipsFromProxyFilter: List<ApiFilterDN>? = null
 
     override suspend fun getDependentInfo(): List<DependentInfoDto> {
         shouldThrowError?.let { throw it }
@@ -49,8 +50,9 @@ class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
         return familyRelationshipsResult
     }
 
-    override suspend fun getFamilyRelationshipsFromProxy(): List<FamilyRelationshipProxyDto> {
+    override suspend fun getFamilyRelationshipsFromProxy(filter: List<ApiFilterDN>): List<FamilyRelationshipProxyDto> {
         shouldThrowError?.let { throw it }
+        lastFamilyRelationshipsFromProxyFilter = filter
         return familyRelationshipsFromProxyResult
     }
 
@@ -142,11 +144,13 @@ class AddDependentRepositoryImplTest {
         remoteDataSource.familyRelationshipsFromProxyResult = listOf(
             FamilyRelationshipProxyDto(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
         )
+        val filter = listOf(ApiFilterDN(property = FilterProperty.DEPENDENCY_DESC, value = "**", operator = FilterOperator.LIKE))
 
-        val items = repository.getFamilyRelationshipsFromProxy().first()
+        val items = repository.getFamilyRelationshipsFromProxy(filter).first()
 
         assertEquals(1, items.size)
         assertEquals("REL_01", items.first().relationCode)
+        assertEquals(filter, remoteDataSource.lastFamilyRelationshipsFromProxyFilter)
     }
 
     @Test

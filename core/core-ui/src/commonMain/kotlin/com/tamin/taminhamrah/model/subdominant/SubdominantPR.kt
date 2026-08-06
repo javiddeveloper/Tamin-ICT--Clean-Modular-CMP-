@@ -19,6 +19,8 @@ data class SubdominantItemPR(
     val fullName: String = "",
     val fatherName: String = "",
     val nationalCode: String = "",
+    /** Jalali, e.g. "۱۳۳۰/۰۴/۰۱" — already formatted for display. */
+    val birthDate: String = "",
     val relationDescription: String = "",
     val status: String = "",
     val insuranceId: String = ""

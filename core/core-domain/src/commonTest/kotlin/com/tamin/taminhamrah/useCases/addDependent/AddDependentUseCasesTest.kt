@@ -75,11 +75,14 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
             FamilyRelationshipDN(id = 2, relationCode = "REL_2", relationDesc = "پسر", bailCode = "BAIL_01")
         )
         repository.familyRelationshipsFromProxyResult = expectedRelationships
+        val filter = listOf(ApiFilterDN(property = FilterProperty.DEPENDENCY_DESC, value = "**", operator = FilterOperator.LIKE))
 
-        getFamilyRelationshipsFromProxyUseCase().test {
+        getFamilyRelationshipsFromProxyUseCase(filter).test {
             assertEquals(expectedRelationships, awaitItem())
             awaitComplete()
         }
+
+        assertEquals(filter, repository.lastFamilyRelationshipsFromProxyFilter)
     }
 
     @Test

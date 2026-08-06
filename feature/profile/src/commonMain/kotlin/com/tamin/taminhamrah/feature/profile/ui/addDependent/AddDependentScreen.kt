@@ -245,7 +245,7 @@ fun AddDependentContent(
                 .padding(padding)
         ) {
             when {
-                state.isLoading && isInitialLoad -> LoadingStateOverlay()
+                state.isLoading && isInitialLoad -> AddDependentShimmer()
 
                 errorMessage != null && isInitialLoad -> ErrorStateView(
                     message = errorMessage,

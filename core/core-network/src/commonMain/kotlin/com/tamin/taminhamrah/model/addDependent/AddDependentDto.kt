@@ -100,9 +100,9 @@ data class FamilyRelationshipDto(
 @Serializable
 data class FamilyRelationshipProxyDto(
     @SerialName("id") val id: Int? = null,
-    @SerialName("relationCode") val relationCode: String? = null,
-    @SerialName("relationDesc") val relationDesc: String? = null,
-    @SerialName("bailCode") val bailCode: String? = null
+    @SerialName("dependencyCode") val relationCode: String? = null,
+    @SerialName("dependencyDesc") val relationDesc: String? = null,
+    @SerialName("reasonCode") val bailCode: String? = null
 )
 
 @Serializable

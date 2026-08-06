@@ -12,6 +12,7 @@ object ProfileMocks {
                 lastName = "حسینی",
                 fatherName = "محمد",
                 nationalCode = "0012345678",
+                dateOfBirth = 642717000000L, // 1369/02/25
                 relationDescription = "همسر",
                 status = "فعال",
                 insuranceId = "INS-1001"
@@ -22,6 +23,7 @@ object ProfileMocks {
                 lastName = "رضایی",
                 fatherName = "رضا",
                 nationalCode = "0087654321",
+                dateOfBirth = 1426797000000L, // 1393/12/29
                 relationDescription = "فرزند پسر",
                 status = "فعال",
                 insuranceId = "INS-1002"
@@ -32,6 +34,7 @@ object ProfileMocks {
                 lastName = "رضایی",
                 fatherName = "رضا",
                 nationalCode = "0099887766",
+                dateOfBirth = 1503171000000L, // 1396/05/29
                 relationDescription = "فرزند دختر",
                 status = "غیرفعال",
                 insuranceId = "INS-1003"
