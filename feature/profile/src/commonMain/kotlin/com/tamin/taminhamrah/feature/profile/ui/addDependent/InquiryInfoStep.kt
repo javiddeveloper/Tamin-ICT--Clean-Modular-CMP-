@@ -84,8 +84,7 @@ fun InquiryInfoStep(
 
         RelationshipDropdown(
             selectedRelationship = state.selectedRelationship,
-            onShowPicker = { onIntent(AddDependentIntent.ShowRelationshipPicker) },
-            enabled = state.familyRelationships.isNotEmpty()
+            onShowPicker = { onIntent(AddDependentIntent.ShowRelationshipPicker) }
         )
     }
 }
@@ -107,16 +106,14 @@ private fun NationalIdField(
 @Composable
 private fun RelationshipDropdown(
     selectedRelationship: FamilyRelationshipPR?,
-    onShowPicker: () -> Unit,
-    enabled: Boolean
+    onShowPicker: () -> Unit
 ) {
     Box {
         SelectableFieldRow(
             value = selectedRelationship?.relationDesc.orEmpty(),
             placeholder = stringResource(Res.string.inquiry_relationship_placeholder),
             trailingIcon = vectorResource(Res.drawable.ic_arrow_down),
-            onClick = { if (enabled) onShowPicker() },
-            enabled = enabled
+            onClick = onShowPicker
         )
     }
 }

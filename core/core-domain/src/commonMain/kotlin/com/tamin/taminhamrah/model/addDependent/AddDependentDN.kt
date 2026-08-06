@@ -1,21 +1,21 @@
 package com.tamin.taminhamrah.model.addDependent
 
 data class BranchDN(
-    val branchCode: String = "",
-    val branchName: String = "",
-    val workshopCode: String = "",
-    val workshopName: String = ""
+    val branchCode: String? = null,
+    val branchName: String? = null,
+    val workshopCode: String? = null,
+    val workshopName: String? = null,
 )
 
 data class RegistryDataDN(
-    val age: Int = 0,
-    val birthDate: String = "",
-    val fatherName: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
-    val nationalId: String = "",
-    val gender: String = "",
-    val registryConfirmState: String = ""
+    val age: Int? = null,
+    val birthDate: String? = null,
+    val fatherName: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val nationalId: String? = null,
+    val gender: String? = null,
+    val registryConfirmState: String? = null,
 )
 
 data class FamilyRelationshipDN(

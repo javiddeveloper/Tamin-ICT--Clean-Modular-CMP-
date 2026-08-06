@@ -27,7 +27,7 @@ private val sonRelation   = FamilyRelationshipPR(id = 2, relationCode = "FRZ", r
 private val daughterRelation = FamilyRelationshipPR(id = 3, relationCode = "FRD", relationDesc = "فرزند دختر", bailCode = "B3")
 
 private val wifeRegistry = RegistryDataPR(
-    age = 34,
+    age = "34",
     birthDate = "1369/05/12",
     fatherName = "محمد",
     firstName = "منصوره",
@@ -39,7 +39,7 @@ private val wifeRegistry = RegistryDataPR(
 )
 
 private val sonRegistry = RegistryDataPR(
-    age = 8,
+    age = "8",
     birthDate = "1396/03/07",
     fatherName = "حسین",
     firstName = "امیرعلی",
@@ -51,7 +51,7 @@ private val sonRegistry = RegistryDataPR(
 )
 
 private val daughterRegistry = RegistryDataPR(
-    age = 22,
+    age = "22",
     birthDate = "1382/09/15",
     fatherName = "رضا",
     firstName = "روناک",

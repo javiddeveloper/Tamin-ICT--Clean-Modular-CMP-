@@ -57,10 +57,10 @@ data class ParentIdDto(
 
 @Serializable
 data class BranchDto(
-    @SerialName("branchCode") val branchCode: String = "",
-    @SerialName("branchName") val branchName: String = "",
-    @SerialName("workshopCode") val workshopCode: String = "",
-    @SerialName("workshopName") val workshopName: String = ""
+    @SerialName("branchCode") val branchCode: String? = null,
+    @SerialName("branchName") val branchName: String? = null,
+    @SerialName("workshopCode") val workshopCode: String? = null,
+    @SerialName("workshopName") val workshopName: String? = null,
 )
 
 @Serializable
@@ -72,14 +72,14 @@ data class BranchListResponseDto(
 
 @Serializable
 data class RegistryDataDto(
-    @SerialName("age") val age: Int = 0,
-    @SerialName("birthDate") val birthDate: String = "",
-    @SerialName("fatherName") val fatherName: String = "",
-    @SerialName("firstName") val firstName: String = "",
-    @SerialName("lastName") val lastName: String = "",
-    @SerialName("nationalId") val nationalId: String = "",
-    @SerialName("gender") val gender: String = "",
-    @SerialName("insuranceId") val registryConfirmState: String = ""
+    @SerialName("age") val age: Int? = null,
+    @SerialName("birthDate") val birthDate: String? = null,
+    @SerialName("fatherName") val fatherName: String? = null,
+    @SerialName("firstName") val firstName: String? = null,
+    @SerialName("lastName") val lastName: String? = null,
+    @SerialName("nationalId") val nationalId: String? = null,
+    @SerialName("gender") val gender: String? = null,
+    @SerialName("insuranceId") val registryConfirmState: String? = null,
 )
 
 @Serializable

@@ -28,22 +28,22 @@ fun DependentInfoDN.toPresentation(): DependentInfoPR = DependentInfoPR(
 )
 
 fun BranchDN.toPresentation(): BranchPR = BranchPR(
-    branchCode = branchCode,
-    branchName = branchName,
-    workshopCode = workshopCode,
-    workshopName = workshopName
+    branchCode = branchCode ?: "-",
+    branchName = branchName ?: "-",
+    workshopCode = workshopCode ?: "-",
+    workshopName = workshopName ?: "-",
 )
 
 fun RegistryDataDN.toPresentation(): RegistryDataPR = RegistryDataPR(
-    age = age,
-    birthDate = birthDate,
-    fatherName = fatherName,
-    firstName = firstName,
-    lastName = lastName,
+    age = age.toString(),
+    birthDate = birthDate ?: "-",
+    fatherName = fatherName ?:  "-",
+    firstName = firstName ?:  "-",
+    lastName = lastName ?:  "-",
     fullName = "$firstName $lastName".trim(),
-    nationalId = nationalId,
-    gender = gender,
-    registryConfirmState = registryConfirmState
+    nationalId = nationalId ?: "-",
+    gender = gender ?: "-",
+    registryConfirmState = registryConfirmState ?: "-",
 )
 
 fun FamilyRelationshipDN.toPresentation(): FamilyRelationshipPR = FamilyRelationshipPR(

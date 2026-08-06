@@ -179,9 +179,11 @@ fun AddDependentContent(
     }
 
     val errorMessage = state.error
-    // The initial lookups feed step 1; until they arrive there is nothing meaningful to show,
-    // so a failure there is blocking. Later failures must not wipe the data already entered.
-    val isInitialLoad = state.currentStep == STEP_INQUIRY && state.familyRelationships.isEmpty()
+    // Active branches are the only lookup still fetched eagerly on screen open (family
+    // relationships and cities are now fetched lazily when their pickers open, see the
+    // ViewModel), so they're what gates the initial blocking loading/error state. Later
+    // failures (e.g. while submitting the inquiry) must not wipe the data already entered.
+    val isInitialLoad = state.currentStep == STEP_INQUIRY && state.activeBranches.isEmpty()
     val showBlockingError = errorMessage != null && isInitialLoad
 
     LaunchedEffect(errorMessage) {

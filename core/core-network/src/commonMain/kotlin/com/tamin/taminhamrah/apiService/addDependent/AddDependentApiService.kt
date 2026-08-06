@@ -23,7 +23,9 @@ internal interface AddDependentApiService {
     @GET("services/dependent-info")
     suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDto>>
 
-    @GET("services/active-branches")
+    // Real backend route confirmed via UserApiService.getInsuredActiveBranch(), which this
+    // module's DTO shape (branchCode/branchName/workshopCode/workshopName) already matches.
+    @GET("subdominants/getInsuredActiveBranch")
     suspend fun getActiveBranches(): BaseDTO<List<BranchDto>>
 
     @GET("services/family-relationships")

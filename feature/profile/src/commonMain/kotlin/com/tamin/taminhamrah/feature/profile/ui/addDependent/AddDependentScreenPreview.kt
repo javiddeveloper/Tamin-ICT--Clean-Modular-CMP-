@@ -32,7 +32,7 @@ private val sampleRelationships = listOf(
 )
 
 private val sampleWifeRegistry = RegistryDataPR(
-    age = 34,
+    age = "34",
     birthDate = "1369/05/12",
     fatherName = "محمد",
     firstName = "منصوره",
@@ -44,7 +44,7 @@ private val sampleWifeRegistry = RegistryDataPR(
 )
 
 private val sampleSonRegistry = RegistryDataPR(
-    age = 8,
+    age = "8",
     birthDate = "1396/03/07",
     fatherName = "حسین",
     firstName = "امیرعلی",

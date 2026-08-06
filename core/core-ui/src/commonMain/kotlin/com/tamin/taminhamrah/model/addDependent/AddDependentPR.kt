@@ -15,7 +15,7 @@ data class BranchPR(
 @Immutable
 @Serializable
 data class RegistryDataPR(
-    val age: Int = 0,
+    val age: String = "-",
     val birthDate: String = "",
     val fatherName: String = "",
     val firstName: String = "",
