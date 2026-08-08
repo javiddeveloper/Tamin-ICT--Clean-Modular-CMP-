@@ -359,7 +359,7 @@ private fun SettingsListPreviewContent() {
                     leadingText = "1"
                 ),
                 ListItemData(
-                    title = "تماس با من",
+                    title = "تماس با ما",
                     subtitle = "شماره تماس و اطلاعات ارتباطی",
                     leadingIconPainter = painterResource(Res.drawable.ic_tamin_logo),
                     colors = ListItemColors(
