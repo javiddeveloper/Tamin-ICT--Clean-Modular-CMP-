@@ -51,10 +51,10 @@ internal interface AddDependentApiService {
         @Query("educationCode") educationCode: String
     ): BaseDTO<String>
 
-    @POST("services/upload-image")
+    @POST("upload-image")
     suspend fun uploadImage(
         @Body body: MultiPartFormDataContent
-    ): BaseDTO<UploadImageResponseDto>
+    ): UploadImageResponseDto
 
     @POST("services/add-dependent")
     suspend fun addNewDependent(

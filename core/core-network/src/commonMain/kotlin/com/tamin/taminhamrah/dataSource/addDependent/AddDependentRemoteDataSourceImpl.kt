@@ -131,8 +131,7 @@ internal class AddDependentRemoteDataSourceImpl(
         mimeType: String
     ): UploadImageResponseDto {
         return try {
-            val response = apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
-            response.extractData()
+            apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

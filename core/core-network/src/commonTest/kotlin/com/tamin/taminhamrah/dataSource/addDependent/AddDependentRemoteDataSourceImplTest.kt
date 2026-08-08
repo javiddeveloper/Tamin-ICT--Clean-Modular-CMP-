@@ -33,7 +33,7 @@ class FakeAddDependentApiService : AddDependentApiService {
     var familyRelationshipsFromProxyResult: BaseDTO<ListData<FamilyRelationshipProxyDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = emptyList()))
     var registryDataResult: BaseDTO<RegistryDataDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = RegistryDataDto())
     var educationCodeResult: BaseDTO<String> = BaseDTO(status = 200, family = "OK", reason = "OK", data = "OK")
-    var uploadImageResult: BaseDTO<UploadImageResponseDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = UploadImageResponseDto())
+    var uploadImageResult: UploadImageResponseDto = UploadImageResponseDto()
     var addNewDependentResult: BaseDTO<GeneralResponseDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = GeneralResponseDto())
 
     var shouldThrowException: Exception? = null
@@ -79,7 +79,7 @@ class FakeAddDependentApiService : AddDependentApiService {
         return educationCodeResult
     }
 
-    override suspend fun uploadImage(body: MultiPartFormDataContent): BaseDTO<UploadImageResponseDto> {
+    override suspend fun uploadImage(body: MultiPartFormDataContent): UploadImageResponseDto {
         shouldThrowException?.let { throw it }
         return uploadImageResult
     }
@@ -193,7 +193,7 @@ class AddDependentRemoteDataSourceImplTest {
     @Test
     fun uploadImage_success_returnsUploadResponse() = runTest {
         val expectedResponse = UploadImageResponseDto(guid = "FID123", isSuccess = true)
-        fakeApiService.uploadImageResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedResponse)
+        fakeApiService.uploadImageResult = expectedResponse
 
         val result = dataSource.uploadImage(byteArrayOf(1, 2, 3), "img.png", "image/png")
 

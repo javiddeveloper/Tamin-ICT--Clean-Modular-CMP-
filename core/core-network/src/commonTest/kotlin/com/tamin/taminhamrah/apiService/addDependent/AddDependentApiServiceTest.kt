@@ -153,9 +153,8 @@ class AddDependentApiServiceTest : BaseApiTest() {
 
         val response = apiService.uploadImage(multipartBody)
 
-        assertEquals(200, response.status)
-        assertNotNull(response.data)
-        assertEquals("FILE_9988", response.data?.guid)
+        assertNotNull(response)
+        assertEquals("a4769aa8-b9af-4183-83b9-367dc9f52511", response.guid)
     }
 
     @Test
