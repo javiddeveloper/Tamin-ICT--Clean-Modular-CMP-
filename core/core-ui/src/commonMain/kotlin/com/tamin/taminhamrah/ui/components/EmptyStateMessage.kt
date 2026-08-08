@@ -28,6 +28,8 @@ import com.tamin.taminhamrah.ui.theme.Thickness
 
 private val EmptyStateTileSize = 76.dp
 private val EmptyStateTileCorner = 24.dp
+private val EmptyStateTileShadowBlur = 20.dp
+private val EmptyStateTileShadowOffsetY = 8.dp
 
 @Composable
 fun EmptyStateMessage(
@@ -61,6 +63,14 @@ fun EmptyStateMessage(
                 Box(
                     modifier = Modifier
                         .size(EmptyStateTileSize)
+                        // Before the clip, so it draws outside the tile. Without it the tile is
+                        // white on a near-white page and reads as no tile at all.
+                        .coloredShadow(
+                            color = taminColors.shadowSubtle,
+                            borderRadius = EmptyStateTileCorner,
+                            blurRadius = EmptyStateTileShadowBlur,
+                            offsetY = EmptyStateTileShadowOffsetY,
+                        )
                         .clip(RoundedCornerShape(EmptyStateTileCorner))
                         .background(taminColors.bgSurface)
                         .border(
