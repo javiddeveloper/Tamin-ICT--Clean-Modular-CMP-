@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +33,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,7 +45,6 @@ import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -50,6 +52,7 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.TaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -95,114 +98,71 @@ fun InboxItemCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
             .animateContentSize()
             .taminSurface()
     ) {
-        Icon(
-            imageVector = vectorResource(if (item.seen) Res.drawable.ic_check_label else Res.drawable.ic_check_label),
-            contentDescription = null,
-            tint = colors.textPrimary.copy(alpha = 0.50f),
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(IconSize.xxxlarge)
-                .graphicsLayer {
-                    translationX = Spacing.smPlus.toPx()
-                    translationY = Spacing.badgeVertical.toPx()
-                }
-        )
-
-        // Vertical Gradient Indicator (Right edge in RTL)
-        Box(
-            modifier = Modifier
-                .width(Spacing.xs)
-                .fillMaxHeight()
-                .align(Alignment.CenterStart)
-                .background(colors.iconGradientPrimary)
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            // Top Row: Category and Counter
+            // Row 1: System Pill (Start) and Date (End)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(Res.string.inbox_item_header),
+                Row(
+                    modifier = Modifier
+                        .background(colors.blueBg, CircleShape)
+                        .padding(horizontal = Spacing.md, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+                ) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_inbox),
+                        contentDescription = null,
+                        tint = colors.blueText,
+                        modifier = Modifier.size(IconSize.small)
+                    )
+                    Text(
+                        text = item.system,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = colors.blueText
+                    )
+                }
+                NumericText(
+                    text = item.requestDate,
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.textMuted
                 )
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Spacing.none)
-                ) {
-                    Icon(
-                        imageVector = vectorResource(if (item.seen) Res.drawable.ic_tamin_verified else Res.drawable.ic_tamin_cross),
-                        contentDescription = null,
-                        tint = if (item.seen) colors.greenText else colors.dangerText.copy(alpha = 0.80f),
-                        modifier = Modifier.size(IconSize.medium)
-                    )
-                    Text(
-                        text = if (item.seen) stringResource(Res.string.inbox_status_delivered) else stringResource(Res.string.inbox_status_rejected),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (item.seen) colors.greenText else colors.dangerText.copy(alpha = 0.80f)
-                    )
-                }
             }
-            // Main Content Row
+
+            // Row 2: Subject (Start) and Status Circle (End)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconTile(
-                    modifier = Modifier.border(
-                        Thickness.border,
-                        colors.border,
-                        RoundedCornerShape(CornerRadius.lg)
+                Text(
+                    text = item.subject,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     ),
-                    icon = vectorResource(Res.drawable.ic_inbox),
-                    tint = colors.blueText,
-                    background = Brush.verticalGradient(
-                        listOf(colors.blueBg, colors.blueBg)
-                    ),
-                    cornerRadius = CornerRadius.lg,
+                    color = colors.textPrimary,
+                    modifier = Modifier.weight(1f)
                 )
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
-                ) {
-                    Text(
-                        text = item.subject,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 15.sp),
-                        color = colors.textPrimary,
-                        maxLines = 2
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        StatusPill(
-                            text = "سابقه",
-                            containerColor = colors.blueBg,
-                            contentColor = colors.blueText,
-                            fontWeight = FontWeight.Bold
-                        )
-                        NumericText(
-                            text = item.requestDate,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.textMuted
-                        )
-                    }
-                }
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                StatusCircle(seen = item.seen, colors = colors)
             }
 
-            // Tracking Code Row
+            // Row 3: Tracking Code Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -234,22 +194,42 @@ fun InboxItemCard(
                         }
                 )
 
-                NumericText(
-                    text = item.id.toString().toPersianDigits(),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = colors.textPrimary
-                )
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-                    contentDescription = null,
-                    tint = colors.textMuted,
+                // Tracking Code Box with Dashed Border
+                Box(
                     modifier = Modifier
-                        .size(IconSize.small)
+                        .drawBehind {
+                            drawRoundRect(
+                                color = colors.blueText.copy(alpha = 0.6f),
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                    width = 1.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                                ),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(12.dp.toPx())
+                            )
+                        }
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) { onCopyClick() }
-                )
+                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_tamin_copy),
+                            contentDescription = null,
+                            tint = colors.blueText,
+                            modifier = Modifier.size(IconSize.small)
+                        )
+                        NumericText(
+                            text = item.id.toString().toPersianDigits(),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = colors.blueText
+                        )
+                    }
+                }
             }
 
             if (isExpanded) {
@@ -312,6 +292,62 @@ fun InboxItemCard(
     }
 }
 
+@Composable
+private fun StatusCircle(seen: Boolean, colors: TaminColors) {
+    val statusColor = if (seen) colors.greenText else colors.border
+    val statusText = if (seen) stringResource(Res.string.inbox_status_delivered) else stringResource(Res.string.inbox_status_rejected)
+
+    Box(
+        modifier = Modifier
+            .size(75.dp)
+            .drawBehind {
+                // Background faint fill
+                drawCircle(
+                    color = statusColor.copy(alpha = 0.04f)
+                )
+
+                // Outer Dashed Circle
+                drawCircle(
+                    color = statusColor.copy(alpha = 0.4f),
+                    style = Stroke(
+                        width = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                    )
+                )
+
+                // Inner Solid Circle (The "internal circle" requested)
+                drawCircle(
+                    color = statusColor.copy(alpha = 0.15f),
+                    radius = (size.minDimension / 2) - 10.dp.toPx(),
+                    style = Stroke(
+                        width = 1.dp.toPx()
+                    )
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_verified),
+                contentDescription = null,
+                tint = statusColor,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = statusText,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = statusColor
+            )
+        }
+    }
+}
+
 @PreviewRtlTheme
 @Composable
 private fun InboxItemCardExpandedPreview() {
@@ -319,12 +355,12 @@ private fun InboxItemCardExpandedPreview() {
         Box(modifier = Modifier.fillMaxWidth().padding(Spacing.page)) {
             InboxItemCard(
                 item = PersonalInboxItemPR(
-                    id = 1,
+                    id = 211020,
                     refCode = "۳۱۸۶۲۲۶۲۱",
                     requestDate = "۱۴۰۴/۱۲/۱۹",
                     subject = "اعلام سابقه به مؤسسات",
-                    seen = true,
-                    system = "سازمان تأمین اجتماعی",
+                    seen = false,
+                    system = "اعلام سابقه",
                     passwordCode = "۱۲۳۴۵۶",
                     natCode = "222222",
                     email = "",
@@ -351,7 +387,7 @@ private fun InboxItemCardExpandedPreviewDark() {
                     refCode = "۳۱۸۶۲۲۶۲۱",
                     requestDate = "۱۴۰۴/۱۲/۱۹",
                     subject = "اعلام سابقه به مؤسسات",
-                    seen = true,
+                    seen = false,
                     system = "سازمان تأمین اجتماعی",
                     passwordCode = "۱۲۳۴۵۶",
                     natCode = "2222222",

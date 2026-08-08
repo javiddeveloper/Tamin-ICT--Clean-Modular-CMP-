@@ -298,7 +298,7 @@
     <string name="inbox_inquiry_password">کد رمز استعلام</string>
     <string name="inbox_tracking_code">کد پیگیری</string>
     <string name="inbox_status_delivered">تحویل شد</string>
-    <string name="inbox_status_rejected">رد شد</string>
+    <string name="inbox_status_rejected">در انتظار تحویل</string>
     <string name="inbox_item_header">سند رسمی • سازمان تأمین اجتماعی</string>
 
     <string name="label_dear_user">کاربر گرامی</string>
