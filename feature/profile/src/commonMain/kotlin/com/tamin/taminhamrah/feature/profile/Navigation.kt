@@ -6,7 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountScreen
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountRoute
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountViewModel
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
@@ -80,8 +81,11 @@ fun NavGraphBuilder.profileGraph(
         }
 
         composableWithFadeTransitions<ProfileRoute.BankAccount> {
-            BankAccountScreen(
-                onNavigateBack = { navController.popBackStack() },
+            val viewModel = koinViewModel<BankAccountViewModel>()
+
+            BankAccountRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() },
             )
         }
     }

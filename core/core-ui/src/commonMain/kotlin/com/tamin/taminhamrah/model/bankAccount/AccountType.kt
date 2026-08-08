@@ -7,6 +7,8 @@ import taminx.core.core_ui.bank_account_type_current_companion
 import taminx.core.core_ui.bank_account_type_interest_free
 import taminx.core.core_ui.bank_account_type_savings
 import taminx.core.core_ui.bank_account_type_savings_companion
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * The account kinds the register call accepts. Hard-coded because the previous app hard-coded them
@@ -24,6 +26,11 @@ enum class AccountType(val code: String, val label: StringResource) {
     ;
 
     companion object {
+        /** The order the picker lists them in, as the design does. */
+        val displayOrder: ImmutableList<AccountType> = persistentListOf(
+            SAVINGS_COMPANION, SAVINGS, CURRENT_COMPANION, CURRENT, INTEREST_FREE,
+        )
+
         fun fromCode(code: String?): AccountType? =
             code?.trim()?.let { wanted -> entries.firstOrNull { it.code == wanted } }
     }

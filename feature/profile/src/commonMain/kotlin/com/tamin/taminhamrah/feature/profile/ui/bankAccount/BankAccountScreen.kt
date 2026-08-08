@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,9 +39,9 @@ import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccount
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountIntent
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountMode
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountPicker
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountUiState
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountDraftPR
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
-import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -56,13 +57,16 @@ import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.bank_account_add
@@ -74,10 +78,14 @@ import taminx.core.core_ui.bank_account_iban_understood
 import taminx.core.core_ui.bank_account_picker_bank
 import taminx.core.core_ui.bank_account_picker_type
 import taminx.core.core_ui.bank_account_registered
+import taminx.core.core_ui.bank_account_registered_description
+import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
 import taminx.core.core_ui.ic_number
 import taminx.core.core_ui.ic_tamin_chevron_back
+
+private const val PARAGRAPH_BREAK = "\n\n"
 
 private const val ADD_BUTTON_KEY = "add"
 private const val EMPTY_STATE_KEY = "empty"
@@ -89,21 +97,43 @@ private val DecorCircleX = 450.dp
 private val DecorCircleY = (-150).dp
 
 @Composable
-fun BankAccountScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: BankAccountViewModel = koinViewModel(),
+fun BankAccountRoute(
+    viewModel: BankAccountViewModel,
+    onBackClicked: () -> Unit,
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) { viewModel.sendIntent(BankAccountIntent.LoadAccounts) }
 
-    viewModel.events.collectWithLifecycleAware { event ->
+    HandleBankAccountEvents(
+        events = viewModel.events,
+        onBackClicked = onBackClicked,
+    )
+
+    BankAccountScreen(
+        state = uiState,
+        onIntent = viewModel::sendIntent,
+    )
+}
+
+@Composable
+fun HandleBankAccountEvents(
+    events: Flow<BankAccountEvent>,
+    onBackClicked: () -> Unit,
+) {
+    events.collectWithLifecycleAware { event ->
         when (event) {
-            is BankAccountEvent.NavigateBack -> onNavigateBack()
+            is BankAccountEvent.NavigateBack -> onBackClicked()
         }
     }
+}
 
-    val onIntent = viewModel::sendIntent
+@Composable
+fun BankAccountScreen(
+    state: BankAccountUiState,
+    onIntent: (BankAccountIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val taminColors = LocalTaminColors.current
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
@@ -111,7 +141,7 @@ fun BankAccountScreen(
 
     // Same header as the change-mobile subpage, so the profile subpages read as one family.
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.bank_account_title),
@@ -320,9 +350,19 @@ private fun Overlays(
     }
 
     if (referenceCode != null) {
+        // Registering files a request rather than inserting an account, so the message says what
+        // happens next; the code is the only handle the person has on it until it is approved.
+        val trackingCode = stringResource(
+            Res.string.bank_account_tracking_code,
+            referenceCode.toPersianDigits(),
+        )
+        val registeredDescription = stringResource(Res.string.bank_account_registered_description)
+        val successMessage = remember(registeredDescription, trackingCode) {
+            listOf(registeredDescription, trackingCode).joinToString(PARAGRAPH_BREAK)
+        }
         TaminConfirmationDialog(
             title = stringResource(Res.string.bank_account_registered),
-            description = referenceCode,
+            description = successMessage,
             icon = Icons.Default.Check,
             onDismissRequest = { onIntent(BankAccountIntent.OnSuccessDismissed) },
             confirmButton = {
@@ -337,4 +377,13 @@ private fun Overlays(
     }
 }
 
-
+@PreviewRtlTheme
+@Composable
+private fun PreviewBankAccountScreen() {
+    PreviewRtlThemeContent {
+        BankAccountScreen(
+            state = BankAccountUiState(),
+            onIntent = {},
+        )
+    }
+}

@@ -247,30 +247,13 @@ fun String.digitsOnly(): String = buildString(length) {
 }
 
 /**
- * Breaks a run of characters into fixed-size groups the way a card number is printed —
- * left to right, unlike [groupThousands], which counts from the end.
- *
- * The receiver should already be [digitsOnly]: a stray separator would otherwise be counted as one
- * of the four.
- */
-fun String.grouped(size: Int = 4, separator: Char = ' '): String {
-    if (isEmpty() || size <= 0) return this
-    return buildString(length + (length - 1) / size) {
-        this@grouped.forEachIndexed { index, char ->
-            if (index > 0 && index % size == 0) append(separator)
-            append(char)
-        }
-    }
-}
-
-/**
  * Groups from the right in [size]s, folding a short leading group into the first one — the way an
  * account number is printed: 13 digits read 4-3-3-3, 10 read 4-3-3, 9 read 3-3-3.
  *
  * Differs from [grouped], which counts from the left and so leaves the remainder at the end.
  */
 fun String.groupedFromEnd(size: Int = 3, separator: Char = ' '): String {
-    if (size <= 0 || length <= size) return this
+    if (size !in 1..<length) return this
     val remainder = length % size
     val head = if (remainder == 0) size else remainder + size
     return buildString(length + (length - 1) / size) {

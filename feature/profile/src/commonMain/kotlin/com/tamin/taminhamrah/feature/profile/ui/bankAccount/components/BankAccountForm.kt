@@ -2,8 +2,6 @@ package com.tamin.taminhamrah.feature.profile.ui.bankAccount.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountPicker
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountDraftPR
@@ -32,12 +31,12 @@ import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -55,7 +54,12 @@ import taminx.core.core_ui.bank_account_help_mobile_bank
 import taminx.core.core_ui.bank_account_help_ussd
 import taminx.core.core_ui.bank_account_number_hint
 import taminx.core.core_ui.bank_account_submit
-import taminx.core.core_ui.ic_arrow_down
+import taminx.core.core_ui.ic_tamin_calendar
+import taminx.core.core_ui.ic_tamin_chevron_back
+
+private const val CHEVRON_DOWN_DEGREES = 90f
+
+private val IconSize = 19.dp
 
 private const val PARAGRAPH_BREAK = "\n\n"
 
@@ -126,6 +130,8 @@ fun BankAccountForm(
             isPlaceholder = draft.startDateLabel == null,
             isError = incomplete && draft.startDateMillis == null,
             onClick = { onPickerRequested(BankAccountPicker.DATE) },
+            icon = vectorResource(Res.drawable.ic_tamin_calendar),
+            iconTint = colors.blueText,
         )
         Spacer(Modifier.height(Spacing.sm))
 
@@ -147,15 +153,36 @@ fun BankAccountForm(
         )
         Spacer(Modifier.height(Spacing.sm))
 
-        AccountNumberRow(
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(Res.string.bank_account_field_number),
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.textSecondary,
+            )
+            // Live count against the bank's requirement, so the length is checkable while typing
+            // rather than only on submit.
+            Text(
+                text = stringResource(
+                    Res.string.bank_account_digit_counter,
+                    entered.toString().toPersianDigits(),
+                    expected.toString().toPersianDigits(),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (numberError != null) colors.dangerText else colors.textMuted,
+            )
+        }
+        Spacer(Modifier.height(Spacing.xs))
+
+        // Slot count is the chosen bank's digit count, so the field itself shows the length owed.
+        SegmentedInputField(
             value = draft.accountNumber,
             onValueChange = onAccountNumberChanged,
-            counter = stringResource(
-                Res.string.bank_account_digit_counter,
-                entered.toString().toPersianDigits(),
-                expected.toString().toPersianDigits(),
-            ),
-            isError = numberError != null,
+            slotCount = expected,
+            error = numberError != null,
         )
         Spacer(Modifier.height(Spacing.sm))
 
@@ -187,65 +214,6 @@ fun BankAccountForm(
 }
 
 /**
- * The account number: one bordered row with the digits on the reading edge and the live count
- * opposite them, both inside the box the design draws.
- *
- * A plain field rather than [SegmentedInputField]: the final design shows no slots, and the count
- * is what tells the reader how many digits are still owed.
- */
-@Composable
-private fun AccountNumberRow(
-    value: String,
-    onValueChange: (String) -> Unit,
-    counter: String,
-    isError: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.lg))
-            .background(colors.bgSurface)
-            .animatedErrorBorder(
-                isError = isError,
-                errorColor = colors.dangerText,
-                normalColor = colors.textMuted,
-                borderWidth = Thickness.border,
-                cornerRadius = CornerRadius.lg,
-            )
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        BasicTextField(
-            value = value,
-            onValueChange = { raw -> onValueChange(raw.digitsOnly()) },
-            modifier = Modifier.weight(1f),
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            cursorBrush = SolidColor(colors.blueText),
-            decorationBox = { inner ->
-                if (value.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.bank_account_field_number),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textMuted,
-                    )
-                }
-                inner()
-            },
-        )
-        Text(
-            text = counter,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (isError) colors.dangerText else colors.textMuted,
-        )
-    }
-}
-
-/**
  * A row that opens a picker. Not a text field, but it reports a problem like one — same animated
  * border, same danger color — so the form reads as a single control set.
  */
@@ -256,6 +224,7 @@ private fun PickerRow(
     isError: Boolean,
     onClick: () -> Unit,
     icon: ImageVector? = null,
+    iconTint: Color? = null,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -276,19 +245,22 @@ private fun PickerRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        // Label first so it takes the reading edge and the affordance sits opposite it, which is
-        // the left in a right-to-left layout -- where the design puts every one of these icons.
+        Icon(
+            imageVector = icon ?: vectorResource(Res.drawable.ic_tamin_chevron_back),
+            contentDescription = null,
+            tint = iconTint ?: colors.textMuted,
+            // The bare chevron turned to point down. ic_arrow_down carries a shaft, which reads as
+            // "download" rather than "opens a list".
+            modifier = Modifier.size(IconSize).then(
+                if (icon == null) Modifier.rotate(CHEVRON_DOWN_DEGREES) else Modifier
+            ),
+        )
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
+            // SemiBold is the heaviest face actually imported; 700 and 800 are synthesized.
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = if (isPlaceholder) colors.textMuted else colors.textPrimary,
             modifier = Modifier.weight(1f),
-        )
-        Icon(
-            imageVector = icon ?: vectorResource(Res.drawable.ic_arrow_down),
-            contentDescription = null,
-            tint = colors.textMuted,
-            modifier = Modifier.size(19.dp),
         )
     }
 }

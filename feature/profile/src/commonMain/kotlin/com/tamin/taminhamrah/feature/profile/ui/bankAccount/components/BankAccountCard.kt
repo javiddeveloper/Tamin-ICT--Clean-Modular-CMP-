@@ -29,12 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
 import com.tamin.taminhamrah.model.bankAccount.cardGradient
 import com.tamin.taminhamrah.model.bankAccount.cardInk
@@ -51,6 +56,27 @@ import taminx.core.core_ui.bank_account_active
 import taminx.core.core_ui.bank_account_end_date
 import taminx.core.core_ui.bank_account_no_date
 import taminx.core.core_ui.bank_account_start_date
+
+// sheen(): radial highlight at 86%/6% fading by 44%, then a banded 112deg linear.
+private const val SPOT_X = 0.86f
+private const val SPOT_Y = 0.06f
+private const val SPOT_RADIUS = 0.44f
+private const val BAND_ANGLE_DEGREES = 112f
+private const val HALF_TURN_DEGREES = 180f
+
+private val SheenSpotColors = listOf(Color.White.copy(alpha = 0.55f), Color.Transparent)
+
+/** Hard-edged bands: each pair repeats a stop so the color steps rather than blends. */
+private val SheenBandStops = arrayOf(
+    0f to Color.White.copy(alpha = 0.30f),
+    0.18f to Color.White.copy(alpha = 0.30f),
+    0.185f to Color.Transparent,
+    0.38f to Color.Transparent,
+    0.385f to Color.White.copy(alpha = 0.16f),
+    0.48f to Color.White.copy(alpha = 0.16f),
+    0.485f to Color.Transparent,
+    1f to Color.Transparent,
+)
 
 private val CardHeight = 200.dp
 private val CardCorner = 22.dp
@@ -98,13 +124,45 @@ fun BankAccountCard(
     // Two stops on the 135deg diagonal, exactly as the design writes it.
     val surface = remember(gradient) { Brush.linearGradient(gradient) }
 
+    // The soft directional wash that sits over the sheen; direction-independent, so it is built
+    // once rather than per draw.
+    val sheen = remember {
+        Brush.linearGradient(
+            0f to Color.White.copy(alpha = 0.14f),
+            0.38f to Color.Transparent,
+            1f to Color.Black.copy(alpha = 0.10f),
+        )
+    }
+
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(CardHeight)
             .clip(RoundedCornerShape(CardCorner))
-            .drawBehind { drawRect(surface) }
+            .drawBehind {
+                drawRect(surface)
+                // The design's "sheen": a highlight near the top-trailing corner, then two hard
+                // diagonal bands. Built here rather than as remembered brushes because every stop
+                // is a fraction of the card's measured size.
+                drawRect(
+                    Brush.radialGradient(
+                        colors = SheenSpotColors,
+                        center = Offset(size.width * SPOT_X, size.height * SPOT_Y),
+                        radius = size.maxDimension * SPOT_RADIUS,
+                    )
+                )
+                val angle = BAND_ANGLE_DEGREES * PI.toFloat() / HALF_TURN_DEGREES
+                val direction = Offset(sin(angle), -cos(angle))
+                drawRect(
+                    Brush.linearGradient(
+                        colorStops = SheenBandStops,
+                        start = Offset.Zero,
+                        end = Offset(direction.x * size.width, direction.y * size.height),
+                    )
+                )
+                drawRect(sheen)
+            }
             .padding(horizontal = CardPaddingX, vertical = CardPaddingY),
     ) {
         if (bank != null) {
@@ -138,7 +196,9 @@ fun BankAccountCard(
                 Text(
                     text = bank?.label?.let { stringResource(it) }
                         ?: account.bankNameFallback.orEmpty(),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
                     color = ink,
                 )
             }
@@ -176,7 +236,9 @@ fun BankAccountCard(
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             Text(
                 text = account.accountNumber,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                ),
                 color = bank.cardNumberInk,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxSize().wrapContentHeight(Alignment.CenterVertically),
@@ -236,4 +298,5 @@ private fun CardDate(label: String, value: String?, ink: Color, subInk: Color) {
         )
     }
 }
+
 

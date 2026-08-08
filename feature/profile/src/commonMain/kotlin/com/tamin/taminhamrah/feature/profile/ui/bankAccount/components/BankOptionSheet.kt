@@ -1,9 +1,12 @@
 package com.tamin.taminhamrah.feature.profile.ui.bankAccount.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -19,23 +25,36 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.bankAccount.AccountType
 import com.tamin.taminhamrah.model.bankAccount.Bank
+import com.tamin.taminhamrah.ui.components.CustomChip
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.bank_account_digits_suffix
+import taminx.core.core_ui.ic_number
 
-private val LogoSize = 28.dp
+private val SheetCorner = 28.dp
+private val TileSize = 36.dp
+private val TileCorner = 10.dp
+private val LogoSize = 24.dp
+private val IconSize = 18.dp
 
 /**
- * The bank chooser. Each row carries its logo, which is the fastest way to find a bank in a list
- * of six and the reason the marks were cropped away from their wordmarks.
+ * The bank chooser.
+ *
+ * Each row carries its logo — the fastest way to find a bank in a list of six, and the reason the
+ * marks were cropped away from their wordmarks — and its digit count, so the choice is made knowing
+ * how long that bank's numbers are.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,56 +63,44 @@ fun BankPickerSheet(
     onSelect: (Bank) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val colors = LocalTaminColors.current
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgSurface,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = Spacing.page, vertical = Spacing.md),
-        ) {
-            SheetTitle(title)
-            Bank.entries.forEach { bank ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(bank) }
-                        .padding(vertical = Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                ) {
-                    Image(
-                        painter = painterResource(bank.logo),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(LogoSize),
-                    )
-                    Text(
-                        text = stringResource(bank.label),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textPrimary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    // The row states the bank's digit count so the choice is made knowing it.
-                    Text(
+    OptionSheet(title = title, onDismiss = onDismiss) {
+        Bank.displayOrder.forEachIndexed { index, bank ->
+            if (index > 0) SheetDivider()
+            OptionRow(
+                label = stringResource(bank.label),
+                onClick = { onSelect(bank) },
+                leading = {
+                    Box(
+                        modifier = Modifier
+                            .size(TileSize)
+                            .clip(RoundedCornerShape(TileCorner))
+                            .background(bank.chipSurface),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(bank.logo),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.size(LogoSize),
+                        )
+                    }
+                },
+                trailing = {
+                    CustomChip(
                         text = stringResource(
                             Res.string.bank_account_digits_suffix,
                             bank.accountNumberLength.toString().toPersianDigits(),
                         ),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.textMuted,
+                        containerColor = bank.chipSurface,
+                        textColor = bank.chipInk,
                     )
-                }
-            }
+                },
+            )
         }
     }
 }
 
-/** The account-kind chooser: five fixed options, no logos. */
+/** The account-kind chooser: five fixed options, each behind the same neutral tile. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountTypePickerSheet(
@@ -102,40 +109,107 @@ fun AccountTypePickerSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    OptionSheet(title = title, onDismiss = onDismiss) {
+        AccountType.displayOrder.forEachIndexed { index, type ->
+            if (index > 0) SheetDivider()
+            OptionRow(
+                label = stringResource(type.label),
+                onClick = { onSelect(type) },
+                leading = {
+                    Box(
+                        modifier = Modifier
+                            .size(TileSize)
+                            .clip(RoundedCornerShape(TileCorner))
+                            .background(colors.blueBg),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_number),
+                            contentDescription = null,
+                            tint = colors.blueText,
+                            modifier = Modifier.size(IconSize),
+                        )
+                    }
+                },
+            )
+        }
+    }
+}
+
+/** The shell both choosers share: centred title over one rounded, divided list. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OptionSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = LocalTaminColors.current
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgSurface,
+        containerColor = colors.bgPage,
+        // Rounder than the app default: these two sheets carry a card of their own, and the
+        // design gives the outer corner more curve so the inner list does not look pinched.
+        shape = RoundedCornerShape(topStart = SheetCorner, topEnd = SheetCorner),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = Spacing.page, vertical = Spacing.md),
+                .padding(horizontal = Spacing.page)
+                .padding(bottom = Spacing.md),
         ) {
-            SheetTitle(title)
-            AccountType.entries.forEach { type ->
-                Text(
-                    text = stringResource(type.label),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textPrimary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(type) }
-                        .padding(vertical = Spacing.md),
-                )
-            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.textPrimary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(Spacing.md))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .background(colors.bgSurface),
+                content = content,
+            )
         }
     }
 }
 
 @Composable
-private fun SheetTitle(title: String) {
+private fun OptionRow(
+    label: String,
+    onClick: () -> Unit,
+    leading: @Composable () -> Unit,
+    trailing: (@Composable () -> Unit)? = null,
+) {
     val colors = LocalTaminColors.current
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        color = colors.textPrimary,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        leading()
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textPrimary,
+            modifier = Modifier.weight(1f),
+        )
+        trailing?.invoke()
+    }
+}
+
+@Composable
+private fun SheetDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = Spacing.md),
+        color = LocalTaminColors.current.divider,
     )
-    Spacer(Modifier.height(Spacing.sm))
 }
