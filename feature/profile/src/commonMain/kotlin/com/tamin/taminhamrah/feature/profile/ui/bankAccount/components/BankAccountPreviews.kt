@@ -198,6 +198,30 @@ private fun PreviewBankAccountFormSubmitting() {
     }
 }
 
+/**
+ * The two choosers.
+ *
+ * [BankPickerSheet] and [AccountTypePickerSheet] open a real [androidx.compose.material3.ModalBottomSheet],
+ * which a preview renders as a full-screen scrim rather than in place, so these draw the sheets'
+ * own content through [OptionSheetContent] -- the rows, dividers, tiles and chips are what
+ * there is to check, and they are the part the design pins down.
+ */
+@PreviewRtlTheme
+@Composable
+private fun PreviewBankPickerSheetContent() {
+    PreviewRtlThemeContent {
+        OptionSheetContent(title = "انتخاب بانک") { BankPickerRows(onSelect = {}) }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewAccountTypePickerSheetContent() {
+    PreviewRtlThemeContent {
+        OptionSheetContent(title = "نوع حساب") { AccountTypePickerRows(onSelect = {}) }
+    }
+}
+
 @PreviewRtlTheme
 @Composable
 private fun PreviewBankAccountListSkeletonState() {

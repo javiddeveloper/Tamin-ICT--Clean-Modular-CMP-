@@ -63,8 +63,15 @@ fun BankPickerSheet(
     onSelect: (Bank) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    OptionSheet(title = title, onDismiss = onDismiss) {
-        Bank.displayOrder.forEachIndexed { index, bank ->
+    OptionSheet(onDismiss = onDismiss) {
+        OptionSheetContent(title = title) { BankPickerRows(onSelect = onSelect) }
+    }
+}
+
+/** The bank rows on their own, so a preview can draw them without a sheet around them. */
+@Composable
+internal fun ColumnScope.BankPickerRows(onSelect: (Bank) -> Unit) {
+    Bank.displayOrder.forEachIndexed { index, bank ->
             if (index > 0) SheetDivider()
             OptionRow(
                 label = stringResource(bank.label),
@@ -94,9 +101,8 @@ fun BankPickerSheet(
                         containerColor = bank.chipSurface,
                         textColor = bank.chipInk,
                     )
-                },
-            )
-        }
+            },
+        )
     }
 }
 
@@ -108,9 +114,16 @@ fun AccountTypePickerSheet(
     onSelect: (AccountType) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    OptionSheet(onDismiss = onDismiss) {
+        OptionSheetContent(title = title) { AccountTypePickerRows(onSelect = onSelect) }
+    }
+}
+
+/** The account-kind rows on their own, for the same reason as [BankPickerRows]. */
+@Composable
+internal fun ColumnScope.AccountTypePickerRows(onSelect: (AccountType) -> Unit) {
     val colors = LocalTaminColors.current
-    OptionSheet(title = title, onDismiss = onDismiss) {
-        AccountType.displayOrder.forEachIndexed { index, type ->
+    AccountType.displayOrder.forEachIndexed { index, type ->
             if (index > 0) SheetDivider()
             OptionRow(
                 label = stringResource(type.label),
@@ -130,17 +143,15 @@ fun AccountTypePickerSheet(
                             modifier = Modifier.size(IconSize),
                         )
                     }
-                },
-            )
-        }
+            },
+        )
     }
 }
 
-/** The shell both choosers share: centred title over one rounded, divided list. */
+/** The sheet itself. Split from [OptionSheetContent] so previews can render the content alone. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OptionSheet(
-    title: String,
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -152,30 +163,40 @@ private fun OptionSheet(
         // Rounder than the app default: these two sheets carry a card of their own, and the
         // design gives the outer corner more curve so the inner list does not look pinched.
         shape = RoundedCornerShape(topStart = SheetCorner, topEnd = SheetCorner),
+        content = content,
+    )
+}
+
+/** Centred title over one rounded, divided list -- what both choosers put inside the sheet. */
+@Composable
+internal fun OptionSheetContent(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = Spacing.page)
+            .padding(bottom = Spacing.md),
     ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(Spacing.md))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = Spacing.page)
-                .padding(bottom = Spacing.md),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.textPrimary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(Spacing.md))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(CornerRadius.lg))
-                    .background(colors.bgSurface),
-                content = content,
-            )
-        }
+                .clip(RoundedCornerShape(CornerRadius.lg))
+                .background(colors.bgSurface),
+            content = content,
+        )
     }
 }
 

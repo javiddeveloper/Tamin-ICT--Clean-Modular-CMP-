@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,6 +66,7 @@ private const val BAND_ANGLE_DEGREES = 112f
 private const val HALF_TURN_DEGREES = 180f
 
 private val SheenSpotColors = listOf(Color.White.copy(alpha = 0.55f), Color.Transparent)
+private val GlowColors = listOf(Color.White.copy(alpha = 0.80f), Color.Transparent)
 
 /** Hard-edged bands: each pair repeats a stop so the color steps rather than blends. */
 private val SheenBandStops = arrayOf(
@@ -93,6 +95,14 @@ private val DatesBottom = 16.dp - CardPaddingY
 
 private val WatermarkX = (-18).dp - CardPaddingX
 private val WatermarkY = 24.dp + CardPaddingY
+
+// The glow the design puts behind the mark: white at 80%, which on a pale card reads as a wash
+// rather than a halo, and is what stops the emblem muddying into the gradient.
+private val GlowSize = 210.dp
+private val GlowX = (-46).dp - CardPaddingX
+private val GlowY = 52.dp + CardPaddingY
+private const val GLOW_CENTER = 0.42f
+private const val GLOW_EDGE = 0.68f
 
 /**
  * One registered account.
@@ -271,6 +281,23 @@ fun BankAccountCard(
 @Composable
 private fun BoxScope.Watermark(logoAlpha: Float, account: BankAccountPR) {
     val bank = account.bank ?: return
+    Box(
+        modifier = Modifier
+            .align(AbsoluteAlignment.BottomLeft)
+            // absoluteOffset, not offset: offset flips its x with the layout direction, so a
+            // negative value moved the mark to the right on this right-to-left page.
+            .absoluteOffset(x = GlowX, y = GlowY)
+            .size(GlowSize)
+            .drawBehind {
+                drawCircle(
+                    Brush.radialGradient(
+                        colors = GlowColors,
+                        center = Offset(size.width * GLOW_CENTER, size.height * GLOW_CENTER),
+                        radius = size.minDimension * GLOW_EDGE,
+                    )
+                )
+            },
+    )
     Image(
         painter = painterResource(bank.logo),
         contentDescription = null,
@@ -278,7 +305,7 @@ private fun BoxScope.Watermark(logoAlpha: Float, account: BankAccountPR) {
         alpha = logoAlpha,
         modifier = Modifier
             .align(AbsoluteAlignment.BottomLeft)
-            .offset(x = WatermarkX, y = WatermarkY)
+            .absoluteOffset(x = WatermarkX, y = WatermarkY)
             .size(WatermarkSize),
     )
 }
