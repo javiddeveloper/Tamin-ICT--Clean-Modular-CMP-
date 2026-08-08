@@ -25,8 +25,11 @@ import com.tamin.taminhamrah.model.bankAccount.AccountType
 import com.tamin.taminhamrah.model.bankAccount.Bank
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.bank_account_digits_suffix
 
 private val LogoSize = 28.dp
 
@@ -73,6 +76,16 @@ fun BankPickerSheet(
                         text = stringResource(bank.label),
                         style = MaterialTheme.typography.bodyMedium,
                         color = colors.textPrimary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // The row states the bank's digit count so the choice is made knowing it.
+                    Text(
+                        text = stringResource(
+                            Res.string.bank_account_digits_suffix,
+                            bank.accountNumberLength.toString().toPersianDigits(),
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textMuted,
                     )
                 }
             }

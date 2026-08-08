@@ -311,30 +311,26 @@
 
     <!-- Add form -->
     <string name="bank_account_form_title">اطلاعات شماره حساب</string>
-    <string name="bank_account_field_start_date">تاریخ شروع</string>
-    <string name="bank_account_field_bank">بانک</string>
+    <string name="bank_account_field_start_date">تاریخ افتتاح حساب</string>
+    <string name="bank_account_field_bank">انتخاب بانک</string>
     <string name="bank_account_field_type">نوع حساب</string>
     <string name="bank_account_field_number">شماره حساب</string>
     <string name="bank_account_submit">ثبت و تأیید اطلاعات حساب بانکی</string>
     <string name="bank_account_picker_bank">انتخاب بانک</string>
     <string name="bank_account_picker_type">نوع حساب</string>
-    <string name="bank_account_number_hint">۱۸ رقم آخر شمارهٔ شبا که روی کارت بانکی چاپ شده، همان «شمارهٔ حساب» شماست.</string>
-    <string name="bank_account_where_on_card">کجای کارتم را ببینم؟</string>
+    <string name="bank_account_number_hint">ابتدا بانک را انتخاب کنید؛ تعداد ارقام شمارهٔ حساب در هر بانک متفاوت است.</string>
 
     <!-- The help sheet explaining which part of an IBAN the account number is -->
-    <string name="bank_account_iban_title">شمارهٔ حساب را چطور پیدا کنم؟</string>
-    <string name="bank_account_iban_description">شمارهٔ شبا با «IR» شروع می‌شود. بخش رنگی پایین، همان شمارهٔ حساب شماست. فقط این ۱۸ رقم را وارد کنید.</string>
-    <string name="bank_account_iban_label_sheba">شماره شبا</string>
-    <string name="bank_account_iban_label_country">کد کشور</string>
-    <string name="bank_account_iban_label_check">ارقام کنترلی</string>
-    <string name="bank_account_iban_label_bank">کد بانک</string>
-    <string name="bank_account_iban_label_account">شماره حساب</string>
-    <string name="bank_account_iban_footer">بخش سفیدرنگ (شمارهٔ حساب) را از روی کارت خود بخوانید و در کادر وارد کنید.</string>
     <string name="bank_account_iban_understood">متوجه شدم</string>
 
     <!-- Validation -->
     <string name="bank_account_error_incomplete">لطفاً بانک، نوع حساب، تاریخ و شمارهٔ حساب را کامل وارد کنید.</string>
-    <string name="bank_account_error_length">شمارهٔ حساب باید %1$s رقم باشد.</string>
+    <string name="bank_account_error_length">شمارهٔ حساب %1$s باید دقیقاً %2$s رقم باشد؛ %3$s رقم وارد کرده‌اید.</string>
+    <string name="bank_account_digits_of_bank">شمارهٔ حساب %1$s شامل %2$s رقم است.</string>
+    <string name="bank_account_digit_counter">%1$s/%2$s</string>
+    <string name="bank_account_help_mobile_bank">برای پیدا کردن شماره حساب یا شبا، بهتر است وارد همراه‌بانک یا اینترنت‌بانک بانک خود شوید و آن را از بخش «اطلاعات حساب» کپی کنید.</string>
+    <string name="bank_account_help_ussd">اگر به همراه‌بانک دسترسی ندارید، می‌توانید با شماره‌گیری کد دستوری بانک خود یا مراجعه به نزدیک‌ترین شعبه، شماره شبا را دریافت کنید.</string>
+    <string name="bank_account_digits_suffix">%1$s رقم</string>
     <string name="bank_account_error_title">خطا در دریافت اطلاعات</string>
     <string name="bank_account_registered">حساب بانکی با موفقیت ثبت شد.</string>
 

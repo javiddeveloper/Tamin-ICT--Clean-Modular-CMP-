@@ -12,7 +12,7 @@ import kotlinx.collections.immutable.persistentListOf
 enum class BankAccountMode { LIST, ADD }
 
 /** Which picker is open, if any — only one can be at a time. */
-enum class BankAccountPicker { NONE, DATE, BANK, TYPE, IBAN_HELP }
+enum class BankAccountPicker { NONE, DATE, BANK, TYPE }
 
 @Immutable
 data class BankAccountUiState(

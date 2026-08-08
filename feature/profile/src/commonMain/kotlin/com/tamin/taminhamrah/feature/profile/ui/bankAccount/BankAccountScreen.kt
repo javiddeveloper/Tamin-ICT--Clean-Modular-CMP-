@@ -34,7 +34,6 @@ import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccou
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountForm
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountListSkeleton
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankPickerSheet
-import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.IbanExplainerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountEvent
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountIntent
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountMode
@@ -162,6 +161,7 @@ fun BankAccountScreen(
                 state.mode == BankAccountMode.ADD -> AddView(
                     draft = state.draft,
                     showValidation = state.showValidation,
+                    isSubmitting = state.isSubmitting,
                     onIntent = onIntent,
                 )
 
@@ -245,6 +245,7 @@ private fun ListView(
 private fun AddView(
     draft: BankAccountDraftPR,
     showValidation: Boolean,
+    isSubmitting: Boolean,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
     Column(
@@ -256,6 +257,7 @@ private fun AddView(
         BankAccountForm(
             draft = draft,
             showValidation = showValidation,
+            isSubmitting = isSubmitting,
             onPickerRequested = { onIntent(BankAccountIntent.OnPickerRequested(it)) },
             onAccountNumberChanged = { onIntent(BankAccountIntent.OnAccountNumberChanged(it)) },
             onSubmit = { onIntent(BankAccountIntent.OnSubmitClicked) },
@@ -298,10 +300,6 @@ private fun Overlays(
             onDismiss = { onIntent(BankAccountIntent.OnPickerDismissed) },
         )
 
-        BankAccountPicker.IBAN_HELP -> IbanExplainerSheet(
-            onDismiss = { onIntent(BankAccountIntent.OnPickerDismissed) },
-        )
-
         BankAccountPicker.NONE -> Unit
     }
 
@@ -338,4 +336,5 @@ private fun Overlays(
         )
     }
 }
+
 

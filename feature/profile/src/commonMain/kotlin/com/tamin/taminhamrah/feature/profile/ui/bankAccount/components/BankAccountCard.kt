@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.model.bankAccount.cardNumberInk
 import com.tamin.taminhamrah.model.bankAccount.pillBackground
 import com.tamin.taminhamrah.model.bankAccount.subInk
 import com.tamin.taminhamrah.model.bankAccount.watermarkAlpha
+import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.theme.TaminGreen
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -163,16 +164,11 @@ fun BankAccountCard(
         val typeLabel = account.accountType?.label?.let { stringResource(it) }
             ?: account.accountTypeNameFallback
         if (typeLabel != null) {
-            Text(
+            CustomChip(
                 text = typeLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = ink,
-                modifier = Modifier
-                    .align(AbsoluteAlignment.TopLeft)
-                    .offset(y = PillTop)
-                    .clip(RoundedCornerShape(percent = 50))
-                    .background(bank.pillBackground)
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                containerColor = bank.pillBackground,
+                textColor = ink,
+                modifier = Modifier.align(AbsoluteAlignment.TopLeft).offset(y = PillTop),
             )
         }
 
