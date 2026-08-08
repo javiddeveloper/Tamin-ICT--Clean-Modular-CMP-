@@ -13,7 +13,16 @@ actual fun getPlatform(): Platform = AndroidPlatform()
 
 actual fun openUrl(url: String) {
     val context = GlobalContext.get().get<Context>()
-    val customTabsIntent = CustomTabsIntent.Builder().build()
-    customTabsIntent.intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    customTabsIntent.launchUrl(context, Uri.parse(url))
+    val uri = Uri.parse(url)
+
+    if (url.startsWith("http://", ignoreCase = true) || url.startsWith("https://", ignoreCase = true)) {
+        val customTabsIntent = CustomTabsIntent.Builder().build()
+        customTabsIntent.intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        customTabsIntent.launchUrl(context, uri)
+    } else {
+        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
+            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    }
 }

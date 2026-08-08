@@ -131,6 +131,7 @@ class ProfileViewModel(
             ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
             ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)
             ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
+            ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
             ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
