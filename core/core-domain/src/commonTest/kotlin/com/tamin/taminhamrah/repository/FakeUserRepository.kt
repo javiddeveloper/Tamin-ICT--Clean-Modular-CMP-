@@ -10,7 +10,6 @@ import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
-import com.tamin.taminhamrah.model.certificate.StatusCertificateReportDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,7 +27,7 @@ class FakeUserRepository : UserRepository {
     var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
     var electronicFileResult: List<ElectronicFileDN> = emptyList()
     var userProfileResult: UserProfileDN? = null
-    var statusCertificateReportResult: StatusCertificateReportDN? = null
+    var statusCertificateReportResult: String = ""
     var recipientsResult: List<RecipientDN> = emptyList()
 
     var shouldThrowError = false
@@ -108,9 +107,9 @@ class FakeUserRepository : UserRepository {
         emit(checkUserIsNewResult)
     }
 
-    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<StatusCertificateReportDN> = flow {
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
         if (shouldThrowError) throw error
-        statusCertificateReportResult?.let { emit(it) }
+        emit(statusCertificateReportResult)
     }
 
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {

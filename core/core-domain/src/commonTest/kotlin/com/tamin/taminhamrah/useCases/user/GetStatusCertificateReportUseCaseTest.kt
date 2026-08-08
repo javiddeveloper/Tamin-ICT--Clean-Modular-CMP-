@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.useCases.user
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.model.certificate.StatusCertificateReportDN
 import com.tamin.taminhamrah.repository.FakeUserRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
@@ -22,12 +21,12 @@ class GetStatusCertificateReportUseCaseTest : BaseUseCaseTest() {
 
     @Test
     fun `invoke should return certificate report`() = runTest {
-        val expected = StatusCertificateReportDN(refCode = "OK")
+        val expected = "OK"
         repository.statusCertificateReportResult = expected
 
         useCase(emptyList()).test {
             val result = awaitItem()
-            assertEquals("OK", result.refCode)
+            assertEquals("OK", result)
             awaitComplete()
         }
     }

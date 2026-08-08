@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.useCases.user
 
-import com.tamin.taminhamrah.model.certificate.StatusCertificateReportDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +9,7 @@ class GetStatusCertificateReportUseCase(
 ) {
     suspend operator fun invoke(
         filters: List<ApiFilterDN>
-    ): Flow<StatusCertificateReportDN> {
+    ): Flow<String> {
         return userRepository.getStatusCertificateReport(filters)
     }
 }

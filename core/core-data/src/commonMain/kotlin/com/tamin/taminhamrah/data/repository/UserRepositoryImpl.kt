@@ -9,7 +9,6 @@ import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
-import com.tamin.taminhamrah.model.certificate.StatusCertificateReportDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
@@ -135,10 +134,10 @@ internal class UserRepositoryImpl(
         emit(userRemoteDataSource.checkUserIsNew(nationalId))
     }
 
-    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<StatusCertificateReportDN> =
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> =
         flow {
             val remoteData = userRemoteDataSource.getStatusCertificateReport(filters)
-            emit(StatusCertificateReportDN(refCode = remoteData))
+            emit(remoteData ?: "")
         }
 
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
