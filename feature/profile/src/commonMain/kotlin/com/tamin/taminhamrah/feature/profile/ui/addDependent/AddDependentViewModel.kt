@@ -33,12 +33,19 @@ import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
-import com.tamin.taminhamrah.util.ValidationUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_title
+import taminx.core.core_ui.error_file_too_large
+import taminx.core.core_ui.error_image_duplicate
+import taminx.core.core_ui.city_birth_picker_title
+import taminx.core.core_ui.city_issuance_picker_title
+import taminx.core.core_ui.branch_picker_title
 
 /** Documents larger than this are rejected outright — see [uploadDocument]. */
 private const val MAX_UPLOAD_SIZE_BYTES = 2_000_000
@@ -120,23 +127,24 @@ class AddDependentViewModel(
 
             is AddDependentIntent.ShowRelationshipPicker -> showRelationshipPicker()
             is AddDependentIntent.ShowCityBirthPicker -> showCityPicker(
-                title = "انتخاب محل تولد",
+                titleRes = Res.string.city_birth_picker_title,
                 target = BottomSheetTarget.CITY_BIRTH,
                 selectedCityCode = { it.selectedCityBirth?.cityCode }
             )
 
             is AddDependentIntent.ShowCityIssuancePicker -> showCityPicker(
-                title = "انتخاب محل صدور",
+                titleRes = Res.string.city_issuance_picker_title,
                 target = BottomSheetTarget.CITY_ISSUANCE,
                 selectedCityCode = { it.selectedCityIssuance?.cityCode }
             )
 
             is AddDependentIntent.ShowBranchPicker -> flow {
                 val state = uiState.value
+                val titleString = getString(Res.string.branch_picker_title)
                 emit(
                     PartialState.BottomSheetStateChanged(
                         config = TaminBottomSheetConfig(
-                            title = "انتخاب شعبه",
+                            title = titleString,
                             type = TaminBottomSheetType.CUSTOM,
                             items = state.activeBranches.mapIndexed { index, branch ->
                                 TaminBottomSheetItem(
@@ -165,6 +173,11 @@ class AddDependentViewModel(
 
             is AddDependentIntent.DeleteDocument -> flow {
                 emit(PartialState.DocumentDeleted(intent.docType))
+            }
+
+            is AddDependentIntent.OnFileReadError -> flow {
+                val errorTitle = getString(Res.string.error_title)
+                sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, intent.message))
             }
 
             is AddDependentIntent.OnNextStepClicked -> onNextStepClicked()
@@ -213,11 +226,12 @@ class AddDependentViewModel(
      * search picker in the app), so it's intentionally out of scope here pending confirmation.
      */
     private fun showCityPicker(
-        title: String,
+        titleRes: org.jetbrains.compose.resources.StringResource,
         target: BottomSheetTarget,
         selectedCityCode: (AddDependentState) -> String?
     ): Flow<PartialState> = flow {
         val state = uiState.value
+        val titleString = getString(titleRes)
         emit(PartialState.Loading(true))
 
         loadCities().collect { partialState ->
@@ -226,7 +240,7 @@ class AddDependentViewModel(
                 emit(
                     PartialState.BottomSheetStateChanged(
                         config = TaminBottomSheetConfig(
-                            title = title,
+                            title = titleString,
                             type = TaminBottomSheetType.CITY,
                             items = partialState.cities.mapIndexed { index, city ->
                                 TaminBottomSheetItem(
@@ -365,10 +379,27 @@ class AddDependentViewModel(
         // Previously oversized files were truncated with copyOf(), which silently produced a
         // corrupt image. Reject them instead and let the user pick a smaller file.
         if (fileBytes.size > MAX_UPLOAD_SIZE_BYTES) {
+            val errorTitle = getString(Res.string.error_title)
+            val errorMessage = getString(Res.string.error_file_too_large)
             sendEvent(
                 AddDependentEvent.ShowErrorDialog(
-                    "خطا",
-                    "حجم فایل انتخاب شده بیش از ۲ مگابایت است. لطفا فایل کوچک‌تری انتخاب کنید."
+                    errorTitle,
+                    errorMessage
+                )
+            )
+            return@flow
+        }
+
+        val isDuplicate = uiState.value.uploadedDocuments.any {
+            it.fileBytes != null && it.fileBytes.contentEquals(fileBytes)
+        }
+        if (isDuplicate) {
+            val errorTitle = getString(Res.string.error_title)
+            val errorMessage = getString(Res.string.error_image_duplicate)
+            sendEvent(
+                AddDependentEvent.ShowErrorDialog(
+                    errorTitle,
+                    errorMessage
                 )
             )
             return@flow
@@ -386,7 +417,8 @@ class AddDependentViewModel(
                 UploadedDocument(
                     guid = uploadPR.guid,
                     docType = docType,
-                    fileName = fileName
+                    fileName = fileName,
+                    fileBytes = fileBytes
                 )
             ) as PartialState
         }.catch {
@@ -509,21 +541,21 @@ class AddDependentViewModel(
         relationCode: String
     ): List<DocType> = when (relationCode) {
         RELATION_CODE_SPOUSE -> listOf(
-            DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه"),
-            DocType("ID_CARD_SPOUSE", "صفحه مشخصات همسر شناسنامه"),
-            DocType("MARRIAGE_CERT", "عقدنامه")
+            DocType("1", "صفحه اول شناسنامه"),
+            DocType("2", "صفحه مشخصات همسر شناسنامه"),
+            DocType("3", "عقدنامه")
         )
 
         RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(
             DocType(
-                code = "ID_CARD_PAGE_1",
+                code = "1",
                 title = "صفحه اول شناسنامه",
                 isDisabled = data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE
             ),
-            DocType("MARRIAGE_CERT", "عقدنامه", isDisabled = true)
+            DocType("3", "عقدنامه", isDisabled = true)
         )
 
-        else -> listOf(DocType("ID_CARD_PAGE_1", "صفحه اول شناسنامه"))
+        else -> listOf(DocType("1", "صفحه اول شناسنامه"))
     }
 
     override fun reduceState(

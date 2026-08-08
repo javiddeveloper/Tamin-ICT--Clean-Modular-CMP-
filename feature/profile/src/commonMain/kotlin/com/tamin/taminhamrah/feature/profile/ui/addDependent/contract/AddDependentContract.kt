@@ -41,8 +41,33 @@ data class UploadedDocument(
     val guid: String,
     val docType: String,
     val fileName: String,
-    val uri: String? = null
-)
+    val fileBytes: ByteArray? = null
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as UploadedDocument
+
+        if (guid != other.guid) return false
+        if (docType != other.docType) return false
+        if (fileName != other.fileName) return false
+        if (fileBytes != null) {
+            if (other.fileBytes == null) return false
+            if (!fileBytes.contentEquals(other.fileBytes)) return false
+        } else if (other.fileBytes != null) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = guid.hashCode()
+        result = 31 * result + docType.hashCode()
+        result = 31 * result + fileName.hashCode()
+        result = 31 * result + (fileBytes?.contentHashCode() ?: 0)
+        return result
+    }
+}
 
 @Immutable
 data class AddDependentState(
@@ -151,6 +176,7 @@ sealed interface AddDependentIntent {
         }
     }
     data class DeleteDocument(val docType: String) : AddDependentIntent
+    data class OnFileReadError(val message: String) : AddDependentIntent
     data object OnNextStepClicked : AddDependentIntent
     data object OnPreviousStepClicked : AddDependentIntent
     data object SubmitFinalRequest : AddDependentIntent

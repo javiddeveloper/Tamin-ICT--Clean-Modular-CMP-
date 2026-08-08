@@ -42,7 +42,6 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.upload_banner_error
 import taminx.core.core_ui.upload_banner_no_need
@@ -51,6 +50,19 @@ import taminx.core.core_ui.upload_desc
 import taminx.core.core_ui.upload_slot_placeholder
 import taminx.core.core_ui.upload_slot_success
 import taminx.core.core_ui.upload_title
+import taminx.core.core_ui.error_file_read_fallback
+import org.jetbrains.compose.resources.getString
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.launch
 
 @Composable
 fun DocumentUploadStep(
@@ -63,6 +75,38 @@ fun DocumentUploadStep(
     val uploadedTypes =
         remember(state.uploadedDocuments) { state.uploadedDocuments.map { it.docType }.toSet() }
     val allUploaded = activeDocTypes.all { uploadedTypes.contains(it.code) }
+
+    val scope = rememberCoroutineScope()
+    var pendingDocType by remember { mutableStateOf<String?>(null) }
+
+    val filePickerLauncher = rememberFilePickerLauncher(
+        type = FileKitType.Image,
+    ) { file: PlatformFile? ->
+        if (file == null) return@rememberFilePickerLauncher
+        val targetDocType = pendingDocType ?: return@rememberFilePickerLauncher
+
+        scope.launch {
+            try {
+                val bytes = file.readBytes()
+                onIntent(
+                    AddDependentIntent.UploadDocument(
+                        fileBytes = bytes,
+                        fileName = file.name,
+                        docType = targetDocType
+                    )
+                )
+            } catch (e: Exception) {
+                val errorMsg = getString(Res.string.error_file_read_fallback)
+                onIntent(
+                    AddDependentIntent.OnFileReadError(
+                        e.message ?: errorMsg
+                    )
+                )
+            } finally {
+                pendingDocType = null
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -97,13 +141,8 @@ fun DocumentUploadStep(
                         docType = docType,
                         uploaded = uploaded,
                         onUploadClicked = {
-                            onIntent(
-                                AddDependentIntent.UploadDocument(
-                                    fileBytes = ByteArray(100),
-                                    fileName = "${docType.code}.jpg",
-                                    docType = docType.code
-                                )
-                            )
+                            pendingDocType = docType.code
+                            filePickerLauncher.launch()
                         },
                         onDeleteClicked = { onIntent(AddDependentIntent.DeleteDocument(docType.code)) }
                     )

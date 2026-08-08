@@ -322,6 +322,16 @@
     <string name="upload_slot_success">بارگذاری شد</string>
     <string name="upload_submit_final">تأیید و ثبت نهایی</string>
 
+    <string name="error_title">خطا</string>
+    <string name="error_file_too_large">حجم فایل انتخاب شده بیش از ۲ مگابایت است. لطفا فایل کوچک‌تری انتخاب کنید.</string>
+    <string name="error_image_duplicate">تصویر انتخاب شده تکراری است.</string>
+    <string name="error_file_read">خطا در خواندن فایل</string>
+    <string name="error_file_read_fallback">خطا در خواندن فایل. لطفا دوباره تلاش کنید.</string>
+
+    <string name="city_birth_picker_title">انتخاب محل تولد</string>
+    <string name="city_issuance_picker_title">انتخاب محل صدور</string>
+    <string name="branch_picker_title">انتخاب شعبه</string>
+
     <string name="success_title">ثبت فرد تبعی تکمیل شد</string>
     <string name="success_desc">درخواست شما ثبت شد و پس از بررسی مدارک، پوشش بیمه‌ای فرد تبعی فعال می‌شود.</string>
     <string name="success_dependent_fallback">فرد تبعی</string>
