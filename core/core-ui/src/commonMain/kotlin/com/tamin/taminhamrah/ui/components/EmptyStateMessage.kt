@@ -17,7 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.ui.theme.IconSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+
+private val EmptyStateTileSize = 76.dp
+private val EmptyStateTileCorner = 24.dp
 
 @Composable
 fun EmptyStateMessage(
@@ -26,8 +36,11 @@ fun EmptyStateMessage(
     subtitle: String? = null,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
+    /** Sets the icon on a raised surface tile, as the newer empty states draw it. */
+    showIconTile: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -36,12 +49,33 @@ fun EmptyStateMessage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(IconSize.large),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            val iconContent: @Composable () -> Unit = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(IconSize.large),
+                    tint = if (showIconTile) taminColors.chevron else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (showIconTile) {
+                Box(
+                    modifier = Modifier
+                        .size(EmptyStateTileSize)
+                        .clip(RoundedCornerShape(EmptyStateTileCorner))
+                        .background(taminColors.bgSurface)
+                        .border(
+                            width = Thickness.border,
+                            color = taminColors.border,
+                            shape = RoundedCornerShape(EmptyStateTileCorner),
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    iconContent()
+                }
+                Spacer(modifier = Modifier.height(Spacing.sm))
+            } else {
+                iconContent()
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,

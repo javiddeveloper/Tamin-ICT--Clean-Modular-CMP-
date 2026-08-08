@@ -250,6 +250,7 @@ private fun ListView(
                         icon = vectorResource(Res.drawable.ic_number),
                         title = stringResource(Res.string.bank_account_empty_title),
                         subtitle = stringResource(Res.string.bank_account_empty_description),
+                        showIconTile = true,
                         modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl),
                     )
                 }
@@ -387,3 +388,4 @@ private fun PreviewBankAccountScreen() {
         )
     }
 }
+

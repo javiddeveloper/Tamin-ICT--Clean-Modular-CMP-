@@ -91,11 +91,8 @@ private val WatermarkSize = 158.dp
 private val PillTop = 52.dp - CardPaddingY
 private val DatesBottom = 16.dp - CardPaddingY
 
-// The watermark sits flush against the card's bottom-left corner rather than hanging off it: the
-// prototype crops the mark, and a half-shown emblem reads as a mistake. 158dp of logo inside a
-// 200dp card clears the corner radius and still leaves the dates their row.
-private val WatermarkX = -CardPaddingX
-private val WatermarkY = CardPaddingY
+private val WatermarkX = (-18).dp - CardPaddingX
+private val WatermarkY = 24.dp + CardPaddingY
 
 /**
  * One registered account.
