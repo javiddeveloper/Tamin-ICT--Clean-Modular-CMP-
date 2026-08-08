@@ -28,3 +28,9 @@ data class PersonalInboxSizePR(
     val usageLabel: String,
     val totalLabel: String,
 )
+
+@Immutable
+data class PermitDurationPR(
+    val label: String,
+    val valueInDays: Int,
+)

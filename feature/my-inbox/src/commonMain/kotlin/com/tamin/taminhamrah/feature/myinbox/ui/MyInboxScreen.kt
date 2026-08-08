@@ -37,10 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.semantics.setText
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.myinbox.ui.components.InboxItemCard
+import com.tamin.taminhamrah.feature.myinbox.ui.components.InquiryPermitBottomSheet
 import com.tamin.taminhamrah.feature.myinbox.ui.contract.MyInboxEvent
 import com.tamin.taminhamrah.feature.myinbox.ui.contract.MyInboxIntent
 import com.tamin.taminhamrah.feature.myinbox.ui.contract.MyInboxUiState
@@ -49,7 +49,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
-import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SegmentedRadialGauge
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -61,7 +60,6 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
-import com.tamin.taminhamrah.ui.theme.ListShapes.bottom
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
@@ -339,6 +337,18 @@ private fun MyInboxContent(
                 }
             }
         }
+    }
+
+    if (state.showInquiryPermitSheet) {
+        InquiryPermitBottomSheet(
+            durations = state.permitDurations,
+            onDismissRequest = { onIntent(MyInboxIntent.DismissInquiryPermit) },
+            onConfirm = { duration ->
+                state.selectedItemIdForPermit?.let { id ->
+                    onIntent(MyInboxIntent.ConfirmInquiryPermit(id, duration))
+                }
+            }
+        )
     }
 }
 

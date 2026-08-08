@@ -6,7 +6,7 @@ import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDN
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizePR
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.ui.ActionMenuItem
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_trash
@@ -26,27 +26,35 @@ fun PersonalInboxItemDN.toPresentation(): PersonalInboxItemPR {
         email = email?: "_",
         mobile = mobileNumber?: "",
         permissionPassword = permission?.password?.toString() ?: "-",
-        actions = persistentListOf(
-            ActionMenuItem(
-                value = "ISSUE_LICENSE",
-                label = "صدور مجوز استعلام",
-                icon = Res.drawable.ic_license,
-                hasDivider = true,
-                isWarningIcon = true
-            ),
-            ActionMenuItem(
-                value = "CORRESPONDENCE",
-                label = "مکاتبه",
-                icon = Res.drawable.ic_email,
-                hasDivider = true
-            ),
-            ActionMenuItem(
-                value = "DELETE",
-                label = "حذف",
-                icon = Res.drawable.ic_trash,
-                isDestructive = true
+        actions = buildList {
+            if (permission == null || permission?.dateTo == null) {
+                add(
+                    ActionMenuItem(
+                        value = "ISSUE_LICENSE",
+                        label = "صدور مجوز استعلام",
+                        icon = Res.drawable.ic_license,
+                        hasDivider = true,
+                        isWarningIcon = true
+                    )
+                )
+            }
+            add(
+                ActionMenuItem(
+                    value = "CORRESPONDENCE",
+                    label = "مکاتبه",
+                    icon = Res.drawable.ic_email,
+                    hasDivider = true
+                )
             )
-        )
+            add(
+                ActionMenuItem(
+                    value = "DELETE",
+                    label = "حذف",
+                    icon = Res.drawable.ic_trash,
+                    isDestructive = true
+                )
+            )
+        }.toPersistentList()
     )
 }
 
