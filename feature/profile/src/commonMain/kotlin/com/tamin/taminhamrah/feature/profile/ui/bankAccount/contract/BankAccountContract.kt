@@ -17,6 +17,12 @@ enum class BankAccountPicker { NONE, DATE, BANK, TYPE }
 @Immutable
 data class BankAccountUiState(
     val isLoading: Boolean = false,
+    /**
+     * Whether a load has ever come back. The empty state may only be trusted once one has: an
+     * empty list after a failure means "not known", and dismissing the error must not turn that
+     * into "you have no accounts".
+     */
+    val hasLoadedOnce: Boolean = false,
     val accounts: ImmutableList<BankAccountPR> = persistentListOf(),
     val mode: BankAccountMode = BankAccountMode.LIST,
     val draft: BankAccountDraftPR = BankAccountDraftPR(),

@@ -195,3 +195,4 @@ val Bank?.pillBackground: Color get() = cardInk.copy(alpha = PILL_ALPHA)
  * compete with the account number sitting over it here.
  */
 val Bank?.watermarkAlpha: Float get() = 0.12f
+

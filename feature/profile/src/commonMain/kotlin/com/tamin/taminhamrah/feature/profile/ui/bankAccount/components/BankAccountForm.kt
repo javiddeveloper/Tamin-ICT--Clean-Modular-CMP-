@@ -122,7 +122,13 @@ fun BankAccountForm(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        SectionHeaderTitle(title = stringResource(Res.string.bank_account_form_title))
+        SectionHeaderTitle(
+            title = stringResource(Res.string.bank_account_form_title),
+            color = colors.textPrimary,
+            textStyle = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+            ),
+        )
         Spacer(Modifier.height(Spacing.sm))
 
         PickerRow(

@@ -109,16 +109,22 @@ class BankAccountViewModel(
         }
 
         emit(PartialState.Submitting(true))
+        // Tracked locally rather than read back off uiState: the reducer may not have applied the
+        // emission yet, and a stale error from an earlier failure would skip the reload entirely.
+        var failed = false
         registerBankAccountUseCase(
             accountNumber = draft.normalizedAccountNumber,
             bankCode = bank.code,
             accountTypeCode = accountType.code,
             startDateMillis = startDateMillis,
         )
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .catch {
+                failed = true
+                emit(PartialState.Error(it.toSingleLineMessage()))
+            }
             .collect { referenceCode -> emit(PartialState.Submitted(referenceCode)) }
 
-        if (uiState.value.error == null) {
+        if (!failed) {
             emitAll(loadAccounts())
         }
     }
@@ -132,6 +138,7 @@ class BankAccountViewModel(
 
         is PartialState.AccountsLoaded -> currentState.copy(
             isLoading = false,
+            hasLoadedOnce = true,
             accounts = partialState.accounts,
             error = null,
         )

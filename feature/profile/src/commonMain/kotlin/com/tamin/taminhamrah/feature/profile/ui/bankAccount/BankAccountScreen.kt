@@ -197,7 +197,7 @@ fun BankAccountScreen(
 
                 else -> ListView(
                     accounts = state.accounts,
-                    hasError = state.error != null,
+                    canShowEmptyState = state.hasLoadedOnce,
                     onIntent = onIntent,
                 )
             }
@@ -216,7 +216,7 @@ fun BankAccountScreen(
 @Composable
 private fun ListView(
     accounts: ImmutableList<BankAccountPR>,
-    hasError: Boolean,
+    canShowEmptyState: Boolean,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
     // Held across scrolls so a card that has already arrived does not fade in again.
@@ -243,9 +243,9 @@ private fun ListView(
         }
 
         if (accounts.isEmpty()) {
-            // The empty state must not appear while an error is on screen: a failed load has
-            // nothing to say about whether the person has accounts.
-            if (!hasError) {
+            // Only once a load has actually returned. An empty list after a failure means "not
+            // known", and dismissing the error must not silently turn that into "you have none".
+            if (canShowEmptyState) {
                 item(key = EMPTY_STATE_KEY) {
                     EmptyStateMessage(
                         icon = vectorResource(Res.drawable.ic_number),
@@ -336,7 +336,7 @@ private fun Overlays(
         BankAccountPicker.NONE -> Unit
     }
 
-    if (error != null) {
+    if (error != null && !hasSubmitted) {
         TaminConfirmationDialog(
             title = stringResource(Res.string.bank_account_error_title),
             description = error,
@@ -390,4 +390,6 @@ private fun PreviewBankAccountScreen() {
         )
     }
 }
+
+
 
