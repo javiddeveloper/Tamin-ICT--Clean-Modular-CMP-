@@ -30,6 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.LocalFocusManager
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.AccountTypePickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountCard
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountForm
@@ -280,9 +283,15 @@ private fun AddView(
     isSubmitting: Boolean,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
             .verticalScroll(rememberScrollState(), overscrollEffect = rememberJellyOverscroll())
             .padding(Spacing.page),
     ) {
@@ -290,9 +299,15 @@ private fun AddView(
             draft = draft,
             showValidation = showValidation,
             isSubmitting = isSubmitting,
-            onPickerRequested = { onIntent(BankAccountIntent.OnPickerRequested(it)) },
+            onPickerRequested = {
+                focusManager.clearFocus()
+                onIntent(BankAccountIntent.OnPickerRequested(it))
+            },
             onAccountNumberChanged = { onIntent(BankAccountIntent.OnAccountNumberChanged(it)) },
-            onSubmit = { onIntent(BankAccountIntent.OnSubmitClicked) },
+            onSubmit = {
+                focusManager.clearFocus()
+                onIntent(BankAccountIntent.OnSubmitClicked)
+            },
         )
     }
 }

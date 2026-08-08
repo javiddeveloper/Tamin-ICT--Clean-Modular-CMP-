@@ -27,7 +27,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.ic_tamin_chevron_back
 
 private const val CHEVRON_DOWN_DEGREES = 90f
 
@@ -42,16 +42,16 @@ private val PickerRowPaddingVertical = 15.dp
  * [SegmentedInputField] so a missing selection looks exactly like a bad value in the input beside
  * it, and a form built from both reads as one set of controls.
  *
- * The affordance takes the leading edge — the right in a right-to-left layout. With no [icon] it
+ * The affordance takes the trailing edge — the left in a right-to-left layout. With no [icon] it
  * draws a bare chevron turned to point down; a plain arrow reads as "download" rather than
  * "opens a list".
  */
 @Composable
 fun PickerRow(
     text: String,
-    isError: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
     /** Greys the label, for when [text] is a prompt rather than a chosen value. */
     isPlaceholder: Boolean = false,
     icon: ImageVector? = null,
@@ -77,7 +77,7 @@ fun PickerRow(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Icon(
-            imageVector = icon ?: vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            imageVector = icon ?: vectorResource(Res.drawable.ic_tamin_chevron_back),
             contentDescription = null,
             tint = iconTint ?: colors.textMuted,
             modifier = Modifier.size(IconSize).then(

@@ -210,33 +210,37 @@ fun BankAccountCard(
                 )
             }
 
-            if (account.isActive) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(TaminGreen),
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(Res.string.bank_account_active),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = subInk,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                if (account.isActive) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(TaminGreen),
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(Res.string.bank_account_active),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = subInk,
+                        )
+                    }
+                }
+
+                val typeLabel = account.accountType?.label?.let { stringResource(it) }
+                    ?: account.accountTypeNameFallback
+                if (typeLabel != null) {
+                    CustomChip(
+                        text = typeLabel,
+                        containerColor = bank.pillBackground,
+                        textColor = ink,
                     )
                 }
             }
-        }
-
-        val typeLabel = account.accountType?.label?.let { stringResource(it) }
-            ?: account.accountTypeNameFallback
-        if (typeLabel != null) {
-            CustomChip(
-                text = typeLabel,
-                containerColor = bank.pillBackground,
-                textColor = ink,
-                modifier = Modifier.align(AbsoluteAlignment.TopLeft).offset(y = PillTop),
-            )
         }
 
         // Centred on the whole card, not on the space left over by the surrounding rows.
