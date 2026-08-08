@@ -1,11 +1,6 @@
 package com.tamin.taminhamrah.feature.myinbox.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,7 +31,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,26 +48,49 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_show_more
+import taminx.core.core_ui.ic_check_label
 import taminx.core.core_ui.ic_inbox
 import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_tamin_copy
+import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_track
 import taminx.core.core_ui.ic_tamin_verified
+import taminx.core.core_ui.action_hide_details
+import taminx.core.core_ui.action_show_details
+import taminx.core.core_ui.identity_field_email
+import taminx.core.core_ui.identity_field_mobile
+import taminx.core.core_ui.identity_field_national_code
+import taminx.core.core_ui.inbox_action_operations
+import taminx.core.core_ui.inbox_inquiry_password
+import taminx.core.core_ui.inbox_item_header
+import taminx.core.core_ui.inbox_status_delivered
+import taminx.core.core_ui.inbox_status_rejected
+import taminx.core.core_ui.inbox_tracking_code
+import com.tamin.taminhamrah.ui.ActionMenuItem
+import com.tamin.taminhamrah.ui.RecordActionMenu
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun InboxItemCard(
     item: PersonalInboxItemPR,
-    onActionsClick: () -> Unit,
+    actions: ImmutableList<ActionMenuItem<String>>,
+    onActionSelect: (String) -> Unit,
+    onCopyClick: () -> Unit,
     modifier: Modifier = Modifier,
     initialExpanded: Boolean = false
 ) {
     val colors = LocalTaminColors.current
     var isExpanded by remember { mutableStateOf(initialExpanded) }
+    var isActionsMenuExpanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -82,10 +99,23 @@ fun InboxItemCard(
             .animateContentSize()
             .taminSurface()
     ) {
+        Icon(
+            imageVector = vectorResource(if (item.seen) Res.drawable.ic_check_label else Res.drawable.ic_check_label),
+            contentDescription = null,
+            tint = colors.textPrimary.copy(alpha = 0.50f),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(IconSize.xxxlarge)
+                .graphicsLayer {
+                    translationX = Spacing.smPlus.toPx()
+                    translationY = Spacing.badgeVertical.toPx()
+                }
+        )
+
         // Vertical Gradient Indicator (Right edge in RTL)
         Box(
             modifier = Modifier
-                .width(4.dp)
+                .width(Spacing.xs)
                 .fillMaxHeight()
                 .align(Alignment.CenterStart)
                 .background(colors.iconGradientPrimary)
@@ -101,20 +131,29 @@ fun InboxItemCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "سند رسمی • سازمان تأمین اجتماعی",
+                    text = stringResource(Res.string.inbox_item_header),
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.textMuted
                 )
-                NumericText(
-                    text = "۰۱ / ۰۱",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.none)
+                ) {
+                    Icon(
+                        imageVector = vectorResource(if (item.seen) Res.drawable.ic_tamin_verified else Res.drawable.ic_tamin_cross),
+                        contentDescription = null,
+                        tint = if (item.seen) colors.greenText else colors.dangerText.copy(alpha = 0.80f),
+                        modifier = Modifier.size(IconSize.medium)
+                    )
+                    Text(
+                        text = if (item.seen) stringResource(Res.string.inbox_status_delivered) else stringResource(Res.string.inbox_status_rejected),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (item.seen) colors.greenText else colors.dangerText.copy(alpha = 0.80f)
+                    )
+                }
             }
-
             // Main Content Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -123,7 +162,7 @@ fun InboxItemCard(
             ) {
                 IconTile(
                     modifier = Modifier.border(
-                        1.dp,
+                        Thickness.border,
                         colors.border,
                         RoundedCornerShape(CornerRadius.lg)
                     ),
@@ -134,7 +173,6 @@ fun InboxItemCard(
                     ),
                     cornerRadius = CornerRadius.lg,
                 )
-
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(Spacing.xs)
@@ -162,44 +200,6 @@ fun InboxItemCard(
                         )
                     }
                 }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-                    modifier = Modifier.width(64.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .drawBehind {
-                                drawCircle(
-                                    brush = Brush.verticalGradient(
-                                        listOf(colors.border, Color.Transparent)
-                                    ),
-                                    style = Stroke(
-                                        width = 1.dp.toPx(),
-                                        pathEffect = PathEffect.dashPathEffect(
-                                            floatArrayOf(5f, 5f),
-                                            0f
-                                        )
-                                    )
-                                )
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_tamin_verified),
-                            contentDescription = null,
-                            tint = colors.greenText,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Text(
-                        text = "تحویل شد",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.greenText
-                    )
-                }
             }
 
             // Tracking Code Row
@@ -212,10 +212,10 @@ fun InboxItemCard(
                     imageVector = vectorResource(Res.drawable.ic_tamin_track),
                     contentDescription = null,
                     tint = colors.textMuted,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(IconSize.small)
                 )
                 Text(
-                    text = "کد پیگیری",
+                    text = stringResource(Res.string.inbox_tracking_code),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted
                 )
@@ -223,7 +223,7 @@ fun InboxItemCard(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(1.dp)
+                        .height(Thickness.border)
                         .drawBehind {
                             drawLine(
                                 color = colors.border,
@@ -235,7 +235,7 @@ fun InboxItemCard(
                 )
 
                 NumericText(
-                    text = item.refCode,
+                    text = item.id.toString().toPersianDigits(),
                     style = MaterialTheme.typography.titleSmall,
                     color = colors.textPrimary
                 )
@@ -244,24 +244,24 @@ fun InboxItemCard(
                     contentDescription = null,
                     tint = colors.textMuted,
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(IconSize.small)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { /* TODO: Copy to clipboard */ }
+                        ) { onCopyClick() }
                 )
             }
 
             if (isExpanded) {
                 Column {
                     TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                    DetailRow(label = "کد ملی", value = "۵۵۸۹۷۴۳۴۵۱")
+                    DetailRow(label = stringResource(Res.string.identity_field_national_code), value =  item.natCode.toPersianDigits())
                     TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                    DetailRow(label = "پست الکترونیک", value = "—", numeric = false)
+                    DetailRow(label = stringResource(Res.string.identity_field_email), value = item.email, numeric = false)
                     TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                    DetailRow(label = "شماره تلفن همراه", value = "۰۹۱۸۶۴۵۳۵۱۱")
+                    DetailRow(label = stringResource(Res.string.identity_field_mobile), value = item.mobile.toPersianDigits())
                     TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                    DetailRow(label = "کد رمز استعلام", value = item.passwordCode.ifEmpty { "—" })
+                    DetailRow(label = stringResource(Res.string.inbox_inquiry_password), value = item.permissionPassword.toPersianDigits())
                 }
             }
 
@@ -273,7 +273,7 @@ fun InboxItemCard(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 TaminOutlinedButton(
-                    text = if (isExpanded) "مخفی کردن جزئیات" else "نمایش جزئیات",
+                    text = if (isExpanded) stringResource(Res.string.action_hide_details) else stringResource(Res.string.action_show_details),
                     onClick = { isExpanded = !isExpanded },
                     icon = vectorResource(Res.drawable.ic_arrow_show_more),
                     iconModifier = Modifier.graphicsLayer {
@@ -283,20 +283,30 @@ fun InboxItemCard(
                     contentColor = colors.blueText,
                     borderColor = Color.Transparent,
                     textStyle = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        fontWeight = FontWeight.Bold
                     ),
                     modifier = Modifier.weight(1.5f),
 
                     )
-                TaminFilledButton(
-                    text = "عملیات",
-                    onClick = onActionsClick,
-                    icon = vectorResource(Res.drawable.ic_setting),
-                    background = colors.iconGradientSuccess,
-                    iconPosition = IconPosition.End,
-                    modifier = Modifier.weight(1f)
-                )
+                Box(modifier = Modifier.weight(1f)) {
+                    TaminFilledButton(
+                        text = stringResource(Res.string.inbox_action_operations),
+                        onClick = { isActionsMenuExpanded = true },
+                        icon = vectorResource(Res.drawable.ic_setting),
+                        background = colors.iconGradientSuccess,
+                        iconPosition = IconPosition.End,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    RecordActionMenu(
+                        expanded = isActionsMenuExpanded,
+                        items = actions,
+                        onDismiss = { isActionsMenuExpanded = false },
+                        onSelect = { action ->
+                            isActionsMenuExpanded = false
+                            onActionSelect(action)
+                        }
+                    )
+                }
             }
         }
     }
@@ -315,10 +325,16 @@ private fun InboxItemCardExpandedPreview() {
                     subject = "اعلام سابقه به مؤسسات",
                     seen = true,
                     system = "سازمان تأمین اجتماعی",
-                    passwordCode = "۱۲۳۴۵۶"
+                    passwordCode = "۱۲۳۴۵۶",
+                    natCode = "222222",
+                    email = "",
+                    mobile = "",
+                    permissionPassword = "",
                 ),
-                onActionsClick = {},
-                initialExpanded = true
+                actions = kotlinx.collections.immutable.persistentListOf(),
+                onActionSelect = {},
+                initialExpanded = true,
+                onCopyClick = {}
             )
         }
     }
@@ -337,10 +353,16 @@ private fun InboxItemCardExpandedPreviewDark() {
                     subject = "اعلام سابقه به مؤسسات",
                     seen = true,
                     system = "سازمان تأمین اجتماعی",
-                    passwordCode = "۱۲۳۴۵۶"
+                    passwordCode = "۱۲۳۴۵۶",
+                    natCode = "2222222",
+                    email = "",
+                    mobile = "",
+                    permissionPassword = ""
                 ),
-                onActionsClick = {},
-                initialExpanded = true
+                actions = kotlinx.collections.immutable.persistentListOf(),
+                onActionSelect = {},
+                initialExpanded = true,
+                onCopyClick = {}
             )
         }
     }

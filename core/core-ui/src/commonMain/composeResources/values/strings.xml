@@ -283,5 +283,13 @@
     <string name="identity_gender_female">زن</string>
     <string name="identity_gender_unknown">نامشخص</string>
 
+    <!-- Inbox Item Card -->
+    <string name="inbox_action_operations">عملیات</string>
+    <string name="inbox_inquiry_password">کد رمز استعلام</string>
+    <string name="inbox_tracking_code">کد پیگیری</string>
+    <string name="inbox_status_delivered">تحویل شد</string>
+    <string name="inbox_status_rejected">رد شد</string>
+    <string name="inbox_item_header">سند رسمی • سازمان تأمین اجتماعی</string>
+
 </resources>
 
