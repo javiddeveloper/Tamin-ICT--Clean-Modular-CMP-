@@ -100,7 +100,7 @@ val mockContactUsData = ContactUsInfoDto(
             type = "POSTAL_CODE",
             title = "کد پستی",
             value = "۱۴۵۷۹۶۵۵۹۵",
-            actionUrl = null,
+            actionUrl = "",
             canCopy = true
         ),
         ContactDetailDto(
