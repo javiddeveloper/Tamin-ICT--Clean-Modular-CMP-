@@ -28,12 +28,12 @@ import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
+import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import com.tamin.taminhamrah.repository.VersionHistoryRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
+import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
-import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
-import com.tamin.taminhamrah.repository.AddDependentRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -55,6 +55,6 @@ val dataKoinModule = module {
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
     singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
-    singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
+    singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
 }

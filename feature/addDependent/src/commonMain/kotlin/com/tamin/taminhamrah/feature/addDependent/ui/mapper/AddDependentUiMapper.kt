@@ -1,22 +1,22 @@
-package com.tamin.taminhamrah.mapper.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui.mapper
 
 import com.tamin.taminhamrah.model.addDependent.BranchDN
-import com.tamin.taminhamrah.model.addDependent.BranchPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.BranchPR
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
-import com.tamin.taminhamrah.model.addDependent.DependentInfoPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.DependentInfoPR
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
-import com.tamin.taminhamrah.model.addDependent.GeneralResultPR
-import com.tamin.taminhamrah.model.addDependent.InquiryEducationCodePR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.GeneralResultPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.InquiryEducationCodePR
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
-import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.RegistryDataPR
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.RequestAddDependentPR
 import com.tamin.taminhamrah.model.addDependent.RequestFileDN
-import com.tamin.taminhamrah.model.addDependent.RequestFilePR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.RequestFilePR
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
-import com.tamin.taminhamrah.model.addDependent.UploadImagePR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.UploadImagePR
 
 fun DependentInfoDN.toPresentation(): DependentInfoPR = DependentInfoPR(
     id = id,

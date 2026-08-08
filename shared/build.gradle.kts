@@ -42,6 +42,7 @@ kotlin {
             api(project(":feature:taminServices"))
             api(project(":feature:healthProfile"))
             api(project(":feature:change-mobile"))
+            api(project(":feature:addDependent"))
 //            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)

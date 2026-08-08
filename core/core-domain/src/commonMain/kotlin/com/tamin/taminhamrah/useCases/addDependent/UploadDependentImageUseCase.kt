@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.useCases.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
-import com.tamin.taminhamrah.repository.AddDependentRepository
+import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 
 class UploadDependentImageUseCase(
@@ -11,9 +11,5 @@ class UploadDependentImageUseCase(
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): Flow<UploadImageDN> = repository.uploadImage(
-        imageBytes = imageBytes,
-        fileName = fileName,
-        mimeType = mimeType
-    )
+    ): Flow<UploadImageDN> = repository.uploadImage(imageBytes, fileName, mimeType)
 }

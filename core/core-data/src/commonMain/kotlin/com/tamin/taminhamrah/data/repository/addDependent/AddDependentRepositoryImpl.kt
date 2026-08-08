@@ -11,11 +11,11 @@ import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.repository.AddDependentRepository
+import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-internal class AddDependentRepositoryImpl(
+class AddDependentRepositoryImpl(
     private val remoteDataSource: AddDependentRemoteDataSource
 ) : AddDependentRepository {
 

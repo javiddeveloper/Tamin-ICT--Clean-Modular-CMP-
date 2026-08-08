@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,11 +29,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.StepperMode
-import com.tamin.taminhamrah.model.addDependent.BranchPR
-import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.StepperMode
+import com.tamin.taminhamrah.feature.addDependent.ui.model.BranchPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.RegistryDataPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType

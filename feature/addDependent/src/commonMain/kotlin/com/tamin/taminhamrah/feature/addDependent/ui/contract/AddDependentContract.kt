@@ -1,9 +1,9 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent.contract
+package com.tamin.taminhamrah.feature.addDependent.ui.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.model.addDependent.BranchPR
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
-import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.BranchPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.FamilyRelationshipPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.RegistryDataPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 

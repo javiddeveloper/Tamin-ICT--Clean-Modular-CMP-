@@ -1,17 +1,16 @@
 package com.tamin.taminhamrah.dataSource.addDependent
 
 import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -22,13 +21,13 @@ import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-internal class AddDependentRemoteDataSourceImpl(
+class AddDependentRemoteDataSourceImpl(
     private val apiService: AddDependentApiService,
     private val apiQueryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser
 ) : AddDependentRemoteDataSource {
 
-    override suspend fun getDependentInfo(): List<DependentInfoDto> {
+    override suspend fun getDependentInfo(): List<DependentInfoDTO> {
         return try {
             val response = apiService.getDependentInfo()
             response.extractData()
@@ -41,7 +40,7 @@ internal class AddDependentRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getActiveBranches(): List<BranchDto> {
+    override suspend fun getActiveBranches(): List<BranchDTO> {
         return try {
             val response = apiService.getActiveBranches()
             response.extractData()
@@ -56,7 +55,7 @@ internal class AddDependentRemoteDataSourceImpl(
 
     override suspend fun getFamilyRelationships(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipDto> {
+    ): List<FamilyRelationshipDTO> {
         return try {
             val parameters = if (filter.isEmpty()) {
                 emptyMap()
@@ -76,7 +75,7 @@ internal class AddDependentRemoteDataSourceImpl(
 
     override suspend fun getFamilyRelationshipsFromProxy(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipProxyDto> {
+    ): List<FamilyRelationshipProxyDTO> {
         return try {
             val parameters = apiQueryBuilder.buildQuery(
                 ApiQueryParamDN(page = 1, filters = filter)
@@ -96,7 +95,7 @@ internal class AddDependentRemoteDataSourceImpl(
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): RegistryDataDto {
+    ): RegistryDataDTO {
         return try {
             val response = apiService.inquiryRegistry(dependentNationalId, birthDateTimeStamp, dependencyCode)
             response.extractData()
@@ -129,7 +128,7 @@ internal class AddDependentRemoteDataSourceImpl(
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): UploadImageResponseDto {
+    ): UploadImageResponseDTO {
         return try {
             apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
         } catch (e: TaminErrorUriException) {
@@ -156,7 +155,7 @@ internal class AddDependentRemoteDataSourceImpl(
         )
     }
 
-    override suspend fun addNewDependent(request: RequestAddDependentDto): GeneralResponseDto {
+    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO {
         return try {
             val response = apiService.addNewDependent(request)
             response.extractData()

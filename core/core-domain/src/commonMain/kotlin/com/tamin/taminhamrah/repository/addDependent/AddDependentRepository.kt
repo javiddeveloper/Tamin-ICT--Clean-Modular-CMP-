@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.repository
+package com.tamin.taminhamrah.repository.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.BranchDN
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDN

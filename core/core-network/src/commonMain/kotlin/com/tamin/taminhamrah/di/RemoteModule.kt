@@ -34,6 +34,8 @@ import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
@@ -136,6 +138,14 @@ val remoteModule = module {
         )
     }
 
+    single<AddDependentRemoteDataSource> {
+        AddDependentRemoteDataSourceImpl(
+            apiService = get(),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
     single<ContractsRemoteDataSource> {
         ContractsRemoteDataSourceImpl(
             contractsApiService = get(named("contractsApiService")),
@@ -171,15 +181,5 @@ val remoteModule = module {
         AgentRepositoryImpl(
             remoteDataSource = get()
         )
-    }
-
-    single<com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource> {
-        com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl(
-            apiService = get(),
-            apiQueryBuilder = get(),
-            errorParser = get()
-        )
-        // Swap to the line below to use mock data for UI flows without live API accounts:
-        // com.tamin.taminhamrah.dataSource.addDependent.MockAddDependentRemoteDataSourceImpl()
     }
 }

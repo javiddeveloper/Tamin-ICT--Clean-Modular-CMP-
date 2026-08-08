@@ -1,15 +1,15 @@
 package com.tamin.taminhamrah.data.repository.addDependent
 
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
@@ -21,36 +21,36 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
-    var dependentInfoResult: List<DependentInfoDto> = emptyList()
-    var activeBranchesResult: List<BranchDto> = emptyList()
-    var familyRelationshipsResult: List<FamilyRelationshipDto> = emptyList()
-    var familyRelationshipsFromProxyResult: List<FamilyRelationshipProxyDto> = emptyList()
-    var registryDataResult: RegistryDataDto = RegistryDataDto()
+    var dependentInfoResult: List<DependentInfoDTO> = emptyList()
+    var activeBranchesResult: List<BranchDTO> = emptyList()
+    var familyRelationshipsResult: List<FamilyRelationshipDTO> = emptyList()
+    var familyRelationshipsFromProxyResult: List<FamilyRelationshipProxyDTO> = emptyList()
+    var registryDataResult: RegistryDataDTO = RegistryDataDTO()
     var educationCodeResult: String = ""
-    var uploadImageResult: UploadImageResponseDto = UploadImageResponseDto()
-    var addNewDependentResult: GeneralResponseDto = GeneralResponseDto()
+    var uploadImageResult: UploadImageResponseDTO = UploadImageResponseDTO()
+    var addNewDependentResult: GeneralResponseDTO = GeneralResponseDTO()
 
     var shouldThrowError: Exception? = null
     var lastFamilyRelationshipsFilter: List<ApiFilterDN>? = null
     var lastFamilyRelationshipsFromProxyFilter: List<ApiFilterDN>? = null
 
-    override suspend fun getDependentInfo(): List<DependentInfoDto> {
+    override suspend fun getDependentInfo(): List<DependentInfoDTO> {
         shouldThrowError?.let { throw it }
         return dependentInfoResult
     }
 
-    override suspend fun getActiveBranches(): List<BranchDto> {
+    override suspend fun getActiveBranches(): List<BranchDTO> {
         shouldThrowError?.let { throw it }
         return activeBranchesResult
     }
 
-    override suspend fun getFamilyRelationships(filter: List<ApiFilterDN>): List<FamilyRelationshipDto> {
+    override suspend fun getFamilyRelationships(filter: List<ApiFilterDN>): List<FamilyRelationshipDTO> {
         shouldThrowError?.let { throw it }
         lastFamilyRelationshipsFilter = filter
         return familyRelationshipsResult
     }
 
-    override suspend fun getFamilyRelationshipsFromProxy(filter: List<ApiFilterDN>): List<FamilyRelationshipProxyDto> {
+    override suspend fun getFamilyRelationshipsFromProxy(filter: List<ApiFilterDN>): List<FamilyRelationshipProxyDTO> {
         shouldThrowError?.let { throw it }
         lastFamilyRelationshipsFromProxyFilter = filter
         return familyRelationshipsFromProxyResult
@@ -60,7 +60,7 @@ class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): RegistryDataDto {
+    ): RegistryDataDTO {
         shouldThrowError?.let { throw it }
         return registryDataResult
     }
@@ -77,12 +77,12 @@ class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): UploadImageResponseDto {
+    ): UploadImageResponseDTO {
         shouldThrowError?.let { throw it }
         return uploadImageResult
     }
 
-    override suspend fun addNewDependent(request: RequestAddDependentDto): GeneralResponseDto {
+    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO {
         shouldThrowError?.let { throw it }
         return addNewDependentResult
     }
@@ -102,7 +102,7 @@ class AddDependentRepositoryImplTest {
     @Test
     fun getDependentInfo_emitsMappedDependentInfoDNList() = runTest {
         remoteDataSource.dependentInfoResult = listOf(
-            DependentInfoDto(id = "1", fullName = "مریم حسینی")
+            DependentInfoDTO(id = "1", fullName = "مریم حسینی")
         )
 
         val items = repository.getDependentInfo().first()
@@ -114,7 +114,7 @@ class AddDependentRepositoryImplTest {
     @Test
     fun getActiveBranches_emitsMappedBranchDNList() = runTest {
         remoteDataSource.activeBranchesResult = listOf(
-            BranchDto(branchCode = "0101", branchName = "مرکزی", workshopCode = "001", workshopName = "کارگاه")
+            BranchDTO(branchCode = "0101", branchName = "مرکزی", workshopCode = "001", workshopName = "کارگاه")
         )
 
         val items = repository.getActiveBranches().first()
@@ -127,7 +127,7 @@ class AddDependentRepositoryImplTest {
     @Test
     fun getFamilyRelationships_emitsMappedFamilyRelationshipDNList() = runTest {
         remoteDataSource.familyRelationshipsResult = listOf(
-            FamilyRelationshipDto(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
+            FamilyRelationshipDTO(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
         )
         val filter = listOf(ApiFilterDN(property = FilterProperty.SERIAL_ID, value = "1", operator = FilterOperator.EQUAL))
 
@@ -142,7 +142,7 @@ class AddDependentRepositoryImplTest {
     @Test
     fun getFamilyRelationshipsFromProxy_emitsMappedFamilyRelationshipDNList() = runTest {
         remoteDataSource.familyRelationshipsFromProxyResult = listOf(
-            FamilyRelationshipProxyDto(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
+            FamilyRelationshipProxyDTO(id = 1, relationCode = "REL_01", relationDesc = "فرزند")
         )
         val filter = listOf(ApiFilterDN(property = FilterProperty.DEPENDENCY_DESC, value = "**", operator = FilterOperator.LIKE))
 
@@ -155,7 +155,7 @@ class AddDependentRepositoryImplTest {
 
     @Test
     fun inquiryRegistry_emitsMappedRegistryDataDN() = runTest {
-        remoteDataSource.registryDataResult = RegistryDataDto(
+        remoteDataSource.registryDataResult = RegistryDataDTO(
             firstName = "رضا",
             lastName = "کریمی",
             nationalId = "0012345678"
@@ -179,7 +179,7 @@ class AddDependentRepositoryImplTest {
 
     @Test
     fun uploadImage_emitsMappedUploadImageDN() = runTest {
-        remoteDataSource.uploadImageResult = UploadImageResponseDto(guid = "GUID_XYZ")
+        remoteDataSource.uploadImageResult = UploadImageResponseDTO(guid = "GUID_XYZ")
 
         val item = repository.uploadImage(byteArrayOf(1, 2), "file.jpg", "image/jpeg").first()
 
@@ -188,7 +188,7 @@ class AddDependentRepositoryImplTest {
 
     @Test
     fun addNewDependent_emitsMappedGeneralResultDN() = runTest {
-        remoteDataSource.addNewDependentResult = GeneralResponseDto(
+        remoteDataSource.addNewDependentResult = GeneralResponseDTO(
             isSuccess = true,
             message = "ثبت شد",
             code = 200

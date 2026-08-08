@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.apiService.addDependent
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -175,7 +175,7 @@ class AddDependentApiServiceTest : BaseApiTest() {
         val apiService = ktorfit.createAddDependentApiService()
 
         val response = apiService.addNewDependent(
-            RequestAddDependentDto(
+            RequestAddDependentDTO(
                 nationalId = "0012345678"
             )
         )

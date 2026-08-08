@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.navigation
+package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
@@ -90,6 +90,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
+import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
@@ -356,7 +358,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToChangeMobile = {
                         navController.navigateToChangeMobile()
                     },
+                    onNavigateToAddDependent = {
+                        navController.navigate(AddDependentRoute)
+                    },
                     onOpenUrl = { url -> openUrl(url) },
+                    onBack = { navController.popBackStack() }
+                )
+
+                addDependentGraph(
+                    navController = navController,
                     onBack = { navController.popBackStack() }
                 )
 

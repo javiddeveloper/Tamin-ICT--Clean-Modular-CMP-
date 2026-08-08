@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.useCases.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.repository.AddDependentRepository
+import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetFamilyRelationshipsFromProxyUseCase(

@@ -1,13 +1,5 @@
 package com.tamin.taminhamrah.di
 
-import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
-import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
-import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
-import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
-import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
-import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
-import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
-import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
@@ -137,10 +129,27 @@ import org.koin.dsl.module
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
+import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
+import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
+import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 
 val domainModule = module {
+    // Add Dependent UseCases
+    factoryOf(::GetActiveBranchesUseCase)
+    factoryOf(::GetFamilyRelationshipsFromProxyUseCase)
+    factoryOf(::GetFamilyRelationshipsUseCase)
+    factoryOf(::InquiryRegistryUseCase)
+    factoryOf(::InquiryEducationCodeUseCase)
+    factoryOf(::UploadDependentImageUseCase)
+    factoryOf(::AddNewDependentUseCase)
+    factoryOf(::GetDependentInfoUseCase)
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
@@ -272,15 +281,5 @@ val domainModule = module {
     factoryOf(::SyncIllnessSelfDeclarativesUseCase)
     factoryOf(::SyncDrugAllergiesUseCase)
     factoryOf(::GetActFrequenciesUseCase)
-
-    // Add Dependent UseCases
-    factoryOf(::GetDependentInfoUseCase)
-    factoryOf(::GetActiveBranchesUseCase)
-    factoryOf(::GetFamilyRelationshipsUseCase)
-    factoryOf(::GetFamilyRelationshipsFromProxyUseCase)
-    factoryOf(::InquiryRegistryUseCase)
-    factoryOf(::InquiryEducationCodeUseCase)
-    factoryOf(::UploadDependentImageUseCase)
-    factoryOf(::AddNewDependentUseCase)
 }
 

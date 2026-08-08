@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -33,21 +33,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentEvent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.BottomSheetTarget
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_DOCUMENTS
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_INQUIRY
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_SUCCESS
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_VERIFICATION
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentEvent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.BottomSheetTarget
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_DOCUMENTS
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_INQUIRY
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_SUCCESS
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_VERIFICATION
 import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -117,12 +116,6 @@ fun AddDependentRoute(
     }
 }
 
-/**
- * Maps a bottom sheet selection back to the intent for whichever picker opened it.
- *
- * Selection ids are list indices (see the picker configs in the ViewModel) because branch and
- * city codes are zero-padded strings that do not survive a round trip through [Int].
- */
 private fun resolvePickerSelection(
     result: TaminBottomSheetResult,
     state: AddDependentState
@@ -179,10 +172,6 @@ fun AddDependentContent(
     }
 
     val errorMessage = state.error
-    // Active branches are the only lookup still fetched eagerly on screen open (family
-    // relationships and cities are now fetched lazily when their pickers open, see the
-    // ViewModel), so they're what gates the initial blocking loading/error state. Later
-    // failures (e.g. while submitting the inquiry) must not wipe the data already entered.
     val isInitialLoad = state.currentStep == STEP_INQUIRY && state.activeBranches.isEmpty()
     val showBlockingError = errorMessage != null && isInitialLoad
 

@@ -9,8 +9,6 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
-import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
-import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
 import com.tamin.taminhamrah.apiService.agent.AgentApiService
 import com.tamin.taminhamrah.apiService.agent.createAgentApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
@@ -32,6 +30,8 @@ import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
+import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
+import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -123,6 +123,10 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("healthKtorfit"))
         ktorfit.createHealthApiService()
     }
+    single<AddDependentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createAddDependentApiService()
+    }
     single<ContractsApiService>(named("contractsApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createContractsApiService()
@@ -132,10 +136,4 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
     }
-
-    single<com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService> {
-        val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.createAddDependentApiService()
-    }
-
 }
