@@ -207,6 +207,7 @@ fun BankAccountScreen(
     Overlays(
         picker = state.picker,
         error = state.error,
+        hasSubmitted = state.hasSubmitted,
         referenceCode = state.submittedReferenceCode,
         onIntent = onIntent,
     )
@@ -301,6 +302,7 @@ private fun AddView(
 private fun Overlays(
     picker: BankAccountPicker,
     error: String?,
+    hasSubmitted: Boolean,
     referenceCode: String?,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
@@ -350,16 +352,16 @@ private fun Overlays(
         )
     }
 
-    if (referenceCode != null) {
+    if (hasSubmitted) {
         // Registering files a request rather than inserting an account, so the message says what
-        // happens next; the code is the only handle the person has on it until it is approved.
-        val trackingCode = stringResource(
-            Res.string.bank_account_tracking_code,
-            referenceCode.toPersianDigits(),
-        )
+        // happens next. The code is the only handle the person has on it until it is approved, but
+        // it is optional -- its absence must not swallow the confirmation.
         val registeredDescription = stringResource(Res.string.bank_account_registered_description)
+        val trackingCode = referenceCode?.let {
+            stringResource(Res.string.bank_account_tracking_code, it.toPersianDigits())
+        }
         val successMessage = remember(registeredDescription, trackingCode) {
-            listOf(registeredDescription, trackingCode).joinToString(PARAGRAPH_BREAK)
+            listOfNotNull(registeredDescription, trackingCode).joinToString(PARAGRAPH_BREAK)
         }
         TaminConfirmationDialog(
             title = stringResource(Res.string.bank_account_registered),

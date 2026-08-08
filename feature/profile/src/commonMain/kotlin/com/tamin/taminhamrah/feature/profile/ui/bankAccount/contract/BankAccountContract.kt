@@ -26,7 +26,12 @@ data class BankAccountUiState(
     val isSubmitting: Boolean = false,
     /** Every API failure, already turned into the sentence the dialog shows. */
     val error: String? = null,
-    /** The tracking code of the filed request, present once one has been accepted. */
+    /**
+     * Whether a request has been accepted. Separate from [submittedReferenceCode] because the code
+     * is optional — inferring success from it hides a successful submit whenever it is absent.
+     */
+    val hasSubmitted: Boolean = false,
+    /** The tracking code of the filed request, when the service returns one. */
     val submittedReferenceCode: String? = null,
 ) {
     sealed interface PartialState {
@@ -38,6 +43,7 @@ data class BankAccountUiState(
         data object ValidationShown : PartialState
         data class Submitting(val isSubmitting: Boolean) : PartialState
         data class Submitted(val referenceCode: String?) : PartialState
+        data object SubmissionAcknowledged : PartialState
         data class Error(val message: String) : PartialState
     }
 }

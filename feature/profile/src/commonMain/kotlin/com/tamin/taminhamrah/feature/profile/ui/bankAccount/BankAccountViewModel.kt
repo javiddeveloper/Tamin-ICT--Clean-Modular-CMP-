@@ -71,7 +71,7 @@ class BankAccountViewModel(
         is BankAccountIntent.OnErrorDismissed -> flow { emit(PartialState.Error("")) }
 
         is BankAccountIntent.OnSuccessDismissed -> flow {
-            emit(PartialState.Submitted(null))
+            emit(PartialState.SubmissionAcknowledged)
             emit(PartialState.ModeChanged(BankAccountMode.LIST))
         }
     }
@@ -153,8 +153,14 @@ class BankAccountViewModel(
 
         is PartialState.Submitted -> currentState.copy(
             isSubmitting = false,
+            hasSubmitted = true,
             submittedReferenceCode = partialState.referenceCode,
             showValidation = false,
+        )
+
+        is PartialState.SubmissionAcknowledged -> currentState.copy(
+            hasSubmitted = false,
+            submittedReferenceCode = null,
         )
 
         is PartialState.Error -> currentState.copy(
