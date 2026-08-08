@@ -49,7 +49,13 @@ internal object TreatmentDimens {
     const val certificateSkeletonRows = 4
 
     /** A quarter turn: the disclosure chevron points back when closed, down when open. */
+    /**
+     * The disclosure chevron. The asset points along the reading direction, so it has to be turned
+     * a quarter-turn down when closed and up when open -- leaving the closed state at 0 degrees
+     * shows a forward arrow, which reads as "navigates away" rather than "expands".
+     */
     const val chevronOpenDegrees = -90f
+    const val chevronClosedDegrees = 90f
 
     // Category tiles & badges
     val categoryTileIconSize = 40.dp
