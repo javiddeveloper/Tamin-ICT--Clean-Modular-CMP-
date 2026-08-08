@@ -39,6 +39,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +48,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +57,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -65,10 +69,10 @@ import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
-import com.tamin.taminhamrah.feature.contracts.contractsScreen
-import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.contracts.contractsScreen
+import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.historyScreen
@@ -81,8 +85,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
+import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
@@ -106,17 +110,14 @@ import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
-import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import com.tamin.taminhamrah.feature.history.navigateToHistory
-import com.tamin.taminhamrah.openUrl
+import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -235,7 +236,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
 
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
     Scaffold(contentWindowInsets = WindowInsets(0),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = isHomeRoute && isAgentEnabled,
@@ -333,6 +337,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     HomeScreen(
                         onNavigateToService = { flag -> navController.navigateToFeature(flag) },
                         onNavigateToWeb = { url -> openUrl(url) },
+                        onShowMessage = { message ->
+                            snackbarScope.launch { snackbarHostState.showSnackbar(message) }
+                        },
                     )
                 }
 
@@ -487,6 +494,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 fun HomeScreen(
     onNavigateToService: (FeatureFlag) -> Unit,
     onNavigateToWeb: (String) -> Unit,
+    // No default: a disabled feature says why through this, and a caller that omitted it used to
+    // drop the message silently — the tap then did nothing at all.
+    onShowMessage: (String) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -496,7 +506,7 @@ fun HomeScreen(
             when (event) {
                 is HomeEvent.NavigateToService -> onNavigateToService(event.flag)
                 is HomeEvent.NavigateToWeb -> onNavigateToWeb(event.url)
-                is HomeEvent.ShowMessage -> Unit // TODO: surface via SnackbarHostState
+                is HomeEvent.ShowMessage -> onShowMessage(event.message)
             }
         }
     }
@@ -682,69 +692,6 @@ fun HomeScreen(
         }
     }
 }
-
-@Composable
-private fun Handleevents(
-    viewModel: HomeViewModel,
-    onNavigateToHistory: () -> Unit,
-    onNavigateToWorkshops: () -> Unit,
-    onNavigateToContracts: () -> Unit,
-    onNavigateToStudentInsuranceContract: () -> Unit,
-    onNavigateToFreelanceInsuranceContract: () -> Unit,
-    onNavigateToOptionalInsuranceContract: () -> Unit,
-    onNavigateToHousewifeInsuranceContract: () -> Unit,
-    onNavigateToPensionInquiry: () -> Unit,
-    onNavigateToCalculatePension: () -> Unit,
-    onNavigateToPrescription: () -> Unit,
-    onNavigateToDeservedTreatment: () -> Unit,
-    onNavigateToPayRoll: () -> Unit,
-    onNavigateToEdict: () -> Unit,
-    onNavigateToIssuanceCertificate: () -> Unit,
-    onNavigateToDeferredInstallment: () -> Unit,
-    onNavigateToGirlSurvivor: () -> Unit,
-    onNavigateToPensionSurvivor: () -> Unit,
-    onNavigateToDisabilityPension: () -> Unit
-) {
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is HomeEvent.NavigateToService -> {
-                    when (event.flag) {
-                        FeatureFlag.MERGE_HISTORY -> onNavigateToHistory()
-                        FeatureFlag.WORKSHOPS -> onNavigateToWorkshops()
-                        FeatureFlag.CONTRACTS -> onNavigateToContracts()
-                        FeatureFlag.STUDENT_INSURANCE -> onNavigateToStudentInsuranceContract()
-                        FeatureFlag.FREELANCE_INSURANCE -> onNavigateToFreelanceInsuranceContract()
-                        FeatureFlag.OPTIONAL_INSURANCE -> onNavigateToOptionalInsuranceContract()
-                        FeatureFlag.HOUSEWIFE_INSURANCE -> onNavigateToHousewifeInsuranceContract()
-                        FeatureFlag.PENSION_INQUIRY -> onNavigateToPensionInquiry()
-                        FeatureFlag.CALCULATE_WAGE_PENSION -> onNavigateToCalculatePension()
-                        FeatureFlag.PRESCRIPTION -> onNavigateToPrescription()
-                        FeatureFlag.DESERVED_TREATMENT_101 -> onNavigateToDeservedTreatment()
-                        FeatureFlag.PAY_ROLL -> onNavigateToPayRoll()
-                        FeatureFlag.EDICT_PENSIONER -> onNavigateToEdict()
-                        FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> onNavigateToIssuanceCertificate()
-                        FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> onNavigateToDeferredInstallment()
-                        FeatureFlag.GIRL_SURVIVOR -> onNavigateToGirlSurvivor()
-                        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> onNavigateToPensionSurvivor()
-                        FeatureFlag.DISABILITY_PENSION -> onNavigateToDisabilityPension()
-                        else -> { /* Handle other flags if needed */
-                        }
-                    }
-                }
-
-                is HomeEvent.NavigateToWeb -> {
-                    openUrl(event.url)
-                }
-
-                is HomeEvent.ShowMessage -> {
-                    // In a real app, we'd use a SnackbarHostState
-                }
-            }
-        }
-    }
-}
-
 @Composable
 private fun AgentFab(onClick: () -> Unit) {
     val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")

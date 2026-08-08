@@ -30,15 +30,12 @@ class ElectronicFileViewModel(
     initialState = ElectronicFileUiState(),
 ) {
 
-    init {
-        sendIntent(ElectronicFileIntent.LoadNationalCode)
-    }
-
     /**
      * The document list, kept out of [uiState] on purpose.
      *
      * `cachedIn` means opening a document and coming back does not refetch the pages already
      * loaded, which is the difference between a smooth back gesture and a full reload.
+     * Compatible with both Android and iOS targets using androidx.paging KMP.
      */
     val documents: Flow<PagingData<ElectronicFilePR>> =
         Pager(PagingConfig(pageSize = ELECTRONIC_FILE_PAGE_SIZE, enablePlaceholders = false)) {

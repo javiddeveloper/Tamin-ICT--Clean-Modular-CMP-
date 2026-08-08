@@ -199,9 +199,10 @@ private fun retryIntent(
     tab: RecordTab,
     period: RecordPeriod,
     customRange: Pair<String, String>? = null,
+    prescType: String? = null,
 ) = PrescriptionsIntent.LoadList(
     nationalCode = nationalCode,
-    requestTypeIds = tab.requestTypeIds,
+    requestTypeIds = RecordSearchCriteria(tab = tab, prescType = prescType).requestTypeIds(),
     startDate = customRange?.first ?: period.startTimestamp(),
     endDate = customRange?.second,
 )
@@ -270,9 +271,17 @@ fun MedicalRecordsScreen(
 
     // Patient, period and category are all endpoint parameters, so any change re-queries.
     // Held until a patient resolves, so the shortcut path never fires a blank-code query.
-    LaunchedEffect(selectedPatient, selectedPeriod, selectedTab, customRange) {
+    LaunchedEffect(selectedPatient, selectedPeriod, selectedTab, customRange, searchCriteria.prescType) {
         if (selectedPatient.isBlank()) return@LaunchedEffect
-        viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
+        viewModel.sendIntent(
+            retryIntent(
+                selectedPatient,
+                selectedTab,
+                selectedPeriod,
+                customRange,
+                searchCriteria.prescType,
+            ),
+        )
     }
 
     // «سهم شما» is not in the list response, so it comes from the price endpoint — one request per
@@ -299,12 +308,24 @@ fun MedicalRecordsScreen(
         selectedTab = selectedTab,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
-        onTabSelected = { selectedTab = it },
+        // The tab row cannot show داروخانه, so choosing a tab has to drop it or the tap does nothing.
+        onTabSelected = {
+            selectedTab = it
+            searchCriteria = searchCriteria.copy(tab = it, prescType = null)
+        },
         onPatientSelected = { selectedPatient = it },
         onPeriodSelected = { selectedPeriod = it },
         onRecordSelected = { onOpenRecord(it, selectedPatient) },
         onRetry = {
-            viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
+            viewModel.sendIntent(
+                retryIntent(
+                    selectedPatient,
+                    selectedTab,
+                    selectedPeriod,
+                    customRange,
+                    searchCriteria.prescType,
+                ),
+            )
         },
         onCustomRangePicked = { start, end ->
             customRange = start to end

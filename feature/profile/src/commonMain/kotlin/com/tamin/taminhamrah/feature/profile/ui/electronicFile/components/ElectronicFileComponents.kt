@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +33,7 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -41,6 +41,7 @@ import com.tamin.taminhamrah.ui.theme.shimmer
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_retry
 import taminx.core.core_ui.electronic_file_category
 import taminx.core.core_ui.electronic_file_empty
 import taminx.core.core_ui.electronic_file_registered_subtitle
@@ -130,8 +131,22 @@ fun DocumentGrid(
                 }
             }
 
-            if (documents.loadState.append is LoadState.Loading) {
-                item(span = { GridItemSpan(COLUMNS) }) { AppendSpinner() }
+            when (documents.loadState.append) {
+                is LoadState.Loading ->
+                    item(span = { GridItemSpan(COLUMNS) }) { AppendSpinner() }
+
+                // A failed next page is not worth a dialog — the pages already loaded are still
+                // usable, so it offers the retry inline and leaves the grid alone.
+                is LoadState.Error ->
+                    item(span = { GridItemSpan(COLUMNS) }) {
+                        TaminOutlinedButton(
+                            text = stringResource(Res.string.action_retry),
+                            onClick = documents::retry,
+                            modifier = Modifier.fillMaxWidth().padding(Spacing.md),
+                        )
+                    }
+
+                else -> Unit
             }
         }
     }

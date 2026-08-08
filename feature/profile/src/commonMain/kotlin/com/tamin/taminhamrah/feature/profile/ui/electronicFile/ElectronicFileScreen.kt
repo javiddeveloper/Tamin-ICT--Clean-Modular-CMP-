@@ -8,16 +8,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.DocumentGrid
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.ElectronicFileHeader
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.ElectronicFileEvent
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.ElectronicFileIntent
+import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.ElectronicFileUiState
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.model.DocumentTarget
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -30,6 +33,7 @@ import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -43,16 +47,45 @@ fun ElectronicFileRoute(
     viewModel: ElectronicFileViewModel,
     onBackClicked: () -> Unit,
 ) {
-    viewModel.events.collectWithLifecycleAware { event ->
-        when (event) {
-            ElectronicFileEvent.NavigateBack -> onBackClicked()
-        }
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(ElectronicFileIntent.LoadNationalCode)
     }
+
+    HandleElectronicFileEvents(
+        events = viewModel.events,
+        onBackClicked = onBackClicked,
+    )
 
     val state by viewModel.uiState.collectAsState()
     val documents = viewModel.documents.collectAsLazyPagingItems()
 
-    val onIntent = viewModel::sendIntent
+    ElectronicFileScreen(
+        state = state,
+        documents = documents,
+        onIntent = viewModel::sendIntent,
+        onBackClicked = onBackClicked,
+    )
+}
+
+@Composable
+fun HandleElectronicFileEvents(
+    events: Flow<ElectronicFileEvent>,
+    onBackClicked: () -> Unit,
+) {
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            ElectronicFileEvent.NavigateBack -> onBackClicked()
+        }
+    }
+}
+
+@Composable
+fun ElectronicFileScreen(
+    state: ElectronicFileUiState,
+    documents: LazyPagingItems<ElectronicFilePR>,
+    onIntent: (ElectronicFileIntent) -> Unit,
+    onBackClicked: () -> Unit,
+) {
     val onOpen = remember(onIntent) {
         { document: ElectronicFilePR ->
             onIntent(ElectronicFileIntent.OpenDocument(document))
