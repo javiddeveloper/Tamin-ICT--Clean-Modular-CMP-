@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -118,7 +119,9 @@ fun DocumentGrid(
         ) {
             items(
                 count = documents.itemCount,
-                key = { index -> documents[index]?.id ?: index },
+                // itemKey peeks; indexing with documents[index] would register an access and
+                // trigger a page load for every item the grid merely keys, not just the visible ones.
+                key = documents.itemKey { it.id },
             ) { index ->
                 val document = documents[index]
                 if (document != null) {
