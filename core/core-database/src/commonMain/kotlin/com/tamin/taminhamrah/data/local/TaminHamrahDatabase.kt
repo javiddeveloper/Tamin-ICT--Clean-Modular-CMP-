@@ -111,7 +111,11 @@ expect abstract class TaminXDatabase : RoomDatabase {
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect object TaminXDatabaseConstructor : RoomDatabaseConstructor<TaminXDatabase>
+expect object TaminXDatabaseConstructor : RoomDatabaseConstructor<TaminXDatabase> {
+    // Declared here as Room's KMP docs require: without it the expect object is abstract-but-not,
+    // which only surfaces when commonMain is compiled on its own rather than per target.
+    override fun initialize(): TaminXDatabase
+}
 
 fun getRoomDatabase(builder: RoomDatabase.Builder<TaminXDatabase>): TaminXDatabase {
     return builder
