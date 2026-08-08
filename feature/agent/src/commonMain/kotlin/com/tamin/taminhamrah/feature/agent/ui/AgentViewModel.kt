@@ -56,7 +56,8 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transformWhile
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * ViewModel for the Agent (AI Chatbot) screen.
@@ -71,6 +72,9 @@ import java.util.UUID
  * 4. Done state → entities are forwarded to [AgentActionDispatcher]
  * 5. Each dispatcher result is appended to the chat list
  */
+// Uuid is the stdlib's, replacing java.util.UUID: this class is commonMain and the JVM one does
+// not exist on iOS. Still experimental in Kotlin 2.2, hence the opt-in.
+@OptIn(ExperimentalUuidApi::class)
 class AgentViewModel(
     private val sendAgentPromptUseCase: SendAgentPromptUseCase,
     private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
@@ -241,7 +245,7 @@ class AgentViewModel(
         if (!isRetry && addUserBubble) {
             // Append the user's message to the chat
             val userItem = ChatItem(
-                id = UUID.randomUUID().toString(),
+                id = Uuid.random().toString(),
                 sender = ChatSender.User,
                 content = ChatBubbleContent.Text(message)
             )
@@ -306,7 +310,7 @@ class AgentViewModel(
 
                     // --- Phase 1: Show the ProcessingSteps bubble and run all steps ---
                     var currentStepIndex = 1
-                    val processingBubbleId = "processing_${UUID.randomUUID()}"
+                    val processingBubbleId = "processing_${Uuid.random()}"
                     sendEvent(AgentEvent.ScrollToBottom)
 
                     // Collect all result bubbles while animating steps
@@ -333,7 +337,7 @@ class AgentViewModel(
                         val result = dispatchEntity(entity)
                         val newItems = result.map { bubble ->
                             ChatItem(
-                                id = "${entity.action.key}_${UUID.randomUUID()}",
+                                id = "${entity.action.key}_${Uuid.random()}",
                                 sender = ChatSender.Agent,
                                 content = bubble,
                                 isTypingAnimating = true
@@ -378,7 +382,7 @@ class AgentViewModel(
                 is AgentPollingState.Failed -> {
                     emit(PartialState.ProcessingStateUpdated(null))
                     val errorItem = ChatItem(
-                        id = UUID.randomUUID().toString(),
+                        id = Uuid.random().toString(),
                         sender = ChatSender.Agent,
                         content = ChatBubbleContent.ServiceError(pollingState.message, canRetryPrompt = true)
                     )
@@ -450,7 +454,7 @@ class AgentViewModel(
         if (bubbles.isNotEmpty()) {
             val items = bubbles.map {
                 ChatItem(
-                    id = "${actionKey.key}_${UUID.randomUUID()}",
+                    id = "${actionKey.key}_${Uuid.random()}",
                     sender = ChatSender.Agent,
                     content = it,
                     isTypingAnimating = true
@@ -495,7 +499,7 @@ class AgentViewModel(
 
     /** Creates a new conversation row and makes it the active one. @return its id. */
     private suspend fun startFreshSession(nationalCode: String): String {
-        val id = UUID.randomUUID().toString()
+        val id = Uuid.random().toString()
         val now = currentTimeMillis()
         cacheSessionId = id
         runCatching {
@@ -676,7 +680,7 @@ class AgentViewModel(
         loadedAudioPath = null
 
         val userItem = ChatItem(
-            id = UUID.randomUUID().toString(),
+            id = Uuid.random().toString(),
             sender = ChatSender.User,
             content = ChatBubbleContent.Voice(
                 source = preview.filePath,
