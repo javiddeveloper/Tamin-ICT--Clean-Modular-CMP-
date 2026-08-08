@@ -64,4 +64,8 @@ internal class PersonalInboxRepositoryImpl(
     override suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDN {
         return personalInboxRemoteDataSource.getMyRequestPDF(requestId).toDomain()
     }
+
+    override suspend fun deleteMyRequest(requestId: String) {
+        personalInboxRemoteDataSource.deleteMyRequest(requestId)
+    }
 }

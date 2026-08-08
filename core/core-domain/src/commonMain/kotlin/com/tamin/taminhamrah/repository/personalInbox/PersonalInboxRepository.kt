@@ -9,4 +9,5 @@ interface PersonalInboxRepository {
     fun getInboxItems(query: ApiQueryParamDN?): Flow<List<PersonalInboxItemDN>>
     fun getInboxSize(): Flow<PersonalInboxSizeDN>
     suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDN
+    suspend fun deleteMyRequest(requestId: String)
 }

@@ -54,4 +54,17 @@ class PersonalInboxRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun deleteMyRequest(requestId: String) {
+        try {
+            val response = personalInboxApiService.deleteMyRequest(requestId)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }
