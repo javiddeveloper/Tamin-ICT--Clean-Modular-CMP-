@@ -10,4 +10,5 @@ interface PersonalInboxRepository {
     fun getInboxSize(): Flow<PersonalInboxSizeDN>
     suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDN
     suspend fun deleteMyRequest(requestId: String)
+    suspend fun inboxInquiryLicense(requestId: String, operation: String, duration: String? = null)
 }

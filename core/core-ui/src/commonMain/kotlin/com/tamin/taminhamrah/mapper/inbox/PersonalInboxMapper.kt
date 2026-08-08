@@ -37,6 +37,16 @@ fun PersonalInboxItemDN.toPresentation(): PersonalInboxItemPR {
                         isWarningIcon = true
                     )
                 )
+            } else {
+                add(
+                    ActionMenuItem(
+                        value = "CANCEL_LICENSE",
+                        label = "لغو مجوز استعلام",
+                        icon = Res.drawable.ic_license,
+                        hasDivider = true,
+                        isDestructive = true
+                    )
+                )
             }
             add(
                 ActionMenuItem(

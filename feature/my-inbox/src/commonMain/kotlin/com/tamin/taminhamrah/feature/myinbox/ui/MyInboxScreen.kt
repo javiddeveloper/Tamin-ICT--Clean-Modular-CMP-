@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FiberManualRecord
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -52,7 +53,11 @@ import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SegmentedRadialGauge
 import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -67,6 +72,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_trash
 
 @Composable
 fun MyInboxScreen(
@@ -348,6 +354,81 @@ private fun MyInboxContent(
                     onIntent(MyInboxIntent.ConfirmInquiryPermit(id, duration))
                 }
             }
+        )
+    }
+
+    if (state.showPdfViewer && state.selectedPdfId != null) {
+        TaminPdfViewer(
+            fileName = "correspondence_${state.selectedPdfId}.pdf",
+            pdf = state.pdfDownload,
+            downloadFailed = state.pdfDownloadFailed,
+            onRequestDownload = {
+                onIntent(MyInboxIntent.RequestPdfDownload(state.selectedPdfId))
+            },
+            onDismiss = {
+                onIntent(MyInboxIntent.DismissPdfViewer)
+            }
+        )
+    }
+
+    if (state.showDeleteConfirmation && state.selectedItemIdForDelete != null) {
+        TaminConfirmationDialog(
+            title = "حذف پیام",
+            description = "آیا از حذف اطلاعات اطمینان دارید؟",
+            confirmButton = {
+                TaminFilledButton(
+                    text = "حذف",
+                    icon = Icons.Outlined.Delete,
+                    background = Brush.horizontalGradient(listOf(Color(0xFFEF4444), Color(0xFFDC2626))),
+                    onClick = {
+                        onIntent(MyInboxIntent.ConfirmDeleteRequest(state.selectedItemIdForDelete))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp)
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = "انصراف",
+                    onClick = { onIntent(MyInboxIntent.DismissDeleteConfirmation) },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp)
+                )
+            },
+            onDismissRequest = { onIntent(MyInboxIntent.DismissDeleteConfirmation) },
+            icon = vectorResource(Res.drawable.ic_trash)
+        )
+    }
+
+    if (state.showCancelLicenseConfirmation && state.selectedItemIdForCancelLicense != null) {
+        TaminConfirmationDialog(
+            title = "لغو مجوز استعلام",
+            description = "آیا از لغو مجوز استعلام برای این پیام اطمینان دارید؟",
+            confirmButton = {
+                TaminFilledButton(
+                    text = "لغو مجوز",
+                    background = Brush.horizontalGradient(listOf(Color(0xFFEF4444), Color(0xFFDC2626))),
+                    onClick = {
+                        onIntent(MyInboxIntent.ConfirmCancelLicense(state.selectedItemIdForCancelLicense))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp)
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = "انصراف",
+                    onClick = { onIntent(MyInboxIntent.DismissCancelLicenseConfirmation) },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp)
+                )
+            },
+            onDismissRequest = { onIntent(MyInboxIntent.DismissCancelLicenseConfirmation) },
+            icon = vectorResource(Res.drawable.ic_trash)
         )
     }
 }

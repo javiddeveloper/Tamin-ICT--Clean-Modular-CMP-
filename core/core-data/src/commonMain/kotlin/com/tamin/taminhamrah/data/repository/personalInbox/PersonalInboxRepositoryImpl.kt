@@ -68,4 +68,12 @@ internal class PersonalInboxRepositoryImpl(
     override suspend fun deleteMyRequest(requestId: String) {
         personalInboxRemoteDataSource.deleteMyRequest(requestId)
     }
+
+    override suspend fun inboxInquiryLicense(
+        requestId: String,
+        operation: String,
+        duration: String?
+    ) {
+        personalInboxRemoteDataSource.inboxInquiryLicense(requestId, operation, duration)
+    }
 }

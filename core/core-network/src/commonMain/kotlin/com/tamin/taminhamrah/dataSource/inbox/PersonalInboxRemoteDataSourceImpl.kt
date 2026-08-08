@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.dataSource.inbox
 
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
+import com.tamin.taminhamrah.model.inbox.InboxInquiryRequestDTO
+import com.tamin.taminhamrah.model.inbox.InboxPermissionRequestDTO
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDTO
 import com.tamin.taminhamrah.model.inbox.PersonalInboxListDTO
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDTO
@@ -58,6 +60,29 @@ class PersonalInboxRemoteDataSourceImpl(
     override suspend fun deleteMyRequest(requestId: String) {
         try {
             val response = personalInboxApiService.deleteMyRequest(requestId)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun inboxInquiryLicense(
+        requestId: String,
+        operation: String,
+        duration: String?
+    ) {
+        try {
+            val body = InboxInquiryRequestDTO(
+                operation = operation,
+                permission = duration?.let {
+                    InboxPermissionRequestDTO(operation = it)
+                }
+            )
+            val response = personalInboxApiService.inboxInquiryLicense(requestId, body)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
