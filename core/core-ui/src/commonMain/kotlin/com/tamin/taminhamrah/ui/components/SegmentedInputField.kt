@@ -94,6 +94,11 @@ fun SegmentedInputField(
     enabled: Boolean = true,
     error: Boolean = false,
     errorMessage: String? = null,
+    /**
+     * Shown in place of the empty slots while the field is untouched. The slots only appear once
+     * the field takes focus, so a row of dashes does not greet someone who has not started typing.
+     */
+    placeholderText: String? = null,
     showClearButton: Boolean = true,
     leadingIcon: ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Number,
@@ -165,9 +170,19 @@ fun SegmentedInputField(
                         Box(modifier = Modifier.alpha(0f)) {
                             innerTextField()
                         }
+                        val showPlaceholder =
+                            placeholderText != null && value.isEmpty() && !isFocused
+                        if (showPlaceholder) {
+                            Text(
+                                text = placeholderText,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.textMuted,
+                                modifier = Modifier.align(Alignment.CenterStart),
+                            )
+                        }
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().alpha(if (showPlaceholder) 0f else 1f),
                                 horizontalArrangement = horizontalArrangement,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -353,7 +368,7 @@ private fun Char.isPersianDigit(): Boolean {
 }
 
 /**
- * The field-error treatment used across the app: the border animates to the danger colour and back
+ * The field-error treatment used across the app: the border animates to the danger color and back
  * rather than snapping. Public so rows that are not text fields -- pickers, date rows -- report a
  * problem the same way the inputs beside them do.
  */

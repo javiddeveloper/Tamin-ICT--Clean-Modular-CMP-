@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +61,11 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 private const val CHEVRON_DOWN_DEGREES = 90f
 
 private val IconSize = 19.dp
+
+// The three picker rows, sized to the design: 16px side padding on a taller box than the default
+// 12dp inset gave. The minimum keeps all three identical regardless of what their labels measure.
+private val PickerRowMinHeight = 56.dp
+private val PickerRowPaddingVertical = 15.dp
 
 private const val PARAGRAPH_BREAK = "\n\n"
 
@@ -159,28 +165,17 @@ fun BankAccountForm(
         )
         Spacer(Modifier.height(Spacing.sm))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.bank_account_field_number),
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.textSecondary,
-            )
-            // Live count against the bank's requirement, so the length is checkable while typing
-            // rather than only on submit.
-            Text(
-                text = stringResource(
-                    Res.string.bank_account_digit_counter,
-                    entered.toString().toPersianDigits(),
-                    expected.toString().toPersianDigits(),
-                ),
-                style = MaterialTheme.typography.labelSmall,
-                color = if (numberError != null) colors.dangerText else colors.textMuted,
-            )
-        }
+        // Only the count sits above the field now; the field names itself while it is empty.
+        Text(
+            text = stringResource(
+                Res.string.bank_account_digit_counter,
+                entered.toString().toPersianDigits(),
+                expected.toString().toPersianDigits(),
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (numberError != null) colors.dangerText else colors.textMuted,
+            modifier = Modifier.align(Alignment.End),
+        )
         Spacer(Modifier.height(Spacing.xs))
 
         // Slot count is the chosen bank's digit count, so the field itself shows the length owed.
@@ -189,6 +184,7 @@ fun BankAccountForm(
             onValueChange = onAccountNumberChanged,
             slotCount = expected,
             error = numberError != null,
+            placeholderText = stringResource(Res.string.bank_account_field_number),
         )
         Spacer(Modifier.height(Spacing.sm))
 
@@ -247,7 +243,8 @@ private fun PickerRow(
                 cornerRadius = CornerRadius.lg,
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+            .heightIn(min = PickerRowMinHeight)
+            .padding(horizontal = Spacing.lg, vertical = PickerRowPaddingVertical),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
