@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -40,6 +41,7 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -84,10 +86,26 @@ fun HandleContactUsEvents(
     onCopyToClipboard: (text: String, label: String) -> Unit,
     onBackClicked: () -> Unit
 ) {
+    val launcher = remember { ExternalAppLauncher() }
     events.collectWithLifecycleAware { event ->
         when (event) {
             ContactUsEvent.NavigateBack -> onBackClicked()
-            is ContactUsEvent.OpenUrl -> onOpenUrl(event.url)
+            is ContactUsEvent.OpenUrl -> {
+                val url = event.url
+                when {
+                    url.startsWith("tel:") -> {
+                        launcher.openPhone(url.removePrefix("tel:"))
+                    }
+                    url.startsWith("mailto:") -> {
+                        launcher.openEmail(url.removePrefix("mailto:"))
+                    }
+                    url.contains("wa.me") -> {
+                        val phone = url.substringAfter("wa.me/").substringBefore("?").substringBefore("/")
+                        launcher.openWhatsApp(phone)
+                    }
+                    else -> onOpenUrl(url)
+                }
+            }
             is ContactUsEvent.CopyToClipboard -> onCopyToClipboard(event.text, event.label)
             is ContactUsEvent.ShowToast -> {
             }
