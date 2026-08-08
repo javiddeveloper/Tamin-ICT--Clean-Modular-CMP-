@@ -80,14 +80,6 @@ internal fun ActiveRelationScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            ActiveRelationHeader(
-                activeCount = uiState.activeCount,
-                inactiveCount = uiState.inactiveCount,
-                lastCheckTime = uiState.lastCheckTime,
-                onBackClicked = { onIntent(ActiveRelationIntent.OnBackClicked) }
-            )
-        },
         containerColor = taminColors.bgPage
     ) { paddingValues ->
         Box(
@@ -98,12 +90,22 @@ internal fun ActiveRelationScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(Spacing.lg),
+                contentPadding = PaddingValues(bottom = Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
+                item {
+                    ActiveRelationHeader(
+                        activeCount = uiState.activeCount,
+                        inactiveCount = uiState.inactiveCount,
+                        lastCheckTime = uiState.lastCheckTime,
+                        onBackClicked = { onIntent(ActiveRelationIntent.OnBackClicked) }
+                    )
+                }
+
                 items(uiState.items, key = { it.id }) { item ->
                     ActiveRelationItemCard(
                         item = item,
+                        modifier = Modifier.padding(horizontal = Spacing.lg),
                         onSendCertificateClicked = {
                             onIntent(ActiveRelationIntent.OnSendCertificateClicked(item))
                         }
