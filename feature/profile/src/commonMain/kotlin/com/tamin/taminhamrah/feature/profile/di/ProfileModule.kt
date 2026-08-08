@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile.di
 
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileViewModel
+import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -12,4 +13,6 @@ val profileModule = module {
     viewModelOf(::IdentityInViewModel)
     viewModelOf(::ElectronicFileViewModel)
     viewModelOf(::VersionHistoryViewModel)
+    viewModelOf(::ContactUsViewModel)
 }
+

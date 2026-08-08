@@ -131,6 +131,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
+import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 
 val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
@@ -264,5 +265,6 @@ val domainModule = module {
     factoryOf(::SyncIllnessSelfDeclarativesUseCase)
     factoryOf(::SyncDrugAllergiesUseCase)
     factoryOf(::GetActFrequenciesUseCase)
+    factoryOf(::GetContactUsUseCase)
 }
 
