@@ -20,9 +20,13 @@ fun String.toPersianDigits(): String = map { char ->
 }.joinToString("")
 
 fun String.toFormattedDate(): String =
-    if (length == 8) {
-        "${substring(0, 4)}/${substring(4, 6)}/${substring(6, 8)}"
-    } else {
+    try {
+        if (length == 8) {
+            "${substring(0, 4)}/${substring(4, 6)}/${substring(6, 8)}"
+        } else {
+            this
+        }
+    } catch (e: Exception) {
         this
     }
 
