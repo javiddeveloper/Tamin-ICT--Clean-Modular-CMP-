@@ -60,4 +60,8 @@ internal class PersonalInboxRepositoryImpl(
 
         personalInboxDao.getInboxSize().firstOrNull()?.toDomain()?.let { emit(it) }
     }.distinctUntilChanged()
+
+    override suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDN {
+        return personalInboxRemoteDataSource.getMyRequestPDF(requestId).toDomain()
+    }
 }

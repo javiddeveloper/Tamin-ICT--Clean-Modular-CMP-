@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
@@ -172,6 +173,7 @@ val domainModule = module {
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
+    factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::GetContractsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.inbox
 
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
+import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDTO
 import com.tamin.taminhamrah.model.inbox.PersonalInboxListDTO
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -32,6 +33,19 @@ class PersonalInboxRemoteDataSourceImpl(
     override suspend fun getInboxSize(): PersonalInboxSizeDTO {
         return try {
             personalInboxApiService.getInboxSize()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDTO {
+        return try {
+            val response = personalInboxApiService.getMyRequestPDF(requestId)
+            response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
