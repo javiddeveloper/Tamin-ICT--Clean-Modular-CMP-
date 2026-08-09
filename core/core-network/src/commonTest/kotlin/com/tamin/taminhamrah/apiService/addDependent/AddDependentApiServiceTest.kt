@@ -129,13 +129,9 @@ class AddDependentApiServiceTest : BaseApiTest() {
     fun uploadImage_returnsUploadImageResponse() = runTest {
         val jsonResponse = """
             {
-                "status": 200,
-                "family": "SUCCESS",
-                "reason": "OK",
-                "data": {
-                    "guid": "FILE_9988",
-                    "isSuccess": true
-                }
+                "guid": "a4769aa8-b9af-4183-83b9-367dc9f52511",
+                "isSuccess": true,
+                "message": "Upload successful"
             }
         """.trimIndent()
 
@@ -154,6 +150,7 @@ class AddDependentApiServiceTest : BaseApiTest() {
         val response = apiService.uploadImage(multipartBody)
 
         assertNotNull(response)
+        assertTrue(response.isSuccess)
         assertEquals("a4769aa8-b9af-4183-83b9-367dc9f52511", response.guid)
     }
 
