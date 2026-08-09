@@ -60,4 +60,22 @@ internal class PersonalInboxRepositoryImpl(
 
         personalInboxDao.getInboxSize().firstOrNull()?.toDomain()?.let { emit(it) }
     }.distinctUntilChanged()
+
+    override fun getMyRequestPDF(requestId: String): Flow<PersonalInboxItemDN> = flow {
+        emit(personalInboxRemoteDataSource.getMyRequestPDF(requestId).toDomain())
+    }
+
+    override fun deleteMyRequest(requestId: String): Flow<Unit> = flow {
+        personalInboxRemoteDataSource.deleteMyRequest(requestId)
+        emit(Unit)
+    }
+
+    override fun inboxInquiryLicense(
+        requestId: String,
+        operation: String,
+        duration: String?
+    ): Flow<Unit> = flow {
+        personalInboxRemoteDataSource.inboxInquiryLicense(requestId, operation, duration)
+        emit(Unit)
+    }
 }
