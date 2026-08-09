@@ -127,6 +127,7 @@ fun ProfileScreen(
     onNavigateToDependentsList: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
+    onNavigateToMyInbox: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
@@ -152,6 +153,7 @@ fun ProfileScreen(
         onNavigateToActiveRelation = onNavigateToActiveRelation,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
         onNavigateToContactUs = onNavigateToContactUs,
+        onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToDependentsList = onNavigateToDependentsList,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
@@ -178,6 +180,7 @@ fun HandleProfileEvents(
     onNavigateToDependentsList: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToContactUs: () -> Unit,
+    onNavigateToMyInbox: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -214,6 +217,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToContactUs -> {
                 onNavigateToContactUs()
+            }
+
+            ProfileEvent.NavigateToMyInbox -> {
+                onNavigateToMyInbox()
             }
 
             is ProfileEvent.OpenUrl -> {

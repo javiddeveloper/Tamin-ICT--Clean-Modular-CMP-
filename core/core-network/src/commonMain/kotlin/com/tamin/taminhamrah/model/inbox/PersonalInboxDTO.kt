@@ -53,3 +53,14 @@ data class PersonalInboxSizeDTO(
     @SerialName("usage") val usage: String?,
     @SerialName("total") val total: String?,
 )
+
+@Serializable
+data class InboxInquiryRequestDTO(
+    @SerialName("operation") val operation: String,
+    @SerialName("permission") val permission: InboxPermissionRequestDTO? = null
+)
+
+@Serializable
+data class InboxPermissionRequestDTO(
+    @SerialName("operation") val operation: String
+)
