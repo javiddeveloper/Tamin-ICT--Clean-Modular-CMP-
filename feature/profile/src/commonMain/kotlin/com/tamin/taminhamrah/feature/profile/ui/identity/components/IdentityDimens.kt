@@ -78,25 +78,10 @@ internal object IdentityDimens {
     /** The card's soft blue drop shadow. */
     val cardShadow = 20.dp
 
-    // The sheen rings: thin arcs of light.
-    val ringNearInset = 35.dp
-    val ringNearTop = 21.dp
-    val ringFarInset = 39.dp
-    val ringOuterRadius = 105.dp
-    val ringInnerRadius = 75.dp
-    val ringFootRadius = 85.dp
-
     // The card's furniture, at the export's alphas.
-    const val ringOuterAlpha = 0.09f
-    const val ringInnerAlpha = 0.07f
-    const val ringFootAlpha = 0.06f
-    const val avatarBorderAlpha = 0.28f
     const val AVATAR_GLYPH_ALPHA = 0.85f
     const val footerRuleAlpha = 0.18f
     const val topEdgeAlpha = 0.16f
-
-    const val ssnCollapsedScale = 0.82f
-    const val nameCollapsedScale = 0.95f
 
     /**
      * The expanded-only pieces fade this much faster than the fold, so they have cleared well
@@ -104,16 +89,11 @@ internal object IdentityDimens {
      */
     const val VANISH_RATE = 3f
 
-    // ── Detail sections ──────────────────────────────────────────────────────────
-    // Outside the card, so these are 1:1 with the design's pixels — no scaled().
-
     /** Design: section caption `margin:20px 0 10px`. */
     val sectionLabelGap = 10.dp
 
     /** Design: each row is `padding:14px 16px`; the horizontal half is Spacing.lg. */
     val rowVerticalPadding = 14.dp
-
-    // ── Card interior ────────────────────────────────────────────────────────────
 
     /** Gap between the stacked name/father/birth rows. */
     val cardFieldGap = 4.dp
