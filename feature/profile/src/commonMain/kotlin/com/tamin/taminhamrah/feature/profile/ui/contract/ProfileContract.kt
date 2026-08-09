@@ -47,17 +47,17 @@ sealed class ProfileIntent {
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 
-sealed class ProfileEvent {
-    data object NavigateToActiveRelation : ProfileEvent()
-    data object NavigateBack : ProfileEvent()
-    data object NavigateToSettings : ProfileEvent()
-    data object NavigateToIdentity : ProfileEvent()
-    data object NavigateToVersionHistory : ProfileEvent()
-    data object NavigateToMyInbox : ProfileEvent()
-    data class OpenUrl(val url: String) : ProfileEvent()
-    data class ShowToast(val message: String) : ProfileEvent()
-    data object NavigateToChangeMobile : ProfileEvent()
-    data object NavigateToContactUs : ProfileEvent()
-    data object NavigateToElectronicFile : ProfileEvent()
+sealed interface ProfileEvent {
+    data object NavigateToActiveRelation : ProfileEvent
+    data object NavigateBack : ProfileEvent
+    data object NavigateToSettings : ProfileEvent
+    data object NavigateToIdentity : ProfileEvent
+    data object NavigateToVersionHistory : ProfileEvent
+    data object NavigateToMyInbox : ProfileEvent
+    data class OpenUrl(val url: String) : ProfileEvent
+    data class ShowToast(val message: String) : ProfileEvent
+    data object NavigateToChangeMobile : ProfileEvent
+    data object NavigateToContactUs : ProfileEvent
+    data object NavigateToElectronicFile : ProfileEvent
 }
 
