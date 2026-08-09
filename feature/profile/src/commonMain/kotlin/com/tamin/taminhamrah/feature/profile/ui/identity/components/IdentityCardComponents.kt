@@ -398,8 +398,12 @@ private fun CardSsn(
 private fun Modifier.footerRule(progress: () -> Float): Modifier = drawBehind {
     val fade = (1f - progress() * IdentityDimens.VANISH_RATE).coerceIn(0f, 1f)
     if (fade <= 0f) return@drawBehind
-    val pad = IdentityDimens.cardPadding.toPx()
-    val top = IdentityDimens.footerRuleTop.toPx()
+    // The same design scale the card's layout applies. Without it the rule was drawn at raw dp
+    // while the footer it sits above was placed at scaled dp, so on a 374dp card the rule landed
+    // ~8% lower than the text and its inset was wider than the content's.
+    val designScale = size.width / IdentityDimens.designCardWidth.toPx() * IdentityDimens.cardScale
+    val pad = IdentityDimens.cardPadding.toPx() * designScale
+    val top = IdentityDimens.footerRuleTop.toPx() * designScale
     if (top >= size.height) return@drawBehind
     drawRect(
         color = Color.White.copy(alpha = IdentityDimens.footerRuleAlpha * fade),
