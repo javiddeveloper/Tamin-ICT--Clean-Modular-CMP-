@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranceContractModule
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
+import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -43,6 +44,7 @@ val sharedModules: List<Module>
         studentInsuranceContractModule,
         healthProfileModule,
         changeMobileModule,
+        addDependentModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
