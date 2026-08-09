@@ -65,6 +65,12 @@ class FakeUserRepository : UserRepository {
         )
     )
 
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flowOf(null)
 }
 
 /** Minimal fake [CityProvinceRepository] dependency of `IdentityInfoUseCase`. */
