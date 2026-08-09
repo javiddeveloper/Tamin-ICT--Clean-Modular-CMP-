@@ -144,11 +144,6 @@ fun TaminJalaliDatePicker(
                 // انصراف first so that right-to-left puts it on the right and the wide blue
                 // تأیید تاریخ on the left, as the design has them.
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    CancelButton(
-                        text = stringResource(Res.string.action_cancel),
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f),
-                    )
                     TaminPrimaryButton(
                         text = stringResource(Res.string.date_picker_confirm),
                         onClick = { onConfirm(year, month, clampedDay) },
@@ -156,6 +151,11 @@ fun TaminJalaliDatePicker(
                         // dialog is blue throughout, so it takes the same blue as the wheels.
                         background = SolidColor(colors.blueText),
                         modifier = Modifier.weight(2f),
+                    )
+                    CancelButton(
+                        text = stringResource(Res.string.action_cancel),
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
