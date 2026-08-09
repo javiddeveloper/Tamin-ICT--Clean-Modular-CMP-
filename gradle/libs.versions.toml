@@ -2,7 +2,11 @@
 agp = "8.9.3"
 kotlin = "2.2.21"
 compose-multiplatform = "1.10.3"
-ktor = "3.1.3"
+# Must match the Ktor that ktorfit pulls in (2.6.5 -> 3.2.1). If this trails, Gradle bumps
+# core/okhttp/http/io to ktorfit's version but leaves logging/auth/content-negotiation here,
+# and 3.1.x plugins in a 3.2.x client never complete the response pipeline: the engine gets
+# the response, no plugin logs it, and the caller's suspend never resumes.
+ktor = "3.2.1"
 kotlinx-serialization = "1.8.1"
 koin = "4.1.0"
 coil = "3.2.0"

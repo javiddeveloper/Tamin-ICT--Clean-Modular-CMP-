@@ -30,14 +30,20 @@ class AuthRepositoryImpl(
         return tokenStoreManager.getToken()
     }
 
+    // NonCancellable because the authorization code is single-use: the moment this request leaves,
+    // the server burns the code and issues tokens. If the caller's scope dies before the response
+    // is persisted — the login dialog dismissing is enough, and it does dismiss ~16ms after the
+    // POST — the tokens are lost *and* the code cannot be replayed, so nothing is ever stored and
+    // every later call goes out unauthenticated.
     override suspend fun exchangeCodeForTokens(
         code: String,
         codeVerifier: String,
         audience: String,
         redirectUri: String,
         clientId: String
-    ): Boolean {
-        return try {
+    ): Boolean = withContext(NonCancellable) {
+        logger.i { "exchangeCodeForTokens: entered (codeLen=${code.length}, verifierLen=${codeVerifier.length})" }
+        try {
             val response = authRemoteDataSource.exchangeCodeForTokens(
                 redirectUri = redirectUri,
                 clientId = clientId,
@@ -46,30 +52,61 @@ class AuthRepositoryImpl(
                 audience = audience
             )
 
+            if (response.accessToken.isNullOrBlank()) {
+                // A 200 whose body did not carry access_token. Saving null here would *remove* the
+                // stored token, so the app looks logged out while the network log shows success.
+                logger.e { "exchangeCodeForTokens: 200 but access_token was absent or blank." }
+                return@withContext false
+            }
             tokenStoreManager.saveToken(response.accessToken)
-            tokenStoreManager.saveRefreshToken(response.refreshToken)
+            response.refreshToken?.takeIf { it.isNotBlank() }
+                ?.let { tokenStoreManager.saveRefreshToken(it) }
             tokenStoreManager.setTokenValid(true)
             authTokenInvalidator.invalidateAll()
+            logger.d {
+                "exchangeCodeForTokens: token stored (len=${response.accessToken?.length}), " +
+                    "readback=${tokenStoreManager.getToken()?.length ?: -1}, " +
+                    "refreshTokenSent=${!response.refreshToken.isNullOrBlank()}"
+            }
             true
         } catch (e: Exception) {
-            print(e)
+            // Was `print(e)`, which hid the cause entirely: the HTTP call can return 200 and still
+            // fail here (deserialization, for one), leaving the network log green and no token saved.
+            logger.e(e) { "exchangeCodeForTokens failed; no token was stored." }
             false
         }
     }
 
     override suspend fun refreshToken(): Boolean {
-        val currentRefreshToken = tokenStoreManager.getRefreshToken() ?: return false
+        val currentRefreshToken = tokenStoreManager.getRefreshToken()
+        if (currentRefreshToken.isNullOrBlank()) {
+            logger.w { "refreshToken(): no stored refresh token, cannot refresh." }
+            return false
+        }
 
         return try {
             val response = authRemoteDataSource.refreshTokens(
                 refreshToken = currentRefreshToken,
                 clientId = NetworkConstants.CLIENT_ID
             )
+            if (response.accessToken.isNullOrBlank()) {
+                // Saving a null here would *remove* the stored token, so a 200 carrying no
+                // access_token would silently log the user out. Keep what we have instead.
+                logger.e { "refreshToken(): 200 but access_token was absent; keeping existing token." }
+                return false
+            }
             tokenStoreManager.saveToken(response.accessToken)
-            tokenStoreManager.saveRefreshToken(response.refreshToken)
+            // Only overwrite the refresh token when the server actually sent a new one — some
+            // token responses omit it, and saveRefreshToken(null) deletes the one that still works.
+            response.refreshToken?.takeIf { it.isNotBlank() }
+                ?.let { tokenStoreManager.saveRefreshToken(it) }
             tokenStoreManager.setTokenValid(true)
+            // The bearer provider caches its tokens per HttpClient and only reloads when cleared,
+            // so every client has to be told the stored token just changed.
+            authTokenInvalidator.invalidateAll()
             true
         } catch (e: Exception) {
+            logger.e(e) { "refreshToken() failed." }
             tokenStoreManager.setTokenValid(false)
             false
         }
