@@ -69,6 +69,7 @@ import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -453,7 +454,7 @@ private fun MyInboxScreenPreviewLight() {
     PreviewRtlThemeContent(darkTheme = false) {
         MyInboxContent(
             state = MyInboxUiState(
-                items = listOf(
+                items = persistentListOf(
                     PersonalInboxItemPR(
                         id = 1,
                         refCode = "۳۱۸۶۲۲۶۲۱",

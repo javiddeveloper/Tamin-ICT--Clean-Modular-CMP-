@@ -126,33 +126,30 @@ fun SegmentedRadialGauge(
                     )
                 }
 
-                val inactivePath = Path()
-                val activePath = Path()
+                // Per-segment endpoints (arc position <-> collapsed linear position) depend only
+                // on layout size / segment config, not on morphProgress, so they're computed once
+                // per cache build instead of on every animation frame.
+                val arcX = FloatArray(segmentCount)
+                val arcY = FloatArray(segmentCount)
+                val arcRot = FloatArray(segmentCount)
+                val linearX = FloatArray(segmentCount)
 
-                val segmentPaths = Array(segmentCount) { index ->
+                for (index in 0 until segmentCount) {
                     val angle = startAngle + (index * angleStep)
                     val originalRot = angle - 90f
                     val originalRotRad = ((originalRot * kotlin.math.PI) / 180.0).toFloat()
 
-                    val x_A = centerArc.x - r * kotlin.math.sin(originalRotRad)
-                    val y_A = centerArc.y + r * kotlin.math.cos(originalRotRad)
-                    val rot_A = angle - 270f
-
-                    val x_B = startX + index * linearSpacing
-
-                    val currentX = x_A + (x_B - x_A) * morphProgress
-                    val currentY = y_A + (y_B - y_A) * morphProgress
-                    val currentRot = rot_A * (1f - morphProgress)
-
-                    val matrix = Matrix()
-                    matrix.translate(x = currentX, y = currentY)
-                    matrix.rotateZ(currentRot)
-
-                    val path = Path()
-                    path.addPath(baseCapsulePath)
-                    path.transform(matrix)
-                    path
+                    arcX[index] = centerArc.x - r * kotlin.math.sin(originalRotRad)
+                    arcY[index] = centerArc.y + r * kotlin.math.cos(originalRotRad)
+                    arcRot[index] = angle - 270f
+                    linearX[index] = startX + index * linearSpacing
                 }
+
+                // Reused every frame instead of allocating new Path/Matrix instances per segment.
+                val segmentPaths = Array(segmentCount) { Path() }
+                val matrix = Matrix()
+                val inactivePath = Path()
+                val activePath = Path()
 
                 val glowSteps = 4
                 val glowStrokes = Array(glowSteps) { step ->
@@ -170,8 +167,20 @@ fun SegmentedRadialGauge(
                     activePath.reset()
 
                     for (i in 0 until segmentCount) {
-                        if (i < activeCount) activePath.addPath(segmentPaths[i])
-                        else inactivePath.addPath(segmentPaths[i])
+                        val currentX = arcX[i] + (linearX[i] - arcX[i]) * morphProgress
+                        val currentY = arcY[i] + (y_B - arcY[i]) * morphProgress
+                        val currentRot = arcRot[i] * (1f - morphProgress)
+
+                        matrix.reset()
+                        matrix.translate(x = currentX, y = currentY)
+                        matrix.rotateZ(currentRot)
+
+                        val path = segmentPaths[i]
+                        path.reset()
+                        path.addPath(baseCapsulePath)
+                        path.transform(matrix)
+
+                        if (i < activeCount) activePath.addPath(path) else inactivePath.addPath(path)
                     }
 
                     if (activeCount < segmentCount) {

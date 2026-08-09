@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.myinbox.ui.contract
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.tamin.taminhamrah.model.inbox.PermitDurationPR
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemPR
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizePR
@@ -7,9 +9,10 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
+@Immutable
 data class MyInboxUiState(
     val isLoading: Boolean = false,
-    val items: List<PersonalInboxItemPR> = emptyList(),
+    val items: ImmutableList<PersonalInboxItemPR> = persistentListOf(),
     val size: PersonalInboxSizePR? = null,
     val error: String? = null,
     val showInquiryPermitSheet: Boolean = false,
@@ -27,7 +30,7 @@ data class MyInboxUiState(
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
         data class Error(val message: String) : PartialState
-        data class ItemsLoaded(val items: List<PersonalInboxItemPR>) : PartialState
+        data class ItemsLoaded(val items: ImmutableList<PersonalInboxItemPR>) : PartialState
         data class SizeLoaded(val size: PersonalInboxSizePR) : PartialState
         data class ShowInquiryPermitSheet(val itemId: Long) : PartialState
         data object HideInquiryPermitSheet : PartialState

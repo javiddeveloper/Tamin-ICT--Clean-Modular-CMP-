@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emitAll
@@ -142,7 +143,7 @@ class MyInboxViewModel(
         emit(PartialState.Loading(true))
         try {
             getPersonalInboxItemsUseCase().collect { items ->
-                emit(PartialState.ItemsLoaded(items.toPresentation()))
+                emit(PartialState.ItemsLoaded(items.toPresentation().toImmutableList()))
             }
         } catch (e: Exception) {
             emit(emitError(e.message ?: getString(Res.string.error_unknown_fallback)))
