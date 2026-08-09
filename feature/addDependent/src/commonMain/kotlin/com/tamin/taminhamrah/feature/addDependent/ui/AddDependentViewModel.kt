@@ -46,6 +46,16 @@ import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.city_birth_picker_title
 import taminx.core.core_ui.city_issuance_picker_title
 import taminx.core.core_ui.branch_picker_title
+import taminx.core.core_ui.picker_relationship_title
+import taminx.core.core_ui.error_select_birth_date
+import taminx.core.core_ui.error_select_relationship
+import taminx.core.core_ui.error_enter_education_code
+import taminx.core.core_ui.error_complete_additional_info
+import taminx.core.core_ui.error_daughter_commitment_required
+import taminx.core.core_ui.error_upload_all_docs
+import taminx.core.core_ui.doc_type_id_first_page
+import taminx.core.core_ui.doc_type_spouse_id
+import taminx.core.core_ui.doc_type_marriage_certificate
 
 private const val MAX_UPLOAD_SIZE_BYTES = 2_000_000
 private const val RELATION_CODE_SPOUSE = "01"
@@ -183,7 +193,7 @@ class AddDependentViewModel(
                 emit(PartialState.FamilyRelationshipsLoaded(relationships))
                 emit(PartialState.BottomSheetStateChanged(
                     config = TaminBottomSheetConfig(
-                        title = "انتخاب نسبت خانوادگی",
+                        title = getString(Res.string.picker_relationship_title),
                         type = TaminBottomSheetType.CUSTOM,
                         items = relationships.map {
                             TaminBottomSheetItem(id = it.id ?: 0, title = it.relationDesc.orEmpty(), isSelected = it.id == state.selectedRelationship?.id)
@@ -197,12 +207,13 @@ class AddDependentViewModel(
 
     private fun submitInquiryRegistry(): Flow<PartialState> = flow {
         val state = uiState.value
+        val errorTitle = getString(Res.string.error_title)
         if (state.birthDateTimeStamp.isBlank() && state.birthDatePersian.isBlank()) {
-            sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا تاریخ تولد را انتخاب کنید"))
+            sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_select_birth_date)))
             return@flow
         }
         if (state.selectedRelationship == null) {
-            sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا نسبت خانوادگی را انتخاب کنید"))
+            sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_select_relationship)))
             return@flow
         }
         emit(PartialState.Loading(true))
@@ -219,7 +230,8 @@ class AddDependentViewModel(
     private fun submitInquiryEducation(): Flow<PartialState> = flow {
         val state = uiState.value
         if (state.educationCode.isBlank()) {
-            sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا کد استعلام تحصیلی را وارد کنید"))
+            val errorTitle = getString(Res.string.error_title)
+            sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_enter_education_code)))
             return@flow
         }
         emit(PartialState.Loading(true))
@@ -255,19 +267,20 @@ class AddDependentViewModel(
 
     private fun onNextStepClicked(): Flow<PartialState> = flow {
         val state = uiState.value
+        val errorTitle = getString(Res.string.error_title)
         when (state.currentStep) {
             STEP_VERIFICATION -> {
                 if (state.selectedCityBirth == null || state.selectedCityIssuance == null || state.selectedBranch == null) {
-                    sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید"))
+                    sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_complete_additional_info)))
                     return@flow
                 }
                 when (state.stepperMode) {
                     StepperMode.SON_MODE -> if (state.needCallInquiryEducation) submitInquiryEducation().collect { emit(it) } else emit(PartialState.StepChanged(STEP_DOCUMENTS))
-                    StepperMode.DAUGHTER_MODE -> if (!state.isDaughterCommitmentChecked) sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "تایید تعهدنامه الزامی است")) else emit(PartialState.StepChanged(STEP_DOCUMENTS))
+                    StepperMode.DAUGHTER_MODE -> if (!state.isDaughterCommitmentChecked) sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_daughter_commitment_required))) else emit(PartialState.StepChanged(STEP_DOCUMENTS))
                     StepperMode.DEFAULT_MODE -> emit(PartialState.StepChanged(STEP_DOCUMENTS))
                 }
             }
-            STEP_DOCUMENTS -> if (!areRequiredDocumentsUploaded(state)) sendEvent(AddDependentEvent.ShowErrorDialog("خطا", "لطفا تمامی مدارک الزامی را بارگذاری کنید")) else submitFinalRequest().collect { emit(it) }
+            STEP_DOCUMENTS -> if (!areRequiredDocumentsUploaded(state)) sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_upload_all_docs))) else submitFinalRequest().collect { emit(it) }
         }
     }
 
@@ -306,10 +319,15 @@ class AddDependentViewModel(
             }
         } ?: StepperMode.DEFAULT_MODE
 
-    private fun evaluateDocumentRequirements(data: RegistryDataPR, relationCode: String): List<DocType> = when (relationCode) {
-        RELATION_CODE_SPOUSE -> listOf(DocType("1", "صفحه اول شناسنامه"), DocType("2", "صفحه مشخصات همسر شناسنامه"), DocType("3", "عقدنامه"))
-        RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(DocType("1", "صفحه اول شناسنامه", data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE), DocType("3", "عقدنامه", true))
-        else -> listOf(DocType("1", "صفحه اول شناسنامه"))
+    private suspend fun evaluateDocumentRequirements(data: RegistryDataPR, relationCode: String): List<DocType> {
+        val idFirstPage = getString(Res.string.doc_type_id_first_page)
+        val spouseId = getString(Res.string.doc_type_spouse_id)
+        val marriageCertificate = getString(Res.string.doc_type_marriage_certificate)
+        return when (relationCode) {
+            RELATION_CODE_SPOUSE -> listOf(DocType("1", idFirstPage), DocType("2", spouseId), DocType("3", marriageCertificate))
+            RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(DocType("1", idFirstPage, data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE), DocType("3", marriageCertificate, true))
+            else -> listOf(DocType("1", idFirstPage))
+        }
     }
 
     override fun reduceState(currentState: AddDependentState, partialState: PartialState): AddDependentState = when (partialState) {

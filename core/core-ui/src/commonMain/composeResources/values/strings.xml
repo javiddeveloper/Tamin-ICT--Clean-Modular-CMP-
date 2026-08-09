@@ -358,5 +358,25 @@
     <string name="picker_issue_place_title">انتخاب محل صدور</string>
     <string name="picker_branch_title">انتخاب شعبه</string>
 
+    <string name="verify_label_first_name">نام</string>
+    <string name="verify_label_last_name">نام خانوادگی</string>
+    <string name="verify_label_father_name">نام پدر</string>
+    <string name="verify_label_age">سن</string>
+    <string name="verify_label_age_value">%1$s سال</string>
+    <string name="verify_label_gender">جنسیت</string>
+    <string name="verify_label_relation">نسبت</string>
+    <string name="verify_label_national_id">کد ملی</string>
+    <string name="verify_label_birth_date">تاریخ تولد</string>
+    <string name="gender_male">مرد</string>
+    <string name="gender_female">زن</string>
+
+    <string name="doc_type_id_first_page">صفحه اول شناسنامه</string>
+    <string name="doc_type_spouse_id">صفحه مشخصات همسر شناسنامه</string>
+    <string name="doc_type_marriage_certificate">عقدنامه</string>
+
+    <string name="step_number_2">۱</string>
+    <string name="step_number_2">۲</string>
+    <string name="step_number_3">۳</string>
+
 </resources>
 

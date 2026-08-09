@@ -74,6 +74,9 @@ import taminx.core.core_ui.ic_tamin_user
 import taminx.core.core_ui.inquiry_submit_button
 import taminx.core.core_ui.step_complete
 import taminx.core.core_ui.step_get_info
+import taminx.core.core_ui.step_number_1
+import taminx.core.core_ui.step_number_2
+import taminx.core.core_ui.step_number_3
 import taminx.core.core_ui.step_upload_docs
 import taminx.core.core_ui.step_verify_info
 import taminx.core.core_ui.success_view_list
@@ -360,18 +363,21 @@ private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndic
     val verifyInfoTitle = stringResource(Res.string.step_verify_info)
     val uploadDocsTitle = stringResource(Res.string.step_upload_docs)
     val completeTitle = stringResource(Res.string.step_complete)
+    val step1Num = stringResource(Res.string.step_number_1)
+    val step2Num = stringResource(Res.string.step_number_2)
+    val step3Num = stringResource(Res.string.step_number_3)
 
-    return remember(currentStep, getInfoTitle, verifyInfoTitle, uploadDocsTitle, completeTitle) {
+    return remember(currentStep, getInfoTitle, verifyInfoTitle, uploadDocsTitle, completeTitle, step1Num, step2Num, step3Num) {
         val documentsTitle = if (currentStep >= STEP_SUCCESS) completeTitle else uploadDocsTitle
         persistentListOf(
             StepIndicatorModel(
                 title = getInfoTitle,
-                stepNumber = "۱",
+                stepNumber = step1Num,
                 state = if (currentStep <= STEP_INQUIRY) StepState.Active else StepState.Completed
             ),
             StepIndicatorModel(
                 title = verifyInfoTitle,
-                stepNumber = "۲",
+                stepNumber = step2Num,
                 state = when {
                     currentStep == STEP_VERIFICATION -> StepState.Active
                     currentStep > STEP_VERIFICATION -> StepState.Completed
@@ -380,7 +386,7 @@ private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndic
             ),
             StepIndicatorModel(
                 title = documentsTitle,
-                stepNumber = "۳",
+                stepNumber = step3Num,
                 state = when {
                     currentStep == STEP_DOCUMENTS -> StepState.Active
                     currentStep >= STEP_SUCCESS -> StepState.Completed
