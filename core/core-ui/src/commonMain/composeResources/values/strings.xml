@@ -408,9 +408,17 @@
     <string name="doc_type_spouse_id">صفحه مشخصات همسر شناسنامه</string>
     <string name="doc_type_marriage_certificate">عقدنامه</string>
 
-    <string name="step_number_2">۱</string>
+    <string name="step_number_1">۱</string>
     <string name="step_number_2">۲</string>
     <string name="step_number_3">۳</string>
+
+    <!-- Version History -->
+    <string name="profile_version_history_last_updated">آخرین به‌روزرسانی: %1$s</string>
+    <string name="profile_version_history_version_prefix">نسخه %1$s</string>
+    <string name="profile_version_history_release_date">تاریخ انتشار: %1$s</string>
+    <string name="profile_version_history_new_features">ویژگی‌های جدید</string>
+    <string name="profile_version_history_bug_fixes_and_improvements">رفع اشکال و بهینه‌سازی</string>
+    <string name="profile_version_history_latest_badge">جدیدترین</string>
 
 </resources>
 
