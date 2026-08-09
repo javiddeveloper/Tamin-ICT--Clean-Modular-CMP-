@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 class InboxInquiryLicenseUseCase(
     private val personalInboxRepository: PersonalInboxRepository,
 ) {
-    operator fun invoke(requestId: String, operation: String, duration: String? = null): Flow<Unit> {
-        return personalInboxRepository.inboxInquiryLicense(requestId, operation, duration)
+    operator fun invoke(requestId: String, operation: InboxLicenseOperation, duration: String? = null): Flow<Unit> {
+        return personalInboxRepository.inboxInquiryLicense(requestId, operation.value, duration)
     }
 }

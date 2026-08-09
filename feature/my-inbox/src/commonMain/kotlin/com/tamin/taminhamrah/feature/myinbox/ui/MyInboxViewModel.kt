@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.InboxLicenseOperation
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.collections.immutable.persistentListOf
@@ -196,7 +197,7 @@ class MyInboxViewModel(
         try {
             inboxInquiryLicenseUseCase(
                 requestId = requestId.toString(),
-                operation = "cancel"
+                operation = InboxLicenseOperation.CANCEL
             ).collect()
             emit(PartialState.HideCancelLicenseConfirmation)
             // Refresh inbox after cancellation
@@ -213,7 +214,7 @@ class MyInboxViewModel(
         try {
             inboxInquiryLicenseUseCase(
                 requestId = requestId.toString(),
-                operation = "ok",
+                operation = InboxLicenseOperation.APPROVE,
                 duration = duration.valueInDays.toString()
             ).collect()
             emit(PartialState.HideInquiryPermitSheet)

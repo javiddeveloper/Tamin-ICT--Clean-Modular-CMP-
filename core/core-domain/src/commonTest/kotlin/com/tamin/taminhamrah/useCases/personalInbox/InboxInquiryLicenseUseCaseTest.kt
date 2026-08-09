@@ -23,12 +23,12 @@ class InboxInquiryLicenseUseCaseTest : BaseUseCaseTest() {
     @Test
     fun `invoke should call inboxInquiryLicense on repository`() = runTest {
         val requestId = "req-123"
-        val operation = "verify"
+        val operation = InboxLicenseOperation.CANCEL
         val duration = "12"
 
         useCase(requestId, operation, duration).collect()
 
-        assertEquals(Triple(requestId, operation, duration), repository.lastInquiryParams)
+        assertEquals(Triple(requestId, operation.value, duration), repository.lastInquiryParams)
     }
 
     @Test
@@ -39,7 +39,7 @@ class InboxInquiryLicenseUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val actualException = assertFailsWith<RuntimeException> {
-            useCase(requestId, "op", "dur").collect()
+            useCase(requestId, InboxLicenseOperation.APPROVE, "dur").collect()
         }
         assertEquals(expectedException.message, actualException.message)
     }

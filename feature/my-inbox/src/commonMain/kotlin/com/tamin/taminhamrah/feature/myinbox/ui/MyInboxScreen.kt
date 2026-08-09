@@ -92,6 +92,7 @@ import taminx.core.core_ui.inbox_usage_format
 import taminx.core.core_ui.inbox_usage_label
 import taminx.core.core_ui.inbox_usage_zero
 import taminx.core.core_ui.pdf_filename_format
+import taminx.core.core_ui.toast_copy_tracking_code
 
 @Composable
 fun MyInboxScreen(
@@ -99,10 +100,6 @@ fun MyInboxScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(MyInboxIntent.LoadInbox)
-    }
 
     HandleMyInboxEvents(
         events = viewModel.events,
@@ -122,11 +119,12 @@ private fun HandleMyInboxEvents(
     onNavigateBack: () -> Unit
 ) {
     val toaster = LocalToaster.current
+    val copySuccessMsg = stringResource(Res.string.toast_copy_tracking_code)
     events.collectWithLifecycleAware { event ->
         when (event) {
             is MyInboxEvent.NavigateBack -> onNavigateBack()
             is MyInboxEvent.CopyToClipboard -> {
-                toaster.success("کد پیگیری کپی شد")
+                toaster.success(copySuccessMsg)
             }
             is MyInboxEvent.ShowError -> {
                 toaster.error(event.message)
