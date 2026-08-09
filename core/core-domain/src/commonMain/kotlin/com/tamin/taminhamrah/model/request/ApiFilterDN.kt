@@ -67,6 +67,12 @@ enum class FilterProperty(val key: String) {
     @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
     @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
     @SerialName("paymentType") PAYMENT_TYPE("paymentType"),
+    @SerialName("insuranceNumber") INSURANCE_NUMBER("insuranceNumber"),
+    @SerialName("endDate") END_DATE("endDate"),
+    @SerialName("recipient") RECIPIENT("recipient"),
+    @SerialName("branchName") BRANCH_NAME("branchName"),
+    @SerialName("target") TARGET("target"),
+    @SerialName("statusCode") STATUS_CODE("statusCode"),
     @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
 }
 
