@@ -94,7 +94,7 @@ private fun IdentitySectionCard(
                 .taminSurface()
                 // Design rows are padding:14px 16px, and the rule between them is
                 // inset by the same 16px (margin:0 16px). Spacing.md is 12dp, 4dp short.
-                .padding(horizontal = Spacing.lg),
+                .padding(horizontal = IdentityDimens.rowHorizontalPadding),
         ) {
             section.fields.forEachIndexed { index, field ->
                 // Names, not codes, so the value keeps the screen's reading direction.

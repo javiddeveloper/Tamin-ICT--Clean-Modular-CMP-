@@ -92,8 +92,14 @@ internal object IdentityDimens {
     /** Design: section caption `margin:20px 0 10px`. */
     val sectionLabelGap = 10.dp
 
-    /** Design: each row is `padding:14px 16px`; the horizontal half is Spacing.lg. */
+    /** Design: each row is `padding:14px 16px`. */
     val rowVerticalPadding = 14.dp
+
+    /**
+     * 20dp, not the design's 16px: asked for explicitly so the label and value sit further off
+     * the card's edges than the mock has them. The rule between rows follows the same inset.
+     */
+    val rowHorizontalPadding = 20.dp
 
     /** Gap between the stacked name/father/birth rows. */
     val cardFieldGap = 4.dp
