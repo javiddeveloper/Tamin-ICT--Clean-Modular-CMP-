@@ -8,7 +8,6 @@ import org.koin.dsl.module
 
 actual val platformModule: Module = module {
     single { getDatabaseBuilder() }
-//    single<NetworkRepository> { IosNetworkMonitor() }
     single<HttpClientEngine> {
         Darwin.create()
     }
