@@ -420,5 +420,16 @@
     <string name="profile_version_history_bug_fixes_and_improvements">رفع اشکال و بهینه‌سازی</string>
     <string name="profile_version_history_latest_badge">جدیدترین</string>
 
+    <!-- Dependents List -->
+    <string name="dependents_list_title">افراد تبعی</string>
+    <string name="dependents_list_header_subtitle">مشاهده و ثبت افراد تبعی بیمهٔ اصلی</string>
+    <string name="dependents_list_info_banner">از طریق این سرویس صرفاً همسر، فرزند پسر (زیر ۲۰ سال یا شاغل به تحصیل) و فرزند دختر (فاقد شغل و همسر) می‌توانند تحت پوشش قرار گیرند.</string>
+    <string name="dependents_list_btn_add_new">افزودن فرد جدید</string>
+    <string name="dependents_list_section_covered">افراد تحت پوشش</string>
+    <string name="dependents_list_empty_title">هیچ فرد تبعی ثبت نشده است</string>
+    <string name="dependents_list_unregistered_name">نام ثبت نشده</string>
+    <string name="dependents_list_status">وضعیت</string>
+    <string name="dependents_list_insurance_id">شماره بیمه</string>
+
 </resources>
 
