@@ -19,12 +19,18 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_cancel_license_message
+import taminx.core.core_ui.error_delete_message
+import taminx.core.core_ui.error_issue_license_message
+import taminx.core.core_ui.error_unknown_fallback
 import taminx.core.core_ui.permit_duration_one_day
 import taminx.core.core_ui.permit_duration_one_month
 import taminx.core.core_ui.permit_duration_one_week
@@ -60,17 +66,7 @@ class MyInboxViewModel(
             }
 
             is MyInboxIntent.OnItemActionClicked -> {
-                if (intent.actionValue == "ISSUE_LICENSE") {
-                    flow { emit(PartialState.ShowInquiryPermitSheet(intent.id)) }
-                } else if (intent.actionValue == "CANCEL_LICENSE") {
-                    flow { emit(PartialState.ShowCancelLicenseConfirmation(intent.id)) }
-                } else if (intent.actionValue == "CORRESPONDENCE") {
-                    flow { emit(PartialState.ShowPdfViewer(intent.id)) }
-                } else if (intent.actionValue == "DELETE") {
-                    flow { emit(PartialState.ShowDeleteConfirmation(intent.id)) }
-                } else {
-                    emptyFlow()
-                }
+                handleActionClicked(intent)
             }
 
             is MyInboxIntent.ShowDeleteConfirmation -> flow {
@@ -113,6 +109,20 @@ class MyInboxViewModel(
         }
     }
 
+    private fun emitError(message: String): PartialState {
+        sendEvent(ShowError(message))
+        return PartialState.Error(message)
+    }
+
+    private fun handleActionClicked(intent: MyInboxIntent.OnItemActionClicked): Flow<PartialState> =
+        when (intent.actionValue) {
+            ACTION_ISSUE_LICENSE -> flowOf(PartialState.ShowInquiryPermitSheet(intent.id))
+            ACTION_CANCEL_LICENSE -> flowOf(PartialState.ShowCancelLicenseConfirmation(intent.id))
+            ACTION_CORRESPONDENCE -> flowOf(PartialState.ShowPdfViewer(intent.id))
+            ACTION_DELETE -> flowOf(PartialState.ShowDeleteConfirmation(intent.id))
+            else -> emptyFlow()
+        }
+
     private fun handleLoadInbox(): Flow<PartialState> = merge(
         loadInboxItems(),
         loadInboxSize(),
@@ -135,7 +145,7 @@ class MyInboxViewModel(
                 emit(PartialState.ItemsLoaded(items.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message ?: "Unknown Error"))
+            emit(emitError(e.message ?: getString(Res.string.error_unknown_fallback)))
         }
     }
 
@@ -145,7 +155,7 @@ class MyInboxViewModel(
                 emit(PartialState.SizeLoaded(size.toPresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message ?: "Unknown Error"))
+            emit(emitError(e.message ?: getString(Res.string.error_unknown_fallback)))
         }
     }
 
@@ -174,7 +184,7 @@ class MyInboxViewModel(
             // Refresh inbox after deletion
             handleLoadInbox().collect { emit(it) }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message ?: "حذف پیام با خطا مواجه شد"))
+            emit(emitError(e.message ?: getString(Res.string.error_delete_message)))
         } finally {
             emit(PartialState.Loading(false))
         }
@@ -191,7 +201,7 @@ class MyInboxViewModel(
             // Refresh inbox after cancellation
             handleLoadInbox().collect { emit(it) }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message ?: "لغو مجوز با خطا مواجه شد"))
+            emit(emitError(e.message ?: getString(Res.string.error_cancel_license_message)))
         } finally {
             emit(PartialState.Loading(false))
         }
@@ -209,7 +219,7 @@ class MyInboxViewModel(
             // Refresh inbox after issuing
             handleLoadInbox().collect { emit(it) }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message ?: "صدور مجوز با خطا مواجه شد"))
+            emit(emitError(e.message ?: getString(Res.string.error_issue_license_message)))
         } finally {
             emit(PartialState.Loading(false))
         }
@@ -295,6 +305,12 @@ class MyInboxViewModel(
         )
     }
 
-    override fun createErrorState(message: String): PartialState =
-        PartialState.Error(message)
+    override fun createErrorState(message: String): PartialState = emitError(message)
+
+    companion object {
+        private const val ACTION_ISSUE_LICENSE = "ISSUE_LICENSE"
+        private const val ACTION_CANCEL_LICENSE = "CANCEL_LICENSE"
+        private const val ACTION_CORRESPONDENCE = "CORRESPONDENCE"
+        private const val ACTION_DELETE = "DELETE"
+    }
 }

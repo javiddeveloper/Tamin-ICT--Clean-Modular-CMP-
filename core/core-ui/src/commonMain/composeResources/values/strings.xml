@@ -335,5 +335,27 @@
     <string name="permit_duration_one_week">یک هفته</string>
     <string name="permit_duration_one_month">یک ماه</string>
     <string name="permit_duration_one_year">یک سال</string>
+
+    <!-- My Inbox Screen -->
+    <string name="inbox_title">صندوق شخصی من</string>
+    <string name="inbox_subtitle">فضایی برای نگهداری و اشتراک‌گذاری اسناد و مکاتبات</string>
+    <string name="inbox_empty_state">پیامی در صندوق شما یافت نشد</string>
+    <string name="inbox_usage_zero">۰ مگابایت</string>
+    <string name="inbox_usage_format">از %1$s مصرف شده</string>
+    <string name="inbox_free_space_format">%1$d٪ فضای آزاد</string>
+    <string name="inbox_usage_label">میزان فضای مصرف شده</string>
+    <string name="inbox_total_default">۱۰ مگابایت</string>
+    <string name="toast_copy_tracking_code">کد پیگیری کپی شد</string>
+    <string name="pdf_filename_format">correspondence_%1$d.pdf</string>
+    <string name="dialog_delete_title">حذف پیام</string>
+    <string name="dialog_delete_description">آیا از حذف اطلاعات اطمینان دارید؟</string>
+    <string name="dialog_delete_confirm">حذف</string>
+    <string name="dialog_cancel_license_title">لغو مجوز استعلام</string>
+    <string name="dialog_cancel_license_description">آیا از لغو مجوز استعلام برای این پیام اطمینان دارید؟</string>
+    <string name="dialog_cancel_license_confirm">لغو مجوز</string>
+    <string name="error_delete_message">حذف پیام با خطا مواجه شد</string>
+    <string name="error_cancel_license_message">لغو مجوز با خطا مواجه شد</string>
+    <string name="error_issue_license_message">صدور مجوز با خطا مواجه شد</string>
+    <string name="error_unknown_fallback">Unknown Error</string>
 </resources>
 

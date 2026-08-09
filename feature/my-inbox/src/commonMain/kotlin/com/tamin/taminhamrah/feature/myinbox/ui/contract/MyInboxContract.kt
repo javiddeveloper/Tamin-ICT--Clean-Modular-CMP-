@@ -66,4 +66,5 @@ sealed interface MyInboxIntent {
 sealed interface MyInboxEvent {
     data object NavigateBack : MyInboxEvent
     data class CopyToClipboard(val id: Long) : MyInboxEvent
+    data class ShowError(val message: String) : MyInboxEvent
 }

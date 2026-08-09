@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SegmentedRadialGauge
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -62,6 +63,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
@@ -71,8 +73,24 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.dialog_cancel_license_confirm
+import taminx.core.core_ui.dialog_cancel_license_description
+import taminx.core.core_ui.dialog_cancel_license_title
+import taminx.core.core_ui.dialog_delete_confirm
+import taminx.core.core_ui.dialog_delete_description
+import taminx.core.core_ui.dialog_delete_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_trash
+import taminx.core.core_ui.inbox_empty_state
+import taminx.core.core_ui.inbox_free_space_format
+import taminx.core.core_ui.inbox_subtitle
+import taminx.core.core_ui.inbox_title
+import taminx.core.core_ui.inbox_total_default
+import taminx.core.core_ui.inbox_usage_format
+import taminx.core.core_ui.inbox_usage_label
+import taminx.core.core_ui.inbox_usage_zero
+import taminx.core.core_ui.pdf_filename_format
 
 @Composable
 fun MyInboxScreen(
@@ -109,6 +127,9 @@ private fun HandleMyInboxEvents(
             is MyInboxEvent.CopyToClipboard -> {
                 toaster.success("کد پیگیری کپی شد")
             }
+            is MyInboxEvent.ShowError -> {
+                toaster.error(event.message)
+            }
         }
     }
 }
@@ -144,7 +165,7 @@ private fun MyInboxContent(
         topBar = {
             Column {
                 TaminTopAppBar(
-                    title = "صندوق شخصی من",
+                    title = stringResource(Res.string.inbox_title),
                     centerTitle = true,
                     background = profileGradientBrush,
                     bottomPadding = 20.dp,
@@ -172,7 +193,7 @@ private fun MyInboxContent(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "فضایی برای نگهداری و اشتراک‌گذاری اسناد و مکاتبات",
+                                text = stringResource(Res.string.inbox_subtitle),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = colors.textHeaderSubtitle
                             )
@@ -223,7 +244,6 @@ private fun MyInboxContent(
                                 colors = listOf(Color(0xFFD1D9E6), Color(0xFFF2F4F8), Color(0xFFD1D9E6))
                             )
                         )
-                        // حالت باز شده (Expanded)
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
@@ -234,19 +254,19 @@ private fun MyInboxContent(
                                 }
                         ) {
                             Text(
-                                text = state.size?.usageLabel ?: "۰ مگابایت",
+                                text = state.size?.usageLabel ?: stringResource(Res.string.inbox_usage_zero),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary,
                                 modifier = Modifier.padding(bottom = 6.dp, top = 40.dp)
                             )
                             Text(
-                                text = "از ${state.size?.totalLabel ?: "۱۰ مگابایت"} مصرف شده",
+                                text = stringResource(Res.string.inbox_usage_format, state.size?.totalLabel ?: stringResource(Res.string.inbox_total_default)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textMuted
                             )
                             val freePercent = ((1f - progress) * 100).toInt()
                             StatusPill(
-                                text = "$freePercent٪ فضای آزاد",
+                                text = stringResource(Res.string.inbox_free_space_format, freePercent),
                                 containerColor = colors.greenBg,
                                 contentColor = colors.greenText,
                                 icon = Icons.Default.FiberManualRecord,
@@ -255,7 +275,6 @@ private fun MyInboxContent(
                         }
                     }
 
-                    // حالت جمع شده (Collapsed) - نمایش در زیر گیج
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -265,7 +284,6 @@ private fun MyInboxContent(
                             }
                             .layout { measurable, constraints ->
                                 val placeable = measurable.measure(constraints)
-                                // تغییر ارتفاع بر اساس میزان جمع شدن برای جلوگیری از ایجاد فضای خالی در حالت باز
                                 val currentHeight = (placeable.height * motionState.progress).toInt()
                                 layout(placeable.width, currentHeight) {
                                     placeable.placeRelative(0, 0)
@@ -275,13 +293,13 @@ private fun MyInboxContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "میزان فضای مصرف شده",
+                            text = stringResource(Res.string.inbox_usage_label),
                             style = MaterialTheme.typography.labelMedium,
                             color = colors.textMuted
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             NumericText(
-                                text = state.size?.usageLabel ?: "۰ مگابایت",
+                                text = state.size?.usageLabel ?: stringResource(Res.string.inbox_usage_zero),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = colors.textPrimary
                             )
@@ -292,7 +310,7 @@ private fun MyInboxContent(
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
                             NumericText(
-                                text = state.size?.totalLabel ?: "۱۰ مگابایت",
+                                text = state.size?.totalLabel ?: stringResource(Res.string.inbox_total_default),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textMuted
                             )
@@ -302,45 +320,41 @@ private fun MyInboxContent(
             }
         }
     ) { innerPadding ->
-        if (state.isLoading && state.items.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-        } else if (state.items.isEmpty()) {
-            TaminEmptyState(
-                message = "پیامی در صندوق شما یافت نشد",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            )
-        } else {
-            LazyColumn(
-                state = lazyListState,
-                flingBehavior = snapFlingBehavior,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(Spacing.page),
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-            ) {
-                items(state.items, key = { it.id }) { item ->
-                    InboxItemCard(
-                        item = item,
-                        actions = item.actions,
-                        onActionSelect = { actionValue ->
-                            onIntent(MyInboxIntent.OnItemActionClicked(item.id, actionValue))
-                        },
-                        onCopyClick = {
-                            clipboardManager.setText(AnnotatedString(item.id.toString()))
-                            onIntent(MyInboxIntent.OnCopyClicked(item.id))
-                        },
-                    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (state.items.isEmpty() && !state.isLoading) {
+                TaminEmptyState(
+                    message = stringResource(Res.string.inbox_empty_state),
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else if (state.items.isNotEmpty()) {
+                LazyColumn(
+                    state = lazyListState,
+                    flingBehavior = snapFlingBehavior,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(Spacing.page),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+                ) {
+                    items(state.items, key = { it.id }) { item ->
+                        InboxItemCard(
+                            item = item,
+                            actions = item.actions,
+                            onActionSelect = { actionValue ->
+                                onIntent(MyInboxIntent.OnItemActionClicked(item.id, actionValue))
+                            },
+                            onCopyClick = {
+                                clipboardManager.setText(AnnotatedString(item.id.toString()))
+                                onIntent(MyInboxIntent.OnCopyClicked(item.id))
+                            },
+                        )
+                    }
                 }
+            }
+            if (state.isLoading) {
+                LoadingStateOverlay()
             }
         }
     }
@@ -359,7 +373,7 @@ private fun MyInboxContent(
 
     if (state.showPdfViewer && state.selectedPdfId != null) {
         TaminPdfViewer(
-            fileName = "correspondence_${state.selectedPdfId}.pdf",
+            fileName = stringResource(Res.string.pdf_filename_format, state.selectedPdfId),
             pdf = state.pdfDownload,
             downloadFailed = state.pdfDownloadFailed,
             onRequestDownload = {
@@ -373,11 +387,11 @@ private fun MyInboxContent(
 
     if (state.showDeleteConfirmation && state.selectedItemIdForDelete != null) {
         TaminConfirmationDialog(
-            title = "حذف پیام",
-            description = "آیا از حذف اطلاعات اطمینان دارید؟",
+            title = stringResource(Res.string.dialog_delete_title),
+            description = stringResource(Res.string.dialog_delete_description),
             confirmButton = {
                 TaminFilledButton(
-                    text = "حذف",
+                    text = stringResource(Res.string.dialog_delete_confirm),
                     icon = Icons.Outlined.Delete,
                     background = Brush.horizontalGradient(listOf(Color(0xFFEF4444), Color(0xFFDC2626))),
                     onClick = {
@@ -390,7 +404,7 @@ private fun MyInboxContent(
             },
             dismissButton = {
                 TaminOutlinedButton(
-                    text = "انصراف",
+                    text = stringResource(Res.string.action_cancel),
                     onClick = { onIntent(MyInboxIntent.DismissDeleteConfirmation) },
                     modifier = Modifier.fillMaxWidth(),
                     height = 50.dp,
@@ -404,11 +418,11 @@ private fun MyInboxContent(
 
     if (state.showCancelLicenseConfirmation && state.selectedItemIdForCancelLicense != null) {
         TaminConfirmationDialog(
-            title = "لغو مجوز استعلام",
-            description = "آیا از لغو مجوز استعلام برای این پیام اطمینان دارید؟",
+            title = stringResource(Res.string.dialog_cancel_license_title),
+            description = stringResource(Res.string.dialog_cancel_license_description),
             confirmButton = {
                 TaminFilledButton(
-                    text = "لغو مجوز",
+                    text = stringResource(Res.string.dialog_cancel_license_confirm),
                     background = Brush.horizontalGradient(listOf(Color(0xFFEF4444), Color(0xFFDC2626))),
                     onClick = {
                         onIntent(MyInboxIntent.ConfirmCancelLicense(state.selectedItemIdForCancelLicense))
@@ -420,7 +434,7 @@ private fun MyInboxContent(
             },
             dismissButton = {
                 TaminOutlinedButton(
-                    text = "انصراف",
+                    text = stringResource(Res.string.action_cancel),
                     onClick = { onIntent(MyInboxIntent.DismissCancelLicenseConfirmation) },
                     modifier = Modifier.fillMaxWidth(),
                     height = 50.dp,
