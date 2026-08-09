@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationRoute
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationViewModel
 import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
@@ -34,6 +36,9 @@ sealed interface ProfileRoute {
     data object VersionHistory : ProfileRoute
 
     @Serializable
+    data object ActiveRelation : ProfileRoute
+
+    @Serializable
     data object ContactUs : ProfileRoute
 }
 
@@ -54,6 +59,7 @@ fun NavGraphBuilder.profileGraph(
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
+                onNavigateToActiveRelation = { navController.navigate(ProfileRoute.ActiveRelation) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onOpenUrl = onOpenUrl,
@@ -74,6 +80,15 @@ fun NavGraphBuilder.profileGraph(
             val viewModel = koinViewModel<VersionHistoryViewModel>()
 
             VersionHistoryRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.ActiveRelation> {
+            val viewModel = koinViewModel<ActiveRelationViewModel>()
+
+            ActiveRelationRoute(
                 viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() }
             )
