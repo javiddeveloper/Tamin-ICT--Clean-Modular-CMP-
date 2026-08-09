@@ -1,11 +1,12 @@
 package com.tamin.taminhamrah.useCases.personalInbox
 
 import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
+import kotlinx.coroutines.flow.Flow
 
 class InboxInquiryLicenseUseCase(
     private val personalInboxRepository: PersonalInboxRepository,
 ) {
-    suspend operator fun invoke(requestId: String, operation: String, duration: String? = null) {
-        personalInboxRepository.inboxInquiryLicense(requestId, operation, duration)
+    operator fun invoke(requestId: String, operation: String, duration: String? = null): Flow<Unit> {
+        return personalInboxRepository.inboxInquiryLicense(requestId, operation, duration)
     }
 }

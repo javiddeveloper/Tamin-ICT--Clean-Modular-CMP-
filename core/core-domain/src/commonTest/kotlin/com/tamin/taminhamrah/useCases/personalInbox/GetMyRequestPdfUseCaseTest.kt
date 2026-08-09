@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.useCases.personalInbox
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.repository.personalInbox.FakePersonalInboxRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -26,7 +27,7 @@ class GetMyRequestPdfUseCaseTest : BaseUseCaseTest() {
         val expectedItem = sampleInboxItem()
         repository.inboxItemsResult = listOf(expectedItem)
 
-        val result = useCase(requestId)
+        val result = useCase(requestId).first()
 
         assertEquals(expectedItem, result)
     }
@@ -39,7 +40,7 @@ class GetMyRequestPdfUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val actualException = assertFailsWith<RuntimeException> {
-            useCase(requestId)
+            useCase(requestId).first()
         }
         assertEquals(expectedException.message, actualException.message)
     }

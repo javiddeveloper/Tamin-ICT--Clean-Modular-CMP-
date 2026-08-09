@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.useCases.personalInbox
 
 import com.tamin.taminhamrah.repository.personalInbox.FakePersonalInboxRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,7 +24,7 @@ class DeleteMyRequestUseCaseTest : BaseUseCaseTest() {
     fun `invoke should call deleteMyRequest on repository`() = runTest {
         val requestId = "req-123"
 
-        useCase(requestId)
+        useCase(requestId).collect()
 
         assertEquals(requestId, repository.deletedRequestId)
     }
@@ -36,7 +37,7 @@ class DeleteMyRequestUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val actualException = assertFailsWith<RuntimeException> {
-            useCase(requestId)
+            useCase(requestId).collect()
         }
         assertEquals(expectedException.message, actualException.message)
     }

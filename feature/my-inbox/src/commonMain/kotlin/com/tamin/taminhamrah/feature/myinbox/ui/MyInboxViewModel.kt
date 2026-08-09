@@ -18,7 +18,9 @@ import io.ktor.util.decodeBase64Bytes
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import org.jetbrains.compose.resources.getString
@@ -149,7 +151,7 @@ class MyInboxViewModel(
 
     private fun downloadPdf(requestId: Long): Flow<PartialState> = flow {
         try {
-            val response = getMyRequestPdfUseCase(requestId.toString())
+            val response = getMyRequestPdfUseCase(requestId.toString()).first()
             val base64String = response.pdf
             if (!base64String.isNullOrEmpty()) {
                 val bytes = base64String.decodeBase64Bytes()
@@ -167,7 +169,7 @@ class MyInboxViewModel(
     private fun handleDelete(requestId: Long): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            deleteMyRequestUseCase(requestId.toString())
+            deleteMyRequestUseCase(requestId.toString()).collect()
             emit(PartialState.HideDeleteConfirmation)
             // Refresh inbox after deletion
             handleLoadInbox().collect { emit(it) }
@@ -184,7 +186,7 @@ class MyInboxViewModel(
             inboxInquiryLicenseUseCase(
                 requestId = requestId.toString(),
                 operation = "cancel"
-            )
+            ).collect()
             emit(PartialState.HideCancelLicenseConfirmation)
             // Refresh inbox after cancellation
             handleLoadInbox().collect { emit(it) }
@@ -202,7 +204,7 @@ class MyInboxViewModel(
                 requestId = requestId.toString(),
                 operation = "ok",
                 duration = duration.valueInDays.toString()
-            )
+            ).collect()
             emit(PartialState.HideInquiryPermitSheet)
             // Refresh inbox after issuing
             handleLoadInbox().collect { emit(it) }

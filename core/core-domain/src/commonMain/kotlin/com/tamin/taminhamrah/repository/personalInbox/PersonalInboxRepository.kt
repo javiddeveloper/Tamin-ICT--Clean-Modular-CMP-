@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface PersonalInboxRepository {
     fun getInboxItems(query: ApiQueryParamDN?): Flow<List<PersonalInboxItemDN>>
     fun getInboxSize(): Flow<PersonalInboxSizeDN>
-    suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDN
-    suspend fun deleteMyRequest(requestId: String)
-    suspend fun inboxInquiryLicense(requestId: String, operation: String, duration: String? = null)
+    fun getMyRequestPDF(requestId: String): Flow<PersonalInboxItemDN>
+    fun deleteMyRequest(requestId: String): Flow<Unit>
+    fun inboxInquiryLicense(requestId: String, operation: String, duration: String? = null): Flow<Unit>
 }

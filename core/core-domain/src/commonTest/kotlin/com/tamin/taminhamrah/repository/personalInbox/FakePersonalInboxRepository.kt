@@ -26,18 +26,20 @@ class FakePersonalInboxRepository : PersonalInboxRepository {
         emit(inboxSizeResult)
     }
 
-    override suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDN {
+    override fun getMyRequestPDF(requestId: String): Flow<PersonalInboxItemDN> = flow {
         if (shouldThrowError) throw error
-        return inboxItemsResult.firstOrNull { it.id.toString() == requestId } ?: inboxItemsResult.first()
+        emit(inboxItemsResult.firstOrNull { it.id.toString() == requestId } ?: inboxItemsResult.first())
     }
 
-    override suspend fun deleteMyRequest(requestId: String) {
+    override fun deleteMyRequest(requestId: String): Flow<Unit> = flow {
         deletedRequestId = requestId
         if (shouldThrowError) throw error
+        emit(Unit)
     }
 
-    override suspend fun inboxInquiryLicense(requestId: String, operation: String, duration: String?) {
+    override fun inboxInquiryLicense(requestId: String, operation: String, duration: String?): Flow<Unit> = flow {
         lastInquiryParams = Triple(requestId, operation, duration)
         if (shouldThrowError) throw error
+        emit(Unit)
     }
 }

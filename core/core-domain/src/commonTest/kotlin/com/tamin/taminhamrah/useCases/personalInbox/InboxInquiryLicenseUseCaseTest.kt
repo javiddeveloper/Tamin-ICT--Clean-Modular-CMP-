@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.useCases.personalInbox
 
 import com.tamin.taminhamrah.repository.personalInbox.FakePersonalInboxRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -25,7 +26,7 @@ class InboxInquiryLicenseUseCaseTest : BaseUseCaseTest() {
         val operation = "verify"
         val duration = "12"
 
-        useCase(requestId, operation, duration)
+        useCase(requestId, operation, duration).collect()
 
         assertEquals(Triple(requestId, operation, duration), repository.lastInquiryParams)
     }
@@ -38,7 +39,7 @@ class InboxInquiryLicenseUseCaseTest : BaseUseCaseTest() {
         repository.error = expectedException
 
         val actualException = assertFailsWith<RuntimeException> {
-            useCase(requestId, "op", "dur")
+            useCase(requestId, "op", "dur").collect()
         }
         assertEquals(expectedException.message, actualException.message)
     }
