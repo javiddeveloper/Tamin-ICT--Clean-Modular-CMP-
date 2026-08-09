@@ -19,16 +19,18 @@ fun taminHamrahTypography(): Typography {
         // Display
         displayLarge = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(800),
             fontSize = 34.sp,
             lineHeight = 40.8.sp,
             letterSpacing = (-0.5).sp
         ),
-        displayMedium = defaultTypography.displayMedium.copy(fontFamily = fontFamily),
-        displaySmall = defaultTypography.displaySmall.copy(fontFamily = fontFamily),
+        displayMedium = defaultTypography.displayMedium.copy(fontFamily = fontFamily, fontFeatureSettings = "ss01"),
+        displaySmall = defaultTypography.displaySmall.copy(fontFamily = fontFamily, fontFeatureSettings = "ss01"),
         // H1
         headlineLarge = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(800),
             fontSize = 28.sp,
             lineHeight = 35.sp,
@@ -37,6 +39,7 @@ fun taminHamrahTypography(): Typography {
         // H2
         headlineMedium = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(700),
             fontSize = 24.sp,
             lineHeight = 31.2.sp,
@@ -45,6 +48,7 @@ fun taminHamrahTypography(): Typography {
         // H3
         headlineSmall = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(700),
             fontSize = 20.sp,
             lineHeight = 27.sp,
@@ -53,16 +57,18 @@ fun taminHamrahTypography(): Typography {
         // H4
         titleLarge = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(700),
             fontSize = 17.sp,
             lineHeight = 23.8.sp,
             letterSpacing = 0.sp
         ),
-        titleMedium = defaultTypography.titleMedium.copy(fontFamily = fontFamily),
-        titleSmall = defaultTypography.titleSmall.copy(fontFamily = fontFamily),
+        titleMedium = defaultTypography.titleMedium.copy(fontFamily = fontFamily, fontFeatureSettings = "ss01"),
+        titleSmall = defaultTypography.titleSmall.copy(fontFamily = fontFamily, fontFeatureSettings = "ss01"),
         // Body Large
         bodyLarge = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(400),
             fontSize = 16.sp,
             lineHeight = 27.2.sp,
@@ -71,6 +77,7 @@ fun taminHamrahTypography(): Typography {
         // Body Medium
         bodyMedium = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(400),
             fontSize = 14.sp,
             lineHeight = 23.8.sp,
@@ -79,6 +86,7 @@ fun taminHamrahTypography(): Typography {
         // Body Small
         bodySmall = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(400),
             fontSize = 13.sp,
             lineHeight = 20.8.sp,
@@ -87,6 +95,7 @@ fun taminHamrahTypography(): Typography {
         // Label
         labelLarge = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(700),
             fontSize = 12.5.sp,
             lineHeight = 17.5.sp,
@@ -95,11 +104,12 @@ fun taminHamrahTypography(): Typography {
         // Caption
         labelMedium = TextStyle(
             fontFamily = fontFamily,
+            fontFeatureSettings = "ss01",
             fontWeight = FontWeight(500),
             fontSize = 12.sp,
             lineHeight = 18.sp,
             letterSpacing = 0.sp
         ),
-        labelSmall = defaultTypography.labelSmall.copy(fontFamily = fontFamily)
+        labelSmall = defaultTypography.labelSmall.copy(fontFamily = fontFamily, fontFeatureSettings = "ss01")
     )
 }
