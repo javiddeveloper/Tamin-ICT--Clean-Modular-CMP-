@@ -1,8 +1,11 @@
 package com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -14,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.treatment.ui.components.CertificateList
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsIntent
@@ -22,10 +26,12 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.getString
@@ -35,7 +41,9 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.category_misc_claims
+import taminx.core.core_ui.costs_hero_subtitle
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_misc_claims
 
 
 @Composable
@@ -107,6 +115,24 @@ fun TreatmentCostsScreen(
                         contentDescription = stringResource(Res.string.action_back),
                         onClick = onBackClicked,
                     )
+                },
+                content = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                    ) {
+                        AnimatedRingHeaderIcon(
+                            icon = vectorResource(Res.drawable.ic_tamin_misc_claims)
+                        )
+                        androidx.compose.foundation.layout.Spacer(
+                            modifier = Modifier.padding(top = Spacing.xs)
+                        )
+                        androidx.compose.material3.Text(
+                            text = stringResource(Res.string.costs_hero_subtitle),
+                            style = typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.9f),
+                        )
+                    }
                 },
             )
         },

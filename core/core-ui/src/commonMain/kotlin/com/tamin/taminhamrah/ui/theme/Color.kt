@@ -197,3 +197,18 @@ val TaminIdentityCardShine = Brush.linearGradient(
 val TaminIdentityAvatarGlass = Brush.verticalGradient(
     listOf(Color.White.copy(alpha = 0.125f), Color.White.copy(alpha = 0.05f)),
 )
+
+/* ---- Treatment costs ------------------------------------------------------------------------ */
+
+/**
+ * The refund card's own gradients, from the design.
+ *
+ * Fixed in both themes like the bank palettes: the card is a document, and its accent identifies
+ * the service rather than following the app's light/dark surface.
+ */
+val TaminCostsAccentTop = Color(0xFF2FB9BC)
+val TaminCostsAccentBottom = Color(0xFF0E7C82)
+
+/** The «عملیات» button is green, not the card's teal. */
+val TaminCostsOperationsStart = Color(0xFF16C26B)
+val TaminCostsOperationsEnd = Color(0xFF03794A)

@@ -184,6 +184,12 @@
     <string name="search_apply">اعمال جستجو</string>
 
     <!-- Miscellaneous-claim certificates -->
+    <string name="costs_hero_subtitle">بازپرداخت هزینه‌های درمان</string>
+    <string name="costs_list_section_title">لیست بازپرداخت هزینه‌های درمان</string>
+    <string name="costs_official_doc_subtitle">سند رسمی - سازمان تأمین اجتماعی</string>
+    <string name="costs_file_payment">پرداختی پرونده</string>
+    <string name="costs_action_operations">عملیات</string>
+    <string name="costs_admission_label">شماره پذیرش</string>
     <string name="costs_empty">بازپرداخت هزینه‌ای برای نمایش وجود ندارد.</string>
     <string name="costs_admission_no">شماره پذیرش %1$s</string>
     <string name="costs_refund_amount">مبلغ بازپرداخت</string>
