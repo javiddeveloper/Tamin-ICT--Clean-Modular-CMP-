@@ -9,11 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.UIKitView
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVPlayer
-import platform.AVFoundation.pause
 import platform.AVFoundation.play
+import platform.AVFoundation.pause
 import platform.AVFoundation.setMuted
 import platform.AVKit.AVPlayerViewController
 import platform.Foundation.NSURL
+import platform.UIKit.UIView
 
 @Composable
 actual fun VideoPlayer(
@@ -34,7 +35,7 @@ actual fun VideoPlayer(
     }
 
     DisposableEffect(controller, autoPlay, muted) {
-        controller.player?.setMuted(muted)
+        controller.player?.muted = muted
         if (autoPlay) {
             controller.player?.play()
             onPlayingChanged(true)
@@ -56,7 +57,7 @@ actual fun VideoPlayer(
 
     UIKitView(
         modifier = modifier,
-        factory = { controller.view },
+        factory = { controller.view as UIView },
         update = { }
     )
 }

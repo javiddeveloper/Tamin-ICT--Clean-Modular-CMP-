@@ -88,15 +88,6 @@ class FakeUserRepository : UserRepository {
         emit(electronicFileResult)
     }
 
-    override suspend fun getElectronicFilePage(
-        page: Int,
-        limit: Int,
-        filters: List<ApiFilterDN>,
-    ): List<ElectronicFileDN> {
-        if (shouldThrowError) throw error
-        return electronicFilePages.getOrElse(page) { emptyList() }
-    }
-
     override suspend fun downloadDocument(url: String): PdfDownloadDN {
         if (shouldThrowError) throw error
         return PdfDownloadDN()

@@ -13,9 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.DocumentGrid
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.ElectronicFileHeader
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.contract.ElectronicFileEvent
@@ -49,6 +46,7 @@ fun ElectronicFileRoute(
 ) {
     LaunchedEffect(Unit) {
         viewModel.sendIntent(ElectronicFileIntent.LoadNationalCode)
+        viewModel.sendIntent(ElectronicFileIntent.LoadDocuments)
     }
 
     HandleElectronicFileEvents(
@@ -57,11 +55,9 @@ fun ElectronicFileRoute(
     )
 
     val state by viewModel.uiState.collectAsState()
-    val documents = viewModel.documents.collectAsLazyPagingItems()
 
     ElectronicFileScreen(
         state = state,
-        documents = documents,
         onIntent = viewModel::sendIntent,
         onBackClicked = onBackClicked,
     )
@@ -82,7 +78,6 @@ fun HandleElectronicFileEvents(
 @Composable
 fun ElectronicFileScreen(
     state: ElectronicFileUiState,
-    documents: LazyPagingItems<ElectronicFilePR>,
     onIntent: (ElectronicFileIntent) -> Unit,
     onBackClicked: () -> Unit,
 ) {
@@ -93,6 +88,7 @@ fun ElectronicFileScreen(
     }
     val onDismissViewer = remember(onIntent) { { onIntent(ElectronicFileIntent.DismissViewer) } }
     val onBack = remember(onIntent) { { onIntent(ElectronicFileIntent.OnBackClicked) } }
+    val onRetry = remember(onIntent) { { onIntent(ElectronicFileIntent.LoadDocuments) } }
 
     val colors = LocalTaminColors.current
 
@@ -122,8 +118,12 @@ fun ElectronicFileScreen(
             modifier = Modifier.padding(start = Spacing.page, end = Spacing.page, top = Spacing.md, bottom = Spacing.xs),
         )
 
+        // Narrow arguments rather than the whole state: the grid must not recompose when the
+        // viewer opens, and the viewer's fields change on every download tick.
         DocumentGrid(
-            documents = documents,
+            documents = state.documents,
+            isLoading = state.isLoading,
+            hasError = state.errorMessage != null,
             onOpen = onOpen,
             modifier = Modifier.fillMaxSize(),
         )
@@ -132,9 +132,9 @@ fun ElectronicFileScreen(
     // A failed refresh leaves the grid with nothing to show, so closing the dialog leaves the
     // screen rather than a blank page.
     ErrorStateView(
-        message = (documents.loadState.refresh as? LoadState.Error)?.error?.message,
+        message = state.errorMessage,
         onDismiss = onBackClicked,
-        onRetry = documents::retry,
+        onRetry = onRetry,
     )
 
     when (val target = state.openTarget) {

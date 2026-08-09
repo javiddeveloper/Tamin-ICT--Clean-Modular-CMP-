@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,15 +26,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import com.tamin.taminhamrah.model.erecords.ElectronicFilePR
+import kotlinx.collections.immutable.ImmutableList
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -42,7 +39,6 @@ import com.tamin.taminhamrah.ui.theme.shimmer
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.action_retry
 import taminx.core.core_ui.electronic_file_category
 import taminx.core.core_ui.electronic_file_empty
 import taminx.core.core_ui.electronic_file_registered_subtitle
@@ -93,18 +89,17 @@ fun ElectronicFileHeader(
  */
 @Composable
 fun DocumentGrid(
-    documents: LazyPagingItems<ElectronicFilePR>,
+    documents: ImmutableList<ElectronicFilePR>,
+    isLoading: Boolean,
+    hasError: Boolean,
     onOpen: (ElectronicFilePR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val refresh = documents.loadState.refresh
-
     when {
-        refresh is LoadState.Loading && documents.itemCount == 0 ->
-            DocumentGridSkeleton(modifier = modifier)
+        isLoading && documents.isEmpty() -> DocumentGridSkeleton(modifier = modifier)
 
-        // Guarded on error: a refresh that failed has no idea whether the person has documents.
-        refresh !is LoadState.Error && documents.itemCount == 0 ->
+        // Guarded on error: a request that failed has no idea whether the person has documents.
+        !hasError && documents.isEmpty() ->
             TaminEmptyState(
                 message = stringResource(Res.string.electronic_file_empty),
                 modifier = modifier,
@@ -117,39 +112,13 @@ fun DocumentGrid(
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            items(
-                count = documents.itemCount,
-                // itemKey peeks; indexing with documents[index] would register an access and
-                // trigger a page load for every item the grid merely keys, not just the visible ones.
-                key = documents.itemKey { it.id },
-            ) { index ->
-                val document = documents[index]
-                if (document != null) {
-                    DocumentCard(
-                        name = document.name,
-                        category = document.categoryName,
-                        thumb = document.thumb,
-                        onClick = { onOpen(document) },
-                    )
-                }
-            }
-
-            when (documents.loadState.append) {
-                is LoadState.Loading ->
-                    item(span = { GridItemSpan(COLUMNS) }) { AppendSpinner() }
-
-                // A failed next page is not worth a dialog — the pages already loaded are still
-                // usable, so it offers the retry inline and leaves the grid alone.
-                is LoadState.Error ->
-                    item(span = { GridItemSpan(COLUMNS) }) {
-                        TaminOutlinedButton(
-                            text = stringResource(Res.string.action_retry),
-                            onClick = documents::retry,
-                            modifier = Modifier.fillMaxWidth().padding(Spacing.md),
-                        )
-                    }
-
-                else -> Unit
+            items(items = documents, key = { it.id }) { document ->
+                DocumentCard(
+                    name = document.name,
+                    category = document.categoryName,
+                    thumb = document.thumb,
+                    onClick = { onOpen(document) },
+                )
             }
         }
     }
@@ -229,16 +198,3 @@ private fun DocumentGridSkeleton(modifier: Modifier = Modifier) {
         }
     }
 }
-
-@Composable
-private fun AppendSpinner() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(Spacing.md)
-            .clip(RoundedCornerShape(CornerRadius.card))
-            .shimmer(),
-    )
-}
-

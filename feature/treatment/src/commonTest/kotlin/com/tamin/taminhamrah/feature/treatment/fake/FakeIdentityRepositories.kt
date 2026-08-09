@@ -66,12 +66,6 @@ class FakeUserRepository : UserRepository {
             mobile = "09123456789"
         )
     )
-    override suspend fun getElectronicFilePage(
-        page: Int,
-        limit: Int,
-        filters: List<ApiFilterDN>
-    ): List<ElectronicFileDN> = emptyList()
-
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         PdfDownloadDN()
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")

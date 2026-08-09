@@ -39,17 +39,6 @@ interface UserRepository {
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<ElectronicFileDN>>
 
-    /**
-     * One page of the person's registered documents.
-     *
-     * [page] is zero-based, as Paging counts. Separate from [getElectronicFile] because a
-     * PagingSource needs a one-shot answer, not a stream.
-     */
-    suspend fun getElectronicFilePage(
-        page: Int,
-        limit: Int,
-        filters: List<ApiFilterDN> = emptyList(),
-    ): List<ElectronicFileDN>
 
     /** The document's PDF download stream. */
     suspend fun downloadDocument(url: String): PdfDownloadDN

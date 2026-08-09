@@ -126,26 +126,6 @@ internal class UserRepositoryImpl(
         emit(electronicFileList ?: emptyList())
     }
 
-    override suspend fun getElectronicFilePage(
-        page: Int,
-        limit: Int,
-        filters: List<ApiFilterDN>,
-    ): List<ElectronicFileDN> {
-        // The endpoint is ExtJS-style: a 1-based page alongside the row offset it implies.
-        // Unverified: could not be checked against a real server response (no device/network
-        // access available). If the second page repeats the first page's rows, try
-        // `page = page` (zero-based) with the same `start`.
-        val remoteData = userRemoteDataSource.getElectronicFile(
-            ApiQueryParamDN(
-                page = page + 1,
-                start = page * limit,
-                limit = limit,
-                filters = filters,
-            ),
-        )
-        return remoteData?.list?.map { it.toDomain() }.orEmpty()
-    }
-
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         userRemoteDataSource.downloadDocument(url).toDomain()
 

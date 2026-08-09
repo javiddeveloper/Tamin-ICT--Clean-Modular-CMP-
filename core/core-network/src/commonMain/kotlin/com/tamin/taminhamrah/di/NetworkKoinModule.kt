@@ -10,13 +10,13 @@ import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
 import com.tamin.taminhamrah.repository.authRepository.AuthTokenInvalidatorImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
-import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.util.NetworkConstants
+import com.tamin.taminhamrah.util.AppConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProviders
+import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -30,6 +30,7 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -159,39 +160,27 @@ private fun createHttpClient(
                 sendWithoutRequest { true }
                 loadTokens {
                     val token = authRepository.getAccessToken()
-                    // Ktor caches whatever this returns — null included — and never calls it
-                    // again until clearToken(). A null here therefore strips the Authorization
-                    // header from every later request on this client, which is why every token
-                    // write goes through AuthTokenInvalidator.
-                    if (token.isNullOrBlank()) {
-                        KermitLogger.w(tag = "KtorAuth") { "loadTokens: no stored token; requests will be unauthenticated until invalidated." }
-                        null
-                    } else {
-                        // refreshToken is deliberately blank: the real one lives in
-                        // TokenStoreManager, and Ktor only needs a non-null value to arm refresh.
-                        BearerTokens(accessToken = token, refreshToken = "")
+                    // Since AuthRepository handles persistence, we don't need to manually read from DataStore here
+                    // However, BearerTokens needs a non-null refreshToken (even if it's empty) for Ktor to trigger refreshTokens block
+                    token?.let {
+                        BearerTokens(
+                            accessToken = it,
+                            refreshToken = "" // We'll handle the actual refresh token inside AuthRepository
+                        )
                     }
                 }
                 refreshTokens {
-                    val refreshed = authRepository.refreshToken()
-                    val token = authRepository.getAccessToken()
-                    when {
-                        refreshed && !token.isNullOrBlank() ->
-                            BearerTokens(accessToken = token, refreshToken = "")
-
-                        // Refresh failed but a token is still stored. Returning null would set the
-                        // holder to null and unauthenticate every subsequent request for the rest
-                        // of the process; hand back what we have instead. Ktor retries the request
-                        // once and then surfaces the 401, so this cannot loop.
-                        !token.isNullOrBlank() -> {
-                            KermitLogger.w(tag = "KtorAuth") { "refreshTokens: refresh failed, reusing stored token rather than clearing it." }
-                            BearerTokens(accessToken = token, refreshToken = "")
-                        }
-
-                        else -> {
-                            KermitLogger.e(tag = "KtorAuth") { "refreshTokens: refresh failed and no stored token; the user is signed out." }
-                            null
-                        }
+                    val success = authRepository.refreshToken()
+                    if (success) {
+                        val newAccessToken = authRepository.getAccessToken()
+                        if (newAccessToken != null) {
+                            BearerTokens(
+                                accessToken = newAccessToken,
+                                refreshToken = ""
+                            )
+                        } else null
+                    } else {
+                        null
                     }
                 }
             }
