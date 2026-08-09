@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,10 +30,6 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 
-/**
- * A flat, filled row used for tap-to-open selectors (dropdowns, date pickers) across every
- * step of the wizard — mirrors the design's rounded, bordered field style.
- */
 @Composable
 internal fun SelectableFieldRow(
     value: String,
@@ -71,7 +67,6 @@ internal fun SelectableFieldRow(
     }
 }
 
-/** Bold, primary-colored heading used above each step's main content block. */
 @Composable
 internal fun StepSectionTitle(title: String, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
@@ -84,7 +79,6 @@ internal fun StepSectionTitle(title: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** Bordered square icon button used for the wizard's secondary "previous step" action. */
 @Composable
 internal fun SquareIconButton(
     icon: ImageVector,
@@ -110,7 +104,6 @@ internal fun SquareIconButton(
     }
 }
 
-/** Shimmer placeholder for the initial data loading in the "Add Dependent" flow. */
 @Composable
 internal fun AddDependentShimmer(modifier: Modifier = Modifier) {
     Column(
@@ -118,7 +111,6 @@ internal fun AddDependentShimmer(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(Spacing.lg)
     ) {
-        // Step title placeholder
         ShimmerBlock(
             modifier = Modifier
                 .width(200.dp)
@@ -127,7 +119,6 @@ internal fun AddDependentShimmer(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(Spacing.lg))
 
-        // Form fields placeholders
         repeat(3) {
             ShimmerBlock(
                 modifier = Modifier

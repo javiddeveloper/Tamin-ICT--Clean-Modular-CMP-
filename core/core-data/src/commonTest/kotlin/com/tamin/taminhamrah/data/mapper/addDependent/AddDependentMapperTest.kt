@@ -1,12 +1,12 @@
 package com.tamin.taminhamrah.data.mapper.addDependent
 
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.RequestFileDN
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -16,7 +16,7 @@ class AddDependentMapperTest {
 
     @Test
     fun branchDto_toDomain_mapsCorrectly() {
-        val dto = BranchDto(
+        val dto = BranchDTO(
             branchCode = "0101",
             branchName = "شعبه مرکزی",
             workshopCode = "9900",
@@ -33,7 +33,7 @@ class AddDependentMapperTest {
 
     @Test
     fun registryDataDto_toDomain_mapsCorrectly() {
-        val dto = RegistryDataDto(
+        val dto = RegistryDataDTO(
             age = 30,
             birthDate = "1372/05/10",
             fatherName = "محمد",
@@ -58,7 +58,7 @@ class AddDependentMapperTest {
 
     @Test
     fun familyRelationshipDto_toDomain_mapsCorrectly() {
-        val dto = FamilyRelationshipDto(
+        val dto = FamilyRelationshipDTO(
             id = 10,
             relationCode = "REL_01",
             relationDesc = "همسر",
@@ -75,7 +75,7 @@ class AddDependentMapperTest {
 
     @Test
     fun uploadImageResponseDto_toDomain_mapsCorrectly() {
-        val dto = UploadImageResponseDto(guid = "GUID-123-456")
+        val dto = UploadImageResponseDTO(guid = "GUID-123-456")
 
         val domain = dto.toDomain()
 
@@ -84,7 +84,7 @@ class AddDependentMapperTest {
 
     @Test
     fun generalResponseDto_toDomain_mapsCorrectly() {
-        val dto = GeneralResponseDto(
+        val dto = GeneralResponseDTO(
             isSuccess = true,
             message = "عملیات با موفقیت انجام شد",
             code = 200

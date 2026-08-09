@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.apiService.addDependent
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -129,13 +129,9 @@ class AddDependentApiServiceTest : BaseApiTest() {
     fun uploadImage_returnsUploadImageResponse() = runTest {
         val jsonResponse = """
             {
-                "status": 200,
-                "family": "SUCCESS",
-                "reason": "OK",
-                "data": {
-                    "guid": "FILE_9988",
-                    "isSuccess": true
-                }
+                "guid": "a4769aa8-b9af-4183-83b9-367dc9f52511",
+                "isSuccess": true,
+                "message": "Upload successful"
             }
         """.trimIndent()
 
@@ -153,9 +149,9 @@ class AddDependentApiServiceTest : BaseApiTest() {
 
         val response = apiService.uploadImage(multipartBody)
 
-        assertEquals(200, response.status)
-        assertNotNull(response.data)
-        assertEquals("FILE_9988", response.data?.guid)
+        assertNotNull(response)
+        assertTrue(response.isSuccess)
+        assertEquals("a4769aa8-b9af-4183-83b9-367dc9f52511", response.guid)
     }
 
     @Test
@@ -176,7 +172,7 @@ class AddDependentApiServiceTest : BaseApiTest() {
         val apiService = ktorfit.createAddDependentApiService()
 
         val response = apiService.addNewDependent(
-            RequestAddDependentDto(
+            RequestAddDependentDTO(
                 nationalId = "0012345678"
             )
         )

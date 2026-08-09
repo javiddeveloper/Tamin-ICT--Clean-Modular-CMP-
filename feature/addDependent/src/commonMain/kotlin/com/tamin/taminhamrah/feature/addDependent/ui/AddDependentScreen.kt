@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -33,21 +33,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentEvent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.BottomSheetTarget
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_DOCUMENTS
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_INQUIRY
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_SUCCESS
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.STEP_VERIFICATION
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentEvent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.BottomSheetTarget
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_DOCUMENTS
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_INQUIRY
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_SUCCESS
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_VERIFICATION
 import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -75,6 +74,9 @@ import taminx.core.core_ui.ic_tamin_user
 import taminx.core.core_ui.inquiry_submit_button
 import taminx.core.core_ui.step_complete
 import taminx.core.core_ui.step_get_info
+import taminx.core.core_ui.step_number_1
+import taminx.core.core_ui.step_number_2
+import taminx.core.core_ui.step_number_3
 import taminx.core.core_ui.step_upload_docs
 import taminx.core.core_ui.step_verify_info
 import taminx.core.core_ui.success_view_list
@@ -117,12 +119,6 @@ fun AddDependentRoute(
     }
 }
 
-/**
- * Maps a bottom sheet selection back to the intent for whichever picker opened it.
- *
- * Selection ids are list indices (see the picker configs in the ViewModel) because branch and
- * city codes are zero-padded strings that do not survive a round trip through [Int].
- */
 private fun resolvePickerSelection(
     result: TaminBottomSheetResult,
     state: AddDependentState
@@ -179,10 +175,6 @@ fun AddDependentContent(
     }
 
     val errorMessage = state.error
-    // Active branches are the only lookup still fetched eagerly on screen open (family
-    // relationships and cities are now fetched lazily when their pickers open, see the
-    // ViewModel), so they're what gates the initial blocking loading/error state. Later
-    // failures (e.g. while submitting the inquiry) must not wipe the data already entered.
     val isInitialLoad = state.currentStep == STEP_INQUIRY && state.activeBranches.isEmpty()
     val showBlockingError = errorMessage != null && isInitialLoad
 
@@ -371,18 +363,21 @@ private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndic
     val verifyInfoTitle = stringResource(Res.string.step_verify_info)
     val uploadDocsTitle = stringResource(Res.string.step_upload_docs)
     val completeTitle = stringResource(Res.string.step_complete)
+    val step1Num = stringResource(Res.string.step_number_1)
+    val step2Num = stringResource(Res.string.step_number_2)
+    val step3Num = stringResource(Res.string.step_number_3)
 
-    return remember(currentStep, getInfoTitle, verifyInfoTitle, uploadDocsTitle, completeTitle) {
+    return remember(currentStep, getInfoTitle, verifyInfoTitle, uploadDocsTitle, completeTitle, step1Num, step2Num, step3Num) {
         val documentsTitle = if (currentStep >= STEP_SUCCESS) completeTitle else uploadDocsTitle
         persistentListOf(
             StepIndicatorModel(
                 title = getInfoTitle,
-                stepNumber = "۱",
+                stepNumber = step1Num,
                 state = if (currentStep <= STEP_INQUIRY) StepState.Active else StepState.Completed
             ),
             StepIndicatorModel(
                 title = verifyInfoTitle,
-                stepNumber = "۲",
+                stepNumber = step2Num,
                 state = when {
                     currentStep == STEP_VERIFICATION -> StepState.Active
                     currentStep > STEP_VERIFICATION -> StepState.Completed
@@ -391,7 +386,7 @@ private fun rememberAddDependentSteps(currentStep: Int): ImmutableList<StepIndic
             ),
             StepIndicatorModel(
                 title = documentsTitle,
-                stepNumber = "۳",
+                stepNumber = step3Num,
                 state = when {
                     currentStep == STEP_DOCUMENTS -> StepState.Active
                     currentStep >= STEP_SUCCESS -> StepState.Completed

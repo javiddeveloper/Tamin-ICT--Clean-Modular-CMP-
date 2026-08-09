@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.useCases.addDependent
 
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
-import com.tamin.taminhamrah.repository.AddDependentRepository
+import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 
 class InquiryRegistryUseCase(
@@ -11,9 +11,5 @@ class InquiryRegistryUseCase(
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): Flow<RegistryDataDN> = repository.inquiryRegistry(
-        dependentNationalId = dependentNationalId,
-        birthDateTimeStamp = birthDateTimeStamp,
-        dependencyCode = dependencyCode
-    )
+    ): Flow<RegistryDataDN> = repository.inquiryRegistry(dependentNationalId, birthDateTimeStamp, dependencyCode)
 }

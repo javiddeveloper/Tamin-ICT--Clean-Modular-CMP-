@@ -1,14 +1,14 @@
 package com.tamin.taminhamrah.dataSource.addDependent
 
 import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -20,7 +20,7 @@ import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-internal class AddDependentRemoteDataSourceImpl(
+class AddDependentRemoteDataSourceImpl(
     private val apiService: AddDependentApiService,
     private val apiQueryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser

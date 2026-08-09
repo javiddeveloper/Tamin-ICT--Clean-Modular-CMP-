@@ -74,6 +74,21 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_user
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.action_back
+import taminx.core.core_ui.action_retry
+import taminx.core.core_ui.identity_field_birth_date
+import taminx.core.core_ui.identity_field_father_name
+import taminx.core.core_ui.identity_field_national_code
+import taminx.core.core_ui.dependents_list_title
+import taminx.core.core_ui.dependents_list_header_subtitle
+import taminx.core.core_ui.dependents_list_info_banner
+import taminx.core.core_ui.dependents_list_btn_add_new
+import taminx.core.core_ui.dependents_list_section_covered
+import taminx.core.core_ui.dependents_list_empty_title
+import taminx.core.core_ui.dependents_list_unregistered_name
+import taminx.core.core_ui.dependents_list_status
+import taminx.core.core_ui.dependents_list_insurance_id
 
 @Composable
 fun DependentsListRoute(
@@ -135,14 +150,14 @@ fun DependentsListScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TaminTopAppBar(
-                title = "افراد تبعی",
+                title = stringResource(Res.string.dependents_list_title),
                 background = profileGradientBrush,
                 bottomPadding = Spacing.xl,
                 shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = "بازگشت",
+                        contentDescription = stringResource(Res.string.action_back),
                         onClick = onBackClicked,
                         bordered = true
                     )
@@ -161,7 +176,7 @@ fun DependentsListScreen(
                         AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_user))
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Text(
-                            text = "مشاهده و ثبت افراد تبعی بیمهٔ اصلی",
+                            text = stringResource(Res.string.dependents_list_header_subtitle),
                             style = MaterialTheme.typography.labelLarge,
                             color = taminColors.textHeaderSubtitle
                         )
@@ -194,19 +209,19 @@ fun DependentsListScreen(
                 ) {
                     item {
                         BannerCard(
-                            message = "از طریق این سرویس صرفاً همسر، فرزند پسر (زیر ۲۰ سال یا شاغل به تحصیل) و فرزند دختر (فاقد شغل و همسر) می‌توانند تحت پوشش قرار گیرند.",
+                            message = stringResource(Res.string.dependents_list_info_banner),
                             type = BannerType.Info
                         )
                     }
                     item {
                         TaminFilledButton(
-                            text = "افزودن فرد جدید",
+                            text = stringResource(Res.string.dependents_list_btn_add_new),
                             onClick = { onIntent(DependentsListIntent.OnAddDependentClicked) },
                             icon = Icons.Filled.Add
                         )
                     }
                     item {
-                        SectionLabel(text = "افراد تحت پوشش")
+                        SectionLabel(text = stringResource(Res.string.dependents_list_section_covered))
                     }
                     if (state.dependentsList.isEmpty()) {
                         item {
@@ -218,8 +233,8 @@ fun DependentsListScreen(
                             ) {
                                 EmptyStateMessage(
                                     icon = vectorResource(Res.drawable.ic_tamin_user),
-                                    title = "هیچ فرد تبعی ثبت نشده است",
-                                    actionLabel = "تلاش مجدد",
+                                    title = stringResource(Res.string.dependents_list_empty_title),
+                                    actionLabel = stringResource(Res.string.action_retry),
                                     onAction = { onIntent(DependentsListIntent.OnRefreshClicked) }
                                 )
                             }
@@ -268,9 +283,9 @@ private fun DependentCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Column( modifier = Modifier.fillMaxWidth().weight(0.8f),verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 Text(
-                    text = dependent.fullName.ifBlank { "نام ثبت نشده" },
+                    text = dependent.fullName.ifBlank { stringResource(Res.string.dependents_list_unregistered_name) },
                     color = colors.textPrimary,
                     fontSize = 14.5.sp,
                     fontWeight = FontWeight.ExtraBold
@@ -281,22 +296,24 @@ private fun DependentCard(
                     contentColor = colors.blueText
                 )
             }
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(colors.bgPage)
-                    .border(1.dp, colors.border, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_show_more),
-                    contentDescription = null,
-                    tint = colors.chevron,
+            Box(modifier = Modifier.fillMaxWidth().weight(0.2f) , contentAlignment = Alignment.CenterEnd){
+                Box(
                     modifier = Modifier
-                        .size(17.dp)
-                        .rotate(rotation)
-                )
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(colors.bgPage)
+                        .border(1.dp, colors.border, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_arrow_show_more),
+                        contentDescription = null,
+                        tint = colors.chevron,
+                        modifier = Modifier
+                            .size(17.dp)
+                            .rotate(rotation)
+                    )
+                }
             }
         }
 
@@ -307,11 +324,11 @@ private fun DependentCard(
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
-                DetailRow(label = "کد ملی", value = dependent.nationalCode, numeric = true)
-                DetailRow(label = "تاریخ تولد", value = dependent.birthDate.ifBlank { "-" }, numeric = true)
-                DetailRow(label = "نام پدر", value = dependent.fatherName.ifBlank { "-" }, numeric = false)
-                DetailRow(label = "شماره بیمه", value = dependent.insuranceId.ifBlank { "-" }, numeric = true)
-                DetailRow(label = "وضعیت", value = dependent.status.ifBlank { "-" }, numeric = false)
+                DetailRow(label = stringResource(Res.string.identity_field_national_code), value = dependent.nationalCode, numeric = true)
+                DetailRow(label = stringResource(Res.string.identity_field_birth_date), value = dependent.birthDate.ifBlank { "-" }, numeric = true)
+                DetailRow(label = stringResource(Res.string.identity_field_father_name), value = dependent.fatherName.ifBlank { "-" }, numeric = false)
+                DetailRow(label = stringResource(Res.string.dependents_list_insurance_id), value = dependent.insuranceId.ifBlank { "-" }, numeric = true)
+                DetailRow(label = stringResource(Res.string.dependents_list_status), value = dependent.status.ifBlank { "-" }, numeric = false)
             }
             Box(
                 modifier = Modifier

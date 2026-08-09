@@ -1,29 +1,29 @@
 package com.tamin.taminhamrah.dataSource.addDependent
 
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 
 interface AddDependentRemoteDataSource {
-    suspend fun getDependentInfo(): List<DependentInfoDto>
-    suspend fun getActiveBranches(): List<BranchDto>
+    suspend fun getDependentInfo(): List<DependentInfoDTO>
+    suspend fun getActiveBranches(): List<BranchDTO>
     suspend fun getFamilyRelationships(
         filter: List<ApiFilterDN> = emptyList()
-    ): List<FamilyRelationshipDto>
+    ): List<FamilyRelationshipDTO>
     suspend fun getFamilyRelationshipsFromProxy(
         filter: List<ApiFilterDN> = emptyList()
-    ): List<FamilyRelationshipProxyDto>
+    ): List<FamilyRelationshipProxyDTO>
     suspend fun inquiryRegistry(
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): RegistryDataDto
+    ): RegistryDataDTO
     suspend fun inquiryEducationCode(
         nationalId: String,
         educationCode: String
@@ -32,8 +32,8 @@ interface AddDependentRemoteDataSource {
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): UploadImageResponseDto
+    ): UploadImageResponseDTO
     suspend fun addNewDependent(
-        request: RequestAddDependentDto
-    ): GeneralResponseDto
+        request: RequestAddDependentDTO
+    ): GeneralResponseDTO
 }

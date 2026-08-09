@@ -1,13 +1,13 @@
 package com.tamin.taminhamrah.apiService.addDependent
 
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
@@ -18,32 +18,30 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import io.ktor.client.request.forms.MultiPartFormDataContent
 
-internal interface AddDependentApiService {
+interface AddDependentApiService {
 
     @GET("services/dependent-info")
-    suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDto>>
+    suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDTO>>
 
-    // Real backend route confirmed via UserApiService.getInsuredActiveBranch(), which this
-    // module's DTO shape (branchCode/branchName/workshopCode/workshopName) already matches.
     @GET("subdominants/getInsuredActiveBranch")
-    suspend fun getActiveBranches(): BaseDTO<List<BranchDto>>
+    suspend fun getActiveBranches(): BaseDTO<List<BranchDTO>>
 
     @GET("services/family-relationships")
     suspend fun getFamilyRelationships(
         @QueryMap parameters: Map<String, String> = emptyMap()
-    ): BaseDTO<List<FamilyRelationshipDto>>
+    ): BaseDTO<List<FamilyRelationshipDTO>>
 
     @GET("proxy/models/dependency")
     suspend fun getFamilyRelationshipsFromProxy(
         @QueryMap parameters: Map<String, String>
-    ): BaseDTO<ListData<FamilyRelationshipProxyDto>>
+    ): BaseDTO<ListData<FamilyRelationshipProxyDTO>>
 
     @GET("subdominants/getOfficeData/{nationalCode}/{timeStampBirthDay}/{dependencyCode}")
     suspend fun inquiryRegistry(
         @Path("nationalCode") dependentNationalId: String,
         @Path("timeStampBirthDay") birthDateTimeStamp: String,
         @Path("dependencyCode") dependencyCode: String
-    ): BaseDTO<RegistryDataDto>
+    ): BaseDTO<RegistryDataDTO>
 
     @GET("services/inquiry-education")
     suspend fun inquiryEducationCode(
@@ -51,13 +49,13 @@ internal interface AddDependentApiService {
         @Query("educationCode") educationCode: String
     ): BaseDTO<String>
 
-    @POST("services/upload-image")
+    @POST("upload-image")
     suspend fun uploadImage(
         @Body body: MultiPartFormDataContent
-    ): BaseDTO<UploadImageResponseDto>
+    ): UploadImageResponseDTO
 
     @POST("services/add-dependent")
     suspend fun addNewDependent(
-        @Body request: RequestAddDependentDto
-    ): BaseDTO<GeneralResponseDto>
+        @Body request: RequestAddDependentDTO
+    ): BaseDTO<GeneralResponseDTO>
 }

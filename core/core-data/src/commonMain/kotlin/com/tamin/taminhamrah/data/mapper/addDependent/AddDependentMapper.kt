@@ -1,29 +1,29 @@
 package com.tamin.taminhamrah.data.mapper.addDependent
 
-import com.tamin.taminhamrah.model.addDependent.BailTypeDto
-import com.tamin.taminhamrah.model.addDependent.BranchDto
+import com.tamin.taminhamrah.model.addDependent.BailTypeDTO
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
 import com.tamin.taminhamrah.model.addDependent.BranchDN
-import com.tamin.taminhamrah.model.addDependent.DependencyDto
-import com.tamin.taminhamrah.model.addDependent.DependentTypeDto
-import com.tamin.taminhamrah.model.addDependent.DocumentFileDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
+import com.tamin.taminhamrah.model.addDependent.DependencyDTO
+import com.tamin.taminhamrah.model.addDependent.DependentTypeDTO
+import com.tamin.taminhamrah.model.addDependent.DocumentFileDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
 import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
-import com.tamin.taminhamrah.model.addDependent.ParentIdDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
+import com.tamin.taminhamrah.model.addDependent.ParentIdDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
-import com.tamin.taminhamrah.model.addDependent.RequestFileDto
+import com.tamin.taminhamrah.model.addDependent.RequestFileDTO
 import com.tamin.taminhamrah.model.addDependent.RequestFileDN
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
 
-internal fun DependentInfoDto.toDomain(): DependentInfoDN = DependentInfoDN(
+fun DependentInfoDTO.toDomain(): DependentInfoDN = DependentInfoDN(
     id = id.orEmpty(),
     nationalId = nationalId.orEmpty(),
     fullName = fullName.orEmpty(),
@@ -32,14 +32,14 @@ internal fun DependentInfoDto.toDomain(): DependentInfoDN = DependentInfoDN(
     birthDatePersian = birthDatePersian.orEmpty()
 )
 
-internal fun BranchDto.toDomain(): BranchDN = BranchDN(
+fun BranchDTO.toDomain(): BranchDN = BranchDN(
     branchCode = branchCode,
     branchName = branchName,
     workshopCode = workshopCode,
     workshopName = workshopName
 )
 
-internal fun RegistryDataDto.toDomain(): RegistryDataDN = RegistryDataDN(
+fun RegistryDataDTO.toDomain(): RegistryDataDN = RegistryDataDN(
     age = age,
     birthDate = birthDate,
     fatherName = fatherName,
@@ -50,50 +50,50 @@ internal fun RegistryDataDto.toDomain(): RegistryDataDN = RegistryDataDN(
     registryConfirmState = registryConfirmState
 )
 
-internal fun FamilyRelationshipDto.toDomain(): FamilyRelationshipDN = FamilyRelationshipDN(
+fun FamilyRelationshipDTO.toDomain(): FamilyRelationshipDN = FamilyRelationshipDN(
     id = id,
     relationCode = relationCode,
     relationDesc = relationDesc,
     bailCode = bailCode
 )
 
-internal fun FamilyRelationshipProxyDto.toDomain(): FamilyRelationshipDN = FamilyRelationshipDN(
+fun FamilyRelationshipProxyDTO.toDomain(): FamilyRelationshipDN = FamilyRelationshipDN(
     id = id,
     relationCode = relationCode,
     relationDesc = relationDesc,
     bailCode = bailCode
 )
 
-internal fun UploadImageResponseDto.toDomain(): UploadImageDN = UploadImageDN(
+fun UploadImageResponseDTO.toDomain(): UploadImageDN = UploadImageDN(
     guid = guid
 )
 
-internal fun GeneralResponseDto.toDomain(): GeneralResultDN = GeneralResultDN(
+fun GeneralResponseDTO.toDomain(): GeneralResultDN = GeneralResultDN(
     isSuccess = isSuccess,
     message = message,
     code = code
 )
 
-internal fun RequestAddDependentDN.toDto(): RequestAddDependentDto = RequestAddDependentDto(
-    bailType = bailTypeCode?.let { BailTypeDto(code = it) },
+fun RequestAddDependentDN.toDto(): RequestAddDependentDTO = RequestAddDependentDTO(
+    bailType = bailTypeCode?.let { BailTypeDTO(code = it) },
     branchCode = branchCode,
     cityOfBirthId = cityOfBirthId,
     cityOfIssueId = cityOfIssueId,
     countryId = countryId,
     dateOfBirth = dateOfBirth,
-    dependency = dependencyId?.let { DependencyDto(id = it) },
-    dependentType = dependentTypeCode?.let { DependentTypeDto(code = it) },
+    dependency = dependencyId?.let { DependencyDTO(id = it) },
+    dependentType = dependentTypeCode?.let { DependentTypeDTO(code = it) },
     firstName = firstName,
     id = id,
     lastName = lastName,
     nation = nation,
     nationalId = nationalId,
-    parentId = parentId?.let { ParentIdDto(id = it) } ?: ParentIdDto(),
+    parentId = parentId?.let { ParentIdDTO(id = it) } ?: ParentIdDTO(),
     requestFileList = requestFileList?.map { it.toDto() }
 )
 
-internal fun RequestFileDN.toDto(): RequestFileDto = RequestFileDto(
-    documentFile = documentFileId?.let { DocumentFileDto(id = it) },
+fun RequestFileDN.toDto(): RequestFileDTO = RequestFileDTO(
+    documentFile = documentFileId?.let { DocumentFileDTO(id = it) },
     documentType = documentType,
     id = id,
     personal = personal

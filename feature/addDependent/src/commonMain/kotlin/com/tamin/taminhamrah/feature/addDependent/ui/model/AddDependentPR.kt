@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable

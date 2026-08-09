@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.tamin.taminhamrah.feature.profile"
+    namespace = "com.tamin.taminhamrah.feature.addDependent"
 }
 
 kotlin {
@@ -14,10 +14,9 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.collections.immutable)
-            implementation(libs.kotlinx.datetime)
-            implementation(libs.chrisbanes.haze)
-            implementation(libs.filekit.dialog.compose)
             implementation(libs.filekit.core)
+            implementation(libs.filekit.compose)
+            implementation(libs.filekit.dialog.compose)
         }
     }
 }

@@ -1,14 +1,14 @@
 package com.tamin.taminhamrah.dataSource.addDependent
 
 import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
-import com.tamin.taminhamrah.model.addDependent.BranchDto
-import com.tamin.taminhamrah.model.addDependent.DependentInfoDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDto
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDto
-import com.tamin.taminhamrah.model.addDependent.GeneralResponseDto
-import com.tamin.taminhamrah.model.addDependent.RegistryDataDto
-import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDto
-import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDto
+import com.tamin.taminhamrah.model.addDependent.BranchDTO
+import com.tamin.taminhamrah.model.addDependent.DependentInfoDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDTO
+import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipProxyDTO
+import com.tamin.taminhamrah.model.addDependent.GeneralResponseDTO
+import com.tamin.taminhamrah.model.addDependent.RegistryDataDTO
+import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDTO
+import com.tamin.taminhamrah.model.addDependent.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
@@ -27,36 +27,36 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class FakeAddDependentApiService : AddDependentApiService {
-    var dependentInfoResult: BaseDTO<List<DependentInfoDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
-    var activeBranchesResult: BaseDTO<List<BranchDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
-    var familyRelationshipsResult: BaseDTO<List<FamilyRelationshipDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
-    var familyRelationshipsFromProxyResult: BaseDTO<ListData<FamilyRelationshipProxyDto>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = emptyList()))
-    var registryDataResult: BaseDTO<RegistryDataDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = RegistryDataDto())
+    var dependentInfoResult: BaseDTO<List<DependentInfoDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
+    var activeBranchesResult: BaseDTO<List<BranchDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
+    var familyRelationshipsResult: BaseDTO<List<FamilyRelationshipDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = emptyList())
+    var familyRelationshipsFromProxyResult: BaseDTO<ListData<FamilyRelationshipProxyDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = emptyList()))
+    var registryDataResult: BaseDTO<RegistryDataDTO> = BaseDTO(status = 200, family = "OK", reason = "OK", data = RegistryDataDTO())
     var educationCodeResult: BaseDTO<String> = BaseDTO(status = 200, family = "OK", reason = "OK", data = "OK")
-    var uploadImageResult: BaseDTO<UploadImageResponseDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = UploadImageResponseDto())
-    var addNewDependentResult: BaseDTO<GeneralResponseDto> = BaseDTO(status = 200, family = "OK", reason = "OK", data = GeneralResponseDto())
+    var uploadImageResult: UploadImageResponseDTO = UploadImageResponseDTO()
+    var addNewDependentResult: BaseDTO<GeneralResponseDTO> = BaseDTO(status = 200, family = "OK", reason = "OK", data = GeneralResponseDTO())
 
     var shouldThrowException: Exception? = null
     var lastFamilyRelationshipsParameters: Map<String, String>? = null
     var lastFamilyRelationshipsFromProxyParameters: Map<String, String>? = null
 
-    override suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDto>> {
+    override suspend fun getDependentInfo(): BaseDTO<List<DependentInfoDTO>> {
         shouldThrowException?.let { throw it }
         return dependentInfoResult
     }
 
-    override suspend fun getActiveBranches(): BaseDTO<List<BranchDto>> {
+    override suspend fun getActiveBranches(): BaseDTO<List<BranchDTO>> {
         shouldThrowException?.let { throw it }
         return activeBranchesResult
     }
 
-    override suspend fun getFamilyRelationships(parameters: Map<String, String>): BaseDTO<List<FamilyRelationshipDto>> {
+    override suspend fun getFamilyRelationships(parameters: Map<String, String>): BaseDTO<List<FamilyRelationshipDTO>> {
         shouldThrowException?.let { throw it }
         lastFamilyRelationshipsParameters = parameters
         return familyRelationshipsResult
     }
 
-    override suspend fun getFamilyRelationshipsFromProxy(parameters: Map<String, String>): BaseDTO<ListData<FamilyRelationshipProxyDto>> {
+    override suspend fun getFamilyRelationshipsFromProxy(parameters: Map<String, String>): BaseDTO<ListData<FamilyRelationshipProxyDTO>> {
         shouldThrowException?.let { throw it }
         lastFamilyRelationshipsFromProxyParameters = parameters
         return familyRelationshipsFromProxyResult
@@ -66,7 +66,7 @@ class FakeAddDependentApiService : AddDependentApiService {
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): BaseDTO<RegistryDataDto> {
+    ): BaseDTO<RegistryDataDTO> {
         shouldThrowException?.let { throw it }
         return registryDataResult
     }
@@ -79,12 +79,12 @@ class FakeAddDependentApiService : AddDependentApiService {
         return educationCodeResult
     }
 
-    override suspend fun uploadImage(body: MultiPartFormDataContent): BaseDTO<UploadImageResponseDto> {
+    override suspend fun uploadImage(body: MultiPartFormDataContent): UploadImageResponseDTO {
         shouldThrowException?.let { throw it }
         return uploadImageResult
     }
 
-    override suspend fun addNewDependent(request: RequestAddDependentDto): BaseDTO<GeneralResponseDto> {
+    override suspend fun addNewDependent(request: RequestAddDependentDTO): BaseDTO<GeneralResponseDTO> {
         shouldThrowException?.let { throw it }
         return addNewDependentResult
     }
@@ -107,7 +107,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun getDependentInfo_success_returnsDependentInfoList() = runTest {
-        val expectedInfo = listOf(DependentInfoDto(id = "1", fullName = "علی رضایی"))
+        val expectedInfo = listOf(DependentInfoDTO(id = "1", fullName = "علی رضایی"))
         fakeApiService.dependentInfoResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedInfo)
 
         val result = dataSource.getDependentInfo()
@@ -117,7 +117,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun getActiveBranches_success_returnsBranchesList() = runTest {
-        val expectedBranches = listOf(BranchDto(branchCode = "01", branchName = "مرکزی"))
+        val expectedBranches = listOf(BranchDTO(branchCode = "01", branchName = "مرکزی"))
         fakeApiService.activeBranchesResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedBranches)
 
         val result = dataSource.getActiveBranches()
@@ -127,7 +127,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun getFamilyRelationships_withoutFilter_sendsNoQueryParameters() = runTest {
-        val expectedRelationships = listOf(FamilyRelationshipDto(relationCode = "01", relationDesc = "فرزند"))
+        val expectedRelationships = listOf(FamilyRelationshipDTO(relationCode = "01", relationDesc = "فرزند"))
         fakeApiService.familyRelationshipsResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedRelationships)
 
         val result = dataSource.getFamilyRelationships()
@@ -138,7 +138,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun getFamilyRelationships_withFilter_sendsBuiltQueryJson() = runTest {
-        val expectedRelationships = listOf(FamilyRelationshipDto(relationCode = "01", relationDesc = "فرزند"))
+        val expectedRelationships = listOf(FamilyRelationshipDTO(relationCode = "01", relationDesc = "فرزند"))
         fakeApiService.familyRelationshipsResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedRelationships)
         val filter = listOf(ApiFilterDN(property = FilterProperty.SERIAL_ID, value = "123", operator = FilterOperator.EQUAL))
 
@@ -150,7 +150,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun getFamilyRelationshipsFromProxy_success_returnsProxyList() = runTest {
-        val expectedRelationships = listOf(FamilyRelationshipProxyDto(relationCode = "01", relationDesc = "فرزند"))
+        val expectedRelationships = listOf(FamilyRelationshipProxyDTO(relationCode = "01", relationDesc = "فرزند"))
         fakeApiService.familyRelationshipsFromProxyResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = expectedRelationships))
 
         val result = dataSource.getFamilyRelationshipsFromProxy()
@@ -160,7 +160,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun getFamilyRelationshipsFromProxy_buildsPageOneQueryWithFilter() = runTest {
-        val expectedRelationships = listOf(FamilyRelationshipProxyDto(relationCode = "01", relationDesc = "همسر"))
+        val expectedRelationships = listOf(FamilyRelationshipProxyDTO(relationCode = "01", relationDesc = "همسر"))
         fakeApiService.familyRelationshipsFromProxyResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = expectedRelationships))
         val filter = listOf(ApiFilterDN(property = FilterProperty.DEPENDENCY_DESC, value = "**", operator = FilterOperator.LIKE))
 
@@ -173,7 +173,7 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun inquiryRegistry_success_returnsRegistryData() = runTest {
-        val expectedData = RegistryDataDto(firstName = "احمد", lastName = "محمدی")
+        val expectedData = RegistryDataDTO(firstName = "احمد", lastName = "محمدی")
         fakeApiService.registryDataResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedData)
 
         val result = dataSource.inquiryRegistry("1234567890", "1000000", "01")
@@ -192,8 +192,8 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun uploadImage_success_returnsUploadResponse() = runTest {
-        val expectedResponse = UploadImageResponseDto(guid = "FID123", isSuccess = true)
-        fakeApiService.uploadImageResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedResponse)
+        val expectedResponse = UploadImageResponseDTO(guid = "FID123", isSuccess = true)
+        fakeApiService.uploadImageResult = expectedResponse
 
         val result = dataSource.uploadImage(byteArrayOf(1, 2, 3), "img.png", "image/png")
 
@@ -202,10 +202,10 @@ class AddDependentRemoteDataSourceImplTest {
 
     @Test
     fun addNewDependent_success_returnsGeneralResponse() = runTest {
-        val expectedResponse = GeneralResponseDto(isSuccess = true, message = "انجام شد")
+        val expectedResponse = GeneralResponseDTO(isSuccess = true, message = "انجام شد")
         fakeApiService.addNewDependentResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedResponse)
 
-        val result = dataSource.addNewDependent(RequestAddDependentDto())
+        val result = dataSource.addNewDependent(RequestAddDependentDTO())
 
         assertEquals(expectedResponse, result)
     }

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors

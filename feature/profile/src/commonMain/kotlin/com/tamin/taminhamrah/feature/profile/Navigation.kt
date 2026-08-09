@@ -41,10 +41,10 @@ sealed interface ProfileRoute {
     @Serializable
     data object ContactUs : ProfileRoute
     @Serializable
-    data object AddDependent : ProfileRoute
+    data object DependentsList : ProfileRoute
 
     @Serializable
-    data object DependentsList : ProfileRoute
+    data object AddDependent : ProfileRoute
 
 }
 
@@ -52,6 +52,7 @@ fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
     onNavigateToChangeMobile: () -> Unit,
+    onNavigateToAddDependent: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -69,6 +70,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
                 onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
+                onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -88,6 +90,15 @@ fun NavGraphBuilder.profileGraph(
 
             VersionHistoryRoute(
                 viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.DependentsList> {
+            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel>()
+            com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute(
+                viewModel = viewModel,
+                onNavigateToAddDependent = onNavigateToAddDependent,
                 onBackClicked = { navController.popBackStack() }
             )
         }

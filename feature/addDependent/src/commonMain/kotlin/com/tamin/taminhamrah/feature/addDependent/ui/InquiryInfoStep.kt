@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
-import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipPR
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.model.FamilyRelationshipPR
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -116,11 +115,4 @@ private fun RelationshipDropdown(
             onClick = onShowPicker
         )
     }
-}
-
-@PreviewRtlTheme
-@Composable
-fun InquiryInfoStepPreview(){
-
-    // InquiryInfoStepPreview()
 }

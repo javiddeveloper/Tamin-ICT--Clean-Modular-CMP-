@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.profile.ui.addDependent
+package com.tamin.taminhamrah.feature.addDependent.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,11 +29,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentIntent
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.AddDependentState
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.contract.StepperMode
-import com.tamin.taminhamrah.model.addDependent.BranchPR
-import com.tamin.taminhamrah.model.addDependent.RegistryDataPR
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.StepperMode
+import com.tamin.taminhamrah.feature.addDependent.ui.model.BranchPR
+import com.tamin.taminhamrah.feature.addDependent.ui.model.RegistryDataPR
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
@@ -56,6 +56,17 @@ import taminx.core.core_ui.verify_issue_place_label
 import taminx.core.core_ui.verify_section_additional_info
 import taminx.core.core_ui.verify_section_new_info
 import taminx.core.core_ui.verify_university_label
+import taminx.core.core_ui.verify_label_first_name
+import taminx.core.core_ui.verify_label_last_name
+import taminx.core.core_ui.verify_label_father_name
+import taminx.core.core_ui.verify_label_age
+import taminx.core.core_ui.verify_label_age_value
+import taminx.core.core_ui.verify_label_gender
+import taminx.core.core_ui.verify_label_relation
+import taminx.core.core_ui.verify_label_national_id
+import taminx.core.core_ui.verify_label_birth_date
+import taminx.core.core_ui.gender_male
+import taminx.core.core_ui.gender_female
 
 @Composable
 fun VerificationStep(
@@ -127,6 +138,7 @@ private fun RegistryDataGrid(
     nationalId: String
 ) {
     val colors = LocalTaminColors.current
+    val ageText = if (registry.age.isNotBlank()) stringResource(Res.string.verify_label_age_value, registry.age) else "-"
 
     Column(
         modifier = Modifier
@@ -136,13 +148,13 @@ private fun RegistryDataGrid(
             .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg))
             .padding(vertical = Spacing.xs)
     ) {
-        RegistryGridRow("نام" to registry.firstName, "نام خانوادگی" to registry.lastName)
+        RegistryGridRow(stringResource(Res.string.verify_label_first_name) to registry.firstName, stringResource(Res.string.verify_label_last_name) to registry.lastName)
         TaminDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
-        RegistryGridRow("نام پدر" to registry.fatherName, "سن" to "${registry.age} سال")
+        RegistryGridRow(stringResource(Res.string.verify_label_father_name) to registry.fatherName, stringResource(Res.string.verify_label_age) to ageText)
         TaminDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
-        RegistryGridRow("جنسیت" to formatGender(registry.gender), "نسبت" to relationDesc)
+        RegistryGridRow(stringResource(Res.string.verify_label_gender) to formatGender(registry.gender), stringResource(Res.string.verify_label_relation) to relationDesc)
         TaminDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
-        RegistryGridRow("کد ملی" to nationalId, "تاریخ تولد" to registry.birthDate)
+        RegistryGridRow(stringResource(Res.string.verify_label_national_id) to nationalId, stringResource(Res.string.verify_label_birth_date) to registry.birthDate)
     }
 }
 
@@ -171,9 +183,10 @@ private fun RegistryFieldCell(label: String, value: String, modifier: Modifier =
     }
 }
 
+@Composable
 private fun formatGender(gender: String): String = when {
-    gender.equals("MAN", true) || gender == "1" || gender == "M" || gender.contains("مرد") -> "مرد"
-    gender.equals("WOMAN", true) || gender == "2" || gender == "F" || gender.contains("زن") -> "زن"
+    gender.equals("MAN", true) || gender == "1" || gender == "M" || gender.contains("مرد") -> stringResource(Res.string.gender_male)
+    gender.equals("WOMAN", true) || gender == "2" || gender == "F" || gender.contains("زن") -> stringResource(Res.string.gender_female)
     else -> gender.ifBlank { "-" }
 }
 
