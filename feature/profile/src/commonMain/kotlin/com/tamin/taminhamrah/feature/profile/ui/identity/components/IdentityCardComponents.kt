@@ -169,7 +169,7 @@ internal fun IdentityCard(
             val expAvatarY = scaled(IdentityDimens.avatarTop)
             val expTopInfoX = if (rtl) pad else avatarW + gap + pad
             val expNameY = scaled(IdentityDimens.topInfoTop)
-            val expTopInfoY = expNameY + name.height + 4.dp.roundToPx()
+            val expTopInfoY = expNameY + name.height + IdentityDimens.cardFieldGap.roundToPx()
             val expFooterY = scaled(IdentityDimens.footerTop)
             val expNationalIdX = if (rtl) pad else width - pad - nationalIdPlaceable.width
             val expSsnX = if (rtl) width - pad - ssnPlaceable.width else pad
@@ -235,7 +235,7 @@ private fun CardAvatar(photo: String?, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .background(TaminIdentityAvatarGlass, shape)
-            .border(1.dp, Color.White.copy(alpha = 0.25f), shape)
+            .border(IdentityDimens.hairline, Color.White.copy(alpha = 0.25f), shape)
             .clip(shape),
         contentAlignment = Alignment.Center,
     ) {
@@ -301,7 +301,7 @@ private fun CardTopInfo(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(IdentityDimens.cardFieldGap),
         horizontalAlignment = Alignment.Start,
     ) {
         CardFieldRow(
@@ -405,7 +405,7 @@ private fun Modifier.footerRule(progress: () -> Float): Modifier = drawBehind {
     drawRect(
         color = Color.White.copy(alpha = IdentityDimens.footerRuleAlpha * fade),
         topLeft = Offset(pad, top),
-        size = Size(size.width - 2 * pad, 1.dp.toPx()),
+        size = Size(size.width - 2 * pad, IdentityDimens.hairline.toPx()),
     )
 }
 
@@ -413,7 +413,7 @@ private fun Modifier.footerRule(progress: () -> Float): Modifier = drawBehind {
  * The laminated look: thin arcs of light and the lit top edge.
  */
 private fun Modifier.cardSheen(rtl: Boolean): Modifier = drawBehind {
-    val stroke = Stroke(1.dp.toPx())
+    val stroke = Stroke(IdentityDimens.hairline.toPx())
     val topArcX = if (rtl) size.width * 0.1f else size.width * 0.9f
     val bottomArcX = if (rtl) size.width * 0.9f else size.width * 0.1f
 
@@ -434,6 +434,6 @@ private fun Modifier.cardSheen(rtl: Boolean): Modifier = drawBehind {
     drawRect(brush = TaminIdentityCardShine)
     drawRect(
         color = Color.White.copy(alpha = IdentityDimens.topEdgeAlpha),
-        size = Size(size.width, 1.dp.toPx()),
+        size = Size(size.width, IdentityDimens.hairline.toPx()),
     )
 }

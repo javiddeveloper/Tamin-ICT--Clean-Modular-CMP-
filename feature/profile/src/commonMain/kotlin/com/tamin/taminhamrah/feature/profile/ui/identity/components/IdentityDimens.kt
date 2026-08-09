@@ -103,4 +103,21 @@ internal object IdentityDimens {
      * before the bar forms rather than ghosting over it.
      */
     const val VANISH_RATE = 3f
+
+    // ── Detail sections ──────────────────────────────────────────────────────────
+    // Outside the card, so these are 1:1 with the design's pixels — no scaled().
+
+    /** Design: section caption `margin:20px 0 10px`. */
+    val sectionLabelGap = 10.dp
+
+    /** Design: each row is `padding:14px 16px`; the horizontal half is Spacing.lg. */
+    val rowVerticalPadding = 14.dp
+
+    // ── Card interior ────────────────────────────────────────────────────────────
+
+    /** Gap between the stacked name/father/birth rows. */
+    val cardFieldGap = 4.dp
+
+    /** Hairlines: the footer rule, the avatar border and the card's top edge. */
+    val hairline = 1.dp
 }
