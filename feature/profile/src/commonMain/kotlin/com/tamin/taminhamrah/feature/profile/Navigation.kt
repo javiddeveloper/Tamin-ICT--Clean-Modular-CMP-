@@ -45,6 +45,7 @@ sealed interface ProfileRoute {
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
+    onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
@@ -61,6 +62,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
                 onNavigateToActiveRelation = { navController.navigate(ProfileRoute.ActiveRelation) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
+                onNavigateToMyInbox = onNavigateToMyInbox,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack

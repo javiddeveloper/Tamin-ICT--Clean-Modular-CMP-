@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -49,7 +50,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
  * and lambdas only, so each piece previews and snapshot-tests without a ViewModel.
  */
 
-private val PILL_VERTICAL_PADDING = 5.dp
 private val PRIMARY_BUTTON_HEIGHT = 52.dp
 
 /**
@@ -94,11 +94,13 @@ fun StatusPill(
     contentColor: Color,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    fontWeight: FontWeight = FontWeight.Medium,
+    verticalPadding: Dp = 5.dp,
 ) {
     Row(
         modifier = modifier
             .background(containerColor, CircleShape)
-            .padding(horizontal = Spacing.md, vertical = PILL_VERTICAL_PADDING),
+            .padding(horizontal = Spacing.md, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
@@ -110,7 +112,11 @@ fun StatusPill(
                 modifier = Modifier.size(IconSize.small),
             )
         }
-        Text(text = text, style = MaterialTheme.typography.labelMedium, color = contentColor)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
+            color = contentColor
+        )
     }
 }
 
@@ -318,6 +324,7 @@ fun TaminOutlinedButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: ImageVector? = null,
+    iconModifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
     height: Dp = PRIMARY_BUTTON_HEIGHT,
     borderWidth: Dp = 1.dp,
@@ -355,13 +362,14 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium),
+                modifier = Modifier.size(IconSize.medium).then(iconModifier),
             )
         }
 
         Text(
             text = text,
             style = textStyle,
+            color = currentContentColor
         )
     }
 }

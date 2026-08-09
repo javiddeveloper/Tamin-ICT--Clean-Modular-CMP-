@@ -133,6 +133,7 @@ class ProfileViewModel(
             ProfileMenuItem.ACTIVE_RELATION -> sendEvent(ProfileEvent.NavigateToActiveRelation)
             ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
+            ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()
