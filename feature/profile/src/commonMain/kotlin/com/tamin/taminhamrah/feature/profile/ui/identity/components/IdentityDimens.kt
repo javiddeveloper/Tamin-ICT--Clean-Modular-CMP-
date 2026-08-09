@@ -55,8 +55,13 @@ internal object IdentityDimens {
     // Slot offsets inside the expanded card, measured from its top.
     val topInfoTop = 20.dp
     val avatarTop = 20.dp
-    val footerRuleTop = 154.dp
-    val footerTop = 168.dp
+    // Derived from the design rather than nudged: inside the card the body starts 14px below the
+    // 15px top padding, the four field rows occupy 91.8px (16.8+16.8+15.6+15.6 plus three 9px
+    // gaps), and the strip adds margin-top:14px before its border-top. That puts the rule at
+    // 134.8px in design space; scaled() divides by 0.92, hence 146.5.
+    val footerRuleTop = 146.5.dp
+    // The strip's padding-top:12px below the rule -> 146.8px in design space, /0.92.
+    val footerTop = 159.5.dp
 
     // The holder's photo.
     val avatarWidth = 72.dp
@@ -65,7 +70,8 @@ internal object IdentityDimens {
     val avatarCollapsedHeight = 36.dp
 
     /** Air between the photo and the name beside it. */
-    val avatarNameGap = 12.dp
+    // Design has gap:14px between the field column and the photo; /0.92 = 15.2.
+    val avatarNameGap = 15.2.dp
 
     val bannerIconSize = 18.dp
 
