@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -121,6 +122,12 @@ fun TreatmentCostsScreen(
             )
         }
     }
+
+    ErrorStateView(
+        message = state.error,
+        onDismiss = onBackClicked,
+        onRetry = { onIntent(CostsIntent.LoadList) },
+    )
 
     showingRepId?.let { repId ->
         TaminPdfViewer(

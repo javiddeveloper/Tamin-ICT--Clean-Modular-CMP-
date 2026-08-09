@@ -58,5 +58,6 @@ sealed interface ProfileEvent {
     data class ShowToast(val message: String) : ProfileEvent
     data object NavigateToChangeMobile : ProfileEvent
     data object NavigateToContactUs : ProfileEvent
+    data object NavigateToElectronicFile : ProfileEvent
 }
 

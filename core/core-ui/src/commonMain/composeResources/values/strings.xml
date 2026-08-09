@@ -102,6 +102,8 @@
 
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
+    <string name="action_close">بستن</string>
+    <string name="error_title">خطا در دریافت اطلاعات</string>
     <string name="action_confirm">تایید</string>
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
@@ -117,7 +119,6 @@
     <string name="amount_total">جمع کل</string>
     <!-- Stands in for an amount that has not loaded; must never read as a real figure. -->
     <string name="amount_unknown">—</string>
-    <string name="error_pull_to_retry">برای تلاش دوباره، صفحه را به پایین بکشید.</string>
 
     <!-- Treatment hub -->
     <string name="hub_empty_patients">بیمه‌شده‌ای برای نمایش وجود ندارد</string>
@@ -292,6 +293,22 @@
     <string name="identity_gender_male">مرد</string>
     <string name="identity_gender_female">زن</string>
     <string name="identity_gender_unknown">نامشخص</string>
+
+    <!-- Document viewer strings -->
+    <string name="document_viewer_close">بستن</string>
+    <string name="document_viewer_title">نمایش سند</string>
+    <string name="document_viewer_file_unavailable">فایل در دسترس نیست</string>
+    <string name="document_zoom_hint">برای بزرگ‌نمایی، دو بار ضربه بزنید</string>
+    <string name="prescription_viewer_title">نمایش نسخه</string>
+    <string name="lab_result_viewer_title">نتیجه آزمایش</string>
+
+    <!-- Electronic File -->
+    <string name="electronic_file_title">پروندهٔ الکترونیک من</string>
+    <string name="electronic_file_section">تصاویر مدارک ثبت‌شده در سیستم</string>
+    <string name="electronic_file_registered">مدارک ثبت‌شده</string>
+    <string name="electronic_file_registered_subtitle">مشاهدهٔ مدارک ثبت‌شده در سیستم</string>
+    <string name="electronic_file_empty">مدرکی در سیستم ثبت نشده است</string>
+    <string name="electronic_file_category">(%1$s)</string>
 
     <!-- Active Relation -->
     <string name="active_relation_active">دارای ارتباط فعال</string>

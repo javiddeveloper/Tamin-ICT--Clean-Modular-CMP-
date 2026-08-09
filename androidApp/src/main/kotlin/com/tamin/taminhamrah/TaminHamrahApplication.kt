@@ -3,15 +3,15 @@ package com.tamin.taminhamrah
 import android.app.Application
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
-import coil3.disk.DiskCache
-import coil3.disk.directory
-import coil3.memory.MemoryCache
-import coil3.request.crossfade
 import com.tamin.taminhamrah.di.initKoin
+import com.tamin.taminhamrah.ui.image.taminImageLoader
+import io.ktor.client.HttpClient
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-class TaminHamrahApplication : Application(), SingletonImageLoader.Factory {
+class TaminHamrahApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
 
     override fun onCreate() {
         super.onCreate()
@@ -22,20 +22,8 @@ class TaminHamrahApplication : Application(), SingletonImageLoader.Factory {
     }
 
     override fun newImageLoader(context: coil3.PlatformContext): ImageLoader {
-        return ImageLoader.Builder(context)
-            .memoryCache {
-                MemoryCache.Builder()
-                    .maxSizePercent(context, 0.15)
-                    .build()
-            }
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(cacheDir.resolve("image_cache"))
-                    .maxSizePercent(0.02)
-                    .build()
-            }
-            .crossfade(true)
-            .build()
+        val httpClient: HttpClient? = getKoin().getOrNull<HttpClient>(named("mainHttpClient")) ?: getKoin().getOrNull<HttpClient>()
+        return taminImageLoader(context, httpClient)
     }
 }
 
