@@ -29,10 +29,6 @@ import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
-import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
-import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.util.NetworkConstants
 
