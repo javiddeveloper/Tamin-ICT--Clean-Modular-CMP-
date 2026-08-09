@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.util.UserTestData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class UserApiServiceTest : BaseApiTest() {
 
@@ -72,6 +73,39 @@ class UserApiServiceTest : BaseApiTest() {
 
         assertEquals(200, response.status)
         assertEquals(true, response.data)
+    }
+
+    @Test
+    fun `getRecipients should return recipient list with provided data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserTestData.recipientsSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.getRecipients(emptyMap())
+
+        assertEquals(200, response.status)
+        assertEquals(10, response.data?.list?.size)
+        assertEquals("001", response.data?.list?.get(0)?.recipientCode)
+        assertEquals("دادگاه عمومي", response.data?.list?.get(0)?.recipientName)
+        assertEquals("01", response.data?.list?.get(9)?.recipientCode)
+        assertEquals("بانک رفاه کارگران", response.data?.list?.get(9)?.recipientName)
+    }
+
+    @Test
+    fun `getStatusCertificateReport should return success with null data`() = runTest {
+        val jsonResponse = UserTestData.certificateReportSuccess
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.getStatusCertificateReport("[]")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
     }
 
 }

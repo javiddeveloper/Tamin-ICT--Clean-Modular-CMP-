@@ -123,6 +123,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
+    onNavigateToActiveRelation: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
@@ -148,6 +149,7 @@ fun ProfileScreen(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToVersionHistory = onNavigateToVersionHistory,
+        onNavigateToActiveRelation = onNavigateToActiveRelation,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
@@ -172,6 +174,7 @@ fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
+    onNavigateToActiveRelation: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
@@ -195,6 +198,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToVersionHistory -> {
                 onNavigateToVersionHistory()
+            }
+
+            ProfileEvent.NavigateToActiveRelation -> {
+                onNavigateToActiveRelation()
             }
 
             ProfileEvent.NavigateToChangeMobile -> {
