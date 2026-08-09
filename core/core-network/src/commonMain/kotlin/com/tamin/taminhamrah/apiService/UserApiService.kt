@@ -9,6 +9,7 @@ package com.tamin.taminhamrah.apiService
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
+import com.tamin.taminhamrah.model.certificate.RecipientDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
@@ -32,6 +33,7 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
 import com.tamin.taminhamrah.model.user.UserProfileDto
+import kotlinx.serialization.json.JsonElement
 
 internal interface UserApiService {
     @GET("central-reg/personal")
@@ -137,4 +139,14 @@ internal interface UserApiService {
     suspend fun checkUserIsNew(
         @Path("nationalId") nationalId: String
     ): BaseDTO<Boolean>
+
+    @GET("status-certificate/report")
+    suspend fun getStatusCertificateReport(
+        @Query("filter") filter: String
+    ): BaseDTO<JsonElement?>
+
+    @GET("recipients")
+    suspend fun getRecipients(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<RecipientDTO>>
 }

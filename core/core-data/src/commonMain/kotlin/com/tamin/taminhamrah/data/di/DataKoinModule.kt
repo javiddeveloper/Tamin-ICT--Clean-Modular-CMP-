@@ -30,6 +30,8 @@ import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
 import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import com.tamin.taminhamrah.repository.VersionHistoryRepository
+import com.tamin.taminhamrah.data.repository.ContactUsRepositoryImpl
+import com.tamin.taminhamrah.repository.ContactUsRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
@@ -57,4 +59,5 @@ val dataKoinModule = module {
     singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
     singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
+    singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
 }

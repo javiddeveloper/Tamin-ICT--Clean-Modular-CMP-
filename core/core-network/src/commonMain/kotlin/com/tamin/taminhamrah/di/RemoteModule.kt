@@ -34,6 +34,8 @@ import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSource
+import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
@@ -152,6 +154,10 @@ val remoteModule = module {
             apiQueryBuilder = get(),
             errorParser = get()
         )
+    }
+
+    single<ContactUsRemoteDataSource> {
+        ContactUsRemoteDataSourceImpl()
     }
 
     single<AgentRemoteDataSource> {
