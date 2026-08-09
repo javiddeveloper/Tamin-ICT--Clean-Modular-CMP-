@@ -15,7 +15,7 @@ class UserApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.getIdentityInfo()
 
@@ -33,11 +33,11 @@ class UserApiServiceTest : BaseApiTest() {
         )
 
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.changeMobile(
-            referer = "https://profile.tamin.ir/main/change-phone-number",
-            url = "https://profile.tamin.ir/api/v2.0/users/data/request-otp",
+//            referer = "https://profile.tamin.ir/main/change-phone-number",
+            url = "https://apim.tamin.ir/t/um-mobile-api.tamin.ir/change-mobile-number/request/v1",
             mobile = "09123456789"
         )
 
@@ -50,7 +50,7 @@ class UserApiServiceTest : BaseApiTest() {
     fun `getUserProfile should return user profile`() = runTest {
         val jsonResponse = """{"status":200,"family":"SUCCESS","reason":"OK","data":{"entityId":"1","login":"user","firstName":"John","lastName":"Doe","email":"john@example.com","nationalCode":"1234567890","mobile":"09123456789"}}"""
         val ktorfit = createMockKtorfit(jsonResponse)
-        val apiService = ktorfit.create<UserApiService>()
+        val apiService = ktorfit.createUserApiService()
 
         val response = apiService.getUserProfile()
 
@@ -59,4 +59,19 @@ class UserApiServiceTest : BaseApiTest() {
         assertEquals("Doe", response.data?.lastName)
         assertEquals("1234567890", response.data?.nationalCode)
     }
+    @Test
+    fun `checkUserIsNew should return boolean flag`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserTestData.checkUserIsNewSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.checkUserIsNew("0000000000")
+
+        assertEquals(200, response.status)
+        assertEquals(true, response.data)
+    }
+
 }

@@ -24,11 +24,14 @@ kotlin {
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialog.compose)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.chrisbanes.haze)
         }
 
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.coil.network.okhttp)
+            // Runtime POST_NOTIFICATIONS request for the PDF downloader (API 33+).
+            implementation(libs.androidx.activity.compose)
         }
 
         commonTest.dependencies {

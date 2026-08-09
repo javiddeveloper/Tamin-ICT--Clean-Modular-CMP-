@@ -9,6 +9,8 @@ package com.tamin.taminhamrah.di
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.apiService.UserApiService
+import com.tamin.taminhamrah.apiService.agent.AgentApiService
+import com.tamin.taminhamrah.apiService.agent.createAgentApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.apiService.contract.createContractsApiService
@@ -16,14 +18,19 @@ import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
 import com.tamin.taminhamrah.apiService.createWorkShopsApiService
+import com.tamin.taminhamrah.apiService.health.HealthApiService
+import com.tamin.taminhamrah.apiService.health.createHealthApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
+import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
+import com.tamin.taminhamrah.apiService.personal.createPersonalApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
+import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -42,6 +49,21 @@ val ApiClientsModule = module {
     single(named("authKtorfit")) {
         Ktorfit.Builder()
             .httpClient(get<HttpClient>(named("authHttpClient")))
+            .build()
+    }
+
+    // AI Ktorfit instance
+    single(named("aiKtorfit")) {
+        Ktorfit.Builder()
+            .httpClient(get<HttpClient>(named("aiHttpClient")))
+            .build()
+    }
+
+    // Health Ktorfit instance (uses HTTP base IP 172.16.14.115:5700)
+    single(named("healthKtorfit")) {
+        Ktorfit.Builder()
+            .baseUrl(NetworkConstants.BASE_URL_HEALTH_PROFILE)
+            .httpClient(get<HttpClient>(named("healthHttpClient")))
             .build()
     }
 
@@ -68,11 +90,11 @@ val ApiClientsModule = module {
 
     single<PensionApiService>(named("pensionApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createPensionApiService()
     }
     single<PersonalApiService>(named("personalApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
-        ktorfit.create()
+        ktorfit.createPersonalApiService()
     }
 
     single<HistoryApiServices> {
@@ -95,9 +117,18 @@ val ApiClientsModule = module {
         ktorfit.createPersonalInboxApiService()
     }
 
+    single<HealthApiService> {
+        val ktorfit: Ktorfit = get(named("healthKtorfit"))
+        ktorfit.createHealthApiService()
+    }
     single<ContractsApiService>(named("contractsApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createContractsApiService()
+    }
+
+    single<AgentApiService>(named("agentApiService")) {
+        val ktorfit: Ktorfit = get(named("aiKtorfit"))
+        ktorfit.createAgentApiService()
     }
 
 }

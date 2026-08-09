@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CityDTO (
-    @SerialName("parent") val parent: ParentDTO? = null,
     @SerialName("isDefault") val isDefault: Boolean? = null,
     @SerialName("code") val code: String? = null,
     @SerialName("description") val description: String? = null,

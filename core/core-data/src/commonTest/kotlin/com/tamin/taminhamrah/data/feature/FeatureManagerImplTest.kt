@@ -2,8 +2,11 @@ package com.tamin.taminhamrah.data.feature
 
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.common.RoleDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -20,6 +23,18 @@ class FakeRepositoryForFeatureManager : CommonRepository {
 
     override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> = flow {
         emit(mainMenuResult)
+    }
+
+    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
+        emit(byteArrayOf())
+    }
+
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
+        emit(null)
+    }
+
+    override fun getRoles(): Flow<List<RoleDN>> = flow {
+        emit(emptyList())
     }
 
     override fun getBeneficiary(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>): Flow<List<com.tamin.taminhamrah.model.common.BeneficiaryDN>> = flow {}

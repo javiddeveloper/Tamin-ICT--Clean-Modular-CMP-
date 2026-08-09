@@ -1,11 +1,17 @@
 package com.tamin.taminhamrah.data.mapper.treatment
 
 import com.tamin.taminhamrah.data.local.entity.DeservedTreatmentEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionDetailEntity
+import com.tamin.taminhamrah.data.local.entity.ElectronicPrescriptionPriceEntity
 import com.tamin.taminhamrah.data.local.entity.DependantUserUnderEighteenEntity
-import com.tamin.taminhamrah.data.local.entity.MedicalAuthoritiesEntity
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDN
-import com.tamin.taminhamrah.model.treatment.MedicalAuthoritiesDN
+import com.tamin.taminhamrah.data.local.entity.TreatmentCostEntity
+import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 
 // --- Deserved Treatment ---
 fun DeservedTreatmentDN.toEntity(nationalCode: String) = DeservedTreatmentEntity(
@@ -33,6 +39,7 @@ fun DeservedTreatmentDN.toEntity(nationalCode: String) = DeservedTreatmentEntity
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
 )
@@ -61,8 +68,93 @@ fun DeservedTreatmentEntity.toDomain() = DeservedTreatmentDN(
     regWorkshopName = regWorkshopName,
     risuid = risuid,
     message = message,
+    finalDesc = finalDesc,
     illness = illness,
     trackingCode = trackingCode
+)
+
+// --- Electronic Prescription ---
+fun ElectronicPrescriptionDN.toEntity(patientNationalCode: String) = ElectronicPrescriptionEntity(
+    patientNationalCode = patientNationalCode,
+    id = id,
+    docId = docId,
+    docName = docName,
+    flagSata = flagSata,
+    location = location,
+    noteHeadEprescID = noteHeadEprescID,
+    patientID = patientID,
+    patientName = patientName,
+    prescDate = prescDate,
+    prescName = prescName,
+    specDesc = specDesc,
+    prescType = prescType,
+    trackingCode = trackingCode
+)
+
+fun ElectronicPrescriptionEntity.toDomain() = ElectronicPrescriptionDN(
+    id = id,
+    docId = docId,
+    docName = docName,
+    flagSata = flagSata,
+    location = location,
+    noteHeadEprescID = noteHeadEprescID,
+    patientID = patientID,
+    patientName = patientName,
+    prescDate = prescDate,
+    prescName = prescName,
+    specDesc = specDesc,
+    prescType = prescType,
+    trackingCode = trackingCode
+)
+
+// --- Electronic Prescription Detail ---
+fun ElectronicPrescriptionDetailDN.toEntity(noteHeadId: String) = ElectronicPrescriptionDetailEntity(
+    noteHeadId = noteHeadId,
+    sumPriceItem = sumPriceItem,
+    ssoPayment = ssoPayment,
+    insurancePayment = insurancePayment,
+    serviceQuantity = serviceQuantity,
+    noteHeadEprescID = noteHeadEprescID,
+    serverCode = serverCode,
+    serverName = serverName,
+    serviceName = serviceName,
+    drugInst = drugInst,
+    registerDate = registerDate,
+    drugInstruction = drugInstruction,
+    deliveredNo = deliveredNo,
+    drugAmount = drugAmount
+)
+
+fun ElectronicPrescriptionDetailEntity.toDomain() = ElectronicPrescriptionDetailDN(
+    sumPriceItem = sumPriceItem,
+    ssoPayment = ssoPayment,
+    insurancePayment = insurancePayment,
+    serviceQuantity = serviceQuantity,
+    noteHeadEprescID = noteHeadEprescID,
+    serverCode = serverCode,
+    serverName = serverName,
+    serviceName = serviceName,
+    drugInst = drugInst,
+    registerDate = registerDate,
+    drugInstruction = drugInstruction,
+    deliveredNo = deliveredNo,
+    drugAmount = drugAmount
+)
+
+// --- Electronic Prescription Price ---
+fun ElectronicPrescriptionPriceDN.toEntity(noteHeadId: String) = ElectronicPrescriptionPriceEntity(
+    noteHeadId = noteHeadId,
+    headInsuPayment = headInsuPayment,
+    headSsoPayment = headSsoPayment,
+    noteHeadEprescID = noteHeadEprescID,
+    requestPrice = requestPrice
+)
+
+fun ElectronicPrescriptionPriceEntity.toDomain() = ElectronicPrescriptionPriceDN(
+    headInsuPayment = headInsuPayment,
+    headSsoPayment = headSsoPayment,
+    noteHeadEprescID = noteHeadEprescID,
+    requestPrice = requestPrice
 )
 
 // --- Dependant Under Eighteen ---
@@ -81,45 +173,65 @@ fun DependantUserUnderEighteenEntity.toDomain() = DependantUserUnderEighteenDN(
     id = id
 )
 
-// --- Medical Confirmations ---
-fun MedicalAuthoritiesDN.toEntity() = MedicalAuthoritiesEntity(
-    supportType = supportType,
-    treatmentCenter = treatmentCenter,
-    confirmInBranch = confirmInBranch,
-    confirmStatus = confirmStatus,
-    insuranceNumber = insuranceNumber,
-    nationalCode = nationalCode,
-    firstName = firstName,
-    lastName = lastName,
-    outpatientRestStartDate = outpatientRestStartDate,
-    outpatientRestEndDate = outpatientRestEndDate,
-    numberOfOutpatientDays = numberOfOutpatientDays,
-    hospitalizationStartDate = hospitalizationStartDate,
-    hospitalizationEndDate = hospitalizationEndDate,
-    numberOfHospitalizationDays = numberOfHospitalizationDays,
-    description = description,
-    branch = branch,
-    fromDateNotConfirm = fromDateNotConfirm,
-    toDateNotConfirm = toDateNotConfirm
+
+// --- Treatment Costs ---
+fun TreatmentCostDN.toEntity() = TreatmentCostEntity(
+    accountNumber = accountNumber,
+    bimeCode = bimeCode,
+    datePaz = datePaz,
+    famil = famil,
+    healthcenterName = healthcenterName,
+    mainNational = mainNational,
+    maliCode = maliCode,
+    name = name,
+    nameAsli = nameAsli,
+    nameFamil = nameFamil,
+    noPazir = noPazir,
+    payNatCode = payNatCode,
+    payOtherService = payOtherService,
+    payPrice = payPrice,
+    payService = payService,
+    payStatus = payStatus,
+    payType = payType,
+    province = province,
+    rahgiriCode = rahgiriCode,
+    releaseDate = releaseDate,
+    repId = repId,
+    serviceDate = serviceDate,
+    status = status,
+    statusDesc = statusDesc,
+    payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
+    returnReason = returnReason
 )
 
-fun MedicalAuthoritiesEntity.toDomain() = MedicalAuthoritiesDN(
-    supportType = supportType,
-    treatmentCenter = treatmentCenter,
-    confirmInBranch = confirmInBranch,
-    confirmStatus = confirmStatus,
-    insuranceNumber = insuranceNumber,
-    nationalCode = nationalCode,
-    firstName = firstName,
-    lastName = lastName,
-    outpatientRestStartDate = outpatientRestStartDate,
-    outpatientRestEndDate = outpatientRestEndDate,
-    numberOfOutpatientDays = numberOfOutpatientDays,
-    hospitalizationStartDate = hospitalizationStartDate,
-    hospitalizationEndDate = hospitalizationEndDate,
-    numberOfHospitalizationDays = numberOfHospitalizationDays,
-    description = description,
-    branch = branch,
-    fromDateNotConfirm = fromDateNotConfirm,
-    toDateNotConfirm = toDateNotConfirm
+fun TreatmentCostEntity.toDomain() = TreatmentCostDN(
+    accountNumber = accountNumber,
+    bimeCode = bimeCode,
+    datePaz = datePaz,
+    famil = famil,
+    healthcenterName = healthcenterName,
+    mainNational = mainNational,
+    maliCode = maliCode,
+    name = name,
+    nameAsli = nameAsli,
+    nameFamil = nameFamil,
+    noPazir = noPazir,
+    payNatCode = payNatCode,
+    payOtherService = payOtherService,
+    payPrice = payPrice,
+    payService = payService,
+    payStatus = payStatus,
+    payType = payType,
+    province = province,
+    rahgiriCode = rahgiriCode,
+    releaseDate = releaseDate,
+    repId = repId,
+    serviceDate = serviceDate,
+    status = status,
+    statusDesc = statusDesc,
+    payStatusDesc = payStatusDesc,
+    estimatePayDate = estimatePayDate,
+    returnReason = returnReason
 )
+

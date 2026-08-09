@@ -35,12 +35,8 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsIntent
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsUiState
 import com.tamin.taminhamrah.model.contracts.ContractPR
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import org.koin.compose.viewmodel.koinViewModel
-
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +48,6 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsEvent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContractsScreen(
     onBackClicked: () -> Unit,

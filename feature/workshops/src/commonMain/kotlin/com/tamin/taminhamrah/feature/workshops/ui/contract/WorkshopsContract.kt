@@ -20,6 +20,8 @@ sealed interface WorkshopsIntent {
         val branchCode: String? = null,
         val workshopStatus: String? = null
     ) : WorkshopsIntent
+    
+    data object TestDownloadPdf : WorkshopsIntent
 }
 
 sealed interface WorkshopsEvent {

@@ -93,14 +93,14 @@ internal interface UserApiService {
 
     @GET
     suspend fun changeMobile(
-        @Header("Referer") referer: String,
+//        @Header("Referer") referer: String,
         @Url url: String,
         @Query("mobile") mobile: String
     ): BaseDTO<EditMobileResponseDto>
 
     @POST
     suspend fun verifyChangeMobileCode(
-        @Header("Referer") referer: String,
+//        @Header("Referer") referer: String,
         @Url url:String,
         @Body loginRequest: VerifyMobileRequest,
     ): BaseDTO<String>
@@ -132,4 +132,9 @@ internal interface UserApiService {
 
     @GET("users/current-user")
     suspend fun getUserProfile(): BaseDTO<UserProfileDto>
+
+    @GET("relation-tamins/isnew/{nationalId}")
+    suspend fun checkUserIsNew(
+        @Path("nationalId") nationalId: String
+    ): BaseDTO<Boolean>
 }

@@ -83,7 +83,7 @@ internal class AuthRemoteDataSourceImpl(
         logger.d { "revokeToken called. AccessToken: ${accessToken?.take(10)}..., RefreshToken: ${refreshToken?.take(10)}..." }
         return try {
             userApiService.revokeToken(
-                accessToken = accessToken,
+                accessToken = accessToken?.let { "${com.tamin.taminhamrah.util.HeaderConstant.AUTHORIZATION_TYPE}$it" },
                 refreshToken = refreshToken
             )
             logger.d { "revokeToken API call successful" }

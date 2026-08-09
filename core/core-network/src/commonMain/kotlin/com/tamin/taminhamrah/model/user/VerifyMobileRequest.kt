@@ -7,5 +7,6 @@ import kotlinx.serialization.Serializable
 data class VerifyMobileRequest(
     @SerialName("mobileNumber") var mobile: String = "",
     @SerialName("otp") var otp: String = "",
-    @SerialName("hash") var otpHashCode: String = ""
+    @SerialName("hash") var otpHashCode: String = "",
+    @SerialName("ip") var ip: String = ""
 )

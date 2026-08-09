@@ -1,15 +1,23 @@
 package com.tamin.taminhamrah.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Upsert
+import androidx.room.Transaction
 import com.tamin.taminhamrah.data.local.entity.PersonalInfoEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PersonalDao {
-    @Upsert
-    suspend fun upsertPersonalInfo(item: PersonalInfoEntity)
+
+    @Transaction
+    suspend fun upsertPersonalInfo(item: PersonalInfoEntity) {
+        clearPersonalInfo()
+        insertPersonalInfo(item)
+    }
+
+    @Insert
+    suspend fun insertPersonalInfo(item: PersonalInfoEntity)
 
     @Query("SELECT * FROM personal_info LIMIT 1")
     fun getPersonalInfo(): Flow<PersonalInfoEntity?>

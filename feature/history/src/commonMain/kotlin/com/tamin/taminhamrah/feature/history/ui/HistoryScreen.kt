@@ -41,7 +41,7 @@ fun HistoryScreen(
 
 @Composable
 fun HistoryContent(
-    uiState: com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState,
+    uiState: HistoryUiState,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {

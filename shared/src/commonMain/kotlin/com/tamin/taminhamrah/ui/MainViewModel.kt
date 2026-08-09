@@ -5,13 +5,15 @@ package com.tamin.taminhamrah.ui
 
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.core.datastore.UserPreferencesRepository
+import com.tamin.taminhamrah.repository.AuthRepository
+import com.tamin.taminhamrah.repository.UserPreferencesRepository
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.contract.MainUiState
 import com.tamin.taminhamrah.ui.contract.MainUiState.PartialState
 import com.tamin.taminhamrah.ui.contract.MainIntent
 import com.tamin.taminhamrah.ui.contract.MainEvent
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
+import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -19,14 +21,15 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val tokenStoreManager: TokenStoreManager,
-    private val authAuthorizeUrlUseCase: AuthAuthorizeUrlUseCase
+    private val authRepository: AuthRepository,
+    private val authAuthorizeUrlUseCase: AuthAuthorizeUrlUseCase,
+    private val setThemeUseCase: SetThemeUseCase
 ) : BaseViewModel<MainUiState, PartialState, MainEvent, MainIntent>(
     initialState = MainUiState(isLoading = true)
 ) {
 
     init {
         observeData()
-        sendIntent(MainIntent.CheckAuthStatus)
     }
 
     private fun observeData() {
@@ -36,8 +39,14 @@ class MainViewModel(
             }
         }
         viewModelScope.launch {
-            tokenStoreManager.tokenValidFlow().collect {
-                sendIntent(MainIntent.CheckAuthStatus)
+            authRepository.isLoggedIn.collect { isLoggedIn ->
+                sendIntent(MainIntent.SetAuthStatus(isLoggedIn))
+            }
+        }
+
+        viewModelScope.launch {
+            tokenStoreManager.isAuthProcessingFlow().collect { isProcessing ->
+                sendIntent(MainIntent.SetAuthProcessing(isProcessing))
             }
         }
     }
@@ -51,9 +60,11 @@ class MainViewModel(
                 val url = authAuthorizeUrlUseCase()
                 sendEvent(MainEvent.OpenUrl(url))
             }
-            MainIntent.CheckAuthStatus -> {
-                val hasToken = !tokenStoreManager.getToken().isNullOrEmpty()
-                emit(PartialState.SetLoginStatus(hasToken))
+            is MainIntent.SetAuthStatus -> {
+                emit(PartialState.SetLoginStatus(intent.isLoggedIn))
+            }
+            is MainIntent.SetAuthProcessing -> {
+                emit(PartialState.SetAuthProcessing(intent.isProcessing))
             }
         }
     }
@@ -61,12 +72,13 @@ class MainViewModel(
     override fun reduceState(currentState: MainUiState, partialState: PartialState): MainUiState {
         return when (partialState) {
             is PartialState.SetDarkThemeConfig -> currentState.copy(
-                darkThemeConfig = partialState.config,
-                isLoading = false
+                darkThemeConfig = partialState.config
             )
             is PartialState.SetLoginStatus -> currentState.copy(
                 isLoggedIn = partialState.isLoggedIn,
-                isLoading = false
+                isLoading = false )
+            is PartialState.SetAuthProcessing -> currentState.copy(
+                isLoading = partialState.isProcessing
             )
             PartialState.Loading -> currentState.copy(isLoading = true)
         }
@@ -78,7 +90,7 @@ class MainViewModel(
 
     fun updateDarkThemeConfig(config: com.tamin.taminhamrah.model.DarkThemeConfig) {
         viewModelScope.launch {
-            userPreferencesRepository.setDarkThemeConfig(config)
+            setThemeUseCase(config)
         }
     }
 

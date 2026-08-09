@@ -168,7 +168,7 @@ internal class UserRemoteDataSourceImpl(
     ): EditMobileResponseDto {
         return try {
             val response = userApiService.changeMobile(
-                referer = NetworkConstants.REFERER_MOBILE,
+//                referer = NetworkConstants.REFERER_MOBILE,
                 url = NetworkConstants.EDIT_MOBILE_URL,
                 mobile = mobile
             )
@@ -185,7 +185,7 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun verifyChangeMobileCode(request: VerifyMobileRequest): String {
         return try {
             val response = userApiService.verifyChangeMobileCode(
-                referer = NetworkConstants.REFERER_MOBILE,
+//                referer = NetworkConstants.REFERER_MOBILE,
                 url = NetworkConstants.VERIFY_EDIT_MOBILE_URL,
                 loginRequest = request
             )
@@ -206,7 +206,16 @@ internal class UserRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            Logger.e("UserDS") { "getUserProfile failed: ${e::class.simpleName} - ${e.message}" }
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+    override suspend fun checkUserIsNew(nationalId: String): Boolean {
+        return try {
+            val response = userApiService.checkUserIsNew(nationalId)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }

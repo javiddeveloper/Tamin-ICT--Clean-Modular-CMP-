@@ -15,6 +15,11 @@ fun LoadAsyncImage(
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
+    /**
+     * What to draw when the image cannot be loaded. Defaults to the app's gray placeholder, which
+     * suits a light surface; a caller drawing on a dark one should pass its own.
+     */
+    errorContent: (@Composable () -> Unit)? = null,
 ) {
     val processedModel = remember(model) {
         when {
@@ -32,7 +37,11 @@ fun LoadAsyncImage(
             Box(modifier = Modifier.fillMaxSize().shimmer())
         },
         error = {
-            ImageErrorPlaceholder(modifier = Modifier.fillMaxSize())
+            if (errorContent != null) {
+                errorContent()
+            } else {
+                ImageErrorPlaceholder(modifier = Modifier.fillMaxSize())
+            }
         }
     )
 }

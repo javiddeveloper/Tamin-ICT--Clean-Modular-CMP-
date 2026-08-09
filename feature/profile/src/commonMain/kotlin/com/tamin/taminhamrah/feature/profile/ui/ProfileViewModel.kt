@@ -1,5 +1,9 @@
 package com.tamin.taminhamrah.feature.profile.ui
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
+import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
@@ -44,7 +48,8 @@ class ProfileViewModel(
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
     private val getElectronicFileUseCase: GetElectronicFileUseCase,
     private val changeMobileUseCase: ChangeMobileUseCase,
-    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase
+    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
+    private val setThemeUseCase: SetThemeUseCase
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -60,13 +65,14 @@ class ProfileViewModel(
             )
             is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
             is ProfileIntent.LoadBankAccountList -> handleLoadElectronicFile()
+            is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
     }
 
-    private fun handleLoadProfile(providedUserId: String?): Flow<PartialState> {
+    private fun handleLoadProfile(providedUserId: String?): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
 
         val userIdFlow = flow {
-            emit(PartialState.Loading(true))
             val userId = providedUserId ?: tokenStoreManager.getUserId()
             emit(PartialState.SetUserId(userId))
         }
@@ -94,13 +100,14 @@ class ProfileViewModel(
             }
         }
 
-        return merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow)
+        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow).collect {
+            emit(it)
+        }
     }
 
     private fun handleLogout(): Flow<PartialState> = flow {
         val token = tokenStoreManager.getToken()
         if (token != null) {
-            // Background sign out (invalidates token on server and clears local tokens)
             signOutUseCase.invoke(HeaderConstant.AUTHORIZATION_TYPE + token).collect {
                 com.tamin.taminhamrah.util.Logger.d("handleLogout", "Sign out response: $it")
             }
@@ -108,10 +115,10 @@ class ProfileViewModel(
             // If no token, just perform local logout
             tokenStoreManager.saveToken(null)
             tokenStoreManager.saveRefreshToken(null)
+            tokenStoreManager.saveUserId(null)
             tokenStoreManager.setTokenValid(isValid = false)
         }
 
-        // Trigger browser/WebView sign out to clear SSO session cookies
         val signOutUrl = getSignOutUrlUseCase()
         sendEvent(ProfileEvent.OpenUrl(signOutUrl))
         sendEvent(ProfileEvent.NavigateBack)
@@ -122,6 +129,8 @@ class ProfileViewModel(
             ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
             ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
+            ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)
+            ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()
@@ -182,6 +191,14 @@ class ProfileViewModel(
         }
     }
 
+    private fun handleToggleTheme(isDark: Boolean): Flow<PartialState> {
+        viewModelScope.launch {
+            val config = if (isDark) DarkThemeConfig.DARK else DarkThemeConfig.LIGHT
+            setThemeUseCase(config)
+        }
+        return emptyFlow()
+    }
+
 
     override fun reduceState(
         currentState: ProfileUiState,
@@ -196,14 +213,15 @@ class ProfileViewModel(
         )
 
         is PartialState.SetUserId -> currentState.copy(
-            isLoading = false,
             userId = partialState.userId
         )
 
         is PartialState.ProfileImageLoaded -> currentState.copy(
+            isProfileImageLoading = false,
             profileImage = partialState.image
         )
         is PartialState.IdentityInfoLoaded -> currentState.copy(
+            isLoading = false,
             identityInfo = partialState.info
         )
 
@@ -225,7 +243,11 @@ class ProfileViewModel(
             imageRequestError = partialState.message
         )
 
-        is PartialState.ScreenStateChanged -> currentState
+        is PartialState.ScreenStateChanged -> when (partialState) {
+            is PartialState.ScreenStateChanged.Loading -> currentState.copy(isLoading = true)
+            is PartialState.ScreenStateChanged.Success -> currentState.copy(isLoading = false)
+            is PartialState.ScreenStateChanged.Error -> currentState.copy(isLoading = false, error = partialState.message)
+        }
     }
 
     override fun createErrorState(message: String): PartialState =

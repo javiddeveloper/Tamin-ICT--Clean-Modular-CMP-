@@ -1,17 +1,23 @@
 package com.tamin.taminhamrah.data.repository.common
 
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
+
 import com.tamin.taminhamrah.data.local.dao.MenuDao
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import io.ktor.client.statement.HttpStatement
+import io.ktor.client.statement.readBytes
+import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -45,4 +51,40 @@ class CommonRepositoryImpl(
                 throw e
             }
         }
+
+    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
+        try {
+            val statement = commonRemoteDataSource.getRegistrationDeclarationForm()
+            val bytes = statement.execute { response -> response.readRawBytes() }
+            emit(bytes)
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
+        try {
+            val response = commonRemoteDataSource.getJobTitle(query)
+            emit(
+                response?.let {
+                    JobTitleListDN(
+                        list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                        total = it.total
+                    )
+                }
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override fun getRoles(): Flow<List<RoleDN>> = flow {
+        emit(
+            listOf(
+                RoleDN(1, "بیمه شده"),
+                RoleDN(2, "مستمری بگیر"),
+                RoleDN(3, "کارفرما")
+            )
+        )
+    }
 }

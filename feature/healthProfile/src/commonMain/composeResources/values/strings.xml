@@ -1,0 +1,265 @@
+<resources>
+    <!-- Gate Screen Strings -->
+    <string name="health_gate_title">پروندهٔ سلامت</string>
+    <string name="health_gate_heading">پروندهٔ سلامت من</string>
+    <string name="health_gate_desc">برای مشاهدهٔ پروندهٔ سلامت، لازم است یک‌بار فرم خوداظهاری سلامت را تکمیل کنید.</string>
+    <string name="health_gate_locked_title">دسترسی غیرفعال است</string>
+    <string name="health_gate_locked_desc">تا زمان تکمیل خوداظهاری، امکان ورود به پرونده وجود ندارد.</string>
+    <string name="health_gate_step1"> تأیید اطلاعات هویتی</string>
+    <string name="health_gate_step2"> اطلاعات تماس و سکونت</string>
+    <string name="health_gate_step3"> پرسش‌های سلامت و تکمیلی</string>
+    <string name="health_gate_btn_start">تکمیل خوداظهاری سلامت</string>
+    <string name="health_gate_btn_back">بازگشت</string>
+
+    <!-- Intro Screen Strings -->
+    <string name="health_intro_title">خوداظهاری سلامت</string>
+    <string name="health_intro_heading">فرم خوداظهاری سلامت</string>
+    <string name="health_intro_desc">با تکمیل این فرم، اطلاعات سلامت پایهٔ شما ثبت می‌شود. تکمیل آن برای دسترسی به «پروندهٔ سلامت من» الزامی است.</string>
+    <string name="health_intro_duration">تکمیل فرم حدود ۴ دقیقه زمان می‌برد</string>
+    <string name="health_intro_steps">در ۹ مرحلهٔ کوتاه و ساده تکمیل می‌شود</string>
+    <string name="health_intro_fast">تکمیل سریع در چند دقیقه</string>
+    <string name="health_intro_update">امکان بروزرسانی اطلاعات در آینده</string>
+    <string name="health_intro_privacy">اطلاعات شما محرمانه نگهداری می‌شود</string>
+    <string name="health_intro_btn_next">شروع خوداظهاری</string>
+
+    <!-- Shared Navigation & Buttons -->
+    <string name="health_btn_next_step">مرحلهٔ بعدی</string>
+    <string name="health_btn_prev_step">مرحلهٔ قبلی</string>
+    <string name="health_btn_cancel">انصراف</string>
+    <string name="health_step_1_of_10">مرحلهٔ ۱ از ۱۰</string>
+    <string name="health_step_2_of_10">مرحلهٔ ۲ از ۱۰</string>
+    <string name="health_step_format">مرحلهٔ %1$s از %2$s</string>
+
+    <!-- Identity Screen Strings -->
+    <string name="health_identity_title">اطلاعات هویتی</string>
+    <string name="health_identity_notice">این اطلاعات از قبل ثبت شده و قابل ویرایش نیست. در صورت نیاز به اصلاح، با پشتیبانی تماس بگیرید.</string>
+    <string name="health_identity_insurance_number_prefix">شمارهٔ بیمه:</string>
+    <string name="health_label_first_name">نام</string>
+    <string name="health_label_last_name">نام خانوادگی</string>
+    <string name="health_label_father_name">نام پدر</string>
+    <string name="health_label_gender">جنسیت</string>
+    <string name="health_label_birth_date">تاریخ تولد</string>
+    <string name="health_label_insurance_number">شمارهٔ بیمه</string>
+    <string name="health_identity_insurance_card_title">اطلاعات بیمه</string>
+    <string name="health_label_insurance_type">نوع بیمه</string>
+    <string name="health_label_last_visit">آخرین ویزیت</string>
+
+    <!-- Personal Screen Strings -->
+    <string name="health_personal_title">اطلاعات تکمیلی فردی</string>
+    <string name="health_personal_heading">اطلاعات تکمیلی فردی</string>
+    <string name="health_personal_desc">لطفاً وضعیت تاهل و شغل خود را به همراه اطلاعات تابعیت وارد کنید.</string>
+    <string name="health_personal_marital_status">وضعیت تأهل</string>
+    <string name="health_marital_single">مجرد</string>
+    <string name="choose">انتخاب کنید</string>
+    <string name="health_marital_married">متأهل</string>
+    <string name="health_marital_divorced">مطلقه</string>
+    <string name="health_marital_widowed">همسر فوت شده</string>
+    <string name="health_personal_job_label">شغل / نوع فعالیت</string>
+    <string name="health_personal_job_placeholder">مثلاً کارمند، آزاد و...</string>
+    <string name="health_personal_citizenship_label">تابعیت</string>
+    <string name="health_personal_citizenship_placeholder">مثلا ایران</string>
+    <string name="health_personal_nationality_label">ملیت</string>
+    <string name="health_personal_nationality_placeholder">مثلاً ایرانی</string>
+
+    <!-- Contact Screen Strings -->
+    <string name="health_contact_title">اطلاعات تماس و سکونت</string>
+    <string name="health_contact_desc">اطلاعات تماس جهت ارتباط‌های بعدی و موارد اضطراری استفاده خواهد شد.</string>
+    <string name="health_contact_mobile_label">شماره تلفن همراه</string>
+    <string name="health_contact_mobile_placeholder">۰۹۱۲۳۴۵۶۷۸۹</string>
+    <string name="health_contact_mobile_error">شماره تلفن همراه باید 11 رقم باشد</string>
+    <string name="health_contact_landline_label">تلفن ثابت (به همراه کد استان)</string>
+    <string name="health_contact_landline_placeholder">۰۲۱۲۲۳۳۴۴۵۵</string>
+    <string name="health_contact_landline_error">شماره تلفن ثابت باید 11 رقم باشد</string>
+    <string name="health_contact_email_label">پست الکترونیکی (ایمیل)</string>
+    <string name="health_contact_email_placeholder">example@email.com</string>
+    <string name="health_contact_email_error">فرمت ایمیل وارد شده معتبر نیست</string>
+    <string name="health_contact_province_label">استان</string>
+    <string name="health_contact_province_placeholder">انتخاب استان</string>
+    <string name="health_contact_province_bs_title">انتخاب استان</string>
+    <string name="health_contact_province_bs_subtitle">استان مورد نظر خود را انتخاب کنید</string>
+    <string name="health_contact_province_bs_search_hint">جستجوی استان...</string>
+    <string name="health_contact_city_label">شهر</string>
+    <string name="health_contact_city_placeholder">انتخاب شهر</string>
+    <string name="health_contact_city_bs_title">انتخاب شهر</string>
+    <string name="health_contact_city_bs_subtitle">شهر مورد نظر خود را انتخاب کنید</string>
+    <string name="health_contact_city_bs_search_hint">جستجوی شهر...</string>
+    <string name="health_contact_address_label">نشانی کامل محل سکونت</string>
+    <string name="health_contact_address_placeholder">خیابان، کوچه، پلاک، واحد</string>
+    <string name="health_contact_postcode_label">کد پستی ۱۰ رقمی</string>
+    <string name="health_contact_postcode_placeholder">۱۲۳۴۵۶۷۸۹۰</string>
+    <string name="health_contact_postcode_error">کد پستی باید 10 رقم باشد</string>
+    <string name="health_contact_map_button">انتخاب موقعیت روی نقشه (جهت ثبت آدرس دقیق)</string>
+
+    <!-- Emergency Screen Strings -->
+    <string name="health_emergency_title">تماس اضطراری</string>
+    <string name="health_emergency_desc">اطلاعات یکی از نزدیکان خود را وارد کنید تا در مواقع اضطراری با وی تماس گرفته شود.</string>
+    <string name="health_emergency_name_label">نام مخاطب اضطراری</string>
+    <string name="health_placeholder_enter">وارد کنید</string>
+    <string name="health_emergency_relation_label">نسبت با شما</string>
+    <string name="health_emergency_relation_placeholder">مثلاً همسر، پدر، خواهر و...</string>
+    <string name="health_emergency_mobile_label">شماره تلفن همراه اضطراری</string>
+    <!-- Physical Screen Strings -->
+    <string name="health_physical_title">قد و وزن</string>
+    <string name="health_physical_desc">برای تنظیم دقیق قد و وزن خود، خط کش‌ها را بکشید یا از دکمه‌های کناری استفاده کنید.</string>
+    <string name="health_physical_height_label">قد (سانتی‌متر)</string>
+    <string name="health_physical_unit_cm">سانتی‌متر</string>
+    <string name="health_physical_weight_label">وزن (کیلوگرم)</string>
+    <string name="health_physical_unit_kg">کیلوگرم</string>
+    <string name="health_physical_unselected_value">--</string>
+
+    <!-- RulerPicker Strings -->
+    <string name="health_ruler_increase">افزایش</string>
+    <string name="health_ruler_decrease">کاهش</string>
+
+    <!-- BMI Meter Strings -->
+    <string name="health_bmi_title">شاخص تودهٔ بدنی (BMI)</string>
+    <string name="health_bmi_unselected_category">ثبت نشده</string>
+    <string name="health_bmi_empty_advice">برای محاسبهٔ شاخص تودهٔ بدنی (BMI)، لطفاً قد و وزن خود را وارد کنید.</string>
+    <string name="health_bmi_underweight_category">کمبود وزن</string>
+    <string name="health_bmi_underweight_advice">شما کمبود وزن دارید. تغذیه مناسب و متعادل توصیه می‌شود.</string>
+    <string name="health_bmi_normal_category">وزن طبیعی</string>
+    <string name="health_bmi_normal_advice">وزن شما طبیعی است. برای حفظ شیوه زندگی فعال و وزن مناسب تلاش کنید.</string>
+    <string name="health_bmi_overweight_category">اضافه وزن</string>
+    <string name="health_bmi_overweight_advice">شما دچار اضافه وزن خفیف هستید. افزایش فعالیت بدنی و کنترل کالری توصیه می‌شود.</string>
+    <string name="health_bmi_obese_category">چاقی شدید</string>
+    <string name="health_bmi_obese_advice">شاخص توده بدنی نشان‌دهنده چاقی است. مشاوره با متخصص تغذیه پیشنهاد می‌شود.</string>
+
+    <!-- Shared Yes / No Options -->
+    <string name="health_option_no">خیر</string>
+    <string name="health_option_yes">بله</string>
+    <string name="health_option_has">دارد</string>
+    <string name="health_option_has_not">ندارد</string>
+
+    <!-- Family Screen Strings -->
+    <string name="health_family_title">سلامتی خانواده درجه یک</string>
+    <string name="health_family_desc">آیا در اعضای درجه یک خانواده (پدر، مادر، خواهر، برادر) سابقهٔ ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="health_family_diabetes">قند خون بالا (دیابت)</string>
+    <string name="health_family_bp">فشار خون بالا</string>
+    <string name="health_family_cholesterol">چربی خون یا کلسترول بالا</string>
+    <string name="health_family_cancer_question">سابقهٔ ابتلا به سرطان در خانواده؟</string>
+    <string name="health_family_cancer_type_label">نوع سرطان در خانواده</string>
+    <string name="health_family_cancer_select_placeholder">انتخاب نوع سرطان</string>
+    <string name="health_family_cancer_bs_title">انتخاب نوع سرطان</string>
+    <string name="health_family_cancer_bs_subtitle">نوع یا انواع سرطان در اعضای درجه یک خانواده را انتخاب کنید:</string>
+
+    <!-- Default Cancer Types -->
+    <string name="health_cancer_leukemia">سرطان خون</string>
+    <string name="health_cancer_lung">سرطان ریه</string>
+    <string name="health_cancer_breast">سرطان پستان</string>
+    <string name="health_cancer_gi">سرطان دستگاه گوارش</string>
+    <string name="health_cancer_prostate">سرطان پروستات</string>
+    <string name="health_cancer_cervical">سرطان رحم و تخمدان</string>
+    <string name="health_cancer_skin">سرطان پوست</string>
+    <string name="health_cancer_thyroid">سرطان تیرویید</string>
+    <string name="health_cancer_other">سایر</string>
+
+    <!-- Shared Confidentiality Notice -->
+    <string name="health_confidential_notice">فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.</string>
+
+    <!-- Diseases Screen Strings -->
+    <string name="health_diseases_title">سوالات سلامت</string>
+    <string name="health_bs_chronic_subtitle">نوع بیماری خود را انتخاب کنید:</string>
+    <string name="health_bs_mental_subtitle">نوع عارضه را انتخاب کنید:</string>
+    <string name="health_bs_cancer_subtitle">نوع سرطان را انتخاب کنید:</string>
+    <string name="health_bs_submit">ثبت</string>
+
+    <!-- Lifestyle Screen Strings -->
+    <string name="health_lifestyle_title">سبک زندگی</string>
+    <string name="health_lifestyle_smoking_question">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="health_lifestyle_smoking_bs_subtitle">الگوی مصرف خود را انتخاب کنید</string>
+    <string name="health_lifestyle_addiction_question">آیا اعتیاد دارید؟</string>
+    <string name="health_lifestyle_addiction_bs_subtitle">الگوی مصرف خود را انتخاب کنید</string>
+    <string name="health_lifestyle_alcohol_question">آیا الکل مصرف دارید؟</string>
+    <string name="health_lifestyle_alcohol_bs_subtitle">جزئیات مربوط به مصرف الکل را وارد کنید</string>
+    <string name="health_lifestyle_exercise_question">آیا ورزش می‌کنید؟</string>
+    <string name="health_lifestyle_exercise_bs_subtitle">جزئیات مربوط به ورزش را وارد کنید</string>
+
+    <!-- Allergy Screen-->
+    <string name="health_allergy_title">حساسیت‌ دارویی</string>
+    <string name="health_allergy_final_check">مرحلهٔ بعدی (بررسی نهایی)</string>
+    <string name="health_allergy_description">در این قسمت می‌توانید داروهایی که به آن‌ها حساسیت دارید را اضافه کنید.</string>
+    <string name="health_allergy_add_new_allergy">افزودن حساسیت دارویی جدید</string>
+    <string name="health_allergy_no_allergy_registered">هیچ حساسیت دارویی ثبت نشده است.</string>
+    <string name="health_allergy_choose_drug">انتخاب دارو</string>
+    <string name="health_allergy_choose_your_allergy">دارویی که به آن حساسیت دارید را انتخاب کنید.</string>
+    <string name="health_allergy_add">افزودن</string>
+    <string name="health_allergy_unknows">نامشخص</string>
+    <string name="health_allergy_no_description_for_allergy">فاقد توضیحات عارضه</string>
+
+    <!-- BloodGroup Screen-->
+    <string name="health_blood_choose_your_blood_group">گروه خونی‌تان را انتخاب کنید</string>
+    <string name="health_blood_choose_your_blood_group_first">ابتدا گروه خونی را انتخاب کنید</string>
+    <string name="health_blood_blood_group_type">نوع گروه خونی</string>
+    <string name="health_blood_rh_factor">فاکتور Rh</string>
+    <string name="health_blood_i_dont_know_my_blood_group">گروه خونی خود را نمی‌دانم</string>
+
+
+    <!-- Review Screen-->
+    <string name="health_review_title">بررسی نهایی پروندهٔ سلامت</string>
+    <string name="health_confirm_info_btn">تأیید و ثبت نهایی اطلاعات</string>
+    <string name="health_warning_banner_desc">لطفاً صحت اطلاعات وارد شده را بررسی و تأیید کنید.</string>
+    <string name="health_review_edit">ویرایش</string>
+    <string name="health_identity_section_title">مشخصات هویتی</string>
+    <string name="health_identity_section_patient_name">نام بیمار:</string>
+    <string name="health_identity_section_insurance">بیمه:</string>
+    <string name="health_identity_section_personal_title">اطلاعات تکمیلی فردی</string>
+    <string name="health_identity_section_personal_nationality">ملیت:</string>
+    <string name="health_identity_section_personal_marriage">تاهل:</string>
+    <string name="health_identity_section_personal_job">شغل:</string>
+    <string name="health_identity_section_contact_title">تماس و سکونت</string>
+    <string name="health_identity_section_contact_mobile">موبایل:</string>
+    <string name="health_identity_section_contact_province_city">شهر / استان:</string>
+    <string name="health_identity_section_contact_postal_code">کد پستی:</string>
+    <string name="health_identity_section_contact_emergency_title">تماس اضطراری</string>
+    <string name="health_identity_section_contact_emergency_name">نام:</string>
+    <string name="health_identity_section_contact_emergency_relation">نسبت:</string>
+    <string name="health_identity_section_contact_height_weight_title">قد و وزن</string>
+    <string name="health_identity_section_contact_height">قد:</string>
+    <string name="health_identity_section_contact_weight">وزن:</string>
+    <string name="health_identity_section_blood_group_title">گروه خونی</string>
+    <string name="health_identity_section_blood_group">گروه خونی:</string>
+    <string name="health_identity_section_lifestyle_title">سبک زندگی</string>
+    <string name="health_identity_section_lifestyle_addiction">اعتیاد:</string>
+    <string name="health_identity_section_lifestyle_alcohol">الکل:</string>
+    <string name="health_identity_section_lifestyle_exercise">ورزش:</string>
+    <string name="health_identity_section_lifestyle_smoking">دخانیات:</string>
+    <string name="health_identity_section_diseases_title">سوالات سلامت</string>
+    <string name="health_identity_section_diseases_risk_factor">سابقهٔ فشار/قند/چربی:</string>
+    <string name="health_identity_section_diseases_chronic">ابتلا به بیماری:</string>
+    <string name="health_identity_section_diseases_mental">اعصاب و روان:</string>
+    <string name="health_identity_section_diseases_cancer">سابقهٔ سرطان:</string>
+    <string name="health_identity_section_family_title">سلامتی خانواده درجه یک</string>
+    <string name="health_identity_section_allergy_title">حساسیت‌های دارویی</string>
+    <string name="health_identity_section_allergy_drugs">داروهای آلرژیک:</string>
+    <string name="health_review_confirm_modal_text">ثبت نهایی اطلاعات</string>
+    <string name="health_review_confirm_modal_desc">آیا از صحت اطلاعات واردشده اطمینان دارید؟ پس از ثبت نهایی، امکان ویرایش برخی اطلاعات محدود خواهد بود.</string>
+    <string name="health_review_confirm_modal_btn_text">تأیید و ثبت نهایی</string>
+    <string name="health_review_submit_loading_text">در حال ثبت اطلاعات...</string>
+    <string name="health_review_error_banner_title">ثبت انجام نشد</string>
+    <string name="health_review_error_banner_btn_text">مشاهدهٔ پیام‌های خطا</string>
+    <string name="error_count_message">سامانه %1$s پیام خطا برگرداند.</string>
+
+
+
+    <!-- Bottom Sheet Types -->
+    <string name="health_type_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
+    <string name="health_type_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
+    <string name="health_type_mental">آیا بیماری اعصاب و روان دارید؟</string>
+    <string name="health_type_cancer">ایا سابقه ابتلا به سرطان دارید ؟</string>
+    <string name="health_type_family_diseases">آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="health_type_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
+    <string name="health_type_province">استان</string>
+    <string name="health_type_city">شهر</string>
+    <string name="health_type_blood_group">گروه خونی</string>
+    <string name="health_type_smoking">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="health_type_drug_addiction">آیا اعتیاد دارید؟</string>
+    <string name="health_type_alcohol">آیا الکل مصرف دارید؟</string>
+    <string name="health_type_exercise">آیا ورزش می‌کنید؟</string>
+    <string name="health_type_marital_status">وضعیت تاهل</string>
+    <string name="health_type_emergency_contact">تماس اضطراری</string>
+
+    <string name="i_dont_know">نمی دانم</string>
+    <string name="i_dont_knoww">نمیدانم</string>
+</resources>
+
+

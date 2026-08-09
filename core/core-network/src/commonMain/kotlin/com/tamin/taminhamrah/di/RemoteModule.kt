@@ -7,9 +7,13 @@
 package com.tamin.taminhamrah.di
 
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
-import com.tamin.core.network.datasource.commonSource.CommonRemoteDataSource
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
+import com.tamin.taminhamrah.repository.AgentRepository
+import com.tamin.taminhamrah.repository.agentRepository.AgentRepositoryImpl
 import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.treatment.TreatmentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
@@ -28,6 +32,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
@@ -71,7 +77,6 @@ val remoteModule = module {
     single<TreatmentRemoteDataSource> {
         TreatmentRemoteDataSourceImpl(
             apiService = get(),
-            queryBuilder = get(),
             errorParser = get()
         )
     }
@@ -124,11 +129,47 @@ val remoteModule = module {
         )
     }
 
+    single<HealthRemoteDataSource> {
+        HealthRemoteDataSourceImpl(
+            apiService = get(),
+            errorParser = get()
+        )
+    }
+
     single<ContractsRemoteDataSource> {
         ContractsRemoteDataSourceImpl(
             contractsApiService = get(named("contractsApiService")),
             apiQueryBuilder = get(),
             errorParser = get()
+        )
+    }
+
+    single<AgentRemoteDataSource> {
+        // Fake agent responses while the real API is being finished.
+        // Swap to the AgentRemoteDataSourceImpl below to hit the live service:
+        //   AgentRemoteDataSourceImpl(
+        //       agentApiService = get(named("agentApiService")),
+        //       errorParser = get(),
+        //       json = get()
+        //   )
+        com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl(
+            json = get()
+        )
+    }
+
+    single<com.tamin.taminhamrah.apiService.VersionHistoryApiService> {
+        com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl()
+    }
+
+    single<com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSource> {
+        com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSourceImpl(
+            apiService = get()
+        )
+    }
+
+    single<AgentRepository> {
+        AgentRepositoryImpl(
+            remoteDataSource = get()
         )
     }
 }

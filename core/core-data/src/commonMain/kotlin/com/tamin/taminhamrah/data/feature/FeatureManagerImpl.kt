@@ -28,6 +28,15 @@ class FeatureManagerImpl(
         }
     }
 
+    override suspend fun getDisabledMessage(flag: FeatureFlag): String? {
+        return try {
+            val menu = commonRepository.getMainMenu("", false).first()
+            menu.find { it.id == flag.id }?.message
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     private fun mapToFeatureStatus(item: MainServiceDN?): FeatureStatus {
         if (item == null) return FeatureStatus.Disabled(null)
         if (item.active == false) return FeatureStatus.Disabled(item.message)
