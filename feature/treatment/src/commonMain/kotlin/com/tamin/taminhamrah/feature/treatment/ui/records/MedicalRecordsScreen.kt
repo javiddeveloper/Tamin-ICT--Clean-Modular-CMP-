@@ -60,6 +60,8 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.RecordFilterMenu
+import com.tamin.taminhamrah.ui.RecordFilterMenu
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
@@ -127,60 +129,6 @@ private fun rememberPeriodOptions(): ImmutableList<Pair<RecordPeriod, String>> {
     return remember(labels) {
         RecordPeriod.entries.mapIndexed { index, period -> period to labels[index] }
             .toImmutableList()
-    }
-}
-
-/**
- * The chooser behind a filter chip.
- *
- * Material's own menu rather than a panel of our own: it anchors to the chip that opened it,
- * animates out of that anchor, and brings the platform's outside-tap and back handling with it.
- */
-@Composable
-private fun <T> RecordFilterMenu(
-    expanded: Boolean,
-    options: ImmutableList<Pair<T, String>>,
-    isSelected: (T) -> Boolean,
-    onDismiss: () -> Unit,
-    onSelect: (T) -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        // The menu keeps the card surface the panel had: menu defaults are a tighter radius and
-        // a tonal fill, which read as a system menu dropped onto the screen rather than as ours.
-        shape = RoundedCornerShape(CornerRadius.card),
-        containerColor = colors.bgSurface,
-        border = BorderStroke(1.dp, colors.border),
-        shadowElevation = Elevation.md,
-    ) {
-        options.forEach { (value, label) ->
-            val selected = isSelected(value)
-            DropdownMenuItem(
-                modifier = if (selected) Modifier.background(colors.greenBg) else Modifier,
-                text = {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (selected) colors.teal else colors.textPrimary,
-                    )
-                },
-                trailingIcon = if (!selected) {
-                    null
-                } else {
-                    {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_tamin_check),
-                            contentDescription = null,
-                            tint = colors.teal,
-                            modifier = Modifier.size(IconSize.small),
-                        )
-                    }
-                },
-                onClick = { onSelect(value) },
-            )
-        }
     }
 }
 

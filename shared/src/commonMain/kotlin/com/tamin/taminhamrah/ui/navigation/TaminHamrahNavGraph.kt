@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.navigation
+package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
@@ -101,6 +101,8 @@ import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
+import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -366,6 +368,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToChangeMobile = {
                         navController.navigateToChangeMobile()
                     },
+                    onNavigateToMyInbox = {
+                        navController.navigate(MyInboxRoute)
+                    },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
                 )
@@ -413,6 +418,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 )
 
                 workshopsScreen(navController)
+
+                myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
 
