@@ -128,11 +128,11 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_identity)
                 ) {
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_patient_name),
+                        label = "نام بیمار:",
                         value = "${selfDecState.identity.patientName} ${selfDecState.identity.patientFamily}"
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_insurance),
+                        label = "بیمه:",
                         value = selfDecState.identity.insuranceNumber,
                         showDivider = false
                     )
@@ -152,18 +152,14 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_personal)
                 ) {
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_personal_nationality),
-                        value = selfDecState.personal.nationality.ifEmpty { stringResource(Res.string.health_allergy_unknows) })
+                        label = "ملیت:",
+                        value = selfDecState.personal.nationality.ifEmpty { "نامشخص" })
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_personal_marriage),
-                        value = selfDecState.personal.maritalStatusLabel.ifEmpty {
-                            stringResource(
-                                Res.string.health_allergy_unknows
-                            )
-                        })
+                        label = "تاهل:",
+                        value = selfDecState.personal.maritalStatusLabel.ifEmpty { "نامشخص" })
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_personal_job),
-                        value = selfDecState.personal.job.ifEmpty { stringResource(Res.string.health_allergy_unknows) },
+                        label = "شغل:",
+                        value = selfDecState.personal.job.ifEmpty { "نامشخص" },
                         showDivider = false
                     )
                 }
@@ -182,18 +178,14 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_contact)
                 ) {
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_mobile),
+                        label = "موبایل:",
                         value = selfDecState.contact.mobile
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_province_city),
-                        value = "${selfDecState.contact.cityLabel} / ${selfDecState.contact.provinceLabel}".ifEmpty {
-                            stringResource(
-                                Res.string.health_allergy_unknows
-                            )
-                        })
+                        label = "شهر / استان:",
+                        value = "${selfDecState.contact.cityLabel} / ${selfDecState.contact.provinceLabel}".ifEmpty { "نامشخص" })
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_postal_code),
+                        label = "کد پستی:",
                         value = selfDecState.contact.postcode,
                         showDivider = false
                     )
@@ -213,19 +205,15 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_emergency)
                 ) {
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_emergency_name),
+                        label = "نام:",
                         value = "${selfDecState.emergency.emergencyName} ${selfDecState.emergency.emergencyFamily}".trim()
-                            .ifEmpty { stringResource(Res.string.health_allergy_unknows) })
+                            .ifEmpty { "نامشخص" })
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_mobile),
-                        value = selfDecState.emergency.emergencyMobile.ifEmpty { stringResource(Res.string.health_allergy_unknows) })
+                        label = "موبایل:",
+                        value = selfDecState.emergency.emergencyMobile.ifEmpty { "نامشخص" })
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_emergency_relation),
-                        value = selfDecState.emergency.emergencyRelation.ifEmpty {
-                            stringResource(
-                                Res.string.health_allergy_unknows
-                            )
-                        },
+                        label = "نسبت:",
+                        value = selfDecState.emergency.emergencyRelationLabel.ifEmpty { "نامشخص" },
                         showDivider = false
                     )
                 }
@@ -244,15 +232,11 @@ fun SelfDeclarationReviewScreen(
                     icon = painterResource(Res.drawable.ic_weight)
                 ) {
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_height),
-                        value = selfDecState.physical.height?.let { "$it ${stringResource(Res.string.health_physical_unit_cm)}" }
-                            ?: stringResource(
-                                Res.string.health_bmi_unselected_category
-                            ))
+                        label = "قد:",
+                        value = selfDecState.physical.height?.let { "$it سانتی‌متر" } ?: "ثبت نشده")
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_contact_weight),
-                        value = selfDecState.physical.weight?.let { "$it ${stringResource(Res.string.health_physical_unit_kg)}" } ?: stringResource(
-                            Res.string.health_bmi_unselected_category),
+                        label = "وزن:",
+                        value = selfDecState.physical.weight?.let { "$it کیلوگرم" } ?: "ثبت نشده",
                         showDivider = false
                     )
                 }
@@ -270,11 +254,11 @@ fun SelfDeclarationReviewScreen(
                     },
                     icon = painterResource(Res.drawable.ic_blood)
                 ) {
-                    val unknownText = stringResource(Res.string.health_allergy_unknows)
+                    val unknownText = "نامشخص"
                     val group =
                         if (selfDecState.bloodGroup.isBloodGroupUnknown) unknownText else "${selfDecState.bloodGroup.selectedBloodGroupLetter ?: ""}${selfDecState.bloodGroup.selectedBloodGroupRh ?: ""}"
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_blood_group),
+                        label = "گروه خونی:",
                         value = group.ifEmpty { unknownText },
                         showDivider = false
                     )
@@ -293,22 +277,22 @@ fun SelfDeclarationReviewScreen(
                     },
                     icon = painterResource(Res.drawable.ic_lifestyle)
                 ) {
-                    val yesText = stringResource(Res.string.health_option_yes)
-                    val noText = stringResource(Res.string.health_option_no)
+                    val yesText = "بله"
+                    val noText = "خیر"
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_lifestyle_addiction),
+                        label = "اعتیاد:",
                         value = if (selfDecState.lifestyle.hasAddiction == true) "$yesText (${selfDecState.lifestyle.substancePattern ?: ""})" else noText
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_lifestyle_alcohol),
+                        label = "الکل:",
                         value = if (selfDecState.lifestyle.isDrinking == true) "$yesText (${selfDecState.lifestyle.drinkingPattern ?: ""})" else noText
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_lifestyle_exercise),
+                        label = "ورزش:",
                         value = if (selfDecState.lifestyle.isExercising == true) "$yesText (${selfDecState.lifestyle.exerciseFrequency ?: ""})" else noText
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_lifestyle_smoking),
+                        label = "دخانیات:",
                         value = if (selfDecState.lifestyle.isSmoking == true) "$yesText (${selfDecState.lifestyle.smokingPattern ?: ""})" else noText,
                         showDivider = false
                     )
@@ -340,18 +324,18 @@ fun SelfDeclarationReviewScreen(
                         illnessGroups.findGroup(BottomSheetType.CANCER)?.illnesses?.filter { it.id in selfDecState.diseases.cancerIds }
                             ?.joinToString { it.label } ?: ""
 
-                    val yesText = stringResource(Res.string.health_option_yes)
-                    val noText = stringResource(Res.string.health_option_no)
-                    val hasText = stringResource(Res.string.health_option_has)
-                    val hasNotText = stringResource(Res.string.health_option_has_not)
-                    val unknownText = stringResource(Res.string.health_allergy_unknows)
+                    val yesText = "بله"
+                    val noText = "خیر"
+                    val hasText = "دارد"
+                    val hasNotText = "ندارد"
+                    val unknownText = "نامشخص"
 
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_diseases_risk_factor),
+                        label = "سابقهٔ فشار/قند/چربی:",
                         value = if (selfDecState.diseases.riskFactorIds.isNotEmpty()) hasText else hasNotText
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_diseases_chronic),
+                        label = "ابتلا به بیماری:",
                         value = if (selfDecState.diseases.hasChronicDisease == true) {
                             chronicGroup.ifEmpty { yesText }
                         } else {
@@ -359,7 +343,7 @@ fun SelfDeclarationReviewScreen(
                         }
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_diseases_mental),
+                        label = "اعصاب و روان:",
                         value = if (selfDecState.diseases.hasMentalIllness == true) {
                             mental.ifEmpty { yesText }
                         } else if (selfDecState.diseases.hasMentalIllness == false) {
@@ -369,7 +353,7 @@ fun SelfDeclarationReviewScreen(
                         }
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_diseases_cancer),
+                        label = "سابقهٔ سرطان:",
                         value = when (selfDecState.diseases.hasCancer) {
                             true -> {
                                 cancer.ifEmpty { yesText }
@@ -406,21 +390,21 @@ fun SelfDeclarationReviewScreen(
                         forFamily = true
                     )?.illnesses?.filter { it.id in selfDecState.family.familyCancerIds }
                         ?.joinToString { it.label } ?: ""
-                    val hasText = stringResource(Res.string.health_option_has)
-                    val hasNotText = stringResource(Res.string.health_option_has_not)
-                    val yesText = stringResource(Res.string.health_option_yes)
-                    val noText = stringResource(Res.string.health_option_no)
-                    val unknownText = stringResource(Res.string.health_allergy_unknows)
+                    val hasText = "دارد"
+                    val hasNotText = "ندارد"
+                    val yesText = "بله"
+                    val noText = "خیر"
+                    val unknownText = "نامشخص"
 
                     val group =
                         if (selfDecState.family.familyDiseaseIds.isNotEmpty()) hasText else hasNotText
 
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_diseases_risk_factor),
+                        label = "سابقهٔ فشار/قند/چربی:",
                         value = group
                     )
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_diseases_cancer),
+                        label = "سابقهٔ سرطان:",
                         value = when (selfDecState.family.familyHasCancer) {
                             true -> {
                                 cancer.ifEmpty { yesText }
@@ -440,7 +424,7 @@ fun SelfDeclarationReviewScreen(
 
                 // Allergies
                 ReviewSection(
-                    title = stringResource(Res.string.health_identity_section_allergy_title),
+                    title = "حساسیت‌های دارویی",
                     onEdit = {
                         onIntent(
                             HealthProfileIntent.ChangeStep(
@@ -451,10 +435,10 @@ fun SelfDeclarationReviewScreen(
                     },
                     icon = painterResource(Res.drawable.ic_allergy)
                 ) {
-                    val hasNotText = stringResource(Res.string.health_option_has_not)
+                    val hasNotText = "ندارد"
                     val allergyStr = selfDecState.allergy.allergies.joinToString { it.drugName }
                     IdentityRow(
-                        label = stringResource(Res.string.health_identity_section_allergy_drugs),
+                        label = "داروهای آلرژیک:",
                         value = allergyStr.ifEmpty { hasNotText },
                         showDivider = false
                     )
@@ -582,7 +566,7 @@ fun SelfDeclarationReviewScreenPreview() {
                     ),
                     emergency = EmergencyStepState(
                         emergencyName = "محمد",
-                        emergencyRelation = "پدر"
+                        emergencyRelationLabel = "پدر"
                     ),
                     physical = PhysicalStepState(height = 180, weight = 80),
                     bloodGroup = BloodGroupStepState(
@@ -613,7 +597,7 @@ fun SelfDeclarationReviewScreenWithErrorsPreview() {
                     ),
                     emergency = EmergencyStepState(
                         emergencyName = "محمد",
-                        emergencyRelation = "پدر"
+                        emergencyRelationLabel = "پدر"
                     ),
                     physical = PhysicalStepState(height = 180, weight = 80),
                     bloodGroup = BloodGroupStepState(

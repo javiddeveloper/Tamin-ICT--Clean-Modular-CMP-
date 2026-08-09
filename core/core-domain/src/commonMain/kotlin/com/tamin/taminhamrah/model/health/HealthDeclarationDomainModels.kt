@@ -169,6 +169,11 @@ data class MaritalStatusDN(
     val value: String?
 )
 
+data class RelationTypeDN(
+    val key: Int?,
+    val value: String?
+)
+
 data class SmokingStatusDN(
     val key: Int?,
     val value: String?

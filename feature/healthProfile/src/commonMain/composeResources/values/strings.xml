@@ -25,6 +25,8 @@
     <!-- Shared Navigation & Buttons -->
     <string name="health_btn_next_step">مرحلهٔ بعدی</string>
     <string name="health_btn_prev_step">مرحلهٔ قبلی</string>
+    <string name="health_btn_save_edit">ثبت ویرایش</string>
+    <string name="health_btn_delete">حذف</string>
     <string name="health_btn_cancel">انصراف</string>
     <string name="health_step_1_of_10">مرحلهٔ ۱ از ۱۰</string>
     <string name="health_step_2_of_10">مرحلهٔ ۲ از ۱۰</string>
@@ -38,7 +40,39 @@
     <string name="health_label_last_name">نام خانوادگی</string>
     <string name="health_label_father_name">نام پدر</string>
     <string name="health_label_gender">جنسیت</string>
+    <string name="health_success_title">ثبت موفق خوداظهاری</string>
+    <string name="health_success_btn_enter">ورود به پروندهٔ سلامت</string>
+    <string name="health_success_btn_back">بازگشت به تأمین من</string>
+    <string name="health_success_desc">خوداظهاری سلامت شما با موفقیت ثبت شد. اکنون می‌توانید اطلاعات ثبت شده را در پروندهٔ سلامت خود مشاهده کنید.</string>
+    <string name="health_success_tracking_code">کد پیگیری:  </string>
+    <string name="health_error_allergy_duplicate">شما قبلاً این دارو را اضافه کرده‌اید.</string>
+    <string name="health_lifestyle_never_used">هرگز مصرف نشده</string>
+
+    <!-- Error Messages -->
+    <string name="health_error_fetch_marital">خطا در دریافت وضعیت تاهل</string>
+    <string name="health_error_fetch_relation">خطا در دریافت نسبت با شما</string>
+    <string name="health_error_fetch_provinces">خطا در دریافت لیست استان‌ها</string>
+    <string name="health_error_fetch_blood_groups">خطا در دریافت گروه‌های خونی</string>
+    <string name="health_error_fetch_smoking">خطا در دریافت وضعیت دخانیات</string>
+    <string name="health_error_fetch_act_freq">خطا در دریافت فرکانس فعالیت‌ها</string>
+    <string name="health_error_fetch_illness_groups">خطا در دریافت گروه‌های بیماری</string>
+    <string name="health_error_fetch_drugs">خطا در دریافت لیست داروها</string>
+    <string name="health_error_fetch_general">خطا در دریافت اطلاعات عمومی</string>
+    <string name="health_error_fetch_lifestyle">خطا در دریافت اطلاعات خوداظهاری</string>
+    <string name="health_error_fetch_allergies">خطا در دریافت حساسیت‌های دارویی</string>
+    <string name="health_error_fetch_cities">خطا در دریافت لیست شهرها</string>
+    <string name="health_error_patient_not_found">اطلاعات شناسایی بیمار یا کد ملی یافت نشد.</string>
+    <string name="health_success_submit">اطلاعات پرونده سلامت با موفقیت ثبت شد</string>
+    <string name="health_error_submit">خطا در ثبت اطلاعات</string>
+    <string name="health_error_general">خطای نامشخص</string>
+
     <string name="health_label_birth_date">تاریخ تولد</string>
+    <string name="health_label_nat_code">کد ملی</string>
+    <string name="health_label_age">سن</string>
+    <string name="health_label_mobile">شمارهٔ همراه</string>
+    <string name="health_label_address">آدرس بیمار</string>
+    <string name="health_unit_year">سال</string>
+    <string name="health_label_patient_name">نام بیمار</string>
     <string name="health_label_insurance_number">شمارهٔ بیمه</string>
     <string name="health_identity_insurance_card_title">اطلاعات بیمه</string>
     <string name="health_label_insurance_type">نوع بیمه</string>
@@ -48,6 +82,7 @@
     <string name="health_personal_title">اطلاعات تکمیلی فردی</string>
     <string name="health_personal_heading">اطلاعات تکمیلی فردی</string>
     <string name="health_personal_desc">لطفاً وضعیت تاهل و شغل خود را به همراه اطلاعات تابعیت وارد کنید.</string>
+    <string name="health_marital_status_bs_subtitle">در قسمت زیر می‌توانید وضعیت تأهل خود را انتخاب کنید</string>
     <string name="health_personal_marital_status">وضعیت تأهل</string>
     <string name="health_marital_single">مجرد</string>
     <string name="choose">انتخاب کنید</string>
@@ -161,6 +196,9 @@
     <string name="health_bs_chronic_subtitle">نوع بیماری خود را انتخاب کنید:</string>
     <string name="health_bs_mental_subtitle">نوع عارضه را انتخاب کنید:</string>
     <string name="health_bs_cancer_subtitle">نوع سرطان را انتخاب کنید:</string>
+    <string name="health_bs_no_items_found">موردی یافت نشد</string>
+    <string name="health_label_description">توضیحات</string>
+    <string name="health_search_placeholder">جستجو...</string>
     <string name="health_bs_submit">ثبت</string>
 
     <!-- Lifestyle Screen Strings -->
@@ -193,6 +231,18 @@
     <string name="health_blood_rh_factor">فاکتور Rh</string>
     <string name="health_blood_i_dont_know_my_blood_group">گروه خونی خود را نمی‌دانم</string>
 
+
+    <string name="health_label_substance_usage">سوء مصرف مواد</string>
+    <string name="health_label_smoking">مصرف سیگار / دخانیات</string>
+    <string name="health_label_smoking_desc">توضیحات دخانیات</string>
+    <string name="health_label_alcohol">مصرف الکل</string>
+    <string name="health_label_alcohol_desc">توضیحات الکل</string>
+    <string name="health_label_exercise_freq">فراوانی ورزش</string>
+    <string name="health_label_exercise_desc">توضیحات فعالیت ورزشی</string>
+    <string name="health_label_unknown_drug">داروی نامشخص</string>
+    <string name="health_label_emergency_contact_name">نام مخاطب اضطراری</string>
+    <string name="health_label_emergency_contact_mobile">تلفن همراه اضطراری</string>
+    <string name="health_general_info_section_title">اطلاعات عمومی پرونده سلامت</string>
 
     <!-- Review Screen-->
     <string name="health_review_title">بررسی نهایی پروندهٔ سلامت</string>
@@ -237,6 +287,9 @@
     <string name="health_review_submit_loading_text">در حال ثبت اطلاعات...</string>
     <string name="health_review_error_banner_title">ثبت انجام نشد</string>
     <string name="health_review_error_banner_btn_text">مشاهدهٔ پیام‌های خطا</string>
+    <string name="health_review_error_bs_desc">سامانه پیام‌های زیر را برگرداند:</string>
+    <string name="health_review_error_bs_footer">این پیام‌ها عیناً از سامانه تأمین دریافت شده است. اطلاعات وارد شده شما پاک نشده است.</string>
+    <string name="health_review_error_bs_btn">بازگشت به فرم و بررسی</string>
     <string name="error_count_message">سامانه %1$s پیام خطا برگرداند.</string>
 
 
@@ -255,8 +308,10 @@
     <string name="health_type_drug_addiction">آیا اعتیاد دارید؟</string>
     <string name="health_type_alcohol">آیا الکل مصرف دارید؟</string>
     <string name="health_type_exercise">آیا ورزش می‌کنید؟</string>
-    <string name="health_type_marital_status">وضعیت تاهل</string>
+    <string name="health_type_marital_status">وضعیت تأهل</string>
+    <string name="health_type_relation">نسبت با شما</string>
     <string name="health_type_emergency_contact">تماس اضطراری</string>
+    <string name="health_emergency_relation_desc">نسبت فرد تماس اضطراری با شما را انتخاب کنید</string>
 
     <string name="i_dont_know">نمی دانم</string>
     <string name="i_dont_knoww">نمیدانم</string>

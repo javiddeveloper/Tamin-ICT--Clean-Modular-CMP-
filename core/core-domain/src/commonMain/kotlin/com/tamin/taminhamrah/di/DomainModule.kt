@@ -85,6 +85,7 @@ import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
+import com.tamin.taminhamrah.useCases.health.GetRelationTypesUseCase
 import com.tamin.taminhamrah.useCases.health.GetAllProvincesUseCase
 import com.tamin.taminhamrah.useCases.health.GetProvinceCitiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetBloodGroupsUseCase
@@ -251,6 +252,7 @@ val domainModule = module {
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)
     factoryOf(::GetMaritalStatusUseCase)
+    factoryOf(::GetRelationTypesUseCase)
     factoryOf(::GetSmokingStatusUseCase)
     factoryOf(::GetSelfDeclarableIllnessesUseCase)
     factoryOf(::GetSelfDeclarableIllnessesByGroupUseCase)

@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.PatientVisitDN
 import com.tamin.taminhamrah.model.health.ProvinceItemDN
 import com.tamin.taminhamrah.model.health.ProvinceCityItemDN
+import com.tamin.taminhamrah.model.health.RelationTypeDN
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessGroupDN
 import com.tamin.taminhamrah.model.health.SmokingStatusDN
 import com.tamin.taminhamrah.model.health.ActFrequencyDN
@@ -46,6 +47,7 @@ interface HealthRepository {
     // --- Lookup ---
     suspend fun getBloodGroups(): Flow<List<BloodGroupDN>>
     suspend fun getMaritalStatus(): Flow<List<MaritalStatusDN>>
+    suspend fun getRelationTypes(): Flow<List<RelationTypeDN>>
     suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>>
     suspend fun getActFrequencies(): Flow<List<ActFrequencyDN>>
 

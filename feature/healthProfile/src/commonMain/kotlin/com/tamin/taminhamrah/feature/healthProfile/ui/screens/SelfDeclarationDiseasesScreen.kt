@@ -121,7 +121,7 @@ fun SelfDeclarationDiseasesScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 InfoBanner(
-                    message = stringResource(Res.string.health_confidential_notice),
+                    message = "فرآیند اطلاعات شما کاملاً محرمانه بوده و تنها برای ارزیابی پروندهٔ سلامت استفاده می‌شود.",
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
 
