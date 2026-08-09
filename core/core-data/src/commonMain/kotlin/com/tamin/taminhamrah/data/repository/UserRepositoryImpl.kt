@@ -8,8 +8,8 @@ import com.tamin.taminhamrah.data.local.dao.UserDao
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
-import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.data.mapper.user.toDomain
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -70,7 +71,11 @@ internal class UserRepositoryImpl(
         emit(remoteData.toDomain())
     }
 
-    override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
+    override suspend fun verifyChangeMobileCode(
+        mobile: String,
+        otp: String,
+        otpHashCode: String
+    ): Flow<String> = flow {
         val request = VerifyMobileRequest(mobile, otp, otpHashCode)
         val remoteData = userRemoteDataSource.verifyChangeMobileCode(request)
         emit(remoteData)
@@ -80,7 +85,8 @@ internal class UserRepositoryImpl(
     override suspend fun getSubDominantsInfo(
         filters: List<ApiFilterDN>
     ): Flow<SubdominantDN> = flow {
-        val remoteData = userRemoteDataSource.getSubDominantsInfo(ApiQueryParamDN(filters = filters))
+        val remoteData =
+            userRemoteDataSource.getSubDominantsInfo(ApiQueryParamDN(filters = filters))
         Logger.d("getSubDominantsInfo", remoteData.toString())
         emit(remoteData.toDomain())
     }
@@ -105,7 +111,8 @@ internal class UserRepositoryImpl(
     override suspend fun getRelationTaminAll(
         filters: List<ApiFilterDN>
     ): Flow<List<ActiveRelationDN>> = flow {
-        val remoteData = userRemoteDataSource.getRelationTaminAll(ApiQueryParamDN(filters = filters))
+        val remoteData =
+            userRemoteDataSource.getRelationTaminAll(ApiQueryParamDN(filters = filters))
         Logger.d("getRelationTaminAll", remoteData?.list.toString())
         val relationList = remoteData?.list?.map { it.toDomain() }
         emit(relationList ?: emptyList())
@@ -146,7 +153,19 @@ internal class UserRepositoryImpl(
         val result = userRemoteDataSource.getUserProfile()
         emit(result!!.toDomain())
     }
+
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {
         emit(userRemoteDataSource.checkUserIsNew(nationalId))
+    }
+
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> =
+        flow {
+            val remoteData = userRemoteDataSource.getStatusCertificateReport(filters)
+            emit(remoteData ?: "")
+        }
+
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
+        val remoteData = userRemoteDataSource.getRecipients(ApiQueryParamDN(filters = filters))
+        emit(remoteData?.list?.map { it.toDomain() } ?: emptyList())
     }
 }

@@ -124,6 +124,7 @@ fun ProfileScreen(
     onNavigateToIdentity: (String?) -> Unit = {},
     onNavigateToElectronicFile: () -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
+    onNavigateToActiveRelation: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
@@ -149,6 +150,7 @@ fun ProfileScreen(
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
         onNavigateToElectronicFile = onNavigateToElectronicFile,
         onNavigateToVersionHistory = onNavigateToVersionHistory,
+        onNavigateToActiveRelation = onNavigateToActiveRelation,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToRouteById = onNavigateToRouteById,
@@ -173,6 +175,7 @@ fun HandleProfileEvents(
     onNavigateToIdentity: () -> Unit,
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
+    onNavigateToActiveRelation: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
@@ -199,6 +202,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToVersionHistory -> {
                 onNavigateToVersionHistory()
+            }
+
+            ProfileEvent.NavigateToActiveRelation -> {
+                onNavigateToActiveRelation()
             }
 
             ProfileEvent.NavigateToChangeMobile -> {
