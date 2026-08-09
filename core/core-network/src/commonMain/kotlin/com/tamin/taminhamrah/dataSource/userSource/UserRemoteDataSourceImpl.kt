@@ -11,8 +11,10 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
+import com.tamin.taminhamrah.model.certificate.RecipientDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
@@ -234,6 +236,28 @@ internal class UserRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
+        }
+    }
+
+    override suspend fun getStatusCertificateReport(filter: List<ApiFilterDN>): String? {
+        return try {
+            val response = userApiService.getStatusCertificateReport(queryBuilder.buildFilterJson(filter))
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getRecipients(query: ApiQueryParamDN): ListData<RecipientDTO>? {
+        return try {
+            val response = userApiService.getRecipients(queryBuilder.buildQuery(query.copy(limit = 1000)))
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }

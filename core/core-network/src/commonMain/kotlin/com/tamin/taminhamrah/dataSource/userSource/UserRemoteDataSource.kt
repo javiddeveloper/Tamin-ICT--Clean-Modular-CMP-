@@ -10,6 +10,7 @@ import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
+import com.tamin.taminhamrah.model.certificate.RecipientDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
@@ -51,6 +52,14 @@ interface UserRemoteDataSource {
     ): ListData<ElectronicFileDTO>?
 
     suspend fun getUserProfile(): UserProfileDto?
+
+    suspend fun getStatusCertificateReport(
+        filter: List<ApiFilterDN>
+    ): String?
+
+    suspend fun getRecipients(
+        query: ApiQueryParamDN
+    ): ListData<RecipientDTO>?
 
     suspend fun registerBankAccount(
         request: BankAccountRequestDTO,

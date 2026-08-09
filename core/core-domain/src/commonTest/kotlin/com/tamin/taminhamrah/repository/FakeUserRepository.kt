@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -27,6 +28,8 @@ class FakeUserRepository : UserRepository {
     var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
     var electronicFileResult: List<ElectronicFileDN> = emptyList()
     var userProfileResult: UserProfileDN? = null
+    var statusCertificateReportResult: String = ""
+    var recipientsResult: List<RecipientDN> = emptyList()
 
     var shouldThrowError = false
     var error: Throwable = RuntimeException("User Repository Error")
@@ -111,4 +114,14 @@ class FakeUserRepository : UserRepository {
         accountTypeCode: String,
         startDateMillis: Long,
     ): Flow<String?> = flowOf(null)
+
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(statusCertificateReportResult)
+    }
+
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(recipientsResult)
+    }
 }

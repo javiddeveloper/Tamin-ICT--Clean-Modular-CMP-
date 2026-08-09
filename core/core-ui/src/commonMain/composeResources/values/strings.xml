@@ -63,7 +63,16 @@
     <string name="profile_settings">تنظیمات</string>
     <string name="profile_support_section">پشتیبانی</string>
     <string name="profile_support">پشتیبانی</string>
-    <string name="profile_contact_me">تماس با من</string>
+    <string name="contact_us_title">تماس با ما</string>
+    <string name="contact_us_subtitle">ارتباط با سازمان تأمین اجتماعی</string>
+    <string name="contact_us_hotline_title">مرکز تماس شبانه‌روزی</string>
+    <string name="contact_us_hotline_number">۱۴۲۰</string>
+    <string name="contact_us_btn_call">تماس</string>
+    <string name="contact_us_social_section">شبکه‌های اجتماعی</string>
+    <string name="contact_us_details_section">اطلاعات تماس</string>
+    <string name="contact_us_footer_title">پاسخگوی شما هستیم</string>
+    <string name="contact_us_footer_subtitle">۲۴ ساعته، ۷ روز هفته در کنار شما</string>
+    <string name="contact_us_copied">در حافظه کپی شد</string>
     <string name="profile_share">اشتراک‌گذاری</string>
     <string name="profile_version_history">تاریخچهٔ نسخه</string>
     <string name="profile_logout">خروج از حساب کاربری</string>
@@ -335,6 +344,31 @@
     <string name="bank_account_registered_description">پس از بررسی و تأیید، این حساب به فهرست حساب‌های بانکی شما افزوده می‌شود.</string>
     <string name="bank_account_tracking_code">کد پیگیری: %1$s</string>
     <string name="bank_account_registered">حساب بانکی با موفقیت ثبت شد.</string>
+
+    <!-- Active Relation -->
+    <string name="active_relation_active">دارای ارتباط فعال</string>
+    <string name="active_relation_inactive">فاقد ارتباط فعال</string>
+    <string name="active_relation_verified_badge">تأیید سازمان</string>
+    <string name="active_relation_disconnected_badge">قطع شده</string>
+    <string name="active_relation_org_name">نام واحد سازمانی</string>
+    <string name="active_relation_insurance_number">شمارهٔ بیمه</string>
+    <string name="active_relation_status">وضعیت ارتباط</string>
+    <string name="active_relation_start_date">از تاریخ</string>
+    <string name="active_relation_send_certificate">ارسال گواهی</string>
+    <string name="active_relation_select_recipient">انتخاب بانک/مؤسسه/نهاد</string>
+    <string name="active_relation_recipient_branch_placeholder">نام شعبه دریافت‌کننده گواهی</string>
+    <string name="active_relation_issue_and_send">صدور و ارسال به صندوق شخصی</string>
+    <string name="active_relation_select_recipient_title">لطفا بانک/موسسه/نهاد را انتخاب نمایید</string>
+    <string name="active_relation_search_placeholder">جستجو</string>
+    <string name="active_relation_success_title">درخواست شما با موفقیت ثبت شد</string>
+    <string name="active_relation_success_description">پیام تایید ارسال گواهی استعلام وضعیت ، برای شماره همراه شما ارسال گردید. گواهی استعلام وضعیت شما به صندوق شخصی شما ارسال شده است.</string>
+    <string name="active_relation_success_button">متوجه شدم</string>
+
+    <string name="active_relation_header_status_ok">ارتباط شما برقرار است</string>
+    <string name="active_relation_header_status_error">ارتباط شما برقرار نیست</string>
+    <string name="active_relation_header_active_count">%1$s ارتباط فعال</string>
+    <string name="active_relation_header_inactive_count">%1$s ارتباط غیرفعال</string>
+    <string name="active_relation_header_check_time">بررسی: امروز %1$s</string>
 
 </resources>
 

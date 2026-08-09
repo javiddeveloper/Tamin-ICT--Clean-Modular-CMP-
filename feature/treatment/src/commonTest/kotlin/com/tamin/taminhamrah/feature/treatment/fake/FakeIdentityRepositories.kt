@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.treatment.fake
 
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
@@ -71,6 +72,9 @@ class FakeUserRepository : UserRepository {
         accountTypeCode: String,
         startDateMillis: Long,
     ): Flow<String?> = flowOf(null)
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
+
 }
 
 /** Minimal fake [CityProvinceRepository] dependency of `IdentityInfoUseCase`. */

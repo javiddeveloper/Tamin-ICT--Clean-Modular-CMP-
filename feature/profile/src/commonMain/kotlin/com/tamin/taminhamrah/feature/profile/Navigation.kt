@@ -12,10 +12,14 @@ import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationRoute
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationViewModel
 import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
+import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsRoute
+import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 
@@ -36,6 +40,11 @@ sealed interface ProfileRoute {
     @Serializable
     data object BankAccount : ProfileRoute
 
+    @Serializable
+    data object ActiveRelation : ProfileRoute
+
+    @Serializable
+    data object ContactUs : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -55,8 +64,10 @@ fun NavGraphBuilder.profileGraph(
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
+                onNavigateToActiveRelation = { navController.navigate(ProfileRoute.ActiveRelation) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
                 onNavigateToBankAccount = { navController.navigate(ProfileRoute.BankAccount) },
+                onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -86,6 +97,25 @@ fun NavGraphBuilder.profileGraph(
             BankAccountRoute(
                 viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() },
+            )
+        }
+
+        composable<ProfileRoute.ActiveRelation> {
+            val viewModel = koinViewModel<ActiveRelationViewModel>()
+
+            ActiveRelationRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.ContactUs> {
+            val viewModel = koinViewModel<ContactUsViewModel>()
+
+            ContactUsRoute(
+                viewModel = viewModel,
+                onOpenUrl = onOpenUrl,
+                onBackClicked = { navController.popBackStack() }
             )
         }
     }
