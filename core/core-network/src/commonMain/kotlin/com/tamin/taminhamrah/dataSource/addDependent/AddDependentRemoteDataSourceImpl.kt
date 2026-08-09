@@ -26,19 +26,19 @@ class AddDependentRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : AddDependentRemoteDataSource {
 
-    override suspend fun getDependentInfo(): List<DependentInfoDto> =
+    override suspend fun getDependentInfo(): List<DependentInfoDTO> =
         errorParser.safeCall("getDependentInfo") {
             apiService.getDependentInfo().extractData()
         }
 
-    override suspend fun getActiveBranches(): List<BranchDto> =
+    override suspend fun getActiveBranches(): List<BranchDTO> =
         errorParser.safeCall("getActiveBranches") {
             apiService.getActiveBranches().extractData()
         }
 
     override suspend fun getFamilyRelationships(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipDto> = errorParser.safeCall("getFamilyRelationships") {
+    ): List<FamilyRelationshipDTO> = errorParser.safeCall("getFamilyRelationships") {
         val parameters = if (filter.isEmpty()) {
             emptyMap()
         } else {
@@ -49,7 +49,7 @@ class AddDependentRemoteDataSourceImpl(
 
     override suspend fun getFamilyRelationshipsFromProxy(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipProxyDto> = errorParser.safeCall("getFamilyRelationshipsFromProxy") {
+    ): List<FamilyRelationshipProxyDTO> = errorParser.safeCall("getFamilyRelationshipsFromProxy") {
         val parameters = apiQueryBuilder.buildQuery(
             ApiQueryParamDN(page = 1, filters = filter)
         )
@@ -60,7 +60,7 @@ class AddDependentRemoteDataSourceImpl(
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): RegistryDataDto = errorParser.safeCall("inquiryRegistry") {
+    ): RegistryDataDTO = errorParser.safeCall("inquiryRegistry") {
         apiService.inquiryRegistry(
             dependentNationalId,
             birthDateTimeStamp,
@@ -79,8 +79,8 @@ class AddDependentRemoteDataSourceImpl(
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): UploadImageResponseDto = errorParser.safeCall("uploadImage") {
-        apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType)).extractData()
+    ): UploadImageResponseDTO = errorParser.safeCall("uploadImage") {
+        apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
     }
 
     private fun createUploadImageRequest(
@@ -98,7 +98,7 @@ class AddDependentRemoteDataSourceImpl(
         )
     }
 
-    override suspend fun addNewDependent(request: RequestAddDependentDto): GeneralResponseDto =
+    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO =
         errorParser.safeCall("addNewDependent") {
             apiService.addNewDependent(request).extractData()
         }

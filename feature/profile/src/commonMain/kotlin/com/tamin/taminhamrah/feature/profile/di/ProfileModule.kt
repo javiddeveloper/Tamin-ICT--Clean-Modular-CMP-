@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.profile.di
 
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
-import com.tamin.taminhamrah.feature.profile.ui.addDependent.AddDependentViewModel
 import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationViewModel
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
@@ -16,7 +15,6 @@ val profileModule = module {
     viewModelOf(::VersionHistoryViewModel)
     viewModelOf(::ActiveRelationViewModel)
     viewModelOf(::ContactUsViewModel)
-    viewModelOf(::AddDependentViewModel)
     viewModelOf(::DependentsListViewModel)
 }
 
