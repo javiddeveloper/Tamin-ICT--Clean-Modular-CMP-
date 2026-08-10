@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
@@ -148,13 +147,13 @@ fun RecordSearchSheet(
 
                 IconButton(
                     onClick = onDismiss,
-                    modifier = Modifier.size(SearchHandleIconSize),
+                    modifier = Modifier.size(TreatmentDimens.searchHandleIconSize),
                 ) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_tamin_cross),
                         contentDescription = stringResource(Res.string.btn_close),
                         tint = colors.textSecondary,
-                        modifier = Modifier.size(SearchHandleGlyphSize),
+                        modifier = Modifier.size(TreatmentDimens.searchHandleGlyphSize),
                     )
                 }
             }
@@ -230,9 +229,9 @@ fun RecordSearchSheet(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(SearchFieldCorner),
+                shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner),
                 colors = textFieldColors(),
-                modifier = Modifier.fillMaxWidth().height(SearchFieldHeight),
+                modifier = Modifier.fillMaxWidth().height(TreatmentDimens.searchFieldHeight),
             )
 
             // Section 4: Cost Range (بازهٔ مبلغ هزینه (ریال))
@@ -252,10 +251,10 @@ fun RecordSearchSheet(
                         )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(SearchFieldCorner),
+                    shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = textFieldColors(),
-                    modifier = Modifier.weight(1f).height(SearchFieldHeight),
+                    modifier = Modifier.weight(1f).height(TreatmentDimens.searchFieldHeight),
                 )
                 OutlinedTextField(
                     value = criteria.maxAmount,
@@ -268,10 +267,10 @@ fun RecordSearchSheet(
                         )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(SearchFieldCorner),
+                    shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = textFieldColors(),
-                    modifier = Modifier.weight(1f).height(SearchFieldHeight),
+                    modifier = Modifier.weight(1f).height(TreatmentDimens.searchFieldHeight),
                 )
             }
 
@@ -286,11 +285,11 @@ fun RecordSearchSheet(
             ) {
                 OutlinedButton(
                     onClick = { criteria = RecordSearchCriteria() },
-                    shape = RoundedCornerShape(SearchActionCorner),
+                    shape = RoundedCornerShape(TreatmentDimens.searchActionCorner),
                     border = BorderStroke(Thickness.border, colors.border),
                     modifier = Modifier
                         .weight(1f)
-                        .height(SearchActionHeight),
+                        .height(TreatmentDimens.searchActionHeight),
                 ) {
                     Text(
                         text = stringResource(Res.string.search_clear),
@@ -303,8 +302,8 @@ fun RecordSearchSheet(
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
-                        .height(SearchActionHeight)
-                        .clip(RoundedCornerShape(SearchActionCorner))
+                        .height(TreatmentDimens.searchActionHeight)
+                        .clip(RoundedCornerShape(TreatmentDimens.searchActionCorner))
                         .background(colors.medicalGradient)
                         .clickable { onApply(criteria) },
                     contentAlignment = Alignment.Center,
@@ -370,7 +369,7 @@ private fun ServiceTypeChip(
                     .border(Thickness.border, colors.border, CircleShape),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = SearchChipPaddingHorizontal, vertical = SearchChipPaddingVertical),
+            .padding(horizontal = TreatmentDimens.searchChipPaddingHorizontal, vertical = TreatmentDimens.searchChipPaddingVertical),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -403,10 +402,10 @@ private fun DateFieldButton(
 
     Box(
         modifier = modifier
-            .height(SearchFieldHeight)
-            .clip(RoundedCornerShape(SearchFieldCorner))
+            .height(TreatmentDimens.searchFieldHeight)
+            .clip(RoundedCornerShape(TreatmentDimens.searchFieldCorner))
             .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, RoundedCornerShape(SearchFieldCorner))
+            .border(Thickness.border, colors.border, RoundedCornerShape(TreatmentDimens.searchFieldCorner))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         contentAlignment = Alignment.CenterStart,
@@ -422,14 +421,6 @@ private fun DateFieldButton(
 
 // The design's inputs compute to roughly 36-40px against Material's 56dp floor. One height for
 // every control in the sheet -- the two date buttons included -- so the rows line up.
-private val SearchHandleIconSize = 32.dp
-private val SearchHandleGlyphSize = 18.dp
-private val SearchActionHeight = 52.dp
-private val SearchActionCorner = 14.dp
-private val SearchChipPaddingHorizontal = 18.dp
-private val SearchChipPaddingVertical = 10.dp
-private val SearchFieldHeight = 40.dp
-private val SearchFieldCorner = 13.dp
 
 @Composable
 private fun textFieldColors() = OutlinedTextFieldDefaults.colors(

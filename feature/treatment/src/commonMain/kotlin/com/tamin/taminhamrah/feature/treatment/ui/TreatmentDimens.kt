@@ -14,6 +14,16 @@ internal object TreatmentDimens {
     val detailPdfPlaceholderTall = 120.dp
     val detailPdfPlaceholderShort = 80.dp
 
+    /** The advanced-search sheet: inputs sized to the design rather than Material's 56dp floor. */
+    val searchFieldHeight = 40.dp
+    val searchFieldCorner = 13.dp
+    val searchActionHeight = 52.dp
+    val searchActionCorner = 14.dp
+    val searchChipPaddingHorizontal = 18.dp
+    val searchChipPaddingVertical = 10.dp
+    val searchHandleIconSize = 32.dp
+    val searchHandleGlyphSize = 18.dp
+
     /** Header collapse scroll distance. */
     val headerCollapseDistance = 96.dp
 
