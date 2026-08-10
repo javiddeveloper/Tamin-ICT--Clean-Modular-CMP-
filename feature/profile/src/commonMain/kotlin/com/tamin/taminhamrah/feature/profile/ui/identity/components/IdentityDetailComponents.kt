@@ -43,17 +43,17 @@ internal fun RegistryVerifiedNotice(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
     ) {
+       Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_check_circle),
+            contentDescription = null,
+            tint = colors.greenText,
+            modifier = Modifier.size(IdentityDimens.bannerIconSize),
+        )
         Text(
             text = stringResource(Res.string.identity_verified_notice),
             style = MaterialTheme.typography.labelSmall,
             color = colors.textMuted,
             textAlign = TextAlign.Center,
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_check_circle),
-            contentDescription = null,
-            tint = colors.greenText,
-            modifier = Modifier.size(IdentityDimens.bannerIconSize),
         )
     }
 }
@@ -85,13 +85,16 @@ private fun IdentitySectionCard(
         SectionLabel(
             text = stringResource(section.title),
             color = colors.textSecondary,
-            modifier = Modifier.padding(bottom = Spacing.sm),
+            // Design: margin:20px 0 10px on the section caption.
+            modifier = Modifier.padding(bottom = IdentityDimens.sectionLabelGap),
         )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .taminSurface()
-                .padding(horizontal = Spacing.md),
+                // Design rows are padding:14px 16px, and the rule between them is
+                // inset by the same 16px (margin:0 16px). Spacing.md is 12dp, 4dp short.
+                .padding(horizontal = IdentityDimens.rowHorizontalPadding),
         ) {
             section.fields.forEachIndexed { index, field ->
                 // Names, not codes, so the value keeps the screen's reading direction.
@@ -100,7 +103,7 @@ private fun IdentitySectionCard(
                     value = field.value,
                     valueColor = if (field.isAbsent) colors.textTertiary else colors.textPrimary,
                     numeric = false,
-                    verticalPadding = Spacing.sm,
+                    verticalPadding = IdentityDimens.rowVerticalPadding,
                 )
                 if (index != section.fields.lastIndex) TaminDivider()
             }

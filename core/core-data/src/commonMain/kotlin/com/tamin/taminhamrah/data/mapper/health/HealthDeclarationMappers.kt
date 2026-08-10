@@ -160,6 +160,8 @@ fun BloodGroupDTO.toDomain() = BloodGroupDN(key = key, value = value)
 
 fun MaritalStatusDTO.toDomain() = MaritalStatusDN(key = key, value = value)
 
+fun RelationTypeDTO.toDomain() = RelationTypeDN(key = key, value = value)
+
 fun SmokingStatusDTO.toDomain() = SmokingStatusDN(key = key, value = value)
 
 fun ActFrequencyDTO.toDomain() = ActFrequencyDN(key = key, value = value)

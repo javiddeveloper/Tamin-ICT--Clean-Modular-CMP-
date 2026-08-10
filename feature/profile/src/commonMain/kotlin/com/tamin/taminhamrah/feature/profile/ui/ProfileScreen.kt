@@ -78,6 +78,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.contact_us_title
 import taminx.core.core_ui.ic_communication
 import taminx.core.core_ui.ic_exit
 import taminx.core.core_ui.ic_history
@@ -98,7 +99,6 @@ import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable
 import taminx.core.core_ui.profile_change_mobile
-import taminx.core.core_ui.profile_contact_me
 import taminx.core.core_ui.profile_dependents
 import taminx.core.core_ui.profile_dependents_badge_test
 import taminx.core.core_ui.profile_electronic_file
@@ -122,8 +122,12 @@ fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = koinViewModel(),
     onNavigateToIdentity: (String?) -> Unit = {},
+    onNavigateToElectronicFile: () -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
+    onNavigateToActiveRelation: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
+    onNavigateToContactUs: () -> Unit = {},
+    onNavigateToMyInbox: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
@@ -145,8 +149,12 @@ fun ProfileScreen(
     HandleProfileEvents(
         events = viewModel.events,
         onNavigateToIdentity = { onNavigateToIdentity(userId) },
+        onNavigateToElectronicFile = onNavigateToElectronicFile,
         onNavigateToVersionHistory = onNavigateToVersionHistory,
+        onNavigateToActiveRelation = onNavigateToActiveRelation,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
+        onNavigateToContactUs = onNavigateToContactUs,
+        onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
@@ -167,8 +175,12 @@ fun ProfileScreen(
 fun HandleProfileEvents(
     events: Flow<ProfileEvent>,
     onNavigateToIdentity: () -> Unit,
+    onNavigateToElectronicFile: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
+    onNavigateToActiveRelation: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
+    onNavigateToContactUs: () -> Unit,
+    onNavigateToMyInbox: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -187,12 +199,28 @@ fun HandleProfileEvents(
                 onNavigateToIdentity()
             }
 
+            ProfileEvent.NavigateToElectronicFile -> {
+                onNavigateToElectronicFile()
+            }
+
             ProfileEvent.NavigateToVersionHistory -> {
                 onNavigateToVersionHistory()
             }
 
+            ProfileEvent.NavigateToActiveRelation -> {
+                onNavigateToActiveRelation()
+            }
+
             ProfileEvent.NavigateToChangeMobile -> {
                 onNavigateToChangeMobile()
+            }
+
+            ProfileEvent.NavigateToContactUs -> {
+                onNavigateToContactUs()
+            }
+
+            ProfileEvent.NavigateToMyInbox -> {
+                onNavigateToMyInbox()
             }
 
             is ProfileEvent.OpenUrl -> {
@@ -503,7 +531,7 @@ fun ProfileContent(
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SUPPORT)) }
                             ),
                             ListItemData(
-                                title = stringResource(Res.string.profile_contact_me),
+                                title = stringResource(Res.string.contact_us_title),
                                 leadingIconPainter = painterResource(Res.drawable.ic_send),
                                 colors = ListItemColors(
                                     leadingIconTintColor = taminColors.bgIconProfile,

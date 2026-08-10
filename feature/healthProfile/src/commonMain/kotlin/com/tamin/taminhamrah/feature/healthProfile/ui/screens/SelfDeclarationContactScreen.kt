@@ -137,6 +137,8 @@ fun SelfDeclarationContactScreen (
 
                 val showMobileError = mobileTouched && !isMobileValid
                 StyledTextField(
+                    singleLine = true,
+                    inputRestriction = InputRestriction.DigitsOnly,
                     value = state.mobile,
                     onValueChange = { mob ->
                         val filtered = ValidationUtils.validatePhoneNumber(mob)
@@ -160,6 +162,7 @@ fun SelfDeclarationContactScreen (
 
                 val showEmailError = emailTouched && !isEmailValid
                 StyledTextField(
+                    singleLine = true,
                     value = state.email,
                     onValueChange = { email ->
                         onIntent(HealthProfileIntent.UpdateContact(state.copy(email = email)))
@@ -218,6 +221,8 @@ fun SelfDeclarationContactScreen (
 
                 val showPostcodeError = postcodeTouched && state.postcode.length != 10
                 StyledTextField(
+                    singleLine = true,
+                    inputRestriction = InputRestriction.DigitsOnly,
                     value = state.postcode,
                     onValueChange = { post ->
                         val filtered = ValidationUtils.validatePostcode(post)

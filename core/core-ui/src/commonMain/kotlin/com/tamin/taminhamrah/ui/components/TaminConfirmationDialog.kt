@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +42,9 @@ fun TaminConfirmationDialog(
     dismissButton: @Composable () -> Unit,
     onDismissRequest: () -> Unit,
     icon: ImageVector? = null,
+    /** Defaults keep the informational blue every existing caller expects. */
+    iconTint: Color = LocalTaminColors.current.blueText,
+    iconBackground: Color = LocalTaminColors.current.blueBg,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -68,13 +72,13 @@ fun TaminConfirmationDialog(
                         modifier = Modifier
                             .size(68.dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(taminColors.blueBg),
+                            .background(iconBackground),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = taminColors.blueText,
+                            tint = iconTint,
                             modifier = Modifier.size(32.dp)
                         )
                     }

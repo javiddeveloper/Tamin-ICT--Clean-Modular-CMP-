@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.health.DrugItemDN
 import com.tamin.taminhamrah.model.health.HealthProblemDN
 import com.tamin.taminhamrah.model.health.IllnessItemDN
 import com.tamin.taminhamrah.model.health.MaritalStatusDN
+import com.tamin.taminhamrah.model.health.RelationTypeDN
 import com.tamin.taminhamrah.model.health.PatientGeneralDN
 import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.ProvinceItemDN
@@ -90,6 +91,11 @@ fun BloodGroupDN.toPresentation(): LookupItemPR = LookupItemPR(
 )
 
 fun MaritalStatusDN.toPresentation(): LookupItemPR = LookupItemPR(
+    id = key ?: 0,
+    label = value ?: ""
+)
+
+fun RelationTypeDN.toPresentation(): LookupItemPR = LookupItemPR(
     id = key ?: 0,
     label = value ?: ""
 )

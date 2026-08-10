@@ -37,6 +37,7 @@ kotlin {
             api(project(":feature:history"))
             api(project(":feature:contracts"))
             api(project(":feature:workshops"))
+            api(project(":feature:my-inbox"))
             api(project(":feature:studentInsuranceContract"))
             api(project(":feature:agent"))
             api(project(":feature:taminServices"))

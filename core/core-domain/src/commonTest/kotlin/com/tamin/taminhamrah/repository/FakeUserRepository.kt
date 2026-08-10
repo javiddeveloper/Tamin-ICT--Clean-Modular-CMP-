@@ -5,11 +5,13 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -25,7 +27,10 @@ class FakeUserRepository : UserRepository {
     var insuredActiveBranchResult: List<InsuredActiveBranchDN> = emptyList()
     var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
     var electronicFileResult: List<ElectronicFileDN> = emptyList()
+    var electronicFilePages: List<List<ElectronicFileDN>> = emptyList()
     var userProfileResult: UserProfileDN? = null
+    var statusCertificateReportResult: String = ""
+    var recipientsResult: List<RecipientDN> = emptyList()
 
     var shouldThrowError = false
     var error: Throwable = RuntimeException("User Repository Error")
@@ -83,6 +88,11 @@ class FakeUserRepository : UserRepository {
         emit(electronicFileResult)
     }
 
+    override suspend fun downloadDocument(url: String): PdfDownloadDN {
+        if (shouldThrowError) throw error
+        return PdfDownloadDN()
+    }
+
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {
         if (shouldThrowError) throw error
         changeMobileResult?.let { emit(it) }
@@ -102,5 +112,15 @@ class FakeUserRepository : UserRepository {
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {
         if (shouldThrowError) throw error
         emit(checkUserIsNewResult)
+    }
+
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(statusCertificateReportResult)
+    }
+
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(recipientsResult)
     }
 }
