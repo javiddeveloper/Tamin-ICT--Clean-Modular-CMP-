@@ -57,6 +57,7 @@ sealed interface ProfileEvent {
     data object NavigateToDependentsList : ProfileEvent
     data object NavigateToContactUs : ProfileEvent
     data object NavigateToElectronicFile : ProfileEvent
+    data object NavigateToMyInbox : ProfileEvent
     data class OpenUrl(val url: String) : ProfileEvent
     data class ShowToast(val message: String) : ProfileEvent
 }

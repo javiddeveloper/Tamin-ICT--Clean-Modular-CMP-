@@ -12,7 +12,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_close
 import taminx.core.core_ui.action_retry
-import taminx.core.core_ui.error_title
+import taminx.core.core_ui.error_information_loading
 import taminx.core.core_ui.ic_tamin_cross
 
 /**
@@ -44,7 +44,7 @@ fun ErrorStateView(
     val colors = LocalTaminColors.current
 
     TaminConfirmationDialog(
-        title = stringResource(Res.string.error_title),
+        title = stringResource(Res.string.error_information_loading),
         description = message,
         icon = vectorResource(Res.drawable.ic_tamin_cross),
         iconTint = colors.dangerText,

@@ -195,7 +195,9 @@ fun DependentsListScreen(
                 state.isLoading && state.dependentsList.isEmpty() -> LoadingStateOverlay()
                 state.error != null -> ErrorStateView(
                     message = state.error,
-                    onRetry = { onIntent(DependentsListIntent.OnRefreshClicked) }
+                    onRetry = { onIntent(DependentsListIntent.OnRefreshClicked) },
+                    onDismiss = {onBackClicked()}
+
                 )
 
                 else -> LazyColumn(
