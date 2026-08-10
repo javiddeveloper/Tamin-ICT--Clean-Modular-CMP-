@@ -73,7 +73,12 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchName") BRANCH_NAME("branchName"),
     @SerialName("target") TARGET("target"),
     @SerialName("statusCode") STATUS_CODE("statusCode"),
+    @SerialName("request.id") REQUEST_ID("request.id"),
+    @SerialName("requestType") REQUEST_TYPE("requestType"),
+    @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
+    @SerialName("isPublic") IS_PUBLIC("isPublic"),
 }
+
 
 @Serializable
 data class ApiFilterDN(

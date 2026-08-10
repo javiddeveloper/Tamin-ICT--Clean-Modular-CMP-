@@ -66,7 +66,43 @@ object UserRequestTestData {
 
     val requestTypesSuccess: String
         get() = readResourceFile("mocks/request_types_success.json")
+
+    val requestErrorsSuccess: String
+        get() = """
+            {
+                "total": 1,
+                "list": [
+                    {
+                        "id": 101,
+                        "errorMassage": "نقص مدارک شناسایی",
+                        "errorType": "VALIDATION",
+                        "errorStatus": "FAILED",
+                        "creationTime": 1700000000000
+                    }
+                ]
+            }
+        """.trimIndent()
+
+    val smartGuideSuccess: String
+        get() = """
+            {
+                "total": 1,
+                "list": [
+                    {
+                        "id": 201,
+                        "question": "شرایط ثبت درخواست چیست؟",
+                        "reply": "برای ثبت درخواست داشتن سابقه بیمه حداقل یک سال الزامی است.",
+                        "requestCode": "0018",
+                        "requestDesc": "درخواست راهنما",
+                        "isPublic": true,
+                        "title": "راهنمای هوشمند",
+                        "description": "توضیحات تکمیلی"
+                    }
+                ]
+            }
+        """.trimIndent()
 }
+
 
 object PersonalInboxTestData {
     val inboxItemsSuccess: String

@@ -1,6 +1,11 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
+import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
+
+import com.tamin.taminhamrah.model.userRequest.RequestErrorDTO
+import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
+import com.tamin.taminhamrah.model.userRequest.SmartGuideDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestStatusDN
@@ -91,3 +96,27 @@ fun UserRequestTypeDTO.toDomain(): UserRequestTypeDN {
         description = description,
     )
 }
+
+fun RequestErrorDTO.toDomain(): RequestErrorDN {
+    return RequestErrorDN(
+        id = id,
+        errorMessage = errorMessage,
+        errorType = errorType,
+        errorStatus = errorStatus,
+        creationTime = creationTime,
+    )
+}
+
+fun SmartGuideDTO.toDomain(): SmartGuideDN {
+    return SmartGuideDN(
+        id = id,
+        question = question,
+        reply = reply,
+        requestCode = requestCode ?: requestStatus?.requestCode,
+        requestDesc = requestDesc ?: requestStatus?.requestDesc,
+        isPublic = isPublic,
+        title = title ?: requestType?.title,
+        description = description ?: requestType?.description,
+    )
+}
+

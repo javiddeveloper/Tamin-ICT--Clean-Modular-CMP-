@@ -4,11 +4,17 @@ import com.tamin.taminhamrah.data.local.dao.UserRequestDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
+import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
+import com.tamin.taminhamrah.model.userRequest.SmartGuideSearchParams
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
-import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -50,8 +56,40 @@ internal class UserRequestRepositoryImpl(
         return response.list.orEmpty().map { it.toDomain() }
     }
 
+    override suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN> {
+        val query = ApiQueryParamDN(
+            filters = listOf(
+                ApiFilterDN(
+                    property = FilterProperty.REQUEST_ID,
+                    value = requestId.toString(),
+                    operator = FilterOperator.EQ,
+                )
+            )
+        )
+        val response = requestRemoteDataSource.getRequestErrors(query)
+        return response.list.orEmpty().map { it.toDomain() }
+    }
+
+    override suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN> {
+        val filters = buildList {
+            params.requestType?.let {
+                add(ApiFilterDN(FilterProperty.REQUEST_TYPE, it.toString(), FilterOperator.EQ))
+            }
+            params.requestStatus?.let {
+                add(ApiFilterDN(FilterProperty.REQUEST_STATUS, it, FilterOperator.EQ))
+            }
+            params.isPublic?.let {
+                add(ApiFilterDN(FilterProperty.IS_PUBLIC, if (it) "1" else "0", FilterOperator.EQ))
+            }
+        }
+        val query = ApiQueryParamDN(filters = filters)
+        val response = requestRemoteDataSource.getSmartGuideList(query)
+        return response.list.orEmpty().map { it.toDomain() }
+    }
+
     private fun buildQuery(search: UserRequestSearchParams): ApiQueryParamDN = ApiQueryParamDN(
         filters = UserRequestFilter.buildFilters(search),
         sorts = UserRequestSort.defaultSorts(),
     )
 }
+

@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
@@ -179,6 +181,9 @@ val domainModule = module {
     factoryOf(::GetMainMenuUseCase)
     factoryOf(::GetUserRequestsUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
+    factoryOf(::GetUserRequestErrorsUseCase)
+    factoryOf(::GetSmartGuideListUseCase)
+
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)

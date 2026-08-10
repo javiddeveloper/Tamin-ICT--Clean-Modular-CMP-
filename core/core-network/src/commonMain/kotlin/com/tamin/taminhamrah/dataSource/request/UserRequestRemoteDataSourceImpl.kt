@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.dataSource.request
 
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.userRequest.RequestErrorDTO
+import com.tamin.taminhamrah.model.userRequest.SmartGuideDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -24,6 +26,14 @@ class UserRequestRemoteDataSourceImpl(
 
     override suspend fun getRequestTypes(query: ApiQueryParamDN): ListData<UserRequestTypeDTO> {
         return fetchListData { requestApiService.getRequestTypes(apiQueryBuilder.buildQuery(query)) }
+    }
+
+    override suspend fun getRequestErrors(query: ApiQueryParamDN): ListData<RequestErrorDTO> {
+        return fetchListData { requestApiService.getMyRequestErrorList(apiQueryBuilder.buildQuery(query)) }
+    }
+
+    override suspend fun getSmartGuideList(query: ApiQueryParamDN): ListData<SmartGuideDTO> {
+        return fetchListData { requestApiService.getSmartGuideList(apiQueryBuilder.buildQuery(query)) }
     }
 
     private suspend fun <T> fetchListData(

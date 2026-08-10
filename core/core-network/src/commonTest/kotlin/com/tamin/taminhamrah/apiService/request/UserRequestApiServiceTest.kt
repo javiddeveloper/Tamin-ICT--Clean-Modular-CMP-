@@ -65,4 +65,50 @@ class UserRequestApiServiceTest : BaseApiTest() {
         assertEquals(67L, types.first().id)
         assertEquals("خاتمه کفالت", types.first().description)
     }
+
+    @Test
+    fun `getMyRequestErrorList should return request errors`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserRequestTestData.requestErrorsSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserRequestApiService()
+
+        val response = apiService.getMyRequestErrorList(mapOf("filter" to "[{\"property\":\"request.id\",\"value\":123}]"))
+
+        assertEquals(200, response.status)
+        val listData = response.data
+        assertNotNull(listData)
+        assertEquals(1, listData.total)
+
+        val errors = listData.list.orEmpty()
+        assertEquals(1, errors.size)
+        assertEquals(101L, errors.first().id)
+        assertEquals("نقص مدارک شناسایی", errors.first().errorMessage)
+    }
+
+    @Test
+    fun `getSmartGuideList should return smart guide FAQ items`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = UserRequestTestData.smartGuideSuccess,
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserRequestApiService()
+
+        val response = apiService.getSmartGuideList(mapOf("requestType" to "3", "isPublic" to "1"))
+
+        assertEquals(200, response.status)
+        val listData = response.data
+        assertNotNull(listData)
+        assertEquals(1, listData.total)
+
+        val items = listData.list.orEmpty()
+        assertEquals(1, items.size)
+        assertEquals(201L, items.first().id)
+        assertEquals("شرایط ثبت درخواست چیست؟", items.first().question)
+        assertEquals(true, items.first().isPublic)
+    }
 }
+

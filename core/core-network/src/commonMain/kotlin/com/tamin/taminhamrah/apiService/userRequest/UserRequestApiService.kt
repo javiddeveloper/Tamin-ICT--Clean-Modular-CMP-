@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.apiService.userRequest
 
+import com.tamin.taminhamrah.model.userRequest.RequestErrorDTO
+import com.tamin.taminhamrah.model.userRequest.SmartGuideDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -18,4 +20,15 @@ interface UserRequestApiService {
     suspend fun getRequestTypes(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<UserRequestTypeDTO>>
+
+    @GET("request-error")
+    suspend fun getMyRequestErrorList(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<RequestErrorDTO>>
+
+    @GET("faq/limitation")
+    suspend fun getSmartGuideList(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<SmartGuideDTO>>
 }
+
