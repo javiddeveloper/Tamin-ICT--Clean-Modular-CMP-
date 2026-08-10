@@ -488,5 +488,26 @@
     <string name="dependents_list_status">وضعیت</string>
     <string name="dependents_list_insurance_id">شماره بیمه</string>
 
+    <!-- Bottom Sheet Strings -->
+    <string name="bs_submit">ثبت</string>
+    <string name="bs_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
+    <string name="bs_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
+    <string name="bs_mental">آیا بیماری اعصاب و روان دارید؟</string>
+    <string name="bs_cancer">ایا سابقه ابتلا به سرطان دارید ؟</string>
+    <string name="bs_family_diseases">آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
+    <string name="bs_province">استان</string>
+    <string name="bs_city">شهر</string>
+    <string name="bs_blood_group">گروه خونی</string>
+    <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>
+    <string name="bs_alcohol_addiction">آیا الکل مصرف دارید؟</string>
+    <string name="bs_exercise">آیا ورزش می کنید؟</string>
+    <string name="bs_marital_status">وضعیت تاهل</string>
+    <string name="bs_relation_type">نسبت با شما</string>
+    <string name="bs_emergency_contact">تماس اضطراری</string>
+    <string name="search_hint">جستجو...</string>
+    <string name="description_label">توضیحات</string>
+    <string name="close_content_description">بستن</string>
 </resources>
 

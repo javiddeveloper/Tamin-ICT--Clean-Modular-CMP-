@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativePR
 
+import taminx.feature.healthprofile.generated.resources.*
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Wizard Step Enum
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,16 +107,16 @@ data class DiseasesStepState(
         illnessGroups: List<IllnessGroupPR>
     ): TaminBottomSheetConfig? {
         val group = illnessGroups.findGroup(type) ?: return null
-        val (subtitle, selectedIds) = when (type) {
-            TaminBottomSheetType.ILLNESS_HISTORY -> "نوع بیماری خود را انتخاب کنید:" to chronicDiseaseIds
-            TaminBottomSheetType.MENTAL          -> "نوع عارضه را انتخاب کنید:" to mentalIllnessIds
-            TaminBottomSheetType.CANCER          -> "نوع سرطان را انتخاب کنید:" to cancerIds
-            else                            -> "" to emptySet()
+        val (subtitleRes, selectedIds) = when (type) {
+            TaminBottomSheetType.ILLNESS_HISTORY -> Res.string.health_bs_chronic_subtitle to chronicDiseaseIds
+            TaminBottomSheetType.MENTAL          -> Res.string.health_bs_mental_subtitle to mentalIllnessIds
+            TaminBottomSheetType.CANCER          -> Res.string.health_bs_cancer_subtitle to cancerIds
+            else                            -> null to emptySet()
         }
 
         return TaminBottomSheetConfig(
             title = group.groupTitle,
-            subtitle = subtitle,
+            subtitleRes = subtitleRes,
             type = type,
             singleSelection = false,
             items = group.illnesses.map { item ->

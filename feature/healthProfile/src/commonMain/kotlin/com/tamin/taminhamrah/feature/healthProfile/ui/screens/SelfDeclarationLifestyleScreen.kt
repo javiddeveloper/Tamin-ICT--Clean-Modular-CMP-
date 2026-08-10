@@ -98,6 +98,8 @@ fun SelfDeclarationLifestyleScreen(
         }
     }
 
+    val neverUsed = stringResource(Res.string.health_lifestyle_never_used)
+
     Scaffold(
         topBar = {
             HealthTopAppBar(
@@ -182,7 +184,7 @@ fun SelfDeclarationLifestyleScreen(
                                         isSmoking = isYes,
                                         smokingStatusId = if (isYes) state.smokingStatusId else SmokingStatus.NEVER_CONSUMED.id,
                                         smokingPattern = if (isYes) state.smokingPattern else (smokingStatusOptions.find { it.id == SmokingStatus.NEVER_CONSUMED.id }?.label
-                                            ?: SmokingStatus.NEVER_CONSUMED.type)
+                                    ?: neverUsed)
                                     )
                                 )
                             )
@@ -222,7 +224,7 @@ fun SelfDeclarationLifestyleScreen(
                                         modifier = Modifier.size(14.dp)
                                     )
                                     TaminText(
-                                        text = "ویرایش",
+                                        text = stringResource(Res.string.health_review_edit),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
@@ -320,7 +322,7 @@ fun SelfDeclarationLifestyleScreen(
                                         modifier = Modifier.size(14.dp)
                                     )
                                     TaminText(
-                                        text = "ویرایش",
+                                        text = stringResource(Res.string.health_review_edit),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
@@ -418,7 +420,7 @@ fun SelfDeclarationLifestyleScreen(
                                         modifier = Modifier.size(14.dp)
                                     )
                                     TaminText(
-                                        text = "ویرایش",
+                                        text = stringResource(Res.string.health_review_edit),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
@@ -516,7 +518,7 @@ fun SelfDeclarationLifestyleScreen(
                                         modifier = Modifier.size(14.dp)
                                     )
                                     TaminText(
-                                        text = "ویرایش",
+                                        text = stringResource(Res.string.health_review_edit),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
@@ -546,7 +548,7 @@ fun SelfDeclarationLifestyleScreen(
     if (showSmokingBottomSheet) {
         TaminBottomSheet(
             config = TaminBottomSheetConfig(
-                title = TaminBottomSheetType.SMOKING_ADDICTION.title ?: "",
+                title = TaminBottomSheetType.SMOKING_ADDICTION.titleRes?.let { stringResource(it) } ?: "",
                 subtitle = stringResource(Res.string.health_lifestyle_smoking_bs_subtitle),
                 type = TaminBottomSheetType.SMOKING_ADDICTION,
                 singleSelection = true,
@@ -566,7 +568,7 @@ fun SelfDeclarationLifestyleScreen(
                                 isSmoking = false,
                                 smokingStatusId = SmokingStatus.NEVER_CONSUMED.id,
                                 smokingPattern = smokingStatusOptions.find { it.id == SmokingStatus.NEVER_CONSUMED.id }?.label
-                                    ?: "هرگز مصرف نشده"
+                                    ?: neverUsed
                             )
                         )
                     )
@@ -593,7 +595,7 @@ fun SelfDeclarationLifestyleScreen(
     if (showAddictionBottomSheet) {
         TaminBottomSheet(
             config = TaminBottomSheetConfig(
-                title = TaminBottomSheetType.DRUG_ADDICTION.title ?: "",
+                title = TaminBottomSheetType.DRUG_ADDICTION.titleRes?.let { stringResource(it) } ?: "",
                 subtitle = stringResource(Res.string.health_lifestyle_addiction_bs_subtitle),
                 type = TaminBottomSheetType.DRUG_ADDICTION,
                 singleSelection = true,
@@ -640,7 +642,7 @@ fun SelfDeclarationLifestyleScreen(
     if (showAlcoholBottomSheet) {
         TaminBottomSheet(
             config = TaminBottomSheetConfig(
-                title = TaminBottomSheetType.ALCOHOL_ADDICTION.title ?: "",
+                title = TaminBottomSheetType.ALCOHOL_ADDICTION.titleRes?.let { stringResource(it) } ?: "",
                 subtitle = stringResource(Res.string.health_lifestyle_alcohol_bs_subtitle),
                 type = TaminBottomSheetType.ALCOHOL_ADDICTION,
                 singleSelection = true,
@@ -686,7 +688,7 @@ fun SelfDeclarationLifestyleScreen(
     if (showExerciseBottomSheet) {
         TaminBottomSheet(
             config = TaminBottomSheetConfig(
-                title = TaminBottomSheetType.EXERCISE.title ?: "",
+                title = TaminBottomSheetType.EXERCISE.titleRes?.let { stringResource(it) } ?: "",
                 subtitle = stringResource(Res.string.health_lifestyle_exercise_bs_subtitle),
                 type = TaminBottomSheetType.EXERCISE,
                 singleSelection = true,

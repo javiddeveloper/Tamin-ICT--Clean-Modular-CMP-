@@ -15,7 +15,7 @@ internal fun SubDominantResponseDTO.toDomain(): SubdominantDN = SubdominantDN(
             lastName = personal?.lastName,
             fatherName = personal?.fatherName,
             nationalCode = personal?.nationalId,
-            dateOfBirth = personal?.dateOfBirth,
+            dateOfBirthTimestamp = personal?.dateOfBirthTimestamp,
             // "status" and "relationDescription" both come from the same relationDescription
             // field on the payload (e.g. "تبعي - تحت پوشش بيمه شده اصلي - کفالت زن توسط شوهر-
             // عقد دائم") — there's a separate numeric "status" code ("1") alongside it, but the
