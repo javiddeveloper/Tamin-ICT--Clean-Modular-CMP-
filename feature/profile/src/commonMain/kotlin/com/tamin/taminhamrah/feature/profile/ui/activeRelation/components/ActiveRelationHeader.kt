@@ -19,7 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -57,6 +60,18 @@ internal fun ActiveRelationHeader(
 
     val topBarGradient =
         remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
+
+    // Title fades out and the status text fades in over the same title-row spot, so
+    // scrolling reads as the status taking over the title's place rather than two
+    // unrelated labels swapping. Sequential (not overlapping) so the RTL glyphs never
+    // sit half-opaque on top of each other mid-fade.
+    val title = stringResource(Res.string.profile_active_relation)
+    val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
+    val statusColor =
+        if (activeCount > 0) taminColors.springGreenText else taminColors.dangerText
+    val titleAlpha = { (1f - collapseProgress() * 2f).coerceIn(0f, 1f) }
+    val collapsedAlpha = { ((collapseProgress() - 0.5f) * 2f).coerceIn(0f, 1f) }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -70,15 +85,48 @@ internal fun ActiveRelationHeader(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TaminTopAppBar(
-            title = stringResource(Res.string.profile_active_relation),
+            title = title,
             centerTitle = true,
             background = topBarGradient,
+            titleContent = {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = titleAlpha() },
+                    )
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = statusColor,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = collapsedAlpha() },
+                    )
+                }
+            },
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
                     modifier = Modifier
+                )
+            },
+            // The header icon fades out below as this fades in here, on the same schedule
+            // as the title/status handoff, so it reads as the icon moving up into the bar.
+            action = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_communication),
+                    contentDescription = null,
+                    onClick = {},
+                    modifier = Modifier.graphicsLayer { alpha = collapsedAlpha() },
                 )
             },
         )
@@ -99,10 +147,6 @@ internal fun ActiveRelationHeader(
             )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
-
-            val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
-            val statusColor =
-                if (activeCount > 0) taminColors.springGreenText else taminColors.dangerText
 
             Row(
                 modifier = Modifier.padding(bottom = Spacing.xs),
