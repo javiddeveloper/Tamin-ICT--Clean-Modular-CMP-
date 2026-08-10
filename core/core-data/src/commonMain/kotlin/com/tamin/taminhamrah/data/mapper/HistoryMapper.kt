@@ -4,10 +4,14 @@ import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDTO
-import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDTO
+import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
-import com.tamin.taminhamrah.model.history.TalfighInfoDN
+import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
 import com.tamin.taminhamrah.model.history.WageDetailDN
 
 fun TalfighInfoItemDTO.toDomain(): TalfighInfoItemDN {
@@ -73,6 +77,25 @@ fun DastmozdInfoItemDTO.toDomain(): DastmozdInfoItemDN {
 
 fun DastmozdInfoDTO.toDomain(): DastmozdInfoDN {
     return DastmozdInfoDN(
+        list = list?.map { it.toDomain() },
+        total = total
+    )
+}
+
+fun HistoryJobInfoItemDTO.toDomain(): HistoryJobInfoItemDN {
+    return HistoryJobInfoItemDN(
+        risuid = risuid,
+        rwshName = rwshName,
+        brhcode = brhcode,
+        id = id,
+        jobDesc = jobDesc,
+        startDate = startDate,
+        rwshId = rwshId
+    )
+}
+
+fun HistoryJobInfoDTO.toDomain(): HistoryJobInfoDN {
+    return HistoryJobInfoDN(
         list = list?.map { it.toDomain() },
         total = total
     )
