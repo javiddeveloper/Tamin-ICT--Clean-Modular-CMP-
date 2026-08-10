@@ -75,6 +75,7 @@ import taminx.core.core_ui.search_service_type
 import taminx.core.core_ui.search_title
 import taminx.core.core_ui.search_to_placeholder
 import taminx.core.core_ui.search_to_prefix
+import taminx.core.core_ui.tab_pharmacy
 
 /** Which date field the picker is currently filling, if any. */
 private enum class DateField { NONE, FROM, TO }
@@ -165,32 +166,31 @@ fun RecordSearchSheet(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
                 itemsIndexed(filterChips) { index, tab ->
-                    val isSelected = criteria.tab == tab
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .then(
-                                if (isSelected) Modifier.background(colors.medicalGradient)
-                                else Modifier
-                                    .background(colors.bgSurface)
-                                    .border(1.dp, colors.border, CircleShape),
-                            )
-                            .clickable {
-                                criteria = criteria.copy(tab = tab)
-                                coroutineScope.launch {
-                                    lazyListState.animateScrollToItem(index)
-                                }
+                    ServiceTypeChip(
+                        label = stringResource(tab.label),
+                        // A tab and داروخانه are the same choice, so picking one clears the other.
+                        isSelected = criteria.prescType == null && criteria.tab == tab,
+                        onClick = {
+                            criteria = criteria.copy(tab = tab, prescType = null)
+                            coroutineScope.launch {
+                                lazyListState.animateScrollToItem(index)
                             }
-                            .padding(horizontal = 18.dp, vertical = 10.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = stringResource(tab.label),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else colors.textSecondary,
-                        )
-                    }
+                        },
+                    )
+                }
+
+                // داروخانه has no tab of its own — it is only reachable from here.
+                item {
+                    ServiceTypeChip(
+                        label = stringResource(Res.string.tab_pharmacy),
+                        isSelected = criteria.prescType == RecordTab.pharmacyTypeId,
+                        onClick = {
+                            criteria = criteria.copy(
+                                tab = RecordTab.Default,
+                                prescType = RecordTab.pharmacyTypeId,
+                            )
+                        },
+                    )
                 }
             }
 
@@ -349,6 +349,36 @@ private fun SectionHeader(text: String) {
         color = colors.textPrimary,
         modifier = Modifier.padding(top = Spacing.xs),
     )
+}
+
+/** One «نوع خدمت» pill. Extracted so the tabs and داروخانه cannot drift apart visually. */
+@Composable
+private fun ServiceTypeChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .then(
+                if (isSelected) Modifier.background(colors.medicalGradient)
+                else Modifier
+                    .background(colors.bgSurface)
+                    .border(1.dp, colors.border, CircleShape),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = if (isSelected) Color.White else colors.textSecondary,
+        )
+    }
 }
 
 /** A date field button matching the input box design in the mockup. */

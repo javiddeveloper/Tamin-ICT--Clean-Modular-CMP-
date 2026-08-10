@@ -144,11 +144,6 @@ fun TaminJalaliDatePicker(
                 // انصراف first so that right-to-left puts it on the right and the wide blue
                 // تأیید تاریخ on the left, as the design has them.
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    CancelButton(
-                        text = stringResource(Res.string.action_cancel),
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f),
-                    )
                     TaminPrimaryButton(
                         text = stringResource(Res.string.date_picker_confirm),
                         onClick = { onConfirm(year, month, clampedDay) },
@@ -156,6 +151,11 @@ fun TaminJalaliDatePicker(
                         // dialog is blue throughout, so it takes the same blue as the wheels.
                         background = SolidColor(colors.blueText),
                         modifier = Modifier.weight(2f),
+                    )
+                    CancelButton(
+                        text = stringResource(Res.string.action_cancel),
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -184,10 +184,17 @@ private fun PickerHeader(
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textTertiary,
             )
+            val headerDateText = remember(day, month, year) {
+                buildString {
+                    append(day.toString().toPersianDigits())
+                    append(' ')
+                    append(PersianDateFormatter.monthNames.getOrElse(month - 1) { "" })
+                    append(' ')
+                    append(year.toString().toPersianDigits())
+                }
+            }
             Text(
-                text = "${day.toString().toPersianDigits()} " +
-                    "${PersianDateFormatter.monthNames[month - 1]} " +
-                    year.toString().toPersianDigits(),
+                text = headerDateText,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colors.blueText,
@@ -240,7 +247,9 @@ private fun DateWheels(
                 .height(ROW_HEIGHT)
                 .padding(horizontal = Spacing.sm)
                 .clip(RoundedCornerShape(CornerRadius.chip))
-                .background(colors.bgSurface)
+                // The pale blue band from the design, edged in the same blue rather than in ink —
+                // the selection should sit quietly under the numbers, not box them in.
+                .background(colors.blueBg)
                 .border(1.dp, colors.blueText.copy(alpha = SELECTION_BORDER_ALPHA), RoundedCornerShape(CornerRadius.chip)),
         )
 
@@ -349,7 +358,9 @@ private fun CancelButton(
     }
 }
 
-private const val SELECTION_BORDER_ALPHA = 0.35f
+
+/** Just enough edge to separate the band from the panel; the fill carries the selection. */
+private const val SELECTION_BORDER_ALPHA = 0.25f
 
 /** Nudges the glyph off the row's top edge so it sits optically centred. */
 private val ROW_TEXT_TOP_PADDING = 10.dp

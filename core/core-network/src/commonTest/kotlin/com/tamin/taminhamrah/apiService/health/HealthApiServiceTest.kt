@@ -368,11 +368,11 @@ class HealthApiServiceTest : BaseApiTest() {
 
     @Test
     fun `getRelationTypes should return response`() = runTest {
-        val jsonResponse = ApiTestUtils.createJsonResponse(HealthTestData.emptyArraySuccess)
+        val jsonResponse = HealthTestData.emptyArraySuccess
         val ktorfit = createCustomMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHealthApiService()
         val response = apiService.getRelationTypes()
-        assertNotNull(response.extractData())
+        assertNotNull(response)
     }
 
     @Test

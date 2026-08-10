@@ -55,8 +55,13 @@ internal object IdentityDimens {
     // Slot offsets inside the expanded card, measured from its top.
     val topInfoTop = 20.dp
     val avatarTop = 20.dp
-    val footerRuleTop = 154.dp
-    val footerTop = 168.dp
+    // Derived from the design rather than nudged: inside the card the body starts 14px below the
+    // 15px top padding, the four field rows occupy 91.8px (16.8+16.8+15.6+15.6 plus three 9px
+    // gaps), and the strip adds margin-top:14px before its border-top. That puts the rule at
+    // 134.8px in design space; scaled() divides by 0.92, hence 146.5.
+    val footerRuleTop = 146.5.dp
+    // The strip's padding-top:12px below the rule -> 146.8px in design space, /0.92.
+    val footerTop = 159.5.dp
 
     // The holder's photo.
     val avatarWidth = 72.dp
@@ -65,36 +70,40 @@ internal object IdentityDimens {
     val avatarCollapsedHeight = 36.dp
 
     /** Air between the photo and the name beside it. */
-    val avatarNameGap = 12.dp
+    // Design has gap:14px between the field column and the photo; /0.92 = 15.2.
+    val avatarNameGap = 15.2.dp
 
     val bannerIconSize = 18.dp
 
     /** The card's soft blue drop shadow. */
     val cardShadow = 20.dp
 
-    // The sheen rings: thin arcs of light.
-    val ringNearInset = 35.dp
-    val ringNearTop = 21.dp
-    val ringFarInset = 39.dp
-    val ringOuterRadius = 105.dp
-    val ringInnerRadius = 75.dp
-    val ringFootRadius = 85.dp
-
     // The card's furniture, at the export's alphas.
-    const val ringOuterAlpha = 0.09f
-    const val ringInnerAlpha = 0.07f
-    const val ringFootAlpha = 0.06f
-    const val avatarBorderAlpha = 0.28f
     const val AVATAR_GLYPH_ALPHA = 0.85f
     const val footerRuleAlpha = 0.18f
     const val topEdgeAlpha = 0.16f
-
-    const val ssnCollapsedScale = 0.82f
-    const val nameCollapsedScale = 0.95f
 
     /**
      * The expanded-only pieces fade this much faster than the fold, so they have cleared well
      * before the bar forms rather than ghosting over it.
      */
     const val VANISH_RATE = 3f
+
+    /** Design: section caption `margin:20px 0 10px`. */
+    val sectionLabelGap = 10.dp
+
+    /** Design: each row is `padding:14px 16px`. */
+    val rowVerticalPadding = 14.dp
+
+    /**
+     * 20dp, not the design's 16px: asked for explicitly so the label and value sit further off
+     * the card's edges than the mock has them. The rule between rows follows the same inset.
+     */
+    val rowHorizontalPadding = 20.dp
+
+    /** Gap between the stacked name/father/birth rows. */
+    val cardFieldGap = 4.dp
+
+    /** Hairlines: the footer rule, the avatar border and the card's top edge. */
+    val hairline = 1.dp
 }
