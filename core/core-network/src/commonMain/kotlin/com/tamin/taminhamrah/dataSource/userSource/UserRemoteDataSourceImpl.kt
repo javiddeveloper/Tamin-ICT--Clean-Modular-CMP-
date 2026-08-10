@@ -31,8 +31,6 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.util.NetworkConstants
-import com.tamin.taminhamrah.model.user.UserProfileDto
-import co.touchlab.kermit.Logger
 import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
