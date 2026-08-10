@@ -15,6 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.history.Res
+import taminx.feature.history.history_job_info_stat_first_employment
+import taminx.feature.history.history_job_info_stat_job_title
+import taminx.feature.history.history_job_info_stat_workshop
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -44,7 +49,7 @@ fun JobInfoStatsCard(
     ) {
         StatColumn(
             value = jobTitleCount.toString(),
-            label = "عنوان شغلی",
+            label = stringResource(Res.string.history_job_info_stat_job_title),
             highlight = true,
             modifier = Modifier.weight(1f)
         )
@@ -56,7 +61,7 @@ fun JobInfoStatsCard(
         )
         StatColumn(
             value = firstEmploymentYear,
-            label = "اولین اشتغال",
+            label = stringResource(Res.string.history_job_info_stat_first_employment),
             modifier = Modifier.weight(1f)
         )
         Box(
@@ -67,7 +72,7 @@ fun JobInfoStatsCard(
         )
         StatColumn(
             value = workshopCount.toString(),
-            label = "کارگاه",
+            label = stringResource(Res.string.history_job_info_stat_workshop),
             modifier = Modifier.weight(1f)
         )
     }

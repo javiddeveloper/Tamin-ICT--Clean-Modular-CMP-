@@ -30,8 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,6 +64,14 @@ import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.unit.lerp as dpLerp
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res as CoreRes
+import taminx.core.core_ui.action_back
+import taminx.feature.history.Res as HistoryRes
+import taminx.feature.history.history_job_info_empty_state
+import taminx.feature.history.history_job_info_list_header
+import taminx.feature.history.history_job_info_subtitle
+import taminx.feature.history.history_job_info_title
 
 @Composable
 fun HistoryJobInfoScreen(
@@ -142,7 +148,7 @@ fun HistoryJobInfoContent(
                         navigationIcon = {
                             TaminTopAppBarButton(
                                 icon = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "بازگشت",
+                                contentDescription = stringResource(CoreRes.string.action_back),
                                 onClick = onBackClicked,
                                 bordered = true
                             )
@@ -158,7 +164,7 @@ fun HistoryJobInfoContent(
                             )
 
                             Text(
-                                text = "عناوین شغلی",
+                                text = stringResource(HistoryRes.string.history_job_info_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Color.White,
                                 modifier = Modifier
@@ -187,7 +193,7 @@ fun HistoryJobInfoContent(
                                 AnimatedRingHeaderIcon(icon = Icons.Outlined.Work)
                                 Spacer(modifier = Modifier.height(Spacing.xs))
                                 Text(
-                                    text = "عناوین شغلی ثبت‌شده در سوابق بیمه‌ای شما",
+                                    text = stringResource(HistoryRes.string.history_job_info_subtitle),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color.White.copy(alpha = 0.85f),
                                     textAlign = TextAlign.Center
@@ -243,7 +249,7 @@ fun HistoryJobInfoContent(
                 if (uiState.jobInfos.isNotEmpty()) {
                     item {
                         Text(
-                            text = "لیست عناوین شغلی",
+                            text = stringResource(HistoryRes.string.history_job_info_list_header),
                             style = MaterialTheme.typography.titleMedium,
                             color = taminColors.textPrimary,
                             fontWeight = FontWeight.Bold,
@@ -263,7 +269,7 @@ fun HistoryJobInfoContent(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "عنوان شغلی یافت نشد",
+                                text = stringResource(HistoryRes.string.history_job_info_empty_state),
                                 color = taminColors.textMuted,
                                 style = MaterialTheme.typography.bodyMedium
                             )

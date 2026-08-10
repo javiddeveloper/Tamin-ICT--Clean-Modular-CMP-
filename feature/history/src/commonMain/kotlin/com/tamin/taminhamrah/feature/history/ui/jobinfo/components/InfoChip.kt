@@ -61,7 +61,7 @@ fun InfoChip(
             )
             Icon(
                 imageVector = Icons.Outlined.ContentCopy,
-                contentDescription = "کپی $label",
+                contentDescription = "copy",
                 tint = taminColors.blueText,
                 modifier = Modifier
                     .size(14.dp)

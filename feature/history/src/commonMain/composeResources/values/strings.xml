@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_job_info_title">عناوین شغلی</string>
+    <string name="history_job_info_subtitle">عناوین شغلی ثبت‌شده در سوابق بیمه‌ای شما</string>
+    <string name="history_job_info_list_header">لیست عناوین شغلی</string>
+    <string name="history_job_info_empty_state">عنوان شغلی یافت نشد</string>
+
+    <string name="history_job_info_stat_job_title">عنوان شغلی</string>
+    <string name="history_job_info_stat_first_employment">اولین اشتغال</string>
+    <string name="history_job_info_stat_workshop">کارگاه</string>
+
+    <string name="history_job_info_employment_start">شروع اشتغال %1$s</string>
+    <string name="history_job_info_workshop_id">کد کارگاه</string>
+    <string name="history_job_info_insurance_id">شماره بیمه</string>
+    <string name="history_job_info_copy_label">کپی %1$s</string>
+</resources>

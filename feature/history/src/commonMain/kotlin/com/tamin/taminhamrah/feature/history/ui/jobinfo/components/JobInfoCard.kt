@@ -25,6 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.history.Res
+import taminx.feature.history.history_job_info_employment_start
+import taminx.feature.history.history_job_info_insurance_id
+import taminx.feature.history.history_job_info_workshop_id
 import com.tamin.taminhamrah.model.history.HistoryJobInfoItemPR
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -120,7 +125,7 @@ fun JobInfoCard(
                 )
                 Spacer(modifier = Modifier.width(Spacing.xs))
                 Text(
-                    text = "شروع اشتغال $formattedStartDate",
+                    text = stringResource(Res.string.history_job_info_employment_start, formattedStartDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textMuted
                 )
@@ -134,13 +139,13 @@ fun JobInfoCard(
         ) {
             InfoChip(
                 modifier = Modifier.weight(1f),
-                label = "کد کارگاه",
+                label = stringResource(Res.string.history_job_info_workshop_id),
                 value = jobInfo.rwshId,
                 onCopy = onCopy
             )
             InfoChip(
                 modifier = Modifier.weight(1f),
-                label = "شماره بیمه",
+                label = stringResource(Res.string.history_job_info_insurance_id),
                 value = jobInfo.risuid,
                 onCopy = onCopy
             )
