@@ -76,6 +76,11 @@ import taminx.core.core_ui.search_to_prefix
 import taminx.core.core_ui.tab_pharmacy
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
 import com.tamin.taminhamrah.ui.theme.Thickness
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.VisualTransformation
 
 /** Which date field the picker is currently filling, if any. */
 private enum class DateField { NONE, FROM, TO }
@@ -218,20 +223,11 @@ fun RecordSearchSheet(
 
             // Section 3: Doctor or Center Name (نام پزشک یا مرکز)
             SectionHeader(text = stringResource(Res.string.search_doctor_or_center))
-            OutlinedTextField(
+            SearchTextField(
                 value = criteria.nameQuery,
                 onValueChange = { criteria = criteria.copy(nameQuery = it) },
-                placeholder = {
-                    Text(
-                        text = stringResource(Res.string.search_doctor_hint),
-                        color = colors.textMuted,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner),
-                colors = textFieldColors(),
-                modifier = Modifier.fillMaxWidth().height(TreatmentDimens.searchFieldHeight),
+                placeholder = stringResource(Res.string.search_doctor_hint),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             // Section 4: Cost Range (بازهٔ مبلغ هزینه (ریال))
@@ -240,37 +236,19 @@ fun RecordSearchSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                OutlinedTextField(
+                SearchTextField(
                     value = criteria.minAmount,
                     onValueChange = { criteria = criteria.copy(minAmount = it) },
-                    placeholder = {
-                        Text(
-                            text = stringResource(Res.string.search_min),
-                            color = colors.textMuted,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = textFieldColors(),
-                    modifier = Modifier.weight(1f).height(TreatmentDimens.searchFieldHeight),
+                    placeholder = stringResource(Res.string.search_min),
+                    digitsOnly = true,
+                    modifier = Modifier.weight(1f),
                 )
-                OutlinedTextField(
+                SearchTextField(
                     value = criteria.maxAmount,
                     onValueChange = { criteria = criteria.copy(maxAmount = it) },
-                    placeholder = {
-                        Text(
-                            text = stringResource(Res.string.search_max),
-                            color = colors.textMuted,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = textFieldColors(),
-                    modifier = Modifier.weight(1f).height(TreatmentDimens.searchFieldHeight),
+                    placeholder = stringResource(Res.string.search_max),
+                    digitsOnly = true,
+                    modifier = Modifier.weight(1f),
                 )
             }
 
@@ -421,6 +399,76 @@ private fun DateFieldButton(
 
 // The design's inputs compute to roughly 36-40px against Material's 56dp floor. One height for
 // every control in the sheet -- the two date buttons included -- so the rows line up.
+
+/**
+ * A search input short enough for the design.
+ *
+ * [OutlinedTextField] floors itself at 56dp and keeps 16dp of vertical padding, so forcing a
+ * smaller height clips its own placeholder — which is why the hints had stopped showing. Driving
+ * [OutlinedTextFieldDefaults.DecorationBox] directly lets the padding shrink with the field.
+ *
+ * [digitsOnly] filters at the source rather than trusting the number keyboard: a paste, a hardware
+ * keyboard or a third-party IME can all put letters in a numeric field.
+ */
+@Composable
+private fun SearchTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    digitsOnly: Boolean = false,
+) {
+    val colors = LocalTaminColors.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner)
+    val fieldColors = textFieldColors()
+
+    BasicTextField(
+        value = value,
+        onValueChange = { raw ->
+            onValueChange(if (digitsOnly) raw.filter(Char::isDigit) else raw)
+        },
+        modifier = modifier.height(TreatmentDimens.searchFieldHeight),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
+        singleLine = true,
+        cursorBrush = SolidColor(colors.teal),
+        keyboardOptions = if (digitsOnly) {
+            KeyboardOptions(keyboardType = KeyboardType.Number)
+        } else {
+            KeyboardOptions.Default
+        },
+        interactionSource = interactionSource,
+        decorationBox = { innerTextField ->
+            OutlinedTextFieldDefaults.DecorationBox(
+                value = value,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = interactionSource,
+                isError = false,
+                placeholder = {
+                    Text(
+                        text = placeholder,
+                        color = colors.textMuted,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                colors = fieldColors,
+                contentPadding = PaddingValues(horizontal = Spacing.md),
+                container = {
+                    OutlinedTextFieldDefaults.Container(
+                        enabled = true,
+                        isError = false,
+                        interactionSource = interactionSource,
+                        colors = fieldColors,
+                        shape = shape,
+                    )
+                },
+            )
+        },
+    )
+}
 
 @Composable
 private fun textFieldColors() = OutlinedTextFieldDefaults.colors(

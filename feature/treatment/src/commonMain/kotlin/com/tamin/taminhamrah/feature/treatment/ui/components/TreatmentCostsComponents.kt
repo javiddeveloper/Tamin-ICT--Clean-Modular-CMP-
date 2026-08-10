@@ -1,36 +1,23 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,16 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -59,10 +40,10 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
-import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.ActionMenuItem
+import com.tamin.taminhamrah.ui.components.RecordCard
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
@@ -74,18 +55,15 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCostsAccentBottom
 import com.tamin.taminhamrah.ui.theme.TaminCostsAccentTop
 import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsEnd
-import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsInk
 import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsStart
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.action_hide_details
-import taminx.core.core_ui.action_show_details
 import taminx.core.core_ui.category_misc_claims
 import taminx.core.core_ui.costs_action_operations
 import taminx.core.core_ui.costs_admission_label
@@ -102,19 +80,16 @@ import taminx.core.core_ui.costs_return_reason
 import taminx.core.core_ui.costs_send_to_inbox
 import taminx.core.core_ui.costs_view_certificate
 import taminx.core.core_ui.ic_email
-import taminx.core.core_ui.ic_setting
-import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_eye
 import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
-import taminx.core.core_ui.ic_tamin_verified
-import kotlin.math.PI
-import kotlin.math.sin
 
 /** Shown where the service sent nothing, matching the previous app's placeholder. */
 private const val ABSENT_VALUE = "-"
+
+/** What the «عملیات» menu can do. */
+private enum class CostsAction { VIEW_CERTIFICATE, SEND_TO_INBOX }
 
 @Composable
 internal fun CertificateList(
@@ -155,8 +130,6 @@ internal fun CertificateList(
                 itemsIndexed(certificates) { index, item ->
                     CertificateCard(
                         item = item,
-                        index = index,
-                        totalCount = certificates.size,
                         onOpenCertificate = onOpenCertificate,
                         onSendToInbox = onSendToInbox,
                         modifier = Modifier
@@ -182,20 +155,14 @@ private val OperationsGradient =
     Brush.linearGradient(listOf(TaminCostsOperationsStart, TaminCostsOperationsEnd))
 
 /**
- * One refund card.
+ * One refund row, mapped onto the shared [RecordCard].
  *
- * Laid out from the design's own values rather than measured off a render: a teal rail down the
- * trailing edge, a wash under the top edge, then four bands — claim chip and date, patient and
- * stamp, the receipt line, and the details behind a disclosure.
- *
- * The rail is drawn at the *physical* right through [drawBehind] rather than aligned to an edge,
- * because `End` follows the reading direction and would put it on the left of a Persian page.
+ * Everything visual now lives in that component; this only says what a treatment cost *is* — the
+ * claim chip, the payment stamp, the receipt number and the two operations it offers.
  */
 @Composable
 private fun CertificateCard(
     item: TreatmentCostPR,
-    index: Int,
-    totalCount: Int,
     onOpenCertificate: (String) -> Unit,
     onSendToInbox: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -204,447 +171,86 @@ private fun CertificateCard(
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
     var expanded by remember(item.repId) { mutableStateOf(false) }
-    var menuOpen by remember(item.repId) { mutableStateOf(false) }
 
-    val paid = item.isPaid
-    val stampColor = if (paid) colors.greenText else colors.orangeText
+    val viewLabel = stringResource(Res.string.costs_view_certificate)
+    val sendLabel = stringResource(Res.string.costs_send_to_inbox)
+    val actions = remember(viewLabel, sendLabel) {
+        persistentListOf(
+            ActionMenuItem(CostsAction.VIEW_CERTIFICATE, viewLabel, Res.drawable.ic_tamin_eye),
+            ActionMenuItem(CostsAction.SEND_TO_INBOX, sendLabel, Res.drawable.ic_email),
+        )
+    }
+    val rail = remember {
+        Brush.verticalGradient(listOf(TaminCostsAccentTop, TaminCostsAccentBottom))
+    }
+
     val fileSettled = item.isFileSettled
 
-    val rail = remember { Brush.verticalGradient(listOf(TaminCostsAccentTop, TaminCostsAccentBottom)) }
-    val topWash = remember(colors.teal) {
-        Brush.verticalGradient(
-            listOf(TaminCostsAccentBottom.copy(alpha = TreatmentCostsDimens.TOP_WASH_ALPHA), Color.Transparent),
-        )
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = TreatmentCostsDimens.cardCorner,
-                blurRadius = TreatmentCostsDimens.cardShadowBlur,
-                offsetY = TreatmentCostsDimens.cardShadowOffsetY,
-            )
-            .clip(RoundedCornerShape(TreatmentCostsDimens.cardCorner))
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, RoundedCornerShape(TreatmentCostsDimens.cardCorner))
-            .drawBehind {
-                drawRect(
-                    brush = topWash,
-                    size = Size(size.width, TreatmentCostsDimens.topWashHeight.toPx()),
-                )
-                val railWidth = TreatmentCostsDimens.railWidth.toPx()
-                drawRect(
-                    brush = rail,
-                    topLeft = Offset(size.width - railWidth, 0f),
-                    size = Size(railWidth, size.height),
-                )
-            },
-    ) {
-        // Claim type and the date it was filed.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = TreatmentCostsDimens.cardPaddingHorizontal, end = TreatmentCostsDimens.cardPaddingHorizontal, top = TreatmentCostsDimens.claimRowTop),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(colors.greenBg)
-                    .padding(horizontal = TreatmentCostsDimens.chipPaddingHorizontal, vertical = TreatmentCostsDimens.chipPaddingVertical),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.chipGap),
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_medical_records),
-                    contentDescription = null,
-                    tint = colors.teal,
-                    modifier = Modifier.size(TreatmentCostsDimens.chipIconSize),
-                )
-                Text(
-                    text = stringResource(Res.string.category_misc_claims),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.teal,
-                )
+    RecordCard(
+        chipLabel = stringResource(Res.string.category_misc_claims),
+        chipIcon = vectorResource(Res.drawable.ic_tamin_medical_records),
+        chipContainerColor = colors.greenBg,
+        chipContentColor = colors.teal,
+        date = item.serviceDate.toPersianDigits(),
+        title = item.nameFamil,
+        stampLabel = item.payStatusDesc,
+        stampColor = if (item.isPaid) colors.greenText else colors.orangeText,
+        codeLabel = stringResource(Res.string.costs_admission_label),
+        code = item.noPazir,
+        codeIcon = vectorResource(Res.drawable.ic_tamin_misc_claims),
+        onCopyCode = { clipboardManager.setText(AnnotatedString(item.noPazir)) },
+        actionsLabel = stringResource(Res.string.costs_action_operations),
+        actions = actions,
+        onActionSelect = { action ->
+            when (action) {
+                CostsAction.VIEW_CERTIFICATE -> onOpenCertificate(item.repId)
+                CostsAction.SEND_TO_INBOX -> onSendToInbox(item.repId)
             }
-            NumericText(
-                text = item.serviceDate.toPersianDigits(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),
-                color = colors.textMuted,
-            )
-        }
-
-        // Patient, and the payment stamp inside its ring.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = TreatmentCostsDimens.cardPaddingHorizontal,
-                    end = TreatmentCostsDimens.cardPaddingHorizontal,
-                    top = TreatmentCostsDimens.patientRowTop,
-                    bottom = TreatmentCostsDimens.patientRowBottom,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
-            Text(
-                text = item.nameFamil,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            PaymentStamp(label = item.payStatusDesc, color = stampColor)
-        }
-
-        // Receipt number: a leader ruled across to a copyable chip.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)
-                .padding(top = TreatmentCostsDimens.receiptRowTop, bottom = TreatmentCostsDimens.receiptRowBottom),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_misc_claims),
-                contentDescription = null,
-                tint = colors.textMuted,
-                modifier = Modifier.size(TreatmentCostsDimens.receiptIconSize),
-            )
-            Text(
-                text = stringResource(Res.string.costs_admission_label),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.textMuted,
-            )
-            DashedDivider(modifier = Modifier.weight(1f), color = colors.border)
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(TreatmentCostsDimens.copyChipCorner))
-                    .background(colors.blueBg)
-                    .dashedBorder(colors.blueText, TreatmentCostsDimens.copyChipCorner, TreatmentCostsDimens.copyChipBorderWidth)
-                    .clickable { clipboardManager.setText(AnnotatedString(item.noPazir)) }
-                    .padding(start = TreatmentCostsDimens.copyChipPaddingStart,
-                        end = TreatmentCostsDimens.copyChipPaddingEnd,
-                        top = TreatmentCostsDimens.copyChipPaddingVertical,
-                        bottom = TreatmentCostsDimens.copyChipPaddingVertical,),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap),
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-                    contentDescription = stringResource(Res.string.costs_admission_label),
-                    tint = colors.blueText,
-                    modifier = Modifier.size(TreatmentCostsDimens.chipIconSize),
-                )
-                NumericText(
-                    text = item.noPazir.toPersianDigits(),
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        letterSpacing = TreatmentCostsDimens.receiptLetterSpacing,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                    color = colors.blueText,
-                )
-            }
-        }
-
-        DoubleRule(
-            modifier = Modifier
-                .padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)
-                .padding(top = TreatmentCostsDimens.ruleTop, bottom = TreatmentCostsDimens.ruleBottom),
-        )
-
-        AnimatedVisibility(visible = expanded) {
-            Column(modifier = Modifier.padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)) {
-                DetailRow(
-                    label = stringResource(Res.string.costs_patient_national_code),
-                    value = item.maliCode,
-                    divider = RowDivider.Solid,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.costs_main_insured),
-                    value = item.nameAsli,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.costs_file_status),
-                    value = item.statusDesc,
-                    valueColor = if (fileSettled) colors.greenText else colors.dangerText,
-                    valueBold = true,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.costs_return_reason),
-                    value = item.returnReason,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.costs_refund_date),
-                    value = item.estimatePayDate,
-                    valueColor = colors.teal,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.costs_center_name),
-                    value = item.healthcenterName,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.costs_file_payment),
-                    value = item.payService.toRialAmount(ABSENT_VALUE),
-                )
-                DetailPillRow(
-                    label = stringResource(Res.string.costs_other_services_payment),
-                    amount = item.payOtherService.toRialAmount(ABSENT_VALUE),
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)
-                .padding(top = TreatmentCostsDimens.footerTop, bottom = TreatmentCostsDimens.footerBottom),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.footerButtonGap),
-        ) {
-            // Held as State, not delegated: reading it here would recompose the footer on every
-            // frame of the turn. Read inside graphicsLayer, the animation costs none.
-            val rotation = animateFloatAsState(
-                targetValue = if (expanded) {
-                    TreatmentDimens.chevronOpenDegrees
-                } else {
-                    TreatmentDimens.chevronClosedDegrees
-                },
-                label = "certificate-chevron",
-            )
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(TreatmentCostsDimens.footerButtonCorner))
-                    .background(colors.bgPage)
-                    .clickable { expanded = !expanded }
-                    .padding(vertical = TreatmentCostsDimens.footerButtonPaddingVertical),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap, Alignment.CenterHorizontally),
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    tint = colors.teal,
-                    modifier = Modifier
-                        .size(TreatmentCostsDimens.chevronSize)
-                        .graphicsLayer { rotationZ = rotation.value },
-                )
-                Text(
-                    text = stringResource(
-                        if (expanded) Res.string.action_hide_details else Res.string.action_show_details,
-                    ),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.teal,
-                )
-            }
-
-            Box {
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(TreatmentCostsDimens.footerButtonCorner))
-                        .background(OperationsGradient)
-                        .clickable { menuOpen = true }
-                        .padding(horizontal = TreatmentCostsDimens.operationsPaddingHorizontal,
-                            vertical = TreatmentCostsDimens.footerButtonPaddingVertical,),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap),
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_setting),
-                        contentDescription = null,
-                        tint = TaminCostsOperationsInk,
-                        modifier = Modifier.size(TreatmentCostsDimens.chevronSize),
-                    )
-                    Text(
-                        text = stringResource(Res.string.costs_action_operations),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TaminCostsOperationsInk,
-                    )
-                }
-                OperationsMenu(
-                    expanded = menuOpen,
-                    onDismiss = { menuOpen = false },
-                    onOpenCertificate = {
-                        menuOpen = false
-                        onOpenCertificate(item.repId)
-                    },
-                    onSendToInbox = {
-                        menuOpen = false
-                        onSendToInbox(item.repId)
-                    },
-                )
-            }
-        }
-    }
-}
-
-/**
- * The payment stamp: a double check over its label, inside the design's two rings.
- *
- * The rings sweep once and pulse when the card first appears. In a lazy list that is exactly
- * "when the user scrolls to it" — the item does not compose until then — and [LaunchedEffect]
- * keyed on nothing runs it a single time per card.
- *
- * The [Animatable] is never read during composition: [drawBehind] samples it at draw time, so the
- * whole animation costs zero recompositions.
- */
-@Composable
-private fun PaymentStamp(label: String, color: Color) {
-    val reveal = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        reveal.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = TreatmentCostsDimens.STAMP_REVEAL_MILLIS,
-                easing = LinearOutSlowInEasing,
-            ),
-        )
-    }
-
-    Column(
-        modifier = Modifier.drawBehind {
-            val progress = reveal.value
-            // A single shallow swell: base -> brighter -> base, never a fade to nothing.
-            val pulse = 1f + TreatmentCostsDimens.STAMP_PULSE_DEPTH * sin(progress * PI.toFloat())
-            val outerAlpha =
-                (TreatmentCostsDimens.STAMP_RING_ALPHA * pulse).coerceIn(0f, 1f)
-            val innerAlpha =
-                (TreatmentCostsDimens.STAMP_RING_ALPHA *
-                    TreatmentCostsDimens.STAMP_RING_INNER_ALPHA * pulse).coerceIn(0f, 1f)
-
-            rotate(degrees = progress * TreatmentCostsDimens.STAMP_SWEEP_DEGREES) {
-                drawCircle(
-                    color = color.copy(alpha = outerAlpha),
-                    radius = TreatmentCostsDimens.stampRingSize.toPx() / 2f,
-                    style = Stroke(
-                        width = TreatmentCostsDimens.stampRingStroke.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(
-                            floatArrayOf(
-                                TreatmentCostsDimens.stampDashOn.toPx(),
-                                TreatmentCostsDimens.stampDashOff.toPx(),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            drawCircle(
-                color = color.copy(alpha = innerAlpha),
-                radius = TreatmentCostsDimens.stampRingInnerSize.toPx() / 2f,
-                style = Stroke(width = TreatmentCostsDimens.stampRingInnerStroke.toPx()),
-            )
         },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-    ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_verified),
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(TreatmentCostsDimens.stampCheckSize),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = color,
-            maxLines = 1,
-        )
-    }
-}
-
-/** The «عملیات» menu. A popover anchored to the button, which is what the design shows. */
-@Composable
-private fun OperationsMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    onOpenCertificate: () -> Unit,
-    onSendToInbox: () -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    DropdownMenu(
+        railBrush = rail,
         expanded = expanded,
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(TreatmentCostsDimens.menuCorner),
-        containerColor = colors.bgSurface,
-        modifier = Modifier.width(TreatmentCostsDimens.menuWidth),
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
     ) {
-        OperationsMenuItem(
-            text = stringResource(Res.string.costs_view_certificate),
-            icon = vectorResource(Res.drawable.ic_tamin_eye),
-            iconTint = colors.teal,
-            onClick = onOpenCertificate,
+        DetailRow(
+            label = stringResource(Res.string.costs_patient_national_code),
+            value = item.maliCode,
+            divider = RowDivider.Solid,
         )
-        TaminDivider()
-        OperationsMenuItem(
-            text = stringResource(Res.string.costs_send_to_inbox),
-            icon = vectorResource(Res.drawable.ic_email),
-            iconTint = colors.textTertiary,
-            onClick = onSendToInbox,
+        DetailRow(
+            label = stringResource(Res.string.costs_main_insured),
+            value = item.nameAsli,
+        )
+        DetailRow(
+            label = stringResource(Res.string.costs_file_status),
+            value = item.statusDesc,
+            valueColor = if (fileSettled) colors.greenText else colors.dangerText,
+            valueBold = true,
+        )
+        DetailRow(
+            label = stringResource(Res.string.costs_return_reason),
+            value = item.returnReason,
+        )
+        DetailRow(
+            label = stringResource(Res.string.costs_refund_date),
+            value = item.estimatePayDate,
+            valueColor = colors.teal,
+        )
+        DetailRow(
+            label = stringResource(Res.string.costs_center_name),
+            value = item.healthcenterName,
+        )
+        DetailRow(
+            label = stringResource(Res.string.costs_file_payment),
+            value = item.payService.toRialAmount(ABSENT_VALUE),
+        )
+        DetailPillRow(
+            label = stringResource(Res.string.costs_other_services_payment),
+            amount = item.payOtherService.toRialAmount(ABSENT_VALUE),
         )
     }
 }
 
-@Composable
-private fun OperationsMenuItem(
-    text: String,
-    icon: ImageVector,
-    iconTint: Color,
-    onClick: () -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = TreatmentCostsDimens.menuItemPaddingHorizontal,
-                vertical = TreatmentCostsDimens.menuItemPaddingVertical,),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = iconTint,
-            modifier = Modifier.size(TreatmentCostsDimens.menuIconSize),
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = colors.textPrimary,
-        )
-    }
-}
-
-/** A dashed rounded outline, which Compose has no first-class modifier for. */
-private fun Modifier.dashedBorder(color: Color, cornerRadius: Dp, width: Dp): Modifier = drawBehind {
-    val stroke = width.toPx()
-    drawRoundRect(
-        color = color,
-        topLeft = Offset(stroke / 2f, stroke / 2f),
-        size = Size(size.width - stroke, size.height - stroke),
-        cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius.toPx()),
-        style = Stroke(
-            width = stroke,
-            pathEffect = PathEffect.dashPathEffect(
-                floatArrayOf(TreatmentCostsDimens.copyChipDashOn.toPx(), TreatmentCostsDimens.copyChipDashOff.toPx()),
-            ),
-        ),
-    )
-}
 
 /** Which rule a detail row draws beneath itself. The design's first row is solid, the rest are
  *  dashed, and the last carries none. */
@@ -669,17 +275,6 @@ private fun DetailRowContainer(divider: RowDivider, content: @Composable () -> U
             )
             RowDivider.None -> Unit
         }
-    }
-}
-
-/** The design's 3px double rule: a solid hairline over a lighter one. */
-@Composable
-private fun DoubleRule(modifier: Modifier = Modifier) {
-    val colors = LocalTaminColors.current
-    Column(modifier = modifier.fillMaxWidth()) {
-        HorizontalDivider(thickness = TreatmentCostsDimens.ruleThickness, color = colors.border)
-        Spacer(Modifier.height(TreatmentCostsDimens.ruleGap))
-        HorizontalDivider(thickness = TreatmentCostsDimens.ruleThickness, color = colors.divider)
     }
 }
 

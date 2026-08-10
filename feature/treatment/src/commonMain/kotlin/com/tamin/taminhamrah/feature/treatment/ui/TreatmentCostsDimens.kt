@@ -1,101 +1,21 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
- * Layout numbers for the refund card, read from the design's own markup rather than measured off a
- * render — see `docs/superpowers/specs/2026-08-05-treatment-costs-card.md`.
+ * What is left of the refund card's own numbers.
  *
- * Separate from [TreatmentDimens] because that object holds the hub's numbers; these belong to one
- * screen and would otherwise be private vals scattered through the card, its stamp and its menu.
- * Anything a second screen could want — spacing, radii, icon sizes — stays in core-ui's theme.
+ * The card's shell, bands, chip, stamp, tracking line and footer all moved into core-ui's
+ * `RecordCard` when the personal inbox started sharing it — only the detail rows below the rule
+ * are still drawn here, so only their measurements remain.
  */
 internal object TreatmentCostsDimens {
-
-    // The card shell.
-    val cardCorner = 18.dp
-    val cardPaddingHorizontal = 20.dp
-    val cardShadowBlur = 26.dp
-    val cardShadowOffsetY = 10.dp
-
-    /** The teal rail down the trailing edge, and the wash under the top edge. */
-    val railWidth = 3.dp
-    val topWashHeight = 26.dp
-    const val TOP_WASH_ALPHA = 0.05f
-
-    // Band paddings, top to bottom.
-    val claimRowTop = 15.dp
-    val patientRowTop = 11.dp
-    val patientRowBottom = 14.dp
-    val receiptRowTop = 2.dp
-    val receiptRowBottom = 4.dp
-    val ruleTop = 12.dp
-    val ruleBottom = 4.dp
-    val footerTop = 6.dp
-    val footerBottom = 16.dp
-
-    // The claim chip.
-    val chipPaddingHorizontal = 12.dp
-    val chipPaddingVertical = 5.dp
-    val chipIconSize = 14.dp
-    val chipGap = 6.dp
-
-    /**
-     * The payment stamp: a double check over its label, inside two rings — a dashed outer and a
-     * fainter solid inner, at the design's 46:33 radius ratio.
-     */
-    val stampRingSize = 54.dp
-    val stampRingInnerSize = 39.dp
-    val stampCheckSize = 21.dp
-    val stampDashOn = 3.dp
-    val stampDashOff = 4.dp
-    val stampRingStroke = 1.5.dp
-    val stampRingInnerStroke = 1.dp
-    const val STAMP_RING_ALPHA = 0.35f
-    const val STAMP_RING_INNER_ALPHA = 0.45f
-
-    /**
-     * The rings sweep once and pulse gently when the card is first scrolled into view — long and
-     * shallow, so it reads as a stamp settling rather than a spinner.
-     */
-    const val STAMP_SWEEP_DEGREES = 360f
-    const val STAMP_PULSE_DEPTH = 0.5f
-    const val STAMP_REVEAL_MILLIS = 2600
-
-    // The receipt line and its copyable chip.
-    val receiptIconSize = 15.dp
-    val receiptLetterSpacing = 1.sp
-    val copyChipCorner = 9.dp
-    val copyChipBorderWidth = 1.4.dp
-    val copyChipDashOn = 3.dp
-    val copyChipDashOff = 3.dp
-    val copyChipPaddingStart = 6.dp
-    val copyChipPaddingEnd = 8.dp
-    val copyChipPaddingVertical = 5.dp
-    val copyChipGap = 7.dp
 
     /** Detail rows carry their own rhythm so a rule sits flush between two of them. */
     val detailRowPadding = 12.dp
 
-    /** The double rule: two hairlines with a pixel of air between them. */
-    val ruleThickness = 1.dp
-    val ruleGap = 1.dp
-
-    /** The dashed leader ruled across to the receipt chip. */
+    /** The dashed rule under every row but the first and the last. */
     val dashedStrokeWidth = 1.dp
     val dashedDashLength = 4.dp
     val dashedGapLength = 4.dp
-
-    // The footer and the actions popover.
-    val footerButtonCorner = 14.dp
-    val footerButtonGap = 9.dp
-    val footerButtonPaddingVertical = 12.dp
-    val operationsPaddingHorizontal = 18.dp
-    val chevronSize = 15.dp
-    val menuWidth = 206.dp
-    val menuCorner = 16.dp
-    val menuIconSize = 16.dp
-    val menuItemPaddingHorizontal = 14.dp
-    val menuItemPaddingVertical = 12.dp
 }
