@@ -16,7 +16,8 @@ data class HistoryJobInfoUiState(
 
 sealed interface HistoryJobInfoIntent {
     data object Load : HistoryJobInfoIntent
-    data object Retry : HistoryJobInfoIntent
 }
 
-sealed interface HistoryJobInfoEvent
+sealed interface HistoryJobInfoEvent {
+    data class ShowToast(val message: String) : HistoryJobInfoEvent
+}

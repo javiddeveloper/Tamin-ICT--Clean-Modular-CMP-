@@ -18,11 +18,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Work
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,11 +41,16 @@ import com.tamin.taminhamrah.feature.history.ui.jobinfo.components.JobInfoStatsC
 import com.tamin.taminhamrah.model.history.HistoryJobInfoItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.ToasterState
+import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.motionFade
 import com.tamin.taminhamrah.ui.motion.motionParallax
@@ -59,6 +62,7 @@ import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.unit.lerp as dpLerp
 
@@ -70,18 +74,37 @@ fun HistoryJobInfoScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lazyListState = rememberLazyListState()
     val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
+    val toaster = LocalToaster.current
 
     LaunchedEffect(motionState, lazyListState) {
         motionState.observeLazyListState(lazyListState)
     }
 
+    HistoryJobInfoEvents(
+        events = viewModel.events,
+        toaster = toaster
+    )
+
     HistoryJobInfoContent(
         uiState = uiState,
         lazyListState = lazyListState,
         motionState = motionState,
-        onBackClicked = onBackClicked,
-        onRetry = { viewModel.sendIntent(HistoryJobInfoIntent.Retry) }
+        onBackClicked = onBackClicked
     )
+}
+
+@Composable
+fun HistoryJobInfoEvents(
+    events: Flow<HistoryJobInfoEvent>,
+    toaster: ToasterState,
+) {
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            is HistoryJobInfoEvent.ShowToast -> {
+                toaster.error(event.message)
+            }
+        }
+    }
 }
 
 @Composable
@@ -89,8 +112,7 @@ fun HistoryJobInfoContent(
     uiState: HistoryJobInfoUiState,
     lazyListState: LazyListState,
     motionState: ScrollMotionState,
-    onBackClicked: () -> Unit,
-    onRetry: () -> Unit
+    onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val clipboardManager = LocalClipboardManager.current
@@ -203,91 +225,62 @@ fun HistoryJobInfoContent(
         },
         containerColor = taminColors.bgPage
     ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            }
-
-            uiState.error != null && uiState.jobInfos.isEmpty() -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = Spacing.page),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = uiState.error,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.md))
-                    TextButton(onClick = onRetry) {
-                        Text(text = "تلاش مجدد")
-                    }
-                }
-            }
-
-            else -> {
-                LazyColumn(
-                    state = lazyListState,
-                    flingBehavior = snapFlingBehavior,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(
-                        horizontal = Spacing.page,
-                        vertical = Spacing.md
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                ) {
-                    if (uiState.jobInfos.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "لیست عناوین شغلی",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = taminColors.textPrimary,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            LazyColumn(
+                state = lazyListState,
+                flingBehavior = snapFlingBehavior,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    horizontal = Spacing.page,
+                    vertical = Spacing.md
+                ),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                if (uiState.jobInfos.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "لیست عناوین شغلی",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = taminColors.textPrimary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = Spacing.md)
-                            )
-                        }
-                    }
-
-                    if (uiState.jobInfos.isEmpty() && !uiState.isLoading) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = Spacing.xxl),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "عنوان شغلی یافت نشد",
-                                    color = taminColors.textMuted,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
-
-                    items(uiState.jobInfos, key = { it.id }) { jobInfo ->
-                        JobInfoCard(
-                            jobInfo = jobInfo,
-                            onCopy = { text -> clipboardManager.setText(AnnotatedString(text)) }
                         )
                     }
                 }
+
+                if (uiState.jobInfos.isEmpty() && !uiState.isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = Spacing.xxl),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "عنوان شغلی یافت نشد",
+                                color = taminColors.textMuted,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+
+                items(uiState.jobInfos, key = { it.id }) { jobInfo ->
+                    JobInfoCard(
+                        jobInfo = jobInfo,
+                        onCopy = { text -> clipboardManager.setText(AnnotatedString(text)) }
+                    )
+                }
+            }
+
+            if (uiState.isLoading) {
+                LoadingStateOverlay()
             }
         }
     }
@@ -379,8 +372,7 @@ private fun HistoryJobInfoScreenPreview() {
             ),
             lazyListState = lazyListState,
             motionState = motionState,
-            onBackClicked = {},
-            onRetry = {}
+            onBackClicked = {}
         )
     }
 }
@@ -470,8 +462,7 @@ private fun HistoryJobInfoScreenPreviewDark() {
             ),
             lazyListState = lazyListState,
             motionState = motionState,
-            onBackClicked = {},
-            onRetry = {}
+            onBackClicked = {}
         )
     }
 }

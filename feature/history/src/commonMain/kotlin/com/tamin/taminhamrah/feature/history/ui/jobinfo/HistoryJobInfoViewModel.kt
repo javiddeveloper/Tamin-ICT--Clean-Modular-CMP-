@@ -17,7 +17,7 @@ class HistoryJobInfoViewModel(
 
     override fun handleIntent(intent: HistoryJobInfoIntent): Flow<HistoryJobInfoUiState.PartialState> {
         return when (intent) {
-            HistoryJobInfoIntent.Load, HistoryJobInfoIntent.Retry -> loadJobInfos()
+            HistoryJobInfoIntent.Load-> loadJobInfos()
         }
     }
 
@@ -32,7 +32,9 @@ class HistoryJobInfoViewModel(
                 )
             }
         } catch (e: Exception) {
-            emit(HistoryJobInfoUiState.PartialState.Error(e.message))
+            val message = e.message ?: "در دریافت عناوین شغلی خطایی رخ داده است"
+            sendEvent(HistoryJobInfoEvent.ShowToast(message))
+            emit(HistoryJobInfoUiState.PartialState.Error(message))
         } finally {
             emit(HistoryJobInfoUiState.PartialState.Loading(false))
         }
