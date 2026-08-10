@@ -48,7 +48,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
@@ -100,8 +99,10 @@ import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
-import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostDimens
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostsDimens
 import androidx.compose.ui.graphics.graphicsLayer
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsInk
 
 /** Shown where the service sent nothing, matching the previous app's placeholder. */
 private const val ABSENT_VALUE = "-"
@@ -117,7 +118,10 @@ internal fun CertificateList(
     val colors = LocalTaminColors.current
     val staggerState = rememberStaggeredEntranceState()
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        overscrollEffect = rememberJellyOverscroll(),
+    ) {
         when {
             isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
 
@@ -200,7 +204,7 @@ private fun CertificateCard(
     val rail = remember { Brush.verticalGradient(listOf(TaminCostsAccentTop, TaminCostsAccentBottom)) }
     val topWash = remember(colors.teal) {
         Brush.verticalGradient(
-            listOf(TaminCostsAccentBottom.copy(alpha = TreatmentCostDimens.TOP_WASH_ALPHA), Color.Transparent),
+            listOf(TaminCostsAccentBottom.copy(alpha = TreatmentCostsDimens.TOP_WASH_ALPHA), Color.Transparent),
         )
     }
 
@@ -209,19 +213,19 @@ private fun CertificateCard(
             .fillMaxWidth()
             .coloredShadow(
                 color = colors.shadowSubtle,
-                borderRadius = TreatmentCostDimens.cardCorner,
-                blurRadius = TreatmentCostDimens.cardShadowBlur,
-                offsetY = TreatmentCostDimens.cardShadowOffsetY,
+                borderRadius = TreatmentCostsDimens.cardCorner,
+                blurRadius = TreatmentCostsDimens.cardShadowBlur,
+                offsetY = TreatmentCostsDimens.cardShadowOffsetY,
             )
-            .clip(RoundedCornerShape(TreatmentCostDimens.cardCorner))
+            .clip(RoundedCornerShape(TreatmentCostsDimens.cardCorner))
             .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, RoundedCornerShape(TreatmentCostDimens.cardCorner))
+            .border(Thickness.border, colors.border, RoundedCornerShape(TreatmentCostsDimens.cardCorner))
             .drawBehind {
                 drawRect(
                     brush = topWash,
-                    size = Size(size.width, TreatmentCostDimens.topWashHeight.toPx()),
+                    size = Size(size.width, TreatmentCostsDimens.topWashHeight.toPx()),
                 )
-                val railWidth = TreatmentCostDimens.railWidth.toPx()
+                val railWidth = TreatmentCostsDimens.railWidth.toPx()
                 drawRect(
                     brush = rail,
                     topLeft = Offset(size.width - railWidth, 0f),
@@ -233,7 +237,7 @@ private fun CertificateCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = TreatmentCostDimens.cardPaddingHorizontal, end = TreatmentCostDimens.cardPaddingHorizontal, top = TreatmentCostDimens.claimRowTop),
+                .padding(start = TreatmentCostsDimens.cardPaddingHorizontal, end = TreatmentCostsDimens.cardPaddingHorizontal, top = TreatmentCostsDimens.claimRowTop),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -241,15 +245,15 @@ private fun CertificateCard(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(colors.greenBg)
-                    .padding(horizontal = TreatmentCostDimens.chipPaddingHorizontal, vertical = TreatmentCostDimens.chipPaddingVertical),
+                    .padding(horizontal = TreatmentCostsDimens.chipPaddingHorizontal, vertical = TreatmentCostsDimens.chipPaddingVertical),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.chipGap),
             ) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_tamin_misc_claims),
                     contentDescription = null,
                     tint = colors.teal,
-                    modifier = Modifier.size(TreatmentCostDimens.chipIconSize),
+                    modifier = Modifier.size(TreatmentCostsDimens.chipIconSize),
                 )
                 Text(
                     text = stringResource(Res.string.category_misc_claims),
@@ -272,10 +276,10 @@ private fun CertificateCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    start = TreatmentCostDimens.cardPaddingHorizontal,
-                    end = TreatmentCostDimens.cardPaddingHorizontal,
-                    top = TreatmentCostDimens.patientRowTop,
-                    bottom = TreatmentCostDimens.patientRowBottom,
+                    start = TreatmentCostsDimens.cardPaddingHorizontal,
+                    end = TreatmentCostsDimens.cardPaddingHorizontal,
+                    top = TreatmentCostsDimens.patientRowTop,
+                    bottom = TreatmentCostsDimens.patientRowBottom,
                 ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -296,8 +300,8 @@ private fun CertificateCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = TreatmentCostDimens.cardPaddingHorizontal)
-                .padding(top = TreatmentCostDimens.receiptRowTop, bottom = TreatmentCostDimens.receiptRowBottom),
+                .padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)
+                .padding(top = TreatmentCostsDimens.receiptRowTop, bottom = TreatmentCostsDimens.receiptRowBottom),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
@@ -305,7 +309,7 @@ private fun CertificateCard(
                 imageVector = vectorResource(Res.drawable.ic_tamin_medical_records),
                 contentDescription = null,
                 tint = colors.textMuted,
-                modifier = Modifier.size(TreatmentCostDimens.receiptIconSize),
+                modifier = Modifier.size(TreatmentCostsDimens.receiptIconSize),
             )
             Text(
                 text = stringResource(Res.string.costs_admission_label),
@@ -316,27 +320,27 @@ private fun CertificateCard(
             DashedDivider(modifier = Modifier.weight(1f), color = colors.border)
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(TreatmentCostDimens.copyChipCorner))
+                    .clip(RoundedCornerShape(TreatmentCostsDimens.copyChipCorner))
                     .background(colors.blueBg)
-                    .dashedBorder(colors.blueText, TreatmentCostDimens.copyChipCorner, TreatmentCostDimens.copyChipBorderWidth)
+                    .dashedBorder(colors.blueText, TreatmentCostsDimens.copyChipCorner, TreatmentCostsDimens.copyChipBorderWidth)
                     .clickable { clipboardManager.setText(AnnotatedString(item.noPazir)) }
-                    .padding(start = TreatmentCostDimens.copyChipPaddingStart,
-                        end = TreatmentCostDimens.copyChipPaddingEnd,
-                        top = TreatmentCostDimens.copyChipPaddingVertical,
-                        bottom = TreatmentCostDimens.copyChipPaddingVertical,),
+                    .padding(start = TreatmentCostsDimens.copyChipPaddingStart,
+                        end = TreatmentCostsDimens.copyChipPaddingEnd,
+                        top = TreatmentCostsDimens.copyChipPaddingVertical,
+                        bottom = TreatmentCostsDimens.copyChipPaddingVertical,),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(TreatmentCostDimens.copyChipGap),
+                horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap),
             ) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_share),
                     contentDescription = stringResource(Res.string.costs_admission_label),
                     tint = colors.blueText,
-                    modifier = Modifier.size(TreatmentCostDimens.chipIconSize),
+                    modifier = Modifier.size(TreatmentCostsDimens.chipIconSize),
                 )
                 NumericText(
                     text = item.noPazir.toPersianDigits(),
                     style = MaterialTheme.typography.titleSmall.copy(
-                        letterSpacing = TreatmentCostDimens.receiptLetterSpacing,
+                        letterSpacing = TreatmentCostsDimens.receiptLetterSpacing,
                         fontWeight = FontWeight.SemiBold,
                     ),
                     color = colors.blueText,
@@ -346,12 +350,12 @@ private fun CertificateCard(
 
         DoubleRule(
             modifier = Modifier
-                .padding(horizontal = TreatmentCostDimens.cardPaddingHorizontal)
-                .padding(top = TreatmentCostDimens.ruleTop, bottom = TreatmentCostDimens.ruleBottom),
+                .padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)
+                .padding(top = TreatmentCostsDimens.ruleTop, bottom = TreatmentCostsDimens.ruleBottom),
         )
 
         AnimatedVisibility(visible = expanded) {
-            Column(modifier = Modifier.padding(horizontal = TreatmentCostDimens.cardPaddingHorizontal)) {
+            Column(modifier = Modifier.padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)) {
                 DetailRow(
                     label = stringResource(Res.string.costs_patient_national_code),
                     value = item.maliCode,
@@ -394,10 +398,10 @@ private fun CertificateCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = TreatmentCostDimens.cardPaddingHorizontal)
-                .padding(top = TreatmentCostDimens.footerTop, bottom = TreatmentCostDimens.footerBottom),
+                .padding(horizontal = TreatmentCostsDimens.cardPaddingHorizontal)
+                .padding(top = TreatmentCostsDimens.footerTop, bottom = TreatmentCostsDimens.footerBottom),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(TreatmentCostDimens.footerButtonGap),
+            horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.footerButtonGap),
         ) {
             // Held as State, not delegated: reading it here would recompose the footer on every
             // frame of the turn. Read inside graphicsLayer, the animation costs none.
@@ -412,19 +416,19 @@ private fun CertificateCard(
             Row(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(TreatmentCostDimens.footerButtonCorner))
+                    .clip(RoundedCornerShape(TreatmentCostsDimens.footerButtonCorner))
                     .background(colors.bgPage)
                     .clickable { expanded = !expanded }
-                    .padding(vertical = TreatmentCostDimens.footerButtonPaddingVertical),
+                    .padding(vertical = TreatmentCostsDimens.footerButtonPaddingVertical),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(TreatmentCostDimens.copyChipGap, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap, Alignment.CenterHorizontally),
             ) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                     contentDescription = null,
                     tint = colors.teal,
                     modifier = Modifier
-                        .size(TreatmentCostDimens.chevronSize)
+                        .size(TreatmentCostsDimens.chevronSize)
                         .graphicsLayer { rotationZ = rotation.value },
                 )
                 Text(
@@ -440,25 +444,25 @@ private fun CertificateCard(
             Box {
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(TreatmentCostDimens.footerButtonCorner))
+                        .clip(RoundedCornerShape(TreatmentCostsDimens.footerButtonCorner))
                         .background(OperationsGradient)
                         .clickable { menuOpen = true }
-                        .padding(horizontal = TreatmentCostDimens.operationsPaddingHorizontal,
-                            vertical = TreatmentCostDimens.footerButtonPaddingVertical,),
+                        .padding(horizontal = TreatmentCostsDimens.operationsPaddingHorizontal,
+                            vertical = TreatmentCostsDimens.footerButtonPaddingVertical,),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(TreatmentCostDimens.copyChipGap),
+                    horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap),
                 ) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_setting),
                         contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(TreatmentCostDimens.chevronSize),
+                        tint = TaminCostsOperationsInk,
+                        modifier = Modifier.size(TreatmentCostsDimens.chevronSize),
                     )
                     Text(
                         text = stringResource(Res.string.costs_action_operations),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
+                        color = TaminCostsOperationsInk,
                     )
                 }
                 OperationsMenu(
@@ -486,10 +490,10 @@ private fun CertificateCard(
  */
 @Composable
 private fun PaymentStamp(label: String, color: Color) {
-    val ringColor = color.copy(alpha = TreatmentCostDimens.STAMP_RING_ALPHA)
+    val ringColor = color.copy(alpha = TreatmentCostsDimens.STAMP_RING_ALPHA)
     Column(
         modifier = Modifier.drawBehind {
-            val diameter = TreatmentCostDimens.stampRingSize.toPx()
+            val diameter = TreatmentCostsDimens.stampRingSize.toPx()
             val stroke = Thickness.border.toPx()
             drawCircle(
                 color = ringColor,
@@ -498,7 +502,7 @@ private fun PaymentStamp(label: String, color: Color) {
                 style = Stroke(
                     width = stroke,
                     pathEffect = PathEffect.dashPathEffect(
-                        floatArrayOf(TreatmentCostDimens.stampDashOn.toPx(), TreatmentCostDimens.stampDashOff.toPx()),
+                        floatArrayOf(TreatmentCostsDimens.stampDashOn.toPx(), TreatmentCostsDimens.stampDashOff.toPx()),
                     ),
                 ),
             )
@@ -510,7 +514,7 @@ private fun PaymentStamp(label: String, color: Color) {
             imageVector = vectorResource(Res.drawable.ic_check),
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(TreatmentCostDimens.stampCheckSize),
+            modifier = Modifier.size(TreatmentCostsDimens.stampCheckSize),
         )
         Text(
             text = label,
@@ -534,9 +538,9 @@ private fun OperationsMenu(
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(TreatmentCostDimens.menuCorner),
+        shape = RoundedCornerShape(TreatmentCostsDimens.menuCorner),
         containerColor = colors.bgSurface,
-        modifier = Modifier.width(TreatmentCostDimens.menuWidth),
+        modifier = Modifier.width(TreatmentCostsDimens.menuWidth),
     ) {
         OperationsMenuItem(
             text = stringResource(Res.string.costs_view_certificate),
@@ -566,8 +570,8 @@ private fun OperationsMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = TreatmentCostDimens.menuItemPaddingHorizontal,
-                vertical = TreatmentCostDimens.menuItemPaddingVertical,),
+            .padding(horizontal = TreatmentCostsDimens.menuItemPaddingHorizontal,
+                vertical = TreatmentCostsDimens.menuItemPaddingVertical,),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -575,7 +579,7 @@ private fun OperationsMenuItem(
             imageVector = icon,
             contentDescription = null,
             tint = iconTint,
-            modifier = Modifier.size(TreatmentCostDimens.menuIconSize),
+            modifier = Modifier.size(TreatmentCostsDimens.menuIconSize),
         )
         Text(
             text = text,
@@ -597,7 +601,7 @@ private fun Modifier.dashedBorder(color: Color, cornerRadius: Dp, width: Dp): Mo
         style = Stroke(
             width = stroke,
             pathEffect = PathEffect.dashPathEffect(
-                floatArrayOf(TreatmentCostDimens.copyChipDashOn.toPx(), TreatmentCostDimens.copyChipDashOff.toPx()),
+                floatArrayOf(TreatmentCostsDimens.copyChipDashOn.toPx(), TreatmentCostsDimens.copyChipDashOff.toPx()),
             ),
         ),
     )
@@ -617,7 +621,7 @@ private enum class RowDivider { Solid, Dashed, None }
 private fun DetailRowContainer(divider: RowDivider, content: @Composable () -> Unit) {
     val colors = LocalTaminColors.current
     Column(modifier = Modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(vertical = TreatmentCostDimens.detailRowPadding)) { content() }
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = TreatmentCostsDimens.detailRowPadding)) { content() }
         when (divider) {
             RowDivider.Solid -> TaminDivider()
             RowDivider.Dashed -> DashedDivider(
@@ -634,9 +638,9 @@ private fun DetailRowContainer(divider: RowDivider, content: @Composable () -> U
 private fun DoubleRule(modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
     Column(modifier = modifier.fillMaxWidth()) {
-        HorizontalDivider(thickness = 1.dp, color = colors.border)
-        Spacer(Modifier.height(1.dp))
-        HorizontalDivider(thickness = 1.dp, color = colors.divider)
+        HorizontalDivider(thickness = TreatmentCostsDimens.ruleThickness, color = colors.border)
+        Spacer(Modifier.height(TreatmentCostsDimens.ruleGap))
+        HorizontalDivider(thickness = TreatmentCostsDimens.ruleThickness, color = colors.divider)
     }
 }
 
@@ -645,9 +649,9 @@ private fun DoubleRule(modifier: Modifier = Modifier) {
 private fun DashedDivider(
     modifier: Modifier = Modifier,
     color: Color = LocalTaminColors.current.border,
-    strokeWidth: Dp = 1.dp,
-    dashLength: Dp = 4.dp,
-    gapLength: Dp = 4.dp,
+    strokeWidth: Dp = TreatmentCostsDimens.dashedStrokeWidth,
+    dashLength: Dp = TreatmentCostsDimens.dashedDashLength,
+    gapLength: Dp = TreatmentCostsDimens.dashedGapLength,
 ) {
     Canvas(modifier = modifier.height(strokeWidth)) {
         val strokeWidthPx = strokeWidth.toPx()

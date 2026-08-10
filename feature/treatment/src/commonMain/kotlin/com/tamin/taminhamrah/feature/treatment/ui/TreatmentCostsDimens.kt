@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.sp
  * screen and would otherwise be private vals scattered through the card, its stamp and its menu.
  * Anything a second screen could want — spacing, radii, icon sizes — stays in core-ui's theme.
  */
-internal object TreatmentCostDimens {
+internal object TreatmentCostsDimens {
 
     // The card shell.
     val cardCorner = 18.dp
@@ -39,6 +39,7 @@ internal object TreatmentCostDimens {
     val chipPaddingHorizontal = 12.dp
     val chipPaddingVertical = 5.dp
     val chipIconSize = 14.dp
+    val chipGap = 6.dp
 
     /** The payment stamp: a check over its label, ringed by a dashed circle. */
     val stampRingSize = 54.dp
@@ -61,6 +62,15 @@ internal object TreatmentCostDimens {
 
     /** Detail rows carry their own rhythm so a rule sits flush between two of them. */
     val detailRowPadding = 12.dp
+
+    /** The double rule: two hairlines with a pixel of air between them. */
+    val ruleThickness = 1.dp
+    val ruleGap = 1.dp
+
+    /** The dashed leader ruled across to the receipt chip. */
+    val dashedStrokeWidth = 1.dp
+    val dashedDashLength = 4.dp
+    val dashedGapLength = 4.dp
 
     // The footer and the actions popover.
     val footerButtonCorner = 14.dp

@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,7 +66,6 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
 import com.tamin.taminhamrah.ui.theme.TaminRed
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -82,6 +80,10 @@ import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_ejtemaei_logo
 import taminx.core.core_ui.ic_tamin_verified
 import kotlin.math.roundToInt
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardTrackBg
 
 /**
  * The electronic health-insurance card and everything that dresses one: its gradient identity,
@@ -157,7 +159,7 @@ fun InsuranceCard(
                 Text(
                     text = holderName,
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = TaminInsuranceCardInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
@@ -171,7 +173,7 @@ fun InsuranceCard(
                 Text(
                     text = stringResource(Res.string.card_national_code),
                     style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = TaminInsuranceCardInkMuted,
                     modifier = Modifier
                         .layoutId(CardSlot.CodeLabel)
                         .vanishOnCollapse(collapseProgress),
@@ -179,7 +181,7 @@ fun InsuranceCard(
                 NumericText(
                     text = nationalId.toPersianDigits(),
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    color = TaminInsuranceCardInk,
                     modifier = Modifier.layoutId(CardSlot.Code),
                 )
                 // Wrapped so the slot exists even when there is no badge to show.
@@ -279,7 +281,7 @@ fun CoverageBadge(
 
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
 private fun Modifier.cardDecoration(): Modifier = drawBehind {
-    val decor = Color.White.copy(alpha = TreatmentDimens.cardDecorAlpha)
+    val decor = TaminInsuranceCardInk.copy(alpha = TreatmentDimens.cardDecorAlpha)
     drawOval(
         color = decor,
         topLeft = Offset(-size.width * 0.15f, size.height * 0.55f),
@@ -303,7 +305,7 @@ private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(TreatmentDimens.brandTileSize)
                 .background(
-                    Color.White.copy(alpha = 0.13f),
+                    TaminInsuranceCardChipBg,
                     RoundedCornerShape(CornerRadius.avatarTile),
                 ),
             contentAlignment = Alignment.Center,
@@ -311,7 +313,7 @@ private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_ejtemaei_logo),
                 contentDescription = null,
-                tint = Color.White,
+                tint = TaminInsuranceCardInk,
                 modifier = Modifier.size(TreatmentDimens.brandTileIconSize),
             )
         }
@@ -319,24 +321,24 @@ private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
             Text(
                 text = stringResource(Res.string.card_org_name),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White,
+                color = TaminInsuranceCardInk,
             )
             Text(
                 text = stringResource(Res.string.card_subtitle),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.75f),
+                color = TaminInsuranceCardInkMuted,
             )
         }
         Box(
             modifier = Modifier
                 .size(TreatmentDimens.brandTickSize)
-                .background(Color.White.copy(alpha = 0.13f), CircleShape),
+                .background(TaminInsuranceCardChipBg, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_check),
                 contentDescription = null,
-                tint = Color.White,
+                tint = TaminInsuranceCardInk,
                 modifier = Modifier.size(TreatmentDimens.brandTickIconSize),
             )
         }
@@ -353,7 +355,7 @@ private fun InsuranceCardFooter(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(TaminInsuranceCardTrackBg)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -362,7 +364,7 @@ private fun InsuranceCardFooter(
         Text(
             text = coverageLabel,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White,
+            color = TaminInsuranceCardInk,
             // A refusal reason is a sentence, not a status word, so it gets a second line before
             // being cut — the chip beside it still opens the full text.
             maxLines = 2,
@@ -431,7 +433,7 @@ private fun CoverageStatus.cardStyle(
                 CoverageBadge(
                     icon = vectorResource(Res.drawable.ic_tamin_cross),
                     containerColor = TaminRed,
-                    contentColor = Color.White,
+                    contentColor = TaminInsuranceCardInk,
                 )
             },
         )
@@ -497,9 +499,7 @@ fun InsuranceCardCarousel(
  * across the whole width. Dot counts are small — one per dependant — so nothing is gained by
  * keeping them lazy, and the strip still scrolls to hold the active dot in view.
  */
-private const val INDICATOR_TRACK_ALPHA = 0.09f
-private const val INDICATOR_TRACK_BORDER_ALPHA = 0.16f
-private const val INDICATOR_IDLE_DOT_ALPHA = 0.35f
+private const val INDICATOR_TRACK_ALPHA = 0.30f
 
 @Composable
 private fun PageIndicator(
@@ -523,15 +523,9 @@ private fun PageIndicator(
         Row(
             modifier = Modifier
                 .clip(CircleShape)
-                // One soft accent-tinted chip: a faint wash with an even fainter rim, rather than
-                // a hard ring. Everything is an alpha over the accent, so the track, its edge and
-                // the idle dots stay one colour family and carry on both the light and dark page.
-                .background(colors.teal.copy(alpha = INDICATOR_TRACK_ALPHA))
-                .border(
-                    width = Thickness.border,
-                    color = colors.teal.copy(alpha = INDICATOR_TRACK_BORDER_ALPHA),
-                    shape = CircleShape,
-                )
+                // A plain gray track, no outline: a tinted rim reads as a stray border against
+                // the light page. Alpha over the neutral so it holds up in both themes.
+                .background(colors.chevron.copy(alpha = INDICATOR_TRACK_ALPHA))
                 .padding(
                     horizontal = TreatmentDimens.pageIndicatorPaddingHorizontal,
                     vertical = TreatmentDimens.pageIndicatorPaddingVertical,
@@ -554,11 +548,7 @@ private fun PageIndicator(
                             height = TreatmentDimens.pageIndicatorDotSize,
                         )
                         .background(
-                            color = if (isSelected) {
-                                colors.teal
-                            } else {
-                                colors.teal.copy(alpha = INDICATOR_IDLE_DOT_ALPHA)
-                            },
+                            color = if (isSelected) colors.teal else colors.chevron,
                             shape = CircleShape,
                         ),
                 )
