@@ -228,6 +228,55 @@ fun String.toRialAmount(fallback: String = "—"): String =
  */
 fun Double.toPriceFormat(): String = groupThousands(this.toLong().toString())
 
+/**
+ * The extension of the document this thumbnail URL stands for.
+ *
+ * This endpoint carries the filename in the query, not the path — a real thumbnail is
+ * `…/api/erecords/thumbs?id=0017312213669900959.tif&parent=…&cs=2`, whose path ends in `thumbs`
+ * and has no extension of its own. So the `id` parameter is read first, and only a URL not shaped
+ * that way falls back to its path.
+ *
+ * Reading the path first is what sent شناسنامه to the image viewer: every document looked
+ * extensionless, and a TIFF cannot be decoded as an image.
+ */
+fun String.documentExtension(): String {
+    val idParameter = substringAfter("id=", missingDelimiterValue = "").substringBefore('&')
+    val fileName = idParameter.ifEmpty {
+        substringBefore('?').substringBefore('#').substringAfterLast('/')
+    }
+    return fileName.substringAfterLast('.', missingDelimiterValue = "").lowercase()
+}
+
+private const val THUMBS_SEGMENT = "thumbs"
+
+/**
+ * The thumbnail URL pointed at the full document instead.
+ *
+ * A URL carrying no `thumbs` segment is already whole and is returned untouched, so an unexpected
+ * shape degrades to "open what we were given" rather than to a mangled URL.
+ */
+fun String.forFullDocument(segment: String): String =
+    if (THUMBS_SEGMENT in this) replace(THUMBS_SEGMENT, segment) else this
+
+/**
+ * Checks if the byte array starts with or contains the %PDF magic header sequence.
+ */
+fun ByteArray.looksLikePdf(): Boolean {
+    if (size < 4) return false
+    val pdfMagic = byteArrayOf(0x25, 0x50, 0x44, 0x46) // %PDF
+    val limit = minOf(size - 3, 1024)
+    for (i in 0 until limit) {
+        if (this[i] == pdfMagic[0] &&
+            this[i + 1] == pdfMagic[1] &&
+            this[i + 2] == pdfMagic[2] &&
+            this[i + 3] == pdfMagic[3]
+        ) {
+            return true
+        }
+    }
+    return false
+}
+
 
 /**
  * Digits as arithmetic sees them: everything that is not a digit is dropped, and Persian and

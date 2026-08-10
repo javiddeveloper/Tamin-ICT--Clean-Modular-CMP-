@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
@@ -27,6 +28,7 @@ class FakeUserRepository : UserRepository {
     var insuredActiveBranchResult: List<InsuredActiveBranchDN> = emptyList()
     var relationTaminAllResult: List<ActiveRelationDN> = emptyList()
     var electronicFileResult: List<ElectronicFileDN> = emptyList()
+    var electronicFilePages: List<List<ElectronicFileDN>> = emptyList()
     var userProfileResult: UserProfileDN? = null
     var statusCertificateReportResult: String = ""
     var recipientsResult: List<RecipientDN> = emptyList()
@@ -85,6 +87,11 @@ class FakeUserRepository : UserRepository {
     ): Flow<List<ElectronicFileDN>> = flow {
         if (shouldThrowError) throw error
         emit(electronicFileResult)
+    }
+
+    override suspend fun downloadDocument(url: String): PdfDownloadDN {
+        if (shouldThrowError) throw error
+        return PdfDownloadDN()
     }
 
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow {

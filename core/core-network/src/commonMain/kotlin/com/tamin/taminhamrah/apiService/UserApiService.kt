@@ -134,6 +134,9 @@ internal interface UserApiService {
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<ElectronicFileDTO>>
 
+    @GET
+    suspend fun downloadDocument(@Url url: String): io.ktor.client.statement.HttpStatement
+
     @GET("users/current-user")
     suspend fun getUserProfile(): BaseDTO<UserProfileDto>
 

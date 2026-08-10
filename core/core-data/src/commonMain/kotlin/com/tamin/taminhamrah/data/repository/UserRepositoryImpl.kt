@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActive
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.data.mapper.user.toDomain
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.feature.profile.data.mapper.toDomain
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
@@ -125,6 +126,9 @@ internal class UserRepositoryImpl(
         val electronicFileList = remoteData?.list?.map { it.toDomain() }
         emit(electronicFileList ?: emptyList())
     }
+
+    override suspend fun downloadDocument(url: String): PdfDownloadDN =
+        userRemoteDataSource.downloadDocument(url).toDomain()
 
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
         val result = userRemoteDataSource.getUserProfile()
