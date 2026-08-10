@@ -16,6 +16,11 @@ import com.tamin.taminhamrah.util.getOneMonthAgoTimestamp
 @Immutable
 data class RecordSearchCriteria(
     val tab: RecordTab = RecordTab.Default,
+    /**
+     * A service type picked in the sheet that no tab can express — today only داروخانه (`0`).
+     * Set, it replaces [tab] as what the endpoint is asked for; null hands the query back to the tab.
+     */
+    val prescType: String? = null,
     /** Epoch millis, or null to fall back to the selected period. */
     val startDate: String? = null,
     val endDate: String? = null,
@@ -26,7 +31,14 @@ data class RecordSearchCriteria(
 ) {
     /** Whether anything beyond the defaults was asked for, so the screen can show it is filtering. */
     val isActive: Boolean
-        get() = startDate != null || nameQuery.isNotBlank() || filtersOnAmount
+        get() = startDate != null || nameQuery.isNotBlank() || filtersOnAmount || prescType != null
+
+    /**
+     * The type ids the list request asks for.
+     *
+     * One place, so the tab row and the sheet can never disagree about what is being queried.
+     */
+    fun requestTypeIds(): List<String> = prescType?.let(::listOf) ?: tab.requestTypeIds
 
     /** Whether a cost bound was given, which is what makes the per-record price lookup worth doing. */
     val filtersOnAmount: Boolean

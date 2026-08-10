@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
+import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
@@ -91,6 +92,7 @@ import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
+import com.tamin.taminhamrah.useCases.health.GetRelationTypesUseCase
 import com.tamin.taminhamrah.useCases.health.GetAllProvincesUseCase
 import com.tamin.taminhamrah.useCases.health.GetProvinceCitiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetBloodGroupsUseCase
@@ -183,6 +185,7 @@ val domainModule = module {
     factoryOf(::GetStatusCertificateReportUseCase)
     factoryOf(::GetRecipientsUseCase)
     factoryOf(::GetElectronicFileUseCase)
+    factoryOf(::DownloadDocumentUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)
     factoryOf(::GetDeceasedInfoUseCase)
@@ -282,6 +285,7 @@ val domainModule = module {
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)
     factoryOf(::GetMaritalStatusUseCase)
+    factoryOf(::GetRelationTypesUseCase)
     factoryOf(::GetSmokingStatusUseCase)
     factoryOf(::GetSelfDeclarableIllnessesUseCase)
     factoryOf(::GetSelfDeclarableIllnessesByGroupUseCase)

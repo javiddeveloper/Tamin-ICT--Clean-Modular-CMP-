@@ -39,6 +39,7 @@ class HealthProfileViewModel(
     private val getProvinceCitiesUseCase: GetProvinceCitiesUseCase,
     private val getBloodGroupsUseCase: GetBloodGroupsUseCase,
     private val getMaritalStatusUseCase: GetMaritalStatusUseCase,
+    private val getRelationTypesUseCase: GetRelationTypesUseCase,
     private val getSmokingStatusUseCase: GetSmokingStatusUseCase,
     private val getActFrequenciesUseCase: GetActFrequenciesUseCase,
     private val getSelfDeclarableIllnessesByGroupUseCase: GetSelfDeclarableIllnessesByGroupUseCase,
@@ -293,6 +294,7 @@ class HealthProfileViewModel(
 
     private fun fetchLookupLists(): Flow<PartialState> = merge(
         fetchMaritalStatus(),
+        fetchRelationTypes(),
         fetchProvinces(),
         fetchBloodGroups(),
         fetchSmokingStatus(),
@@ -313,6 +315,21 @@ class HealthProfileViewModel(
             }
             .collect {
                 emit(PartialState.MaritalStatusLoaded(it.map { s -> s.toPresentation() }))
+            }
+    }
+
+    private fun fetchRelationTypes() = flow {
+        getRelationTypesUseCase()
+            .catch {
+                emit(
+                    PartialState.Error(
+                        it.message ?: "خطا در دریافت نسبت با شما",
+                        ErrorSource.RELATION_TYPES
+                    )
+                )
+            }
+            .collect {
+                emit(PartialState.RelationTypesLoaded(it.map { s -> s.toPresentation() }))
             }
     }
 
@@ -523,7 +540,7 @@ class HealthProfileViewModel(
                 emergencyFamily = selfDecState.emergency.emergencyFamily,
                 emergencyMobile = selfDecState.emergency.emergencyMobile,
                 emergencyEmail = null,
-                emergencyRelation = 1, // Specific logic from old code
+                emergencyRelation = selfDecState.emergency.emergencyRelationId,
                 emergencyAddress = null,
                 emergencyArea = null,
                 emergencyCityID = null
@@ -664,6 +681,11 @@ class HealthProfileViewModel(
         is PartialState.MaritalStatusLoaded -> currentState.copy(
             maritalStatusOptions = partialState.options,
             errors = currentState.errors - ErrorSource.MARITAL_STATUS
+        )
+
+        is PartialState.RelationTypesLoaded -> currentState.copy(
+            relationTypeOptions = partialState.options,
+            errors = currentState.errors - ErrorSource.RELATION_TYPES
         )
 
         is PartialState.ProvincesLoaded -> currentState.copy(
@@ -816,7 +838,8 @@ class HealthProfileViewModel(
                 emergency = sd.emergency.copy(
                     emergencyName = info.emergencyName,
                     emergencyFamily = info.emergencyFamily,
-                    emergencyRelation = info.emergencyRelation,
+                    emergencyRelationId = info.emergencyRelationshipCode,
+                    emergencyRelationLabel = info.emergencyRelation,
                     emergencyMobile = info.emergencyMobile
                 ),
                 physical = sd.physical.copy(

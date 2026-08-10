@@ -156,7 +156,7 @@ internal interface HealthApiService {
     suspend fun getMaritalStatus(): List<MaritalStatusDTO>
 
     @GET("UIServices/Lookup/GetRelationTypes")
-    suspend fun getRelationTypes(): BaseDTO<List<RelationTypeDTO>>
+    suspend fun getRelationTypes(): List<RelationTypeDTO>
 
     @GET("UIServices/Lookup/GetIllnessGroups")
     suspend fun getIllnessGroups(): BaseDTO<List<IllnessGroupDTO>>

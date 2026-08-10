@@ -78,7 +78,8 @@ data class ContactStepState(
 data class EmergencyStepState(
     val emergencyName: String = "",
     val emergencyFamily: String = "",
-    val emergencyRelation: String = "",
+    val emergencyRelationId: Int? = null,
+    val emergencyRelationLabel: String = "",
     val emergencyMobile: String = ""
 )
 
@@ -221,6 +222,7 @@ data class HealthProfileUiState(
 
     // ── Lookup / dropdown lists (loaded from API on init) ─────────────────────
     val maritalStatusOptions: List<LookupItemPR> = emptyList(),   // Step 2
+    val relationTypeOptions: List<LookupItemPR> = emptyList(),    // Step 5
     val provinceOptions: List<LookupItemPR> = emptyList(),        // Step 3
     val cityOptions: List<LookupItemPR> = emptyList(),            // Step 3 (filtered by selected province)
     val bloodGroupOptions: List<LookupItemPR> = emptyList(),      // Step 8
@@ -248,6 +250,7 @@ data class HealthProfileUiState(
 
         // ── Lookup lists loaded ───────────────────────────────────────────────
         data class MaritalStatusLoaded(val options: List<LookupItemPR>) : PartialState
+        data class RelationTypesLoaded(val options: List<LookupItemPR>) : PartialState
         data class ProvincesLoaded(val options: List<LookupItemPR>) : PartialState
         data class CitiesLoaded(val options: List<LookupItemPR>) : PartialState
         data class BloodGroupsLoaded(val options: List<LookupItemPR>) : PartialState
@@ -288,6 +291,7 @@ enum class ErrorSource {
     PATIENT_LIFESTYLE,
     PATIENT_ALLERGIES,
     MARITAL_STATUS,
+    RELATION_TYPES,
     PROVINCES,
     CITIES,
     BLOOD_GROUPS,

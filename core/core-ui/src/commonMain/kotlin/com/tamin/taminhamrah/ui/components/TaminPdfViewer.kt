@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.ui.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
@@ -41,6 +42,20 @@ import taminx.core.core_ui.ic_tamin_cross
  * @param pdf the fetched download, or null until [onRequestDownload] has produced one.
  * @param downloadFailed the requested download came back with nothing, so stop waiting for it.
  */
+import androidx.compose.ui.graphics.Brush
+
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.document_viewer_close
+import taminx.core.core_ui.document_viewer_file_unavailable
+import taminx.core.core_ui.document_viewer_title
+
+import com.tamin.taminhamrah.ui.looksLikePdf
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun TaminPdfViewer(
     fileName: String,
@@ -48,6 +63,9 @@ fun TaminPdfViewer(
     downloadFailed: Boolean,
     onRequestDownload: () -> Unit,
     onDismiss: () -> Unit,
+    title: String = stringResource(Res.string.document_viewer_title),
+    background: Brush = taminTopAppBarGradient(),
+    emptyMessage: String = stringResource(Res.string.document_viewer_file_unavailable),
 ) {
     val colors = LocalTaminColors.current
     val saver = rememberPdfSaver()
@@ -95,22 +113,27 @@ fun TaminPdfViewer(
         Surface(modifier = Modifier.fillMaxSize(), color = colors.bgPage) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TaminTopAppBar(
-                    title = "نمایش نسخه",
+                    title = title,
+                    background = background,
                     navigationIcon = {
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_tamin_cross),
-                            contentDescription = "بستن",
+                            contentDescription = stringResource(Res.string.document_viewer_close),
                             onClick = onDismiss,
                         )
                     },
                 )
                 when (val ready = bytes) {
-                    null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                        CircularProgressIndicator(color = colors.teal)
-                    }
+                    null -> Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(Spacing.page)
+                            .clip(RoundedCornerShape(CornerRadius.card))
+                            .shimmer(),
+                    )
                     else -> if (ready.isEmpty()) {
                         Box(Modifier.fillMaxSize(), Alignment.Center) {
-                            Text(text = "فایل نسخه در دسترس نیست", color = colors.textSecondary)
+                            Text(text = emptyMessage, color = colors.textSecondary)
                         }
                     } else {
                         PdfPagesView(pdfBytes = ready, modifier = Modifier.fillMaxSize())
@@ -119,20 +142,4 @@ fun TaminPdfViewer(
             }
         }
     }
-}
-
-private fun ByteArray.looksLikePdf(): Boolean {
-    if (size < 4) return false
-    val pdfMagic = byteArrayOf(0x25, 0x50, 0x44, 0x46) // %PDF
-    val limit = minOf(size - 3, 1024)
-    for (i in 0 until limit) {
-        if (this[i] == pdfMagic[0] &&
-            this[i + 1] == pdfMagic[1] &&
-            this[i + 2] == pdfMagic[2] &&
-            this[i + 3] == pdfMagic[3]
-        ) {
-            return true
-        }
-    }
-    return false
 }

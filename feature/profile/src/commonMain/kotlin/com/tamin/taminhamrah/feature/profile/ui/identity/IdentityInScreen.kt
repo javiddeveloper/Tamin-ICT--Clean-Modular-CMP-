@@ -138,11 +138,6 @@ fun IdentityInScreen(
             when {
                 state.isLoading && sections == null -> LoadingStateOverlay()
 
-                state.error != null -> ErrorStateView(
-                    message = state.error,
-                    onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
-                )
-
                 sections != null -> {
                     RegistryVerifiedNotice(
                         modifier = Modifier.padding(horizontal = Spacing.page),
@@ -156,6 +151,12 @@ fun IdentityInScreen(
 
             Spacer(modifier = Modifier.height(Spacing.xxl))
         }
+
+        ErrorStateView(
+            message = state.error,
+            onDismiss = onBack,
+            onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
+        )
 
         // The header floats on top so the body passes underneath it as it scrolls away.
         IdentityHeader(
