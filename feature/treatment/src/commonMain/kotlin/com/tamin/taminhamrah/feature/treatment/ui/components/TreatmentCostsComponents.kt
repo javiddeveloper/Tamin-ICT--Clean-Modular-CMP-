@@ -95,7 +95,6 @@ import taminx.core.core_ui.costs_view_certificate
 import taminx.core.core_ui.ic_check
 import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_share
-import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
@@ -103,6 +102,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostsDimens
 import androidx.compose.ui.graphics.graphicsLayer
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsInk
+import taminx.core.core_ui.ic_tamin_chevron_back
 
 /** Shown where the service sent nothing, matching the previous app's placeholder. */
 private const val ABSENT_VALUE = "-"
@@ -424,7 +424,7 @@ private fun CertificateCard(
                 horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap, Alignment.CenterHorizontally),
             ) {
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     tint = colors.teal,
                     modifier = Modifier

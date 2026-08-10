@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
@@ -289,7 +288,7 @@ private fun RecordDetailShimmerSkeleton() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(TreatmentDimens.detailPdfPlaceholderTall)
                 .taminSurface(CornerRadius.card)
                 .shimmer(),
         )
@@ -297,7 +296,7 @@ private fun RecordDetailShimmerSkeleton() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .height(TreatmentDimens.detailPdfPlaceholderShort)
                     .taminSurface(CornerRadius.cardCompact)
                     .shimmer(),
             )

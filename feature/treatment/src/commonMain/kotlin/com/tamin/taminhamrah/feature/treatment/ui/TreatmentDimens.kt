@@ -8,6 +8,12 @@ import androidx.compose.ui.unit.dp
  * sizes) live in core-ui's theme; these are layout numbers that only the treatment screens need.
  */
 internal object TreatmentDimens {
+    /** Timeline action buttons, and the placeholders the record detail reserves for a PDF. */
+    val timelineActionSize = 38.dp
+    val recordsFooterSpacer = 100.dp
+    val detailPdfPlaceholderTall = 120.dp
+    val detailPdfPlaceholderShort = 80.dp
+
     /** Header collapse scroll distance. */
     val headerCollapseDistance = 96.dp
 

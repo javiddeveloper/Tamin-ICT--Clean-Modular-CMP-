@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.treatment.ui.components.CertificateList
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsIntent
@@ -45,6 +44,7 @@ import taminx.core.core_ui.category_misc_claims
 import taminx.core.core_ui.costs_hero_subtitle
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_misc_claims
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 
 
 @Composable
@@ -131,7 +131,7 @@ fun TreatmentCostsScreen(
                         androidx.compose.material3.Text(
                             text = stringResource(Res.string.costs_hero_subtitle),
                             style = typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.9f),
+                            color = TaminOnAccentInkSoft,
                         )
                     }
                 },

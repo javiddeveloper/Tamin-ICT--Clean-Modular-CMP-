@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +75,8 @@ import taminx.core.core_ui.search_title
 import taminx.core.core_ui.search_to_placeholder
 import taminx.core.core_ui.search_to_prefix
 import taminx.core.core_ui.tab_pharmacy
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /** Which date field the picker is currently filling, if any. */
 private enum class DateField { NONE, FROM, TO }
@@ -147,13 +148,13 @@ fun RecordSearchSheet(
 
                 IconButton(
                     onClick = onDismiss,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(SearchHandleIconSize),
                 ) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_tamin_cross),
                         contentDescription = stringResource(Res.string.btn_close),
                         tint = colors.textSecondary,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(SearchHandleGlyphSize),
                     )
                 }
             }
@@ -285,11 +286,11 @@ fun RecordSearchSheet(
             ) {
                 OutlinedButton(
                     onClick = { criteria = RecordSearchCriteria() },
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, colors.border),
+                    shape = RoundedCornerShape(SearchActionCorner),
+                    border = BorderStroke(Thickness.border, colors.border),
                     modifier = Modifier
                         .weight(1f)
-                        .height(52.dp),
+                        .height(SearchActionHeight),
                 ) {
                     Text(
                         text = stringResource(Res.string.search_clear),
@@ -302,8 +303,8 @@ fun RecordSearchSheet(
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .height(SearchActionHeight)
+                        .clip(RoundedCornerShape(SearchActionCorner))
                         .background(colors.medicalGradient)
                         .clickable { onApply(criteria) },
                     contentAlignment = Alignment.Center,
@@ -312,7 +313,7 @@ fun RecordSearchSheet(
                         text = stringResource(Res.string.search_apply),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = TaminOnAccentInk,
                     )
                 }
             }
@@ -366,17 +367,17 @@ private fun ServiceTypeChip(
                 if (isSelected) Modifier.background(colors.medicalGradient)
                 else Modifier
                     .background(colors.bgSurface)
-                    .border(1.dp, colors.border, CircleShape),
+                    .border(Thickness.border, colors.border, CircleShape),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 10.dp),
+            .padding(horizontal = SearchChipPaddingHorizontal, vertical = SearchChipPaddingVertical),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) Color.White else colors.textSecondary,
+            color = if (isSelected) TaminOnAccentInk else colors.textSecondary,
         )
     }
 }
@@ -405,7 +406,7 @@ private fun DateFieldButton(
             .height(SearchFieldHeight)
             .clip(RoundedCornerShape(SearchFieldCorner))
             .background(colors.bgSurface)
-            .border(1.dp, colors.border, RoundedCornerShape(SearchFieldCorner))
+            .border(Thickness.border, colors.border, RoundedCornerShape(SearchFieldCorner))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         contentAlignment = Alignment.CenterStart,
@@ -421,6 +422,12 @@ private fun DateFieldButton(
 
 // The design's inputs compute to roughly 36-40px against Material's 56dp floor. One height for
 // every control in the sheet -- the two date buttons included -- so the rows line up.
+private val SearchHandleIconSize = 32.dp
+private val SearchHandleGlyphSize = 18.dp
+private val SearchActionHeight = 52.dp
+private val SearchActionCorner = 14.dp
+private val SearchChipPaddingHorizontal = 18.dp
+private val SearchChipPaddingVertical = 10.dp
 private val SearchFieldHeight = 40.dp
 private val SearchFieldCorner = 13.dp
 

@@ -77,6 +77,10 @@ import taminx.core.core_ui.ic_tamin_misc_claims
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.share_insured
 import taminx.core.core_ui.share_organization
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentFillStrong
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * The stacked sections of the treatment hub, kept out of [TreatmentScreen] so that file
@@ -160,7 +164,7 @@ private fun PatientPlaceholderCard(
             .clip(RoundedCornerShape(CornerRadius.card))
             .background(container)
             .border(
-                width = 1.dp,
+                width = Thickness.border,
                 color = if (isError) colors.dangerBorder else colors.border,
                 shape = RoundedCornerShape(CornerRadius.card),
             )
@@ -222,10 +226,10 @@ internal fun TreatmentQuickAccess(
                     leadingIconPainter = rememberVectorPainter(vectorResource(Res.drawable.ic_tamin_medical_records)),
                     titleStyle = MaterialTheme.typography.titleMedium,
                     colors = ListItemColors(
-                        titleColor = Color.White,
-                        subtitleColor = Color.White.copy(alpha = 0.8f),
-                        leadingIconBackgroundColor = Color.White.copy(alpha = 0.16f),
-                        leadingIconTintColor = Color.White,
+                        titleColor = TaminOnAccentInk,
+                        subtitleColor = TaminOnAccentInkMuted,
+                        leadingIconBackgroundColor = TaminOnAccentFillStrong,
+                        leadingIconTintColor = TaminOnAccentInk,
                     ),
                     onClick = onOpenMedicalRecords,
                 ),

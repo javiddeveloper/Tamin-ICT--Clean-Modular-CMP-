@@ -49,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatTile
@@ -65,6 +64,10 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import kotlinx.collections.immutable.ImmutableList
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentBorder
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentFill
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * Components for the medical-records timeline: the record card and its date-group
@@ -201,13 +204,13 @@ private fun MedicalRecordFooter(shareAmount: String?) {
             Text(
                 text = stringResource(Res.string.records_details),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White,
+                color = TaminOnAccentInk,
             )
             // Points toward the detail screen; autoMirrored, so it sits on the left in RTL.
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                 contentDescription = null,
-                tint = Color.White,
+                tint = TaminOnAccentInk,
                 modifier = Modifier.size(IconSize.small),
             )
         }
@@ -243,7 +246,7 @@ fun TreatmentFilterChip(
             .clip(CircleShape)
             .then(
                 if (selected) Modifier.background(colors.medicalGradient)
-                else Modifier.background(colors.bgSurface).border(1.dp, colors.border, CircleShape)
+                else Modifier.background(colors.bgSurface).border(Thickness.border, colors.border, CircleShape)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
@@ -251,7 +254,7 @@ fun TreatmentFilterChip(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else colors.textSecondary,
+            color = if (selected) TaminOnAccentInk else colors.textSecondary,
         )
     }
 }
@@ -348,16 +351,16 @@ fun TimelineFilterBar(
         }
         Box(
             modifier = Modifier
-                .size(38.dp)
+                .size(TreatmentDimens.timelineActionSize)
                 .clip(RoundedCornerShape(CornerRadius.lg))
-                .background(Color.White.copy(alpha = 0.1f))
+                .background(TaminOnAccentFill)
                 .clickable(onClick = onSearchClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = searchIcon,
                 contentDescription = stringResource(Res.string.search_advanced_cd),
-                tint = Color.White,
+                tint = TaminOnAccentInk,
                 modifier = Modifier.size(IconSize.small),
             )
         }
@@ -383,10 +386,10 @@ private fun FilterTrigger(
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
-            .background(Color.White.copy(alpha = 0.1f))
+            .background(TaminOnAccentFill)
             .border(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.18f),
+                width = Thickness.border,
+                color = TaminOnAccentBorder,
                 shape = RoundedCornerShape(CornerRadius.lg),
             )
             .clickable(onClick = onClick)
@@ -398,14 +401,14 @@ private fun FilterTrigger(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = TaminOnAccentInk,
                 modifier = Modifier.size(IconSize.small),
             )
         }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White,
+            color = TaminOnAccentInk,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -413,7 +416,7 @@ private fun FilterTrigger(
         Icon(
             imageVector = trailingIcon,
             contentDescription = null,
-            tint = Color.White,
+            tint = TaminOnAccentInk,
             modifier = Modifier
                 .size(IconSize.small)
                 .rotate(chevronRotation),

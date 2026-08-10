@@ -1,7 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,19 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.MedicalRecordCard
@@ -61,7 +53,6 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.RecordFilterMenu
-import com.tamin.taminhamrah.ui.RecordFilterMenu
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
@@ -73,8 +64,6 @@ import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Elevation
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.shimmer
@@ -89,7 +78,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.amount_total
-import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_health_profile
 import taminx.core.core_ui.ic_tamin_medical_approvals
@@ -627,7 +615,7 @@ private fun RecordsShimmerSkeleton() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .height(TreatmentDimens.recordsFooterSpacer)
                     .taminSurface(CornerRadius.cardCompact)
                     .shimmer(),
             )
