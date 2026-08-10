@@ -197,6 +197,7 @@ fun DependentsListScreen(
                     message = state.error,
                     onRetry = { onIntent(DependentsListIntent.OnRefreshClicked) }
                 )
+
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
@@ -247,7 +248,13 @@ fun DependentsListScreen(
                             DependentCard(
                                 dependent = dependent,
                                 isExpanded = dependent.id in state.expandedIds,
-                                onToggle = { onIntent(DependentsListIntent.OnDependentCardToggled(dependent.id)) }
+                                onToggle = {
+                                    onIntent(
+                                        DependentsListIntent.OnDependentCardToggled(
+                                            dependent.id
+                                        )
+                                    )
+                                }
                             )
                         }
                     }
@@ -265,7 +272,10 @@ private fun DependentCard(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(targetValue = if (isExpanded) -90f else 0f, label = "ChevronRotation")
+    val rotation by animateFloatAsState(
+        targetValue = if (isExpanded) -90f else 0f,
+        label = "ChevronRotation"
+    )
 
     Column(
         modifier = modifier
@@ -283,7 +293,10 @@ private fun DependentCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column( modifier = Modifier.fillMaxWidth().weight(0.8f),verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Column(
+                modifier = Modifier.fillMaxWidth().weight(0.8f),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            ) {
                 Text(
                     text = dependent.fullName.ifBlank { stringResource(Res.string.dependents_list_unregistered_name) },
                     color = colors.textPrimary,
@@ -296,7 +309,10 @@ private fun DependentCard(
                     contentColor = colors.blueText
                 )
             }
-            Box(modifier = Modifier.fillMaxWidth().weight(0.2f) , contentAlignment = Alignment.CenterEnd){
+            Box(
+                modifier = Modifier.fillMaxWidth().weight(0.2f),
+                contentAlignment = Alignment.CenterEnd
+            ) {
                 Box(
                     modifier = Modifier
                         .size(34.dp)
@@ -324,11 +340,32 @@ private fun DependentCard(
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
-                DetailRow(label = stringResource(Res.string.identity_field_national_code), value = dependent.nationalCode, numeric = true)
-                DetailRow(label = stringResource(Res.string.identity_field_birth_date), value = dependent.birthDate.ifBlank { "-" }, numeric = true)
-                DetailRow(label = stringResource(Res.string.identity_field_father_name), value = dependent.fatherName.ifBlank { "-" }, numeric = false)
-                DetailRow(label = stringResource(Res.string.dependents_list_insurance_id), value = dependent.insuranceId.ifBlank { "-" }, numeric = true)
-                DetailRow(label = stringResource(Res.string.dependents_list_status), value = dependent.status.ifBlank { "-" }, numeric = false)
+                DetailRow(
+                    label = stringResource(Res.string.identity_field_national_code),
+                    value = dependent.nationalCode,
+                    numeric = true
+                )
+                DetailRow(
+                    label = stringResource(Res.string.identity_field_birth_date),
+                    value = dependent.birthDate.ifBlank { "-" },
+                    numeric = true
+                )
+                DetailRow(
+                    label = stringResource(Res.string.identity_field_father_name),
+                    value = dependent.fatherName.ifBlank { "-" },
+                    numeric = false
+                )
+                DetailRow(
+                    label = stringResource(Res.string.dependents_list_insurance_id),
+                    value = dependent.insuranceId.ifBlank { "-" },
+                    numeric = true,
+                    valueStyle = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"),
+                )
+                DetailRow(
+                    label = stringResource(Res.string.dependents_list_status),
+                    value = dependent.status.ifBlank { "-" },
+                    numeric = false
+                )
             }
             Box(
                 modifier = Modifier
