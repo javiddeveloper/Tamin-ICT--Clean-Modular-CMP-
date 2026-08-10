@@ -4,6 +4,8 @@ import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class FakeHistoryRepository : HistoryRepository {
     var shouldThrowError = false
@@ -23,8 +25,8 @@ class FakeHistoryRepository : HistoryRepository {
         return getDastmozdInfosResult
     }
 
-    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): HistoryJobInfoDN {
+    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = flow {
         if (shouldThrowError) throw error
-        return getHistoryJobInfosResult
+        emit(getHistoryJobInfosResult)
     }
 }

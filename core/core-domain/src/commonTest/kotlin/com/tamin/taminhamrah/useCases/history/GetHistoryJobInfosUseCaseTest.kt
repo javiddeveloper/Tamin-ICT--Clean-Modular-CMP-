@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDN
 import com.tamin.taminhamrah.repository.FakeHistoryRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -39,7 +40,7 @@ class GetHistoryJobInfosUseCaseTest : BaseUseCaseTest() {
         )
         repository.getHistoryJobInfosResult = expected
 
-        val result = useCase()
+        val result = useCase().first()
 
         assertEquals(expected, result)
         assertEquals(1, result.total)
@@ -51,7 +52,7 @@ class GetHistoryJobInfosUseCaseTest : BaseUseCaseTest() {
     fun `invoke should return empty list when no job infos`() = runTest {
         repository.getHistoryJobInfosResult = HistoryJobInfoDN(list = emptyList(), total = 0)
 
-        val result = useCase()
+        val result = useCase().first()
 
         assertEquals(0, result.total)
         assertEquals(0, result.list?.size)
@@ -62,7 +63,7 @@ class GetHistoryJobInfosUseCaseTest : BaseUseCaseTest() {
         repository.shouldThrowError = true
 
         assertFailsWith<RuntimeException> {
-            useCase()
+            useCase().first()
         }
     }
 }
