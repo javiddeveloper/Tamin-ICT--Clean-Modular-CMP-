@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import kotlinx.coroutines.flow.Flow
 
 interface HistoryRepository {
     suspend fun getTalfighInfos(
@@ -16,5 +17,5 @@ interface HistoryRepository {
 
     suspend fun getHistoryJobInfos(
         filters: List<ApiFilterDN> = emptyList()
-    ): HistoryJobInfoDN
+    ): Flow<HistoryJobInfoDN>
 }

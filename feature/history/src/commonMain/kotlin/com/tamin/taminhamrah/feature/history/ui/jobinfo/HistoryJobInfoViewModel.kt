@@ -24,10 +24,17 @@ class HistoryJobInfoViewModel(
     private fun loadJobInfos(): Flow<HistoryJobInfoUiState.PartialState> = flow {
         emit(HistoryJobInfoUiState.PartialState.Loading(true))
         try {
-            val result = getHistoryJobInfosUseCase()
-            emit(HistoryJobInfoUiState.PartialState.JobInfosLoaded(result.list?.toPresentation() ?: emptyList()))
+            getHistoryJobInfosUseCase().collect { result ->
+                emit(
+                    HistoryJobInfoUiState.PartialState.JobInfosLoaded(
+                        result.list?.toPresentation() ?: emptyList()
+                    )
+                )
+            }
         } catch (e: Exception) {
             emit(HistoryJobInfoUiState.PartialState.Error(e.message))
+        } finally {
+            emit(HistoryJobInfoUiState.PartialState.Loading(false))
         }
     }
 

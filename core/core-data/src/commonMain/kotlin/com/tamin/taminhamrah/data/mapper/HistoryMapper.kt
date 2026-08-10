@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.data.local.entity.HistoryJobInfoEntity
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
@@ -79,6 +80,30 @@ fun DastmozdInfoDTO.toDomain(): DastmozdInfoDN {
     return DastmozdInfoDN(
         list = list?.map { it.toDomain() },
         total = total
+    )
+}
+
+fun HistoryJobInfoItemDTO.toEntity(): HistoryJobInfoEntity {
+    return HistoryJobInfoEntity(
+        risuid = risuid.orEmpty(),
+        rwshName = rwshName.orEmpty(),
+        brhcode = brhcode.orEmpty(),
+        id = id ?: 0,
+        jobDesc = jobDesc.orEmpty(),
+        startDate = startDate.orEmpty(),
+        rwshId = rwshId.orEmpty()
+    )
+}
+
+fun HistoryJobInfoEntity.toDomain(): HistoryJobInfoItemDN {
+    return HistoryJobInfoItemDN(
+        risuid = risuid,
+        rwshName = rwshName,
+        brhcode = brhcode,
+        id = id,
+        jobDesc = jobDesc,
+        startDate = startDate,
+        rwshId = rwshId
     )
 }
 
