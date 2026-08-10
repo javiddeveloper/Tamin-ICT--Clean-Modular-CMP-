@@ -7,10 +7,12 @@ import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.impl.DastmozdInfosAgentService
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.WageDetailDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,6 +22,7 @@ class FakeHistoryRepository(
     private val expectedResult: DastmozdInfoDN
 ) : HistoryRepository {
     override suspend fun getDastmozdInfos(filters: List<ApiFilterDN>): DastmozdInfoDN = expectedResult
+    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = TODO()
     override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): com.tamin.taminhamrah.model.history.TalfighInfoDN = TODO()
 }
 
@@ -68,7 +71,7 @@ class DastmozdInfosAgentServiceTest {
         val companyPair = keyValueBubble.items.find { it.key == "نام کارگاه" }
         assertEquals("Test Company", companyPair?.value)
     }
-    
+
     @Test
     fun `execute returns message when list is empty`() = runTest {
         // Arrange
