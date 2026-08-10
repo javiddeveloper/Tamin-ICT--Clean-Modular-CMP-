@@ -130,6 +130,7 @@ fun ProfileScreen(
     onNavigateToMyInbox: () -> Unit = {},
     onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
+    onNavigateToSecurity: () -> Unit = {},
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -156,6 +157,7 @@ fun ProfileScreen(
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToRouteById = onNavigateToRouteById,
+        onNavigateToSecurity = onNavigateToSecurity,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -181,6 +183,7 @@ fun HandleProfileEvents(
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
+    onNavigateToSecurity: () -> Unit,
     onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -229,6 +232,9 @@ fun HandleProfileEvents(
 
             is ProfileEvent.ShowToast -> {
                 // Handle toast
+            }
+            ProfileEvent.NavigateToSecurity -> {
+                onNavigateToSecurity()
             }
         }
     }

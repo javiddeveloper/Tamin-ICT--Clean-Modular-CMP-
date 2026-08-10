@@ -59,5 +59,6 @@ sealed interface ProfileEvent {
     data object NavigateToChangeMobile : ProfileEvent
     data object NavigateToContactUs : ProfileEvent
     data object NavigateToElectronicFile : ProfileEvent
+    data object NavigateToSecurity : ProfileEvent
 }
 
