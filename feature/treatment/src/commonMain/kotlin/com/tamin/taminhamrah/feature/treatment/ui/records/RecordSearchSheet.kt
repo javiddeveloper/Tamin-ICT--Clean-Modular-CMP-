@@ -402,10 +402,10 @@ private fun DateFieldButton(
 
     Box(
         modifier = modifier
-            .height(56.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .height(SearchFieldHeight)
+            .clip(RoundedCornerShape(SearchFieldCorner))
             .background(colors.bgSurface)
-            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
+            .border(1.dp, colors.border, RoundedCornerShape(SearchFieldCorner))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         contentAlignment = Alignment.CenterStart,
@@ -419,9 +419,9 @@ private fun DateFieldButton(
     }
 }
 
-// The design's inputs are ~40px tall against Material's 56dp floor; 44 keeps them close to the
-// mock without dropping the touch target further than a text field can afford.
-private val SearchFieldHeight = 44.dp
+// The design's inputs compute to roughly 36-40px against Material's 56dp floor. One height for
+// every control in the sheet -- the two date buttons included -- so the rows line up.
+private val SearchFieldHeight = 40.dp
 private val SearchFieldCorner = 13.dp
 
 @Composable
