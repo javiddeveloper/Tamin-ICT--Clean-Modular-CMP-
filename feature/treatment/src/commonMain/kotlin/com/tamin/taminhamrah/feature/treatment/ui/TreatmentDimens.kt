@@ -25,8 +25,8 @@ internal object TreatmentDimens {
     val cardLoadingHeight = 160.dp
     val pageIndicatorDotSize = 6.dp
     val pageIndicatorSelectedWidth = 16.dp
-    val pageIndicatorPaddingHorizontal = 10.dp
-    val pageIndicatorPaddingVertical = 6.dp
+    val pageIndicatorPaddingHorizontal = 12.dp
+    val pageIndicatorPaddingVertical = 7.dp
 
     /** Past this the strip scrolls rather than growing the pill off the card. */
     val pageIndicatorMaxWidth = 140.dp

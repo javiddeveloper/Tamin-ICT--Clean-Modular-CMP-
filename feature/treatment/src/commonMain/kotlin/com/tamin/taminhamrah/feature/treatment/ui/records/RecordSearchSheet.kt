@@ -229,9 +229,9 @@ fun RecordSearchSheet(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(SearchFieldCorner),
                 colors = textFieldColors(),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(SearchFieldHeight),
             )
 
             // Section 4: Cost Range (بازهٔ مبلغ هزینه (ریال))
@@ -251,10 +251,10 @@ fun RecordSearchSheet(
                         )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(SearchFieldCorner),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = textFieldColors(),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).height(SearchFieldHeight),
                 )
                 OutlinedTextField(
                     value = criteria.maxAmount,
@@ -267,10 +267,10 @@ fun RecordSearchSheet(
                         )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(SearchFieldCorner),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = textFieldColors(),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).height(SearchFieldHeight),
                 )
             }
 
@@ -418,6 +418,11 @@ private fun DateFieldButton(
         )
     }
 }
+
+// The design's inputs are ~40px tall against Material's 56dp floor; 44 keeps them close to the
+// mock without dropping the touch target further than a text field can afford.
+private val SearchFieldHeight = 44.dp
+private val SearchFieldCorner = 13.dp
 
 @Composable
 private fun textFieldColors() = OutlinedTextFieldDefaults.colors(

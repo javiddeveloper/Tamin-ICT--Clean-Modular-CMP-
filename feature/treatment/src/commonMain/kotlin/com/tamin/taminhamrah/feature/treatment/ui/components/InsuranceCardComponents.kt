@@ -497,6 +497,10 @@ fun InsuranceCardCarousel(
  * across the whole width. Dot counts are small — one per dependant — so nothing is gained by
  * keeping them lazy, and the strip still scrolls to hold the active dot in view.
  */
+private const val INDICATOR_TRACK_ALPHA = 0.09f
+private const val INDICATOR_TRACK_BORDER_ALPHA = 0.16f
+private const val INDICATOR_IDLE_DOT_ALPHA = 0.35f
+
 @Composable
 private fun PageIndicator(
     pageCount: Int,
@@ -519,8 +523,15 @@ private fun PageIndicator(
         Row(
             modifier = Modifier
                 .clip(CircleShape)
-                .background(colors.glassIconTileBg)
-                .border(Thickness.border, colors.glassIconTileBorder, CircleShape)
+                // One soft accent-tinted chip: a faint wash with an even fainter rim, rather than
+                // a hard ring. Everything is an alpha over the accent, so the track, its edge and
+                // the idle dots stay one colour family and carry on both the light and dark page.
+                .background(colors.teal.copy(alpha = INDICATOR_TRACK_ALPHA))
+                .border(
+                    width = Thickness.border,
+                    color = colors.teal.copy(alpha = INDICATOR_TRACK_BORDER_ALPHA),
+                    shape = CircleShape,
+                )
                 .padding(
                     horizontal = TreatmentDimens.pageIndicatorPaddingHorizontal,
                     vertical = TreatmentDimens.pageIndicatorPaddingVertical,
@@ -543,7 +554,11 @@ private fun PageIndicator(
                             height = TreatmentDimens.pageIndicatorDotSize,
                         )
                         .background(
-                            color = if (isSelected) colors.teal else colors.chevron,
+                            color = if (isSelected) {
+                                colors.teal
+                            } else {
+                                colors.teal.copy(alpha = INDICATOR_IDLE_DOT_ALPHA)
+                            },
                             shape = CircleShape,
                         ),
                 )
