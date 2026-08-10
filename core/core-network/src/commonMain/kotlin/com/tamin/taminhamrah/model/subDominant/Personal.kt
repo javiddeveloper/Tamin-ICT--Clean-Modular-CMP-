@@ -5,9 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Personal(
-    // Raw epoch-millis timestamp (e.g. -584681400000), not a preformatted string — the backend
-    // sends a JSON number here. Convert with PersianDateFormatter.formatTimestamp() for display.
-    @SerialName("dateOfBirth") val dateOfBirth: Long? = null,
+    @SerialName("dateOfBirth") val dateOfBirthTimestamp: Long? = null,
     @SerialName("fatherName") val fatherName: String? = null,
     @SerialName("firstName") val firstName: String? = null,
     @SerialName("gender") val gender: Gender? = null,

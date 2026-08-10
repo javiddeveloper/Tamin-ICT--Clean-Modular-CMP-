@@ -243,7 +243,8 @@ fun AddDependentContent(
 
                 errorMessage != null && isInitialLoad -> ErrorStateView(
                     message = errorMessage,
-                    onRetry = { onIntent(AddDependentIntent.InitData) }
+                    onRetry = { onIntent(AddDependentIntent.InitData) },
+                    onDismiss = {onBackClicked()}
                 )
 
                 else -> {

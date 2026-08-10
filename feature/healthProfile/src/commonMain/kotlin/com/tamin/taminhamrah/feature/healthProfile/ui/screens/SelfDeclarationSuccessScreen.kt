@@ -20,6 +20,8 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.healthprofile.generated.resources.*
 
 @Composable
 fun SelfDeclarationSuccessScreen(
@@ -29,14 +31,14 @@ fun SelfDeclarationSuccessScreen(
 
     Scaffold(
         topBar = {
-            HealthTopAppBar(title = "ثبت موفق خوداظهاری", onBackClicked = { onFinish(false) })
+            HealthTopAppBar(title = stringResource(Res.string.health_success_title), onBackClicked = { onFinish(false) })
         },
         bottomBar = {
             HealthIrritateNavigationBar(
-                primaryText = "ورود به پروندهٔ سلامت",
+                primaryText = stringResource(Res.string.health_success_btn_enter),
                 showChevron = false,
                 onPrimaryClick = { onFinish(true) }, // true means enter health profile
-                secondaryText = "بازگشت به تأمین من",
+                secondaryText = stringResource(Res.string.health_success_btn_back),
                 onSecondaryClick = { onFinish(false) } // false means close flow
             )
         }
@@ -69,7 +71,7 @@ fun SelfDeclarationSuccessScreen(
                 }
 
                 TaminText(
-                    text = "ثبت موفق خوداظهاری",
+                    text = stringResource(Res.string.health_success_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = taminColors.textPrimary
@@ -77,7 +79,7 @@ fun SelfDeclarationSuccessScreen(
                 )
 
                 TaminText(
-                    text = "خوداظهاری سلامت شما با موفقیت ثبت شد. اکنون می‌توانید اطلاعات ثبت شده را در پروندهٔ سلامت خود مشاهده کنید.",
+                    text = stringResource(Res.string.health_success_desc),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = taminColors.textTertiary,
                         lineHeight = 22.sp,
@@ -96,14 +98,9 @@ fun SelfDeclarationSuccessScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TaminText(
-                            text = "کد پیگیری:  ",
+                            text = stringResource(Res.string.health_success_tracking_code),
                             style = MaterialTheme.typography.bodyMedium,
                             color = taminColors.textSecondary
-                        )
-                        TaminText(
-                            text = "HS-۱۴۰۴-۰۸۲۳۱",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = taminColors.blueText
                         )
                     }
                 }
