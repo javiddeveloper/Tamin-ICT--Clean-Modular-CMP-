@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
@@ -48,7 +49,8 @@ internal fun ActiveRelationHeader(
     inactiveCount: Int,
     lastCheckTime: String,
     onBackClicked: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    collapseProgress: () -> Float = { 0f },
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
@@ -64,8 +66,7 @@ internal fun ActiveRelationHeader(
                     bottomStart = CornerRadius.chip
                 )
             )
-            .background(taminTopAppBarGradient(taminColors.profileGradientStops))
-            .padding(bottom = Spacing.xl),
+            .background(taminTopAppBarGradient(taminColors.profileGradientStops)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TaminTopAppBar(
@@ -82,48 +83,58 @@ internal fun ActiveRelationHeader(
             },
         )
 
-        Spacer(modifier = Modifier.height(Spacing.md))
-
-        AnimatedRingHeaderIcon(
-            icon = vectorResource(Res.drawable.ic_communication)
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.sm))
-
-        val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
-        val statusColor =
-            if (activeCount > 0) taminColors.springGreenText else taminColors.dangerText
-
-        Row(
-            modifier = Modifier.padding(bottom = Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically
+        // Only the expanded-state furniture below the title row folds away; the title
+        // row itself stays put so the bar reads the same as the rest of the app once collapsed.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .collapseAway(collapseProgress)
+                .padding(bottom = Spacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(
-                        if (activeCount > 0) taminColors.springGreenText else taminColors.textMuted,
-                        RoundedCornerShape(50)
-                    )
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            AnimatedRingHeaderIcon(
+                icon = vectorResource(Res.drawable.ic_communication)
             )
-            Spacer(Modifier.width(4.dp))
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
+            val statusColor =
+                if (activeCount > 0) taminColors.springGreenText else taminColors.dangerText
+
+            Row(
+                modifier = Modifier.padding(bottom = Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(
+                            if (activeCount > 0) taminColors.springGreenText else taminColors.textMuted,
+                            RoundedCornerShape(50)
+                        )
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = statusColor
+                )
+            }
+
+            val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
+            val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
+            val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
+
             Text(
-                text = statusText,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = statusColor
+                text = "$activeText · $inactiveText · $checkTimeText",
+                style = MaterialTheme.typography.bodySmall,
+                color = taminColors.txtNatProfile
             )
         }
-
-        val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
-        val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
-        val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
-
-        Text(
-            text = "$activeText · $inactiveText · $checkTimeText",
-            style = MaterialTheme.typography.bodySmall,
-            color = taminColors.txtNatProfile
-        )
     }
 }
 

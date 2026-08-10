@@ -68,6 +68,9 @@ fun TaminTopAppBar(
     ),
     cornerRadius: Dp = CornerRadius.sheet,
     bottomPadding: Dp = Spacing.page,
+    // Overrides the plain [title] text with anything the caller needs there instead — a
+    // crossfade between two strings, an icon, and so on. Null keeps the default Text.
+    titleContent: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     Column(
@@ -101,15 +104,23 @@ fun TaminTopAppBar(
             if (centerTitle || navigationIcon != null) {
                 HeaderSlot { navigationIcon?.invoke() }
             }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
-                textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
+            Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = Spacing.sm)
-            )
+                    .padding(horizontal = Spacing.sm),
+            ) {
+                if (titleContent != null) {
+                    titleContent()
+                } else {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
             if (centerTitle || action != null) {
                 HeaderSlot { action?.invoke() }
             }
