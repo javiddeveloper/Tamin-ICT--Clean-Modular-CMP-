@@ -41,12 +41,27 @@ internal object TreatmentCostsDimens {
     val chipIconSize = 14.dp
     val chipGap = 6.dp
 
-    /** The payment stamp: a check over its label, ringed by a dashed circle. */
+    /**
+     * The payment stamp: a double check over its label, inside two rings — a dashed outer and a
+     * fainter solid inner, at the design's 46:33 radius ratio.
+     */
     val stampRingSize = 54.dp
+    val stampRingInnerSize = 39.dp
     val stampCheckSize = 21.dp
     val stampDashOn = 3.dp
     val stampDashOff = 4.dp
+    val stampRingStroke = 1.5.dp
+    val stampRingInnerStroke = 1.dp
     const val STAMP_RING_ALPHA = 0.35f
+    const val STAMP_RING_INNER_ALPHA = 0.45f
+
+    /**
+     * The rings sweep once and pulse gently when the card is first scrolled into view — long and
+     * shallow, so it reads as a stamp settling rather than a spinner.
+     */
+    const val STAMP_SWEEP_DEGREES = 360f
+    const val STAMP_PULSE_DEPTH = 0.5f
+    const val STAMP_REVEAL_MILLIS = 2600
 
     // The receipt line and its copyable chip.
     val receiptIconSize = 15.dp

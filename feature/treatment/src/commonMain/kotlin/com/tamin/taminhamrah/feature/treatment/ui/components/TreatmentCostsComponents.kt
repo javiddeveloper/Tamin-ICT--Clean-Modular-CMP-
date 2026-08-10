@@ -1,7 +1,10 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +45,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -48,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostsDimens
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
@@ -56,6 +63,7 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.coloredShadow
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -66,6 +74,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCostsAccentBottom
 import com.tamin.taminhamrah.ui.theme.TaminCostsAccentTop
 import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsEnd
+import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsInk
 import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsStart
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.theme.shimmer
@@ -92,17 +101,17 @@ import taminx.core.core_ui.costs_refund_date
 import taminx.core.core_ui.costs_return_reason
 import taminx.core.core_ui.costs_send_to_inbox
 import taminx.core.core_ui.costs_view_certificate
-import taminx.core.core_ui.ic_check
+import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_setting
-import taminx.core.core_ui.ic_share
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_eye
 import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
-import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostsDimens
-import androidx.compose.ui.graphics.graphicsLayer
-import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
-import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsInk
-import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_verified
+import kotlin.math.PI
+import kotlin.math.sin
 
 /** Shown where the service sent nothing, matching the previous app's placeholder. */
 private const val ABSENT_VALUE = "-"
@@ -250,7 +259,7 @@ private fun CertificateCard(
                 horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.chipGap),
             ) {
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_misc_claims),
+                    imageVector = vectorResource(Res.drawable.ic_tamin_medical_records),
                     contentDescription = null,
                     tint = colors.teal,
                     modifier = Modifier.size(TreatmentCostsDimens.chipIconSize),
@@ -306,7 +315,7 @@ private fun CertificateCard(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_medical_records),
+                imageVector = vectorResource(Res.drawable.ic_tamin_misc_claims),
                 contentDescription = null,
                 tint = colors.textMuted,
                 modifier = Modifier.size(TreatmentCostsDimens.receiptIconSize),
@@ -332,7 +341,7 @@ private fun CertificateCard(
                 horizontalArrangement = Arrangement.spacedBy(TreatmentCostsDimens.copyChipGap),
             ) {
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_share),
+                    imageVector = vectorResource(Res.drawable.ic_tamin_copy),
                     contentDescription = stringResource(Res.string.costs_admission_label),
                     tint = colors.blueText,
                     modifier = Modifier.size(TreatmentCostsDimens.chipIconSize),
@@ -483,35 +492,65 @@ private fun CertificateCard(
 }
 
 /**
- * The payment stamp: a check over its label, inside the design's faint ring.
+ * The payment stamp: a double check over its label, inside the design's two rings.
  *
- * The ring is drawn rather than laid out so it can overhang the row without taking space, which is
- * what lets it sit behind the check the way a stamp would.
+ * The rings sweep once and pulse when the card first appears. In a lazy list that is exactly
+ * "when the user scrolls to it" — the item does not compose until then — and [LaunchedEffect]
+ * keyed on nothing runs it a single time per card.
+ *
+ * The [Animatable] is never read during composition: [drawBehind] samples it at draw time, so the
+ * whole animation costs zero recompositions.
  */
 @Composable
 private fun PaymentStamp(label: String, color: Color) {
-    val ringColor = color.copy(alpha = TreatmentCostsDimens.STAMP_RING_ALPHA)
+    val reveal = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        reveal.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = TreatmentCostsDimens.STAMP_REVEAL_MILLIS,
+                easing = LinearOutSlowInEasing,
+            ),
+        )
+    }
+
     Column(
         modifier = Modifier.drawBehind {
-            val diameter = TreatmentCostsDimens.stampRingSize.toPx()
-            val stroke = Thickness.border.toPx()
-            drawCircle(
-                color = ringColor,
-                radius = diameter / 2f,
-                center = Offset(size.width / 2f, size.height / 2f),
-                style = Stroke(
-                    width = stroke,
-                    pathEffect = PathEffect.dashPathEffect(
-                        floatArrayOf(TreatmentCostsDimens.stampDashOn.toPx(), TreatmentCostsDimens.stampDashOff.toPx()),
+            val progress = reveal.value
+            // A single shallow swell: base -> brighter -> base, never a fade to nothing.
+            val pulse = 1f + TreatmentCostsDimens.STAMP_PULSE_DEPTH * sin(progress * PI.toFloat())
+            val outerAlpha =
+                (TreatmentCostsDimens.STAMP_RING_ALPHA * pulse).coerceIn(0f, 1f)
+            val innerAlpha =
+                (TreatmentCostsDimens.STAMP_RING_ALPHA *
+                    TreatmentCostsDimens.STAMP_RING_INNER_ALPHA * pulse).coerceIn(0f, 1f)
+
+            rotate(degrees = progress * TreatmentCostsDimens.STAMP_SWEEP_DEGREES) {
+                drawCircle(
+                    color = color.copy(alpha = outerAlpha),
+                    radius = TreatmentCostsDimens.stampRingSize.toPx() / 2f,
+                    style = Stroke(
+                        width = TreatmentCostsDimens.stampRingStroke.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(
+                            floatArrayOf(
+                                TreatmentCostsDimens.stampDashOn.toPx(),
+                                TreatmentCostsDimens.stampDashOff.toPx(),
+                            ),
+                        ),
                     ),
-                ),
+                )
+            }
+            drawCircle(
+                color = color.copy(alpha = innerAlpha),
+                radius = TreatmentCostsDimens.stampRingInnerSize.toPx() / 2f,
+                style = Stroke(width = TreatmentCostsDimens.stampRingInnerStroke.toPx()),
             )
         },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
     ) {
         Icon(
-            imageVector = vectorResource(Res.drawable.ic_check),
+            imageVector = vectorResource(Res.drawable.ic_tamin_verified),
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(TreatmentCostsDimens.stampCheckSize),
@@ -544,14 +583,14 @@ private fun OperationsMenu(
     ) {
         OperationsMenuItem(
             text = stringResource(Res.string.costs_view_certificate),
-            icon = vectorResource(Res.drawable.ic_tamin_medical_records),
+            icon = vectorResource(Res.drawable.ic_tamin_eye),
             iconTint = colors.teal,
             onClick = onOpenCertificate,
         )
         TaminDivider()
         OperationsMenuItem(
             text = stringResource(Res.string.costs_send_to_inbox),
-            icon = vectorResource(Res.drawable.ic_share),
+            icon = vectorResource(Res.drawable.ic_email),
             iconTint = colors.textTertiary,
             onClick = onSendToInbox,
         )
