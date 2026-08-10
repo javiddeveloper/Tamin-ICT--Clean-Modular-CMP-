@@ -103,7 +103,7 @@
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
     <string name="action_close">بستن</string>
-    <string name="error_title">خطا در دریافت اطلاعات</string>
+    <string name="error_updating-infos">خطا در دریافت اطلاعات</string>
     <string name="action_confirm">تایید</string>
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
