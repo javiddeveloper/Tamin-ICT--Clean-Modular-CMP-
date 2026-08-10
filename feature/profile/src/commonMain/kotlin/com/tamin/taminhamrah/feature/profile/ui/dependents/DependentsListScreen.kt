@@ -349,7 +349,7 @@ private fun DependentCard(
                 )
                 DetailRow(
                     label = stringResource(Res.string.identity_field_birth_date),
-                    value = dependent.birthDate.ifBlank { "-" },
+                    value = dependent.birthDateJalali.ifBlank { "-" },
                     numeric = true
                 )
                 DetailRow(
