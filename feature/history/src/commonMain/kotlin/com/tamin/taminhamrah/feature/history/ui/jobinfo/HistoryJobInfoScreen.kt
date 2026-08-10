@@ -57,6 +57,7 @@ import com.tamin.taminhamrah.ui.motion.motionParallax
 import com.tamin.taminhamrah.ui.motion.motionScale
 import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
+import com.tamin.taminhamrah.ui.system.copyToClipboard
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -115,7 +116,6 @@ fun HistoryJobInfoContent(
     onBackClicked: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
-    val clipboardManager = LocalClipboardManager.current
     val headerProgress = motionState.progress
     val decaySpec = rememberSplineBasedDecay<Float>()
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
@@ -274,7 +274,7 @@ fun HistoryJobInfoContent(
                 items(uiState.jobInfos, key = { it.id }) { jobInfo ->
                     JobInfoCard(
                         jobInfo = jobInfo,
-                        onCopy = { text -> clipboardManager.setText(AnnotatedString(text)) }
+                        onCopy = { text -> copyToClipboard(text) }
                     )
                 }
             }
