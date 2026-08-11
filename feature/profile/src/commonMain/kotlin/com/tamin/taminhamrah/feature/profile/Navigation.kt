@@ -52,6 +52,9 @@ sealed interface ProfileRoute {
     data object ContactUs : ProfileRoute
     @Serializable
     data object DependentsList : ProfileRoute
+
+    @Serializable
+    data object UserRequests : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -61,6 +64,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToAddDependent: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -81,6 +85,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToMyInbox = onNavigateToMyInbox,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
+                onNavigateToUserRequests = onNavigateToUserRequests,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -121,6 +126,7 @@ fun NavGraphBuilder.profileGraph(
                 onBackClicked = { navController.popBackStack() }
             )
         }
+
 
         composableWithFadeTransitions<ProfileRoute.BankAccount> {
             val viewModel = koinViewModel<BankAccountViewModel>()

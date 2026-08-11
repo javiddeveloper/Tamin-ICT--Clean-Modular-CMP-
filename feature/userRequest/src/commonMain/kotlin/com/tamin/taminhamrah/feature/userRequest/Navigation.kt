@@ -1,0 +1,52 @@
+package com.tamin.taminhamrah.feature.userRequest
+
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.tamin.taminhamrah.feature.userRequest.ui.UserRequestsScreen
+import com.tamin.taminhamrah.feature.userRequest.ui.screens.UserRequestDetailScreen
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface UserRequestRoute {
+    @Serializable
+    data object List : UserRequestRoute
+
+    @Serializable
+    data class Detail(
+        val requestId: Long,
+        val refCode: String,
+        val requestTypeId: Long,
+    ) : UserRequestRoute
+}
+
+fun NavController.navigateToUserRequests() {
+    navigate(UserRequestRoute.List)
+}
+
+fun NavController.navigateToUserRequestDetail(requestId: Long, refCode: String, requestTypeId: Long) {
+    navigate(UserRequestRoute.Detail(requestId, refCode, requestTypeId))
+}
+
+fun NavGraphBuilder.userRequestGraph(
+    navController: NavController,
+) {
+    composable<UserRequestRoute.List> {
+        UserRequestsScreen(
+            onBackClick = { navController.popBackStack() },
+            onNavigateToDetail = { requestId, refCode, requestTypeId ->
+                navController.navigateToUserRequestDetail(requestId, refCode, requestTypeId)
+            }
+        )
+    }
+
+    composable<UserRequestRoute.Detail> { backStackEntry ->
+        val route: UserRequestRoute.Detail = backStackEntry.toRoute()
+        UserRequestDetailScreen(
+            requestId = route.requestId,
+            refCode = route.refCode,
+            onBackClick = { navController.popBackStack() }
+        )
+    }
+}

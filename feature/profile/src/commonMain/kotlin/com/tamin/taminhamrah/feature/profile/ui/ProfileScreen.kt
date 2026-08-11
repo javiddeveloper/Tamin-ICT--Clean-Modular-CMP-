@@ -130,6 +130,7 @@ fun ProfileScreen(
     onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
+    onNavigateToUserRequests: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
@@ -158,6 +159,7 @@ fun ProfileScreen(
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToDependentsList = onNavigateToDependentsList,
+        onNavigateToUserRequests = onNavigateToUserRequests,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -185,6 +187,7 @@ fun HandleProfileEvents(
     onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -232,6 +235,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToMyInbox -> {
                 onNavigateToMyInbox()
+            }
+
+            ProfileEvent.NavigateToUserContracts ->{
+                onNavigateToUserRequests()
             }
 
             is ProfileEvent.OpenUrl -> {

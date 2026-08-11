@@ -121,9 +121,10 @@ internal class HealthRemoteDataSourceImpl(
         }
 
     override suspend fun getRelationTypes(): List<RelationTypeDTO>? =
-        safeCall("getRelationTypes") {
+        errorParser.safeCall("getRelationTypes") {
             apiService.getRelationTypes()
         }
+
 
     override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? =
         errorParser.safeCall("getSmokingStatus") {

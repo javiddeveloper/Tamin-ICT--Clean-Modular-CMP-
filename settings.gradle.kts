@@ -43,3 +43,5 @@ include(":feature:taminServices")
 include(":feature:change-mobile")
 include(":feature:my-inbox")
 include(":feature:addDependent")
+include(":feature:userRequest")
+
