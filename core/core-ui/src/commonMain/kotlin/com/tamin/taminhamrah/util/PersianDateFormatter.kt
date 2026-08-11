@@ -147,13 +147,31 @@ object PersianDateFormatter {
         return (isoDayNumber + 1) % 7
     }
 
-    /** Midnight of a Jalali date, in epoch milliseconds, for the date-range endpoints. */
-    fun toEpochMillis(jy: Int, jm: Int, jd: Int): Long {
+    /**
+     * Midnight of a Jalali date, in epoch milliseconds, for the date-range endpoints.
+     *
+     * Uses the device's zone, which is what the range filters want. For anything the service
+     * stores as a calendar day, use [toEpochMillisUtc] instead.
+     */
+    fun toEpochMillis(jy: Int, jm: Int, jd: Int): Long =
+        startOfDay(jy, jm, jd, TimeZone.currentSystemDefault())
+
+    private fun startOfDay(jy: Int, jm: Int, jd: Int, timeZone: TimeZone): Long {
         val (gy, gm, gd) = jalaliToGregorian(jy, jm, jd)
         return LocalDate(gy, gm, gd)
-            .atStartOfDayIn(TimeZone.currentSystemDefault())
+            .atStartOfDayIn(timeZone)
             .toEpochMilliseconds()
     }
+
+    /**
+     * Midnight UTC of a Jalali date, for services that record a calendar day rather than an instant.
+     *
+     * Its own function so callers need no kotlinx-datetime dependency of their own, and so the
+     * reason is stated once: Tehran midnight is 20:30 UTC the previous day, which files a date one
+     * day early. The accounts endpoint returns exactly midnight UTC for the rows it already holds.
+     */
+    fun toEpochMillisUtc(jy: Int, jm: Int, jd: Int): Long =
+        startOfDay(jy, jm, jd, TimeZone.UTC)
 
     /** Formats a Jalali date the way the API and the UI both spell it: `1404/02/15`. */
     fun format(jy: Int, jm: Int, jd: Int): String =

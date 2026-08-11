@@ -2,22 +2,22 @@
 tags: [architecture]
 ---
 
-# ناوبری
+# Navigation
 
-کتابخانه: **Compose Multiplatform Navigation** (`org.jetbrains.androidx.navigation:navigation-compose`) با routeهای **type-safe** مبتنی بر `kotlinx.serialization`.
-(نکته: `androidx.navigation3` هم در version catalog و در `androidApp` هست، ولی گراف اصلی روی navigation-compose سوار است.)
+Library: **Compose Multiplatform Navigation** (`org.jetbrains.androidx.navigation:navigation-compose`) with **type-safe routes** backed by `kotlinx.serialization`.
+(Note: `androidx.navigation3` is also in the version catalog and in `androidApp`, but the main graph runs on navigation-compose.)
 
-## فایل‌های کلیدی
+## Key files
 
-| فایل | نقش |
+| File | Role |
 |---|---|
-| `shared/.../ui/navigation/TaminHamrahNavGraph.kt` | گراف ریشه — همه‌ی `xxxGraph()`ها اینجا وصل می‌شوند |
-| `shared/.../ui/navigation/NavRoutes.kt` | routeهای سطح اپ |
-| `shared/.../ui/navigation/NavigationTab.kt` | تب‌های نوار پایین |
-| `shared/.../ui/navigation/FeatureNavigation.kt` | `NavController.navigateToFeature(flag)` — پل بین `FeatureFlag` و مقصد |
-| `feature/<x>/.../Navigation.kt` | routeها و گراف همان فیچر |
+| `shared/.../ui/navigation/TaminHamrahNavGraph.kt` | root graph — every `xxxGraph()` is attached here |
+| `shared/.../ui/navigation/NavRoutes.kt` | app-level routes |
+| `shared/.../ui/navigation/NavigationTab.kt` | bottom bar tabs |
+| `shared/.../ui/navigation/FeatureNavigation.kt` | `NavController.navigateToFeature(flag)` — bridge from `FeatureFlag` to a destination |
+| `feature/<x>/.../Navigation.kt` | that feature's routes and graph |
 
-## الگوی هر فیچر
+## The per-feature pattern
 
 ```kotlin
 @Serializable
@@ -30,7 +30,7 @@ sealed interface ProfileRoute {
 
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
-    onNavigateToIdentity: (String?) -> Unit,   // مقصدهای خارج از این فیچر → callback
+    onNavigateToIdentity: (String?) -> Unit,   // destinations outside this feature → callback
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -38,23 +38,23 @@ fun NavGraphBuilder.profileGraph(
 }
 ```
 
-قاعده‌ی مهم: **ناوبری داخل فیچر** مستقیم با `navController.navigate(Route.X)` انجام می‌شود؛ **ناوبری به فیچر دیگر** به‌صورت callback به بالا پاس داده می‌شود تا ماژول‌های فیچر به هم وابسته نشوند.
+The rule: **navigation within a feature** calls `navController.navigate(Route.X)` directly; **navigation to another feature** is passed up as a callback, so feature modules never depend on each other.
 
-## گرفتن ViewModel
+## Getting a ViewModel
 
 ```kotlin
-val vm = koinViewModel<XViewModel>()                          // معمولی، scope همان صفحه
-val vm = backStackEntry.sharedViewModel<XViewModel>(navController)  // اشتراکی در طول یک گراف
+val vm = koinViewModel<XViewModel>()                               // per-screen scope
+val vm = backStackEntry.sharedViewModel<XViewModel>(navController) // shared across one graph
 ```
 
-`sharedViewModel` یک extension داخلی پروژه است (`com.tamin.taminhamrah.ui.sharedViewModel`).
+`sharedViewModel` is a project-internal extension (`com.tamin.taminhamrah.ui.sharedViewModel`).
 
-## انیمیشن انتقال
+## Transitions
 
-`composableWithFadeTransitions<Route>` — نسخه‌ی fade از `composable`، در `core-ui` تعریف شده. برای صفحات معمولی از همین استفاده کن تا حس اپ یکدست بماند؛ `composable` خام هم در کد هست ولی الگوی غالب نیست.
+`composableWithFadeTransitions<Route>` — a fade variant of `composable`, defined in `core-ui`. Use it for ordinary screens so the app feels consistent; plain `composable` also appears in the codebase but is not the dominant pattern.
 
-## مسیریابی داینامیک از منو
+## Dynamic routing from the server menu
 
-`FeatureFlag` (آمده از سرور) → `navigateToFeature(flag)` → متد `navigateToXxx()` که هر فیچر خودش export می‌کند. جزئیات کامل در [[Feature-Flags]] و `documents/features.md`.
+`FeatureFlag` (from the server) → `navigateToFeature(flag)` → the `navigateToXxx()` function each feature exports. Full detail in [[Feature-Flags]].
 
-مرتبط: [[Modules]] · [[Feature-Flags]]
+Related: [[Modules]] · [[Feature-Flags]]

@@ -2,44 +2,40 @@
 tags: [moc]
 ---
 
-# TaminX — نقشه دانش پروژه
+# TaminX — Project Knowledge Map
 
-اپلیکیشن **تأمین همراه** (`TaminX`) — یک اپ Kotlin Multiplatform + Compose Multiplatform برای اندروید و iOS، متعلق به سازمان تأمین اجتماعی.
+**تأمین همراه** (`TaminX`) — a Kotlin Multiplatform + Compose Multiplatform app for Android and iOS, built for the Iranian Social Security Organization.
 
-> این vault نقطه‌ی شروع هر سشن است. به‌جای خواندن کل کدبیس، اول اینجا را بخوان.
+> This vault is the starting point for every session. Read the relevant page here before searching the codebase.
 
-## معماری
+## Architecture
 
-- [[Overview]] — تصویر کلی لایه‌ها و جریان داده
-- [[Modules]] — فهرست کامل ماژول‌ها و مسئولیتشان
-- [[MVI-Pattern]] — `BaseViewModel` و قرارداد State/Intent/Event
-- [[Navigation]] — گراف‌های Compose Navigation و الگوی `xxxGraph`
-- [[Dependency-Injection]] — Koin و ترتیب ماژول‌ها
-- [[Networking]] — Ktor، چهار HttpClient، auth و refresh token
-- [[Database]] — Room KMP، DAOها، schemaها
+- [[Overview]] — layers and how a request flows through them
+- [[Modules]] — every module and what it owns
+- [[MVI-Pattern]] — `BaseViewModel` and the State/Intent/Event contract
+- [[Navigation]] — Compose Navigation graphs and the `xxxGraph` pattern
+- [[Dependency-Injection]] — Koin modules and registration order
+- [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
+- [[Database]] — Room KMP, DAOs, schemas
 
-## قواعد کار
+## Conventions
 
-- [[Naming-Conventions]] — قرارداد نام فایل (و چرا build اجبارش نمی‌کند) ⚠️
-- [[Adding-a-Feature]] — چک‌لیست افزودن فیچر جدید
-- [[Code-Review]] — فرایند review مرج‌ریکوئست‌ها و پوشه‌ی `review/`
+- [[Naming-Conventions]] — the file-naming contract (and why the build does not enforce it) ⚠️
+- [[Adding-a-Feature]] — checklist for a new screen or feature module
 
-## ساخت و انتشار
+## Build and release
 
-- [[Build-and-Run]] — دستورات gradle، JDK، flavorها
-- [[CI-CD]] — پایپ‌لاین GitLab
+- [[Build-and-Run]] — gradle commands, JDK, flavors
+- [[CI-CD]] — the GitLab pipeline
 
-## مرجع
+## Domain
 
-- [[Reference-old-android]] — `old_android/` چیست و چرا commit نمی‌شود ⚠️
-- [[Tech-Stack]] — نسخه‌ها و کتابخانه‌های کلیدی
-- [[Feature-Flags]] — سیستم منوی داینامیک و `FeatureFlag`
-- [[Glossary]] — واژه‌نامه دامنه (فارسی ↔ کد)
+- [[Feature-Flags]] — dynamic menu, `FeatureFlag`, `FeatureManager`
+- [[AI-Agent]] — architecture of the AI assistant rewrite
+- [[AI-Agent-API-Contract]] — exact JSON contract the client parses
+- [[Glossary]] — Persian domain term ↔ name in code
 
-## اسناد موجود در ریپو (خارج از vault)
+## Reference
 
-| مسیر | موضوع |
-|---|---|
-| `documents/features.md` | معماری فیچرهای داینامیک، `showRole`، `FeatureStatus`، routing |
-| `documents/agent.md` | معماری بازنویسی دستیار هوش مصنوعی (SDUI، فرم‌های embedded) |
-| `documents/agent-api-contract.md` | قرارداد JSON دقیق API دستیار هوشمند |
+- [[Reference-old-android]] — what `old_android/` is and why it is never committed ⚠️
+- [[Tech-Stack]] — versions and key libraries

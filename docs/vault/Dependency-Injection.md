@@ -2,11 +2,11 @@
 tags: [architecture]
 ---
 
-# تزریق وابستگی — Koin
+# Dependency Injection — Koin
 
-نسخه: Koin `4.1.0` (+ `koin-annotations` 2.1.0 در catalog موجود است ولی الگوی غالب DSL دستی است).
+Koin `4.1.0`. (`koin-annotations` 2.1.0 is in the catalog, but hand-written DSL is the dominant pattern.)
 
-## نقطه‌ی شروع
+## Entry point
 
 `shared/src/commonMain/kotlin/com/tamin/taminhamrah/di/Koin.kt`
 
@@ -16,18 +16,19 @@ val sharedModules: List<Module> get() = listOf(
     ApiClientsModule, remoteModule, domainModule, dataKoinModule, dataModule, pluginModule,
     agentModule, profileModule, pensionInquiryModule, treatmentModule, cartableModule,
     historyModule, contractsModule, TaminServicesModule, workshopsModule,
-    studentInsuranceContractModule, healthProfileModule, changeMobileModule, myInboxModule
+    studentInsuranceContractModule, healthProfileModule, changeMobileModule, myInboxModule,
+    addDependentModule
 )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
     startKoin { appDeclaration(); modules(sharedModules) }
 ```
 
-**افزودن فیچر جدید = افزودن ماژول Koin آن به همین لیست.** فراموش کردنش خطای runtime می‌دهد نه compile.
+**Adding a feature means adding its Koin module to this list.** Forgetting it produces a runtime failure, not a compile error.
 
-## ماژول‌ها و محل تعریفشان
+## Where each module lives
 
-| ماژول | فایل |
+| Module | File |
 |---|---|
 | `platformModule` | `shared/.../di/PlatformModule.kt` (expect/actual) |
 | `dataModule` | `shared/.../di/DataModule.kt` |
@@ -41,24 +42,24 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
 | `pluginModule` | `core-plugin/.../plugin/di/PluginModule.kt` |
 | `<x>Module` | `feature/<x>/.../di/<X>Module.kt` |
 
-`domainModule` توسط core-domain تأمین می‌شود (UseCaseها).
+`domainModule` is provided by core-domain (the UseCases).
 
-## qualifierها
+## Qualifiers
 
-HttpClientها با `named(...)` از هم جدا می‌شوند — رجوع به [[Networking]]:
+HTTP clients are distinguished by `named(...)` — see [[Networking]]:
 
 ```
 "authHttpClient"  "mainHttpClient"  "healthHttpClient"  "uploadHttpClient"  "aiHttpClient"
 ```
 
-و یک ApiService با qualifier: `get(named("authUserApiService"))`.
+And one qualified ApiService: `get(named("authUserApiService"))`.
 
-هنگام تزریق HttpClient حتماً qualifier بده؛ `get<HttpClient>()` بدون نام قابل ابهام است.
+Always pass a qualifier when injecting an `HttpClient`; a bare `get<HttpClient>()` is ambiguous.
 
-## در Compose
+## In Compose
 
 ```kotlin
 val viewModel = koinViewModel<XViewModel>()   // koin-compose-viewmodel
 ```
 
-مرتبط: [[Networking]] · [[Modules]] · [[Adding-a-Feature]]
+Related: [[Networking]] · [[Modules]] · [[Adding-a-Feature]]

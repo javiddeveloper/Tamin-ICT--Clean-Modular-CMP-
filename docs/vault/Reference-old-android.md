@@ -2,23 +2,23 @@
 tags: [reference, gotcha]
 ---
 
-# `old_android/` — پیاده‌سازی مرجع
+# `old_android/` — Reference Implementation
 
-## این چیست
+## What it is
 
-نسخه‌ی قدیمی و native اپ اندروید تأمین همراه. **جزئی از پروژه نیست** و در build شرکت نمی‌کند — در `settings.gradle.kts` include نشده.
+The legacy native Android version of the Tamin Hamrah app. **It is not part of the project** and takes no part in the build — it is not included in `settings.gradle.kts`.
 
-نقشش **مرجع** است: فیچرهای KMP بر اساس رفتار و پیاده‌سازی همین نسخه توسعه داده می‌شوند. وقتی سؤالی پیش می‌آید که «این صفحه قرار است دقیقاً چه کند» یا «قرارداد این API چه بود»، جواب معمولاً اینجاست.
+Its role is **reference**: KMP features are developed based on the behaviour and implementation of this version. When a question comes up like "what exactly is this screen supposed to do" or "what did this API contract look like", the answer is usually in there.
 
-## قواعد
+## Rules
 
-- ⛔ **هرگز commit نشود.** در `.gitignore` با الگوی `old_android/` مستثنا شده و هیچ فایلی از آن tracked نیست.
-- ⛔ کدش را ویرایش نکن — read-only است.
-- ✅ برای فهمیدن رفتار مورد انتظار، منطق کسب‌وکار، یا شکل قدیمی یک API بخوانش.
-- ✅ هنگام port کردن، خروجی نهایی باید با قواعد معماری جدید بخواند ([[Overview]], [[MVI-Pattern]]) — کپی مستقیم ساختار قدیمی هدف نیست.
+- ⛔ **Never commit it.** It is excluded via the `old_android/` pattern in `.gitignore`, and no file under it is tracked.
+- ⛔ Do not edit it — treat it as read-only.
+- ✅ Read it to understand expected behaviour, business logic, or the older shape of an API.
+- ✅ When porting, the result must follow the new architecture ([[Overview]], [[MVI-Pattern]]) — copying the old structure verbatim is not the goal.
 
-## نکته‌ی تاریخی
+## Historical note
 
-یک بار الگوی `old_android/` با انکدینگ UTF-16 به `.gitignore` اضافه شده بود (بایت‌های `\0` بین حروف) و به همین دلیل کار نمی‌کرد؛ پوشه به‌صورت untracked در `git status` ظاهر می‌شد. الان با UTF-8 تمیز نوشته شده است. اگر دوباره در status دیدیدش، اول انکدینگ `.gitignore` را چک کنید.
+The `old_android/` pattern was once added to `.gitignore` with UTF-16 encoding (NUL bytes between the characters), so it never matched and the folder kept appearing as untracked in `git status`. It is now written as clean UTF-8. If it ever shows up in `git status` again, check the encoding of `.gitignore` first.
 
-مرتبط: [[Overview]] · [[Adding-a-Feature]]
+Related: [[Overview]] · [[Adding-a-Feature]]

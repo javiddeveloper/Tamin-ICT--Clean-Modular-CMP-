@@ -45,6 +45,11 @@ fun TaminConfirmationDialog(
     /** Defaults keep the informational blue every existing caller expects. */
     iconTint: Color = LocalTaminColors.current.blueText,
     iconBackground: Color = LocalTaminColors.current.blueBg,
+    /**
+     * Optional block between the description and the buttons, for anything the description cannot
+     * be: a value to copy, a field to read back. Omitted by every caller that only needs prose.
+     */
+    content: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -107,6 +112,11 @@ fun TaminConfirmationDialog(
                     color = taminColors.textSecondary,
                     textAlign = TextAlign.Center
                 )
+
+                if (content != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    content()
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 

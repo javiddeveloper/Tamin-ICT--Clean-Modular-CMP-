@@ -67,6 +67,13 @@ class FakeUserRepository : UserRepository {
             mobile = "09123456789"
         )
     )
+
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flowOf(null)
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         PdfDownloadDN()
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
