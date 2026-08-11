@@ -80,7 +80,6 @@ import kotlin.math.roundToInt
  */
 @Composable
 internal fun IdentityCard(
-    firstName: String,
     lastName: String,
     fullName: String,
     fatherName: String,

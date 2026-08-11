@@ -16,6 +16,6 @@ actual fun applicationFont(): FontFamily {
         Font(Res.font.regular, FontWeight.Normal),
         Font(Res.font.light, FontWeight.Light),
         Font(Res.font.medium, FontWeight.Medium),
-        Font(Res.font.semi_bold, FontWeight.Normal)
+        Font(Res.font.semi_bold, FontWeight.SemiBold)
     )
 }
