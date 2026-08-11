@@ -1,79 +1,84 @@
 # Code Review — MR !<id>
 
-**عنوان branch:** `<branch-name>`
-**لینک:** https://ci.tamin.ir/base/development/finance/tatmin-kmp/-/merge_requests/<id>
+**Branch:** `<branch-name>`
+**Link:** https://ci.tamin.ir/base/development/finance/tatmin-kmp/-/merge_requests/<id>
 **Author:** <author>
 **Target:** `develop`
 
-| مورد | مقدار |
+| | |
 |---|---|
-| Review round | ۱ |
-| تاریخ | <شمسی> (<میلادی>) |
-| Commit بررسی‌شده | `<sha>` |
-| Base (merge-base با develop) | `<sha>` |
-| حجم | <n> فایل، `+<x> / -<y>` |
+| Review round | 1 |
+| Date | <YYYY-MM-DD> |
+| Reviewed commit | `<sha>` |
+| Base (merge-base with develop) | `<sha>` |
+| Size | <n> files, `+<x> / -<y>` |
 
-<!-- اگر این MR شامل branch دیگری هم هست، اینجا بنویس:
-> این MR شامل `Feature-XXX` (MR !NNN) هم هست و آن دو مستقل merge نمی‌شوند.
+<!-- If this MR carries another branch, say so here:
+> This MR also contains `Feature-XXX` (MR !NNN); the two cannot be merged independently.
 -->
 
 ---
 
-## خلاصه وضعیت
+## Summary
 
-| # | موضوع | فایل | شدت | وضعیت |
+| # | Issue | File | Severity | Status |
 |---|---|---|---|---|
-| ۱ | <عنوان کوتاه> | `<file>` | بالا | ⬜ باز |
-| ۲ | <عنوان کوتاه> | `<file>` | متوسط | ⬜ باز |
-| ۳ | <عنوان کوتاه> | `<file>` | پایین | ⬜ نیاز به تأیید |
+| 1 | <short title> | `<file>` | High | ⬜ open |
+| 2 | <short title> | `<file>` | Medium | ⬜ open |
+| 3 | <short title> | `<file>` | Low | ⬜ needs confirmation |
 
-**شدت:** بالا = باعث خرابی داده یا رفتار غلط در جریان عادی · متوسط = خرابی در حالت مرزی یا اثر خارج از دامنه · پایین = خوانایی، یکدستی، بدهی فنی
+**Severity** — High: wrong behaviour or data loss on the normal path · Medium: edge-case failure, or impact outside this MR's scope · Low: readability, consistency, technical debt
 
-**وضعیت:** `⬜ باز` · `✅ برطرف شد` · `🔄 نیاز به اصلاح مجدد` · `➖ رد شد` · `⬜ نیاز به تأیید`
+**Status** — `⬜ open` · `✅ fixed` · `🔄 needs rework` · `➖ rejected (with reason)` · `⬜ needs confirmation`
+
+> **How to use this file:** fix the items and push to this same branch. Do not edit the Status
+> column yourself — the reviewer updates it in the next round. If you disagree with an item,
+> write your reasoning under that item instead of changing the code; it will be marked
+> `➖ rejected`. Full process: `review/README.md` on `develop`.
 
 ---
 
-## ۱. <عنوان> — شدت <بالا/متوسط/پایین>
+## 1. <title> — <High/Medium/Low>
 
-**فایل:** `<path>:<line>`
+**File:** `<path>:<line>`
 
 ```kotlin
-// کد فعلی
+// current code
 ```
 
-<توضیح اینکه چه اتفاقی می‌افتد و چرا مشکل است — با یک سناریوی مشخص، نه توصیف کلی>
+<What happens and why it is a problem — a concrete failure scenario, not a general remark.>
 
-**پیشنهاد:**
+**Suggested change:**
 
 ```kotlin
-// کد پیشنهادی
+// proposed code
 ```
 
 ---
 
-## ۲. <عنوان> — شدت <…>
+## 2. <title> — <severity>
 
-<همان ساختار>
+<same structure>
 
 ---
 
-## مواردی که خوب انجام شده‌اند
+## What was done well
 
-- <مورد>
-- <مورد>
+- <item>
+- <item>
 
 ---
 
 ## Revision log
 
-| Round | تاریخ | Commit | نتیجه |
+| Round | Date | Commit | Result |
 |---|---|---|---|
-| ۱ | <تاریخ> | `<sha>` | <n> مورد ثبت شد |
+| 1 | <YYYY-MM-DD> | `<sha>` | <n> items raised |
 
 <!--
-راهنمای round بعدی:
-- ستون «وضعیت» در جدول خلاصه به‌روز شود
-- موارد جدید به انتهای فهرست اضافه شوند (شماره‌های قبلی جابه‌جا نشوند)
-- یک سطر جدید در Revision log
-- وقتی هیچ ⬜ یا 🔄 نماند، فایل حذف و push شود — merge کار reviewer نیست
+Next round:
+- update the Status column in the Summary table
+- append new findings at the end (do not renumber existing items)
+- add a row to the Revision log
+- when no ⬜ or 🔄 remains, delete this file and push — merging is not the reviewer's job
 -->
