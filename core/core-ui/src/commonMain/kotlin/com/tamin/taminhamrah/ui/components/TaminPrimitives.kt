@@ -148,25 +148,40 @@ fun StatTile(
     modifier: Modifier = Modifier,
     labelColor: Color = contentColor,
     style: StatTileStyle = StatTileStyle.Standard,
+    /**
+     * The opaque color the tint is composited over.
+     *
+     * [containerColor] is a low-alpha tint in the dark theme (16%), so painting it straight onto a
+     * card let the card's own gradient read through and the tile looked washed out. Laying it over
+     * a solid surface first keeps exactly the intended hue while making the tile itself opaque --
+     * the glass stays *around* the tiles, not inside them.
+     */
+    baseColor: Color = LocalTaminColors.current.bgSurface,
 ) {
     val compact = style != StatTileStyle.Standard
+    val inline = style == StatTileStyle.Inline
+    val shape = RoundedCornerShape(if (compact) CornerRadius.md else CornerRadius.lg)
     val container = modifier
-        .background(
-            containerColor,
-            RoundedCornerShape(if (compact) CornerRadius.md else CornerRadius.lg),
-        )
+        .background(baseColor, shape)
+        .background(containerColor, shape)
         .padding(
             horizontal = Spacing.md,
-            vertical = if (compact) Spacing.xs else Spacing.md,
+            // Inline is the only style read as a standalone chip rather than part of a group,
+            // and it sat at 11sp -- a size an older reader has to work at. Roomier on purpose.
+            vertical = when {
+                inline -> Spacing.sm
+                compact -> Spacing.xs
+                else -> Spacing.md
+            },
         )
 
     val labelText: @Composable () -> Unit = {
         Text(
             text = label,
-            style = if (compact) {
-                MaterialTheme.typography.labelSmall
-            } else {
-                MaterialTheme.typography.labelMedium
+            style = when {
+                inline -> MaterialTheme.typography.labelMedium
+                compact -> MaterialTheme.typography.labelSmall
+                else -> MaterialTheme.typography.labelMedium
             },
             color = labelColor,
             textAlign = TextAlign.Center,
@@ -183,10 +198,10 @@ fun StatTile(
         } else {
             NumericText(
                 text = amount,
-                style = if (compact) {
-                    MaterialTheme.typography.labelMedium
-                } else {
-                    MaterialTheme.typography.titleMedium
+                style = when {
+                    inline -> MaterialTheme.typography.titleSmall
+                    compact -> MaterialTheme.typography.labelMedium
+                    else -> MaterialTheme.typography.titleMedium
                 },
                 color = contentColor,
             )
