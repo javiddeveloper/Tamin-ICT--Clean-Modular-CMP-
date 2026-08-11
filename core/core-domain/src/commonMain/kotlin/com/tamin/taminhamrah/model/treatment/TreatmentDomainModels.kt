@@ -105,3 +105,23 @@ data class TreatmentCostDN(
     val estimatePayDate: String?,
     val returnReason: String?
 )
+
+data class MedicalConfirmationDN(
+    val repId: String?,
+    val supportType: String?,
+    val treatmentCenter: String?,
+    val outpatientRestStartDate: String?,
+    val outpatientRestEndDate: String?,
+    val numberOfOutpatientDays: String?,
+    val inpatientRestStartDate: String?,
+    val inpatientRestEndDate: String?,
+    val numberOfInpatientDays: String?,
+    val unapprovedFromDate: String?,
+    val unapprovedToDate: String?,
+    val branchName: String?,
+    val branchStatus: String?,
+    val description: String?,
+    val statusDesc: String?
+)
+
+

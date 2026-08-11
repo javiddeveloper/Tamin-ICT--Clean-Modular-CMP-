@@ -50,4 +50,10 @@ interface TreatmentRemoteDataSource {
 
     /** Queues the certificate for the person's inbox; returns the service's acknowledgement. */
     suspend fun sendToInboxTreatmentCosts(repId: String): String
+
+    suspend fun getMedicalConfirmations(params: Map<String, String>): ListData<MedicalConfirmationDTO>?
+
+    suspend fun getMedicalConfirmationPdf(repId: String): PdfDownloadDTO
+
+    suspend fun sendToInboxMedicalConfirmation(repId: String): String
 }
