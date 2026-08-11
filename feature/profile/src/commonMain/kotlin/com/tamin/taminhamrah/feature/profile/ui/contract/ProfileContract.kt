@@ -59,5 +59,8 @@ sealed interface ProfileEvent {
     data object NavigateToChangeMobile : ProfileEvent
     data object NavigateToContactUs : ProfileEvent
     data object NavigateToElectronicFile : ProfileEvent
+
+    data class ShareAppLink(val appLink: String) : ProfileEvent
+    data class Support(val phone: String) : ProfileEvent
 }
 
