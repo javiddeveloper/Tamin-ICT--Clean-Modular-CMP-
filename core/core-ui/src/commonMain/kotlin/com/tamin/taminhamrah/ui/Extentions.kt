@@ -146,7 +146,36 @@ fun Modifier.animatePlacement(): Modifier = composed {
  */
 fun String?.orAbsent(fallback: String): String = if (isNullOrBlank()) fallback else this
 
+/** The dash the design prints wherever a value is missing. */
+const val ABSENT_VALUE = "-"
+
+/** No days at all — distinct from a blank, which only means the service said nothing. */
+const val NO_DAYS = "0"
+
+/** A value the service omitted reads as a dash placeholder, the way the design shows it. */
+fun String?.orDash(): String = orAbsent(ABSENT_VALUE)
+
+/** Day counts are strings on the wire; an absent one is none, not a blank. */
+fun String?.orZero(): String = orAbsent(NO_DAYS)
+
 fun String.iSValidForSearch(): Boolean = this.trim().length > 2
+
+/** True when any of [phrases] appears anywhere in this string. */
+fun String.containsAny(phrases: List<String>): Boolean = phrases.any { contains(it) }
+
+/**
+ * Rewrites Arabic ي/ك to Persian ی/ک.
+ *
+ * The same letters to a reader, different code points on the wire, and the services mix them
+ * freely — `commission-confrimation` returns «تائيد شده» with an Arabic yeh. Anything that either
+ * matches on Persian text or displays it beside Persian text has to fold the variants away first.
+ */
+fun String.normalizeArabicLetters(): String = replace(ARABIC_YEH, PERSIAN_YEH).replace(ARABIC_KAF, PERSIAN_KAF)
+
+private const val ARABIC_YEH = 'ي'
+private const val PERSIAN_YEH = 'ی'
+private const val ARABIC_KAF = 'ك'
+private const val PERSIAN_KAF = 'ک'
 
 fun String.iSValidForSearchHashtag(): Boolean = this.trim().length > 1
 
