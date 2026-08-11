@@ -1,6 +1,9 @@
 package com.tamin.taminhamrah.ui.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -14,21 +17,9 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.drawWithCache
-import com.tamin.taminhamrah.util.toPersianDigits
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathMeasure
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,49 +32,57 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_info
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_close
+import taminx.core.core_ui.ic_info
 
 @Composable
 fun SegmentedInputField(
@@ -94,6 +93,11 @@ fun SegmentedInputField(
     enabled: Boolean = true,
     error: Boolean = false,
     errorMessage: String? = null,
+    /**
+     * Shown in place of the empty slots while the field is untouched. The slots only appear once
+     * the field takes focus, so a row of dashes does not greet someone who has not started typing.
+     */
+    placeholderText: String? = null,
     showClearButton: Boolean = true,
     leadingIcon: ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Number,
@@ -150,9 +154,12 @@ fun SegmentedInputField(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.CenterEnd
         ) {
+            val fieldValue = remember(value) {
+                TextFieldValue(text = value, selection = TextRange(value.length))
+            }
             BasicTextField(
-                value = value,
-                onValueChange = { newValue -> onValueChange(valueFilter(newValue)) },
+                value = fieldValue,
+                onValueChange = { newValue -> onValueChange(valueFilter(newValue.text)) },
                 enabled = enabled,
                 interactionSource = interactionSource,
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -165,9 +172,19 @@ fun SegmentedInputField(
                         Box(modifier = Modifier.alpha(0f)) {
                             innerTextField()
                         }
+                        val showPlaceholder =
+                            placeholderText != null && value.isEmpty() && !isFocused
+                        if (showPlaceholder) {
+                            Text(
+                                text = placeholderText,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.textMuted,
+                                modifier = Modifier.align(Alignment.CenterStart),
+                            )
+                        }
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().alpha(if (showPlaceholder) 0f else 1f),
                                 horizontalArrangement = horizontalArrangement,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -352,7 +369,12 @@ private fun Char.isPersianDigit(): Boolean {
     return this in '۰'..'۹'
 }
 
-private fun Modifier.animatedErrorBorder(
+/**
+ * The field-error treatment used across the app: the border animates to the danger color and back
+ * rather than snapping. Public so rows that are not text fields -- pickers, date rows -- report a
+ * problem the same way the inputs beside them do.
+ */
+fun Modifier.animatedErrorBorder(
     isError: Boolean,
     errorColor: Color,
     normalColor: Color,
