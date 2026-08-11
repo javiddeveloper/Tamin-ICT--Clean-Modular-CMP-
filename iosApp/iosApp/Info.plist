@@ -26,6 +26,8 @@
 	<string>TaminHamrah needs access to save images to your photo library.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>TaminHamrah uses the camera to scan QR codes for model sharing.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>TaminHamrah uses Face ID to securely sign you in.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
