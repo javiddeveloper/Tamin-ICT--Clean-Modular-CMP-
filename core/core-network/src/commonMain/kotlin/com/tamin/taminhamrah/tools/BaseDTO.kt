@@ -12,8 +12,19 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+
+/**
+ * Common interface for DTOs that might carry an error message from the backend
+ * inside the 'data' field (especially for 4xx/5xx responses).
+ */
+interface ErrorCarrier {
+    val message: String?
+    val cause: String? get() = null
+}
 
 /**
  * A single business-level problem reported by the backend, e.g.:
@@ -71,18 +82,6 @@ fun <T> BaseDTO<T>.extractData(): T {
             println("BaseDTO: Data extraction successful")
             data
         }
-        status in 400..499 -> {
-            println("BaseDTO: Client error: $reason")
-            throw TaminErrorUriException(ErrorUri.fromString("CLIENT_ERROR: $reason"))
-        }
-        status in 500..599 -> {
-            println("BaseDTO: Server error: $reason")
-            throw TaminErrorUriException(ErrorUri.fromString("SERVER_ERROR: $reason"))
-        }
-        data == null -> {
-            println("BaseDTO: Data is null")
-            throw TaminErrorUriException(ErrorUri.fromString("NULL_DATA: $reason"))
-        }
         else -> handleCommonErrors()
     }
 }
@@ -98,9 +97,13 @@ fun BaseDTO<JsonElement?>.extractMessage(): String {
     return when {
         hasProblems -> throwProblemError()
         status in 200..299 -> {
-            val message = (data as? JsonPrimitive)?.contentOrNull ?: reason
-            println("BaseDTO: Success message extracted: $message")
-            message
+            val msg = when (val d = data) {
+                is JsonPrimitive -> d.contentOrNull
+                is JsonObject -> d["message"]?.jsonPrimitive?.contentOrNull
+                else -> null
+            } ?: reason
+            println("BaseDTO: Success message extracted: $msg")
+            msg
         }
         else -> handleCommonErrors()
     }
@@ -116,7 +119,7 @@ private fun <T> BaseDTO<T>.throwProblemError(): Nothing {
     println("BaseDTO: Business error: family=$family reason=$reason problems=$problems")
     throw TaminErrorUriException(
         uri = ErrorUri.SERVER_PROBLEM,
-        serverMessage = problemMessage ?: reason,
+        serverMessage = getServerMessage(),
         errorCode = firstProblem?.errorCode
     )
 }
@@ -131,7 +134,25 @@ private fun <T> BaseDTO<T>.handleCommonErrors(): Nothing {
         else -> "UNKNOWN_ERROR"
     }
     println("BaseDTO: $errorPrefix: $reason")
-    throw TaminErrorUriException(ErrorUri.fromString("$errorPrefix: $reason"))
+    throw TaminErrorUriException(
+        uri = ErrorUri.fromString("$errorPrefix: $reason"),
+        serverMessage = getServerMessage()
+    )
+}
+
+/**
+ * Probes 'data', 'problems', and 'reason' for a Persian message to show the user.
+ * Priority: 1. data.message (if data is ErrorCarrier or JsonObject)
+ *           2. problems envelope
+ *           3. reason field
+ */
+private fun <T> BaseDTO<T>.getServerMessage(): String? {
+    val fromData = when (val d = data) {
+        is ErrorCarrier -> d.message
+        is JsonObject -> d["message"]?.jsonPrimitive?.contentOrNull
+        else -> null
+    }
+    return (fromData ?: problemMessage ?: reason).takeIf { it.isPersian() }
 }
 
 /**

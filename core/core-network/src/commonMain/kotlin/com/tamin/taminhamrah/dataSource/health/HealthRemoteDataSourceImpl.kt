@@ -27,14 +27,11 @@ import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeDTO
 import com.tamin.taminhamrah.model.health.UpdateSelfDeclarativeRequestDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.ApiOutcome
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractDataOrProblems
-import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.extractMessageOrProblems
-import co.touchlab.kermit.Logger
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.model.health.ActFrequencyDTO
 
 internal class HealthRemoteDataSourceImpl(
@@ -42,45 +39,29 @@ internal class HealthRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : HealthRemoteDataSource {
 
-    /**
-     * Runs [block], normalizing every failure through [errorParser].
-     * Consolidates the try/catch boilerplate that used to be duplicated
-     * identically in every method of this class.
-     */
-    private inline fun <T> safeCall(tag: String, block: () -> T): T {
-        return try {
-            block()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            Logger.e("HealthDS") { "$tag failed: ${e::class.simpleName} - ${e.message}" }
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
-    }
-
     override suspend fun getPatientGeneral(natCode: String): PatientGeneralDTO? =
-        safeCall("getPatientGeneral") {
+        errorParser.safeCall("getPatientGeneral") {
             apiService.getPatientGeneral(natCode).extractData()
         }
 
     override suspend fun getPatientSelfDeclarative(
         natCode: String,
         patientID: Int
-    ): PatientSelfDeclarativeDTO? = safeCall("getPatientSelfDeclarative") {
+    ): PatientSelfDeclarativeDTO? = errorParser.safeCall("getPatientSelfDeclarative") {
         apiService.getPatientSelfDeclarative(natCode, patientID).extractData()
     }
 
     override suspend fun getPatientDrugAllergies(
         natCode: String,
         patientID: Int
-    ): ListData<DrugItemAllergiesDTO>? = safeCall("getPatientDrugAllergies") {
+    ): ListData<DrugItemAllergiesDTO>? = errorParser.safeCall("getPatientDrugAllergies") {
         apiService.getPatientDrugAllergies(natCode, patientID).extractData()
     }
 
     override suspend fun getPatientHospitalizations(
         natCode: String,
         patientID: Int
-    ): ListData<PatientHospitalizationsDTO>? = safeCall("getPatientHospitalizations") {
+    ): ListData<PatientHospitalizationsDTO>? = errorParser.safeCall("getPatientHospitalizations") {
         apiService.getPatientHospitalize(
             mapOf(
                 "natCode" to natCode,
@@ -92,7 +73,7 @@ internal class HealthRemoteDataSourceImpl(
     override suspend fun getPatientVisits(
         natCode: String,
         patientID: Int
-    ): ListData<PatientVisitDTO>? = safeCall("getPatientVisits") {
+    ): ListData<PatientVisitDTO>? = errorParser.safeCall("getPatientVisits") {
         apiService.getPatientVisit(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
             .extractData()
     }
@@ -100,7 +81,7 @@ internal class HealthRemoteDataSourceImpl(
     override suspend fun getPatientLabs(
         natCode: String,
         patientID: Int
-    ): ListData<PatientLabDTO>? = safeCall("getPatientLabs") {
+    ): ListData<PatientLabDTO>? = errorParser.safeCall("getPatientLabs") {
         apiService.getPatientLab(mapOf("natCode" to natCode, "patientID" to patientID.toString()))
             .extractData()
     }
@@ -108,7 +89,7 @@ internal class HealthRemoteDataSourceImpl(
     override suspend fun getPatientImaging(
         natCode: String,
         patientID: Int
-    ): ListData<PatientImagingDTO>? = safeCall("getPatientImaging") {
+    ): ListData<PatientImagingDTO>? = errorParser.safeCall("getPatientImaging") {
         apiService.getPatientImaging(
             mapOf(
                 "natCode" to natCode,
@@ -119,23 +100,23 @@ internal class HealthRemoteDataSourceImpl(
 
     // --- Location ---
 
-    override suspend fun getAllProvinces(): ProvincesDTO? = safeCall("getAllProvinces") {
+    override suspend fun getAllProvinces(): ProvincesDTO? = errorParser.safeCall("getAllProvinces") {
         apiService.getAllProvinces().extractData()
     }
 
     override suspend fun getProvinceCities(provinceID: Int): ProvinceCitiesDTO? =
-        safeCall("getProvinceCities") {
+        errorParser.safeCall("getProvinceCities") {
             apiService.getProvinceCities(provinceID).extractData()
         }
 
     // --- Lookup ---
 
-    override suspend fun getBloodGroups(): List<BloodGroupDTO>? = safeCall("getBloodGroups") {
+    override suspend fun getBloodGroups(): List<BloodGroupDTO>? = errorParser.safeCall("getBloodGroups") {
         apiService.getBloodGroups()
     }
 
     override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? =
-        safeCall("getMaritalStatus") {
+        errorParser.safeCall("getMaritalStatus") {
             apiService.getMaritalStatus()
         }
 
@@ -145,52 +126,52 @@ internal class HealthRemoteDataSourceImpl(
         }
 
     override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? =
-        safeCall("getSmokingStatus") {
+        errorParser.safeCall("getSmokingStatus") {
             apiService.getSmokingStatus()
         }
 
     override suspend fun getActFrequencies(): List<ActFrequencyDTO>? =
-        safeCall("getActFrequencies") {
+        errorParser.safeCall("getActFrequencies") {
             apiService.getActFrequencies()
         }
 
     // --- Illnesses ---
 
     override suspend fun getSelfDeclarableIllnesses(): DeclarableIllnessesDTO? =
-        safeCall("getSelfDeclarableIllnesses") {
+        errorParser.safeCall("getSelfDeclarableIllnesses") {
             apiService.getSelfDeclarableIllnesses().extractData()
         }
 
     override suspend fun getSelfDeclarableIllnessesByGroup(): SelfDeclarableIllnessesByGroupDTO? =
-        safeCall("getSelfDeclarableIllnessesByGroup") {
+        errorParser.safeCall("getSelfDeclarableIllnessesByGroup") {
             apiService.getSelfDeclarableIllnessesByGroup().extractData()
         }
 
     // --- Drug master list ---
 
-    override suspend fun getAllDrugs(): AllergicDrugsDTO? = safeCall("getAllDrugs") {
+    override suspend fun getAllDrugs(): AllergicDrugsDTO? = errorParser.safeCall("getAllDrugs") {
         apiService.getAllergicDrugs().extractData()
     }
 
     // --- Mutations (POST) ---
 
-    override suspend fun updatePatient(request: UpdatePatientRequestDTO): ApiOutcome<UpdatePatientDTO> = safeCall("updatePatient") {
+    override suspend fun updatePatient(request: UpdatePatientRequestDTO): ApiOutcome<UpdatePatientDTO> = errorParser.safeCall("updatePatient") {
         apiService.updatePatient(request).extractDataOrProblems()
     }
 
-    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): ApiOutcome<AddSelfDeclarativeDTO> = safeCall("addSelfDeclarative") {
+    override suspend fun addSelfDeclarative(request: AddSelfDeclarativeRequestDTO): ApiOutcome<AddSelfDeclarativeDTO> = errorParser.safeCall("addSelfDeclarative") {
         apiService.addSelfDeclarative(request).extractDataOrProblems()
     }
 
-    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): ApiOutcome<UpdateSelfDeclarativeDTO> = safeCall("updateSelfDeclarative") {
+    override suspend fun updateSelfDeclarative(request: UpdateSelfDeclarativeRequestDTO): ApiOutcome<UpdateSelfDeclarativeDTO> = errorParser.safeCall("updateSelfDeclarative") {
         apiService.updateSelfDeclarative(request).extractDataOrProblems()
     }
 
-    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): ApiOutcome<String> = safeCall("syncIllnessSelfDeclaratives") {
+    override suspend fun syncIllnessSelfDeclaratives(request: SyncIllnessesSelfDecRequestDTO): ApiOutcome<String> = errorParser.safeCall("syncIllnessSelfDeclaratives") {
         apiService.syncIllnessSelfDeclaratives(request).extractMessageOrProblems()
     }
 
-    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): ApiOutcome<String> = safeCall("syncDrugAllergies") {
+    override suspend fun syncDrugAllergies(request: SyncDrugAllergiesRequestDTO): ApiOutcome<String> = errorParser.safeCall("syncDrugAllergies") {
         apiService.syncDrugAllergies(request).extractMessageOrProblems()
     }
 }

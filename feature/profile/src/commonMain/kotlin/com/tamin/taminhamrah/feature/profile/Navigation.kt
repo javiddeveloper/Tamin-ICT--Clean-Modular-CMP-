@@ -52,7 +52,6 @@ sealed interface ProfileRoute {
     data object ContactUs : ProfileRoute
     @Serializable
     data object DependentsList : ProfileRoute
-
 }
 
 fun NavGraphBuilder.profileGraph(

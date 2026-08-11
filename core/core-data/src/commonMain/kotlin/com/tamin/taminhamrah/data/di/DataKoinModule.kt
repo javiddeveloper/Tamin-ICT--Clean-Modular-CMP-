@@ -60,4 +60,5 @@ val dataKoinModule = module {
     singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
+    singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
 }
