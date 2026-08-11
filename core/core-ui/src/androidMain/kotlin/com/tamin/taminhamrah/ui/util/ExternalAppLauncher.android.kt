@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import org.koin.core.context.GlobalContext
+import androidx.core.net.toUri
 
 actual class ExternalAppLauncher actual constructor() {
 
@@ -26,14 +27,14 @@ actual class ExternalAppLauncher actual constructor() {
             }
         }
 
-        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse(uriString)).apply {
+        val intent = Intent(Intent.ACTION_SENDTO, uriString.toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     }
 
     actual fun openPhone(phone: String) {
-        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")).apply {
+        val intent = Intent(Intent.ACTION_DIAL, "tel:$phone".toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
@@ -45,7 +46,7 @@ actual class ExternalAppLauncher actual constructor() {
     }
 
     actual fun openUrl(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         // A device with no browser throws ActivityNotFoundException; opening a web page is never
