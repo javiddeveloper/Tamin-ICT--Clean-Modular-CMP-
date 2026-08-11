@@ -2,41 +2,41 @@
 tags: [architecture]
 ---
 
-# ماژول‌ها
+# Modules
 
-منبع حقیقت: `settings.gradle.kts`
+Source of truth: `settings.gradle.kts`
 
 ## core
 
-| ماژول | مسیر | مسئولیت | نکته |
+| Module | Path | Owns | Notes |
 |---|---|---|---|
-| `:core:core-domain` | `core/core-domain` | مدل `*DN.kt`، اینترفیس Repository، UseCaseها، `NetworkConstants` | ~۲۰ زیرپکیج `useCases/` |
-| `:core:core-network` | `core/core-network` | ApiServiceهای Ktorfit، `*RemoteDataSource(+Impl)`، `*Dto.kt`، ساخت HttpClientها | [[Networking]] |
-| `:core:core-database` | `core/core-database` | Room: `TaminHamrahDatabase`, DAO، Entity، Converter | [[Database]] |
-| `:core:core-data` | `core/core-data` | `*RepositoryImpl`، `data/mapper/*Mapper.kt`، `FeatureManagerImpl` | لایه‌ی چسب |
-| `:core:core-datastore` | `core/core-datastore` | `UserPreferencesRepositoryImpl`، `TokenStoreManagerImpl` | multiplatform-settings |
-| `:core:core-ui` | `core/core-ui` | دیزاین‌سیستم، `BaseViewModel`، `*PR.kt`، `mapper/*Mapper.kt` | [[MVI-Pattern]] |
-| `:core:core-plugin` | `core/core-plugin` | `PluginRegistry`، `ThemePlugin`، `ExportFormatPlugin`، `WorkflowEnginePlugin` | معماری افزونه‌ای |
+| `:core:core-domain` | `core/core-domain` | `*DN.kt` models, Repository interfaces, UseCases, `NetworkConstants` | ~20 sub-packages under `useCases/` |
+| `:core:core-network` | `core/core-network` | Ktorfit ApiServices, `*RemoteDataSource(+Impl)`, `*DTO.kt`, HTTP client construction | [[Networking]] |
+| `:core:core-database` | `core/core-database` | Room: `TaminHamrahDatabase`, DAOs, Entities, Converters | [[Database]] |
+| `:core:core-data` | `core/core-data` | `*RepositoryImpl`, `data/mapper/*Mapper.kt`, `FeatureManagerImpl` | the glue layer |
+| `:core:core-datastore` | `core/core-datastore` | `UserPreferencesRepositoryImpl`, `TokenStoreManagerImpl` | multiplatform-settings |
+| `:core:core-ui` | `core/core-ui` | design system, `BaseViewModel`, `*PR.kt`, `mapper/*Mapper.kt` | [[MVI-Pattern]] |
+| `:core:core-plugin` | `core/core-plugin` | `PluginRegistry`, `ThemePlugin`, `ExportFormatPlugin`, `WorkflowEnginePlugin` | plugin architecture |
 
-### داخل core-ui
+### Inside core-ui
 
 ```
 ui/theme/       Color, SemanticColors, Shape, Type, Motion, Shimmer, TaminHamrahTheme
-ui/components/  ۵۹ فایل — TaminTopAppBar, TaminText, TaminJalaliDatePicker,
+ui/components/  59 files — TaminTopAppBar, TaminText, TaminJalaliDatePicker,
                 TaminPdfViewer, LoadingButton, ErrorStateView, SegmentedRadialGauge, …
 ui/blur/  ui/image/  ui/motion/  ui/system/  ui/util/
 base/           BaseViewModel.kt
-model/          مدل‌های *PR به تفکیک دامنه
-mapper/         مپرهای DN → PR
+model/          *PR models, grouped by domain
+mapper/         DN → PR mappers
 ```
 
-قبل از ساختن هر کامپوننت جدید، اول `core-ui/ui/components/` را بگرد — احتمالش زیاد است که موجود باشد.
+Search `core-ui/ui/components/` before building any new component — the odds are good it already exists.
 
 ## feature
 
-⚠️ نام پوشه با نام پکیج یکی نیست. جدول تبدیل:
+⚠️ Folder names do not match package names. Translation table:
 
-| ماژول Gradle | پوشه | پکیج |
+| Gradle module | Folder | Package |
 |---|---|---|
 | `:feature:profile` | `feature/profile` | `…feature.profile` |
 | `:feature:treatment` | `feature/treatment` | `…feature.treatment` |
@@ -51,10 +51,11 @@ mapper/         مپرهای DN → PR
 | `:feature:taminServices` | `feature/taminServices` | `…feature.taminServices` |
 | `:feature:change-mobile` | `feature/change-mobile` | `…feature.changemobile` ⚠️ |
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
+| `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
 
-### ساختار داخلی هر فیچر
+### Layout of a feature module
 
-الگوی مرجع: `feature/profile`
+Reference implementation: `feature/profile`
 
 ```
 feature/<x>/src/commonMain/kotlin/com/tamin/taminhamrah/feature/<x>/
@@ -64,15 +65,15 @@ feature/<x>/src/commonMain/kotlin/com/tamin/taminhamrah/feature/<x>/
     ├── <Screen>Screen.kt
     ├── <Screen>ViewModel.kt
     ├── contract/<Screen>Contract.kt   ← State / PartialState / Event / Intent
-    ├── components/…                   ← Composableهای مختصِ همین صفحه
-    └── model/…                        ← مدل‌های UI مختصِ همین فیچر
+    ├── components/…                   ← Composables specific to this screen
+    └── model/…                        ← UI models specific to this feature
 ```
 
-هر ماژول فیچر پلاگین `TaminHamrah.kmp.feature` را می‌گیرد که خودکار هر پنج ماژول core + Koin + coroutines + (در تست) turbine را وصل می‌کند — نیازی به اضافه کردن دستی نیست.
+Every feature module applies the `TaminHamrah.kmp.feature` plugin, which wires in all five core modules plus Koin, coroutines and (for tests) turbine automatically — do not add them by hand.
 
-## اپ‌ها
+## Apps
 
-- `:androidApp` — `com.tamin.taminhamrah`، مالک `BuildConfig`، flavorها و قابلیت‌های بومی.
-- `iosApp/` — پروژه‌ی Xcode (خارج از Gradle)، شامل `TaminHamrahWidget` و پوشه‌های `ML/`، `Services/`.
+- `:androidApp` — `com.tamin.taminhamrah`, owns `BuildConfig`, product flavors and native capabilities.
+- `iosApp/` — Xcode project (outside Gradle), including `TaminHamrahWidget` and the `ML/` and `Services/` folders.
 
-مرتبط: [[Adding-a-Feature]] · [[Build-and-Run]]
+Related: [[Adding-a-Feature]] · [[Build-and-Run]]

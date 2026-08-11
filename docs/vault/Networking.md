@@ -2,43 +2,44 @@
 tags: [architecture]
 ---
 
-# شبکه
+# Networking
 
-استک: **Ktor 3.1.3** + **Ktorfit 2.5.2** (interfaceهای annotation-based با KSP) + kotlinx-serialization.
+Stack: **Ktor 3.1.3** + **Ktorfit 2.5.2** (annotation-based interfaces via KSP) + kotlinx-serialization.
 
-## ساختار core-network
+## core-network layout
 
 ```
-apiService/     interfaceهای Ktorfit — Common, User, History, WorkShops, VersionHistory,
+apiService/     Ktorfit interfaces — Common, User, History, WorkShops, VersionHistory,
                 agent/, contract/, health/, inbox/, pension/, personal/, treatment/, userRequest/
 dataSource/     <X>RemoteDataSource (interface) + <X>RemoteDataSourceImpl
-model/          *Dto.kt — شکل خام JSON
+model/          *DTO.kt — raw JSON shapes
 di/             NetworkKoinModule, ApiClientsModule, RemoteModule, ApiQueryBuilderModule
+tools/          BaseDTO, NetworkUtils, errorHandling/
 constant/       HeaderConstant, TimeoutConstant
 ```
 
-هر RemoteDataSourceImpl یک `ErrorParser` می‌گیرد (`ErrorParserImpl` در `networkModule`) و پاسخ خطا را به مدل داخلی تبدیل می‌کند. `expectSuccess = false` است، یعنی Ktor روی 4xx/5xx exception پرت نمی‌کند و مدیریت خطا دستی است.
+Every RemoteDataSourceImpl takes an `ErrorParser` (`ErrorParserImpl`, bound in `networkModule`) and converts error responses into internal models. `expectSuccess = false`, so Ktor does not throw on 4xx/5xx — error handling is explicit.
 
-## پنج HttpClient
+## The five HTTP clients
 
-تعریف در `core-network/.../di/NetworkKoinModule.kt`، همه با qualifier:
+Defined in `core-network/.../di/NetworkKoinModule.kt`, all behind qualifiers:
 
-| qualifier | baseUrl | Auth plugin | timeout |
+| Qualifier | baseUrl | Auth plugin | Timeout |
 |---|---|---|---|
-| `mainHttpClient` | `NetworkConstants.BASE_URL` | ✅ bearer + refresh | ۶۰ ثانیه |
-| `authHttpClient` | `BASE_URL` | ❌ (برای endpointهای توکن) | ۶۰ ثانیه |
-| `healthHttpClient` | `BASE_URL_HEALTH_PROFILE` | ❌ | ۶۰ ثانیه |
-| `uploadHttpClient` | `BASE_URL` | ✅ | ۵ دقیقه |
-| `aiHttpClient` | `AI_BASE_URL` | ✅ + `AiChatTokenPlugin` | ۶۰ ثانیه |
+| `mainHttpClient` | `NetworkConstants.BASE_URL` | ✅ bearer + refresh | 60 s |
+| `authHttpClient` | `BASE_URL` | ❌ (for token endpoints) | 60 s |
+| `healthHttpClient` | `BASE_URL_HEALTH_PROFILE` | ❌ | 60 s |
+| `uploadHttpClient` | `BASE_URL` | ✅ | 5 min |
+| `aiHttpClient` | `AI_BASE_URL` | ✅ + `AiChatTokenPlugin` | 60 s |
 
-## جریان توکن
+## Token flow
 
 ```
 loadTokens    → authRepository.getAccessToken()
 refreshTokens → authRepository.refreshToken() → getAccessToken()
 ```
 
-⚠️ نکته‌ای که در کد کامنت هم شده: `BearerAuthProvider` بعد از اولین درخواست، توکن را cache می‌کند و دیگر `loadTokens` را صدا نمی‌زند. به همین دلیل `AuthTokenInvalidator` وجود دارد:
+⚠️ Noted in the source as well: `BearerAuthProvider` caches its tokens after the first request and never calls `loadTokens` again on its own. That is why `AuthTokenInvalidator` exists:
 
 ```kotlin
 client.authProviders.filterIsInstance<BearerAuthProvider>().forEach {
@@ -46,36 +47,46 @@ client.authProviders.filterIsInstance<BearerAuthProvider>().forEach {
 }
 ```
 
-هنگام login/logout باید invalidator صدا زده شود، وگرنه توکن قدیمی می‌ماند.
+The invalidator must be triggered on login/logout, or the stale token survives.
 
-`refreshToken` در `BearerTokens` عمداً `""` پاس می‌شود — مدیریت واقعی refresh token داخل `AuthRepository` است.
+`refreshToken` is deliberately passed as `""` inside `BearerTokens` — the real refresh token is managed inside `AuthRepository`.
 
-## آدرس‌ها
+## Endpoints
 
-`core-domain/.../util/NetworkConstants.kt` — منبع حقیقت برای کد مشترک:
+`core-domain/.../util/NetworkConstants.kt` is the source of truth for shared code:
 
 ```kotlin
 BASE_URL                = "https://eservices.tamin.ir/api/"
 BASE_URL_VIEW           = "https://eservices.tamin.ir/view/"
 BASE_URL_ACCOUNT        = "https://account.tamin.ir/auth/"
-BASE_URL_HEALTH_PROFILE = "http://172.16.14.115:5700/api/"   // IP داخلی
+BASE_URL_HEALTH_PROFILE = "http://172.16.14.115:5700/api/"   // internal IP
 AI_BASE_URL             = "https://sw.tamin.ir/api/"
 REDIRECT_URI            = "mytamin://login"
 DEFAULT_AUDIENCE        = "https://es.tamin.ir,https://eservices.tamin.ir"
 REQUEST_TIMEOUT_60_SEC = 60_000L   REQUEST_TIMEOUT_5_MIN = 300_000L
 ```
 
-⚠️ آدرس‌ها **دو جا** تعریف شده‌اند: همین فایل، و `buildConfigField`های `androidApp/build.gradle.kts`. flavor `flavorTest` آدرس‌های تست را override می‌کند ولی `NetworkConstants` این را نمی‌بیند. اگر آدرسی عوض شد، هر دو جا را بررسی کن. رجوع به [[Build-and-Run]].
+⚠️ Endpoints are declared in **two places**: this file, and the `buildConfigField` entries in `androidApp/build.gradle.kts`. The `flavorTest` flavor overrides the build-config values but `NetworkConstants` does not see that. When an endpoint changes, check both. See [[Build-and-Run]].
 
-⚠️ `CLIENT_ID` در `NetworkConstants` هاردکد شده و در `androidApp` از `key.properties` / متغیر محیطی `OPERATIONAL_API_KEY` می‌آید.
+⚠️ `CLIENT_ID` is hardcoded in `NetworkConstants`, while `androidApp` reads it from `key.properties` / the `OPERATIONAL_API_KEY` environment variable.
 
-## لاگ
+## Error handling
 
-`Logging` plugin با Kermit، تگ `KtorClient` / `KtorHealthClient`. سطح لاگ با `AppConfig.isDebug` کنترل می‌شود و هدر `Authorization` با `sanitizeHeader` پاک می‌شود.
-`chucker` هم در version catalog هست (debug/release no-op) برای بازرسی ترافیک اندروید.
+`tools/BaseDTO.kt` unwraps the standard envelope (`status`, `family`, `reason`, `data`, `problems`):
 
-## تست
+- `extractData()` — returns `data` or throws `TaminErrorUriException`
+- `extractMessage()` — for endpoints that return only a message
+- `extractDataOrProblems()` / `extractMessageOrProblems()` — return `ApiOutcome` instead of throwing when the backend sent a `problems` list
 
-`core-network/src/commonTest/resources/mocks/` و `androidUnitTest/resources/mocks/` فایل‌های JSON نمونه دارند (`certificate/`، `pension/`) — با `ktor-client-mock` استفاده می‌شوند.
+`tools/NetworkUtils.kt` holds `ErrorParser.safeCall(tag) { … }`, which wraps a call and normalizes failures. Note that its catch-all branch maps every unexpected exception to `NO_CONNECTION_ERROR`, and that `ErrorUri.fromString("CLIENT_ERROR: $reason")` never matches an enum name, so it always resolves to `UNKNOWN`.
 
-مرتبط: [[Dependency-Injection]] · [[Database]] · [[Overview]]
+## Logging
+
+The `Logging` plugin uses Kermit with tags `KtorClient` / `KtorHealthClient`. Log level is driven by `AppConfig.isDebug`, and the `Authorization` header is stripped via `sanitizeHeader`.
+`chucker` is also in the catalog (debug build / release no-op) for inspecting Android traffic.
+
+## Testing
+
+`core-network/src/commonTest/resources/mocks/` and `androidUnitTest/resources/mocks/` hold sample JSON (`certificate/`, `pension/`) used with `ktor-client-mock`.
+
+Related: [[Dependency-Injection]] · [[Database]] · [[Overview]]

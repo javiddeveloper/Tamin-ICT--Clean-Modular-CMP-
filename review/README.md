@@ -1,145 +1,145 @@
-# فرایند Code Review
+# Code Review Process
 
-این پوشه محل نگه‌داری گزارش‌های review است. هر merge request باز، یک فایل دارد:
+This folder holds review reports. Every open merge request has one file:
 
 ```
 review/
-├── README.md        ← همین فایل — فرایند
-├── TEMPLATE.md      ← اسکلت گزارش جدید
-└── MR-<id>.md       ← یک فایل به ازای هر MR باز
+├── README.md        ← this file — the process
+├── TEMPLATE.md      ← skeleton for a new report
+└── MR-<id>.md       ← one file per open MR
 ```
 
-نام فایل دقیقاً `MR-<شماره>.md` است — مثل `MR-161.md`، `MR-164.md`. شماره همان عددی است که در URL مربوط به merge request می‌آید:
+The file name is exactly `MR-<number>.md` — `MR-161.md`, `MR-164.md`. The number is the one in the merge request URL:
 `https://ci.tamin.ir/base/development/finance/tatmin-kmp/-/merge_requests/164`
 
-**فایل گزارش روی branch مبدأ همان MR است، نه روی `develop`.** به این ترتیب توسعه‌دهنده بدون هیچ کار اضافه‌ای آن را کنار کدش می‌بیند، و وقتی MR بسته شد فایل هم با آن می‌رود.
+**The report lives on the MR's source branch, not on `develop`.** That way the developer sees it next to their code with no extra step, and when the MR closes the file goes with it.
 
-> ⚠️ **زبان گزارش‌ها انگلیسی است.** فایل‌های `MR-<id>.md` و `TEMPLATE.md` کاملاً به انگلیسی نوشته می‌شوند — عنوان‌ها، شرح موارد، جدول خلاصه و revision log. فقط همین `README.md` که سند فرایند است فارسی می‌ماند.
-
----
-
-## چرخه‌ی کامل
-
-```
-Round 1  ─ reviewer ─→  گزارش روی branch مبدأ commit می‌شود
-                            ↓
-              developer اصلاح می‌کند و push می‌کند
-                            ↓
-Round 2  ─ reviewer ─→  همان فایل به‌روزرسانی می‌شود (بند به بند)
-                            ↓
-              … تا وقتی همه‌ی موارد بسته شوند
-                            ↓
-            reviewer فایل را حذف و push می‌کند
-                            ↓
-              merge از طریق GitLab انجام می‌شود
-```
+> ⚠️ **Reports are written in English** — headings, item descriptions, the summary table and the revision log. This `README.md` is the only file here that is not a report.
 
 ---
 
-## گام ۱ — آماده‌سازی
+## The full cycle
 
-⚠️ **قبل از هر چیز، working tree را دست نزن.**
+```
+Round 1  ─ reviewer ─→  report committed to the source branch
+                            ↓
+              developer applies fixes and pushes
+                            ↓
+Round 2  ─ reviewer ─→  the same file is updated, item by item
+                            ↓
+              … until every item is closed
+                            ↓
+            reviewer deletes the file and pushes
+                            ↓
+              merge happens through GitLab
+```
 
-روش امن، ساختن یک worktree جداست تا پوشه‌ی اصلی پروژه و تغییرات ذخیره‌نشده‌ی کاربر دست‌نخورده بماند:
+---
+
+## Step 1 — Preparation
+
+⚠️ **Do not disturb the working tree.**
+
+The safe approach is a separate worktree, so the main project folder and the user's uncommitted changes stay untouched:
 
 ```powershell
 git fetch origin "refs/merge-requests/<id>/head:mr-<id>" --force
 git worktree add ../review-mr-<id> mr-<id>
 ```
 
-اگر به هر دلیل worktree ممکن نبود، اول باید تأیید شود که `git status` تمیز است. **هرگز روی working tree ای که تغییر ذخیره‌نشده دارد `checkout` نزن.**
+If a worktree is not possible for some reason, confirm `git status` is clean first. **Never run `checkout` on a working tree that has uncommitted changes.**
 
-برای پیدا کردن branch متناظر با یک شماره‌ی MR:
+To find the branch behind an MR number:
 
 ```powershell
 git ls-remote origin "refs/merge-requests/<id>/head"
-# سپس sha را با خروجی git ls-remote --heads origin تطبیق بده
+# then match the sha against the output of: git ls-remote --heads origin
 ```
 
-قبل از push، تأیید کن که sha مربوط به `mr-<id>` با sha همان branch روی remote یکی است. اگر یکی نبود یعنی branch جلو رفته و باید دوباره fetch کنی.
+Before pushing, confirm the sha of `mr-<id>` matches the sha of that branch on the remote. If it does not, the branch has moved and you need to fetch again.
 
 ---
 
-## گام ۲ — نوشتن گزارش (Round 1)
+## Step 2 — Writing the report (Round 1)
 
-`TEMPLATE.md` را کپی کن به `review/MR-<id>.md` و پرش کن. **گزارش به انگلیسی نوشته می‌شود.**
+Copy `TEMPLATE.md` to `review/MR-<id>.md` and fill it in. **The report is written in English.**
 
-**دامنه‌ی diff** — همیشه نسبت به merge-base، نه نسبت به نوک `develop`:
+**Diff scope** — always against the merge-base, not the tip of `develop`:
 
 ```powershell
 $base = git merge-base origin/develop mr-<id>
 git diff --stat $base..mr-<id>
 ```
 
-**قواعد نوشتن:**
+**Writing rules:**
 
-- هر مورد باید **قابل بازبینی** باشد: مسیر فایل، شماره‌ی خط، و اینکه دقیقاً چه چیزی باید عوض شود.
-- برای هر مورد یک سناریوی خرابی مشخص بنویس، نه توصیف کلی. «this may cause problems» گزارش نیست.
-- لحن توصیفی باشد نه قضاوتی. موضوع کد است، نه نویسنده‌ی آن.
-- اگر مطمئن نیستی، وضعیت `⬜ needs confirmation` بگذار — نه اینکه به‌عنوان باگ قطعی ثبتش کنی.
-- اگر مشکلی از قبل وجود داشته و این MR فقط منتقلش کرده، همین را صریح بنویس.
-- بخش «What was done well» را خالی نگذار اگر واقعاً چیزی هست.
-- **commit بررسی‌شده حتماً در header ثبت شود.** بدون آن، round بعدی نمی‌داند از کجا diff بگیرد.
+- Every item must be **verifiable**: file path, line number, and exactly what should change.
+- Give each item a concrete failure scenario, not a general remark. "This may cause problems" is not a finding.
+- Keep the tone descriptive, not judgemental. The subject is the code, not its author.
+- If you are not certain, use `⬜ needs confirmation` rather than recording it as a definite bug.
+- If a problem predates this MR and was only carried forward, say so explicitly.
+- Do not leave "What was done well" empty when there is genuinely something there.
+- **Record the reviewed commit in the header.** Without it the next round does not know where to diff from.
 
-سپس فایل را روی همان branch commit و push کن:
+Then commit and push to the same branch:
 
 ```powershell
 git add review/MR-<id>.md
 git commit -m "docs(review): add review report for MR !<id>"
-git push origin HEAD:<نام-branch-اصلی>
+git push origin HEAD:<source-branch-name>
 ```
 
 ---
 
-## گام ۳ — بازبینی (Round 2 به بعد)
+## Step 3 — Re-review (Round 2 onward)
 
 ```powershell
 git fetch origin "refs/merge-requests/<id>/head:mr-<id>" --force
-git diff <commit-round-قبل>..mr-<id>          # فقط چیزی که عوض شده
+git diff <previous-round-commit>..mr-<id>          # only what changed
 ```
 
-**بند به بند** برو. برای هر مورد در جدول خلاصه، ستون وضعیت را به‌روز کن:
+Go **item by item**. Update the Status column in the summary table:
 
-| نماد | معنی |
+| Symbol | Meaning |
 |---|---|
-| `⬜ open` | هنوز اصلاح نشده |
-| `✅ fixed` | بررسی شد و درست است |
-| `🔄 needs rework` | تلاش شده ولی هنوز مشکل دارد — توضیح بده چرا |
-| `➖ rejected` | توسعه‌دهنده دلیل آورده و پذیرفته شده — دلیل را ثبت کن |
-| `⬜ needs confirmation` | منتظر پاسخ درباره‌ی نیت طراحی |
+| `⬜ open` | not addressed yet |
+| `✅ fixed` | checked and correct |
+| `🔄 needs rework` | attempted but still wrong — explain why |
+| `➖ rejected` | the developer gave a reason and it was accepted — record the reason |
+| `⬜ needs confirmation` | waiting on an answer about design intent |
 
-هر round یک سطر به **Revision log** اضافه می‌کند.
+Each round adds a row to the **Revision log**.
 
-`✅ fixed` فقط وقتی ثبت می‌شود که کد واقعاً خوانده شده باشد. پیام commit توسعه‌دهنده مدرک نیست.
+`✅ fixed` is recorded only after the code has actually been read. The developer's commit message is not evidence.
 
-اگر در round جدید مشکل تازه‌ای پیدا شد، به انتهای فهرست اضافه می‌شود (شماره‌های قبلی جابه‌جا نمی‌شوند، وگرنه ارجاع‌های قبلی بی‌معنا می‌شود).
+If a new problem appears in a later round, append it to the end of the list — never renumber existing items, or earlier references become meaningless.
 
 ---
 
-## گام ۴ — بستن
+## Step 4 — Closing out
 
-وقتی هیچ موردی در وضعیت `⬜` یا `🔄` نماند:
+When nothing is left in `⬜` or `🔄`:
 
 ```powershell
 git rm review/MR-<id>.md
 git commit -m "docs(review): close out review for MR !<id>"
-git push origin HEAD:<نام-branch-اصلی>
+git push origin HEAD:<source-branch-name>
 ```
 
-سپس worktree پاک شود:
+Then clean up the worktree:
 
 ```powershell
 git worktree remove ../review-mr-<id>
 git branch -D mr-<id>
 ```
 
-⛔ **merge کردن به `develop` کار reviewer نیست.** بعد از بسته شدن گزارش، فقط اعلام کن که MR آماده است. خودِ merge از طریق GitLab و توسط انسان انجام می‌شود — تا approval، پایپ‌لاین CI و تصمیم زمان‌بندی سر جای خودشان بمانند.
+⛔ **Merging into `develop` is not the reviewer's job.** Once the report is closed out, just state that the MR is ready. The merge itself happens through GitLab and is performed by a human, so approvals, the CI pipeline and release timing all stay where they belong.
 
 ---
 
-## نکات
+## Notes
 
-- اگر MR شامل branch دیگری هم merge شده باشد (مثل `!166` که `!164` را در خود دارد)، این را در header گزارش بنویس؛ وگرنه دو گزارش موازی روی یک کد نوشته می‌شود.
-- گزارش را روی `develop` commit نکن. اگر اشتباهاً آنجا رفت، حذفش کن.
-- فایل‌های این پوشه موقت‌اند. اگر `review/` جز `README.md` و `TEMPLATE.md` چیزی نداشت، یعنی هیچ MR بازی در انتظار بازبینی نیست.
-- برای ثبت مستقیم کامنت روی GitLab به `glab` نیاز است (نصب شده، ولی احراز هویت با `glab auth login --hostname ci.tamin.ir` باید یک بار توسط کاربر انجام شود). بدون آن، گزارش فقط به‌صورت همین فایل منتقل می‌شود.
+- If an MR carries another branch inside it (like `!166`, which contains `!164`), say so in the report header — otherwise two parallel reports get written against the same code.
+- Do not commit a report to `develop`. If one lands there by mistake, delete it.
+- Files in this folder are temporary. If `review/` holds nothing but `README.md` and `TEMPLATE.md`, no MR is waiting for review.
+- Posting comments directly on GitLab requires `glab` (installed, but `glab auth login --hostname ci.tamin.ir` has to be run once by the user). Without it, the report travels only as this file.

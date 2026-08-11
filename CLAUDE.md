@@ -1,49 +1,51 @@
 # TaminX — تأمین همراه
 
-اپ Kotlin Multiplatform + Compose Multiplatform (اندروید + iOS) برای سازمان تأمین اجتماعی.
-`rootProject.name = "TaminX"` · package base: `com.tamin.taminhamrah`
+A Kotlin Multiplatform + Compose Multiplatform app (Android + iOS) for the Iranian Social Security Organization.
+`rootProject.name = "TaminX"` · base package: `com.tamin.taminhamrah`
 
-## اول اینجا را بخوان
+## Read this first
 
-دانش پروژه در یک vault ابسیدین جمع شده است: **`docs/vault/`** — نقطه‌ی شروع `docs/vault/Home.md`.
-به‌جای گشتن در کدبیس، اول صفحه‌ی مرتبط را از آنجا بخوان:
+Project knowledge lives in an Obsidian vault: **`docs/vault/`** — start at `docs/vault/Home.md`.
+Read the relevant page there before searching the codebase:
 
-| سؤال | صفحه |
+| Question | Page |
 |---|---|
-| لایه‌ها و جریان داده چطور است؟ | `docs/vault/Overview.md` |
-| کدام ماژول مسئول چیست؟ | `docs/vault/Modules.md` |
-| ViewModel چطور نوشته می‌شود؟ | `docs/vault/MVI-Pattern.md` |
-| صفحه/فیچر جدید چطور اضافه کنم؟ | `docs/vault/Adding-a-Feature.md` |
-| ناوبری | `docs/vault/Navigation.md` |
-| DI و Koin | `docs/vault/Dependency-Injection.md` |
-| شبکه، توکن، آدرس سرورها | `docs/vault/Networking.md` |
-| دیتابیس و schema | `docs/vault/Database.md` |
-| build، flavor، JDK | `docs/vault/Build-and-Run.md` |
+| How are the layers and data flow organized? | `docs/vault/Overview.md` |
+| Which module owns what? | `docs/vault/Modules.md` |
+| How is a ViewModel written? | `docs/vault/MVI-Pattern.md` |
+| How do I add a screen or feature? | `docs/vault/Adding-a-Feature.md` |
+| Navigation | `docs/vault/Navigation.md` |
+| DI and Koin | `docs/vault/Dependency-Injection.md` |
+| Networking, tokens, endpoints | `docs/vault/Networking.md` |
+| Database and schemas | `docs/vault/Database.md` |
+| Build, flavors, JDK | `docs/vault/Build-and-Run.md` |
 | CI | `docs/vault/CI-CD.md` |
-| منوی داینامیک و FeatureFlag | `docs/vault/Feature-Flags.md` |
-| اصطلاح فارسی ↔ نام در کد | `docs/vault/Glossary.md` |
+| Dynamic menu and FeatureFlag | `docs/vault/Feature-Flags.md` |
+| AI assistant architecture | `docs/vault/AI-Agent.md` |
+| AI assistant JSON contract | `docs/vault/AI-Agent-API-Contract.md` |
+| Persian domain term ↔ name in code | `docs/vault/Glossary.md` |
 
-اسناد قدیمی‌تر و مفصل‌تر: `documents/features.md`، `documents/agent.md`، `documents/agent-api-contract.md`
+All documentation is written in English. The vault uses Obsidian-style `[[…]]` links, which resolve to the file name without its extension.
+
+## Rules that must not be broken
+
+1. **File naming contract** — `core-domain/model/*DN.kt` · `core-network/model/*DTO.kt` ·
+   `core-ui/model/*PR.kt` · `core-ui/mapper/*Mapper.kt` · `core-database/data/local/entity/*Entity.kt` ·
+   `core-data/data/mapper/*Mapper.kt`
+   ⚠️ `TaminHamrahNamingConventionPlugin` was meant to enforce this but **has a bug and always passes** — details in `docs/vault/Naming-Conventions.md`. Enforcement is manual.
+2. Every ViewModel extends `BaseViewModel<STATE, PARTIAL_STATE, EVENT, INTENT>`; input arrives only through `sendIntent`.
+3. Each feature's Koin module must be registered in `sharedModules` (`shared/.../di/Koin.kt`).
+4. Navigation between two different features goes through a callback, never a direct import.
+5. Search `core-ui/ui/components/` before building a new component (59 already exist).
+6. **`old_android/` is not part of the project** — it is the legacy native version kept as the reference implementation the KMP rewrite is ported from. Read it to understand expected behaviour, but never edit or commit it (it is ignored). Details: `docs/vault/Reference-old-android.md`
 
 ## Code Review
 
-هر درخواست review روی یک merge request، از فرایند **`review/README.md`** پیروی می‌کند — قبل از شروع بخوانش.
-خلاصه: گزارش در `review/MR-<id>.md` نوشته و روی **branch مبدأ همان MR** commit می‌شود؛ توسعه‌دهنده اصلاح می‌کند؛ همان فایل بند به بند به‌روز می‌شود؛ در پایان فایل حذف می‌شود.
-پنج قاعده: (۱) **گزارش review کاملاً به انگلیسی نوشته می‌شود**؛ (۲) working tree کاربر دست نمی‌خورد — از `git worktree` استفاده کن نه `git checkout`؛ (۳) commit بررسی‌شده در header گزارش ثبت شود؛ (۴) `✅ fixed` فقط بعد از خواندن کد؛ (۵) **merge به `develop` کار reviewer نیست.**
+Any request to review a merge request follows the process in **`review/README.md`** — read it before starting.
+In short: the report goes in `review/MR-<id>.md`, committed **on that MR's source branch**; the developer applies fixes; the same file is updated item by item; the file is deleted at the end.
+Five rules: (1) **reports are written in English**; (2) the user's working tree is never disturbed — use `git worktree`, not `git checkout`; (3) record the reviewed commit in the report header; (4) `✅ fixed` only after reading the code; (5) **merging into `develop` is not the reviewer's job.**
 
-## قواعدی که نباید نقض شوند
-
-1. **قرارداد نام‌گذاری فایل** — `core-domain/model/*DN.kt` · `core-network/model/*DTO.kt` ·
-   `core-ui/model/*PR.kt` · `core-ui/mapper/*Mapper.kt` · `core-database/data/local/entity/*Entity.kt` ·
-   `core-data/data/mapper/*Mapper.kt`
-   ⚠️ `TaminHamrahNamingConventionPlugin` قرار بوده این را اجبار کند ولی **باگ دارد و همیشه pass می‌شود** — جزئیات در `docs/vault/Naming-Conventions.md`. پس رعایتش دستی است.
-2. هر ViewModel از `BaseViewModel<STATE, PARTIAL_STATE, EVENT, INTENT>` ارث می‌برد؛ ورودی فقط از `sendIntent`.
-3. ماژول Koin هر فیچر باید در `sharedModules` (فایل `shared/.../di/Koin.kt`) ثبت شود.
-4. ناوبری بین دو فیچر مختلف با callback انجام می‌شود، نه import مستقیم.
-5. قبل از ساخت کامپوننت جدید، `core-ui/ui/components/` را بگرد (۵۹ کامپوننت آماده).
-6. **`old_android/` جزئی از پروژه نیست** — نسخه‌ی native قدیمی است که به‌عنوان پیاده‌سازی مرجع نگه داشته شده و KMP از رویش port می‌شود. برای فهمیدن رفتار مورد انتظار بخوانش، ولی ویرایش و commit نکن (ignore شده). جزئیات: `docs/vault/Reference-old-android.md`
-
-## دستورهای رایج
+## Common commands
 
 ```powershell
 .\gradlew.bat :androidApp:assembleDirectDebug
@@ -51,8 +53,8 @@
 .\gradlew.bat :feature:<name>:compileDebugKotlinAndroid
 ```
 
-JDK 17 · compileSdk 36 · minSdk 24 · iOS فقط روی macOS ساخته می‌شود.
+JDK 17 · compileSdk 36 · minSdk 24 · iOS builds only on macOS.
 
-## نگه‌داری vault
+## Maintaining the vault
 
-وقتی چیزی یاد گرفتی که در کد پیدا نبود یا وقت زیادی برای کشفش صرف شد، صفحه‌ی مربوطه در `docs/vault/` را به‌روز کن. لینک‌های `[[…]]` سبک ابسیدین‌اند و با نام فایل بدون پسوند کار می‌کنند.
+When you learn something that was not visible in the code, or that took real time to discover, update the relevant page in `docs/vault/`.
