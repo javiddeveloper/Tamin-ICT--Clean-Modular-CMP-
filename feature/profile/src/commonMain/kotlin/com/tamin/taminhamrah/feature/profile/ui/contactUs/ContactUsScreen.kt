@@ -3,8 +3,8 @@ package com.tamin.taminhamrah.feature.profile.ui.contactUs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,10 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.components.ContactDetailsCard
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.components.ContactUsFooter
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.components.ContactUsHeader
@@ -36,7 +42,9 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -47,6 +55,8 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contact_us_copied
+
+private val HeaderCollapseDistance = 160.dp
 
 @Composable
 fun ContactUsRoute(
@@ -121,60 +131,71 @@ fun ContactUsScreen(
 ) {
     val colors = LocalTaminColors.current
 
+    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(colors.bgPage)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            ContactUsHeader(
-                onBackClicked = { onIntent(ContactUsIntent.OnBackClicked) }
-            )
+        if (state.isLoading) {
+            LoadingStateOverlay()
+        } else {
+            state.contactInfo?.let { info ->
+                LazyColumn(
+                    overscrollEffect = rememberJellyOverscroll(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .nestedScroll(collapse.nestedScrollConnection),
+                    contentPadding = PaddingValues(
+                        top = Spacing.md,
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding() + Spacing.xxl,
+                        start = Spacing.page,
+                        end = Spacing.page
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    item(key = "header_spacer") {
+                        Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+                    }
 
-            if (state.isLoading) {
-                LoadingStateOverlay()
-            } else {
-                state.contactInfo?.let { info ->
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        overscrollEffect = rememberJellyOverscroll(),
-                        contentPadding = PaddingValues(
-                            top = Spacing.md,
-                            bottom = WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding() + Spacing.xxl,
-                            start = Spacing.page,
-                            end = Spacing.page
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                    ) {
-                        item(key = "hotline_card") {
-                            HotlineCard(
-                                hotline = info.hotline,
-                                onCallClicked = { onIntent(ContactUsIntent.OnCallHotline) }
-                            )
-                        }
+                    item(key = "hotline_card") {
+                        HotlineCard(
+                            hotline = info.hotline,
+                            onCallClicked = { onIntent(ContactUsIntent.OnCallHotline) }
+                        )
+                    }
 
-                        item(key = "social_channels") {
-                            SocialChannelsGrid(
-                                channels = info.socialChannels,
-                                onChannelClick = { onIntent(ContactUsIntent.OnSocialChannelClick(it)) }
-                            )
-                        }
+                    item(key = "social_channels") {
+                        SocialChannelsGrid(
+                            channels = info.socialChannels,
+                            onChannelClick = { onIntent(ContactUsIntent.OnSocialChannelClick(it)) }
+                        )
+                    }
 
-                        item(key = "contact_details") {
-                            ContactDetailsCard(
-                                details = info.contactDetails,
-                                onDetailClick = { onIntent(ContactUsIntent.OnContactDetailClick(it)) }
-                            )
-                        }
+                    item(key = "contact_details") {
+                        ContactDetailsCard(
+                            details = info.contactDetails,
+                            onDetailClick = { onIntent(ContactUsIntent.OnContactDetailClick(it)) }
+                        )
+                    }
 
-                        item(key = "footer") {
-                            ContactUsFooter()
-                        }
+                    item(key = "footer") {
+                        ContactUsFooter()
                     }
                 }
             }
         }
+
+        ContactUsHeader(
+            onBackClicked = { onIntent(ContactUsIntent.OnBackClicked) },
+            collapseProgress = collapse.progressProvider,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { headerHeightPx = it.height }
+        )
     }
 }
 
