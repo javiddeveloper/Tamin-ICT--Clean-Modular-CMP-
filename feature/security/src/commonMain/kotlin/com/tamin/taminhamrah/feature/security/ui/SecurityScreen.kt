@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
@@ -59,6 +60,7 @@ import taminx.core.core_ui.biometric_prompt_subtitle
 import taminx.core.core_ui.biometric_prompt_title
 import taminx.core.core_ui.ic_pattern
 import taminx.core.core_ui.ic_privacy
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_shield_check
 import taminx.core.core_ui.profile_security
 import taminx.core.core_ui.security_2fa
@@ -131,9 +133,10 @@ private fun SecurityContent(
                 title = stringResource(Res.string.profile_security),
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(Res.string.action_back),
-                        onClick = onNavigateBack
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        contentDescription = null,
+                        onClick = onNavigateBack,
+                        bordered = true
                     )
                 }
             )
