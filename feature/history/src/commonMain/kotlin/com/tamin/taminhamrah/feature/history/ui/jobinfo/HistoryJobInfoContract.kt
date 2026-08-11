@@ -1,7 +1,9 @@
 package com.tamin.taminhamrah.feature.history.ui.jobinfo
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.history.HistoryJobInfoItemPR
 
+@Immutable
 data class HistoryJobInfoUiState(
     val isLoading: Boolean = false,
     val jobInfos: List<HistoryJobInfoItemPR> = emptyList(),
