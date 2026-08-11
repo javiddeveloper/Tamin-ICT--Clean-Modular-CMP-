@@ -101,7 +101,57 @@ object UserRequestTestData {
                 ]
             }
         """.trimIndent()
+
+    val salaryDeductionCertificateSuccess: String
+        get() = """
+            {
+                "status": 200,
+                "family": "SUCCESSFUL",
+                "reason": "OK",
+                "traceId": "a57c8114-781e-4b42-9731-950960a5bf9c",
+                "data": {
+                    "list": [
+                        {
+                            "id": 491371155,
+                            "operation": null,
+                            "createdBy": "6319889391",
+                            "creationTime": 1785215695428,
+                            "lastModifiedBy": null,
+                            "lastModificationTime": 1785215798065,
+                            "refCode": "1075558440",
+                            "userName": "6319889391",
+                            "status": {
+                                "operation": null,
+                                "requestCode": "0018",
+                                "requestDesc": "مختومه-تاييد نهايي"
+                            },
+                            "title": "درخواست گواهي کسر از حقوق",
+                            "comment": null,
+                            "template": null,
+                            "requestType": {
+                                "operation": null,
+                                "createdBy": null,
+                                "creationTime": null,
+                                "lastModifiedBy": null,
+                                "lastModificationTime": null,
+                                "id": 22,
+                                "title": "درخواست گواهي کسر از حقوق",
+                                "description": "درخواست گواهي کسر از حقوق"
+                            },
+                            "deliverCode": null,
+                            "refrenceid": null,
+                            "requestDetails": null,
+                            "requestChid": null,
+                            "fullName": null,
+                            "createByName": "سيدرحمت اله ميرفضلي"
+                        }
+                    ],
+                    "total": 1
+                }
+            }
+        """.trimIndent()
 }
+
 
 
 object PersonalInboxTestData {

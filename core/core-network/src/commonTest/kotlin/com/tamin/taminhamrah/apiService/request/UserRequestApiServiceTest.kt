@@ -110,5 +110,31 @@ class UserRequestApiServiceTest : BaseApiTest() {
         assertEquals("شرایط ثبت درخواست چیست؟", items.first().question)
         assertEquals(true, items.first().isPublic)
     }
+
+    @Test
+    fun `getUserRequests should parse salary deduction certificate request correctly`() = runTest {
+        val jsonResponse = UserRequestTestData.salaryDeductionCertificateSuccess
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserRequestApiService()
+
+        val response = apiService.getUserRequests(mapOf("filter" to "[{\"value\":\"03\",\"operator\":\"EQUAL\",\"property\":\"operation\"},{\"property\":\"refCode\",\"value\":\"1075558440\",\"operator\":\"EQ\"},{\"property\":\"requestType.id\",\"value\":22,\"operator\":\"EQ\"}]"))
+
+        assertEquals(200, response.status)
+        val listData = response.data
+        assertNotNull(listData)
+        assertEquals(1, listData.total)
+
+        val item = listData.list?.first()
+        assertNotNull(item)
+        assertEquals(491371155L, item.id)
+        assertEquals("1075558440", item.refCode)
+        assertEquals("درخواست گواهي کسر از حقوق", item.title)
+        assertEquals("0018", item.status?.requestCode)
+        assertEquals("مختومه-تاييد نهايي", item.status?.requestDesc)
+        assertEquals(22L, item.requestType?.id)
+        assertEquals("سيدرحمت اله ميرفضلي", item.createByName)
+    }
 }
+
 
