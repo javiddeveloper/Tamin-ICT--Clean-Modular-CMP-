@@ -2,71 +2,70 @@
 tags: [build]
 ---
 
-# ساخت و اجرا
+# Build and Run
 
-## پیش‌نیاز
+## Prerequisites
 
-- **JDK 17** — `jvmToolchain(17)`، `JvmTarget.JVM_17`. مسیرِ استفاده‌شده در `build.bat`:
-  `%USERPROFILE%\.jdks\corretto-17.0.17`
-  (JBR 17 همراه IDE هم جواب می‌دهد.)
+- **JDK 17** — `jvmToolchain(17)`, `JvmTarget.JVM_17`. The path used by `build.bat`:
+  `%USERPROFILE%\.jdks\corretto-17.0.17` (the IDE's bundled JBR 17 also works).
 - `compileSdk = 36`, `buildToolsVersion = "36.0.0"`, `minSdk = 24`
-- مخازن Maven داخلی: `https://nexus.tamin.ir/content/groups/public` و `https://maven.myket.ir/` — بدون دسترسی به شبکه‌ی تأمین، resolve نمی‌شود.
-- `android.builder.sdkDownload=false` → SDK باید از قبل نصب باشد.
+- Internal Maven repositories: `https://nexus.tamin.ir/content/groups/public` and `https://maven.myket.ir/` — dependency resolution fails without access to the Tamin network.
+- `android.builder.sdkDownload=false` → the Android SDK must already be installed.
 
-## دستورها
+## Commands
 
 ```powershell
-.\gradlew.bat :androidApp:assembleDirectDebug        # ساخت debug (flavor پیش‌فرض کاری)
-.\gradlew.bat :androidApp:assembleFlavorTestDebug    # علیه سرورهای تست
-.\gradlew.bat testDebugUnitTest testDirectDebugUnitTest   # همان چیزی که CI اجرا می‌کند
-.\gradlew.bat :feature:profile:compileDebugKotlinAndroid  # چک سریع یک ماژول
-.\gradlew.bat checkNamingConvention                  # فقط بررسی نام‌گذاری
+.\gradlew.bat :androidApp:assembleDirectDebug        # debug build, default working flavor
+.\gradlew.bat :androidApp:assembleFlavorTestDebug    # against the test servers
+.\gradlew.bat testDebugUnitTest testDirectDebugUnitTest   # what CI runs
+.\gradlew.bat :feature:profile:compileDebugKotlinAndroid  # quick single-module check
+.\gradlew.bat checkNamingConvention                  # naming check (currently a no-op, see [[Naming-Conventions]])
 ```
 
-`build.bat` میان‌بر است: JAVA_HOME را ست می‌کند و `assembleDebug` می‌زند.
+`build.bat` is a shortcut: it sets JAVA_HOME and runs `assembleDebug`.
 
-iOS فقط روی macOS با Xcode (`iosApp/iosApp.xcodeproj`) ساخته می‌شود؛ روی این ماشین ویندوزی قابل build نیست.
+iOS is built only on macOS with Xcode (`iosApp/iosApp.xcodeproj`); it cannot be built on this Windows machine.
 
-## flavorها
+## Flavors
 
-بُعد: `taminHamrah`
+Dimension: `taminHamrah`
 
-| flavor | applicationId | تفاوت |
+| Flavor | applicationId | Difference |
 |---|---|---|
-| `direct` | `com.tamin.taminhamrah` | انتشار مستقیم |
-| `caffeBazaar` | همان | کافه‌بازار |
-| `myket` | همان | مایکت |
-| `flavorTest` | همان | override آدرس‌ها به سرور تست + `TEST_API_KEY` |
-| `reporter` | `com.tamin.taminhamrahreporter` | نسخه‌ی «گزارش‌گیری»، ورژن مستقل `1.0.0` |
+| `direct` | `com.tamin.taminhamrah` | direct distribution |
+| `caffeBazaar` | same | Cafe Bazaar |
+| `myket` | same | Myket |
+| `flavorTest` | same | overrides endpoints to the test servers, uses `TEST_API_KEY` |
+| `reporter` | `com.tamin.taminhamrahreporter` | "reporting" build, independent version `1.0.0` |
 
-buildType `debug` پسوند `.debug` به applicationId می‌زند.
-نسخه‌ی فعلی اپ: `versionCode = 7`, `versionName = "2.2.0"`.
+The `debug` build type appends `.debug` to the applicationId.
+Current app version: `versionCode = 7`, `versionName = "2.2.0"`.
 
-نام فایل خروجی release:
+Release output file name:
 `Tamin_ICT_<versionCode>_<versionName>-(<flavor>).apk`
 
-## کلیدها و امضا
+## Keys and signing
 
-- `key.properties` در ریشه (در گیت نیست): `OPERATIONAL_API_KEY`, `TEST_API_KEY`. اگر نبود، از متغیر محیطی خوانده می‌شود و در نهایت رشته‌ی خالی.
-- امضای release از متغیرهای محیطی: `RELEASE_KEYSTORE`, `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`. اگر keystore نباشد، release بدون امضا ساخته می‌شود.
-- `isMinifyEnabled = false` در release — ProGuard فعال نیست.
+- `key.properties` at the repo root (not in git): `OPERATIONAL_API_KEY`, `TEST_API_KEY`. If missing, values fall back to environment variables and finally to an empty string.
+- Release signing comes from environment variables: `RELEASE_KEYSTORE`, `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`. Without a keystore the release build is produced unsigned.
+- `isMinifyEnabled = false` in release — ProGuard is not active.
 
-## پلاگین‌های convention
+## Convention plugins
 
 `build-logic/convention/src/main/kotlin/`
 
-| پلاگین | id | کارش |
+| Plugin | id | What it does |
 |---|---|---|
-| `TaminHamrahKmpLibraryPlugin` | `TaminHamrah.kmp.library` | KMP + android library، JDK 17، targetهای iOS |
+| `TaminHamrahKmpLibraryPlugin` | `TaminHamrah.kmp.library` | KMP + android library, JDK 17, iOS targets |
 | `TaminHamrahKmpComposePlugin` | `TaminHamrah.kmp.compose` | Compose Multiplatform |
-| `TaminHamrahKmpFeaturePlugin` | `TaminHamrah.kmp.feature` | library + compose + همه‌ی coreها + Koin + turbine |
-| `TaminHamrahAndroidApplicationPlugin` | `TaminHamrah.android.application` | اپ اندروید |
-| `TaminHamrahNamingConventionPlugin` | — | [[Naming-Conventions]] |
+| `TaminHamrahKmpFeaturePlugin` | `TaminHamrah.kmp.feature` | library + compose + all core modules + Koin + turbine |
+| `TaminHamrahAndroidApplicationPlugin` | `TaminHamrah.android.application` | the Android app |
+| `TaminHamrahNamingConventionPlugin` | `TaminHamrah.naming.convention` | [[Naming-Conventions]] — currently a no-op |
 
-## نکات
+## Notes
 
-- `gradle.properties`: heap ۴ گیگ، caching و parallel روشن، `kotlin.native.ignoreDisabledTargets=true` (تا روی ویندوز targetهای iOS مانع نشوند).
-- پوشه‌ی `build-logic/convention/bin/` کپی کامپایل‌شده‌ی IDE است — منبع حقیقت `src/main/kotlin/` است.
-- فایل‌های `hs_err_pid*.log` و `replay_pid*.log` در ریشه، بازمانده‌ی crash قبلی JVM هستند.
+- `gradle.properties`: 4 GB heap, caching and parallel builds on, `kotlin.native.ignoreDisabledTargets=true` so the iOS targets do not block Windows builds.
+- `build-logic/convention/bin/` is the IDE's compiled copy — the source of truth is `src/main/kotlin/`.
+- `hs_err_pid*.log` and `replay_pid*.log` at the repo root are leftovers from an earlier JVM crash.
 
-مرتبط: [[CI-CD]] · [[Naming-Conventions]] · [[Tech-Stack]]
+Related: [[CI-CD]] · [[Naming-Conventions]] · [[Tech-Stack]]

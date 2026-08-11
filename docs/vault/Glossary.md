@@ -2,64 +2,71 @@
 tags: [reference, domain]
 ---
 
-# واژه‌نامه‌ی دامنه
+# Glossary
 
-دامنه: بیمه و تأمین اجتماعی. نگاشت بین اصطلاح فارسی و نامی که در کد دیده می‌شود.
+Domain: insurance and social security. Maps the Persian term used by the business to the name it carries in the code. Persian terms are kept as-is because they are the data, not prose.
 
-## نقش‌های کاربر
+## User roles
 
-| فارسی | کد | `showRole` |
+| Persian | English | In code | `showRole` |
+|---|---|---|---|
+| بیمه‌شده | insured person | `insured` | `1` |
+| مستمری‌بگیر | pensioner | `pensioner` | `2` |
+| کارفرما | employer | `employer` / workshop owner | `3` |
+
+## Services and concepts
+
+| Persian | English | In code |
 |---|---|---|
-| بیمه‌شده | insured | `1` |
-| مستمری‌بگیر | pensioner | `2` |
-| کارفرما | employer / workshop owner | `3` |
+| پروفایل / حساب کاربری | profile / account | `feature:profile` |
+| اطلاعات هویتی | identity information | `IdentityIn*`, `IdentityInfoEntity` |
+| پرونده‌ی الکترونیک | electronic file | `ElectronicFile*` |
+| ارتباط فعال با تأمین | active relation with Tamin | `ActiveRelation*` |
+| تاریخچه‌ی نسخه | app version history | `VersionHistory*` |
+| تماس با ما | contact us | `ContactUs*` |
+| سوابق تلفیقی | merged contribution history | `feature:history`, `MERGE_HISTORY` |
+| کارگاه‌ها | workshops | `feature:workshops` |
+| امور قراردادها | contract affairs | `feature:contracts` |
+| بیمه‌ی دانشجویی | student insurance | `STUDENT_INSURANCE` |
+| بیمه‌ی اختیاری | optional insurance | `OPTIONAL_INSURANCE` |
+| بیمه‌ی مشاغل آزاد | freelance insurance | `FREELANCE_INSURANCE` |
+| بیمه‌ی زنان خانه‌دار | housewives' insurance | `HOUSEWIFE_INSURANCE` |
+| استعلام مستمری | pension inquiry | `PENSION_INQUIRY`, `feature:pensioner` (package `pensionInquiry`) |
+| محاسبه‌ی مستمری | pension calculation | `CALCULATE_WAGE_PENSION` |
+| فیش حقوقی | payslip | `PAY_ROLL` |
+| حکم مستمری | pension decree | `EDICT_PENSIONER` |
+| گواهی کسر اقساط | deferred installment certificate | `DEFERRED_INSTALLMENT_CERTIFICATE` |
+| گواهی حقوق | wage certificate | `ISSUANCE_WAGE_CERTIFICATE` |
+| مستمری ازکارافتادگی | disability pension | `DISABILITY_PENSION` |
+| دختر بازمانده | surviving daughter | `GIRL_SURVIVOR` |
+| درخواست مستمری بازماندگان | survivor pension request | `REQUEST_PENSION_BY_SURVIVOR_112` |
+| بازمانده / وراث | survivor / beneficiary | `survivor`, `Beneficiary`, `Recipient` |
+| نسخه‌ی الکترونیک | e-prescription | `PRESCRIPTION` |
+| استحقاق درمان | treatment entitlement | `DESERVED_TREATMENT_101` |
+| درمان | treatment | `feature:treatment` |
+| پرونده‌ی سلامت | health profile | `feature:healthProfile` |
+| کارتابل | task inbox (cartable) | `feature:cartable` |
+| صندوق پیام من | my inbox | `feature:my-inbox` (package `myinbox`), `PersonalInbox*` |
+| تغییر شماره موبایل | change mobile number | `feature:change-mobile` (package `changemobile`) |
+| افراد تحت تکفل | dependents | `feature:addDependent`, `subdominant` |
+| دستیار هوشمند | AI assistant | `feature:agent`, `FeatureFlag.AGENT` |
+| شعبه | branch | `Branch`, `InsuredActiveBranch` |
+| تحت تکفل | dependent | `subdominant` |
+| کارفرمای اصلی/فرعی | primary/secondary employer | `Organization`, `RelationWithTaminInfo` |
+| دستمزد | wage | `dastmozd` (in AI service keys) |
+| حکم | decree | `hokm` (in AI service keys) |
+| فیش | payslip | `fish` (in AI service keys) |
 
-## سرویس‌ها و مفاهیم
+## Server domains
 
-| فارسی | در کد |
+| Host | Used for |
 |---|---|
-| پروفایل / حساب کاربری | `feature:profile` |
-| اطلاعات هویتی | `IdentityIn*`, `IdentityInfoEntity` |
-| پرونده‌ی الکترونیک | `ElectronicFile*` |
-| ارتباط فعال با تأمین | `ActiveRelation*` |
-| تاریخچه‌ی نسخه (تغییرات اپ) | `VersionHistory*` |
-| تماس با ما | `ContactUs*` |
-| سوابق (تلفیقی) | `feature:history`, `MERGE_HISTORY` |
-| کارگاه‌ها | `feature:workshops` |
-| امور قراردادها | `feature:contracts` |
-| بیمه‌ی دانشجویی / اختیاری / مشاغل آزاد / زنان خانه‌دار | `feature:studentInsuranceContract` → `STUDENT_INSURANCE`, `OPTIONAL_INSURANCE`, `FREELANCE_INSURANCE`, `HOUSEWIFE_INSURANCE` |
-| استعلام مستمری | `PENSION_INQUIRY`, `feature:pensioner` (پکیج `pensionInquiry`) |
-| محاسبه‌ی مستمری/حقوق | `CALCULATE_WAGE_PENSION` |
-| فیش حقوقی | `PAY_ROLL` |
-| حکم مستمری | `EDICT_PENSIONER` |
-| گواهی کسر اقساط | `DEFERRED_INSTALLMENT_CERTIFICATE` |
-| گواهی حقوق | `ISSUANCE_WAGE_CERTIFICATE` |
-| مستمری ازکارافتادگی | `DISABILITY_PENSION` |
-| دختر بازمانده | `GIRL_SURVIVOR` |
-| درخواست مستمری بازماندگان | `REQUEST_PENSION_BY_SURVIVOR_112` |
-| بازمانده / وراث | `survivor`, `Beneficiary`, `Recipient` |
-| نسخه‌ی الکترونیک | `PRESCRIPTION` |
-| استحقاق درمان | `DESERVED_TREATMENT_101` |
-| درمان | `feature:treatment` |
-| پرونده‌ی سلامت | `feature:healthProfile` |
-| کارتابل | `feature:cartable` |
-| صندوق پیام من | `feature:my-inbox` (پکیج `myinbox`), `PersonalInbox*` |
-| تغییر شماره موبایل | `feature:change-mobile` (پکیج `changemobile`) |
-| دستیار هوشمند | `feature:agent`, `FeatureFlag.AGENT` |
-| شعبه | `Branch`, `InsuredActiveBranch` |
-| تحت تکفل | `subdominant` |
-| کارفرمای اصلی/فرعی | `Organization`, `RelationWithTaminInfo` |
-
-## دامنه‌های سرور
-
-| میزبان | کاربرد |
-|---|---|
-| `eservices.tamin.ir` | سرویس‌های اصلی |
-| `account.tamin.ir` | احراز هویت (OAuth) |
-| `medical.tamin.ir` | درمان |
+| `eservices.tamin.ir` | main services |
+| `account.tamin.ir` | authentication (OAuth) |
+| `medical.tamin.ir` | treatment |
 | `ov.tamin.ir` | — |
-| `sw.tamin.ir` | دستیار هوشمند (AI) |
-| `apim.tamin.ir` | تغییر شماره موبایل |
-| `profile.tamin.ir` | referer تغییر موبایل |
+| `sw.tamin.ir` | AI assistant |
+| `apim.tamin.ir` | mobile number change |
+| `profile.tamin.ir` | referer for mobile number change |
 
-مرتبط: [[Feature-Flags]] · [[Modules]]
+Related: [[Feature-Flags]] · [[AI-Agent-API-Contract]] · [[Modules]]

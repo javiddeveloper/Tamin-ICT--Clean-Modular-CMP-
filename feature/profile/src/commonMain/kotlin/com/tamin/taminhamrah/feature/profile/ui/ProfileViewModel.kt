@@ -13,9 +13,7 @@ import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
-import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
-import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
@@ -41,10 +39,8 @@ class ProfileViewModel(
     private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
-    private val getBankAccountListUseCase: GetBankAccountListUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
-    private val getElectronicFileUseCase: GetElectronicFileUseCase,
     private val changeMobileUseCase: ChangeMobileUseCase,
     private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
     private val setThemeUseCase: SetThemeUseCase
@@ -62,7 +58,6 @@ class ProfileViewModel(
                 intent.filter
             )
             is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
-            is ProfileIntent.LoadBankAccountList -> handleLoadElectronicFile()
             is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
     }
@@ -131,6 +126,7 @@ class ProfileViewModel(
             ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)
             ProfileMenuItem.ACTIVE_RELATION -> sendEvent(ProfileEvent.NavigateToActiveRelation)
             ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
+            ProfileMenuItem.BANK_ACCOUNTS -> sendEvent(ProfileEvent.NavigateToBankAccount)
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
             ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
@@ -153,15 +149,6 @@ class ProfileViewModel(
         }
     }
 
-    private fun handleLoadBankAccountList(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            getBankAccountListUseCase.invoke().collect {
-                    emit(PartialState.ScreenStateChanged.Success)
-            }
-        }
-    }
-
     private fun handleGetInsuranceActiveBranch(): Flow<PartialState> {
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
@@ -175,15 +162,6 @@ class ProfileViewModel(
         return flow {
             emit(PartialState.ScreenStateChanged.Loading)
             getRelationTaminAllUseCase.invoke().collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
-        }
-    }
-
-    private fun handleLoadElectronicFile(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            getElectronicFileUseCase.invoke().collect {
                 emit(PartialState.ScreenStateChanged.Success)
             }
         }

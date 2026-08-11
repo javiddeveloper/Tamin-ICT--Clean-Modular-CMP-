@@ -2,27 +2,27 @@
 tags: [architecture, convention]
 ---
 
-# الگوی MVI و BaseViewModel
+# MVI and BaseViewModel
 
-فایل: `core/core-ui/src/commonMain/kotlin/com/tamin/taminhamrah/base/BaseViewModel.kt`
+File: `core/core-ui/src/commonMain/kotlin/com/tamin/taminhamrah/base/BaseViewModel.kt`
 
 ```kotlin
 abstract class BaseViewModel<STATE, PARTIAL_STATE, EVENT, INTENT>(initialState: STATE) : ViewModel()
 ```
 
-چهار پارامتر ژنریک — همه‌ی ViewModelهای پروژه از این ارث می‌برند.
+Four type parameters. Every ViewModel in the project extends this.
 
-## قرارداد
+## Contract
 
-| عضو | جهت | توضیح |
+| Member | Direction | Purpose |
 |---|---|---|
-| `sendIntent(intent)` | UI → VM | تنها راه ورود رویداد کاربر |
-| `uiState: StateFlow<STATE>` | VM → UI | تک‌منبع حقیقتِ صفحه |
-| `events: Flow<EVENT>` | VM → UI | اثرات یک‌بارمصرف (ناوبری، اسنک‌بار) |
-| `sendEvent(event)` | داخل VM | `protected` |
-| `doAsyncTask { … }` | داخل VM | لانچ در `viewModelScope` |
+| `sendIntent(intent)` | UI → VM | the only way user input enters |
+| `uiState: StateFlow<STATE>` | VM → UI | single source of truth for the screen |
+| `events: Flow<EVENT>` | VM → UI | one-shot effects (navigation, snackbar) |
+| `sendEvent(event)` | inside VM | `protected` |
+| `doAsyncTask { … }` | inside VM | launches in `viewModelScope` |
 
-سه متد که باید override شوند:
+Three methods every subclass must override:
 
 ```kotlin
 protected abstract fun handleIntent(intent: INTENT): Flow<PARTIAL_STATE>
@@ -30,7 +30,7 @@ protected abstract fun reduceState(currentState: STATE, partialState: PARTIAL_ST
 protected abstract fun createErrorState(message: String): PARTIAL_STATE
 ```
 
-## نحوه‌ی کار پایپ‌لاین
+## How the pipeline works
 
 ```
 intentChannel (UNLIMITED)
@@ -39,20 +39,20 @@ intentChannel (UNLIMITED)
       → _uiState.value = newState
 ```
 
-نکات که راحت گاز می‌گیرند:
+Details that bite:
 
-- **`flatMapMerge`** یعنی intentها **موازی** اجرا می‌شوند، نه صف‌شده. اگر ترتیب مهم است، خودت باید در `handleIntent` مدیریتش کنی.
-- `catch` روی هر intent جداست، پس یک خطا کل پایپ‌لاین را نمی‌کشد. پیام پیش‌فرض خطا `"خطای نامشخص"` است.
-- `eventChannel` از نوع `BUFFERED` است و با `receiveAsFlow` مصرف می‌شود — یعنی تک‌مصرف‌کننده.
-- `doAsyncTask` هیچ dispatcher سفارشی‌ای ست نمی‌کند (یک `// todo` در کد اشاره به همین دارد) — کار IO را خودت به dispatcher مناسب ببر.
+- **`flatMapMerge` means intents run concurrently, not sequentially.** If ordering matters, enforce it yourself inside `handleIntent`. It also means two quick taps can start two in-flight requests — guard with `if (state.isLoading) return@flow` where a duplicate submission would be harmful.
+- `catch` is applied per intent, so one failure does not tear down the pipeline. The default error message is `"خطای نامشخص"`.
+- `eventChannel` is `BUFFERED` and consumed via `receiveAsFlow`, so it has a single consumer.
+- `doAsyncTask` sets no custom dispatcher (there is a `// todo` in the source about this) — move IO work to an appropriate dispatcher yourself.
 
-## فایل Contract
+## The Contract file
 
-هر صفحه یک `contract/<Screen>Contract.kt` دارد که چهار نوع را کنار هم تعریف می‌کند: `State` (data class)، `PartialState` (sealed)، `Event` (sealed)، `Intent` (sealed).
-نمونه‌های خوب برای الگوبرداری: `feature/profile/.../ui/identity/contract/IdentityInContract.kt` و `.../ui/activeRelation/contract/ActiveRelationContract.kt`.
+Each screen has `contract/<Screen>Contract.kt` declaring four types together: `State` (data class), `PartialState` (sealed), `Event` (sealed), `Intent` (sealed).
+Good examples to copy: `feature/profile/.../ui/identity/contract/IdentityInContract.kt` and `.../ui/activeRelation/contract/ActiveRelationContract.kt`.
 
-## تست
+## Testing
 
-`turbine` در همه‌ی ماژول‌های فیچر به‌صورت خودکار در `commonTest` هست (از `TaminHamrahKmpFeaturePlugin`) — برای assert روی `uiState` و `events` از آن استفاده کن.
+`turbine` is available in `commonTest` of every feature module automatically (via `TaminHamrahKmpFeaturePlugin`) — use it to assert on `uiState` and `events`.
 
-مرتبط: [[Overview]] · [[Navigation]] · [[Adding-a-Feature]]
+Related: [[Overview]] · [[Navigation]] · [[Adding-a-Feature]]

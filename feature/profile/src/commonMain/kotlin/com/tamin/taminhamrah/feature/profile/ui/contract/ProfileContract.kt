@@ -43,7 +43,6 @@ sealed class ProfileIntent {
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 
     data object LoadSubDominants : ProfileIntent()
-    data object LoadBankAccountList : ProfileIntent()
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 
@@ -60,5 +59,6 @@ sealed interface ProfileEvent {
     data object NavigateToElectronicFile : ProfileEvent
     data class OpenUrl(val url: String) : ProfileEvent
     data class ShowToast(val message: String) : ProfileEvent
+    data object NavigateToBankAccount : ProfileEvent
 }
 

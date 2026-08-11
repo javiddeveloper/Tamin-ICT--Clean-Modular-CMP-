@@ -2,16 +2,16 @@
 tags: [architecture]
 ---
 
-# پایگاه داده — Room KMP
+# Database — Room KMP
 
-Room `2.7.0-beta01` + `androidx.sqlite` bundled + KSP. کار روی هر سه target (android / iosArm64 / iosSimulatorArm64).
+Room `2.7.0-beta01` + bundled `androidx.sqlite` + KSP. Runs on all three targets (android / iosArm64 / iosSimulatorArm64).
 
-## فایل‌ها
+## Files
 
 ```
 core-database/src/commonMain/kotlin/com/tamin/taminhamrah/data/local/
 ├── TaminHamrahDatabase.kt        ← @Database
-├── LocalDataClearerImpl.kt       ← پاک‌سازی کامل (logout)
+├── LocalDataClearerImpl.kt       ← full wipe (logout)
 ├── TimeProvider.kt
 ├── converter/TaminHamrahConverters.kt
 ├── dao/      AgentChat, Branch, CityProvince, Contract, Health, Menu, Personal,
@@ -20,27 +20,29 @@ core-database/src/commonMain/kotlin/com/tamin/taminhamrah/data/local/
 └── entity/   AgentChatEntities, BranchEntity, CityEntity, ContractEntity,
               HealthEntities, IdentityInfoEntity, MenuEntity, PersonalInboxEntity,
               PersonalInfoEntity, ProvinceEntity, RecipientEntity,
-              RegistrationInfoEntity, TreatmentEntities, UserRequestEntity,
-              VersionHistoryEntity, TestEntity
+              RegistrationInfoEntity, TestEntity, TreatmentEntities,
+              UserRequestEntity, VersionHistoryEntity
 ```
 
 DI: `core-database/.../di/DatabaseModule.kt` → `databaseModule`
 
-## Schemaها
+## Schemas
 
-`core-database/schemas/` — چند پوشه با نام کلاس‌های قدیمی هم باقی مانده:
+`core-database/schemas/` still contains folders named after older database classes:
 
 ```
-com.tamin.taminhamrah.data.local.TaminXDatabase       ← فعال
+com.tamin.taminhamrah.data.local.TaminXDatabase       ← active
 com.tamin.taminhamrah.data.local.TaminHamrahDatabase
 com.tamin.taminhamrah.data.local.AppDatabase / MyDatabase / TestDatabase
-com.omooooori… / com.riox432…                          ← بازمانده‌ی template اولیه
+com.omooooori… / com.riox432…                          ← leftovers from the original template
 ```
 
-⚠️ هر تغییری در Entity، فایل JSON نسخه‌ی بعدی را در پوشه‌ی schema تولید می‌کند و باید commit شود. نسخه‌ی فعلی روی `TaminXDatabase/2.json` است.
+⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/2.json`.
 
-## نقش دیتابیس
+⚠️ Inconsistency worth fixing: that path is listed in `.gitignore`, but the file is already tracked — so the ignore rule has no effect and the file keeps showing up as modified. Either drop it from `.gitignore` (schemas should be committed) or untrack it with `git rm --cached`.
 
-کش آفلاین برای: منوی سرویس‌ها، اطلاعات هویتی/شخصی، شعب و شهر/استان، صندوق پیام، قراردادها، تاریخچه‌ی نسخه، و تاریخچه‌ی چت دستیار هوشمند.
+## What the database is for
 
-مرتبط: [[Networking]] · [[Overview]] · [[Naming-Conventions]]
+Offline cache for: the service menu, identity and personal information, branches and city/province lists, the personal inbox, contracts, version history, and AI assistant chat history.
+
+Related: [[Networking]] · [[Overview]] · [[Naming-Conventions]]

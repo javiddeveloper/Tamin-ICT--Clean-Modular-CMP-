@@ -162,8 +162,6 @@ fun IdentityInScreen(
         IdentityHeader(
             progress = collapse.progressProvider,
             info = info,
-            nationality = nationality,
-            gender = gender,
             photo = state.profileImage,
             onBack = onBack,
             modifier = Modifier
@@ -183,8 +181,6 @@ fun IdentityInScreen(
 private fun IdentityHeader(
     progress: () -> Float,
     info: IdentityInfoPR?,
-    nationality: String,
-    gender: String,
     photo: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -215,7 +211,6 @@ private fun IdentityHeader(
                     ),
             ) {
                 IdentityCard(
-                    firstName = info.firstName,
                     lastName = info.lastName,
                     fullName = info.fullName,
                     fatherName = info.fatherName,
