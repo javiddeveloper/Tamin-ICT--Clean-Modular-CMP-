@@ -2,55 +2,56 @@
 tags: [convention, howto]
 ---
 
-# چک‌لیست افزودن فیچر یا صفحه‌ی جدید
+# Adding a Feature or Screen
 
-## صفحه‌ی جدید داخل یک فیچر موجود
+## A new screen inside an existing feature
 
-1. `ui/<screen>/contract/<Screen>Contract.kt` — چهار نوع `State` / `PartialState` / `Event` / `Intent`
-2. `ui/<screen>/<Screen>ViewModel.kt` — ارث از `BaseViewModel` ([[MVI-Pattern]])
-3. `ui/<screen>/<Screen>Screen.kt` (+ `components/` برای اجزای مختصِ صفحه)
-4. ثبت ViewModel در `di/<X>Module.kt` همان فیچر
-5. افزودن route به `sealed interface <X>Route` و یک `composableWithFadeTransitions<…>` در `Navigation.kt` ([[Navigation]])
+1. `ui/<screen>/contract/<Screen>Contract.kt` — the four types `State` / `PartialState` / `Event` / `Intent`
+2. `ui/<screen>/<Screen>ViewModel.kt` — extends `BaseViewModel` ([[MVI-Pattern]])
+3. `ui/<screen>/<Screen>Screen.kt` (+ `components/` for parts specific to this screen)
+4. Register the ViewModel in that feature's `di/<X>Module.kt`
+5. Add the route to `sealed interface <X>Route` and a `composableWithFadeTransitions<…>` entry in `Navigation.kt` ([[Navigation]])
 
-## ماژول فیچر کاملاً جدید
+## A brand-new feature module
 
-1. پوشه `feature/<name>/` + `build.gradle.kts` با `id("TaminHamrah.kmp.feature")`
-   (این پلاگین همه‌ی coreها، Koin، coroutines و turbine را خودش می‌دهد — دستی اضافه نکن.)
-2. `include(":feature:<name>")` در `settings.gradle.kts`
-3. `Navigation.kt` — routeها + `fun NavGraphBuilder.<name>Graph(...)` + `fun NavController.navigateTo<Name>()`
+1. Create `feature/<name>/` with a `build.gradle.kts` applying `id("TaminHamrah.kmp.feature")`
+   (that plugin already supplies every core module, Koin, coroutines and turbine — do not add them manually)
+2. `include(":feature:<name>")` in `settings.gradle.kts`
+3. `Navigation.kt` — routes + `fun NavGraphBuilder.<name>Graph(...)` + `fun NavController.navigateTo<Name>()`
 4. `di/<Name>Module.kt`
-5. **ثبت ماژول Koin در `sharedModules` داخل `shared/.../di/Koin.kt`** — فراموش شود، خطای runtime می‌گیری نه compile ([[Dependency-Injection]])
-6. وصل کردن گراف در `shared/.../ui/navigation/TaminHamrahNavGraph.kt`
-7. اگر از منوی سرور باز می‌شود: افزودن case در `FeatureNavigation.kt` و مقدار متناظر در `FeatureFlag` ([[Feature-Flags]])
-8. وابستگی `:shared` به ماژول جدید در `shared/build.gradle.kts`
+5. **Register the Koin module in `sharedModules` in `shared/.../di/Koin.kt`** — miss this and you get a runtime failure, not a compile error ([[Dependency-Injection]])
+6. Attach the graph in `shared/.../ui/navigation/TaminHamrahNavGraph.kt`
+7. If it opens from the server menu: add a case in `FeatureNavigation.kt` and the matching `FeatureFlag` value ([[Feature-Flags]])
+8. Add the dependency from `:shared` in `shared/build.gradle.kts`
 
-## هنگام افزودن مدل یا endpoint
+## When adding a model or endpoint
 
-ترتیب رو به پایین را رعایت کن و پسوندها را دقیق بگذار — build وگرنه می‌شکند ([[Naming-Conventions]]):
+Work downward and get the suffixes right ([[Naming-Conventions]]):
 
 ```
-core-network/model/<domain>/XDto.kt         ← شکل JSON
+core-network/model/<domain>/XDTO.kt          ← JSON shape
 core-network/apiService/<domain>/XApiService.kt
 core-network/dataSource/<domain>/XRemoteDataSource(+Impl).kt
-core-data/data/mapper/XMapper.kt            ← Dto → DN
+core-data/data/mapper/XMapper.kt             ← DTO → DN
 core-domain/model/<domain>/XDN.kt
-core-domain/repository/<domain>/XRepository.kt      ← interface
+core-domain/repository/<domain>/XRepository.kt       ← interface
 core-data/…/XRepositoryImpl.kt
 core-domain/useCases/<domain>/XUseCase.kt
 core-ui/model/<domain>/XPR.kt
-core-ui/mapper/<domain>/XMapper.kt          ← DN → PR
+core-ui/mapper/<domain>/XMapper.kt           ← DN → PR
 ```
 
-## قبل از تمام‌شده اعلام کردن
+## Before calling it done
 
 ```powershell
 .\gradlew.bat :feature:<name>:compileDebugKotlinAndroid
 .\gradlew.bat testDebugUnitTest
 ```
 
-## چیزهایی که راحت فراموش می‌شوند
+## Easy things to forget
 
-- ثبت ماژول Koin (بند ۵ بالا)
-- تغییر Entity بدون commit کردن schema JSON جدید ([[Database]])
-- ساختن کامپوننتی که از قبل در `core-ui/ui/components/` هست (۵۹ فایل — اول بگرد)
-- تغییر آدرس سرور فقط در یک جا از دو جای موجود ([[Networking]])
+- Registering the Koin module (step 5 above)
+- Changing an Entity without committing the new schema JSON ([[Database]])
+- Building a component that already exists in `core-ui/ui/components/` (59 files — search first)
+- Changing a server endpoint in only one of the two places it is declared ([[Networking]])
+- Guarding submit-style intents with `if (state.isLoading) return@flow` — `flatMapMerge` runs intents concurrently ([[MVI-Pattern]])

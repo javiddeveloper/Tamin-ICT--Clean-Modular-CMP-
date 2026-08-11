@@ -22,6 +22,8 @@ import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 
 import com.tamin.taminhamrah.model.user.UserProfileDto
+import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 interface UserRemoteDataSource {
     suspend fun getIdentityInfo(): IdentityInfoDto
@@ -61,4 +63,8 @@ interface UserRemoteDataSource {
     suspend fun getRecipients(
         query: ApiQueryParamDN
     ): ListData<RecipientDTO>?
+
+    suspend fun registerBankAccount(
+        request: BankAccountRequestDTO,
+    ): BankAccountCreatedDTO?
 }

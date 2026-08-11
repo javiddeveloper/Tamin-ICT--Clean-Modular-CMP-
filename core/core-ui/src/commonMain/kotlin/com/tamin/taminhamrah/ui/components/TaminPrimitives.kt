@@ -294,7 +294,23 @@ fun TaminPrimaryButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     background: Brush = taminTopAppBarGradient(),
+    /**
+     * Puts the icon ahead of the label instead of after it — the leading edge, so it reads on the
+     * right in a right-to-left layout. Defaults to the trailing position every existing caller has.
+     */
+    iconAtStart: Boolean = false,
 ) {
+    val iconContent: @Composable () -> Unit = {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -305,15 +321,9 @@ fun TaminPrimaryButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
+        if (iconAtStart) iconContent()
         Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(IconSize.medium),
-            )
-        }
+        if (!iconAtStart) iconContent()
     }
 }
 

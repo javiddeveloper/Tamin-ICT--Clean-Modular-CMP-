@@ -4,34 +4,34 @@ tags: [build]
 
 # CI/CD — GitLab
 
-فایل: `.gitlab-ci.yml` · ریموت: `https://ci.tamin.ir/base/development/finance/tatmin-kmp.git`
-ایمیج: `pull-devops.tamin.ir/devops/android-sdk-image:1.0` · tag رانر: `devops`
+File: `.gitlab-ci.yml` · Remote: `https://ci.tamin.ir/base/development/finance/tatmin-kmp.git`
+Image: `pull-devops.tamin.ir/devops/android-sdk-image:1.0` · Runner tag: `devops`
 
-## مراحل
+## Stages
 
-| stage | job | trigger | دستور |
+| Stage | Job | Trigger | Command |
 |---|---|---|---|
 | test | `android-test` | MR, `main`, `develop` | `./gradlew testDebugUnitTest testDirectDebugUnitTest` |
 | build | `android-build-debug` | `main`, `develop` | `assembleDirectDebug` + `assembleFlavorTestDebug` |
-| release | `android-release` | فقط tag | assemble release چهار flavor |
-| release | `create-release` | فقط tag | آپلود APKها به Package Registry + ساخت GitLab Release |
+| release | `android-release` | tags only | release assemble for all four flavors |
+| release | `create-release` | tags only | upload APKs to the Package Registry, create a GitLab Release |
 
 ## before_script
 
 - `GRADLE_USER_HOME=$(pwd)/.gradle`
-- `key.properties` از متغیرهای CI (`OPERATIONAL_API_KEY`, `TEST_API_KEY`) ساخته می‌شود اگر وجود نداشته باشد.
-- `RELEASE_KEYSTORE_BASE64` دیکد و در `release.jks` نوشته می‌شود.
-- ⚠️ یک **shim برای `xargs`** ساخته و به ابتدای PATH اضافه می‌شود — چون ایمیج xargs واقعی ندارد. اگر build در CI طوری شکست که با محلی فرق داشت، این یکی از مظنون‌هاست.
+- `key.properties` is generated from the CI variables (`OPERATIONAL_API_KEY`, `TEST_API_KEY`) if it does not exist.
+- `RELEASE_KEYSTORE_BASE64` is decoded into `release.jks`.
+- ⚠️ A **shim for `xargs`** is written and prepended to PATH, because the image has no real `xargs`. If a CI build fails in a way that does not reproduce locally, this is one of the suspects.
 
-## شاخه‌ها
+## Branches
 
-- `main` — شاخه‌ی اصلی (مقصد PR)
-- `develop` — شاخه‌ی جاری توسعه؛ فیچرها با الگوی `Feature-EM-<شماره>-<عنوان>` ساخته و در `develop` مرج می‌شوند.
+- `main` — the main branch (default PR target)
+- `develop` — the active integration branch; features use the pattern `Feature-EM-<number>-<title>` and are merged into `develop`.
 
-## artifacts
+## Artifacts
 
-- تست: `**/build/reports/` (۱ هفته)
-- debug: `androidApp/build/outputs/apk/*/debug/*.apk` (۱ هفته)
-- release: APK هر چهار flavor با نام `TaminX-$CI_COMMIT_TAG`
+- test: `**/build/reports/` (1 week)
+- debug: `androidApp/build/outputs/apk/*/debug/*.apk` (1 week)
+- release: APKs for all four flavors, named `TaminX-$CI_COMMIT_TAG`
 
-مرتبط: [[Build-and-Run]]
+Related: [[Build-and-Run]]

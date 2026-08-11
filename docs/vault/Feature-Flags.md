@@ -2,54 +2,108 @@
 tags: [architecture, domain]
 ---
 
-# فیچرفلگ و منوی داینامیک
+# Feature Flags and the Dynamic Menu
 
-> سند مفصل و اصلی: `documents/features.md` — این صفحه فقط خلاصه‌ی قابل مرور است.
+How services are fetched, categorized, gated and routed. Absorbed from the former `documents/features.md`.
 
-## ایده
+## 1. Menu data — `MainServiceDto`
 
-منوی صفحه‌ی اصلی از سرور می‌آید (`MainServiceDto`)، نه هاردکد. هر سرویس دارای:
+The home screen's services arrive dynamically from a web service in the data layer (currently via `MockMenuData`) as `MainServiceDto`. Key fields:
 
-- `id` — شناسه‌ی عددی
-- `name` — عنوان نمایشی
-- `showRole` — آرایه‌ی نقش‌ها: `1` بیمه‌شده، `2` مستمری‌بگیر، `3` کارفرما
-- `status` — وضعیت
-- `message` — پیام خطا در صورت غیرفعال بودن
-- `url` — در حالت WebView
-
-`menu.json` در ریشه‌ی ریپو نمونه/داده‌ی محلی همین ساختار است؛ `MockMenuData.kt` در core-network نسخه‌ی موقت داده است.
-
-## وضعیت‌ها (`FeatureStatus`)
-
-| وضعیت | رفتار UI |
+| Field | Meaning |
 |---|---|
-| `ACTIVE` | کلیک‌پذیر، رفتن به صفحه‌ی بومی |
-| `TEMPORARY_DISABLED` | آلفا ۵۰٪، کلیک مسدود، دلیل زیر عنوان |
-| `DISABLED` / `COMPLETELY_DISABLED` | مثل بالا |
-| `ENABLED_WITH_ERROR` | کلیک‌پذیر و پررنگ، ولی هشدار قرمز زیر عنوان |
-| `WEB_VIEW` | باز کردن `url` |
+| `id` | unique service id (e.g. 35 for contract affairs) |
+| `name` | display name |
+| `showRole` | array of role numbers (e.g. `[1, 2]`) controlling who sees the service |
+| `status` | current service state (active, disabled, webview, …) |
+| `message` | error message to display when the service is unavailable |
+| `url` | target link when the service is a webview |
 
-## زنجیره‌ی اجرا
+`menu.json` at the repo root is a local sample of this structure.
+
+## 2. User roles via `showRole`
+
+| Value | Audience | Examples |
+|---|---|---|
+| `1` | insured persons | merged history, contract affairs, e-prescription |
+| `2` | pensioners | payslip, pension status inquiry, e-prescription |
+| `3` | employers | workshops, inspections |
+
+In the UI these are filtered by a dropdown at the top of `HomeScreen`. If the selected group's number appears in a service's `showRole`, that service is shown. This lets shared services (like e-prescription) appear for several roles without duplicating the id server-side.
+
+## 3. Service states (`MenuServiceStatus` / `FeatureStatus`)
+
+| State | UI behaviour |
+|---|---|
+| `ACTIVE` | fully enabled; tapping opens the native screen |
+| `TEMPORARY_DISABLED` | temporarily down; card is dimmed to 50% alpha, tap is blocked, reason shown under the name |
+| `DISABLED` / `COMPLETELY_DISABLED` | disabled entirely or for this specific user (e.g. not eligible for the marriage grant); looks the same as temporarily disabled |
+| `ENABLED_WITH_ERROR` | opens normally and is not dimmed, but a red server warning is shown under the name |
+| `WEB_VIEW` | no native screen; the `url` opens in an external browser or an in-app webview |
+
+## 4. Server id → client enum (`FeatureFlag`)
+
+The UI layer must not depend on hardcoded numeric ids, so every server id is mapped to a dedicated enum in `FeatureFlag.kt`.
+
+- `FeatureFlag.fromId(id)` converts a server number into the enum.
+- Using an enum instead of a raw number prevents human error and keeps `when` expressions exhaustive.
+
+## 5. Routing and `FeatureManager`
+
+What happens when a user taps a service (for example "housewives' insurance"):
+
+1. **Compose UI** — the user taps a service card.
+2. **ViewModel** — the tap is delivered as an `Intent` (e.g. `OnServiceClick`) to the relevant ViewModel (`HomeViewModel`, `ContractsViewModel`, …).
+3. **FeatureManager** — the ViewModel converts `service.id` into a `FeatureFlag`, then `FeatureManager` evaluates that flag's `FeatureStatus`.
+4. **Events** — if the state allows entry (`Enabled` or `EnabledWithError`), the ViewModel emits a `NavigateToService(flag)` event back to the UI. For `WebView` it emits `NavigateToWeb`.
+5. **NavGraph** — `TaminHamrahNavGraph.kt` decides, based on the `FeatureFlag`, which Compose Navigation call to make (e.g. `navController.navigateToHousewifeInsuranceContract()`), via `FeatureNavigation.kt`.
+
+### Why this is data-driven
+
+- Menus stay fully dynamic.
+- Adding a service later needs no sweeping UI logic changes.
+- Availability and error messages take effect from the server without shipping a new app version.
+- Routing errors and view handling are centralized in `FeatureManager`.
+
+## 6. The AI Agent flag
+
+The AI assistant is a standalone feature in the flag system.
+
+**Id:** `AGENT(2000)` in `FeatureFlag.kt` — deliberately outside the employer range (`1001`–`1012`) so it is semantically distinct.
+
+### Two-stage access control
+
+When the user enters the Agent screen, two checks run in order:
 
 ```
-کلیک کاربر
- → Intent (مثل OnServiceClick) → ViewModel
- → FeatureFlag.fromId(service.id)          ← FeatureFlag.kt
- → FeatureManager.getFeatureStatus(flag)   ← FeatureManagerImpl در core-data
- → Event: NavigateToService(flag) | NavigateToWeb(url)
- → NavController.navigateToFeature(flag)   ← shared/.../ui/navigation/FeatureNavigation.kt
+Step 1: FeatureFlag check (fast — no API call)
+  ├── AGENT Enabled  →  proceed to Step 2
+  └── AGENT Disabled →  show server message immediately (no network request)
+
+Step 2: User-level permission (API call — CheckChatAllowedUseCase)
+  ├── canStartChat = true  →  enter chatbot
+  └── canStartChat = false →  show errorMessage from API
 ```
 
-`FeatureFlag` هرگز نباید با عدد خام جایگزین شود — `when` روی enum را exhaustive نگه می‌دارد.
+Implemented in `AgentViewModel.handleCheckPermission()`.
 
-## دستیار هوشمند (Agent)
+### FAB visibility on the home screen
 
-- فلگ اختصاصی: `AGENT(2000)` — عمداً خارج از بازه‌ی کارفرمایی `1001–1012`.
-- کنترل دسترسی دومرحله‌ای: اول `FeatureFlag` (بدون تماس شبکه)، بعد `CheckChatAllowedUseCase` (API).
-  نقطه‌ی پیاده‌سازی: `AgentViewModel.handleCheckPermission()`
-- FAB ورود به Agent در `TaminHamrahNavGraph.kt` فقط وقتی دیده می‌شود که مسیر جاری `Route.Home` باشد **و** وضعیت `AGENT` برابر `Enabled`.
-- اولویت پیام غیرفعال بودن: `entity.message` › `featureManager.getDisabledMessage(flag)` › fallback ثابت. (در `AgentActionDispatcher.dispatch()`)
+The floating action button that opens the Agent is shown in `TaminHamrahNavGraph.kt` only when both hold:
 
-اسناد تکمیلی: `documents/agent.md` (معماری SDUI و فرم‌های embedded در چت) و `documents/agent-api-contract.md` (قرارداد JSON، case-sensitive، با `ignoreUnknownKeys`).
+1. the current route is `Route.Home`
+2. `FeatureFlag.AGENT` resolves to `FeatureStatus.Enabled`
 
-مرتبط: [[Navigation]] · [[Glossary]]
+This is wired through `collectAsState` on `featureManager.getFeatureStatus(FeatureFlag.AGENT)`, so it reacts immediately to server-side changes.
+
+### Message priority when a service is disabled
+
+| Priority | Source | Meaning |
+|---|---|---|
+| 1 | `entity.message` | AI-specific message for this particular action |
+| 2 | `featureManager.getDisabledMessage(flag)` | message defined in `menu.json` for that service |
+| 3 | fallback string | default text, last resort |
+
+Implemented in `AgentActionDispatcher.dispatch()`.
+
+Related: [[Navigation]] · [[AI-Agent]] · [[Glossary]]
