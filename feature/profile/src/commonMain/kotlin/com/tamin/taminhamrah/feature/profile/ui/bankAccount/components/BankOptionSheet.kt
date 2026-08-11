@@ -70,7 +70,7 @@ fun BankPickerSheet(
 
 /** The bank rows on their own, so a preview can draw them without a sheet around them. */
 @Composable
-internal fun ColumnScope.BankPickerRows(onSelect: (Bank) -> Unit) {
+internal fun BankPickerRows(onSelect: (Bank) -> Unit) {
     Bank.displayOrder.forEachIndexed { index, bank ->
             if (index > 0) SheetDivider()
             OptionRow(
@@ -121,7 +121,7 @@ fun AccountTypePickerSheet(
 
 /** The account-kind rows on their own, for the same reason as [BankPickerRows]. */
 @Composable
-internal fun ColumnScope.AccountTypePickerRows(onSelect: (AccountType) -> Unit) {
+internal fun AccountTypePickerRows(onSelect: (AccountType) -> Unit) {
     val colors = LocalTaminColors.current
     AccountType.displayOrder.forEachIndexed { index, type ->
             if (index > 0) SheetDivider()

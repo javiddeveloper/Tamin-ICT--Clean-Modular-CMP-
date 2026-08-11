@@ -129,7 +129,6 @@ fun ProfileScreen(
     onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
-    onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
@@ -157,7 +156,6 @@ fun ProfileScreen(
         onNavigateToBankAccount = onNavigateToBankAccount,
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
-        onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -184,7 +182,6 @@ fun HandleProfileEvents(
     onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
-    onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -194,9 +191,9 @@ fun HandleProfileEvents(
                 onBackClicked()
             }
 
-            ProfileEvent.NavigateToSettings -> {
-                // onNavigateToRouteById(100)
-            }
+            // Settings has no destination yet; the row is still shown, so the event is
+            // swallowed rather than removed from the contract.
+            ProfileEvent.NavigateToSettings -> Unit
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()

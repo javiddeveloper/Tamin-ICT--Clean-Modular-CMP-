@@ -344,7 +344,8 @@
     <string name="bank_account_digits_suffix">%1$s رقم</string>
     <string name="bank_account_error_title">خطا در دریافت اطلاعات</string>
     <string name="bank_account_registered_description">پس از بررسی و تأیید، این حساب به فهرست حساب‌های بانکی شما افزوده می‌شود.</string>
-    <string name="bank_account_tracking_code">کد پیگیری: %1$s</string>
+    <!-- A label now, not a sentence: the code sits beside it in its own copyable row. -->
+    <string name="bank_account_tracking_code">کد پیگیری</string>
     <string name="bank_account_registered">حساب بانکی با موفقیت ثبت شد.</string>
 
     <!-- Document viewer strings -->

@@ -43,7 +43,6 @@ sealed class ProfileIntent {
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 
     data object LoadSubDominants : ProfileIntent()
-    data object LoadBankAccountList : ProfileIntent()
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 

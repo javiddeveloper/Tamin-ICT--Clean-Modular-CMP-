@@ -1,10 +1,14 @@
 package com.tamin.taminhamrah.feature.profile.ui.bankAccount
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,11 +33,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.AnnotatedString
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.AccountTypePickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountCard
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountForm
@@ -54,10 +62,14 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -86,18 +98,27 @@ import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
 import taminx.core.core_ui.ic_number
+import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_chevron_back
-
-private const val PARAGRAPH_BREAK = "\n\n"
+import taminx.core.core_ui.toast_copy_tracking_code
 
 private const val ADD_BUTTON_KEY = "add"
 private const val EMPTY_STATE_KEY = "empty"
 
 private val CardSpacing = 14.dp
+private val TrackingCodeCorner = 12.dp
 private val HeaderCorner = 40.dp
 private val DecorCircleSize = 190.dp
 private val DecorCircleX = 450.dp
 private val DecorCircleY = (-150).dp
+
+/**
+ * The design's own gradient for the add button: diagonal, not the horizontal bar gradient.
+ *
+ * Built once at class-init rather than per composition — the stops are fixed brand colors, so
+ * there is nothing for a `remember` to key on.
+ */
+private val AddButtonBrush = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900))
 
 @Composable
 fun BankAccountRoute(
@@ -137,50 +158,9 @@ fun BankAccountScreen(
     onIntent: (BankAccountIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val taminColors = LocalTaminColors.current
-    val profileGradientBrush = remember(taminColors.profileGradientStops) {
-        Brush.horizontalGradient(taminColors.profileGradientStops)
-    }
-
-    // Same header as the change-mobile subpage, so the profile subpages read as one family.
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = {
-            TaminTopAppBar(
-                title = stringResource(Res.string.bank_account_title),
-                background = profileGradientBrush,
-                bottomPadding = Spacing.xl,
-                shape = RoundedCornerShape(bottomStart = HeaderCorner, bottomEnd = HeaderCorner),
-                navigationIcon = {
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = stringResource(Res.string.action_back),
-                        onClick = { onIntent(BankAccountIntent.OnBackClicked) },
-                        bordered = true,
-                    )
-                },
-            ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    DecorativeBackgroundCircle(
-                        size = DecorCircleSize,
-                        xOffset = DecorCircleX,
-                        yOffset = DecorCircleY,
-                    )
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_number))
-                        Spacer(Modifier.height(Spacing.md))
-                        Text(
-                            text = stringResource(Res.string.bank_account_subtitle),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = taminColors.textHeaderSubtitle,
-                        )
-                    }
-                }
-            }
-        },
+        topBar = { BankAccountHeader(onBack = { onIntent(BankAccountIntent.OnBackClicked) }) },
     ) { padding ->
         Box(
             modifier = Modifier
@@ -216,6 +196,58 @@ fun BankAccountScreen(
     )
 }
 
+/**
+ * The page header — same one as the change-mobile subpage, so the profile subpages read as one
+ * family.
+ *
+ * Its own composable rather than a lambda inside `Scaffold`: nothing here depends on the state, but
+ * a `topBar` lambda is re-executed every time the page recomposes, which on this screen is every
+ * keystroke in the account-number field. As a function with one stable parameter it skips instead,
+ * so typing no longer re-runs the gradient bar, the decorative circle and the ring icon.
+ */
+@Composable
+private fun BankAccountHeader(onBack: () -> Unit) {
+    val taminColors = LocalTaminColors.current
+    val profileGradientBrush = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
+    TaminTopAppBar(
+        title = stringResource(Res.string.bank_account_title),
+        background = profileGradientBrush,
+        bottomPadding = Spacing.xl,
+        shape = RoundedCornerShape(bottomStart = HeaderCorner, bottomEnd = HeaderCorner),
+        navigationIcon = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = stringResource(Res.string.action_back),
+                onClick = onBack,
+                bordered = true,
+            )
+        },
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            DecorativeBackgroundCircle(
+                size = DecorCircleSize,
+                xOffset = DecorCircleX,
+                yOffset = DecorCircleY,
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_number))
+                Spacer(Modifier.height(Spacing.md))
+                Text(
+                    text = stringResource(Res.string.bank_account_subtitle),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = taminColors.textHeaderSubtitle,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun ListView(
     accounts: ImmutableList<BankAccountPR>,
@@ -224,8 +256,6 @@ private fun ListView(
 ) {
     // Held across scrolls so a card that has already arrived does not fade in again.
     val staggerState = rememberStaggeredEntranceState(accounts.size)
-    // The design's own gradient for this button: diagonal, not the horizontal bar gradient.
-    val addButtonBrush = remember { Brush.linearGradient(listOf(TaminNavy300, TaminNavy900)) }
 
     // The add button is the first row of the list and scrolls with it, as in the design -- not a
     // floating bar, which would sit on top of the last card.
@@ -240,7 +270,7 @@ private fun ListView(
                 text = stringResource(Res.string.bank_account_add),
                 icon = Icons.Default.Add,
                 onClick = { onIntent(BankAccountIntent.OnAddClicked) },
-                background = addButtonBrush,
+                background = AddButtonBrush,
                 iconAtStart = true,
             )
         }
@@ -371,17 +401,11 @@ private fun Overlays(
         // Registering files a request rather than inserting an account, so the message says what
         // happens next. The code is the only handle the person has on it until it is approved, but
         // it is optional -- its absence must not swallow the confirmation.
-        val registeredDescription = stringResource(Res.string.bank_account_registered_description)
-        val trackingCode = referenceCode?.let {
-            stringResource(Res.string.bank_account_tracking_code, it.toPersianDigits())
-        }
-        val successMessage = remember(registeredDescription, trackingCode) {
-            listOfNotNull(registeredDescription, trackingCode).joinToString(PARAGRAPH_BREAK)
-        }
         TaminConfirmationDialog(
             title = stringResource(Res.string.bank_account_registered),
-            description = successMessage,
+            description = stringResource(Res.string.bank_account_registered_description),
             icon = Icons.Default.Check,
+            content = referenceCode?.let { code -> { TrackingCodeRow(code = code) } },
             onDismissRequest = { onIntent(BankAccountIntent.OnSuccessDismissed) },
             confirmButton = {
                 TaminFilledButton(
@@ -392,6 +416,60 @@ private fun Overlays(
             },
             dismissButton = {},
         )
+    }
+}
+
+/**
+ * The tracking code, copyable.
+ *
+ * The whole row is the tap target, not just the glyph — the icon is the affordance, but a 24dp
+ * icon is a poor thing to aim at. What lands on the clipboard is the raw code, never the
+ * Persian-digit rendering: those digits are for reading, and pasting them anywhere that expects a
+ * code would produce something the service cannot match.
+ */
+@Composable
+private fun TrackingCodeRow(code: String) {
+    val colors = LocalTaminColors.current
+    val clipboardManager = LocalClipboardManager.current
+    val toaster = LocalToaster.current
+    val copiedMessage = stringResource(Res.string.toast_copy_tracking_code)
+    val copyDescription = stringResource(Res.string.bank_account_tracking_code)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(TrackingCodeCorner))
+            .background(colors.bgPage)
+            .clickable {
+                clipboardManager.setText(AnnotatedString(code))
+                toaster.success(copiedMessage)
+            }
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = copyDescription,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textMuted,
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            // A code is read as printed, so it stays left-to-right on this right-to-left page.
+            NumericText(
+                text = code.toPersianDigits(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.textPrimary,
+            )
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_copy),
+                contentDescription = copyDescription,
+                tint = colors.blueText,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
     }
 }
 
