@@ -158,7 +158,6 @@ fun ProfileScreen(
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToDependentsList = onNavigateToDependentsList,
-        onNavigateToRouteById = onNavigateToRouteById,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
