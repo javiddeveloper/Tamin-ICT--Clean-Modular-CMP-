@@ -71,6 +71,9 @@
     <string name="biometric_gate_description">برای دسترسی به اپلیکیشن، هویت خود را با اثر انگشت تأیید کنید</string>
     <string name="biometric_enable_prompt_title">فعال‌سازی ورود با اثر انگشت</string>
     <string name="biometric_enable_prompt_description">می‌خواهید برای ورودهای بعدی از اثر انگشت استفاده کنید؟</string>
+    <string name="biometric_gate_unavailable_title">اثر انگشت دیگر در دسترس نیست</string>
+    <string name="biometric_gate_unavailable_description">به نظر می‌رسد اثر انگشت روی این دستگاه دیگر ثبت نشده است. می‌توانید ورود با اثر انگشت را غیرفعال کرده و به روش دیگری وارد شوید.</string>
+    <string name="biometric_gate_disable_action">غیرفعال‌سازی و ادامه</string>
     <string name="profile_settings">تنظیمات</string>
     <string name="profile_support_section">پشتیبانی</string>
     <string name="profile_support">پشتیبانی</string>

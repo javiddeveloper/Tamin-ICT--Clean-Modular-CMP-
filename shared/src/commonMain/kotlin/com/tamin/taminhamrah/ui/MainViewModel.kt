@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.ui.contract.MainIntent
 import com.tamin.taminhamrah.ui.contract.MainEvent
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
 import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUseCase
+import com.tamin.taminhamrah.useCases.common.SetBiometricEnabledUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -27,7 +28,8 @@ class MainViewModel(
     private val biometricSessionState: BiometricSessionState,
     private val authAuthorizeUrlUseCase: AuthAuthorizeUrlUseCase,
     private val setThemeUseCase: SetThemeUseCase,
-    private val completeBiometricEnrollmentPromptUseCase: CompleteBiometricEnrollmentPromptUseCase
+    private val completeBiometricEnrollmentPromptUseCase: CompleteBiometricEnrollmentPromptUseCase,
+    private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase
 ) : BaseViewModel<MainUiState, PartialState, MainEvent, MainIntent>(
     initialState = MainUiState(isLoading = true)
 ) {
@@ -154,5 +156,12 @@ class MainViewModel(
 
     fun onBiometricUnlockSucceeded() {
         biometricSessionState.markUnlocked()
+    }
+
+    fun disableBiometricAndContinue() {
+        biometricSessionState.markUnlocked()
+        viewModelScope.launch {
+            setBiometricEnabledUseCase(false)
+        }
     }
 }

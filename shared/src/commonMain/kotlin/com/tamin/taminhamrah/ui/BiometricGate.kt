@@ -42,7 +42,10 @@ import taminx.core.core_ui.action_retry
 import taminx.core.core_ui.biometric_enable_prompt_description
 import taminx.core.core_ui.biometric_enable_prompt_title
 import taminx.core.core_ui.biometric_gate_description
+import taminx.core.core_ui.biometric_gate_disable_action
 import taminx.core.core_ui.biometric_gate_title
+import taminx.core.core_ui.biometric_gate_unavailable_description
+import taminx.core.core_ui.biometric_gate_unavailable_title
 import taminx.core.core_ui.biometric_prompt_subtitle
 import taminx.core.core_ui.biometric_prompt_title
 
@@ -51,16 +54,27 @@ import taminx.core.core_ui.biometric_prompt_title
 fun BiometricGate(
     biometricAuthenticator: BiometricAuthenticator,
     onUnlocked: () -> Unit,
+    onDisableBiometric: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
     var attempt by remember { mutableStateOf(0) }
     var isAuthenticating by remember { mutableStateOf(false) }
+    var isPermanentlyUnavailable by remember { mutableStateOf(false) }
     val title = stringResource(Res.string.biometric_prompt_title)
     val subtitle = stringResource(Res.string.biometric_prompt_subtitle)
     val negativeButtonText = stringResource(Res.string.action_cancel)
 
     LaunchedEffect(attempt) {
+        val availability = biometricAuthenticator.availability()
+        if (availability == BiometricAvailability.NOT_ENROLLED ||
+            availability == BiometricAvailability.NO_HARDWARE
+        ) {
+            isPermanentlyUnavailable = true
+            return@LaunchedEffect
+        }
+        isPermanentlyUnavailable = false
+
         isAuthenticating = true
         val result = biometricAuthenticator.authenticate(title, subtitle, negativeButtonText)
         isAuthenticating = false
@@ -100,13 +114,19 @@ fun BiometricGate(
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 Text(
-                    text = stringResource(Res.string.biometric_gate_title),
+                    text = stringResource(
+                        if (isPermanentlyUnavailable) Res.string.biometric_gate_unavailable_title
+                        else Res.string.biometric_gate_title
+                    ),
                     style = MaterialTheme.typography.titleLarge,
                     color = taminColors.textPrimary,
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = stringResource(Res.string.biometric_gate_description),
+                    text = stringResource(
+                        if (isPermanentlyUnavailable) Res.string.biometric_gate_unavailable_description
+                        else Res.string.biometric_gate_description
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = taminColors.textMuted,
                     textAlign = TextAlign.Center
@@ -114,8 +134,17 @@ fun BiometricGate(
             }
 
             TaminFilledButton(
-                text = stringResource(Res.string.action_retry),
-                onClick = { attempt++ },
+                text = stringResource(
+                    if (isPermanentlyUnavailable) Res.string.biometric_gate_disable_action
+                    else Res.string.action_retry
+                ),
+                onClick = {
+                    if (isPermanentlyUnavailable) {
+                        onDisableBiometric()
+                    } else {
+                        attempt++
+                    }
+                },
                 enabled = !isAuthenticating,
                 icon = Icons.Rounded.Fingerprint,
                 modifier = Modifier.fillMaxWidth()

@@ -86,7 +86,8 @@ fun MainApp(
                 if (showBiometricGate) {
                     BiometricGate(
                         biometricAuthenticator = biometricAuthenticator,
-                        onUnlocked = { viewModel.onBiometricUnlockSucceeded() }
+                        onUnlocked = { viewModel.onBiometricUnlockSucceeded() },
+                        onDisableBiometric = { viewModel.disableBiometricAndContinue() }
                     )
                 }
             }
