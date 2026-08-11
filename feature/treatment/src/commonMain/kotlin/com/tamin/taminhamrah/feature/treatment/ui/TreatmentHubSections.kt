@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +39,6 @@ import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -103,7 +103,7 @@ internal fun PatientCarousel(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(TreatmentDimens.cardLoadingHeight)
-                .taminSurface(CornerRadius.card)
+                .raisedCard(CornerRadius.card)
                 .shimmer(),
         )
 

@@ -57,7 +57,6 @@ import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -94,7 +93,7 @@ fun MedicalRecordCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
+            .raisedCard(CornerRadius.card)
             .accentStripe(accentColor)
             .clickable(onClick = onClick)
             .padding(Spacing.lg),

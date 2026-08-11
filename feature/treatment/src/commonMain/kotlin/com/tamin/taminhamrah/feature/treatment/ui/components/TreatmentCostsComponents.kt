@@ -45,7 +45,6 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -155,7 +154,7 @@ private fun CertificateCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
+            .raisedCard(CornerRadius.card)
             // The same leading stripe the records list uses, so both read as one family.
             .accentStripe(accent)
             .padding(Spacing.lg),
@@ -422,7 +421,7 @@ private fun CostsShimmerSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(TreatmentDimens.certificateSkeletonHeight)
-                    .taminSurface(CornerRadius.card)
+                    .raisedCard(CornerRadius.card)
                     .shimmer(),
             )
         }

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -71,7 +72,6 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -628,7 +628,7 @@ private fun RecordsShimmerSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .taminSurface(CornerRadius.cardCompact)
+                    .raisedCard(CornerRadius.cardCompact)
                     .shimmer(),
             )
         }

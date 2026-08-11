@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -290,7 +290,7 @@ private fun RecordDetailShimmerSkeleton() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
-                .taminSurface(CornerRadius.card)
+                .raisedCard(CornerRadius.card)
                 .shimmer(),
         )
         repeat(3) {
@@ -298,7 +298,7 @@ private fun RecordDetailShimmerSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .taminSurface(CornerRadius.cardCompact)
+                    .raisedCard(CornerRadius.cardCompact)
                     .shimmer(),
             )
         }

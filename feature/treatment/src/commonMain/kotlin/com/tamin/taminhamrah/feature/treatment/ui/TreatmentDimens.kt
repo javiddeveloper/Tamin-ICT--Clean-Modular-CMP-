@@ -8,6 +8,15 @@ import androidx.compose.ui.unit.dp
  * sizes) live in core-ui's theme; these are layout numbers that only the treatment screens need.
  */
 internal object TreatmentDimens {
+    /**
+     * How far every card in the feature sits off the page.
+     *
+     * One number for all of them on purpose: a list where cards lift by different amounts reads as
+     * a mistake rather than a hierarchy. Deep enough to cast a real shadow, not so deep that a
+     * scrolling list looks like it is peeling away.
+     */
+    val cardElevation = 12.dp
+
     /** Header collapse scroll distance. */
     val headerCollapseDistance = 96.dp
 

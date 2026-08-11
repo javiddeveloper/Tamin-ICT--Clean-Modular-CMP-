@@ -18,7 +18,6 @@ import com.tamin.taminhamrah.ui.components.LabeledBlock
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -62,7 +61,7 @@ fun RecordSummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.cardCompact)
+            .raisedCard(CornerRadius.cardCompact)
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
     ) {
         DetailRow(label = metaLabel, value = metaValue, numeric = false)
@@ -96,7 +95,7 @@ fun PrescriptionItemCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.cardCompact)
+            .raisedCard(CornerRadius.cardCompact)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
@@ -162,7 +161,7 @@ fun VisitSummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.cardCompact)
+            .raisedCard(CornerRadius.cardCompact)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
@@ -192,7 +191,7 @@ fun LabTestCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.cardCompact)
+            .raisedCard(CornerRadius.cardCompact)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
@@ -248,7 +247,7 @@ fun CostBreakdownCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.cardCompact)
+            .raisedCard(CornerRadius.cardCompact)
             .padding(Spacing.lg),
     ) {
         Text(

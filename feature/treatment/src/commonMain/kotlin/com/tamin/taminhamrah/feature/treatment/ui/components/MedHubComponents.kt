@@ -20,7 +20,6 @@ import com.tamin.taminhamrah.ui.components.AutoResizeText
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.startToEndGradient
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -55,7 +54,7 @@ fun CategoryTile(
     val colors = LocalTaminColors.current
     Column(
         modifier = modifier
-            .taminSurface(CornerRadius.cardCompact)
+            .raisedCard(CornerRadius.cardCompact)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.sm, vertical = Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -99,7 +98,7 @@ fun CostSummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
+            .raisedCard(CornerRadius.card)
             .padding(Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
