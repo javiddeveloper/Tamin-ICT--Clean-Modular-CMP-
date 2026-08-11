@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -258,6 +259,7 @@ fun DetailRow(
             style = MaterialTheme.typography.bodySmall,
             color = LocalTaminColors.current.textMuted,
         )
+        Spacer(modifier = Modifier.width(8.dp))
         when {
             // Number and unit are separate children so the unit stays physically left of the digits:
             // in the RTL row the number is the right child, the unit the left one.
@@ -294,7 +296,23 @@ fun TaminPrimaryButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     background: Brush = taminTopAppBarGradient(),
+    /**
+     * Puts the icon ahead of the label instead of after it — the leading edge, so it reads on the
+     * right in a right-to-left layout. Defaults to the trailing position every existing caller has.
+     */
+    iconAtStart: Boolean = false,
 ) {
+    val iconContent: @Composable () -> Unit = {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -305,15 +323,9 @@ fun TaminPrimaryButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
+        if (iconAtStart) iconContent()
         Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(IconSize.medium),
-            )
-        }
+        if (!iconAtStart) iconContent()
     }
 }
 

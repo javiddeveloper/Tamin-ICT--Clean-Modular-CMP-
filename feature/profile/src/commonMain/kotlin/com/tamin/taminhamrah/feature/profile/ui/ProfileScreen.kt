@@ -125,10 +125,11 @@ fun ProfileScreen(
     onNavigateToElectronicFile: () -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToActiveRelation: () -> Unit = {},
+    onNavigateToDependentsList: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
+    onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
-    onNavigateToRouteById: (Int) -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onBackClicked: () -> Unit
 ) {
@@ -153,9 +154,10 @@ fun ProfileScreen(
         onNavigateToVersionHistory = onNavigateToVersionHistory,
         onNavigateToActiveRelation = onNavigateToActiveRelation,
         onNavigateToChangeMobile = onNavigateToChangeMobile,
+        onNavigateToBankAccount = onNavigateToBankAccount,
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
-        onNavigateToRouteById = onNavigateToRouteById,
+        onNavigateToDependentsList = onNavigateToDependentsList,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -178,10 +180,11 @@ fun HandleProfileEvents(
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
     onNavigateToActiveRelation: () -> Unit,
+    onNavigateToDependentsList: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
+    onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
-    onNavigateToRouteById: (Int) -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -191,9 +194,9 @@ fun HandleProfileEvents(
                 onBackClicked()
             }
 
-            ProfileEvent.NavigateToSettings -> {
-                // onNavigateToRouteById(100)
-            }
+            // Settings has no destination yet; the row is still shown, so the event is
+            // swallowed rather than removed from the contract.
+            ProfileEvent.NavigateToSettings -> Unit
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()
@@ -211,8 +214,16 @@ fun HandleProfileEvents(
                 onNavigateToActiveRelation()
             }
 
+            ProfileEvent.NavigateToDependentsList -> {
+                onNavigateToDependentsList()
+            }
+
             ProfileEvent.NavigateToChangeMobile -> {
                 onNavigateToChangeMobile()
+            }
+
+            ProfileEvent.NavigateToBankAccount -> {
+                onNavigateToBankAccount()
             }
 
             ProfileEvent.NavigateToContactUs -> {
@@ -438,7 +449,7 @@ fun ProfileContent(
                                     leadingIconBackgroundGradient = taminColors.iconGradientPrimary
                                 ),
                                 showArrow = true,
-                                onClick = { onIntent(ProfileIntent.LoadBankAccountList) }
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.BANK_ACCOUNTS)) }
                             ),
                             ListItemData(
                                 title = stringResource(Res.string.profile_change_mobile),

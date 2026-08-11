@@ -103,7 +103,7 @@
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
     <string name="action_close">بستن</string>
-    <string name="error_title">خطا در دریافت اطلاعات</string>
+    <string name="error_updating-infos">خطا در دریافت اطلاعات</string>
     <string name="action_confirm">تایید</string>
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
@@ -294,6 +294,60 @@
     <string name="identity_gender_female">زن</string>
     <string name="identity_gender_unknown">نامشخص</string>
 
+    <!-- Bank account -->
+    <string name="bank_account_title">شماره حساب بانکی</string>
+    <string name="bank_account_subtitle">استعلام و ثبت شماره حساب‌های بانکی</string>
+    <string name="bank_account_add">افزودن حساب بانکی</string>
+    <string name="bank_account_empty_title">نتیجه‌ای یافت نشد</string>
+    <string name="bank_account_empty_description">هنوز حساب بانکی ثبت نکرده‌اید</string>
+    <string name="bank_account_active">حساب فعال</string>
+    <string name="bank_account_start_date">از تاریخ</string>
+    <string name="bank_account_end_date">تا تاریخ</string>
+    <string name="bank_account_no_date">—</string>
+
+    <!-- Bank names, spelled as the picker in the previous app spelled them. The list endpoint
+         returns its own wording ("رفاه کارگران"), which is why nothing is matched by name. -->
+    <string name="bank_name_refah">بانک رفاه</string>
+    <string name="bank_name_melli">بانک ملی ایران</string>
+    <string name="bank_name_mellat">بانک ملت</string>
+    <string name="bank_name_tejarat">بانک تجارت</string>
+    <string name="bank_name_saderat">بانک صادرات</string>
+    <string name="bank_name_sepah">بانک سپه</string>
+
+    <string name="bank_account_type_interest_free">قرض‌الحسنه</string>
+    <string name="bank_account_type_savings">پس‌انداز عادی</string>
+    <string name="bank_account_type_savings_companion">پس‌انداز همراه</string>
+    <string name="bank_account_type_current">جاری عادی</string>
+    <string name="bank_account_type_current_companion">جاری همراه</string>
+
+    <!-- Add form -->
+    <string name="bank_account_form_title">اطلاعات شماره حساب</string>
+    <string name="bank_account_field_start_date">تاریخ افتتاح حساب</string>
+    <string name="bank_account_field_bank">انتخاب بانک</string>
+    <string name="bank_account_field_type">نوع حساب</string>
+    <string name="bank_account_field_number">شماره حساب</string>
+    <string name="bank_account_submit">ثبت و تأیید اطلاعات حساب بانکی</string>
+    <string name="bank_account_picker_bank">انتخاب بانک</string>
+    <string name="bank_account_picker_type">نوع حساب</string>
+    <string name="bank_account_number_hint">ابتدا بانک را انتخاب کنید؛ تعداد ارقام شمارهٔ حساب در هر بانک متفاوت است.</string>
+
+    <!-- The help sheet explaining which part of an IBAN the account number is -->
+    <string name="bank_account_iban_understood">متوجه شدم</string>
+
+    <!-- Validation -->
+    <string name="bank_account_error_incomplete">لطفاً بانک، نوع حساب، تاریخ و شمارهٔ حساب را کامل وارد کنید.</string>
+    <string name="bank_account_error_length">شمارهٔ حساب %1$s باید دقیقاً %2$s رقم باشد؛ %3$s رقم وارد کرده‌اید.</string>
+    <string name="bank_account_digits_of_bank">شمارهٔ حساب %1$s شامل %2$s رقم است.</string>
+    <string name="bank_account_digit_counter">%1$s/%2$s</string>
+    <string name="bank_account_help_mobile_bank">برای پیدا کردن شماره حساب یا شبا، بهتر است وارد همراه‌بانک یا اینترنت‌بانک بانک خود شوید و آن را از بخش «اطلاعات حساب» کپی کنید.</string>
+    <string name="bank_account_help_ussd">اگر به همراه‌بانک دسترسی ندارید، می‌توانید با شماره‌گیری کد دستوری بانک خود یا مراجعه به نزدیک‌ترین شعبه، شماره شبا را دریافت کنید.</string>
+    <string name="bank_account_digits_suffix">%1$s رقم</string>
+    <string name="bank_account_error_title">خطا در دریافت اطلاعات</string>
+    <string name="bank_account_registered_description">پس از بررسی و تأیید، این حساب به فهرست حساب‌های بانکی شما افزوده می‌شود.</string>
+    <!-- A label now, not a sentence: the code sits beside it in its own copyable row. -->
+    <string name="bank_account_tracking_code">کد پیگیری</string>
+    <string name="bank_account_registered">حساب بانکی با موفقیت ثبت شد.</string>
+
     <!-- Document viewer strings -->
     <string name="document_viewer_close">بستن</string>
     <string name="document_viewer_title">نمایش سند</string>
@@ -374,5 +428,140 @@
     <string name="error_cancel_license_message">لغو مجوز با خطا مواجه شد</string>
     <string name="error_issue_license_message">صدور مجوز با خطا مواجه شد</string>
     <string name="error_unknown_fallback">Unknown Error</string>
+    <!-- ===================== Add Dependent ===================== -->
+    <string name="add_dependent_title">افزودن فرد تبعی جدید</string>
+    <string name="add_dependent_subtitle">ثبت اطلاعات فرد تحت پوشش جدید</string>
+    <string name="add_dependent_close">بستن</string>
+
+    <string name="step_get_info">دریافت اطلاعات</string>
+    <string name="step_verify_info">تأیید اطلاعات</string>
+    <string name="step_upload_docs">بارگذاری مدارک</string>
+    <string name="step_complete">تکمیل</string>
+
+    <string name="inquiry_title">دریافت اطلاعات از ثبت احوال</string>
+    <string name="inquiry_national_id_label">کد ملی</string>
+    <string name="inquiry_birth_date_placeholder">تاریخ تولد را انتخاب کنید</string>
+    <string name="inquiry_relationship_placeholder">نسبت خانوادگی را انتخاب کنید</string>
+    <string name="inquiry_submit_button">استعلام اطلاعات</string>
+    <string name="inquiry_date_picker_title">انتخاب تاریخ تولد</string>
+
+    <string name="verify_section_new_info">اطلاعات تبعی جدید</string>
+    <string name="verify_banner_success">اطلاعات هویتی با سازمان ثبت‌احوال تطبیق داده شد.</string>
+    <string name="verify_section_additional_info">اطلاعات تکمیلی</string>
+    <string name="verify_birth_place_label">محل تولد</string>
+    <string name="verify_issue_place_label">محل صدور</string>
+    <string name="verify_branch_placeholder">شعبه تامین اجتماعی را انتخاب کنید</string>
+    <string name="verify_education_inquiry_title">استعلام کد تحصیلی</string>
+    <string name="verify_education_submit">استعلام</string>
+    <string name="verify_university_label">محل تحصیل: %1$s</string>
+    <string name="verify_daughter_commitment_title">تعهدنامه فرزند دختر</string>
+    <string name="verify_daughter_commitment_text">اینجانب عدم ازدواج و عدم اشتغال فرزند دختر خود را تایید مینمایم.</string>
+    <string name="verify_next_step">مرحلهٔ بعدی</string>
+
+    <string name="upload_title">بارگذاری مدارک</string>
+    <string name="upload_desc">مدارک زیر بر اساس نسبت انتخابی به صورت خودکار تعیین شده‌اند. روی هر مورد ضربه بزنید تا تصویر آن را بارگذاری کنید.</string>
+    <string name="upload_banner_no_need">اطلاعات ثبت احوال تایید شده است. نیازی به بارگذاری مدرک نیست.</string>
+    <string name="upload_banner_warning">حجم هر فایل باید کمتر از ۲ مگابایت باشد (JPG یا PDF).</string>
+    <string name="upload_banner_error">لطفاً تمامی مدارک درخواستی را بارگذاری نمایید.</string>
+    <string name="upload_slot_placeholder">برای انتخاب فایل ضربه بزنید</string>
+    <string name="upload_slot_success">بارگذاری شد</string>
+    <string name="upload_submit_final">تأیید و ثبت نهایی</string>
+
+    <string name="error_title">خطا</string>
+    <string name="error_file_too_large">حجم فایل انتخاب شده بیش از ۲ مگابایت است. لطفا فایل کوچک‌تری انتخاب کنید.</string>
+    <string name="error_image_duplicate">تصویر انتخاب شده تکراری است.</string>
+    <string name="error_file_read">خطا در خواندن فایل</string>
+    <string name="error_file_read_fallback">خطا در خواندن فایل. لطفا دوباره تلاش کنید.</string>
+
+    <string name="city_birth_picker_title">انتخاب محل تولد</string>
+    <string name="city_issuance_picker_title">انتخاب محل صدور</string>
+    <string name="branch_picker_title">انتخاب شعبه</string>
+
+    <string name="success_title">ثبت فرد تبعی تکمیل شد</string>
+    <string name="success_desc">درخواست شما ثبت شد و پس از بررسی مدارک، پوشش بیمه‌ای فرد تبعی فعال می‌شود.</string>
+    <string name="success_dependent_fallback">فرد تبعی</string>
+    <string name="success_badge_text">ثبت شد</string>
+    <string name="success_view_list">مشاهدهٔ فهرست افراد تبعی</string>
+
+    <string name="error_invalid_national_id">کد ملی معتبر نیست</string>
+    <string name="error_select_birth_date">لطفا تاریخ تولد را انتخاب کنید</string>
+    <string name="error_select_relationship">لطفا نسبت خانوادگی را انتخاب کنید</string>
+    <string name="error_inquiry_registry_failed">خطا در استعلام ثبت احوال</string>
+    <string name="error_enter_education_code">لطفا کد استعلام تحصیلی را وارد کنید</string>
+    <string name="error_inquiry_education_failed">خطا در استعلام کد تحصیلی</string>
+    <string name="error_upload_failed">خطا در آپلود مدرک</string>
+    <string name="error_complete_additional_info">لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید</string>
+    <string name="error_daughter_commitment_required">تایید تعهدنامه الزامی است</string>
+    <string name="error_upload_all_docs">لطفا تمامی مدارک الزامی را بارگذاری کنید</string>
+    <string name="error_final_submit_failed">خطا در ثبت نهایی درخواست</string>
+    <string name="error_load_branches_failed">خطا در دریافت لیست شعب</string>
+    <string name="error_load_relationships_failed">خطا در دریافت نسبت‌های خانوادگی</string>
+    <string name="error_load_cities_failed">خطا در دریافت لیست شهرها</string>
+
+    <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
+    <string name="picker_birth_place_title">انتخاب محل تولد</string>
+    <string name="picker_issue_place_title">انتخاب محل صدور</string>
+    <string name="picker_branch_title">انتخاب شعبه</string>
+
+    <string name="verify_label_first_name">نام</string>
+    <string name="verify_label_last_name">نام خانوادگی</string>
+    <string name="verify_label_father_name">نام پدر</string>
+    <string name="verify_label_age">سن</string>
+    <string name="verify_label_age_value">%1$s سال</string>
+    <string name="verify_label_gender">جنسیت</string>
+    <string name="verify_label_relation">نسبت</string>
+    <string name="verify_label_national_id">کد ملی</string>
+    <string name="verify_label_birth_date">تاریخ تولد</string>
+    <string name="gender_male">مرد</string>
+    <string name="gender_female">زن</string>
+
+    <string name="doc_type_id_first_page">صفحه اول شناسنامه</string>
+    <string name="doc_type_spouse_id">صفحه مشخصات همسر شناسنامه</string>
+    <string name="doc_type_marriage_certificate">عقدنامه</string>
+
+    <string name="step_number_1">۱</string>
+    <string name="step_number_2">۲</string>
+    <string name="step_number_3">۳</string>
+
+    <!-- Version History -->
+    <string name="profile_version_history_last_updated">آخرین به‌روزرسانی: %1$s</string>
+    <string name="profile_version_history_version_prefix">نسخه %1$s</string>
+    <string name="profile_version_history_release_date">تاریخ انتشار: %1$s</string>
+    <string name="profile_version_history_new_features">ویژگی‌های جدید</string>
+    <string name="profile_version_history_bug_fixes_and_improvements">رفع اشکال و بهینه‌سازی</string>
+    <string name="profile_version_history_latest_badge">جدیدترین</string>
+
+    <!-- Dependents List -->
+    <string name="dependents_list_title">افراد تبعی</string>
+    <string name="dependents_list_header_subtitle">مشاهده و ثبت افراد تبعی بیمهٔ اصلی</string>
+    <string name="dependents_list_info_banner">از طریق این سرویس صرفاً همسر، فرزند پسر (زیر ۲۰ سال یا شاغل به تحصیل) و فرزند دختر (فاقد شغل و همسر) می‌توانند تحت پوشش قرار گیرند.</string>
+    <string name="dependents_list_btn_add_new">افزودن فرد جدید</string>
+    <string name="dependents_list_section_covered">افراد تحت پوشش</string>
+    <string name="dependents_list_empty_title">هیچ فرد تبعی ثبت نشده است</string>
+    <string name="dependents_list_unregistered_name">نام ثبت نشده</string>
+    <string name="dependents_list_status">وضعیت</string>
+    <string name="dependents_list_insurance_id">شماره بیمه</string>
+
+    <!-- Bottom Sheet Strings -->
+    <string name="bs_submit">ثبت</string>
+    <string name="bs_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
+    <string name="bs_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
+    <string name="bs_mental">آیا بیماری اعصاب و روان دارید؟</string>
+    <string name="bs_cancer">ایا سابقه ابتلا به سرطان دارید ؟</string>
+    <string name="bs_family_diseases">آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
+    <string name="bs_province">استان</string>
+    <string name="bs_city">شهر</string>
+    <string name="bs_blood_group">گروه خونی</string>
+    <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>
+    <string name="bs_alcohol_addiction">آیا الکل مصرف دارید؟</string>
+    <string name="bs_exercise">آیا ورزش می کنید؟</string>
+    <string name="bs_marital_status">وضعیت تاهل</string>
+    <string name="bs_relation_type">نسبت با شما</string>
+    <string name="bs_emergency_contact">تماس اضطراری</string>
+    <string name="search_hint">جستجو...</string>
+    <string name="description_label">توضیحات</string>
+    <string name="close_content_description">بستن</string>
 </resources>
 

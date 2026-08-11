@@ -1,0 +1,60 @@
+---
+tags: [architecture]
+---
+
+# Navigation
+
+Library: **Compose Multiplatform Navigation** (`org.jetbrains.androidx.navigation:navigation-compose`) with **type-safe routes** backed by `kotlinx.serialization`.
+(Note: `androidx.navigation3` is also in the version catalog and in `androidApp`, but the main graph runs on navigation-compose.)
+
+## Key files
+
+| File | Role |
+|---|---|
+| `shared/.../ui/navigation/TaminHamrahNavGraph.kt` | root graph — every `xxxGraph()` is attached here |
+| `shared/.../ui/navigation/NavRoutes.kt` | app-level routes |
+| `shared/.../ui/navigation/NavigationTab.kt` | bottom bar tabs |
+| `shared/.../ui/navigation/FeatureNavigation.kt` | `NavController.navigateToFeature(flag)` — bridge from `FeatureFlag` to a destination |
+| `feature/<x>/.../Navigation.kt` | that feature's routes and graph |
+
+## The per-feature pattern
+
+```kotlin
+@Serializable
+sealed interface ProfileRoute {
+    @Serializable data object Graph : ProfileRoute
+    @Serializable data class  Main(val userId: String? = null) : ProfileRoute
+    @Serializable data object ElectronicFile : ProfileRoute
+    // …
+}
+
+fun NavGraphBuilder.profileGraph(
+    navController: NavController,
+    onNavigateToIdentity: (String?) -> Unit,   // destinations outside this feature → callback
+    onOpenUrl: (String) -> Unit,
+    onBack: () -> Unit
+) {
+    navigation<ProfileRoute.Graph>(startDestination = ProfileRoute.Main()) { … }
+}
+```
+
+The rule: **navigation within a feature** calls `navController.navigate(Route.X)` directly; **navigation to another feature** is passed up as a callback, so feature modules never depend on each other.
+
+## Getting a ViewModel
+
+```kotlin
+val vm = koinViewModel<XViewModel>()                               // per-screen scope
+val vm = backStackEntry.sharedViewModel<XViewModel>(navController) // shared across one graph
+```
+
+`sharedViewModel` is a project-internal extension (`com.tamin.taminhamrah.ui.sharedViewModel`).
+
+## Transitions
+
+`composableWithFadeTransitions<Route>` — a fade variant of `composable`, defined in `core-ui`. Use it for ordinary screens so the app feels consistent; plain `composable` also appears in the codebase but is not the dominant pattern.
+
+## Dynamic routing from the server menu
+
+`FeatureFlag` (from the server) → `navigateToFeature(flag)` → the `navigateToXxx()` function each feature exports. Full detail in [[Feature-Flags]].
+
+Related: [[Modules]] · [[Feature-Flags]]
