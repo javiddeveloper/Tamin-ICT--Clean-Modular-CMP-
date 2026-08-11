@@ -61,6 +61,10 @@ private const val MAX_UPLOAD_SIZE_BYTES = 2_000_000
 private const val RELATION_CODE_SPOUSE = "01"
 private const val RELATION_CODE_SON = "02"
 private const val RELATION_CODE_DAUGHTER = "03"
+
+private const val DOC_TYPE_ID_FIRST_PAGE = "1"
+private const val DOC_TYPE_SPOUSE_ID = "2"
+private const val DOC_TYPE_MARRIAGE_CERTIFICATE = "3"
 private const val SON_EDUCATION_AGE_THRESHOLD = 19
 private const val DAUGHTER_COMMITMENT_AGE_THRESHOLD = 18
 private const val REGISTRY_STATE_ID_CARD_ON_FILE = "1"
@@ -188,7 +192,7 @@ class AddDependentViewModel(
         emit(PartialState.Loading(true))
         getFamilyRelationshipsFromProxyUseCase(listOf(ApiFilterDN(FilterProperty.DEPENDENCY_DESC, RELATIONSHIP_FILTER_WILDCARD, FilterOperator.LIKE)))
             .map { it.map { item -> item.toPresentation() } }
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .catch { e -> this@flow.emit(PartialState.Error(e.toSingleLineMessage())) }
             .collect { relationships ->
                 emit(PartialState.FamilyRelationshipsLoaded(relationships))
                 emit(PartialState.BottomSheetStateChanged(
@@ -207,6 +211,7 @@ class AddDependentViewModel(
 
     private fun submitInquiryRegistry(): Flow<PartialState> = flow {
         val state = uiState.value
+        if (state.isLoading) return@flow
         val errorTitle = getString(Res.string.error_title)
         if (state.birthDateTimeStamp.isBlank() && state.birthDatePersian.isBlank()) {
             sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_select_birth_date)))
@@ -242,11 +247,13 @@ class AddDependentViewModel(
     }
 
     private fun uploadDocument(fileBytes: ByteArray, fileName: String, docType: String): Flow<PartialState> = flow {
+        if (uiState.value.isLoading) return@flow
         if (fileBytes.size > MAX_UPLOAD_SIZE_BYTES) {
             sendEvent(AddDependentEvent.ShowErrorDialog(getString(Res.string.error_title), getString(Res.string.error_file_too_large)))
             return@flow
         }
-        if (uiState.value.uploadedDocuments.any { it.fileBytes?.contentEquals(fileBytes) == true }) {
+        val newFileHash = fileBytes.contentHashCode()
+        if (uiState.value.uploadedDocuments.any { it.contentHash == newFileHash }) {
             sendEvent(AddDependentEvent.ShowErrorDialog(getString(Res.string.error_title), getString(Res.string.error_image_duplicate)))
             return@flow
         }
@@ -255,7 +262,7 @@ class AddDependentViewModel(
             .map { it.toPresentation() }
             .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
             .collect { uploadPR ->
-                emit(PartialState.DocumentUploaded(UploadedDocument(uploadPR.guid, docType, fileName, fileBytes)))
+                emit(PartialState.DocumentUploaded(UploadedDocument(uploadPR.guid, docType, fileName, newFileHash)))
             }
     }
 
@@ -275,7 +282,15 @@ class AddDependentViewModel(
                     return@flow
                 }
                 when (state.stepperMode) {
-                    StepperMode.SON_MODE -> if (state.needCallInquiryEducation) submitInquiryEducation().collect { emit(it) } else emit(PartialState.StepChanged(STEP_DOCUMENTS))
+
+                    StepperMode.SON_MODE -> if (state.needCallInquiryEducation) {
+                        submitInquiryEducation().collect { partialState ->
+                            emit(partialState)
+                            if (partialState is PartialState.EducationInquirySuccess) {
+                                emit(PartialState.StepChanged(STEP_DOCUMENTS))
+                            }
+                        }
+                    } else emit(PartialState.StepChanged(STEP_DOCUMENTS))
                     StepperMode.DAUGHTER_MODE -> if (!state.isDaughterCommitmentChecked) sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_daughter_commitment_required))) else emit(PartialState.StepChanged(STEP_DOCUMENTS))
                     StepperMode.DEFAULT_MODE -> emit(PartialState.StepChanged(STEP_DOCUMENTS))
                 }
@@ -291,6 +306,8 @@ class AddDependentViewModel(
 
     private fun submitFinalRequest(): Flow<PartialState> = flow {
         val state = uiState.value
+
+        if (state.isLoading) return@flow
         emit(PartialState.Loading(true))
         val requestPR = RequestAddDependentPR(
             branchCode = state.selectedBranch?.branchCode,
@@ -324,9 +341,16 @@ class AddDependentViewModel(
         val spouseId = getString(Res.string.doc_type_spouse_id)
         val marriageCertificate = getString(Res.string.doc_type_marriage_certificate)
         return when (relationCode) {
-            RELATION_CODE_SPOUSE -> listOf(DocType("1", idFirstPage), DocType("2", spouseId), DocType("3", marriageCertificate))
-            RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(DocType("1", idFirstPage, data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE), DocType("3", marriageCertificate, true))
-            else -> listOf(DocType("1", idFirstPage))
+            RELATION_CODE_SPOUSE -> listOf(
+                DocType(DOC_TYPE_ID_FIRST_PAGE, idFirstPage),
+                DocType(DOC_TYPE_SPOUSE_ID, spouseId),
+                DocType(DOC_TYPE_MARRIAGE_CERTIFICATE, marriageCertificate)
+            )
+            RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(
+                DocType(DOC_TYPE_ID_FIRST_PAGE, idFirstPage, data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE),
+                DocType(DOC_TYPE_MARRIAGE_CERTIFICATE, marriageCertificate, true)
+            )
+            else -> listOf(DocType(DOC_TYPE_ID_FIRST_PAGE, idFirstPage))
         }
     }
 
@@ -353,7 +377,8 @@ class AddDependentViewModel(
     }
 
     private fun AddDependentState.resetInquiry(): AddDependentState {
-        val hasInquired = !needCallInquiryRegistry || registryData != null
+
+        val hasInquired = !needCallInquiryRegistry
         return copy(needCallInquiryRegistry = true, registryData = if (hasInquired) null else registryData, uploadedDocuments = if (hasInquired) emptyList() else uploadedDocuments)
     }
 
