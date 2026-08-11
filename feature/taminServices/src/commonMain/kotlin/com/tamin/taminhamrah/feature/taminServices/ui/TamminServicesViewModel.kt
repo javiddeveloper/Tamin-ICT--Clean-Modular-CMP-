@@ -62,7 +62,11 @@ class TamminServicesViewModel(
         val status = featureManager.getFeatureStatus(flag).first()
         when (status) {
             is FeatureStatus.Enabled -> {
-                sendEvent(TaminSericesEvent.NavigateToService(flag))
+                if (flag == FeatureFlag.LAWS) {
+                    service.url?.let { sendEvent(TaminSericesEvent.NavigateToWeb(it)) }
+                } else {
+                    sendEvent(TaminSericesEvent.NavigateToService(flag))
+                }
             }
             is FeatureStatus.Disabled -> {
                 status.message?.let { sendEvent(TaminSericesEvent.ShowMessage(it)) }
