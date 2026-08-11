@@ -39,12 +39,6 @@ All documentation is written in English. The vault uses Obsidian-style `[[…]]`
 5. Search `core-ui/ui/components/` before building a new component (59 already exist).
 6. **`old_android/` is not part of the project** — it is the legacy native version kept as the reference implementation the KMP rewrite is ported from. Read it to understand expected behaviour, but never edit or commit it (it is ignored). Details: `docs/vault/Reference-old-android.md`
 
-## Code Review
-
-Any request to review a merge request follows the process in **`review/README.md`** — read it before starting.
-In short: the report goes in `review/MR-<id>.md`, committed **on that MR's source branch**; the developer applies fixes; the same file is updated item by item; the file is deleted at the end.
-Five rules: (1) **reports are written in English**; (2) the user's working tree is never disturbed — use `git worktree`, not `git checkout`; (3) record the reviewed commit in the report header; (4) `✅ fixed` only after reading the code; (5) **merging into `develop` is not the reviewer's job.**
-
 ## Common commands
 
 ```powershell
