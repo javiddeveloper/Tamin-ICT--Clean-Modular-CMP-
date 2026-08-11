@@ -22,7 +22,6 @@ tags: [moc]
 
 - [[Naming-Conventions]] — the file-naming contract (and why the build does not enforce it) ⚠️
 - [[Adding-a-Feature]] — checklist for a new screen or feature module
-- [[Code-Review]] — merge request review process and the `review/` folder
 
 ## Build and release
 
