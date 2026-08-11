@@ -28,13 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.treatment.ui.components.CostBreakdownCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentRecordPdfExport
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
+import com.tamin.taminhamrah.feature.treatment.ui.model.hasLabResult
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -63,6 +63,7 @@ import taminx.core.core_ui.detail_doctor
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_tamin_download
+import taminx.core.core_ui.ic_tamin_print
 import taminx.core.core_ui.prescription_download_cd
 import taminx.core.core_ui.prescription_empty
 import taminx.core.core_ui.prescription_items
@@ -74,6 +75,7 @@ import taminx.core.core_ui.records_doctor_named
 import taminx.core.core_ui.share_organization
 import taminx.core.core_ui.share_yours
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
 private const val UNKNOWN_VALUE = "—"
@@ -113,6 +115,7 @@ fun RecordDetailScreen(
     RecordDetailContent(
         state = state,
         noteHeadId = noteHeadId,
+        type = type,
         docName = docName,
         prescDate = prescDate,
         trackingCode = trackingCode,
@@ -140,6 +143,8 @@ fun RecordDetailScreen(
 fun RecordDetailContent(
     state: PrescriptionsUiState,
     noteHeadId: String,
+    /** The record's `prescType`; decides whether a lab result exists to offer. */
+    type: String = "",
     docName: String = "",
     prescDate: String = "",
     trackingCode: String = "",
@@ -219,8 +224,11 @@ fun RecordDetailContent(
                                 contentDescription = stringResource(Res.string.prescription_download_cd),
                                 onClick = { showing = TreatmentRecordPdfExport.PRESCRIPTION },
                             )
-                            TaminTopAppBarButton(
-                                icon = vectorResource(Res.drawable.ic_tamin_download),
+                            // Paraclinic records only. Two identical download glyphs sat here
+                            // before, one of which could only fail on a drug prescription --
+                            // invisible until the bar stopped clipping its own actions.
+                            if (type.hasLabResult()) TaminTopAppBarButton(
+                                icon = vectorResource(Res.drawable.ic_tamin_print),
                                 contentDescription = stringResource(Res.string.prescription_lab_result_cd),
                                 onClick = { showing = TreatmentRecordPdfExport.LAB_RESULT },
                             )
@@ -249,6 +257,7 @@ fun RecordDetailContent(
             stringResource(Res.string.records_doctor_named, docName)
         },
                             trackingCode = trackingCode.ifBlank { UNKNOWN_VALUE }.toPersianDigits(),
+                            trackingCodeRaw = trackingCode,
                             date = prescDate.ifBlank { UNKNOWN_VALUE }.toJalaliDateLabel(),
                         )
 
@@ -268,11 +277,6 @@ fun RecordDetailContent(
                             )
                         }
 
-                        CostBreakdownCard(
-                            total = totals.total.toPriceFormat(),
-                            organizationShare = totals.organizationShare.toPriceFormat(),
-                            insuredShare = totals.insuredShare.toPriceFormat(),
-                        )
                     }
                 }
 
@@ -282,6 +286,18 @@ fun RecordDetailContent(
             // Over the page rather than instead of it: the body falls through to its empty
             // state, so dismissing the dialog does not leave a bare top bar behind.
             ErrorStateView(message = state.error, onDismiss = onBack, onRetry = onRetry)
+
+            // Pinned, exactly as on the records timeline: the total is what the page is scrolled
+            // for, and a card at the very end only shows itself once the reading is finished.
+            CostTotalsBar(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                insuredShareLabel = stringResource(Res.string.share_yours),
+                insuredShareAmount = totals.insuredShare.toPriceFormat(),
+                organizationShareLabel = stringResource(Res.string.share_organization),
+                organizationShareAmount = totals.organizationShare.toPriceFormat(),
+                totalLabel = stringResource(Res.string.amount_total),
+                totalAmount = totals.total.toPriceFormat(),
+            )
         }
     }
 

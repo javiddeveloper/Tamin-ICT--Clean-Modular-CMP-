@@ -84,9 +84,7 @@ fun TreatmentScreen(
         TreatmentContent(
             state = uiState,
             onIntent = viewModel::sendIntent,
-            onOpenMedicalRecords = onOpenMedicalRecords,
             onOpenHealthProfile = onOpenHealthProfile,
-            onOpenPrescriptions = onOpenPrescriptions,
             onOpenMiscClaims = onOpenMiscClaims,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
@@ -122,14 +120,18 @@ fun HandleTreatmentEvents(
     }
 }
 
+/**
+ * Records and prescriptions are not callbacks here: both tiles raise
+ * [TreatmentIntent.OpenRecords], and the feature flag in the view model decides whether that
+ * becomes a [TreatmentEvent.NavigateToRecords]. The navigation lambdas belong to [TreatmentScreen],
+ * which handles that event.
+ */
 @Composable
 fun TreatmentContent(
     state: TreatmentUiState,
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenMedicalRecords: (nationalCode: String) -> Unit = {},
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
-    onOpenPrescriptions: (String) -> Unit = {},
     onOpenMiscClaims: () -> Unit = {},
 ) {
     // Keyed on the data the cards are built from, not on the whole state: selecting a patient

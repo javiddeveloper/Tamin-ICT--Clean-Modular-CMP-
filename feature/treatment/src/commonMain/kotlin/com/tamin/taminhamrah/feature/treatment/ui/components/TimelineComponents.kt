@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatTileStyle
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -485,7 +486,7 @@ fun CostSplitTiles(
             containerColor = colors.greenBg,
             contentColor = colors.greenText,
             modifier = Modifier.weight(1f),
-            dense = dense,
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
         )
         StatTile(
             label = organizationShareLabel,
@@ -493,7 +494,7 @@ fun CostSplitTiles(
             containerColor = colors.blueBg,
             contentColor = colors.blueText,
             modifier = Modifier.weight(1f),
-            dense = dense,
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
         )
         StatTile(
             label = totalLabel,
@@ -501,7 +502,7 @@ fun CostSplitTiles(
             containerColor = colors.orangeBg,
             contentColor = colors.orangeText,
             modifier = Modifier.weight(1f),
-            dense = dense,
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
         )
     }
 }

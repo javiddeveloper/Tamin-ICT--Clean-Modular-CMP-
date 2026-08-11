@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
 import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedShadow
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItemPR
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
@@ -212,7 +213,9 @@ internal fun TreatmentQuickAccess(
         // One ListGroupView per row rather than a single grouped list: the design keeps the
         // three as separate cards with gaps, and only the first carries the gradient.
         ListGroupView(
-            modifier = Modifier.background(quickAccessGradient(), RoundedCornerShape(CornerRadius.card)),
+            modifier = Modifier
+                .raisedShadow(CornerRadius.card)
+                .background(quickAccessGradient(), RoundedCornerShape(CornerRadius.card)),
             containerShape = RoundedCornerShape(CornerRadius.card),
             containerBackgroundColor = Color.Transparent,
             items = persistentListOf(
@@ -233,6 +236,7 @@ internal fun TreatmentQuickAccess(
         )
 
         ListGroupView(
+            modifier = Modifier.raisedShadow(CornerRadius.card),
             containerShape = RoundedCornerShape(CornerRadius.card),
             items = persistentListOf(
                 ListItemData(
@@ -263,6 +267,7 @@ internal fun TreatmentQuickAccess(
         )
 
         ListGroupView(
+            modifier = Modifier.raisedShadow(CornerRadius.card),
             containerShape = RoundedCornerShape(CornerRadius.card),
             items = persistentListOf(
                 ListItemData(

@@ -2,26 +2,27 @@ package com.tamin.taminhamrah.feature.profile.ui.bankAccount
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -35,12 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.AccountTypePickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountCard
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountForm
@@ -53,33 +51,32 @@ import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccount
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountUiState
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountDraftPR
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.toast.LocalToaster
-import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -94,13 +91,12 @@ import taminx.core.core_ui.bank_account_picker_bank
 import taminx.core.core_ui.bank_account_picker_type
 import taminx.core.core_ui.bank_account_registered
 import taminx.core.core_ui.bank_account_registered_description
-import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
+import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.ic_number
-import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.toast_copy_tracking_code
+import taminx.core.core_ui.ic_tamin_copy
 
 private const val ADD_BUTTON_KEY = "add"
 private const val EMPTY_STATE_KEY = "empty"
@@ -430,20 +426,17 @@ private fun Overlays(
 @Composable
 private fun TrackingCodeRow(code: String) {
     val colors = LocalTaminColors.current
-    val clipboardManager = LocalClipboardManager.current
-    val toaster = LocalToaster.current
-    val copiedMessage = stringResource(Res.string.toast_copy_tracking_code)
     val copyDescription = stringResource(Res.string.bank_account_tracking_code)
+    // The clipboard write and its confirmation come from core-ui, so this row and every copy
+    // glyph elsewhere behave the same way rather than each growing its own version.
+    val copy = rememberCopyAction(code)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(TrackingCodeCorner))
             .background(colors.bgPage)
-            .clickable {
-                clipboardManager.setText(AnnotatedString(code))
-                toaster.success(copiedMessage)
-            }
+            .clickable(onClick = copy)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,

@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -95,19 +98,22 @@ fun TaminTopAppBar(
                 bottom = bottomPadding,
             ),
     ) {
-        Row(
+        /*
+         * The title is centred against the bar, not against the space left over between the two
+         * end caps. Those caps are only equal in width while each holds one button -- give one
+         * side a second action and a title laid out between them slides off centre.
+         *
+         * So the caps are pinned to the two edges and the title is centred over the whole width
+         * underneath them. It is drawn first, which keeps the buttons on top and hittable.
+         */
+        Box(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            contentAlignment = Alignment.Center,
         ) {
-            // A centred title needs an end cap on both sides even when empty, so the
-            // title sits between equal margins. A start-aligned one does not.
-            if (centerTitle || navigationIcon != null) {
-                HeaderSlot { navigationIcon?.invoke() }
-            }
             Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = Spacing.sm),
+                    .fillMaxWidth()
+                    .padding(horizontal = HEADER_BUTTON_SIZE + Spacing.sm),
             ) {
                 if (titleContent != null) {
                     titleContent()
@@ -117,11 +123,19 @@ fun TaminTopAppBar(
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
-            if (centerTitle || action != null) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                HeaderSlot { navigationIcon?.invoke() }
                 HeaderSlot { action?.invoke() }
             }
         }
@@ -181,11 +195,19 @@ fun TaminTopAppBarButton(
     }
 }
 
-/** Fixed-width end cap so the title stays optically centred with 0, 1 or 2 actions. */
+/**
+ * End cap holding the navigation icon or the actions.
+ *
+ * One button wide *at minimum*, not exactly — that is what keeps the title optically centred when
+ * a bar has an icon on one side only. It has to grow past that when a caller supplies more than one
+ * action, though: pinning it to [HEADER_BUTTON_SIZE] silently clipped everything after the first
+ * button, so a bar with a download and a share showed only the download.
+ */
 @Composable
 private fun HeaderSlot(content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier.size(HEADER_BUTTON_SIZE),
+        modifier = Modifier
+            .defaultMinSize(minWidth = HEADER_BUTTON_SIZE, minHeight = HEADER_BUTTON_SIZE),
         contentAlignment = Alignment.Center,
         content = { content() },
     )

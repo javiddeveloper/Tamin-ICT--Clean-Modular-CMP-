@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,9 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.LabeledBlock
 import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatTileStyle
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -56,6 +60,8 @@ fun RecordSummaryCard(
     trackingCode: String,
     date: String,
     modifier: Modifier = Modifier,
+    /** The tracking code in ASCII digits — what the clipboard gets, not the Persian rendering. */
+    trackingCodeRaw: String = trackingCode,
 ) {
     Column(
         modifier = modifier
@@ -65,7 +71,11 @@ fun RecordSummaryCard(
     ) {
         DetailRow(label = metaLabel, value = metaValue, numeric = false)
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
-        DetailRow(label = stringResource(Res.string.detail_tracking_code), value = trackingCode)
+        DetailRow(
+            label = stringResource(Res.string.detail_tracking_code),
+            value = trackingCode,
+            copyValue = trackingCodeRaw,
+        )
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
         DetailRow(label = stringResource(Res.string.detail_date), value = date)
     }
@@ -98,11 +108,27 @@ fun PrescriptionItemCard(
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.titleSmall,
-            color = colors.blueText,
-        )
+        // Drug names are long, Latin and easy to mistype — the one field on this card someone
+        // actually needs to carry somewhere else. The whole line copies, not just the glyph.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = rememberCopyAction(name)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.blueText,
+                modifier = Modifier.weight(1f),
+            )
+            CopyIconButton(
+                value = name,
+                tint = colors.blueText,
+                interactive = false,
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -112,12 +138,15 @@ fun PrescriptionItemCard(
             LabeledBlock(label = stringResource(Res.string.detail_dose), value = dose)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            // Caption beside the figure, not over it: two words and two digits do not need two
+            // lines, and the card is shorter for it.
             StatTile(
                 label = stringResource(Res.string.detail_prescribed),
                 amount = prescribedCount,
                 containerColor = colors.blueBg,
                 contentColor = colors.blueText,
                 modifier = Modifier.weight(1f),
+                style = StatTileStyle.Inline,
             )
             StatTile(
                 label = stringResource(Res.string.detail_received),
@@ -125,6 +154,7 @@ fun PrescriptionItemCard(
                 containerColor = colors.greenBg,
                 contentColor = colors.greenText,
                 modifier = Modifier.weight(1f),
+                style = StatTileStyle.Inline,
             )
         }
 

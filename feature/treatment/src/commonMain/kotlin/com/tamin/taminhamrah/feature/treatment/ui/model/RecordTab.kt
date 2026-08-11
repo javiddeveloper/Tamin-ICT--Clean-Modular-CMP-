@@ -17,13 +17,35 @@ import taminx.core.core_ui.tab_visit
 
 /**
  * Categories the patient-history endpoint understands, taken from the previous app's
- * `PrescriptionType`: `0` داروخانه, `1` دارویی, `2` پاراکلینیک, `3` ویزیت, `5` خدمات پزشکی.
+ * `PrescriptionType`.
+ *
+ * [id] is the wire value and the only thing the endpoint accepts, so it stays a string — the ids
+ * are not contiguous (`4` is absent) and nothing is gained by treating them as numbers.
+ *
+ * The label lives here too, so the id, the name and the record's capabilities are one table rather
+ * than three that drift the first time one is edited.
  */
-private const val TYPE_PHARMACY = "0"
-private const val TYPE_MEDICINE = "1"
-private const val TYPE_PARACLINIC = "2"
-private const val TYPE_VISIT = "3"
-private const val TYPE_MEDICAL_SERVICE = "5"
+enum class RecordType(val id: String, val label: StringResource) {
+    PHARMACY("0", Res.string.tab_pharmacy),
+    MEDICINE("1", Res.string.tab_medicine),
+    PARACLINIC("2", Res.string.tab_paraclinic),
+    VISIT("3", Res.string.tab_visit),
+    MEDICAL_SERVICE("5", Res.string.tab_medical_service),
+    ;
+
+    /**
+     * Whether a record of this kind can have a lab result behind it.
+     *
+     * Only paraclinic records do. A prescription for cough syrup has no test to print, so offering
+     * the download on one is a button that can only fail.
+     */
+    val hasLabResult: Boolean get() = this == PARACLINIC
+
+    companion object {
+        /** `null` for an id the endpoint has grown since; the caller shows the raw value then. */
+        fun fromId(id: String): RecordType? = entries.firstOrNull { it.id == id }
+    }
+}
 
 /**
  * Record categories of سوابق درمانی, in the design's order.
@@ -38,16 +60,16 @@ enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>
     ALL(
         label = Res.string.tab_all,
         requestTypeIds = listOf(
-            TYPE_MEDICINE,
-            TYPE_VISIT,
-            TYPE_PARACLINIC,
-            TYPE_MEDICAL_SERVICE,
+            RecordType.MEDICINE.id,
+            RecordType.VISIT.id,
+            RecordType.PARACLINIC.id,
+            RecordType.MEDICAL_SERVICE.id,
         ),
     ),
-    MEDICINE(Res.string.tab_medicine, listOf(TYPE_MEDICINE)),
-    VISIT(Res.string.tab_visit, listOf(TYPE_VISIT)),
-    PARACLINIC(Res.string.tab_paraclinic, listOf(TYPE_PARACLINIC)),
-    MEDICAL_SERVICE(Res.string.tab_medical_service, listOf(TYPE_MEDICAL_SERVICE)),
+    MEDICINE(Res.string.tab_medicine, listOf(RecordType.MEDICINE.id)),
+    VISIT(Res.string.tab_visit, listOf(RecordType.VISIT.id)),
+    PARACLINIC(Res.string.tab_paraclinic, listOf(RecordType.PARACLINIC.id)),
+    MEDICAL_SERVICE(Res.string.tab_medical_service, listOf(RecordType.MEDICAL_SERVICE.id)),
     ;
 
     companion object {
@@ -56,15 +78,11 @@ enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>
 
         val chips: ImmutableList<RecordTab> = entries.toImmutableList()
 
-        val medicalServiceTypeId: String = TYPE_MEDICAL_SERVICE
-        val pharmacyTypeId: String = TYPE_PHARMACY
+        val medicalServiceTypeId: String = RecordType.MEDICAL_SERVICE.id
+        val pharmacyTypeId: String = RecordType.PHARMACY.id
 
         /** Name for a category id, including the two that have no tab. */
-        fun labelForTypeId(typeId: String): StringResource? = when (typeId) {
-            TYPE_PHARMACY -> Res.string.tab_pharmacy
-            TYPE_MEDICAL_SERVICE -> Res.string.tab_medical_service
-            else -> null
-        }
+        fun labelForTypeId(typeId: String): StringResource? = RecordType.fromId(typeId)?.label
     }
 }
 
@@ -75,9 +93,9 @@ enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>
  *
  * Lives with the categories it maps rather than in the screen that renders them.
  */
-fun String.toCategoryLabel(): StringResource? =
-    RecordTab.entries.firstOrNull { it != RecordTab.ALL && this in it.requestTypeIds }?.label
-        ?: RecordTab.labelForTypeId(this)
+fun String.hasLabResult(): Boolean = RecordType.fromId(this)?.hasLabResult == true
+
+fun String.toCategoryLabel(): StringResource? = RecordType.fromId(this)?.label
 
 /**
  * The chips' labels, resolved once per composition rather than per recomposition.

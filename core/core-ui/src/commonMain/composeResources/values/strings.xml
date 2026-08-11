@@ -110,6 +110,8 @@
     <string name="date_picker_confirm">تأیید تاریخ</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
+    <string name="action_copy">کپی</string>
+    <string name="action_copied">در حافظه کپی شد</string>
     <string name="action_show_details">نمایش جزئیات</string>
     <string name="action_hide_details">مخفی کردن جزئیات</string>
     <string name="unit_rial">ریال</string>
