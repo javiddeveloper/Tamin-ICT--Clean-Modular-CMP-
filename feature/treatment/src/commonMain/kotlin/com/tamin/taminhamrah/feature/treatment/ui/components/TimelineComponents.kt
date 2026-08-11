@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
@@ -313,9 +315,10 @@ fun TimelineFilterBar(
     personExpanded: Boolean = false,
     dateExpanded: Boolean = false,
     // Each chooser's menu is composed beside the chip that opens it, so the menu anchors there
-    // instead of floating somewhere the trigger has no relationship with.
-    personMenu: @Composable () -> Unit = {},
-    dateMenu: @Composable () -> Unit = {},
+    // instead of floating somewhere the trigger has no relationship with. The chip's own width is
+    // handed over so the menu can be sized against it.
+    personMenu: @Composable (anchorWidth: Dp) -> Unit = {},
+    dateMenu: @Composable (anchorWidth: Dp) -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -324,7 +327,10 @@ fun TimelineFilterBar(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.weight(1f)) {
+        // BoxWithConstraints rather than onSizeChanged: the chip's width is already fixed by the
+        // weight, so it can be read during composition instead of written back as state after
+        // layout — which would cost a recomposition and a frame every time the bar is laid out.
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
             FilterTrigger(
                 label = personLabel,
                 leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
@@ -333,9 +339,9 @@ fun TimelineFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = personExpanded,
             )
-            personMenu()
+            personMenu(maxWidth)
         }
-        Box(modifier = Modifier.weight(1f)) {
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
             FilterTrigger(
                 label = dateLabel,
                 leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
@@ -344,7 +350,7 @@ fun TimelineFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = dateExpanded,
             )
-            dateMenu()
+            dateMenu(maxWidth)
         }
         Box(
             modifier = Modifier

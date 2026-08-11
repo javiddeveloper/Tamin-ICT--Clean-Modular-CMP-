@@ -101,7 +101,7 @@ fun TaminTopAppBar(
         /*
          * The title is centred against the bar, not against the space left over between the two
          * end caps. Those caps are only equal in width while each holds one button -- give one
-         * side a second action and a title laid out between them slides off centre.
+         * side a second action and a title laid out between them slides off center.
          *
          * So the caps are pinned to the two edges and the title is centred over the whole width
          * underneath them. It is drawn first, which keeps the buttons on top and hittable.
@@ -160,6 +160,10 @@ fun taminTopAppBarGradient(
  * Translucent chip holding a single bar icon — a back chevron, a search or share action.
  * The design gives every one of these the same container, so the bar owns it rather than
  * leaving each caller to rebuild it.
+ *
+ * The colors default to the treatment header's white-on-teal. A caller placing one of these on a
+ * plain surface — a sheet's close button, say — overrides them rather than hand-rolling a second
+ * kind of icon button, so the size, shape and touch target stay the app's single answer.
  */
 @Composable
 fun TaminTopAppBarButton(
@@ -168,17 +172,20 @@ fun TaminTopAppBarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     bordered: Boolean = false,
-    shape : Shape =  RoundedCornerShape(CornerRadius.chip)
+    shape: Shape = RoundedCornerShape(CornerRadius.chip),
+    containerColor: Color = Color.White.copy(alpha = 0.125f),
+    contentColor: Color = Color.White,
+    borderColor: Color = Color.White.copy(alpha = 0.2f),
 ) {
 
     Box(
         modifier = modifier
             .size(HEADER_BUTTON_SIZE)
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.125f))
+            .background(containerColor)
             .then(
                 if (bordered) {
-                    Modifier.border(1.dp, Color.White.copy(alpha = 0.2f), shape)
+                    Modifier.border(1.dp, borderColor, shape)
                 } else {
                     Modifier
                 },
@@ -189,7 +196,7 @@ fun TaminTopAppBarButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = Color.White,
+            tint = contentColor,
             modifier = Modifier.size(HEADER_BUTTON_ICON_SIZE),
         )
     }

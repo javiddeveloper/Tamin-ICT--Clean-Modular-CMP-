@@ -41,13 +41,16 @@ actual class ExternalAppLauncher actual constructor() {
 
     actual fun openWhatsApp(phone: String) {
         val phoneNumber = phone.filter { it.isDigit() }
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://wa.me/$phoneNumber")
-        ).apply {
+        openUrl("https://wa.me/$phoneNumber")
+    }
+
+    actual fun openUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        context.startActivity(intent)
+        // A device with no browser throws ActivityNotFoundException; opening a web page is never
+        // the point of the screen that offers it, so it fails quietly rather than taking the app.
+        runCatching { context.startActivity(intent) }
     }
 
     actual fun shareText(text: String, title: String?) {

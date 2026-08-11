@@ -36,11 +36,13 @@ actual class ExternalAppLauncher actual constructor() {
 
     actual fun openWhatsApp(phone: String) {
         val phoneNumber = phone.filter { it.isDigit() }
-        val urlString = "https://wa.me/$phoneNumber"
-        val url = NSURL.URLWithString(urlString) ?: return
+        openUrl("https://wa.me/$phoneNumber")
+    }
 
-        if (UIApplication.sharedApplication.canOpenURL(url)) {
-            UIApplication.sharedApplication.openURL(url)
+    actual fun openUrl(url: String) {
+        val nsUrl = NSURL.URLWithString(url) ?: return
+        if (UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+            UIApplication.sharedApplication.openURL(nsUrl)
         }
     }
 

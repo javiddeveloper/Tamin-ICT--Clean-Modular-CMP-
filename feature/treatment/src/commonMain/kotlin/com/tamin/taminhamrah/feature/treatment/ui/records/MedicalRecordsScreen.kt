@@ -62,7 +62,6 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.RecordFilterMenu
-import com.tamin.taminhamrah.ui.RecordFilterMenu
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
@@ -434,7 +433,7 @@ fun MedicalRecordsContent(
                     onSearchClick = { showSearchSheet = true },
                     personExpanded = openFilter == RecordFilter.PATIENT,
                     dateExpanded = openFilter == RecordFilter.PERIOD,
-                    personMenu = {
+                    personMenu = { anchorWidth ->
                         RecordFilterMenu(
                             expanded = openFilter == RecordFilter.PATIENT,
                             options = remember(patients, selectedPatient, selfLabel) {
@@ -444,6 +443,7 @@ fun MedicalRecordsContent(
                                     .toImmutableList()
                             },
                             isSelected = { it == selectedPatient },
+                            anchorWidth = anchorWidth,
                             onDismiss = { openFilter = null },
                             onSelect = {
                                 onPatientSelected(it)
@@ -451,11 +451,12 @@ fun MedicalRecordsContent(
                             },
                         )
                     },
-                    dateMenu = {
+                    dateMenu = { anchorWidth ->
                         RecordFilterMenu(
                             expanded = openFilter == RecordFilter.PERIOD,
                             options = rememberPeriodOptions(),
                             isSelected = { it == selectedPeriod },
+                            anchorWidth = anchorWidth,
                             onDismiss = { openFilter = null },
                             onSelect = { period ->
                                 openFilter = null
