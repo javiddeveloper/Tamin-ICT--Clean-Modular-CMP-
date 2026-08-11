@@ -439,30 +439,69 @@ fun CostTotalsBar(
     totalAmount: String?,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
     TaminBottomBar(modifier = modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            StatTile(
-                label = insuredShareLabel,
-                amount = insuredShareAmount,
-                containerColor = colors.greenBg,
-                contentColor = colors.greenText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = organizationShareLabel,
-                amount = organizationShareAmount,
-                containerColor = colors.blueBg,
-                contentColor = colors.blueText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = totalLabel,
-                amount = totalAmount,
-                containerColor = colors.orangeBg,
-                contentColor = colors.orangeText,
-                modifier = Modifier.weight(1f),
-            )
-        }
+        CostSplitTiles(
+            insuredShareLabel = insuredShareLabel,
+            insuredShareAmount = insuredShareAmount,
+            organizationShareLabel = organizationShareLabel,
+            organizationShareAmount = organizationShareAmount,
+            totalLabel = totalLabel,
+            totalAmount = totalAmount,
+        )
+    }
+}
+
+/**
+ * The three-figure cost split — insured share, organization share, total — as one row of tiles.
+ *
+ * One definition for all three places it appears: pinned under the timeline, as the detail
+ * screen's total, and [dense] inside a single prescribed item. The colors carry the meaning, so
+ * they must not drift between those: green is what the person pays, blue what the organization
+ * pays, orange the two added up.
+ *
+ * Under the app's right-to-left layout the first child renders rightmost, so the order below reads
+ * on screen as total, organization, insured — left to right.
+ */
+@Composable
+fun CostSplitTiles(
+    insuredShareLabel: String,
+    /** `null` for a figure still being fetched; that tile shimmers on its own. */
+    insuredShareAmount: String?,
+    organizationShareLabel: String,
+    organizationShareAmount: String?,
+    totalLabel: String,
+    totalAmount: String?,
+    modifier: Modifier = Modifier,
+    dense: Boolean = false,
+) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(if (dense) Spacing.xs else Spacing.sm),
+    ) {
+        StatTile(
+            label = insuredShareLabel,
+            amount = insuredShareAmount,
+            containerColor = colors.greenBg,
+            contentColor = colors.greenText,
+            modifier = Modifier.weight(1f),
+            dense = dense,
+        )
+        StatTile(
+            label = organizationShareLabel,
+            amount = organizationShareAmount,
+            containerColor = colors.blueBg,
+            contentColor = colors.blueText,
+            modifier = Modifier.weight(1f),
+            dense = dense,
+        )
+        StatTile(
+            label = totalLabel,
+            amount = totalAmount,
+            containerColor = colors.orangeBg,
+            contentColor = colors.orangeText,
+            modifier = Modifier.weight(1f),
+            dense = dense,
+        )
     }
 }

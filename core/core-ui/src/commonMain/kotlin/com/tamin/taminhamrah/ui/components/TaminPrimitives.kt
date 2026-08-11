@@ -130,17 +130,22 @@ fun StatTile(
     contentColor: Color,
     modifier: Modifier = Modifier,
     labelColor: Color = contentColor,
+    /**
+     * Shrinks the tile so a row of them can sit inside a list item rather than under one.
+     * Same shape and colors, tighter padding and one step down the type scale.
+     */
+    dense: Boolean = false,
 ) {
     Column(
         modifier = modifier
-            .background(containerColor, RoundedCornerShape(CornerRadius.lg))
-            .padding(Spacing.md),
+            .background(containerColor, RoundedCornerShape(if (dense) CornerRadius.md else CornerRadius.lg))
+            .padding(horizontal = Spacing.sm, vertical = if (dense) Spacing.xs else Spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalArrangement = Arrangement.spacedBy(if (dense) Spacing.xxs else Spacing.xs),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = if (dense) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
             color = labelColor,
             textAlign = TextAlign.Center,
         )
@@ -154,7 +159,7 @@ fun StatTile(
         } else {
             NumericText(
                 text = amount,
-                style = MaterialTheme.typography.titleMedium,
+                style = if (dense) MaterialTheme.typography.labelMedium else MaterialTheme.typography.titleMedium,
                 color = contentColor,
             )
         }

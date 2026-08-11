@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.amount_total
 import taminx.core.core_ui.detail_action_date
@@ -39,8 +40,6 @@ import taminx.core.core_ui.detail_tracking_code
 import taminx.core.core_ui.detail_visit_reason
 import taminx.core.core_ui.share_organization
 import taminx.core.core_ui.share_yours
-import taminx.core.core_ui.unit_rial
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * Cards for a single medical record's detail screen. The record type decides which of
@@ -129,10 +128,8 @@ fun PrescriptionItemCard(
             )
         }
 
-        // The old app's remaining per-item fields, each shown only when present.
-        if (centerName.isNotBlank() || actionDate.isNotBlank() || itemTotal.isNotBlank() ||
-            patientShare.isNotBlank() || organizationShare.isNotBlank()
-        ) {
+        // Where and when, from the old app's per-item detail. Each shown only when present.
+        if (centerName.isNotBlank() || actionDate.isNotBlank()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -142,10 +139,22 @@ fun PrescriptionItemCard(
             ) {
                 if (centerName.isNotBlank()) DetailRow(label = stringResource(Res.string.detail_center), value = centerName)
                 if (actionDate.isNotBlank()) DetailRow(label = stringResource(Res.string.detail_action_date), value = actionDate)
-                if (itemTotal.isNotBlank()) DetailRow(label = stringResource(Res.string.amount_total), value = itemTotal, unit = stringResource(Res.string.unit_rial))
-                if (patientShare.isNotBlank()) DetailRow(label = stringResource(Res.string.detail_patient_share), value = patientShare, unit = stringResource(Res.string.unit_rial))
-                if (organizationShare.isNotBlank()) DetailRow(label = stringResource(Res.string.share_organization), value = organizationShare, unit = stringResource(Res.string.unit_rial))
             }
+        }
+
+        // The item's own cost split, in the same three tiles the timeline and the record total use
+        // — just smaller. Three stacked rows of digits said the same thing in three times the
+        // height, and did not read as the same quantity as the figures above.
+        if (itemTotal.isNotBlank() || patientShare.isNotBlank() || organizationShare.isNotBlank()) {
+            CostSplitTiles(
+                insuredShareLabel = stringResource(Res.string.detail_patient_share),
+                insuredShareAmount = patientShare,
+                organizationShareLabel = stringResource(Res.string.share_organization),
+                organizationShareAmount = organizationShare,
+                totalLabel = stringResource(Res.string.amount_total),
+                totalAmount = itemTotal,
+                dense = true,
+            )
         }
     }
 }
@@ -249,27 +258,22 @@ fun CostBreakdownCard(
             .fillMaxWidth()
             .raisedCard(CornerRadius.cardCompact)
             .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Text(
             text = stringResource(Res.string.detail_cost_breakdown),
             style = MaterialTheme.typography.labelLarge,
             color = colors.textPrimary,
-            modifier = Modifier.padding(bottom = Spacing.sm),
         )
-        DetailRow(label = stringResource(Res.string.amount_total), value = total, unit = stringResource(Res.string.unit_rial))
-        DetailRow(
-            label = stringResource(Res.string.share_organization),
-            value = organizationShare,
-            unit = stringResource(Res.string.unit_rial),
-            valueColor = colors.blueText,
-        )
-        TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
-        DetailRow(
-            label = stringResource(Res.string.share_yours),
-            value = insuredShare,
-            unit = stringResource(Res.string.unit_rial),
-            valueColor = colors.greenText,
-            valueStyle = MaterialTheme.typography.titleLarge,
+        // The record's total, in the same three tiles the timeline pins under the list — so the
+        // figure a person sees on the card and the one they see here read as the same quantity.
+        CostSplitTiles(
+            insuredShareLabel = stringResource(Res.string.share_yours),
+            insuredShareAmount = insuredShare,
+            organizationShareLabel = stringResource(Res.string.share_organization),
+            organizationShareAmount = organizationShare,
+            totalLabel = stringResource(Res.string.amount_total),
+            totalAmount = total,
         )
     }
 }

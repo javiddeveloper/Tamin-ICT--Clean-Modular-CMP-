@@ -28,7 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
+import com.tamin.taminhamrah.feature.treatment.ui.components.CostBreakdownCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
@@ -46,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -60,11 +61,14 @@ import taminx.core.core_ui.action_back
 import taminx.core.core_ui.amount_total
 import taminx.core.core_ui.detail_doctor
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_tamin_download
 import taminx.core.core_ui.prescription_download_cd
 import taminx.core.core_ui.prescription_empty
 import taminx.core.core_ui.prescription_items
 import taminx.core.core_ui.prescription_lab_result_cd
+import taminx.core.core_ui.prescription_share_body
+import taminx.core.core_ui.prescription_share_cd
 import taminx.core.core_ui.prescription_title
 import taminx.core.core_ui.records_doctor_named
 import taminx.core.core_ui.share_organization
@@ -149,9 +153,39 @@ fun RecordDetailContent(
 ) {
     val colors = LocalTaminColors.current
     val record = state.prescriptionList.firstOrNull { it.noteHeadEprescID == noteHeadId }
-    val price = state.prescriptionPriceList.firstOrNull()
+
+    /*
+     * The record's total, added up from the items on screen rather than read off the price
+     * endpoint. Two reasons: that endpoint returns nothing for plenty of records -- which is why
+     * the total was simply absent -- and a figure that disagrees with the tiles printed on each
+     * item above it is worse than no figure at all.
+     *
+     * Inside a remember so a scroll or a dialog does not re-add the whole list.
+     */
+    val totals = remember(state.prescriptionDetailList) {
+        state.prescriptionDetailList.fold(RecordCostTotals()) { running, item ->
+            RecordCostTotals(
+                insuredShare = running.insuredShare + (item.ssoPayment.toLongOrNull() ?: 0L),
+                organizationShare = running.organizationShare + (item.insurancePayment.toLongOrNull() ?: 0L),
+                total = running.total + (item.sumPriceItem.toLongOrNull() ?: 0L),
+            )
+        }
+    }
     // Remembers item entrance animations for prescription items, keyed on the prescription note head ID.
     val staggerState = rememberStaggeredEntranceState(key = noteHeadId)
+
+    // The share sheet sends the record as text: every target app accepts it, which a PDF blob
+    // fetched into memory would not without a FileProvider on one platform and a temp URL on the other.
+    val launcher = remember { ExternalAppLauncher() }
+    val shareTitle = stringResource(Res.string.prescription_title)
+    val shareBody = stringResource(
+        Res.string.prescription_share_body,
+        shareTitle,
+        docName.ifBlank { UNKNOWN_VALUE },
+        trackingCode.ifBlank { UNKNOWN_VALUE }.toPersianDigits(),
+        prescDate.ifBlank { UNKNOWN_VALUE }.toJalaliDateLabel(),
+        totals.total.toPriceFormat(),
+    )
 
     // Which export is on screen. Opening the viewer no longer means a download has happened: it
     // decides for itself whether the file needs fetching, so the tap only says which one to show.
@@ -175,6 +209,11 @@ fun RecordDetailContent(
                     },
                     action = {
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                            TaminTopAppBarButton(
+                                icon = vectorResource(Res.drawable.ic_share),
+                                contentDescription = stringResource(Res.string.prescription_share_cd),
+                                onClick = { launcher.shareText(shareBody, shareTitle) },
+                            )
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
                                 contentDescription = stringResource(Res.string.prescription_download_cd),
@@ -229,7 +268,11 @@ fun RecordDetailContent(
                             )
                         }
 
-
+                        CostBreakdownCard(
+                            total = totals.total.toPriceFormat(),
+                            organizationShare = totals.organizationShare.toPriceFormat(),
+                            insuredShare = totals.insuredShare.toPriceFormat(),
+                        )
                     }
                 }
 
@@ -239,18 +282,6 @@ fun RecordDetailContent(
             // Over the page rather than instead of it: the body falls through to its empty
             // state, so dismissing the dialog does not leave a bare top bar behind.
             ErrorStateView(message = state.error, onDismiss = onBack, onRetry = onRetry)
-
-            price?.let {
-                CostTotalsBar(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    insuredShareLabel = stringResource(Res.string.share_yours),
-                    insuredShareAmount = it.headSsoPayment.toPriceFormat(),
-                    organizationShareLabel = stringResource(Res.string.share_organization),
-                    organizationShareAmount = it.headInsuPayment.toPriceFormat(),
-                    totalLabel = stringResource(Res.string.amount_total),
-                    totalAmount = it.requestPrice.toPriceFormat(),
-                )
-            }
         }
     }
 
@@ -320,3 +351,19 @@ fun RecordDetailPreview() {
         )
     }
 }
+
+/**
+ * A record's money, added up across its items.
+ *
+ * Longs rather than the formatted strings the items carry: adding «۲٬۰۳۷٬۷۰۰» to «۶۱۱٬۳۱۰» is not
+ * a thing you can do, and formatting once at the end is also one pass instead of three.
+ *
+ * Not a `*PR` model and deliberately not `@Immutable`: it never leaves this file, never crosses a
+ * composable parameter, and is only ever the accumulator of the fold below — so there is no
+ * stability for the annotation to promise anyone.
+ */
+private data class RecordCostTotals(
+    val insuredShare: Long = 0L,
+    val organizationShare: Long = 0L,
+    val total: Long = 0L,
+)
