@@ -18,8 +18,6 @@ import kotlinx.serialization.json.Json
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.http.contentType
 
 abstract class BaseApiTest {
 

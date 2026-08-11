@@ -39,6 +39,12 @@ object UserTestData {
 
     val checkUserIsNewSuccess: String
         get() = readResourceFile("mocks/check_user_is_new_success.json")
+
+    val recipientsSuccess: String
+        get() = readResourceFile("mocks/certificate/recipients_success.json")
+
+    val certificateReportSuccess: String
+        get() = readResourceFile("mocks/certificate/certificate_report_success.json")
 }
 
 object CommonTestData {

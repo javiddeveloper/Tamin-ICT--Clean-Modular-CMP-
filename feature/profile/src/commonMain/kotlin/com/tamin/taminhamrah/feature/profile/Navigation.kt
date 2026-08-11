@@ -8,12 +8,18 @@ import androidx.navigation.toRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
+import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileRoute
+import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInRoute
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationRoute
+import com.tamin.taminhamrah.feature.profile.ui.activeRelation.ActiveRelationViewModel
 import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
+import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsRoute
+import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 
@@ -29,13 +35,23 @@ sealed interface ProfileRoute {
     data class Identity(val userId: String? = null) : ProfileRoute
 
     @Serializable
+    data object ElectronicFile : ProfileRoute
+
+    @Serializable
     data object VersionHistory : ProfileRoute
 
+    @Serializable
+    data object ActiveRelation : ProfileRoute
+
+    @Serializable
+    data object ContactUs : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
     navController: NavController,
     onNavigateToIdentity: (String?) -> Unit,
+    onNavigateToElectronicFile: () -> Unit,
+    onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
@@ -49,8 +65,12 @@ fun NavGraphBuilder.profileGraph(
                 userId = route.userId,
                 viewModel = viewModel,
                 onNavigateToIdentity = { onNavigateToIdentity(route.userId) },
+                onNavigateToElectronicFile = onNavigateToElectronicFile,
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
+                onNavigateToActiveRelation = { navController.navigate(ProfileRoute.ActiveRelation) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
+                onNavigateToMyInbox = onNavigateToMyInbox,
+                onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -65,6 +85,15 @@ fun NavGraphBuilder.profileGraph(
             )
         }
 
+        composable<ProfileRoute.ElectronicFile> {
+            val viewModel = koinViewModel<ElectronicFileViewModel>()
+
+            ElectronicFileRoute(
+                viewModel = viewModel,
+                onBackClicked = onBack
+            )
+        }
+
         composable<ProfileRoute.VersionHistory> {
             val viewModel = koinViewModel<VersionHistoryViewModel>()
 
@@ -73,6 +102,24 @@ fun NavGraphBuilder.profileGraph(
                 onBackClicked = { navController.popBackStack() }
             )
         }
+
+        composable<ProfileRoute.ActiveRelation> {
+            val viewModel = koinViewModel<ActiveRelationViewModel>()
+
+            ActiveRelationRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.ContactUs> {
+            val viewModel = koinViewModel<ContactUsViewModel>()
+
+            ContactUsRoute(
+                viewModel = viewModel,
+                onOpenUrl = onOpenUrl,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
     }
 }
-

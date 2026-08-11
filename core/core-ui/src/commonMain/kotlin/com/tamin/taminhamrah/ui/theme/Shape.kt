@@ -25,6 +25,7 @@ object Spacing {
     val xxs = 2.dp
     val xs = 4.dp
     val sm = 8.dp
+    val smPlus = 10.dp
     val md = 12.dp
     val lg = 16.dp
     val xlg = 20.dp
@@ -104,6 +105,7 @@ object IconSize {
     val largePlus = 42.dp
     val xlarge = 48.dp
     val xxlarge = 56.dp
+    val xxxlarge = 80.dp
     val tile = 58.dp
     val tileInner = 28.dp
     val textFieldIconContainer = 34.dp

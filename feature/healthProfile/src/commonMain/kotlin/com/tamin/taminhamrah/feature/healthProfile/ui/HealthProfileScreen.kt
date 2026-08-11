@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,11 +38,21 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.LocalIsEditMode
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.util.formatDecimal
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.feature.healthprofile.generated.resources.Res
+import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_confirm
+import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_desc
+import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_dismiss
+import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_title
 
 private fun SelfDeclarationStep.previousStep(): SelfDeclarationStep? = when (this) {
     SelfDeclarationStep.INTRO -> SelfDeclarationStep.GATE
@@ -56,6 +69,21 @@ private fun SelfDeclarationStep.previousStep(): SelfDeclarationStep? = when (thi
     SelfDeclarationStep.REVIEW -> SelfDeclarationStep.ALLERGY
     else -> null
 }
+
+private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
+    SelfDeclarationStep.IDENTITY,
+    SelfDeclarationStep.PERSONAL,
+    SelfDeclarationStep.CONTACT,
+    SelfDeclarationStep.EMERGENCY,
+    SelfDeclarationStep.PHYSICAL,
+    SelfDeclarationStep.BLOOD,
+    SelfDeclarationStep.LIFESTYLE,
+    SelfDeclarationStep.DISEASES,
+    SelfDeclarationStep.FAMILY,
+    SelfDeclarationStep.ALLERGY,
+    SelfDeclarationStep.REVIEW
+)
+
 
 @Composable
 fun HealthProfileScreen(
@@ -128,7 +156,21 @@ fun HealthProfileMainContent(
     val currentStep = selfDecState.currentStep
     val combinedLoading = state.isLoading || selfDecState.isLoading
 
-    val navigateBack = remember(currentStep, selfDecState.isEditMode, onBackClicked, onIntent) {
+
+
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
+    val onExitRequested = remember(currentStep, selfDecState.isEditMode, onBackClicked) {
+        {
+            if (currentStep in STEPS_REQUIRING_EXIT_CONFIRMATION || selfDecState.isEditMode) {
+                showExitConfirmation = true
+            } else {
+                onBackClicked()
+            }
+        }
+    }
+
+    val navigateBack = remember(currentStep, selfDecState.isEditMode, onBackClicked, onIntent, onExitRequested) {
         {
             if (selfDecState.isEditMode) {
                 onIntent(HealthProfileIntent.ChangeStep(SelfDeclarationStep.REVIEW, isEditMode = false))
@@ -137,11 +179,48 @@ fun HealthProfileMainContent(
                 if (previousStep != null) {
                     onIntent(HealthProfileIntent.ChangeStep(previousStep))
                 } else {
-                    onBackClicked()
+                    onExitRequested()
                 }
             }
         }
     }
+
+    BackHandler(onBack = navigateBack)
+
+    if (showExitConfirmation) {
+        val taminColors = LocalTaminColors.current
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.health_exit_confirmation_title),
+            description = stringResource(Res.string.health_exit_confirmation_desc),
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.health_exit_confirmation_confirm),
+                    onClick = { showExitConfirmation = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp),
+                    icon = Icons.Default.Check
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.health_exit_confirmation_dismiss),
+                    onClick = {
+                        showExitConfirmation = false
+                        onBackClicked()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp),
+                    borderWidth = 0.dp,
+                    contentColor = taminColors.textSecondary
+                )
+            },
+            onDismissRequest = { showExitConfirmation = false },
+            icon = Icons.AutoMirrored.Outlined.HelpOutline
+        )
+    }
+
 
     BackHandler(onBack = navigateBack)
 
@@ -157,8 +236,9 @@ fun HealthProfileMainContent(
     // them stuck on a dead error screen until they notice and tap retry manually.
     fun errorSourcesFor(step: SelfDeclarationStep): Array<ErrorSource> = when (step) {
         SelfDeclarationStep.IDENTITY,
-        SelfDeclarationStep.EMERGENCY,
         SelfDeclarationStep.PHYSICAL -> arrayOf(ErrorSource.PATIENT_GENERAL)
+
+        SelfDeclarationStep.EMERGENCY -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.RELATION_TYPES)
 
         SelfDeclarationStep.PERSONAL -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS)
 
@@ -218,7 +298,7 @@ fun HealthProfileMainContent(
                     SelfDeclarationIntroScreen(
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -229,7 +309,7 @@ fun HealthProfileMainContent(
                         error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -241,7 +321,7 @@ fun HealthProfileMainContent(
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -260,18 +340,19 @@ fun HealthProfileMainContent(
                         isCitiesLoading = state.isCitiesLoading,
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
                 SelfDeclarationStep.EMERGENCY -> {
                     SelfDeclarationEmergencyScreen(
                         state = selfDecState.emergency,
+                        relationTypeOptions = state.relationTypeOptions,
                         isLoading = combinedLoading,
-                        error = getError(ErrorSource.PATIENT_GENERAL),
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.RELATION_TYPES),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -282,7 +363,7 @@ fun HealthProfileMainContent(
                         error = getError(ErrorSource.PATIENT_GENERAL),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -294,7 +375,7 @@ fun HealthProfileMainContent(
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.BLOOD_GROUPS),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -311,7 +392,7 @@ fun HealthProfileMainContent(
                         ),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -323,7 +404,7 @@ fun HealthProfileMainContent(
                         onIntent = wrappedOnIntent,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -335,7 +416,7 @@ fun HealthProfileMainContent(
                         onIntent = wrappedOnIntent,
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.ILLNESS_GROUPS),
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -347,7 +428,7 @@ fun HealthProfileMainContent(
                         error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.DRUGS),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -359,7 +440,7 @@ fun HealthProfileMainContent(
                         onResetSubmitErrorsTrigger = onResetSubmitErrorsTrigger,
                         onIntent = onIntent,
                         onBackClicked = navigateBack,
-                        onCloseClicked = onBackClicked
+                        onCloseClicked = onExitRequested
                     )
                 }
 
@@ -382,7 +463,7 @@ fun HealthProfileMainContent(
                             HealthTopAppBar(
                                 title = "پروندهٔ سلامت",
                                 onBackClicked = onBackClicked,
-                                onCloseClicked = onBackClicked
+                                onCloseClicked = onExitRequested
                             )
                         }
                     ) { paddingValues ->

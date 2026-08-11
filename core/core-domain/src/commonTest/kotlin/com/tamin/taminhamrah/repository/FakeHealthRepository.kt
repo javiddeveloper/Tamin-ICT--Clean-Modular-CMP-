@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDN
 import com.tamin.taminhamrah.model.health.PatientVisitDN
 import com.tamin.taminhamrah.model.health.ProvinceCityItemDN
 import com.tamin.taminhamrah.model.health.ProvinceItemDN
+import com.tamin.taminhamrah.model.health.RelationTypeDN
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessGroupDN
 import com.tamin.taminhamrah.model.health.SmokingStatusDN
 import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequest
@@ -49,6 +50,8 @@ class FakeHealthRepository : HealthRepository {
     var getProvinceCitiesResult: List<ProvinceCityItemDN> = emptyList()
     var getBloodGroupsResult: List<BloodGroupDN> = emptyList()
     var getMaritalStatusResult: List<MaritalStatusDN> = emptyList()
+
+    var getRelationResult: List<RelationTypeDN> = emptyList()
     var getSmokingStatusResult: List<SmokingStatusDN> = emptyList()
     var getActFrequenciesResult: List<ActFrequencyDN> = emptyList()
     var getSelfDeclarableIllnessesResult: List<IllnessItemDN> = emptyList()
@@ -123,6 +126,11 @@ class FakeHealthRepository : HealthRepository {
     override suspend fun getMaritalStatus(): Flow<List<MaritalStatusDN>> = flow {
         if (shouldThrowError) throw error
         emit(getMaritalStatusResult)
+    }
+
+    override suspend fun getRelationTypes(): Flow<List<RelationTypeDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getRelationResult)
     }
 
     override suspend fun getSmokingStatus(): Flow<List<SmokingStatusDN>> = flow {

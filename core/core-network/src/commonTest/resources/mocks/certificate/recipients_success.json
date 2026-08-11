@@ -1,0 +1,55 @@
+{
+  "total": 50,
+  "list": [
+    {
+      "operation": null,
+      "recipientCode": "001",
+      "recipientName": "دادگاه عمومي"
+    },
+    {
+      "operation": null,
+      "recipientCode": "002",
+      "recipientName": "دادگاه انقلاب"
+    },
+    {
+      "operation": null,
+      "recipientCode": "003",
+      "recipientName": "دادگاه نظامي"
+    },
+    {
+      "operation": null,
+      "recipientCode": "004",
+      "recipientName": "دادگاه اطفال و نوجوان"
+    },
+    {
+      "operation": null,
+      "recipientCode": "005",
+      "recipientName": "دادگاه تجديدنظر"
+    },
+    {
+      "operation": null,
+      "recipientCode": "006",
+      "recipientName": "دادسراي عمومي و انقلاب"
+    },
+    {
+      "operation": null,
+      "recipientCode": "007",
+      "recipientName": "دادسراي ويژه روحانيت"
+    },
+    {
+      "operation": null,
+      "recipientCode": "008",
+      "recipientName": "شوراي حل اختلاف"
+    },
+    {
+      "operation": null,
+      "recipientCode": "009",
+      "recipientName": "دادسراي سردفتران اسناد رسمي"
+    },
+    {
+      "operation": null,
+      "recipientCode": "01",
+      "recipientName": "بانک رفاه کارگران"
+    }
+  ]
+}

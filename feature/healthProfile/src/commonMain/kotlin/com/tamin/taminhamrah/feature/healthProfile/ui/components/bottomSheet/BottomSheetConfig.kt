@@ -42,7 +42,8 @@ enum class BottomSheetType(
     ALCOHOL_ADDICTION(groupId = 203, title = "آیا الکل مصرف دارید؟", isSingleSelect = false),
     EXERCISE(groupId = 204, title = "آیا ورزش می کنید؟", isSingleSelect = false),
     MARITAL_STATUS(groupId = 10, title = "وضعیت تاهل", isSingleSelect = true),
-    EMERGENCY_CONTACT(groupId = 11, title = "تماس اضطراری", isSingleSelect = true),
+    RELATION_TYPE(groupId = 11, title = "نسبت با شما", isSingleSelect = true),
+    EMERGENCY_CONTACT(groupId = 12, title = "تماس اضطراری", isSingleSelect = true),
     CUSTOM(groupId = 999, title = null);
 
     companion object {

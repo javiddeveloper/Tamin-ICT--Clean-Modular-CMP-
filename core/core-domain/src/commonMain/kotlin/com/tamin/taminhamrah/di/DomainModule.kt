@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
+import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
@@ -25,8 +26,11 @@ import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
@@ -37,6 +41,8 @@ import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
+import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
+import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
@@ -85,6 +91,7 @@ import com.tamin.taminhamrah.useCases.health.GetPatientHospitalizationsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientVisitsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientLabsUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientImagingUseCase
+import com.tamin.taminhamrah.useCases.health.GetRelationTypesUseCase
 import com.tamin.taminhamrah.useCases.health.GetAllProvincesUseCase
 import com.tamin.taminhamrah.useCases.health.GetProvinceCitiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetBloodGroupsUseCase
@@ -129,6 +136,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
+import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 
 val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
@@ -154,7 +162,10 @@ val domainModule = module {
     factoryOf(::GetBankAccountListUseCase)
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
+    factoryOf(::GetStatusCertificateReportUseCase)
+    factoryOf(::GetRecipientsUseCase)
     factoryOf(::GetElectronicFileUseCase)
+    factoryOf(::DownloadDocumentUseCase)
     factoryOf(::GetRecipientListUseCase)
     factoryOf(::GetPersonalInfoUseCase)
     factoryOf(::GetDeceasedInfoUseCase)
@@ -172,6 +183,9 @@ val domainModule = module {
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
+    factoryOf(::GetMyRequestPdfUseCase)
+    factoryOf(::DeleteMyRequestUseCase)
+    factoryOf(::InboxInquiryLicenseUseCase)
     factoryOf(::GetContractsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)
@@ -250,6 +264,7 @@ val domainModule = module {
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)
     factoryOf(::GetMaritalStatusUseCase)
+    factoryOf(::GetRelationTypesUseCase)
     factoryOf(::GetSmokingStatusUseCase)
     factoryOf(::GetSelfDeclarableIllnessesUseCase)
     factoryOf(::GetSelfDeclarableIllnessesByGroupUseCase)
@@ -260,5 +275,6 @@ val domainModule = module {
     factoryOf(::SyncIllnessSelfDeclarativesUseCase)
     factoryOf(::SyncDrugAllergiesUseCase)
     factoryOf(::GetActFrequenciesUseCase)
+    factoryOf(::GetContactUsUseCase)
 }
 
