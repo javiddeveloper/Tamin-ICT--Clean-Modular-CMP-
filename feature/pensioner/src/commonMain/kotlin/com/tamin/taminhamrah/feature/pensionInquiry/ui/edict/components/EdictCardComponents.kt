@@ -33,10 +33,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
+import com.tamin.taminhamrah.ui.components.vanishOnCollapse
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.model.pension.EdictPensionerDetailPR
 import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.SurvivorInfoPR
@@ -55,7 +62,7 @@ import taminx.core.core_ui.edict_comparison_after
 import taminx.core.core_ui.edict_comparison_before
 import taminx.core.core_ui.edict_comparison_title
 import taminx.core.core_ui.edict_description_title
-import taminx.core.core_ui.edict_payable_monthly_label
+import taminx.core.core_ui.edict_payable_monthly_hint
 import taminx.core.core_ui.edict_survivor_desc
 import taminx.core.core_ui.edict_survivor_share_title
 import taminx.core.core_ui.edict_tab_breakdown
@@ -69,65 +76,158 @@ import taminx.core.core_ui.unit_rial
 
 // ─── Main Amount Card ──────────────────────────────────────────────────────────
 
+private enum class EdictCardSlot { LabelHint, DateLabel, Badge, Amount, ProgressBar, Legend }
+
+private fun List<Measurable>.slot(id: EdictCardSlot): Measurable = first { it.layoutId == id }
+
+/**
+ * The primary edict amount card. [collapseProgress] drives a 0→1 morph that:
+ * – fades out the "مبلغ قابل پرداخت ماهانه" hint, the percent badge, and the legend
+ * – slides the date label to the start edge and the amount to the end edge of a compact bar
+ * – rides the progress bar up just below that bar
+ */
 @Composable
-fun EdictMainCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) {
+fun EdictMainCard(
+    edict: EdictPensionerPR,
+    collapseProgress: () -> Float = { 0f },
+    modifier: Modifier = Modifier,
+) {
     val taminColors = LocalTaminColors.current
     val info = edict.edictInfo ?: return
+
+    val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
+    val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
+    val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0
+    val dateLabelText = formatEdictDateLabel(edict.edictYear + edict.edictMonth)
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CornerRadius.card),
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        Layout(
+            content = {
+                // LabelHint: "مبلغ قابل پرداخت ماهانه" – vanishes on collapse
                 TaminText(
-                    text = stringResource(
-                        Res.string.edict_payable_monthly_label,
-                        formatEdictDateLabel(edict.edictYear + edict.edictMonth),
-                        edict.edictYear.toPersianDigits(),
-                    ),
+                    text = stringResource(Res.string.edict_payable_monthly_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
+                    modifier = Modifier
+                        .layoutId(EdictCardSlot.LabelHint)
+                        .vanishOnCollapse(collapseProgress),
                 )
-
-                val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
-                val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
-                val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0
-                if (pct > 0) {
-                    PercentBadge(percent = pct, colors = taminColors)
-                }
-            }
-
-            Spacer(Modifier.height(Spacing.sm))
-
-            Row(verticalAlignment = Alignment.Bottom) {
+                // DateLabel: "فروردین ۱۴۰۰" – travels from beside the hint to the start edge
                 TaminText(
-                    text = info.payableMonthly.toPersianDigits(),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.textPrimary,
-                )
-                Spacer(Modifier.width(Spacing.xs))
-                TaminText(
-                    text = stringResource(Res.string.unit_rial),
+                    text = dateLabelText,
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
+                    modifier = Modifier.layoutId(EdictCardSlot.DateLabel),
                 )
-            }
-
-            Spacer(Modifier.height(Spacing.lg))
-            EdictBreakdownProgressBar(edict.detail)
-            Spacer(Modifier.height(Spacing.lg))
-
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                edict.detail.take(4).forEachIndexed { index, detail ->
-                    BreakdownLegendItem(detail = detail, index = index)
+                // Badge: PercentBadge – vanishes on collapse
+                Box(
+                    modifier = Modifier
+                        .layoutId(EdictCardSlot.Badge)
+                        .vanishOnCollapse(collapseProgress),
+                ) {
+                    if (pct > 0) PercentBadge(pct, taminColors)
                 }
+                // Amount: big payable number + unit – travels to the end edge of the bar
+                Row(
+                    modifier = Modifier.layoutId(EdictCardSlot.Amount),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    TaminText(
+                        text = info.payableMonthly.toPersianDigits(),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.textPrimary,
+                    )
+                    Spacer(Modifier.width(Spacing.xs))
+                    TaminText(
+                        text = stringResource(Res.string.unit_rial),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.textSecondary,
+                    )
+                }
+                // ProgressBar – rides up into the compact bar
+                EdictBreakdownProgressBar(
+                    details = edict.detail,
+                    modifier = Modifier.layoutId(EdictCardSlot.ProgressBar),
+                )
+                // Legend: breakdown items – vanishes on collapse
+                Column(
+                    modifier = Modifier
+                        .layoutId(EdictCardSlot.Legend)
+                        .vanishOnCollapse(collapseProgress),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    edict.detail.take(4).forEachIndexed { index, detail ->
+                        BreakdownLegendItem(detail = detail, index = index)
+                    }
+                }
+            },
+        ) { measurables, constraints ->
+            val width = constraints.maxWidth
+            val pad = Spacing.lg.roundToPx()
+            val sm = Spacing.sm.roundToPx()
+            val lg = Spacing.lg.roundToPx()
+            val xs = Spacing.xs.roundToPx()
+            val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
+
+            val labelHint = measurables.slot(EdictCardSlot.LabelHint).measure(innerC)
+            val dateLabel = measurables.slot(EdictCardSlot.DateLabel).measure(innerC)
+            val badge = measurables.slot(EdictCardSlot.Badge).measure(Constraints())
+            val amount = measurables.slot(EdictCardSlot.Amount).measure(innerC)
+            val progressBar = measurables.slot(EdictCardSlot.ProgressBar)
+                .measure(Constraints.fixedWidth((width - 2 * pad).coerceAtLeast(0)))
+            val legend = measurables.slot(EdictCardSlot.Legend).measure(innerC)
+
+            // Expanded geometry
+            val row1Height = maxOf(labelHint.height, dateLabel.height, badge.height)
+            val row1Top = pad
+            val amountTop = row1Top + row1Height + sm
+            val progressTop = amountTop + amount.height + lg
+            val legendTop = progressTop + progressBar.height + lg
+            val expandedH = legendTop + legend.height + pad
+
+            // Collapsed geometry: compact bar = [DateLabel | Amount], then ProgressBar
+            val barRowHeight = maxOf(dateLabel.height, amount.height)
+            val collapsedH = pad + barRowHeight + sm + progressBar.height + pad
+
+            val dateLabelColY = pad + (barRowHeight - dateLabel.height) / 2
+            val amountColY = pad + (barRowHeight - amount.height) / 2
+            val progressBarColY = pad + barRowHeight + sm
+
+            val t = Easing.standard.transform(collapseProgress())
+
+            layout(width, lerp(expandedH, collapsedH, t)) {
+                // Fading pieces stay at their expanded slots (clipped as the card shrinks).
+                labelHint.placeRelative(
+                    pad,
+                    row1Top + (row1Height - labelHint.height) / 2,
+                )
+                badge.placeRelative(
+                    width - pad - badge.width,
+                    row1Top + (row1Height - badge.height) / 2,
+                )
+                legend.placeRelative(pad, legendTop)
+
+                // Traveling pieces glide from expanded → compact bar positions.
+                // DateLabel: beside the hint (expanded) → start edge of bar (collapsed).
+                dateLabel.placeRelative(
+                    lerp(pad + labelHint.width + xs, pad, t),
+                    lerp(row1Top + (row1Height - dateLabel.height) / 2, dateLabelColY, t),
+                )
+                // Amount: below the hint row (expanded) → end edge of bar (collapsed).
+                amount.placeRelative(
+                    lerp(pad, width - pad - amount.width, t),
+                    lerp(amountTop, amountColY, t),
+                )
+                // ProgressBar: below the amount (expanded) → just below the bar (collapsed).
+                progressBar.placeRelative(
+                    pad,
+                    lerp(progressTop, progressBarColY, t),
+                )
             }
         }
     }
@@ -160,12 +260,12 @@ private fun PercentBadge(percent: Int, colors: TaminColors) {
 }
 
 @Composable
-fun EdictBreakdownProgressBar(details: List<EdictPensionerDetailPR>) {
+fun EdictBreakdownProgressBar(details: List<EdictPensionerDetailPR>, modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     val total = details.sumOf { it.fieldValue.replace(",", "").toDoubleOrNull() ?: 0.0 }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(8.dp)
             .clip(CircleShape)

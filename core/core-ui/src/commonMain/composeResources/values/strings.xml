@@ -34,6 +34,7 @@
     <string name="edict_survivor_share_title">سهم بازمانده - %1$s</string>
     <string name="edict_survivor_desc">فرزند %1$s - مستمری شما بر پایه سهم تعیین‌شده از مبلغ کل حکم محاسبه می‌شود.</string>
     <string name="edict_payable_monthly_label">مبلغ قابل پرداخت ماهانه - %1$s %2$s</string>
+    <string name="edict_payable_monthly_hint">مبلغ قابل پرداخت ماهانه</string>
     <string name="btn_send_to_inbox">ارسال به صندوق شخصی</string>
     <string name="edict_description_title">شرح حکم</string>
     <string name="edict_send_confirm_title">ارسال حکم به صندوق شخصی</string>

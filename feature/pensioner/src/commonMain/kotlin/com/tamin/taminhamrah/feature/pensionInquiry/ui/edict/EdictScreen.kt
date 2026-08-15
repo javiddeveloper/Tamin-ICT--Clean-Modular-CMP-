@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.edict
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -25,8 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictComparisonCard
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictDetailsSection
@@ -42,6 +47,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictUiSta
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
@@ -52,6 +58,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -167,14 +174,17 @@ fun EdictContent(
     val taminColors = LocalTaminColors.current
     val edict = state.edictPensioner
     val scrollState = rememberScrollState()
+    val collapse = rememberCollapsingHeaderState(120.dp)
     var headerHeightPx by remember { mutableStateOf(0) }
 
     Box(modifier = modifier.fillMaxSize().background(taminColors.bgPage)) {
         // Scrollable body: a spacer matching the floating header's measured height,
         // then the secondary cards (comparison, survivors, details).
+        // nestedScroll is applied first so the header folds before the body scrolls.
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .nestedScroll(collapse.nestedScrollConnection)
                 .verticalScroll(scrollState),
         ) {
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
@@ -205,6 +215,7 @@ fun EdictContent(
             state = state,
             onBack = onBack,
             onIntent = onIntent,
+            collapseProgress = collapse.progressProvider,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
@@ -248,13 +259,17 @@ private fun EdictBottomBar(
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TaminTopAppBarButton(
-            icon = vectorResource(Res.drawable.ic_tamin_download),
-            contentDescription = "دانلود",
-            onClick = onDownloadPdf,
-            shape = RoundedCornerShape(CornerRadius.lg),
-            bordered = true,
-            modifier = Modifier.size(52.dp),
+        IconBox(
+            modifier = Modifier.border(
+                width = 1.dp,
+                shape = RoundedCornerShape(CornerRadius.lg),
+                color = taminColors.border
+            ).clickable { onDownloadPdf() },
+            painter = painterResource(Res.drawable.ic_tamin_download),
+            size = 52.dp,
+            backgroundColor = taminColors.bgSurface,
+            cornerRadius = CornerRadius.lg,
+            colorFilter = ColorFilter.tint(color = taminColors.blueText)
         )
         LoadingButton(
             text = stringResource(Res.string.btn_send_to_inbox),

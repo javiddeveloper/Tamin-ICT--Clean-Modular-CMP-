@@ -75,6 +75,7 @@ fun EdictHeader(
     state: EdictUiState,
     onBack: () -> Unit,
     onIntent: (EdictIntent) -> Unit,
+    collapseProgress: () -> Float = { 0f },
     modifier: Modifier = Modifier,
 ) {
     val edict = state.edictPensioner
@@ -124,10 +125,11 @@ fun EdictHeader(
         if (edict != null) {
             EdictMainCard(
                 edict = edict,
+                collapseProgress = collapseProgress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .rideUpIntoHeader(
-                        progress = { 0f },
+                        progress = collapseProgress,
                         expandedOverlap = HEADER_OVERLAP,
                         collapsedOverlap = HEADER_OVERLAP,
                     )
@@ -145,7 +147,7 @@ fun EdictHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .rideUpIntoHeader(
-                        progress = { 0f },
+                        progress = collapseProgress,
                         expandedOverlap = HEADER_OVERLAP,
                         collapsedOverlap = HEADER_OVERLAP,
                     )
