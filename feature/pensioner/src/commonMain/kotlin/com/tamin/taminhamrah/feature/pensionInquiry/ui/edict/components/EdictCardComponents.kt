@@ -91,6 +91,7 @@ fun EdictMainCard(
     edict: EdictPensionerPR,
     collapseProgress: () -> Float = { 0f },
     modifier: Modifier = Modifier,
+    selectedDate: String = "",
 ) {
     val taminColors = LocalTaminColors.current
     val info = edict.edictInfo ?: return
@@ -98,7 +99,8 @@ fun EdictMainCard(
     val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
     val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
     val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0
-    val dateLabelText = formatEdictDateLabel(edict.edictYear + edict.edictMonth)
+    val rawDate = formatEdictDateLabel(selectedDate)
+    val dateLabelText = if (rawDate.isNotEmpty()) " \u00B7 $rawDate" else ""
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -123,12 +125,8 @@ fun EdictMainCard(
                     color = taminColors.textSecondary,
                     modifier = Modifier.layoutId(EdictCardSlot.DateLabel),
                 )
-                // Badge: PercentBadge – vanishes on collapse
-                Box(
-                    modifier = Modifier
-                        .layoutId(EdictCardSlot.Badge)
-                        .vanishOnCollapse(collapseProgress),
-                ) {
+                // Badge: PercentBadge – stays visible, rides vertically into the compact bar
+                Box(modifier = Modifier.layoutId(EdictCardSlot.Badge)) {
                     if (pct > 0) PercentBadge(pct, taminColors)
                 }
                 // Amount: big payable number + unit – travels to the end edge of the bar
@@ -137,7 +135,7 @@ fun EdictMainCard(
                     verticalAlignment = Alignment.Bottom,
                 ) {
                     TaminText(
-                        text = info.payableMonthly.toPersianDigits(),
+                        text = info.payableMonthly,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.textPrimary,
@@ -206,10 +204,6 @@ fun EdictMainCard(
                     pad,
                     row1Top + (row1Height - labelHint.height) / 2,
                 )
-                badge.placeRelative(
-                    width - pad - badge.width,
-                    row1Top + (row1Height - badge.height) / 2,
-                )
                 legend.placeRelative(pad, legendTop)
 
                 // Traveling pieces glide from expanded → compact bar positions.
@@ -218,10 +212,19 @@ fun EdictMainCard(
                     lerp(pad + labelHint.width + xs, pad, t),
                     lerp(row1Top + (row1Height - dateLabel.height) / 2, dateLabelColY, t),
                 )
-                // Amount: below the hint row (expanded) → end edge of bar (collapsed).
+                // Amount: below the hint row (expanded) → right beside DateLabel in collapsed bar.
                 amount.placeRelative(
-                    lerp(pad, width - pad - amount.width, t),
+                    lerp(pad, pad + dateLabel.width + xs, t),
                     lerp(amountTop, amountColY, t),
+                )
+                // Badge: stays at the end edge, rides vertically from row 1 center to bar center.
+                badge.placeRelative(
+                    width - pad - badge.width,
+                    lerp(
+                        row1Top + (row1Height - badge.height) / 2,
+                        pad + (barRowHeight - badge.height) / 2,
+                        t,
+                    ),
                 )
                 // ProgressBar: below the amount (expanded) → just below the bar (collapsed).
                 progressBar.placeRelative(
@@ -243,7 +246,7 @@ private fun PercentBadge(percent: Int, colors: TaminColors) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TaminText(
-                text = "${percent}٪".toPersianDigits(),
+                text = "${percent}٪",
                 color = colors.greenText,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
@@ -309,7 +312,7 @@ fun BreakdownLegendItem(detail: EdictPensionerDetailPR, index: Int) {
         )
         Spacer(Modifier.width(Spacing.sm))
         TaminText(
-            text = detail.fieldValue.toPersianDigits(),
+            text = detail.fieldValue,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = taminColors.textPrimary,
@@ -347,7 +350,7 @@ fun EdictComparisonCard(edict: EdictPensionerPR) {
                 )
                 if (edict.edictMonth.isNotEmpty() && edict.edictYear.isNotEmpty()) {
                     TaminText(
-                        text = formatEdictDateLabel(edict.edictYear + edict.edictMonth),
+                        text = formatEdictDateLabel(edict.edictYear + edict.edictMonth.padStart(2, '0')),
                         style = MaterialTheme.typography.labelSmall,
                         color = taminColors.textMuted,
                     )
@@ -373,7 +376,7 @@ fun EdictComparisonCard(edict: EdictPensionerPR) {
             if (info.edictDescription.isNotEmpty()) {
                 Spacer(Modifier.height(Spacing.md))
                 TaminText(
-                    text = info.edictDescription.toPersianDigits(),
+                    text = info.edictDescription,
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
                     lineHeight = 20.sp,
@@ -397,7 +400,7 @@ private fun ComparisonBar(label: String, amount: String, progress: Float, color:
                 color = taminColors.textSecondary,
             )
             TaminText(
-                text = amount.toPersianDigits(),
+                text = amount,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
             )
@@ -465,7 +468,7 @@ fun SurvivorShareCard(survivor: SurvivorInfoPR) {
                     strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
                 )
                 TaminText(
-                    text = "${survivor.quota}%".toPersianDigits(),
+                    text = "${survivor.quota}%",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = taminColors.blueText,
@@ -567,7 +570,7 @@ private fun EdictInfoList(edict: EdictPensionerPR) {
                     )
                     Spacer(Modifier.height(Spacing.sm))
                     TaminText(
-                        text = info.edictDescription.toPersianDigits(),
+                        text = info.edictDescription,
                         style = MaterialTheme.typography.bodySmall,
                         color = taminColors.textSecondary,
                         lineHeight = 20.sp,
@@ -595,7 +598,7 @@ private fun InfoRow(label: String, value: String?) {
                 color = taminColors.textSecondary,
             )
             TaminText(
-                text = (value ?: "").toPersianDigits(),
+                text = (value ?: ""),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.End,
@@ -649,7 +652,7 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
                         modifier = Modifier.weight(1f),
                     )
                     TaminText(
-                        text = detail.fieldValue.toPersianDigits() + " " + stringResource(Res.string.unit_rial),
+                        text = detail.fieldValue + " " + stringResource(Res.string.unit_rial),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -680,7 +683,7 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
                         fontWeight = FontWeight.Bold,
                     )
                     TaminText(
-                        text = info.payableMonthly.toPersianDigits() + " " + stringResource(Res.string.unit_rial),
+                        text = info.payableMonthly + " " + stringResource(Res.string.unit_rial),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.blueText,

@@ -92,7 +92,7 @@ fun EdictPensionerSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TaminText(
-                        text = id.toPersianDigits(),
+                        text = id,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = if (isSelected) taminColors.blueText else taminColors.textPrimary,

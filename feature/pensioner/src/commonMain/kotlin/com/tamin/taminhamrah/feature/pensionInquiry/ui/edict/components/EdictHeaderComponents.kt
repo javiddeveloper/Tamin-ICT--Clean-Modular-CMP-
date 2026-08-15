@@ -126,6 +126,7 @@ fun EdictHeader(
             EdictMainCard(
                 edict = edict,
                 collapseProgress = collapseProgress,
+                selectedDate = state.startDate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .rideUpIntoHeader(
@@ -179,7 +180,7 @@ private fun EdictPensionerChip(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TaminText(
-                text = "${state.selectedPensionerId?.toPersianDigits() ?: ""} | ${stringResource(Res.string.user_type_pensioner)}",
+                text = "${state.selectedPensionerId ?: ""} | ${stringResource(Res.string.user_type_pensioner)}",
                 color = Color.White,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -206,7 +207,7 @@ private fun EdictYearFilterChip(
         months.getOrNull(idx)
     }
     val label = buildString {
-        append(stringResource(Res.string.edict_year_filter, year.toPersianDigits()))
+        append(stringResource(Res.string.edict_year_filter, year))
         if (monthName != null) append(" · $monthName")
     }
 
@@ -282,11 +283,12 @@ fun EdictDateChipsRow(
 
 @Composable
 internal fun formatEdictDateLabel(date: String): String {
-    if (date.length < 6) return date
-    val monthIndex = date.substring(4, 6).toIntOrNull()?.minus(1) ?: return date
+    if (date.length < 5) return ""
+    val year = date.substring(0, 4)
+    val monthStr = date.substring(4)
+    val monthIndex = monthStr.toIntOrNull()?.minus(1) ?: return date
     val months = stringArrayResource(Res.array.jalali_months)
-    val year = date.substring(0, 4).toPersianDigits()
-    return if (monthIndex in months.indices) "${months[monthIndex]} $year" else date
+    return if (monthIndex in months.indices) "${months[monthIndex]} ${year.toPersianDigits()}" else date.toPersianDigits()
 }
 
 @PreviewRtlTheme

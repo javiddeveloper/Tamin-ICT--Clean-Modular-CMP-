@@ -171,7 +171,7 @@ fun EdictSearchSheet(
                     )
 
                     val monthName = remember { PersianDateFormatter.monthNames[0] }
-                    val yearPersian = remember(searchYear) { searchYear.toPersianDigits() }
+                    val yearPersian = remember(searchYear) { searchYear }
                     EdictMonthOptionCard(
                         title = "$monthName $yearPersian",
                         subtitle = "حکم افزایش سالیانهٔ $yearPersian",
@@ -232,7 +232,7 @@ private fun SelectedYearCard(
                 color = taminColors.textSecondary,
             )
             TaminText(
-                text = year.toPersianDigits(),
+                text = year,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = taminColors.textPrimary,
@@ -327,10 +327,10 @@ private fun YearWheelPicker(
     val taminColors = LocalTaminColors.current
     val lastYear = remember { PersianDateFormatter.currentJalaliYear() }
     val years = remember(lastYear) {
-        (FIRST_YEAR..lastYear).map { it.toString().toPersianDigits() }
+        (FIRST_YEAR..lastYear).map { it.toString() }
     }
     val initialIndex = remember(selectedYear) {
-        val idx = years.indexOfFirst { it == selectedYear.toPersianDigits() }
+        val idx = years.indexOfFirst { it == selectedYear }
         if (idx >= 0) idx else (years.size - 1).coerceAtLeast(0)
     }
     val state = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
