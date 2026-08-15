@@ -151,7 +151,7 @@ fun EdictMainCard(
                 }
                 // ProgressBar – rides up into the compact bar
                 EdictBreakdownProgressBar(
-                    details = edict.detail,
+                    details = edict.detail.take(4),
                     modifier = Modifier.layoutId(EdictCardSlot.ProgressBar),
                 )
                 // Legend: breakdown items – vanishes on collapse
@@ -267,9 +267,8 @@ fun EdictBreakdownProgressBar(details: List<EdictPensionerDetailPR>, modifier: M
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(8.dp)
-            .clip(CircleShape)
-            .background(taminColors.divider),
+            .height(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
     ) {
         if (total > 0) {
             details.forEachIndexed { index, detail ->
@@ -279,6 +278,7 @@ fun EdictBreakdownProgressBar(details: List<EdictPensionerDetailPR>, modifier: M
                         modifier = Modifier
                             .weight((value / total).toFloat())
                             .fillMaxHeight()
+                            .clip(CircleShape)
                             .background(getBreakdownColor(index, taminColors)),
                     )
                 }
@@ -694,9 +694,9 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 fun getBreakdownColor(index: Int, colors: TaminColors): Color = when (index % 4) {
-    0 -> colors.blueText
+    0 -> colors.orangeText
     1 -> colors.teal
-    2 -> colors.orangeText
+    2 -> colors.blueText
     else -> colors.fuchsiaBlue
 }
 
