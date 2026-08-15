@@ -106,7 +106,8 @@ fun EdictHeader(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 EdictPensionerChip(
-                    state = state, onIntent = onIntent,
+                    state = state,
+                    onIntent = onIntent,
                     modifier = Modifier.align(
                         Alignment.CenterHorizontally
                     )
@@ -180,7 +181,7 @@ private fun EdictPensionerChip(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TaminText(
-                text = "${state.selectedPensionerId ?: ""} | ${stringResource(Res.string.user_type_pensioner)}",
+                text = "${state.selectedPensionerId ?: ""} | مستمری بگیر",
                 color = Color.White,
                 style = MaterialTheme.typography.bodySmall,
             )

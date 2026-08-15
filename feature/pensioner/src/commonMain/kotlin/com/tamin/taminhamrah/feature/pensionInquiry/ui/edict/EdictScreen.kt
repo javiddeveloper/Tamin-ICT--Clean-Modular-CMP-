@@ -38,7 +38,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictDet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictHeader
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictPensionerSheet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictSearchSheet
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictSendConfirmationDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictSuccessDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.SurvivorShareCard
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictEvent
@@ -115,13 +114,6 @@ fun EdictScreen(
                 viewModel.sendIntent(EdictIntent.LoadEdict)
             },
             onDismiss = { viewModel.sendIntent(EdictIntent.DismissPensionerSheet) },
-        )
-    }
-
-    if (state.showSendConfirmation) {
-        EdictSendConfirmationDialog(
-            onConfirm = { viewModel.sendIntent(EdictIntent.ConfirmSendToInbox) },
-            onDismiss = { viewModel.sendIntent(EdictIntent.DismissSendConfirmation) },
         )
     }
 

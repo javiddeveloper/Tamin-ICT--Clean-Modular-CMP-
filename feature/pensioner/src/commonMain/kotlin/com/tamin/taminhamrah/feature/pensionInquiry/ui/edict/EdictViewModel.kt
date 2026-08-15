@@ -86,16 +86,9 @@ class EdictViewModel(
                 }
             }
             is EdictIntent.RequestSendToInbox -> {
-                emit(PartialState.ShowSendConfirmation(true))
-            }
-            is EdictIntent.DismissSendConfirmation -> {
-                emit(PartialState.ShowSendConfirmation(false))
-            }
-            is EdictIntent.ConfirmSendToInbox -> {
                 val state = uiState.value
                 val pensionerId = state.selectedPensionerId
                 if (pensionerId.isNullOrEmpty()) return@flow
-                emit(PartialState.ShowSendConfirmation(false))
                 emit(PartialState.SendingToInbox(true))
                 try {
                     val filters = listOf(
@@ -220,7 +213,6 @@ class EdictViewModel(
         is PartialState.SearchYearChanged -> currentState.copy(searchYear = partialState.year)
         is PartialState.SearchMonthChanged -> currentState.copy(searchMonth = partialState.month)
         is PartialState.DateFilteredBySearch -> currentState.copy(isDateFilteredBySearch = partialState.filtered)
-        is PartialState.ShowSendConfirmation -> currentState.copy(showSendConfirmation = partialState.show)
         is PartialState.ShowSendSuccess -> currentState.copy(showSendSuccess = partialState.show)
         is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,

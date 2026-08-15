@@ -54,7 +54,6 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
@@ -129,6 +128,7 @@ fun EdictSearchSheet(
                 TaminText(
                     text = stringResource(Res.string.edict_search_clear),
                     style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
                     color = taminColors.blueText,
                     modifier = Modifier
                         .clip(RoundedCornerShape(CornerRadius.full))

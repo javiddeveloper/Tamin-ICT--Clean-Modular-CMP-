@@ -21,6 +21,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -70,6 +72,7 @@ import taminx.core.core_ui.edict_tab_info
 import taminx.core.core_ui.edict_empty_desc
 import taminx.core.core_ui.edict_empty_show_all
 import taminx.core.core_ui.edict_empty_title
+import taminx.core.core_ui.edict_info_note
 import taminx.core.core_ui.ic_arrow_down
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.unit_rial
@@ -485,8 +488,8 @@ fun EdictDetailsSection(edict: EdictPensionerPR) {
     val taminColors = LocalTaminColors.current
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf(
-        stringResource(Res.string.edict_tab_info),
         stringResource(Res.string.edict_tab_breakdown),
+        stringResource(Res.string.edict_tab_info),
     )
 
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
@@ -518,7 +521,7 @@ fun EdictDetailsSection(edict: EdictPensionerPR) {
             }
         }
 
-        if (selectedTabIndex == 0) EdictInfoList(edict) else EdictBreakdownList(edict)
+        if (selectedTabIndex == 1) EdictInfoList(edict) else EdictBreakdownList(edict)
     }
 }
 
@@ -543,6 +546,12 @@ private fun EdictInfoList(edict: EdictPensionerPR) {
                 InfoRow(label = "نام پدر", value = info.fatherName)
                 InfoRow(label = "اساس برقراری", value = info.basisImplementation)
                 InfoRow(label = "تاریخ برقراری", value = info.pensionStartDate)
+                if (edict.edictYear.isNotEmpty() && edict.edictYear != "0") {
+                    InfoRow(
+                        label = "تاریخ اجرای حکم",
+                        value = "${edict.edictYear}/${edict.edictMonth.padStart(2, '0')}/01".toPersianDigits(),
+                    )
+                }
                 InfoRow(
                     label = "سابقه اصلی",
                     value = "${info.originalHistoryYear} سال و ${info.originalHistoryMonth} ماه و ${info.originalHistoryDay} روز",
@@ -578,6 +587,32 @@ private fun EdictInfoList(edict: EdictPensionerPR) {
                 }
             }
         }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(CornerRadius.card),
+            colors = CardDefaults.cardColors(containerColor = taminColors.blueBg),
+        ) {
+            Row(
+                modifier = Modifier.padding(Spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null,
+                    tint = taminColors.blueText,
+                    modifier = Modifier.size(18.dp),
+                )
+                TaminText(
+                    text = stringResource(Res.string.edict_info_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.blueText,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
     }
 }
 
@@ -611,69 +646,120 @@ private fun InfoRow(label: String, value: String?) {
     }
 }
 
+/*@Composable
+private fun EdictBreakdownList(edict: EdictPensionerPR) {
+    val taminColors = LocalTaminColors.current
+    val info = edict.edictInfo
+    val rial = stringResource(Res.string.unit_rial)
+
+    val packageNames = edict.detail.map { it.packageName }.distinct()
+    val grouped = edict.detail.groupBy { it.packageName }
+    val payableItems = grouped[packageNames.getOrNull(0)] ?: emptyList()
+    val deductionItems = if (packageNames.size > 1) grouped[packageNames[1]] ?: emptyList() else emptyList()
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+        BreakdownSection(
+            title = "مبالغ پرداختی",
+            dotColor = taminColors.blueText,
+            items = payableItems,
+            rial = rial,
+        )
+
+        if (deductionItems.isNotEmpty()) {
+            BreakdownSection(
+                title = "کسورات",
+                dotColor = taminColors.orangeText,
+                items = deductionItems,
+                rial = rial,
+            )
+        }
+
+        if (info != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(CornerRadius.card),
+                colors = CardDefaults.cardColors(containerColor = taminColors.blueText),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TaminText(
+                        text = info.payableMonthly + " " + rial,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.bgSurface,
+                    )
+                    TaminText(
+                        text = "جمع کل حکم",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = taminColors.bgSurface,
+                    )
+                }
+            }
+        }
+    }
+}*/
+
 @Composable
 private fun EdictBreakdownList(edict: EdictPensionerPR) {
     val taminColors = LocalTaminColors.current
     val info = edict.edictInfo
+    val rial = stringResource(Res.string.unit_rial)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(CornerRadius.card),
-        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-        border = BorderStroke(1.dp, taminColors.border),
-    ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
+    val payableItems = edict.detail.map {
+        BreakdownItemUi(
+            label = it.fieldDesc,
+            value = it.fieldValue,
+        )
+    }
+
+    val deductionItems = listOf(
+        BreakdownItemUi(
+            label = "کسر حق بیمه درمان",
+            value = "0",
+        ),
+        BreakdownItemUi(
+            label = "سایر کسورات و اقساط",
+            value = "0",
+        ),
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+
+        BreakdownSection(
+            title = "مبالغ پرداختی",
+            dotColor = taminColors.blueText,
+            items = payableItems,
+            rial = rial,
+        )
+
+        BreakdownSection(
+            title = "کسورات",
+            dotColor = taminColors.orangeText,
+            items = deductionItems,
+            rial = rial,
+        )
+
+        if (info != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = taminColors.blueText,
+                ),
+            ) {
+                Row(
                     modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(taminColors.blueText),
-                )
-                Spacer(Modifier.width(Spacing.sm))
-                TaminText(
-                    text = "مبالغ پرداختی",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            Spacer(Modifier.height(Spacing.md))
-
-            edict.detail.forEachIndexed { index, detail ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    TaminText(
-                        text = detail.fieldDesc,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = taminColors.textSecondary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TaminText(
-                        text = detail.fieldValue + " " + stringResource(Res.string.unit_rial),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-                if (index < edict.detail.size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = Spacing.sm),
-                        color = taminColors.divider,
-                        thickness = 0.5.dp,
-                    )
-                }
-            }
-
-            if (info != null) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = Spacing.md),
-                    color = taminColors.divider,
-                    thickness = 1.dp,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = Spacing.lg,
+                            vertical = Spacing.md,
+                        ),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -681,12 +767,93 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
                         text = "جمع کل حکم",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
+                        color = taminColors.bgSurface,
                     )
                     TaminText(
-                        text = info.payableMonthly + " " + stringResource(Res.string.unit_rial),
+                        text = "${info.payableMonthly} $rial",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = taminColors.blueText,
+                        color = taminColors.bgSurface,
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+private data class BreakdownItemUi(
+    val label: String,
+    val value: String,
+)
+
+@Composable
+private fun BreakdownSection(
+    title: String,
+    dotColor: Color,
+    items: List<BreakdownItemUi>,
+    rial: String,
+) {
+    val taminColors = LocalTaminColors.current
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CornerRadius.card),
+        colors = CardDefaults.cardColors(
+            containerColor = taminColors.bgSurface,
+        ),
+        border = BorderStroke(1.dp, taminColors.border),
+    ) {
+        Column(
+            modifier = Modifier.padding(Spacing.lg),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(dotColor),
+                )
+
+                Spacer(Modifier.width(Spacing.sm))
+
+                TaminText(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            Spacer(Modifier.height(Spacing.md))
+
+            items.forEachIndexed { index, item ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    TaminText(
+                        text = item.label,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.textSecondary,
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    TaminText(
+                        text = "${item.value} $rial",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
+                if (index < items.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(
+                            vertical = Spacing.sm,
+                        ),
+                        color = taminColors.divider,
+                        thickness = 0.5.dp,
                     )
                 }
             }

@@ -73,6 +73,7 @@
     <string name="edict_empty_title">حکمی برای این بازه یافت نشد</string>
     <string name="edict_empty_desc">برای بازه زمانی انتخاب شده حکمی صادر نشده است.</string>
     <string name="edict_empty_show_all">نمایش همه احکام</string>
+    <string name="edict_info_note">این خدمت صرفاً برای مشاهده حکم افزایش سالیانهٔ مستمری است و احکام برقراری اولیه از این مسیر قابل مشاهده نیست. مستمری‌بگیرانی که در سال جاری در زمرهٔ مستمری‌بگیران قرار گرفته‌اند، از سال آینده حکم خود را اینجا خواهند دید.</string>
     <string name="profile_personal_info">اطلاعات شخصی</string>
     <string name="profile_identity_info">اطلاعات هویتی</string>
     <string name="profile_dependents">مشاهده و ثبت افراد تبعی</string>

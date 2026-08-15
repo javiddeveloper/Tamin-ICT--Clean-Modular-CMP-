@@ -19,7 +19,6 @@ data class EdictUiState(
     val searchYear: String = "1405",
     val searchMonth: String = "",
     val isDateFilteredBySearch: Boolean = false,
-    val showSendConfirmation: Boolean = false,
     val showSendSuccess: Boolean = false,
     val viewerPdf: PdfDownloadPR? = null,
     val viewerDownloadFailed: Boolean = false,
@@ -37,7 +36,6 @@ data class EdictUiState(
         data class SearchYearChanged(val year: String) : PartialState
         data class SearchMonthChanged(val month: String) : PartialState
         data class DateFilteredBySearch(val filtered: Boolean) : PartialState
-        data class ShowSendConfirmation(val show: Boolean) : PartialState
         data class ShowSendSuccess(val show: Boolean) : PartialState
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data object ViewerDownloadFailed : PartialState
@@ -50,8 +48,6 @@ sealed interface EdictIntent {
     data class ChangeStartDate(val date: String) : EdictIntent
     data object LoadEdict : EdictIntent
     data object RequestSendToInbox : EdictIntent
-    data object ConfirmSendToInbox : EdictIntent
-    data object DismissSendConfirmation : EdictIntent
     data object DismissSendSuccess : EdictIntent
     data object DownloadPdf : EdictIntent
     data object DismissPdfViewer : EdictIntent
