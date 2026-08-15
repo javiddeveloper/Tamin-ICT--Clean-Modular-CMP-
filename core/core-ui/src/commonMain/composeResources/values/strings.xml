@@ -442,5 +442,9 @@
     <string name="error_cancel_license_message">لغو مجوز با خطا مواجه شد</string>
     <string name="error_issue_license_message">صدور مجوز با خطا مواجه شد</string>
     <string name="error_unknown_fallback">Unknown Error</string>
+
+    <string name="orotez_protez_title">کمک هزینه اروتزپروتز</string>
+    <string name="orotez_protez_empty_state">درخواستی برای کمک هزینه اروتزپروتز یافت نشد</string>
+    <string name="orotez_protez_ref_code_label">کد پیگیری</string>
 </resources>
 

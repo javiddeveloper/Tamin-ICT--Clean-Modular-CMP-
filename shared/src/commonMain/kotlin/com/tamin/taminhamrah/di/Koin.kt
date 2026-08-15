@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranc
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
 import com.tamin.taminhamrah.feature.security.di.securityModule
+import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -47,7 +48,8 @@ val sharedModules: List<Module>
         healthProfileModule,
         changeMobileModule,
         myInboxModule,
-        securityModule
+        securityModule,
+        orotezProtezModule
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
