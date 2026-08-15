@@ -132,7 +132,7 @@ fun EdictMainCard(
                 // Amount: big payable number + unit – travels to the end edge of the bar
                 Row(
                     modifier = Modifier.layoutId(EdictCardSlot.Amount),
-                    verticalAlignment = Alignment.Bottom,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TaminText(
                         text = info.payableMonthly,

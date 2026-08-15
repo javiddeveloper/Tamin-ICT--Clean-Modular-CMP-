@@ -105,6 +105,6 @@ interface PensionApiService {
     @GET("hokm/annoncment")
     suspend fun sendEdictPensionerToMyInbox(
         @QueryMap parameters: Map<String, String>
-    ): BaseDTO<String?>
+    ): BaseDTO<JsonElement?>
 
 }

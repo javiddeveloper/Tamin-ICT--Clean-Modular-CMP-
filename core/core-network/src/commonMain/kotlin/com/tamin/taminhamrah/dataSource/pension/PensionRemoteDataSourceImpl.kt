@@ -241,7 +241,7 @@ class PensionRemoteDataSourceImpl(
             val filterJson = apiQueryBuilder.buildFilterJson(filter)
             val response =
                 pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))
-            response.extractData()
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
