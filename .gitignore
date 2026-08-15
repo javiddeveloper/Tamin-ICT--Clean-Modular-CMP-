@@ -55,3 +55,8 @@ old_android/
 progress.txt
 test.txt
 /core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/
+
+## Code review working files (local only)
+review/
+docs/vault/Code-Review.md
+CLAUDE.local.md

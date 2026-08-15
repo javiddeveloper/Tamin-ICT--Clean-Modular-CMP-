@@ -2,62 +2,58 @@
 tags: [convention, gotcha]
 ---
 
-# قواعد نام‌گذاری
+# Naming Conventions
 
-فایل: `build-logic/convention/src/main/kotlin/TaminHamrahNamingConventionPlugin.kt`
-اعمال‌شده روی: `core-domain`, `core-network`, `core-ui`, `core-database`, `core-data` (با `id("TaminHamrah.naming.convention")` در `build.gradle.kts` هرکدام).
+Plugin: `build-logic/convention/src/main/kotlin/TaminHamrahNamingConventionPlugin.kt`
+Applied to: `core-domain`, `core-network`, `core-ui`, `core-database`, `core-data` (each declares `id("TaminHamrah.naming.convention")` in its `build.gradle.kts`).
 
-## ⚠️ این چک در عمل کار نمی‌کند (باگ)
+## ⚠️ The check does not actually work
 
-پلاگین task ای به نام `checkNamingConvention` می‌سازد و به `check` / `assemble*` / `compileKotlin*` وصلش می‌کند، **ولی همیشه بی‌صدا pass می‌شود**.
+The plugin registers a `checkNamingConvention` task and hooks it to `check`, `assemble*` and `compileKotlin*` — but **it always passes silently**.
 
-علت: داخل بلاک `tasks.register("...") { doLast { ... } }` گیرنده‌ی `path` خودِ **Task** است نه Project. یعنی مقدارش `:core:core-network:checkNamingConvention` است، نه `:core:core-network`. در نتیجه:
+Cause: inside `tasks.register("...") { doLast { ... } }` the receiver for `path` is the **Task**, not the Project. So its value is `:core:core-network:checkNamingConvention`, not `:core:core-network`. As a result:
 
 ```kotlin
-path.endsWith("core-network") // → false برای همه‌ی ماژول‌ها
+path.endsWith("core-network") // → false for every module
 → conventions = emptyList()
-→ return@doLast     // هیچ فایلی بررسی نمی‌شود
+→ return@doLast     // nothing is ever inspected
 ```
 
-شاهد تجربی: `core-network/model/` هم‌اکنون ۲۰ فایل دارد که به `Dto.kt` ختم نمی‌شوند (`ErrorDTO.kt`, `ErrorDataDTO.kt`, `ActiveRelationDTO.kt`, …) و با این حال:
+Empirical proof: `core-network/model/` currently holds 20 files that do not end in `Dto.kt` (`ErrorDTO.kt`, `ErrorDataDTO.kt`, `ActiveRelationDTO.kt`, …), and yet:
 
 ```
 > Task :core:core-network:checkNamingConvention
 BUILD SUCCESSFUL
 ```
 
-**نتیجه‌ی عملی:** قواعد زیر یک *قرارداد تیمی* هستند، نه چیزی که build تضمینش کند. خودت باید رعایتشان کنی و در review نگاهشان کنی.
+**Practical consequence:** the rules below are a *team convention*, not something the build guarantees. Follow them by hand and check them during review.
 
-**اگر خواستی درستش کنی:** `path` را با `project.path` جایگزین کن. توجه: بعد از این اصلاح، build فوراً روی ده‌ها فایل موجود می‌شکند — چون قرارداد واقعی کدبیس `DTO.kt` (سه‌حرفی بزرگ) است ولی پلاگین `Dto.kt` می‌خواهد. یا پلاگین را با واقعیت هماهنگ کن، یا فایل‌ها را rename کن.
+**If you want to fix it:** replace `path` with `project.path`. Be aware the build will then immediately fail on dozens of existing files, because the codebase's real convention is `DTO.kt` (three capitals) while the plugin expects `Dto.kt`. Either align the plugin with reality or rename the files.
 
-## جدول قواعد
+## The rules
 
-| ماژول | پوشه‌ی تحت نظارت | پسوند اجباری فایل |
+| Module | Watched folder | Required suffix |
 |---|---|---|
 | `core-domain` | `model/` | `DN.kt` |
-| `core-network` | `model/` | `Dto.kt` |
+| `core-network` | `model/` | `Dto.kt` (in practice: `DTO.kt`) |
 | `core-ui` | `model/` | `PR.kt` |
 | `core-ui` | `mapper/` | `Mapper.kt` |
 | `core-database` | `data/local/entity/` | `Entity.kt` |
 | `core-data` | `data/mapper/` | `Mapper.kt` |
 
-مسیر پایه‌ای که پلاگین می‌گردد:
-`src/commonMain/kotlin/com/tamin/taminhamrah/<folder>` و همچنین `…/com/tamin/taminx/<folder>` (نام قدیمی).
+Base paths the plugin would scan: `src/commonMain/kotlin/com/tamin/taminhamrah/<folder>` and `…/com/tamin/taminx/<folder>` (the old name), walked recursively so subfolders are included.
 
-مسیر پایه‌ای که پلاگین (در صورت تعمیر) می‌گردد:
-`src/commonMain/kotlin/com/tamin/taminhamrah/<folder>` و `…/com/tamin/taminx/<folder>` (نام قدیمی)، به‌صورت `walkTopDown` یعنی شامل همه‌ی زیرپوشه‌ها.
+## What the codebase actually does
 
-## واقعیت فعلی کدبیس
+- DTOs are written as **`DTO.kt`** (`ErrorDTO.kt`, `AddDependentDTO.kt`), not `Dto.kt`. Match the neighbouring files when adding a new one.
+- Keep `core-ui/model/` to `*PR.kt` only; constants and helpers belong in `util/`.
 
-- DTOها در عمل با **`DTO.kt`** نوشته می‌شوند (`ErrorDTO.kt`, `AddDependentDTO.kt`) نه `Dto.kt`. هنگام افزودن فایل جدید از همسایه‌هایش تقلید کن.
-- در `core-ui/model/` بهتر است فقط `*PR.kt` بگذاری؛ ثابت‌ها و helperها جایشان `util/` است.
-
-## سایر قواعدِ غیراجباری ولی رایج
+## Other conventions, not enforced but consistent
 
 - ViewModel: `<Screen>ViewModel.kt` · Screen: `<Screen>Screen.kt` · Contract: `contract/<Screen>Contract.kt`
 - DataSource: `<X>RemoteDataSource.kt` + `<X>RemoteDataSourceImpl.kt`
-- Repository: interface در core-domain (`repository/<domain>/`)، پیاده‌سازی `<X>RepositoryImpl` در core-data
-- ماژول Koin فیچر: `val <x>Module` — استثنا: `TaminServicesModule` با حرف بزرگ شروع می‌شود
-- کامپوننت‌های عمومی core-ui معمولاً پیشوند `Tamin` دارند: `TaminText`, `TaminTopAppBar`, `TaminPdfViewer`
+- Repository: interface in core-domain (`repository/<domain>/`), implementation `<X>RepositoryImpl` in core-data
+- Feature Koin module: `val <x>Module` — one exception, `TaminServicesModule`, starts with a capital
+- Shared core-ui components are usually prefixed `Tamin`: `TaminText`, `TaminTopAppBar`, `TaminPdfViewer`
 
-مرتبط: [[Overview]] · [[Adding-a-Feature]] · [[Build-and-Run]]
+Related: [[Overview]] · [[Adding-a-Feature]] · [[Build-and-Run]]
