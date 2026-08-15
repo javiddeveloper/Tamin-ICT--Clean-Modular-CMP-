@@ -345,7 +345,7 @@ fun ProfileContent(
                                 )
                                 Column {
                                     Text(
-                                        text = state.identityInfo?.fullName ?: "تست تست تست",
+                                        text = state.identityInfo?.fullName ?: "",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = taminColors.txtNameProfile
                                     )
@@ -369,8 +369,8 @@ fun ProfileContent(
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = Spacing.lg),
                     title = "نام نویسی شده تست",
-                    subtitle = "حساب شما تأیید و فعال است تست",
-                    badgeText = "معتبر تست ",
+                    subtitle = "حساب شما تأیید و فعال است",
+                    badgeText = "معتبر",
                     isValid = true
                 )
             }
