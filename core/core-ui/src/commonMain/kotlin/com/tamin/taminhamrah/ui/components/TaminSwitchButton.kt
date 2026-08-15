@@ -1,7 +1,10 @@
 package com.tamin.taminhamrah.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -19,8 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -30,11 +36,19 @@ import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_moon
+import taminx.core.core_ui.ic_sun
+
 
 private val SwitchTrackWidth = 46.dp
 private val SwitchTrackHeight = 26.dp
 private val SwitchThumbSize = 20.dp
 private val SwitchThumbPadding = 3.dp
+private val SwitchThumbIconSize = 13.dp
+private const val ThemeIconAnimationDurationMillis = 250
+private val SunIconTint = Color(0xFF1F4FA3)
 
 @Immutable
 data class TaminSwitchColors(
@@ -91,6 +105,7 @@ fun TaminSwitchButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: TaminSwitchColors = TaminSwitchDefaults.colors(),
+    showThemeIcon: Boolean = false,
 ) {
     val trackColor by animateColorAsState(
         targetValue = when {
@@ -136,6 +151,68 @@ fun TaminSwitchButton(
                 .size(SwitchThumbSize)
                 .shadow(elevation = Elevation.xxs, shape = CircleShape, clip = false)
                 .background(thumbColor, CircleShape)
+                .clip(CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (showThemeIcon) {
+                SwitchThumbThemeIcon(checked = checked, tint = trackColor)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SwitchThumbThemeIcon(
+    checked: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    val animationSpec = remember {
+        tween<Float>(durationMillis = ThemeIconAnimationDurationMillis, easing = FastOutSlowInEasing)
+    }
+    val moonAlpha by animateFloatAsState(
+        targetValue = if (checked) 1f else 0f,
+        animationSpec = animationSpec,
+        label = "ThemeIconMoonAlpha",
+    )
+    val moonRotation by animateFloatAsState(
+        targetValue = if (checked) 0f else 90f,
+        animationSpec = animationSpec,
+        label = "ThemeIconMoonRotation",
+    )
+    val sunAlpha by animateFloatAsState(
+        targetValue = if (checked) 0f else 1f,
+        animationSpec = animationSpec,
+        label = "ThemeIconSunAlpha",
+    )
+    val sunRotation by animateFloatAsState(
+        targetValue = if (checked) -90f else 0f,
+        animationSpec = animationSpec,
+        label = "ThemeIconSunRotation",
+    )
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_moon),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier
+                .size(SwitchThumbIconSize)
+                .graphicsLayer {
+                    alpha = moonAlpha
+                    rotationZ = moonRotation
+                },
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_sun),
+            contentDescription = null,
+            tint = SunIconTint,
+            modifier = Modifier
+                .size(SwitchThumbIconSize)
+                .graphicsLayer {
+                    alpha = sunAlpha
+                    rotationZ = sunRotation
+                },
         )
     }
 }

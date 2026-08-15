@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -38,8 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -48,12 +54,15 @@ import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.feature.settings.ui.contract.SettingsEvent
 import com.tamin.taminhamrah.feature.settings.ui.contract.SettingsIntent
 import com.tamin.taminhamrah.feature.settings.ui.contract.SettingsUiState
+import com.tamin.taminhamrah.ui.LocalThemeRevealController
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ListGroupView
+import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import com.tamin.taminhamrah.ui.components.TaminSwitchButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -119,13 +128,17 @@ private fun SettingsContent(
 ) {
     val colors = LocalTaminColors.current
     val isDark = colors == DarkTaminColors
+    val topBarGradient = remember(isDark) { Brush.horizontalGradient(colors.profileGradientStops) }
     val defaultBorder = remember(colors) { BorderStroke(1.dp, colors.border) }
+    val revealController = LocalThemeRevealController.current
+    var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0),
         topBar = {
             TaminTopAppBar(
+                background = topBarGradient,
                 title = stringResource(Res.string.profile_settings),
                 navigationIcon = {
                     TaminTopAppBarButton(
@@ -141,7 +154,6 @@ private fun SettingsContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colors.bgPage)
                 .verticalScroll(rememberScrollState())
                 .padding(
                     top = innerPadding.calculateTopPadding() + Spacing.lg,
@@ -152,11 +164,10 @@ private fun SettingsContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.page),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    .padding(horizontal = Spacing.page)
             ) {
+                Spacer(modifier = Modifier.height(12.dp))
                 SectionHeaderTitle(title = stringResource(Res.string.settings_appearance_section))
-
                 ListGroupView(
                     containerBorder = defaultBorder,
                     items = persistentListOf(
@@ -165,17 +176,44 @@ private fun SettingsContent(
                             leadingIconPainter = painterResource(Res.drawable.ic_moon),
                             showArrow = false,
                             customTrailingContent = {
-                                TaminSwitchButton(
-                                    checked = isDark,
-                                    onCheckedChange = { onIntent(SettingsIntent.ToggleNightMode(it)) },
-                                    showThemeIcon = true,
-                                )
+                                Box(
+                                    modifier = Modifier.onGloballyPositioned { coords ->
+                                        val centerInRoot = coords.positionInRoot() +
+                                            Offset(
+                                                coords.size.width / 2f,
+                                                coords.size.height / 2f
+                                            )
+                                        themeButtonCenter = centerInRoot
+                                    }
+                                ) {
+                                    TaminSwitchButton(
+                                        checked = isDark,
+                                        onCheckedChange = { newValue ->
+                                            if (revealController != null) {
+                                                revealController.trigger(origin = themeButtonCenter) {
+                                                    onIntent(SettingsIntent.ToggleNightMode(newValue))
+                                                }
+                                            } else {
+                                                onIntent(SettingsIntent.ToggleNightMode(newValue))
+                                            }
+                                        },
+                                        showThemeIcon = true,
+                                    )
+                                }
                             },
+                            colors = ListItemColors(
+                                leadingIconBackgroundColor = if (isDark) colors.blueBg else Color(0xFFEEF2FB),
+                                leadingIconTintColor = if (isDark) colors.textPrimary else Color(0xFF5E7392)
+                            )
                         ),
                         ListItemData(
                             title = stringResource(Res.string.settings_font_size),
                             leadingIconPainter = painterResource(Res.drawable.ic_font_scale),
                             showArrow = false,
+                            colors = ListItemColors(
+                                leadingIconBackgroundColor = if (isDark) colors.blueBg else Color(0xFFEEF2FB),
+                                leadingIconTintColor = if (isDark) colors.textPrimary else Color(0xFF5E7392)
+                            )
                         ),
                     ),
                     footerContent = {
@@ -250,188 +288,6 @@ private fun SettingsScreenDarkPreview() {
         SettingsContent(
             state = SettingsUiState(fontSize = FontSizeOption.LARGE),
             onIntent = {},
-        )
-    }
-}
-
-
-
-private val SwitchTrackWidth = 46.dp
-private val SwitchTrackHeight = 26.dp
-private val SwitchThumbSize = 20.dp
-private val SwitchThumbPadding = 3.dp
-private val SwitchThumbIconSize = 13.dp
-private const val ThemeIconAnimationDurationMillis = 250
-private val SunIconTint = Color(0xFF1F4FA3)
-
-@Immutable
-data class TaminSwitchColors(
-    val checkedTrackColor: Color,
-    val uncheckedTrackColor: Color,
-    val checkedThumbColor: Color,
-    val uncheckedThumbColor: Color,
-    val disabledCheckedTrackColor: Color,
-    val disabledUncheckedTrackColor: Color,
-    val disabledCheckedThumbColor: Color,
-    val disabledUncheckedThumbColor: Color,
-)
-
-object TaminSwitchDefaults {
-    @Composable
-    fun colors(
-        checkedTrackColor: Color = run {
-            val colors = LocalTaminColors.current
-            if (colors == DarkTaminColors) Color(0xFF1F4FA3) else colors.blueText
-        },
-        uncheckedTrackColor: Color = run {
-            val colors = LocalTaminColors.current
-            if (colors == DarkTaminColors) colors.outerBorder else colors.grey900
-        },
-        checkedThumbColor: Color = run {
-            val colors = LocalTaminColors.current
-            if (colors == DarkTaminColors) colors.textPrimary else Color.White
-        },
-        uncheckedThumbColor: Color = run {
-            val colors = LocalTaminColors.current
-            if (colors == DarkTaminColors) colors.textSecondary else Color.White
-        },
-        disabledCheckedTrackColor: Color = checkedTrackColor.copy(alpha = LocalTaminColors.current.disabledAlpha),
-        disabledUncheckedTrackColor: Color = uncheckedTrackColor.copy(alpha = LocalTaminColors.current.disabledAlpha),
-        disabledCheckedThumbColor: Color = checkedThumbColor,
-        disabledUncheckedThumbColor: Color = uncheckedThumbColor,
-    ): TaminSwitchColors = TaminSwitchColors(
-        checkedTrackColor = checkedTrackColor,
-        uncheckedTrackColor = uncheckedTrackColor,
-        checkedThumbColor = checkedThumbColor,
-        uncheckedThumbColor = uncheckedThumbColor,
-        disabledCheckedTrackColor = disabledCheckedTrackColor,
-        disabledUncheckedTrackColor = disabledUncheckedTrackColor,
-        disabledCheckedThumbColor = disabledCheckedThumbColor,
-        disabledUncheckedThumbColor = disabledUncheckedThumbColor,
-    )
-}
-
-
-@Composable
-fun TaminSwitchButton(
-    checked: Boolean,
-    onCheckedChange: ((Boolean) -> Unit)?,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    colors: TaminSwitchColors = TaminSwitchDefaults.colors(),
-    showThemeIcon: Boolean = false,
-) {
-    val trackColor by animateColorAsState(
-        targetValue = when {
-            checked && enabled -> colors.checkedTrackColor
-            checked && !enabled -> colors.disabledCheckedTrackColor
-            !checked && enabled -> colors.uncheckedTrackColor
-            else -> colors.disabledUncheckedTrackColor
-        },
-        label = "TaminSwitchTrackColor",
-    )
-    val thumbColor by animateColorAsState(
-        targetValue = when {
-            checked && enabled -> colors.checkedThumbColor
-            checked && !enabled -> colors.disabledCheckedThumbColor
-            !checked && enabled -> colors.uncheckedThumbColor
-            else -> colors.disabledUncheckedThumbColor
-        },
-        label = "TaminSwitchThumbColor",
-    )
-    val thumbOffset: Dp by animateDpAsState(
-        targetValue = if (checked) SwitchTrackWidth - SwitchThumbSize - SwitchThumbPadding else SwitchThumbPadding,
-        label = "TaminSwitchThumbOffset",
-    )
-    val interactionSource = remember { MutableInteractionSource() }
-
-    Box(
-        modifier = modifier
-            .size(width = SwitchTrackWidth, height = SwitchTrackHeight)
-            .toggleable(
-                value = checked,
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled && onCheckedChange != null,
-                role = Role.Switch,
-                onValueChange = { onCheckedChange?.invoke(it) },
-            )
-            .background(trackColor, CircleShape),
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(start = thumbOffset)
-                .size(SwitchThumbSize)
-                .shadow(elevation = Elevation.xxs, shape = CircleShape, clip = false)
-                .background(thumbColor, CircleShape)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (showThemeIcon) {
-                SwitchThumbThemeIcon(checked = checked, tint = trackColor)
-            }
-        }
-    }
-}
-
-/**
- * Sun/moon glyph shown inside the thumb when [TaminSwitchButton.showThemeIcon] is opted in.
- * The outgoing icon fades out while rotating ~90° one way; the incoming icon fades in from the
- * opposite rotation and settles at 0°, so the two swaps never share the same spin direction.
- */
-@Composable
-private fun SwitchThumbThemeIcon(
-    checked: Boolean,
-    tint: Color,
-    modifier: Modifier = Modifier,
-) {
-    val animationSpec = remember {
-        tween<Float>(durationMillis = ThemeIconAnimationDurationMillis, easing = FastOutSlowInEasing)
-    }
-    val moonAlpha by animateFloatAsState(
-        targetValue = if (checked) 1f else 0f,
-        animationSpec = animationSpec,
-        label = "ThemeIconMoonAlpha",
-    )
-    val moonRotation by animateFloatAsState(
-        targetValue = if (checked) 0f else 90f,
-        animationSpec = animationSpec,
-        label = "ThemeIconMoonRotation",
-    )
-    val sunAlpha by animateFloatAsState(
-        targetValue = if (checked) 0f else 1f,
-        animationSpec = animationSpec,
-        label = "ThemeIconSunAlpha",
-    )
-    val sunRotation by animateFloatAsState(
-        targetValue = if (checked) -90f else 0f,
-        animationSpec = animationSpec,
-        label = "ThemeIconSunRotation",
-    )
-
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_moon),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier
-                .size(SwitchThumbIconSize)
-                .graphicsLayer {
-                    alpha = moonAlpha
-                    rotationZ = moonRotation
-                },
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_sun),
-            contentDescription = null,
-            tint = SunIconTint,
-            modifier = Modifier
-                .size(SwitchThumbIconSize)
-                .graphicsLayer {
-                    alpha = sunAlpha
-                    rotationZ = sunRotation
-                },
         )
     }
 }

@@ -163,31 +163,6 @@ private fun SecurityContent(
                     containerBorder = defaultBorder,
                     items = persistentListOf(
                         ListItemData(
-                            title = stringResource(Res.string.security_change_password),
-                            leadingIconPainter = painterResource(Res.drawable.ic_privacy),
-                            colors = ListItemColors(
-                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral,
-                                leadingIconTintColor = Color.White
-                            ),
-                            showArrow = true,
-                            onClick = { /* Navigate to change password */ }
-                        ),
-                        ListItemData(
-                            title = stringResource(Res.string.security_2fa),
-                            leadingIconPainter = painterResource(Res.drawable.ic_tamin_shield_check),
-                            colors = ListItemColors(
-                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral,
-                                leadingIconTintColor = Color.White
-                            ),
-                            badge = ListItemBadge(
-                                text = "تست",
-                                backgroundColor = taminColors.greenBg,
-                                textColor = taminColors.greenText
-                            ),
-                            showArrow = true,
-                            onClick = { /* Navigate to 2FA */ }
-                        ),
-                        ListItemData(
                             title = stringResource(Res.string.security_fingerprint),
                             leadingIconPainter = rememberVectorPainter(Icons.Rounded.Fingerprint),
                             colors = ListItemColors(
