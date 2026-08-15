@@ -61,6 +61,12 @@
     <string name="profile_security_settings">امنیت و تنظیمات</string>
     <string name="profile_security">امنیت</string>
     <string name="profile_settings">تنظیمات</string>
+    <string name="settings_appearance_section">ظاهر برنامه</string>
+    <string name="settings_night_mode">حالت شب</string>
+    <string name="settings_font_size">اندازهٔ فونت</string>
+    <string name="settings_font_size_small">کوچک</string>
+    <string name="settings_font_size_medium">متوسط</string>
+    <string name="settings_font_size_large">بزرگ</string>
     <string name="profile_support_section">پشتیبانی</string>
     <string name="profile_support">پشتیبانی</string>
     <string name="contact_us_title">تماس با ما</string>
