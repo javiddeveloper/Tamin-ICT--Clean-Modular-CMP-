@@ -9,11 +9,15 @@ package com.tamin.taminhamrah.tools
 
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * A single business-level problem reported by the backend, e.g.:
@@ -171,4 +175,30 @@ fun BaseDTO<JsonElement?>.extractMessageOrProblems(): ApiOutcome<String> {
         return ApiOutcome(data = null, problems = problems)
     }
     return ApiOutcome(data = extractMessage(), problems = emptyList())
+}
+
+/**
+ * Like [extractData], but for gateways (e.g. the um-mobile-api Kong gateway
+ * behind [com.tamin.taminhamrah.util.NetworkConstants.EDIT_MOBILE_URL]) whose
+ * error envelope shapes `data` as `{cause, message}` instead of the success
+ * DTO. Decoding the typed payload is deferred until the status is known, so a
+ * mismatched error shape never throws a SerializationException before the
+ * backend's own [message] can be read - mirrors the generic `data.message ?:
+ * reason` fallback the previous native app applied to every error body.
+ */
+fun <T> BaseDTO<JsonElement?>.extractTypedData(json: Json, deserializer: DeserializationStrategy<T>): T {
+    return when {
+        hasProblems -> throwProblemError()
+        status in 200..299 && data != null -> json.decodeFromJsonElement(deserializer, data)
+        status in 400..599 -> {
+            val serverMessage = (data as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull
+            val errorPrefix = if (status in 400..499) "CLIENT_ERROR" else "SERVER_ERROR"
+            println("BaseDTO: $errorPrefix: $reason, serverMessage=$serverMessage")
+            throw TaminErrorUriException(
+                uri = ErrorUri.fromString("$errorPrefix: $reason"),
+                serverMessage = serverMessage
+            )
+        }
+        else -> handleCommonErrors()
+    }
 }

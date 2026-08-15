@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_unknown_fallback
 
 class ChangeMobileViewModel(
     private val getUserProfileUseCase: GetUserProfileUseCase,
@@ -41,12 +44,18 @@ class ChangeMobileViewModel(
         }
     }
 
+    private suspend fun emitError(message: String?): PartialState {
+        val resolvedMessage = message ?: getString(Res.string.error_unknown_fallback)
+        sendEvent(ChangeMobileEvent.ShowError(resolvedMessage))
+        return PartialState.Error(resolvedMessage)
+    }
+
     private fun handleLoadCurrentMobile(): Flow<PartialState> = flow {
         getUserProfileUseCase()
             .onStart { emit(PartialState.Loading(true)) }
             .catch {
                 emit(PartialState.Loading(false))
-                emit(PartialState.Error(it.message))
+                emit(emitError(it.message))
             }
             .collect { profile ->
                 emit(PartialState.Loading(false))
@@ -65,7 +74,7 @@ class ChangeMobileViewModel(
             .onStart { emit(PartialState.Loading(true)) }
             .catch { e ->
                 emit(PartialState.Loading(false))
-                emit(PartialState.Error(e.message))
+                emit(emitError(e.message))
             }
             .collect { response ->
                 emit(PartialState.Loading(false))
@@ -79,7 +88,7 @@ class ChangeMobileViewModel(
             .onStart { emit(PartialState.Loading(true)) }
             .catch { e ->
                 emit(PartialState.Loading(false))
-                emit(PartialState.Error(e.message))
+                emit(emitError(e.message))
             }
             .collect {
                 emit(PartialState.Loading(false))
@@ -128,6 +137,8 @@ class ChangeMobileViewModel(
         )
     }
 
-    override fun createErrorState(message: String): PartialState =
-        PartialState.Error(message)
+    override fun createErrorState(message: String): PartialState {
+        sendEvent(ChangeMobileEvent.ShowError(message))
+        return PartialState.Error(message)
+    }
 }

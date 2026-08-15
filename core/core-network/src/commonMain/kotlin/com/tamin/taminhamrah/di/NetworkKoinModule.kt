@@ -59,7 +59,8 @@ val networkModule = module {
             userApiService = get(),
 //            httpClient = get(named("mainHttpClient")),
             errorParser = get(),
-            queryBuilder = get()
+            queryBuilder = get(),
+            json = get()
         )
     }
 

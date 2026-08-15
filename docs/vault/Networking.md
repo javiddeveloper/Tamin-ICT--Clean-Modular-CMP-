@@ -62,7 +62,7 @@ BASE_URL_ACCOUNT        = "https://account.tamin.ir/auth/"
 BASE_URL_HEALTH_PROFILE = "http://172.16.14.115:5700/api/"   // internal IP
 AI_BASE_URL             = "https://sw.tamin.ir/api/"
 REDIRECT_URI            = "mytamin://login"
-DEFAULT_AUDIENCE        = "https://es.tamin.ir,https://eservices.tamin.ir"
+DEFAULT_AUDIENCE        = "https://es.tamin.ir,https://eservices.tamin.ir,https://profile-api.tamin.ir"
 REQUEST_TIMEOUT_60_SEC = 60_000L   REQUEST_TIMEOUT_5_MIN = 300_000L
 ```
 
