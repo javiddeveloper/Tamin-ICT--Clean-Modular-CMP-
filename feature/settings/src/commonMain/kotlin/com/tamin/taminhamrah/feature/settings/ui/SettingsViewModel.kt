@@ -7,6 +7,9 @@ import com.tamin.taminhamrah.feature.settings.ui.contract.SettingsIntent
 import com.tamin.taminhamrah.feature.settings.ui.contract.SettingsUiState
 import com.tamin.taminhamrah.feature.settings.ui.contract.SettingsUiState.PartialState
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.FontSizeOption
+import com.tamin.taminhamrah.repository.UserPreferencesRepository
+import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -14,24 +17,36 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val setThemeUseCase: SetThemeUseCase
+    private val setThemeUseCase: SetThemeUseCase,
+    private val setFontSizeUseCase: SetFontSizeUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : BaseViewModel<SettingsUiState, PartialState, SettingsEvent, SettingsIntent>(
     initialState = SettingsUiState()
 ) {
 
-    override fun handleIntent(intent: SettingsIntent): Flow<PartialState> = when (intent) {
-        is SettingsIntent.ToggleNightMode -> handleToggleNightMode(intent.isDark)
-        is SettingsIntent.SelectFontSize -> flow { emit(PartialState.SetFontSize(intent.option)) }
-        SettingsIntent.OnBackClicked -> flow { sendEvent(SettingsEvent.NavigateBack) }
+    init {
+        viewModelScope.launch {
+            userPreferencesRepository.observeFontSize.collect { fontSize ->
+                sendIntent(SettingsIntent.UpdateFontSize(fontSize))
+            }
+        }
     }
 
-    // Mirrors ProfileViewModel.handleToggleTheme: the effective theme is read back from
-    // LocalTaminColors at the composable level, so this screen keeps no dark-mode state of its own.
+    override fun handleIntent(intent: SettingsIntent): Flow<PartialState> = when (intent) {
+        is SettingsIntent.ToggleNightMode -> handleToggleNightMode(intent.isDark)
+        is SettingsIntent.SelectFontSize -> handleSelectFontSize(intent.option)
+        is SettingsIntent.UpdateFontSize -> flow { emit(PartialState.SetFontSize(intent.fontSize)) }
+        SettingsIntent.OnBackClicked -> flow { sendEvent(SettingsEvent.NavigateBack) }
+    }
     private fun handleToggleNightMode(isDark: Boolean): Flow<PartialState> {
         viewModelScope.launch {
             val config = if (isDark) DarkThemeConfig.DARK else DarkThemeConfig.LIGHT
             setThemeUseCase(config)
         }
+        return emptyFlow()
+    }
+    private fun handleSelectFontSize(option: FontSizeOption): Flow<PartialState> {
+        viewModelScope.launch { setFontSizeUseCase(option) }
         return emptyFlow()
     }
 

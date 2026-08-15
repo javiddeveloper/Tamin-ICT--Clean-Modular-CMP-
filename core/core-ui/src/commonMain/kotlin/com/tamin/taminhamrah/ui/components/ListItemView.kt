@@ -108,7 +108,8 @@ fun ListGroupView(
     itemContentPadding: PaddingValues = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
     showDividers: Boolean = true,
     dividerColor: Color? = null,
-    dividerStartIndent: Dp? = null
+    dividerStartIndent: Dp? = null,
+    footerContent: (@Composable () -> Unit)? = null
 ) {
     val taminColors = LocalTaminColors.current
     val bgColor = containerBackgroundColor ?: taminColors.bgSurface
@@ -132,6 +133,11 @@ fun ListGroupView(
                     dividerColor = resolvedDividerColor,
                     dividerStartIndent = dividerStartIndent
                 )
+            }
+            if (footerContent != null) {
+                Box(modifier = Modifier.fillMaxWidth().padding(itemContentPadding)) {
+                    footerContent()
+                }
             }
         }
     }

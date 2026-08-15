@@ -11,6 +11,7 @@ import com.russhwolf.settings.serialization.decodeValue
 import com.russhwolf.settings.serialization.decodeValueOrNull
 import com.russhwolf.settings.serialization.encodeValue
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.model.UserData
 import com.tamin.taminhamrah.repository.UserPreferencesRepository
 import kotlinx.coroutines.CoroutineScope
@@ -51,10 +52,21 @@ class UserPreferencesRepositoryImpl(private val settings: Settings, ) : UserPref
     override val observeDarkThemeConfig: Flow<DarkThemeConfig>
         get() = _userData.map { it.darkThemeConfig }
 
+    override val observeFontSize: Flow<FontSizeOption>
+        get() = _userData.map { it.fontSize }
+
     override suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig) =
         withContext(Dispatchers.IO) {
             val currentPreference = settings.getUserPreference()
             val newPreference = currentPreference.copy(darkThemeConfig = darkThemeConfig)
+            settings.putUserPreference(newPreference)
+            _userData.value = newPreference
+        }
+
+    override suspend fun setFontSize(fontSize: FontSizeOption) =
+        withContext(Dispatchers.IO) {
+            val currentPreference = settings.getUserPreference()
+            val newPreference = currentPreference.copy(fontSize = fontSize)
             settings.putUserPreference(newPreference)
             _userData.value = newPreference
         }

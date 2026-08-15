@@ -1,12 +1,7 @@
 package com.tamin.taminhamrah.feature.settings.ui.contract
 
 import androidx.compose.runtime.Immutable
-
-enum class FontSizeOption {
-    SMALL,
-    MEDIUM,
-    LARGE,
-}
+import com.tamin.taminhamrah.model.FontSizeOption
 
 @Immutable
 data class SettingsUiState(
@@ -21,6 +16,7 @@ data class SettingsUiState(
 sealed interface SettingsIntent {
     data class ToggleNightMode(val isDark: Boolean) : SettingsIntent
     data class SelectFontSize(val option: FontSizeOption) : SettingsIntent
+    data class UpdateFontSize(val fontSize: FontSizeOption) : SettingsIntent
     data object OnBackClicked : SettingsIntent
 }
 
