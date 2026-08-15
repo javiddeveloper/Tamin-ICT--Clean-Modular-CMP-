@@ -18,6 +18,8 @@ fun UserRequestDN.toPresentation(): UserRequestPR {
         creationTime = creationTime?.toString() ?: "0",
         createByName = createByName ?: "",
         statusDesc = status?.requestDesc ?: "",
+        statusCode = status?.requestCode ?: "",
+        requestTypeId = requestType?.id ?: 0L,
         requestTypeTitle = requestType?.title ?: "",
     )
 }

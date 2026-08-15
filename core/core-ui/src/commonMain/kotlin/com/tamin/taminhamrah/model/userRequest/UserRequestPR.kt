@@ -11,5 +11,7 @@ data class UserRequestPR(
     val creationTime: String,
     val createByName: String,
     val statusDesc: String,
+    val statusCode: String,
+    val requestTypeId: Long,
     val requestTypeTitle: String,
 )

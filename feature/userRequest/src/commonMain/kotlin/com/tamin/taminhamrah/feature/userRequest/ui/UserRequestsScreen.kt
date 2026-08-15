@@ -1,39 +1,29 @@
 package com.tamin.taminhamrah.feature.userRequest.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.userRequest.ui.components.RequestErrorsBottomSheet
@@ -46,15 +36,25 @@ import com.tamin.taminhamrah.feature.userRequest.ui.contract.RequestStatusTab
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsUiState
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_request
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.profile_requests
 
 @Composable
 fun UserRequestsScreen(
     onBackClick: () -> Unit,
-    onNavigateToDetail: (Long, String, Long) -> Unit,
+    onNavigateToDetail: (Long, String, Long, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: UserRequestsViewModel = koinViewModel(),
 ) {
@@ -70,7 +70,7 @@ fun UserRequestsScreen(
             when (event) {
                 is UserRequestsEvent.ShowToast -> { /* Handle Toast */ }
                 is UserRequestsEvent.NavigateToDetail -> {
-                    onNavigateToDetail(event.requestId, event.refCode, event.requestTypeId)
+                    onNavigateToDetail(event.requestId, event.refCode, event.requestTypeId , event.title)
                 }
             }
         }
@@ -92,6 +92,7 @@ fun UserRequestsContent(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
     val allCount = state.requests.size
     val inProgressCount = state.requests.count { it.statusDesc.contains("در جریان") || it.statusDesc.contains("بررسی") }
     val actionRequiredCount = state.requests.count { it.statusDesc.contains("نقص") || it.statusDesc.contains("عدم") || it.statusDesc.contains("اقدام") }
@@ -104,9 +105,54 @@ fun UserRequestsContent(
         RequestStatusTab.COMPLETED to completedCount,
     )
 
+    val profileGradientBrush = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = LocalTaminColors.current.bgPage
+        containerColor = taminColors.bgPage,
+        topBar = {
+            TaminTopAppBar(
+                title = stringResource(Res.string.profile_requests),
+                background = profileGradientBrush,
+                bottomPadding = Spacing.xl,
+                shape = RoundedCornerShape(
+                    bottomStart = 40.dp,
+                    bottomEnd = 40.dp
+                ),
+                navigationIcon = {
+                    TaminTopAppBarButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        contentDescription = null,
+                        onClick = onBackClick,
+                        bordered = true
+                    )
+                }
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    DecorativeBackgroundCircle(
+                        size = 190.dp,
+                        xOffset = 450.dp,
+                        yOffset = (-150).dp
+                    )
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_request))
+                        Spacer(modifier = Modifier.height(Spacing.md))
+                        Text(
+                            text = "کارتابل پیگیری درخواست‌ها، اطلاع از نتیجه اقدامات و ...",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = taminColors.textHeaderSubtitle,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -114,92 +160,7 @@ fun UserRequestsContent(
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(Spacing.xs)
         ) {
-            // Blue Header Arc
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-                        .background(Color(0xFF173D7E))
-                        .padding(horizontal = Spacing.page, vertical = Spacing.lg)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.2f))
-                                    .clickable { onBackClick() },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-
-                            TaminText(
-                                text = "درخواست‌های من",
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.2f))
-                                    .clickable { onIntent(UserRequestsIntent.ToggleFilter) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(Spacing.xs))
-
-                        // Circular Document Icon
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.15f))
-                                .border(2.dp, Color.White.copy(alpha = 0.3f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Description,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-
-                        TaminText(
-                            text = "کارتابل پیگیری درخواست‌ها، اطلاع از نتیجه اقدامات و ...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.8f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
+            // Status Tabs section (header is now handled by TaminTopAppBar)
 
             // Search Filter Panel
             if (state.isFilterOpen) {
@@ -265,7 +226,15 @@ fun UserRequestsContent(
                                 onIntent(UserRequestsIntent.ViewDetails(request))
                             }
                         },
-                        onOpenGuide = { onIntent(UserRequestsIntent.OpenSmartGuide(null, null, request.title)) },
+                        onOpenGuide = {
+                            onIntent(
+                                UserRequestsIntent.OpenSmartGuide(
+                                    requestType = request.requestTypeId.toInt(),
+                                    requestStatus = request.statusCode,
+                                    title = request.title
+                                )
+                            )
+                        },
                         onOpenErrors = { onIntent(UserRequestsIntent.OpenErrors(request.id, request.title)) },
                         onCopyTrackingCode = { onIntent(UserRequestsIntent.CopyTrackingCode(it)) },
                         modifier = Modifier.padding(horizontal = Spacing.page)
@@ -319,6 +288,8 @@ private fun UserRequestsScreenPreviewLight() {
                         creationTime = "۱۴۰۵/۰۳/۱۱",
                         createByName = "سیدرحمت اله میرفضلی",
                         statusDesc = "نقص مدارک ارسالی",
+                        statusCode = "0021",
+                        requestTypeId = 10L, // ILL_DAY — button visible at 0021
                         requestTypeTitle = "غرامت دستمزد ایام بیماری"
                     ),
                     com.tamin.taminhamrah.model.userRequest.UserRequestPR(
@@ -329,6 +300,8 @@ private fun UserRequestsScreenPreviewLight() {
                         creationTime = "۱۴۰۵/۰۲/۲۸",
                         createByName = "سیدرحمت اله میرفضلی",
                         statusDesc = "عدم تایید",
+                        statusCode = "0019",
+                        requestTypeId = 0L, // other — no view button
                         requestTypeTitle = "سایر درخواست‌ها"
                     ),
                     com.tamin.taminhamrah.model.userRequest.UserRequestPR(
@@ -339,6 +312,8 @@ private fun UserRequestsScreenPreviewLight() {
                         creationTime = "۱۴۰۵/۰۲/۰۵",
                         createByName = "سیدرحمت اله میرفضلی",
                         statusDesc = "در انتظار تکمیل اطلاعات",
+                        statusCode = "0014",
+                        requestTypeId = 11L, // PREGNANCY — button visible at 0014
                         requestTypeTitle = "غرامت دستمزد ایام بارداری"
                     ),
                     com.tamin.taminhamrah.model.userRequest.UserRequestPR(
@@ -349,6 +324,8 @@ private fun UserRequestsScreenPreviewLight() {
                         creationTime = "۱۴۰۴/۱۲/۱۸",
                         createByName = "سیدرحمت اله میرفضلی",
                         statusDesc = "تایید نهایی",
+                        statusCode = "0018",
+                        requestTypeId = 22L, // DEFERRED_INSTALLMENT — button visible at 0018
                         requestTypeTitle = "گواهی کسر اقساط معوق"
                     )
                 ),
@@ -376,6 +353,8 @@ private fun UserRequestsScreenPreviewDark() {
                         creationTime = "۱۴۰۴/۱۲/۱۸",
                         createByName = "سیدرحمت اله میرفضلی",
                         statusDesc = "تایید نهایی",
+                        statusCode = "0018",
+                        requestTypeId = 22L,
                         requestTypeTitle = "گواهی کسر اقساط معوق"
                     )
                 ),
@@ -386,5 +365,6 @@ private fun UserRequestsScreenPreviewDark() {
         )
     }
 }
+
 
 

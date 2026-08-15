@@ -18,6 +18,10 @@ import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.feature.userrequest.generated.resources.Res
+import taminx.feature.userrequest.generated.resources.user_request_smart_guide_not_found
+import taminx.feature.userrequest.generated.resources.user_request_tracking_code_copied
 
 class UserRequestsViewModel(
     private val getUserRequestsUseCase: GetUserRequestsUseCase,
@@ -47,7 +51,7 @@ class UserRequestsViewModel(
             is UserRequestsIntent.CloseSmartGuide -> flow { emit(PartialState.SmartGuideToggled(false)) }
             is UserRequestsIntent.CloseErrors -> flow { emit(PartialState.ErrorsToggled(false)) }
             is UserRequestsIntent.ViewDetails -> handleViewDetails(intent)
-            is UserRequestsIntent.CopyTrackingCode -> flow { sendEvent(UserRequestsEvent.ShowToast("کد پیگیری کپی شد")) }
+            is UserRequestsIntent.CopyTrackingCode -> flow { sendEvent(UserRequestsEvent.ShowToast(getString(Res.string.user_request_tracking_code_copied))) }
         }
     }
 
@@ -93,7 +97,13 @@ class UserRequestsViewModel(
         try {
             val params = SmartGuideSearchParams(requestType = requestType, requestStatus = requestStatus, isPublic = true)
             val guides = getSmartGuideListUseCase(params).toSmartGuidePresentation()
-            emit(PartialState.SmartGuideLoaded(guides, title))
+            if (guides.isEmpty()) {
+                // Mirror legacy: "راهنمای هوشمند برای این وضعیت موجود نیست"
+                emit(PartialState.LoadingSmartGuide(false))
+                emit(PartialState.InfoDialogToggled("راهنمای هوشمند برای وضعیت فعلی این درخواست موجود نیست."))
+            } else {
+                emit(PartialState.SmartGuideLoaded(guides, title))
+            }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
         }
@@ -105,6 +115,8 @@ class UserRequestsViewModel(
                 requestId = intent.request.id,
                 refCode = intent.request.refCode,
                 requestTypeId = 22L,
+                title = intent.request.title
+
             )
         )
     }

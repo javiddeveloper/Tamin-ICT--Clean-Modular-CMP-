@@ -14,6 +14,10 @@ interface UserRequestRemoteDataSource {
 
     suspend fun getRequestErrors(query: ApiQueryParamDN): ListData<RequestErrorDTO>
 
-    suspend fun getSmartGuideList(query: ApiQueryParamDN): ListData<SmartGuideDTO>
+    /**
+     * The faq/limitation endpoint uses flat query params (requestType, requestStatus, isPublic)
+     * NOT the standard filter JSON array used by other endpoints.
+     */
+    suspend fun getSmartGuideList(params: Map<String, String>): ListData<SmartGuideDTO>
 }
 

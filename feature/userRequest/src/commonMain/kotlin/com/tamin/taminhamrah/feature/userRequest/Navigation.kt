@@ -18,6 +18,7 @@ sealed interface UserRequestRoute {
         val requestId: Long,
         val refCode: String,
         val requestTypeId: Long,
+        val title : String
     ) : UserRequestRoute
 }
 
@@ -25,8 +26,8 @@ fun NavController.navigateToUserRequests() {
     navigate(UserRequestRoute.List)
 }
 
-fun NavController.navigateToUserRequestDetail(requestId: Long, refCode: String, requestTypeId: Long) {
-    navigate(UserRequestRoute.Detail(requestId, refCode, requestTypeId))
+fun NavController.navigateToUserRequestDetail(requestId: Long, refCode: String, requestTypeId: Long , title: String) {
+    navigate(UserRequestRoute.Detail(requestId, refCode, requestTypeId ,title = title ))
 }
 
 fun NavGraphBuilder.userRequestGraph(
@@ -35,8 +36,8 @@ fun NavGraphBuilder.userRequestGraph(
     composable<UserRequestRoute.List> {
         UserRequestsScreen(
             onBackClick = { navController.popBackStack() },
-            onNavigateToDetail = { requestId, refCode, requestTypeId ->
-                navController.navigateToUserRequestDetail(requestId, refCode, requestTypeId)
+            onNavigateToDetail = { requestId, refCode, requestTypeId , title->
+                navController.navigateToUserRequestDetail(requestId, refCode, requestTypeId , title)
             }
         )
     }
@@ -46,7 +47,8 @@ fun NavGraphBuilder.userRequestGraph(
         UserRequestDetailScreen(
             requestId = route.requestId,
             refCode = route.refCode,
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { navController.popBackStack() },
+            title = route.title
         )
     }
 }

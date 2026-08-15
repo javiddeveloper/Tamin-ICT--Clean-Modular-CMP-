@@ -106,6 +106,7 @@ import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
+import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -378,7 +379,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         navController.navigate(AddDependentRoute)
                     },
                     onNavigateToUserRequests = {
-                        navController.navigate(UserRequestRoute)
+                        navController.navigate(UserRequestRoute.List)
                     },
 
                     onOpenUrl = { url -> openUrl(url) },
@@ -435,6 +436,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 workshopsScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
+
+                userRequestGraph(navController = navController)
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
 

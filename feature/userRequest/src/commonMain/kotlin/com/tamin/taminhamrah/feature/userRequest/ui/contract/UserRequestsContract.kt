@@ -6,11 +6,18 @@ import com.tamin.taminhamrah.model.userRequest.SmartGuidePR
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 
-enum class RequestStatusTab(val label: String) {
-    ALL("همه"),
-    IN_PROGRESS("در جریان"),
-    ACTION_REQUIRED("نیازمند اقدام"),
-    COMPLETED("تکمیل‌شده"),
+import org.jetbrains.compose.resources.StringResource
+import taminx.feature.userrequest.generated.resources.Res
+import taminx.feature.userrequest.generated.resources.user_request_tab_action_required
+import taminx.feature.userrequest.generated.resources.user_request_tab_all
+import taminx.feature.userrequest.generated.resources.user_request_tab_completed
+import taminx.feature.userrequest.generated.resources.user_request_tab_in_progress
+
+enum class RequestStatusTab(val labelRes: StringResource) {
+    ALL(Res.string.user_request_tab_all),
+    IN_PROGRESS(Res.string.user_request_tab_in_progress),
+    ACTION_REQUIRED(Res.string.user_request_tab_action_required),
+    COMPLETED(Res.string.user_request_tab_completed),
 }
 
 @Immutable
@@ -82,5 +89,5 @@ sealed interface UserRequestsIntent {
 
 sealed interface UserRequestsEvent {
     data class ShowToast(val message: String) : UserRequestsEvent
-    data class NavigateToDetail(val requestId: Long, val refCode: String, val requestTypeId: Long) : UserRequestsEvent
+    data class NavigateToDetail(val requestId: Long, val refCode: String, val requestTypeId: Long ,val title: String) : UserRequestsEvent
 }

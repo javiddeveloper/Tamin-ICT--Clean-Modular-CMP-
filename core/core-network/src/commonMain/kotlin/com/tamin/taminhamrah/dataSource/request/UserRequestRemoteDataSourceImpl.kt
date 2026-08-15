@@ -32,8 +32,8 @@ class UserRequestRemoteDataSourceImpl(
         return fetchListData { requestApiService.getMyRequestErrorList(apiQueryBuilder.buildQuery(query)) }
     }
 
-    override suspend fun getSmartGuideList(query: ApiQueryParamDN): ListData<SmartGuideDTO> {
-        return fetchListData { requestApiService.getSmartGuideList(apiQueryBuilder.buildQuery(query)) }
+    override suspend fun getSmartGuideList(params: Map<String, String>): ListData<SmartGuideDTO> {
+        return fetchListData { requestApiService.getSmartGuideList(params) }
     }
 
     private suspend fun <T> fetchListData(

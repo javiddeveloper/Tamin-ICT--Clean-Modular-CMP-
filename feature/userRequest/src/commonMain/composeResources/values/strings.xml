@@ -1,0 +1,76 @@
+<resources>
+    <!-- Header & General -->
+    <string name="user_request_header_subtitle">کارتابل پیگیری درخواست‌ها، اطلاع از نتیجه اقدامات و ...</string>
+    <string name="user_request_empty_list">درخواستی یافت نشد</string>
+    <string name="user_request_demo_details_dialog">در نسخه نهایی، این دکمه شما را به صفحه جزئیات همین درخواست با کد پیگیری %s منتقل می‌کنند.</string>
+    <string name="user_request_default_guide_title">راهنمای عمومی</string>
+    <string name="user_request_default_error_title">خطاهای درخواست</string>
+    <string name="user_request_tracking_code_copied">کد پیگیری کپی شد</string>
+    <string name="user_request_smart_guide_not_found">راهنمای هوشمند برای وضعیت فعلی این درخواست موجود نیست.</string>
+
+    <!-- Request Status Tabs -->
+    <string name="user_request_tab_all">همه</string>
+    <string name="user_request_tab_in_progress">در جریان</string>
+    <string name="user_request_tab_action_required">نیازمند اقدام</string>
+    <string name="user_request_tab_completed">تکمیل‌شده</string>
+
+    <!-- Filter Panel -->
+    <string name="user_request_search_title">جستجوی درخواست</string>
+    <string name="user_request_search_ref_code_placeholder">کد پیگیری – حداکثر ۱۰ رقم</string>
+    <string name="user_request_type_placeholder">نوع درخواست</string>
+    <string name="user_request_all_types">همه انواع درخواست‌ها</string>
+    <string name="user_request_search_button">جستجوی درخواست</string>
+    <string name="user_request_filter_close_desc">بستن فیلتر</string>
+
+    <!-- Request Card -->
+    <string name="user_request_view_request">مشاهده درخواست</string>
+    <string name="user_request_follow_up_objection">پیگیری نتیجه اعتراض</string>
+    <string name="user_request_other_requests">سایر درخواست‌ها</string>
+    <string name="user_request_tracking_code_label">کد پیگیری: %s</string>
+    <string name="user_request_tracking_code_prefix">کد پیگیری: </string>
+    <string name="user_request_errors_btn">خطاها</string>
+    <string name="user_request_guide_btn">راهنما</string>
+
+    <!-- Request Step Progress -->
+    <string name="user_request_step_preprocessing">پیش پردازش</string>
+    <string name="user_request_step_branch_delivery">تحویل شعبه</string>
+    <string name="user_request_step_processing_complete">تکمیل رسیدگی</string>
+    <string name="user_request_step_result">نتیجه</string>
+
+    <!-- Bottom Sheets & Dialogs -->
+    <string name="user_request_errors_sheet_title">خطاهای ثبت‌شده</string>
+    <string name="user_request_error_registered_at">ثبت‌شده در %s</string>
+    <string name="user_request_action_close">بستن</string>
+    <string name="user_request_info_dialog_title">اطلاعیه درخواست</string>
+    <string name="user_request_action_got_it">متوجه شدم</string>
+    <string name="user_request_smart_guide_title">راهنمای هوشمند</string>
+
+    <!-- Request Detail Screen -->
+    <string name="user_request_detail_back_desc">بازگشت</string>
+    <string name="user_request_detail_title">نمایش درخواست کسر اقساط</string>
+    <string name="user_request_detail_bank_example">بانک صادرات ایران</string>
+    <string name="user_request_detail_guarantee_amount_label">مبلغ ضمانت</string>
+    <string name="user_request_detail_guarantee_amount_value">۷۲,۰۰۰,۰۰۰ ریال</string>
+    <string name="user_request_detail_repayment_label">بازپرداخت</string>
+    <string name="user_request_detail_installment_count_label">تعداد اقساط</string>
+    <string name="user_request_detail_installment_count_value">۱۲</string>
+    <string name="user_request_detail_installment_amount_label">مبلغ هر قسط</string>
+    <string name="user_request_detail_installment_amount_value">۵,۰۰۰,۰۰۰</string>
+    <string name="user_request_detail_installment_amount_with_unit">۵,۰۰۰,۰۰۰ ریال</string>
+    <string name="user_request_detail_repayment_zero_rial">۰ ریال</string>
+    <string name="user_request_detail_pensioner_guarantor">مستمری‌بگیر (ضامن)</string>
+    <string name="user_request_detail_full_name">نام و نام خانوادگی</string>
+    <string name="user_request_detail_national_id">کد ملی</string>
+    <string name="user_request_detail_pension_number">شماره مستمری</string>
+    <string name="user_request_detail_borrower">شخص وام‌گیرنده</string>
+    <string name="user_request_detail_birth_date">تاریخ تولد</string>
+    <string name="user_request_detail_loan_details">مشخصات وام</string>
+    <string name="user_request_detail_bank_institution">بانک / موسسه</string>
+    <string name="user_request_detail_branch_name">نام شعبه</string>
+    <string name="user_request_detail_branch_example">امانیه</string>
+    <string name="user_request_detail_repayment_amount">مبلغ بازپرداخت</string>
+    <string name="user_request_detail_sample_name">سیدرحمت اله میرفضلی</string>
+    <string name="user_request_detail_sample_national_id">۶۳۱۹۸۸۹۳۹۱</string>
+    <string name="user_request_detail_sample_pension_num">۱۰۰۳ND06938</string>
+    <string name="user_request_detail_placeholder_dash">-</string>
+</resources>

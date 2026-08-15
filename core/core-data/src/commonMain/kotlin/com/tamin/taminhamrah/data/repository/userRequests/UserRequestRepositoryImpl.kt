@@ -71,19 +71,16 @@ internal class UserRequestRepositoryImpl(
     }
 
     override suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN> {
-        val filters = buildList {
-            params.requestType?.let {
-                add(ApiFilterDN(FilterProperty.REQUEST_TYPE, it.toString(), FilterOperator.EQ))
-            }
-            params.requestStatus?.let {
-                add(ApiFilterDN(FilterProperty.REQUEST_STATUS, it, FilterOperator.EQ))
-            }
-            params.isPublic?.let {
-                add(ApiFilterDN(FilterProperty.IS_PUBLIC, if (it) "1" else "0", FilterOperator.EQ))
-            }
+        // faq/limitation uses flat query params, NOT the filter JSON array used by other endpoints.
+        // Correct URL: ?requestType=22&requestStatus=0018&isPublic=1&filter=[]&sort=[]
+        val flatParams = buildMap<String, String> {
+            params.requestType?.let { put("requestType", it.toString()) }
+            params.requestStatus?.let { put("requestStatus", it) }
+            params.isPublic?.let { put("isPublic", if (it) "1" else "0") }
+            put("filter", "[]")
+            put("sort", "[]")
         }
-        val query = ApiQueryParamDN(filters = filters)
-        val response = requestRemoteDataSource.getSmartGuideList(query)
+        val response = requestRemoteDataSource.getSmartGuideList(flatParams)
         return response.list.orEmpty().map { it.toDomain() }
     }
 

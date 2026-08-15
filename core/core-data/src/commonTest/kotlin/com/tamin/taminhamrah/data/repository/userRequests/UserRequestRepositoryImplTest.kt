@@ -87,8 +87,9 @@ class UserRequestRepositoryImplTest {
         override suspend fun getRequestErrors(query: ApiQueryParamDN): ListData<RequestErrorDTO> =
             getRequestErrorsResult
 
-        override suspend fun getSmartGuideList(query: ApiQueryParamDN): ListData<SmartGuideDTO> =
+        override suspend fun getSmartGuideList(params: Map<String, String>): ListData<SmartGuideDTO> =
             getSmartGuideListResult
+
     }
 
     private class FakeDao : UserRequestDao {

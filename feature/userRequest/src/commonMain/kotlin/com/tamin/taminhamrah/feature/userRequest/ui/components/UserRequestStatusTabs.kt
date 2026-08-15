@@ -22,6 +22,8 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
+import org.jetbrains.compose.resources.stringResource
+
 @Composable
 fun UserRequestStatusTabs(
     selectedTab: RequestStatusTab,
@@ -55,7 +57,7 @@ fun UserRequestStatusTabs(
                 contentAlignment = Alignment.Center
             ) {
                 TaminText(
-                    text = "${tab.label} $count",
+                    text = "${stringResource(tab.labelRes)} $count",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                     ),
