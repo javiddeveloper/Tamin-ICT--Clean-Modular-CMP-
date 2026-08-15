@@ -12,6 +12,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -130,8 +131,6 @@ private fun SettingsContent(
     val isDark = colors == DarkTaminColors
     val topBarGradient = remember(isDark) { Brush.horizontalGradient(colors.profileGradientStops) }
     val defaultBorder = remember(colors) { BorderStroke(1.dp, colors.border) }
-    val revealController = LocalThemeRevealController.current
-    var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -176,34 +175,15 @@ private fun SettingsContent(
                             leadingIconPainter = painterResource(Res.drawable.ic_moon),
                             showArrow = false,
                             customTrailingContent = {
-                                Box(
-                                    modifier = Modifier.onGloballyPositioned { coords ->
-                                        val centerInRoot = coords.positionInRoot() +
-                                            Offset(
-                                                coords.size.width / 2f,
-                                                coords.size.height / 2f
-                                            )
-                                        themeButtonCenter = centerInRoot
-                                    }
-                                ) {
-                                    TaminSwitchButton(
-                                        checked = isDark,
-                                        onCheckedChange = { newValue ->
-                                            if (revealController != null) {
-                                                revealController.trigger(origin = themeButtonCenter) {
-                                                    onIntent(SettingsIntent.ToggleNightMode(newValue))
-                                                }
-                                            } else {
-                                                onIntent(SettingsIntent.ToggleNightMode(newValue))
-                                            }
-                                        },
-                                        showThemeIcon = true,
-                                    )
-                                }
+                                TaminSwitchButton(
+                                    checked = isDark,
+                                    onCheckedChange = { onIntent(SettingsIntent.ToggleNightMode(it)) },
+                                    showThemeIcon = true,
+                                )
                             },
                             colors = ListItemColors(
-                                leadingIconBackgroundColor = if (isDark) colors.blueBg else Color(0xFFEEF2FB),
-                                leadingIconTintColor = if (isDark) colors.textPrimary else Color(0xFF5E7392)
+                                leadingIconBackgroundColor = colors.iconBgSubtle,
+                                leadingIconTintColor = colors.iconTintSubtle
                             )
                         ),
                         ListItemData(
@@ -211,10 +191,16 @@ private fun SettingsContent(
                             leadingIconPainter = painterResource(Res.drawable.ic_font_scale),
                             showArrow = false,
                             colors = ListItemColors(
-                                leadingIconBackgroundColor = if (isDark) colors.blueBg else Color(0xFFEEF2FB),
-                                leadingIconTintColor = if (isDark) colors.textPrimary else Color(0xFF5E7392)
+                                leadingIconBackgroundColor = colors.iconBgSubtle,
+                                leadingIconTintColor = colors.iconTintSubtle
                             )
                         ),
+                    ),
+                    footerContentPadding = PaddingValues(
+                        start = Spacing.lg,
+                        end = Spacing.lg,
+                        top = Spacing.xs,
+                        bottom = Spacing.md,
                     ),
                     footerContent = {
                         FontSizeSelector(
@@ -238,7 +224,7 @@ private fun FontSizeSelector(
     val colors = LocalTaminColors.current
     Row(
         modifier = modifier
-            .background(colors.bgPage, RoundedCornerShape(CornerRadius.md))
+            .background(colors.iconBgSubtle, RoundedCornerShape(CornerRadius.md))
             .padding(Spacing.xs),
         horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
     ) {
@@ -250,7 +236,7 @@ private fun FontSizeSelector(
                     .clip(RoundedCornerShape(CornerRadius.sm))
                     .background(if (isSelected) colors.bgSurface else Color.Transparent)
                     .clickable { onSelect(option) }
-                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
