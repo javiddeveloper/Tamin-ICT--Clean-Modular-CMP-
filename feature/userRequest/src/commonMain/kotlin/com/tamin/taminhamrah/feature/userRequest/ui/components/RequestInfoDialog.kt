@@ -22,6 +22,10 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_action_got_it
+import taminx.feature.userrequest.generated.resources.user_request_info_dialog_title
 
 @Composable
 fun RequestInfoDialog(
@@ -45,7 +49,7 @@ fun RequestInfoDialog(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 TaminText(
-                    text = "اطلاعیه درخواست",
+                    text = stringResource(UserRequestRes.string.user_request_info_dialog_title),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = LocalTaminColors.current.textPrimary
                 )
@@ -59,7 +63,7 @@ fun RequestInfoDialog(
                 Spacer(modifier = Modifier.height(Spacing.xs))
 
                 TaminFilledButton(
-                    text = "متوجه شدم",
+                    text = stringResource(UserRequestRes.string.user_request_action_got_it),
                     onClick = onDismissRequest,
                     modifier = Modifier.fillMaxWidth()
                 )

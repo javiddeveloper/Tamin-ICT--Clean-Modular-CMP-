@@ -40,6 +40,14 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_all_types
+import taminx.feature.userrequest.generated.resources.user_request_filter_close_desc
+import taminx.feature.userrequest.generated.resources.user_request_search_button
+import taminx.feature.userrequest.generated.resources.user_request_search_ref_code_placeholder
+import taminx.feature.userrequest.generated.resources.user_request_search_title
+import taminx.feature.userrequest.generated.resources.user_request_type_placeholder
 
 @Composable
 fun UserRequestFilterPanel(
@@ -74,7 +82,7 @@ fun UserRequestFilterPanel(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TaminText(
-                    text = "جستجوی درخواست",
+                    text = stringResource(UserRequestRes.string.user_request_search_title),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = LocalTaminColors.current.textPrimary
                 )
@@ -89,7 +97,7 @@ fun UserRequestFilterPanel(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(UserRequestRes.string.user_request_filter_close_desc),
                         tint = LocalTaminColors.current.textSecondary,
                         modifier = Modifier.size(16.dp)
                     )
@@ -102,7 +110,7 @@ fun UserRequestFilterPanel(
                 onValueChange = onRefCodeChanged,
                 placeholder = {
                     TaminText(
-                        text = "کد پیگیری – حداکثر ۱۰ رقم",
+                        text = stringResource(UserRequestRes.string.user_request_search_ref_code_placeholder),
                         style = MaterialTheme.typography.bodySmall,
                         color = LocalTaminColors.current.textTertiary
                     )
@@ -129,7 +137,7 @@ fun UserRequestFilterPanel(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TaminText(
-                        text = selectedTypeName ?: "نوع درخواست",
+                        text = selectedTypeName ?: stringResource(UserRequestRes.string.user_request_type_placeholder),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (selectedTypeName != null) LocalTaminColors.current.textPrimary else LocalTaminColors.current.textTertiary
                     )
@@ -147,7 +155,7 @@ fun UserRequestFilterPanel(
                     modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
                     DropdownMenuItem(
-                        text = { TaminText("همه انواع درخواست‌ها") },
+                        text = { TaminText(stringResource(UserRequestRes.string.user_request_all_types)) },
                         onClick = {
                             onTypeSelected(null, null)
                             isDropdownOpen = false
@@ -168,7 +176,7 @@ fun UserRequestFilterPanel(
             Spacer(modifier = Modifier.height(Spacing.xs))
 
             TaminFilledButton(
-                text = "جستجوی درخواست",
+                text = stringResource(UserRequestRes.string.user_request_search_button),
                 onClick = onSearch,
                 modifier = Modifier.fillMaxWidth()
             )

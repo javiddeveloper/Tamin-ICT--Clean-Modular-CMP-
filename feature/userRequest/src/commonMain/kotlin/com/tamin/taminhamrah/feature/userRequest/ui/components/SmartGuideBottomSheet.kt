@@ -33,6 +33,10 @@ import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_action_close
+import taminx.feature.userrequest.generated.resources.user_request_smart_guide_title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +70,7 @@ fun SmartGuideBottomSheet(
             ) {
                 Column {
                     TaminText(
-                        text = "راهنمای هوشمند",
+                        text = stringResource(UserRequestRes.string.user_request_smart_guide_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = LocalTaminColors.current.textPrimary
                     )
@@ -125,7 +129,7 @@ fun SmartGuideBottomSheet(
             Spacer(modifier = Modifier.height(Spacing.xs))
 
             TaminOutlinedButton(
-                text = "بستن",
+                text = stringResource(UserRequestRes.string.user_request_action_close),
                 onClick = onDismissRequest,
                 modifier = Modifier.fillMaxWidth()
             )

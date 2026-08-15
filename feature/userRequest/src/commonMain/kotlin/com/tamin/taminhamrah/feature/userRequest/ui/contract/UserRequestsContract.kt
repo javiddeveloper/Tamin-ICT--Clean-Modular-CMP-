@@ -20,6 +20,19 @@ enum class RequestStatusTab(val labelRes: StringResource) {
     COMPLETED(Res.string.user_request_tab_completed),
 }
 
+object UserRequestKeywords {
+    const val IN_PROGRESS = "در جریان"
+    const val REVIEW = "بررسی"
+    const val DEFECT = "نقص"
+    const val DISAPPROVAL = "عدم"
+    const val ACTION = "اقدام"
+    const val ERROR = "خطا"
+    const val APPROVED = "تایید"
+    const val CLOSED = "مختومه"
+    const val COMPLETED = "تکمیل"
+    const val PREGNANCY = "بارداری"
+}
+
 @Immutable
 data class UserRequestsUiState(
     val isLoading: Boolean = false,
@@ -45,9 +58,15 @@ data class UserRequestsUiState(
     val filteredRequests: List<UserRequestPR>
         get() = when (selectedTab) {
             RequestStatusTab.ALL -> requests
-            RequestStatusTab.IN_PROGRESS -> requests.filter { it.statusDesc.contains("در جریان") || it.statusDesc.contains("بررسی") }
-            RequestStatusTab.ACTION_REQUIRED -> requests.filter { it.statusDesc.contains("نقص") || it.statusDesc.contains("عدم") || it.statusDesc.contains("اقدام") }
-            RequestStatusTab.COMPLETED -> requests.filter { it.statusDesc.contains("تایید") || it.statusDesc.contains("مختومه") || it.statusDesc.contains("تکمیل") }
+            RequestStatusTab.IN_PROGRESS -> requests.filter {
+                it.statusDesc.contains(UserRequestKeywords.IN_PROGRESS) || it.statusDesc.contains(UserRequestKeywords.REVIEW)
+            }
+            RequestStatusTab.ACTION_REQUIRED -> requests.filter {
+                it.statusDesc.contains(UserRequestKeywords.DEFECT) || it.statusDesc.contains(UserRequestKeywords.DISAPPROVAL) || it.statusDesc.contains(UserRequestKeywords.ACTION)
+            }
+            RequestStatusTab.COMPLETED -> requests.filter {
+                it.statusDesc.contains(UserRequestKeywords.APPROVED) || it.statusDesc.contains(UserRequestKeywords.CLOSED) || it.statusDesc.contains(UserRequestKeywords.COMPLETED)
+            }
         }
 
     sealed class PartialState {

@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,14 +31,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.*
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
@@ -77,7 +85,22 @@ fun UserRequestDetailScreen(
                         xOffset = 450.dp,
                         yOffset = (-150).dp
                     )
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AnimatedRingHeaderIcon(icon = Icons.Default.Description)
+                        Spacer(modifier = Modifier.height(Spacing.md))
+                        Text(
+                            text = stringResource(UserRequestRes.string.user_request_header_subtitle),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = taminColors.textHeaderSubtitle,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
+
             }
         }
     ) { innerPadding ->
@@ -179,21 +202,21 @@ fun UserRequestDetailScreen(
                                     .padding(horizontal = Spacing.md, vertical = Spacing.xs)
                             ) {
                                 TaminText(
-                                    text = "بانک صادرات ایران",
+                                    text = stringResource(UserRequestRes.string.user_request_detail_bank_example),
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     color = Color(0xFF1F4FA3)
                                 )
                             }
 
                             TaminText(
-                                text = "مبلغ ضمانت",
+                                text = stringResource(UserRequestRes.string.user_request_detail_guarantee_amount_label),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = LocalTaminColors.current.textTertiary
                             )
                         }
 
                         TaminText(
-                            text = "۷۲,۰۰۰,۰۰۰ ریال",
+                            text = stringResource(UserRequestRes.string.user_request_detail_guarantee_amount_value),
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                             color = LocalTaminColors.current.textPrimary,
                             modifier = Modifier.fillMaxWidth(),
@@ -204,9 +227,9 @@ fun UserRequestDetailScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
                         ) {
-                            MetricPill("بازپرداخت", "-", Modifier.weight(1f))
-                            MetricPill("تعداد اقساط", "۱۲", Modifier.weight(1f))
-                            MetricPill("مبلغ هر قسط", "۵,۰۰۰,۰۰۰", Modifier.weight(1.2f))
+                            MetricPill(stringResource(UserRequestRes.string.user_request_detail_repayment_label), stringResource(UserRequestRes.string.user_request_detail_placeholder_dash), Modifier.weight(1f))
+                            MetricPill(stringResource(UserRequestRes.string.user_request_detail_installment_count_label), stringResource(UserRequestRes.string.user_request_detail_installment_count_value), Modifier.weight(1f))
+                            MetricPill(stringResource(UserRequestRes.string.user_request_detail_installment_amount_label), stringResource(UserRequestRes.string.user_request_detail_installment_amount_value), Modifier.weight(1.2f))
                         }
                     }
                 }
@@ -215,11 +238,11 @@ fun UserRequestDetailScreen(
             // Section 2: Guarantor Info Card
             item {
                 DetailSectionCard(
-                    title = "مستمری‌بگیر (ضامن)",
+                    title = stringResource(UserRequestRes.string.user_request_detail_pensioner_guarantor),
                     items = listOf(
-                        "نام و نام خانوادگی" to "سیدرحمت اله میرفضلی",
-                        "کد ملی" to "۶۳۱۹۸۸۹۳۹۱",
-                        "شماره مستمری" to "۱۰۰۳ND06938"
+                        stringResource(UserRequestRes.string.user_request_detail_full_name) to stringResource(UserRequestRes.string.user_request_detail_sample_name),
+                        stringResource(UserRequestRes.string.user_request_detail_national_id) to stringResource(UserRequestRes.string.user_request_detail_sample_national_id),
+                        stringResource(UserRequestRes.string.user_request_detail_pension_number) to stringResource(UserRequestRes.string.user_request_detail_sample_pension_num)
                     ),
                     modifier = Modifier.padding(horizontal = Spacing.page)
                 )
@@ -228,11 +251,11 @@ fun UserRequestDetailScreen(
             // Section 3: Borrower Info Card
             item {
                 DetailSectionCard(
-                    title = "شخص وام‌گیرنده",
+                    title = stringResource(UserRequestRes.string.user_request_detail_borrower),
                     items = listOf(
-                        "نام و نام خانوادگی" to "-",
-                        "کد ملی" to "۶۳۱۹۸۸۹۳۹۱",
-                        "تاریخ تولد" to "-"
+                        stringResource(UserRequestRes.string.user_request_detail_full_name) to stringResource(UserRequestRes.string.user_request_detail_placeholder_dash),
+                        stringResource(UserRequestRes.string.user_request_detail_national_id) to stringResource(UserRequestRes.string.user_request_detail_sample_national_id),
+                        stringResource(UserRequestRes.string.user_request_detail_birth_date) to stringResource(UserRequestRes.string.user_request_detail_placeholder_dash)
                     ),
                     modifier = Modifier.padding(horizontal = Spacing.page)
                 )
@@ -241,14 +264,14 @@ fun UserRequestDetailScreen(
             // Section 4: Loan Details Card
             item {
                 DetailSectionCard(
-                    title = "مشخصات وام",
+                    title = stringResource(UserRequestRes.string.user_request_detail_loan_details),
                     items = listOf(
-                        "بانک / موسسه" to "بانک صادرات ایران",
-                        "نام شعبه" to "امانیه",
-                        "مبلغ هر قسط" to "۵,۰۰۰,۰۰۰ ریال",
-                        "تعداد اقساط" to "۱۲",
-                        "مبلغ بازپرداخت" to "۰ ریال",
-                        "مبلغ ضمانت" to "۷۲,۰۰۰,۰۰۰ ریال"
+                        stringResource(UserRequestRes.string.user_request_detail_bank_institution) to stringResource(UserRequestRes.string.user_request_detail_bank_example),
+                        stringResource(UserRequestRes.string.user_request_detail_branch_name) to stringResource(UserRequestRes.string.user_request_detail_branch_example),
+                        stringResource(UserRequestRes.string.user_request_detail_installment_amount_label) to stringResource(UserRequestRes.string.user_request_detail_installment_amount_with_unit),
+                        stringResource(UserRequestRes.string.user_request_detail_installment_count_label) to stringResource(UserRequestRes.string.user_request_detail_installment_count_value),
+                        stringResource(UserRequestRes.string.user_request_detail_repayment_amount) to stringResource(UserRequestRes.string.user_request_detail_repayment_zero_rial),
+                        stringResource(UserRequestRes.string.user_request_detail_guarantee_amount_label) to stringResource(UserRequestRes.string.user_request_detail_guarantee_amount_value)
                     ),
                     modifier = Modifier.padding(horizontal = Spacing.page)
                 )

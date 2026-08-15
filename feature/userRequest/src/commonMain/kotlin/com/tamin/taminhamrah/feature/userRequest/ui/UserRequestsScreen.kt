@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.feature.userRequest.ui.components.UserRequestCard
 import com.tamin.taminhamrah.feature.userRequest.ui.components.UserRequestFilterPanel
 import com.tamin.taminhamrah.feature.userRequest.ui.components.UserRequestStatusTabs
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.RequestStatusTab
+import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestKeywords
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsUiState
@@ -46,6 +47,12 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_default_error_title
+import taminx.feature.userrequest.generated.resources.user_request_default_guide_title
+import taminx.feature.userrequest.generated.resources.user_request_demo_details_dialog
+import taminx.feature.userrequest.generated.resources.user_request_empty_list
+import taminx.feature.userrequest.generated.resources.user_request_header_subtitle
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -94,9 +101,15 @@ fun UserRequestsContent(
 ) {
     val taminColors = LocalTaminColors.current
     val allCount = state.requests.size
-    val inProgressCount = state.requests.count { it.statusDesc.contains("در جریان") || it.statusDesc.contains("بررسی") }
-    val actionRequiredCount = state.requests.count { it.statusDesc.contains("نقص") || it.statusDesc.contains("عدم") || it.statusDesc.contains("اقدام") }
-    val completedCount = state.requests.count { it.statusDesc.contains("تایید") || it.statusDesc.contains("مختومه") || it.statusDesc.contains("تکمیل") }
+    val inProgressCount = state.requests.count {
+        it.statusDesc.contains(UserRequestKeywords.IN_PROGRESS) || it.statusDesc.contains(UserRequestKeywords.REVIEW)
+    }
+    val actionRequiredCount = state.requests.count {
+        it.statusDesc.contains(UserRequestKeywords.DEFECT) || it.statusDesc.contains(UserRequestKeywords.DISAPPROVAL) || it.statusDesc.contains(UserRequestKeywords.ACTION)
+    }
+    val completedCount = state.requests.count {
+        it.statusDesc.contains(UserRequestKeywords.APPROVED) || it.statusDesc.contains(UserRequestKeywords.CLOSED) || it.statusDesc.contains(UserRequestKeywords.COMPLETED)
+    }
 
     val counts = mapOf(
         RequestStatusTab.ALL to allCount,
@@ -144,7 +157,7 @@ fun UserRequestsContent(
                         AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_request))
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Text(
-                            text = "کارتابل پیگیری درخواست‌ها، اطلاع از نتیجه اقدامات و ...",
+                            text = stringResource(UserRequestRes.string.user_request_header_subtitle),
                             style = MaterialTheme.typography.labelLarge,
                             color = taminColors.textHeaderSubtitle,
                             textAlign = TextAlign.Center
@@ -209,7 +222,7 @@ fun UserRequestsContent(
                         contentAlignment = Alignment.Center
                     ) {
                         TaminText(
-                            text = "درخواستی یافت نشد",
+                            text = stringResource(UserRequestRes.string.user_request_empty_list),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalTaminColors.current.textTertiary
                         )
@@ -217,11 +230,12 @@ fun UserRequestsContent(
                 }
             } else {
                 items(state.filteredRequests, key = { it.id }) { request ->
+                    val demoDetailsMsg = stringResource(UserRequestRes.string.user_request_demo_details_dialog, request.refCode)
                     UserRequestCard(
                         request = request,
                         onViewDetails = {
-                            if (request.title.contains("بارداری")) {
-                                onIntent(UserRequestsIntent.ShowInfoDialog("در نسخه نهایی، این دکمه شما را به صفحه جزئیات همین درخواست با کد پیگیری ${request.refCode} منتقل می‌کنند."))
+                            if (request.title.contains(UserRequestKeywords.PREGNANCY)) {
+                                onIntent(UserRequestsIntent.ShowInfoDialog(demoDetailsMsg))
                             } else {
                                 onIntent(UserRequestsIntent.ViewDetails(request))
                             }
@@ -250,7 +264,7 @@ fun UserRequestsContent(
         // Modals & Bottom Sheets
         if (state.isSmartGuideOpen) {
             SmartGuideBottomSheet(
-                title = state.smartGuideTitle ?: "راهنمای عمومی",
+                title = state.smartGuideTitle ?: stringResource(UserRequestRes.string.user_request_default_guide_title),
                 items = state.smartGuideItems,
                 onDismissRequest = { onIntent(UserRequestsIntent.CloseSmartGuide) }
             )
@@ -258,7 +272,7 @@ fun UserRequestsContent(
 
         if (state.isErrorsOpen) {
             RequestErrorsBottomSheet(
-                title = state.errorTitle ?: "خطاهای درخواست",
+                title = state.errorTitle ?: stringResource(UserRequestRes.string.user_request_default_error_title),
                 items = state.errorItems,
                 onDismissRequest = { onIntent(UserRequestsIntent.CloseErrors) }
             )

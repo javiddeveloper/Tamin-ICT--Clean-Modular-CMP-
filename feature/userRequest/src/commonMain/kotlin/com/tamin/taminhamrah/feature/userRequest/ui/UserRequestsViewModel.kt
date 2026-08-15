@@ -98,9 +98,8 @@ class UserRequestsViewModel(
             val params = SmartGuideSearchParams(requestType = requestType, requestStatus = requestStatus, isPublic = true)
             val guides = getSmartGuideListUseCase(params).toSmartGuidePresentation()
             if (guides.isEmpty()) {
-                // Mirror legacy: "راهنمای هوشمند برای این وضعیت موجود نیست"
                 emit(PartialState.LoadingSmartGuide(false))
-                emit(PartialState.InfoDialogToggled("راهنمای هوشمند برای وضعیت فعلی این درخواست موجود نیست."))
+                emit(PartialState.InfoDialogToggled(getString(Res.string.user_request_smart_guide_not_found)))
             } else {
                 emit(PartialState.SmartGuideLoaded(guides, title))
             }

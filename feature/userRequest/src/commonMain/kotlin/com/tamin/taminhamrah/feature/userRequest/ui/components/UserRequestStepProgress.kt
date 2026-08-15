@@ -26,6 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_step_branch_delivery
+import taminx.feature.userrequest.generated.resources.user_request_step_preprocessing
+import taminx.feature.userrequest.generated.resources.user_request_step_processing_complete
+import taminx.feature.userrequest.generated.resources.user_request_step_result
 
 enum class StepState {
     COMPLETED,
@@ -49,24 +55,24 @@ fun UserRequestStepProgress(
 
     val steps = if (isCompleted) {
         listOf(
-            RequestStepItem("پیش پردازش", StepState.COMPLETED),
-            RequestStepItem("تحویل شعبه", StepState.COMPLETED),
-            RequestStepItem("تکمیل رسیدگی", StepState.COMPLETED),
-            RequestStepItem("نتیجه", StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_preprocessing), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_branch_delivery), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_processing_complete), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_result), StepState.COMPLETED),
         )
     } else if (isError) {
         listOf(
-            RequestStepItem("پیش پردازش", StepState.COMPLETED),
-            RequestStepItem("تحویل شعبه", StepState.COMPLETED),
-            RequestStepItem("تکمیل رسیدگی", StepState.COMPLETED),
-            RequestStepItem("نتیجه", StepState.ERROR),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_preprocessing), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_branch_delivery), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_processing_complete), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_result), StepState.ERROR),
         )
     } else {
         listOf(
-            RequestStepItem("پیش پردازش", StepState.COMPLETED),
-            RequestStepItem("تحویل شعبه", StepState.IN_PROGRESS),
-            RequestStepItem("تکمیل رسیدگی", StepState.UNREACHED),
-            RequestStepItem("نتیجه", StepState.UNREACHED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_preprocessing), StepState.COMPLETED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_branch_delivery), StepState.IN_PROGRESS),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_processing_complete), StepState.UNREACHED),
+            RequestStepItem(stringResource(UserRequestRes.string.user_request_step_result), StepState.UNREACHED),
         )
     }
 

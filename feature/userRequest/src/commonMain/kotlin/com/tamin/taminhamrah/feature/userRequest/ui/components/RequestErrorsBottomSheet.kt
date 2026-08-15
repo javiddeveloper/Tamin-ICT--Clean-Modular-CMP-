@@ -33,6 +33,11 @@ import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_action_close
+import taminx.feature.userrequest.generated.resources.user_request_error_registered_at
+import taminx.feature.userrequest.generated.resources.user_request_errors_sheet_title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +71,7 @@ fun RequestErrorsBottomSheet(
             ) {
                 Column {
                     TaminText(
-                        text = "خطاهای ثبت‌شده",
+                        text = stringResource(UserRequestRes.string.user_request_errors_sheet_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = LocalTaminColors.current.textPrimary
                     )
@@ -114,7 +119,7 @@ fun RequestErrorsBottomSheet(
                             )
                             if (item.creationTime.isNotBlank()) {
                                 TaminText(
-                                    text = "ثبت‌شده در ${item.creationTime}",
+                                    text = stringResource(UserRequestRes.string.user_request_error_registered_at, item.creationTime),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = LocalTaminColors.current.textTertiary
                                 )
@@ -128,7 +133,7 @@ fun RequestErrorsBottomSheet(
             Spacer(modifier = Modifier.height(Spacing.xs))
 
             TaminOutlinedButton(
-                text = "بستن",
+                text = stringResource(UserRequestRes.string.user_request_action_close),
                 onClick = onDismissRequest,
                 modifier = Modifier.fillMaxWidth()
             )

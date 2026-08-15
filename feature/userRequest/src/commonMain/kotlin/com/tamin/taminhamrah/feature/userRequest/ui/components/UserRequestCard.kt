@@ -30,12 +30,21 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestKeywords
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_errors_btn
+import taminx.feature.userrequest.generated.resources.user_request_follow_up_objection
+import taminx.feature.userrequest.generated.resources.user_request_guide_btn
+import taminx.feature.userrequest.generated.resources.user_request_other_requests
+import taminx.feature.userrequest.generated.resources.user_request_tracking_code_prefix
+import taminx.feature.userrequest.generated.resources.user_request_view_request
 
 // Request type IDs — mirror of RequestTypeEnumClass in legacy my-tamin-droid
 private const val REQUEST_TYPE_ILL_DAY = 10L
@@ -54,26 +63,28 @@ private const val REQUEST_TYPE_MEDICAL_COMMISSION = 27L
 private fun resolveViewButtonVisibility(
     requestTypeId: Long,
     statusCode: String,
+    viewLabel: String,
+    followUpLabel: String,
 ): Pair<Boolean, String> {
     return when (requestTypeId) {
         REQUEST_TYPE_ILL_DAY ->
-            Pair(statusCode == "0021", "مشاهده درخواست")
+            Pair(statusCode == "0021", viewLabel)
 
         REQUEST_TYPE_PREGNANCY ->
-            Pair(statusCode == "0014", "مشاهده درخواست")
+            Pair(statusCode == "0014", viewLabel)
 
         REQUEST_TYPE_ORTHOTICS_PROSTHESIS ->
-            Pair(statusCode == "0021" || statusCode == "0019", "مشاهده درخواست")
+            Pair(statusCode == "0021" || statusCode == "0019", viewLabel)
 
         REQUEST_TYPE_ARTICLE16 ->
-            Pair(statusCode == "2602", "مشاهده درخواست")
+            Pair(statusCode == "2602", viewLabel)
 
         REQUEST_TYPE_DEFERRED_INSTALLMENT_CERTIFICATE ->
-            Pair(statusCode == "0018", "مشاهده درخواست")
+            Pair(statusCode == "0018", viewLabel)
 
         REQUEST_TYPE_FOLLOW_UP_OBJECTION ->
             // Always visible but with a different label
-            Pair(true, "پیگیری نتیجه اعتراض")
+            Pair(true, followUpLabel)
 
         REQUEST_TYPE_MEDICAL_COMMISSION ->
             // Never visible
@@ -113,12 +124,12 @@ fun UserRequestCard(
 ) {
     val clipboardManager = LocalClipboardManager.current
 
-    val isStatusError = request.statusDesc.contains("عدم") ||
-            request.statusDesc.contains("نقص") ||
-            request.statusDesc.contains("خطا")
-    val isStatusApproved = request.statusDesc.contains("تایید") ||
-            request.statusDesc.contains("مختومه") ||
-            request.statusDesc.contains("تکمیل")
+    val isStatusError = request.statusDesc.contains(UserRequestKeywords.DISAPPROVAL) ||
+            request.statusDesc.contains(UserRequestKeywords.DEFECT) ||
+            request.statusDesc.contains(UserRequestKeywords.ERROR)
+    val isStatusApproved = request.statusDesc.contains(UserRequestKeywords.APPROVED) ||
+            request.statusDesc.contains(UserRequestKeywords.CLOSED) ||
+            request.statusDesc.contains(UserRequestKeywords.COMPLETED)
 
     val statusBg = when {
         isStatusError -> Color(0xFFFEE2E2)
@@ -131,8 +142,11 @@ fun UserRequestCard(
         else -> Color(0xFF64748B)
     }
 
-    val (showViewButton, viewButtonLabel) = remember(request.requestTypeId, request.statusCode) {
-        resolveViewButtonVisibility(request.requestTypeId, request.statusCode)
+    val viewLabel = stringResource(UserRequestRes.string.user_request_view_request)
+    val followUpLabel = stringResource(UserRequestRes.string.user_request_follow_up_objection)
+
+    val (showViewButton, viewButtonLabel) = remember(request.requestTypeId, request.statusCode, viewLabel, followUpLabel) {
+        resolveViewButtonVisibility(request.requestTypeId, request.statusCode, viewLabel, followUpLabel)
     }
     val showErrorButton = remember(request.requestTypeId, request.statusCode) {
         resolveErrorButtonVisibility(request.requestTypeId, request.statusCode)
@@ -171,7 +185,7 @@ fun UserRequestCard(
                         .padding(horizontal = Spacing.md, vertical = Spacing.xs)
                 ) {
                     TaminText(
-                        text = request.requestTypeTitle.ifEmpty { "سایر درخواست‌ها" },
+                        text = request.requestTypeTitle.ifEmpty { stringResource(UserRequestRes.string.user_request_other_requests) },
                         style = MaterialTheme.typography.labelSmall,
                         color = LocalTaminColors.current.textSecondary
                     )
@@ -222,7 +236,7 @@ fun UserRequestCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TaminText(
-                        text = "کد پیگیری: ",
+                        text = stringResource(UserRequestRes.string.user_request_tracking_code_prefix),
                         style = MaterialTheme.typography.labelSmall,
                         color = LocalTaminColors.current.textTertiary
                     )
@@ -270,7 +284,7 @@ fun UserRequestCard(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 TaminText(
-                                    text = "خطاها",
+                                    text = stringResource(UserRequestRes.string.user_request_errors_btn),
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = Color(0xFFDC2626)
                                 )
@@ -279,7 +293,7 @@ fun UserRequestCard(
                     }
 
                     TaminOutlinedButton(
-                        text = "راهنما",
+                        text = stringResource(UserRequestRes.string.user_request_guide_btn),
                         onClick = { onOpenGuide(request) },
                         modifier = Modifier.weight(0.8f)
                     )
@@ -287,7 +301,7 @@ fun UserRequestCard(
             } else {
                 // راهنما always shown even when no view button
                 TaminOutlinedButton(
-                    text = "راهنما",
+                    text = stringResource(UserRequestRes.string.user_request_guide_btn),
                     onClick = { onOpenGuide(request) },
                 )
             }
