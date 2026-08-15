@@ -130,6 +130,7 @@ class ProfileViewModel(
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
             ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
             ProfileMenuItem.SECURITY -> sendEvent(ProfileEvent.NavigateToSecurity)
+            ProfileMenuItem.DEVELOPER_OPTIONS -> sendEvent(ProfileEvent.NavigateToDeveloperOptions)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()

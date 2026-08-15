@@ -73,6 +73,7 @@ val remoteModule = module {
         AuthRemoteDataSourceImpl(
             userApiService = get(named("authUserApiService")),
             errorParser = get(),
+            developerOptionsRepository = get()
         )
     }
 

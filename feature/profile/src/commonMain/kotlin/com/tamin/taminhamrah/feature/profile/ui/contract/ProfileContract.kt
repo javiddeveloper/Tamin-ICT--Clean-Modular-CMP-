@@ -60,5 +60,6 @@ sealed interface ProfileEvent {
     data object NavigateToElectronicFile : ProfileEvent
     data object NavigateToBankAccount : ProfileEvent
     data object NavigateToSecurity : ProfileEvent
+    data object NavigateToDeveloperOptions : ProfileEvent
 }
 
