@@ -149,6 +149,24 @@ class PensionRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getEdictReportPDF(filter: List<ApiFilterDN>): PdfDownloadDTO {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response = pensionApiService.getEdictReportPDF(mapOf("filter" to filterJson))
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = response.body()
+                )
+            )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
 
     override suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>): ListData<RetirementRequestDTO> {
         return try {
