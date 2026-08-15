@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranceContractModule
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
+import com.tamin.taminhamrah.feature.security.di.securityModule
 import com.tamin.taminhamrah.feature.settings.di.settingsModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -47,6 +48,7 @@ val sharedModules: List<Module>
         healthProfileModule,
         changeMobileModule,
         myInboxModule,
+        securityModule,
         settingsModule
     )
 

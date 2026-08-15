@@ -6,6 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountRoute
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountViewModel
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileRoute
@@ -41,6 +43,9 @@ sealed interface ProfileRoute {
     data object VersionHistory : ProfileRoute
 
     @Serializable
+    data object BankAccount : ProfileRoute
+
+    @Serializable
     data object ActiveRelation : ProfileRoute
 
     @Serializable
@@ -53,6 +58,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
+    onNavigateToSecurity: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
@@ -70,8 +76,10 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
                 onNavigateToActiveRelation = { navController.navigate(ProfileRoute.ActiveRelation) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
+                onNavigateToBankAccount = { navController.navigate(ProfileRoute.BankAccount) },
                 onNavigateToMyInbox = onNavigateToMyInbox,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
+                onNavigateToSecurity = onNavigateToSecurity,
                 onNavigateToSettings = onNavigateToSettings,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
@@ -102,6 +110,15 @@ fun NavGraphBuilder.profileGraph(
             VersionHistoryRoute(
                 viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composableWithFadeTransitions<ProfileRoute.BankAccount> {
+            val viewModel = koinViewModel<BankAccountViewModel>()
+
+            BankAccountRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() },
             )
         }
 

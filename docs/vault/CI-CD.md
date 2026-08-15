@@ -34,4 +34,4 @@ Image: `pull-devops.tamin.ir/devops/android-sdk-image:1.0` · Runner tag: `devop
 - debug: `androidApp/build/outputs/apk/*/debug/*.apk` (1 week)
 - release: APKs for all four flavors, named `TaminX-$CI_COMMIT_TAG`
 
-Related: [[Build-and-Run]] · [[Code-Review]]
+Related: [[Build-and-Run]]

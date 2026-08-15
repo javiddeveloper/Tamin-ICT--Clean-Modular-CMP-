@@ -9,7 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 interface UserPreferencesRepository {
     val userData: StateFlow<UserData>
     val observeDarkThemeConfig: Flow<DarkThemeConfig>
+    val observeBiometricEnabled: Flow<Boolean>
     val observeFontSize: Flow<FontSizeOption>
     suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig)
+    suspend fun setBiometricEnabled(enabled: Boolean)
+    suspend fun completeBiometricEnrollmentPrompt(enabled: Boolean)
     suspend fun setFontSize(fontSize: FontSizeOption)
 }

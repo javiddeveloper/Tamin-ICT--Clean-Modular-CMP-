@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
+import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
@@ -48,6 +49,8 @@ import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
+import com.tamin.taminhamrah.useCases.common.SetBiometricEnabledUseCase
+import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUseCase
 import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
@@ -161,6 +164,7 @@ val domainModule = module {
     factoryOf(::SignOutUseCase)
     factoryOf(::GetSignOutUrlUseCase)
     factoryOf(::GetBankAccountListUseCase)
+    factoryOf(::RegisterBankAccountUseCase)
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
     factoryOf(::GetStatusCertificateReportUseCase)
@@ -261,6 +265,8 @@ val domainModule = module {
     factoryOf(::GetPatientImagingUseCase)
     factoryOf(::GetVersionHistoryUseCase)
     factoryOf(::SetThemeUseCase)
+    factoryOf(::SetBiometricEnabledUseCase)
+    factoryOf(::CompleteBiometricEnrollmentPromptUseCase)
     factoryOf(::SetFontSizeUseCase)
     factoryOf(::GetAllProvincesUseCase)
     factoryOf(::GetProvinceCitiesUseCase)

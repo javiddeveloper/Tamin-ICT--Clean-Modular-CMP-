@@ -33,6 +33,8 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
 import com.tamin.taminhamrah.model.user.UserProfileDto
+import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 import kotlinx.serialization.json.JsonElement
 
 internal interface UserApiService {
@@ -152,4 +154,13 @@ internal interface UserApiService {
     suspend fun getRecipients(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<RecipientDTO>>
+
+    /**
+     * Registers an account. Note the path is `accounts`, not `personals/accounts` that the list
+     * uses — the previous app posted to the same asymmetric pair.
+     */
+    @POST("accounts")
+    suspend fun registerBankAccount(
+        @Body request: BankAccountRequestDTO,
+    ): BaseDTO<BankAccountCreatedDTO>
 }

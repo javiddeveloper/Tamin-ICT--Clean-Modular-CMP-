@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserData(
     val darkThemeConfig: DarkThemeConfig,
+    val isBiometricEnabled: Boolean = false,
+    val hasAskedToEnableBiometric: Boolean = false,
     val fontSize: FontSizeOption = FontSizeOption.MEDIUM,
 ) {
     companion object {
