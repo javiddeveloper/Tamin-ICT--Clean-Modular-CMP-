@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -82,10 +83,17 @@ fun EdictHeader(
     val taminColors = LocalTaminColors.current
     val edict = state.edictPensioner
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    val profileGradientBrush = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
         TaminTopAppBar(
             title = stringResource(Res.string.edict_title),
-            background = taminTopAppBarGradient(taminColors.profileGradientStops),
+            background = profileGradientBrush,
             bottomPadding = HEADER_OVERLAP,
             navigationIcon = {
                 TaminTopAppBarButton(

@@ -101,9 +101,9 @@ fun EdictMainCard(
 
     val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
     val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
-    val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0
-    val rawDate = formatEdictDateLabel(selectedDate)
-    val dateLabelText = if (rawDate.isNotEmpty()) " \u00B7 $rawDate" else ""
+    val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0 //increase percentage compared to after
+//    val rawDate = formatEdictDateLabel(selectedDate)
+//    val dateLabelText = if (rawDate.isNotEmpty()) " \u00B7 $rawDate" else ""
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -122,12 +122,12 @@ fun EdictMainCard(
                         .vanishOnCollapse(collapseProgress),
                 )
                 // DateLabel: "فروردین ۱۴۰۰" – travels from beside the hint to the start edge
-                TaminText(
-                    text = dateLabelText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textSecondary,
-                    modifier = Modifier.layoutId(EdictCardSlot.DateLabel),
-                )
+//                TaminText(
+//                    text = dateLabelText,
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = taminColors.textSecondary,
+//                    modifier = Modifier.layoutId(EdictCardSlot.DateLabel),
+//                )
                 // Badge: PercentBadge – stays visible, rides vertically into the compact bar
                 Box(modifier = Modifier.layoutId(EdictCardSlot.Badge)) {
                     if (pct > 0) PercentBadge(pct, taminColors)
@@ -248,18 +248,18 @@ private fun PercentBadge(percent: Int, colors: TaminColors) {
             .padding(horizontal = Spacing.sm, vertical = 2.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TaminText(
-                text = "${percent}٪",
-                color = colors.greenText,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.width(2.dp))
             Icon(
                 painter = painterResource(Res.drawable.ic_arrow_down),
                 contentDescription = null,
                 tint = colors.greenText,
                 modifier = Modifier.size(12.dp).rotate(180f),
+            )
+            Spacer(Modifier.width(2.dp))
+            TaminText(
+                text = "${percent}٪",
+                color = colors.greenText,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -348,7 +348,7 @@ fun EdictComparisonCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) 
             ) {
                 TaminText(
                     text = stringResource(Res.string.edict_comparison_title),
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleSmall.copy(color = taminColors.textPrimary),
                     fontWeight = FontWeight.Bold,
                 )
                 if (edict.edictMonth.isNotEmpty() && edict.edictYear.isNotEmpty()) {
@@ -373,18 +373,16 @@ fun EdictComparisonCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) 
                 label = stringResource(Res.string.edict_comparison_after),
                 amount = info.pensionAfterIncrease,
                 progress = (afterAmt / maxAmt).toFloat(),
-                color = taminColors.teal,
+                color = taminColors.blueText,
             )
 
-            if (info.edictDescription.isNotEmpty()) {
                 Spacer(Modifier.height(Spacing.md))
                 TaminText(
-                    text = info.edictDescription,
+                    text = "مستمری ماهانهٔ شما نسبت به حکم پیشین معادل ${(afterAmt-beforeAmt).toLong()} ریال افزایش یافته است.",
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
                     lineHeight = 20.sp,
                 )
-            }
         }
     }
 }
@@ -406,6 +404,7 @@ private fun ComparisonBar(label: String, amount: String, progress: Float, color:
                 text = amount,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
+                color = taminColors.textSecondary,
             )
         }
         Box(
@@ -574,7 +573,7 @@ private fun EdictInfoList(edict: EdictPensionerPR) {
                 Column(modifier = Modifier.padding(Spacing.lg)) {
                     TaminText(
                         text = stringResource(Res.string.edict_description_title),
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleSmall.copy(color = taminColors.textPrimary),
                         fontWeight = FontWeight.Bold,
                     )
                     Spacer(Modifier.height(Spacing.sm))
@@ -637,6 +636,7 @@ private fun InfoRow(label: String, value: String?) {
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.End,
+                color = taminColors.textPrimary,
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .padding(start = Spacing.md),
@@ -738,13 +738,6 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
             rial = rial,
         )
 
-        BreakdownSection(
-            title = "کسورات",
-            dotColor = taminColors.orangeText,
-            items = deductionItems,
-            rial = rial,
-        )
-
         if (info != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -767,13 +760,13 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
                         text = "جمع کل حکم",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = taminColors.bgSurface,
+                        color = Color.White,
                     )
                     TaminText(
                         text = "${info.payableMonthly} $rial",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = taminColors.bgSurface,
+                        color = Color.White,
                     )
                 }
             }
@@ -821,7 +814,7 @@ private fun BreakdownSection(
 
                 TaminText(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleSmall.copy(color = taminColors.textPrimary),
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -842,7 +835,7 @@ private fun BreakdownSection(
 
                     TaminText(
                         text = "${item.value} $rial",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(color = taminColors.textPrimary),
                         fontWeight = FontWeight.SemiBold,
                     )
                 }

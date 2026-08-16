@@ -69,6 +69,7 @@
     <string name="edict_search_year_edicts">احکام صادرشدهٔ این سال</string>
     <string name="edict_search_select_month">ماه را انتخاب کنید</string>
     <string name="edict_search_edict_note">* حکم مستمری هر سال در فروردین صادر می‌شود و در برخی سال‌ها حکم اصلاحی مرداد هم صادر می‌گردد.</string>
+    <string name="edict_search_year_info">۱ حکم در سال %1$s صادر شده است</string>
     <string name="edict_year_filter">سال %1$s</string>
     <string name="edict_empty_title">حکمی برای این بازه یافت نشد</string>
     <string name="edict_empty_desc">برای بازه زمانی انتخاب شده حکمی صادر نشده است.</string>
