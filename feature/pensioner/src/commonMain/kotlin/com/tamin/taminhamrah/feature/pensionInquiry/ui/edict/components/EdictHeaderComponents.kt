@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,6 +47,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminIdentityCardShadow
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
@@ -177,6 +179,7 @@ private fun EdictPensionerChip(
     modifier: Modifier
 ) {
     val taminColors = LocalTaminColors.current
+    val isLoading = state.selectedPensionerId == null
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.card))
@@ -186,23 +189,36 @@ private fun EdictPensionerChip(
                 color = taminColors.border,
                 shape = RoundedCornerShape(CornerRadius.card)
             )
-            .clickable { onIntent(EdictIntent.ShowPensionerSheet) }
+            .clickable(enabled = !isLoading) { onIntent(EdictIntent.ShowPensionerSheet) }
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         contentAlignment = Alignment.Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TaminText(
-                text = "${state.selectedPensionerId ?: ""} | مستمری بگیر",
-                color = Color.White,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Spacer(Modifier.width(Spacing.sm))
-            Icon(
-                painter = painterResource(Res.drawable.ic_arrow_down),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp),
-            )
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .width(80.dp)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(CornerRadius.sm))
+                        .shimmer(
+                            colorBase = Color.White.copy(alpha = 0.15f),
+                            colorHighlight = Color.White.copy(alpha = 0.45f),
+                        )
+                )
+            } else {
+                TaminText(
+                    text = "${state.selectedPensionerId} | مستمری بگیر",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Spacer(Modifier.width(Spacing.sm))
+                Icon(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
         }
     }
 }
