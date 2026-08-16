@@ -442,9 +442,20 @@
     <string name="error_cancel_license_message">لغو مجوز با خطا مواجه شد</string>
     <string name="error_issue_license_message">صدور مجوز با خطا مواجه شد</string>
     <string name="error_unknown_fallback">Unknown Error</string>
-
-    <string name="orotez_protez_title">کمک هزینه اروتزپروتز</string>
-    <string name="orotez_protez_empty_state">درخواستی برای کمک هزینه اروتزپروتز یافت نشد</string>
-    <string name="orotez_protez_ref_code_label">کد پیگیری</string>
+    <string name="orotez_protez_title">کمک هزینه اروتز و پروتز</string>
+    <string name="orotez_protez_subtitle">کمک‌هزینهٔ خرید وسایل اروتز و پروتز</string>
+    <string name="orotez_protez_step_user">استفاده‌کننده</string>
+    <string name="orotez_protez_step_info">اطلاعات</string>
+    <string name="orotez_protez_step_documents">مدارک</string>
+    <string name="orotez_protez_step_user_title">تعیین استفاده‌کننده</string>
+    <string name="orotez_protez_step_user_description">شعبهٔ رسیدگی‌کننده، فرد استفاده‌کننده و تاریخ تجویز پزشک را مشخص کنید.</string>
+    <string name="orotez_protez_field_branch_placeholder">انتخاب شعبه</string>
+    <string name="orotez_protez_field_insured_person">شماره بیمه / فرد استفاده‌کننده</string>
+    <string name="orotez_protez_field_prescription_date">تاریخ تجویز پزشک</string>
+    <string name="orotez_protez_pick_branch_title">انتخاب شعبه</string>
+    <string name="orotez_protez_pick_branch_subtitle">شعبهٔ رسیدگی‌کننده به درخواست</string>
+    <string name="orotez_protez_pick_insured_person_title">فرد استفاده‌کننده</string>
+    <string name="orotez_protez_pick_insured_person_subtitle">بیمه‌شدهٔ اصلی یا افراد تحت تکفل</string>
+    <string name="orotez_protez_next_step">مرحله بعد</string>
 </resources>
 
