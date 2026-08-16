@@ -135,6 +135,84 @@ class UserRequestApiServiceTest : BaseApiTest() {
         assertEquals(22L, item.requestType?.id)
         assertEquals("سيدرحمت اله ميرفضلي", item.createByName)
     }
+
+    @Test
+    fun `getUserRequestDetail should return a single request`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = """
+                {
+                    "id": 491371155,
+                    "refCode": "1075558440",
+                    "title": "درخواست گواهي کسر از حقوق",
+                    "createByName": "سيدرحمت اله ميرفضلي",
+                    "refrenceid": "491371155",
+                    "requestType": { "id": 22, "title": "درخواست گواهي کسر از حقوق" },
+                    "status": { "requestCode": "0018", "requestDesc": "مختومه-تاييد نهايي" }
+                }
+            """.trimIndent()
+        )
+        val apiService = createMockKtorfit(jsonResponse).createUserRequestApiService()
+
+        val response = apiService.getUserRequestDetail(491371155L)
+
+        assertEquals(200, response.status)
+        assertEquals(491371155L, response.data?.id)
+        assertEquals("1075558440", response.data?.refCode)
+        assertEquals("491371155", response.data?.referenceId)
+    }
+
+    @Test
+    fun `getShortTermRequestStatus should parse process data list`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = """
+                {
+                    "total": 1,
+                    "list": [
+                        { "date_acc": 1717000000000, "process_result": "تایید شد", "rejectReson": null }
+                    ]
+                }
+            """.trimIndent()
+        )
+        val apiService = createMockKtorfit(jsonResponse).createUserRequestApiService()
+
+        val response = apiService.getShortTermRequestStatus("ref-1")
+
+        assertEquals(200, response.status)
+        assertEquals(1, response.data?.total)
+        assertEquals("تایید شد", response.data?.list?.first()?.processResult)
+    }
+
+    @Test
+    fun `getDeferredInstallmentInfo should parse wage assignment request`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = """
+                {
+                    "firstName": "نام",
+                    "lastName": "نام خانوادگی",
+                    "nationalId": "0010000000",
+                    "birthDate": 1716000000000,
+                    "pensionerNationalId": "0020000000",
+                    "userFirstName": "کاربر",
+                    "userLastName": "کاربری",
+                    "pensionerId": "123456",
+                    "bank": { "bankName": "بانک ملی" },
+                    "bankBranch": "شعبه مرکزی",
+                    "installmentAmount": 15000000,
+                    "installmentCount": 12,
+                    "loanAmount": 180000000,
+                    "guaranteeAmount": 20000000
+                }
+            """.trimIndent()
+        )
+        val apiService = createMockKtorfit(jsonResponse).createUserRequestApiService()
+
+        val response = apiService.getDeferredInstallmentInfo("req-1")
+
+        assertEquals(200, response.status)
+        assertEquals("نام", response.data?.firstName)
+        assertEquals("بانک ملی", response.data?.bank?.bankName)
+        assertEquals(12, response.data?.installmentCount)
+    }
 }
 
 

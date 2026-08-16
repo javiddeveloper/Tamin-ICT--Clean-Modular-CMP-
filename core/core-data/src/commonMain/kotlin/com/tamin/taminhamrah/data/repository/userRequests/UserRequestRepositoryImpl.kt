@@ -1,9 +1,14 @@
 package com.tamin.taminhamrah.data.repository.userRequests
 
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
+import com.tamin.taminhamrah.data.mapper.toDetails
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
+import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -86,6 +91,62 @@ internal class UserRequestRepositoryImpl(
 
     override suspend fun getUserRequestDetail(id: Long): UserRequestDN {
         return requestRemoteDataSource.getUserRequestDetail(id).toDomain()
+    }
+
+    override suspend fun getShowRequestInfo(
+        referenceId: String,
+        requestTypeId: Long,
+    ): UserRequestDetailsDN? {
+        if (referenceId.isBlank()) return null
+        return when (requestTypeId) {
+            UserRequestTypeIds.ILL_DAY,
+            UserRequestTypeIds.ORTHOTICS_PROSTHESIS,
+            UserRequestTypeIds.PREGNANCY -> getShortTermDetails(referenceId, requestTypeId)
+            UserRequestTypeIds.ARTICLE16 -> {
+                val objectionNumber = referenceId.toLongOrNull() ?: return null
+                requestRemoteDataSource.getArticle16RequestInfo(objectionNumber).toDetails()
+            }
+            UserRequestTypeIds.DEFERRED_INSTALLMENT ->
+                requestRemoteDataSource.getDeferredInstallmentInfo(referenceId).toDetails()
+            UserRequestTypeIds.FOLLOW_UP_OBJECTION ->
+                requestRemoteDataSource.getFollowUpObjectionHistory(referenceId)
+                    .list
+                    ?.firstOrNull()
+                    ?.toDetails()
+            else -> null
+        }
+    }
+
+    override suspend fun downloadUserRequestDocument(guid: String): String {
+        return requestRemoteDataSource.downloadDocument(guid)
+    }
+
+    private suspend fun getShortTermDetails(
+        referenceId: String,
+        requestTypeId: Long,
+    ): UserRequestDetailsDN = coroutineScope {
+        val statusDeferred = async { requestRemoteDataSource.getShortTermRequestStatus(referenceId) }
+        val infoDeferred = async { requestRemoteDataSource.getShortTermRequestLoadData(referenceId) }
+        val status = statusDeferred.await().list?.lastOrNull()
+        val info = infoDeferred.await().list?.firstOrNull()
+
+        val pregnancyStatus = if (requestTypeId == UserRequestTypeIds.PREGNANCY) {
+            requestRemoteDataSource.getPregnancyStatus().list.orEmpty()
+        } else {
+            emptyList()
+        }
+        val pregnancyTypes = if (requestTypeId == UserRequestTypeIds.PREGNANCY) {
+            requestRemoteDataSource.getPregnancyTypes().list.orEmpty()
+        } else {
+            emptyList()
+        }
+
+        info?.toDetails(
+            requestTypeId = requestTypeId,
+            status = status,
+            pregnancyStatus = pregnancyStatus,
+            pregnancyTypes = pregnancyTypes,
+        ) ?: UserRequestDetailsDN(rejectReason = status?.rejectReason)
     }
 
     private fun buildQuery(search: UserRequestSearchParams): ApiQueryParamDN = ApiQueryParamDN(

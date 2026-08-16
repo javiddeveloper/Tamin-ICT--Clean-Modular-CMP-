@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionDetailDN
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionDetailPR
 import com.tamin.taminhamrah.model.userRequest.IllDayDetailDN
 import com.tamin.taminhamrah.model.userRequest.IllDayDetailPR
+import com.tamin.taminhamrah.model.userRequest.PregnancyDetailDN
+import com.tamin.taminhamrah.model.userRequest.PregnancyDetailPR
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.RequestErrorPR
 import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
@@ -18,6 +20,8 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toFormattedDate
 
 fun UserRequestDN.toPresentation(): UserRequestPR {
     return UserRequestPR(
@@ -25,7 +29,7 @@ fun UserRequestDN.toPresentation(): UserRequestPR {
         refCode = refCode ?: "",
         title = title ?: "",
         comment = comment ?: "",
-        creationTime = creationTime?.toString() ?: "0",
+        creationTime = creationTime?.let { PersianDateFormatter.formatTimestamp(it) } ?: "",
         createByName = createByName ?: "",
         statusDesc = status?.requestDesc ?: "",
         statusCode = status?.requestCode ?: "",
@@ -42,13 +46,17 @@ fun UserRequestDetailsDN.toPresentation(): UserRequestDetailsPR {
         illDay = illDay?.toPresentation(),
         article16 = article16?.toPresentation(),
         followUpObjection = followUpObjection?.toPresentation(),
+        pregnancy = pregnancy?.toPresentation(),
+        rejectReason = rejectReason,
     )
 }
 
 fun DeferredInstallmentDetailDN.toPresentation(): DeferredInstallmentDetailPR = DeferredInstallmentDetailPR(
     borrowerName = borrowerName,
     borrowerNationalCode = borrowerNationalCode,
-    borrowerBirthDate = borrowerBirthDate,
+    borrowerBirthDate = borrowerBirthDateMillis
+        ?.let { PersianDateFormatter.formatTimestamp(it) }
+        ?: borrowerBirthDate,
     bankName = bankName,
     branchName = branchName,
     guaranteeAmount = guaranteeAmount,
@@ -59,24 +67,78 @@ fun DeferredInstallmentDetailDN.toPresentation(): DeferredInstallmentDetailPR = 
     borrowerNationalId = borrowerNationalId,
     bank = bank,
     branch = branch,
+    firstName = firstName,
+    lastName = lastName,
+    pensionerFirstName = pensionerFirstName,
+    pensionerLastName = pensionerLastName,
+    pensionerNationalId = pensionerNationalId,
+    pensionerId = pensionerId,
 )
 
 fun IllDayDetailDN.toPresentation(): IllDayDetailPR = IllDayDetailPR(
-    startDate = startDate,
-    endDate = endDate,
+    startDate = startDateMillis?.let { PersianDateFormatter.formatTimestamp(it) } ?: startDate,
+    endDate = endDateMillis?.let { PersianDateFormatter.formatTimestamp(it) } ?: endDate,
     employerName = employerName,
     amount = amount,
+    insuranceNumber = insuranceNumber,
+    insuredFullName = insuredFullName,
+    mobile = mobile,
+    bankAccount = bankAccount,
+    bankName = bankName,
+    branchName = branchName,
+    doctorName = doctorName,
+    doctorId = doctorId,
+    prescriptionDate = prescriptionDateMillis?.let { PersianDateFormatter.formatTimestamp(it) },
+    relationship = relationship,
+    identityNumber = identityNumber,
+    identityPlace = identityPlace,
+    birthDate = birthDate,
+    expirationDate = expirationDate,
 )
 
 fun Article16DetailDN.toPresentation(): Article16DetailPR = Article16DetailPR(
     meetingDate = meetingDate,
     result = result,
+    defectDesc = defectDesc,
 )
 
 fun FollowUpObjectionDetailDN.toPresentation(): FollowUpObjectionDetailPR = FollowUpObjectionDetailPR(
-    objectionDate = objectionDate,
+    objectionDate = objectionDate.toDisplayDate(),
     reason = reason,
+    branchName = branchName,
+    requestDesc = requestDesc,
+    userDesc = userDesc,
+    answerDate = answerDate.toDisplayDate(),
+    answerTypeDesc = answerTypeDesc,
+    resultDesc = resultDesc,
 )
+
+fun PregnancyDetailDN.toPresentation(): PregnancyDetailPR = PregnancyDetailPR(
+    insuranceNumber = insuranceNumber,
+    insuredFullName = insuredFullName,
+    mobile = mobile,
+    bankAccount = bankAccount,
+    bankName = bankName,
+    branchName = branchName,
+    startDate = startDateMillis?.let { PersianDateFormatter.formatTimestamp(it) },
+    endDate = endDateMillis?.let { PersianDateFormatter.formatTimestamp(it) },
+    childbearingDate = childbearingDateMillis?.let { PersianDateFormatter.formatTimestamp(it) },
+    doctorName = doctorName,
+    doctorId = doctorId,
+    restDays = restDays,
+    statusDesc = statusDesc,
+    typeDesc = typeDesc,
+)
+
+private fun String?.toDisplayDate(): String? {
+    if (this.isNullOrBlank()) return this
+    val digits = take(8)
+    return if (digits.length == 8 && digits.all { it.isDigit() }) {
+        digits.toFormattedDate()
+    } else {
+        this
+    }
+}
 
 fun List<UserRequestDN>.toPresentation(): List<UserRequestPR> = map { it.toPresentation() }
 

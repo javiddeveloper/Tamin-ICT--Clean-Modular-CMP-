@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.userRequest.ui.screens.contract.UserRequestDetailEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.screens.contract.UserRequestDetailIntent
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -60,12 +61,13 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 private val COLOR_REPAYMENT_AMOUNT = Color(0xFF16A34A)
 private val COLOR_GUARANTEE_AMOUNT = Color(0xFFD97706)
 
-// Request type ID constants — mirror of RequestTypeEnumClass in legacy my-tamin-droid
-private const val REQUEST_TYPE_ILL_DAY = 10L
-private const val REQUEST_TYPE_ORTHOTICS_PROSTHESIS = 12L
-private const val REQUEST_TYPE_FOLLOW_UP_OBJECTION = 8L
-private const val REQUEST_TYPE_ARTICLE16 = 26L
-private const val REQUEST_TYPE_DEFERRED_INSTALLMENT_CERTIFICATE = 22L
+// Request type IDs — same values as RequestTypeEnumClass in my-tamin-droid
+private const val REQUEST_TYPE_FOLLOW_UP_OBJECTION = UserRequestTypeIds.FOLLOW_UP_OBJECTION
+private const val REQUEST_TYPE_ILL_DAY = UserRequestTypeIds.ILL_DAY
+private const val REQUEST_TYPE_PREGNANCY = UserRequestTypeIds.PREGNANCY
+private const val REQUEST_TYPE_ORTHOTICS_PROSTHESIS = UserRequestTypeIds.ORTHOTICS_PROSTHESIS
+private const val REQUEST_TYPE_DEFERRED_INSTALLMENT_CERTIFICATE = UserRequestTypeIds.DEFERRED_INSTALLMENT
+private const val REQUEST_TYPE_ARTICLE16 = UserRequestTypeIds.ARTICLE16
 
 // ── Route ────────────────────────────────────────────────────────────────────
 
@@ -81,8 +83,15 @@ fun UserRequestDetailRoute(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(requestId) {
-        viewModel.sendIntent(UserRequestDetailIntent.LoadDetail(requestId))
+    LaunchedEffect(requestId, refCode, requestTypeId) {
+        viewModel.sendIntent(
+            UserRequestDetailIntent.LoadDetail(
+                requestId = requestId,
+                refCode = refCode,
+                requestTypeId = requestTypeId,
+                title = title,
+            )
+        )
     }
 
     HandleUserRequestDetailEvents(
@@ -239,20 +248,29 @@ fun UserRequestDetailScreen(
                     when (requestTypeId) {
                         REQUEST_TYPE_DEFERRED_INSTALLMENT_CERTIFICATE -> {
                             val deferredDetails = details?.deferredInstallment
+                            val pensionerName = deferredDetails?.pensionerFullName
+                                ?.takeIf { it.isNotBlank() }
+                                ?: request?.createByName
+                            val pensionerNationalId = deferredDetails?.pensionerNationalId
+                                ?: request?.refCode
 
-                            // 1. Guarantor / Pensioner Card (Always shown when available)
                             item {
                                 DetailSectionCard(
                                     title = stringResource(UserRequestRes.string.user_request_detail_pensioner_guarantor),
                                     items = listOf(
                                         Triple(
                                             stringResource(UserRequestRes.string.user_request_detail_full_name),
-                                            request?.createByName ?: placeholder,
+                                            pensionerName ?: placeholder,
                                             null
                                         ),
                                         Triple(
                                             stringResource(UserRequestRes.string.user_request_detail_national_id),
-                                            request?.refCode ?: placeholder,
+                                            pensionerNationalId ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_pension_number),
+                                            deferredDetails?.pensionerId ?: placeholder,
                                             null
                                         ),
                                     ),
@@ -261,7 +279,6 @@ fun UserRequestDetailScreen(
                             }
 
                             if (deferredDetails != null) {
-                                // 2. Borrower Card
                                 item {
                                     DetailSectionCard(
                                         title = stringResource(UserRequestRes.string.user_request_detail_borrower),
@@ -286,7 +303,6 @@ fun UserRequestDetailScreen(
                                     )
                                 }
 
-                                // 3. Loan Details Card
                                 item {
                                     DetailSectionCard(
                                         title = stringResource(UserRequestRes.string.user_request_detail_loan_details),
@@ -330,15 +346,33 @@ fun UserRequestDetailScreen(
 
                         REQUEST_TYPE_ILL_DAY, REQUEST_TYPE_ORTHOTICS_PROSTHESIS -> {
                             val illDetails = details?.illDay
-
-                            // Guarantor Card
                             item {
                                 DetailSectionCard(
-                                    title = stringResource(UserRequestRes.string.user_request_detail_pensioner_guarantor),
+                                    title = stringResource(UserRequestRes.string.user_request_detail_request_info),
                                     items = listOf(
                                         Triple(
                                             stringResource(UserRequestRes.string.user_request_detail_full_name),
-                                            request?.createByName ?: placeholder,
+                                            illDetails?.insuredFullName ?: request?.createByName ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_insurance_number),
+                                            illDetails?.insuranceNumber ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_mobile),
+                                            illDetails?.mobile ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_bank_institution),
+                                            illDetails?.bankName ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_account_number),
+                                            illDetails?.bankAccount ?: placeholder,
                                             null
                                         ),
                                     ),
@@ -349,8 +383,13 @@ fun UserRequestDetailScreen(
                             if (illDetails != null) {
                                 item {
                                     DetailSectionCard(
-                                        title = stringResource(UserRequestRes.string.user_request_detail_loan_details),
-                                        items = listOf(
+                                        title = stringResource(UserRequestRes.string.user_request_detail_user_info),
+                                        items = listOfNotNull(
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_branch_name),
+                                                illDetails.branchName ?: placeholder,
+                                                null
+                                            ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_start_date),
                                                 illDetails.startDate ?: placeholder,
@@ -362,15 +401,104 @@ fun UserRequestDetailScreen(
                                                 null
                                             ),
                                             Triple(
-                                                stringResource(UserRequestRes.string.user_request_detail_employer_name),
-                                                illDetails.employerName ?: placeholder,
+                                                stringResource(UserRequestRes.string.user_request_detail_doctor_name),
+                                                illDetails.doctorName ?: illDetails.employerName ?: placeholder,
                                                 null
                                             ),
                                             Triple(
-                                                stringResource(UserRequestRes.string.user_request_detail_amount),
-                                                illDetails.amount?.toPriceFormat()?.let { "$it ریال" } ?: placeholder,
-                                                COLOR_REPAYMENT_AMOUNT
-                                            )
+                                                stringResource(UserRequestRes.string.user_request_detail_doctor_id),
+                                                illDetails.doctorId ?: placeholder,
+                                                null
+                                            ),
+                                            illDetails.amount?.let { amount ->
+                                                Triple(
+                                                    stringResource(UserRequestRes.string.user_request_detail_amount),
+                                                    amount.toPriceFormat().let { "$it ریال" },
+                                                    COLOR_REPAYMENT_AMOUNT
+                                                )
+                                            },
+                                        ),
+                                        modifier = Modifier.padding(horizontal = Spacing.page)
+                                    )
+                                }
+                            }
+                        }
+
+                        REQUEST_TYPE_PREGNANCY -> {
+                            val pregnancy = details?.pregnancy
+                            item {
+                                DetailSectionCard(
+                                    title = stringResource(UserRequestRes.string.user_request_detail_request_info),
+                                    items = listOf(
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_full_name),
+                                            pregnancy?.insuredFullName ?: request?.createByName ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_insurance_number),
+                                            pregnancy?.insuranceNumber ?: placeholder,
+                                            null
+                                        ),
+                                        Triple(
+                                            stringResource(UserRequestRes.string.user_request_detail_mobile),
+                                            pregnancy?.mobile ?: placeholder,
+                                            null
+                                        ),
+                                    ),
+                                    modifier = Modifier.padding(horizontal = Spacing.page)
+                                )
+                            }
+                            if (pregnancy != null) {
+                                item {
+                                    DetailSectionCard(
+                                        title = stringResource(UserRequestRes.string.user_request_detail_user_info),
+                                        items = listOf(
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_branch_name),
+                                                pregnancy.branchName ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_start_date),
+                                                pregnancy.startDate ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_end_date),
+                                                pregnancy.endDate ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_childbearing_date),
+                                                pregnancy.childbearingDate ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_doctor_name),
+                                                pregnancy.doctorName ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_doctor_id),
+                                                pregnancy.doctorId ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_rest_days),
+                                                pregnancy.restDays ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_pregnancy_status),
+                                                pregnancy.statusDesc ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_pregnancy_type),
+                                                pregnancy.typeDesc ?: placeholder,
+                                                null
+                                            ),
                                         ),
                                         modifier = Modifier.padding(horizontal = Spacing.page)
                                     )
@@ -380,8 +508,6 @@ fun UserRequestDetailScreen(
 
                         REQUEST_TYPE_ARTICLE16 -> {
                             val article16Details = details?.article16
-
-                            // Guarantor Card
                             item {
                                 DetailSectionCard(
                                     title = stringResource(UserRequestRes.string.user_request_detail_pensioner_guarantor),
@@ -400,11 +526,10 @@ fun UserRequestDetailScreen(
                                     modifier = Modifier.padding(horizontal = Spacing.page)
                                 )
                             }
-
                             if (article16Details != null) {
                                 item {
                                     DetailSectionCard(
-                                        title = stringResource(UserRequestRes.string.user_request_detail_loan_details),
+                                        title = stringResource(UserRequestRes.string.user_request_detail_article16_info),
                                         items = listOf(
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_article16_date),
@@ -413,9 +538,14 @@ fun UserRequestDetailScreen(
                                             ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_article16_result),
-                                                article16Details.result ?: placeholder,
+                                                article16Details.result ?: article16Details.defectDesc ?: placeholder,
                                                 null
-                                            )
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_article16_defect),
+                                                article16Details.defectDesc ?: placeholder,
+                                                null
+                                            ),
                                         ),
                                         modifier = Modifier.padding(horizontal = Spacing.page)
                                     )
@@ -425,27 +555,16 @@ fun UserRequestDetailScreen(
 
                         REQUEST_TYPE_FOLLOW_UP_OBJECTION -> {
                             val objectionDetails = details?.followUpObjection
-
-                            // Guarantor Card
-                            item {
-                                DetailSectionCard(
-                                    title = stringResource(UserRequestRes.string.user_request_detail_pensioner_guarantor),
-                                    items = listOf(
-                                        Triple(
-                                            stringResource(UserRequestRes.string.user_request_detail_full_name),
-                                            request?.createByName ?: placeholder,
-                                            null
-                                        ),
-                                    ),
-                                    modifier = Modifier.padding(horizontal = Spacing.page)
-                                )
-                            }
-
                             if (objectionDetails != null) {
                                 item {
                                     DetailSectionCard(
-                                        title = stringResource(UserRequestRes.string.user_request_detail_loan_details),
+                                        title = stringResource(UserRequestRes.string.user_request_detail_objection_info),
                                         items = listOf(
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_branch_name),
+                                                objectionDetails.branchName ?: placeholder,
+                                                null
+                                            ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_objection_date),
                                                 objectionDetails.objectionDate ?: placeholder,
@@ -453,9 +572,29 @@ fun UserRequestDetailScreen(
                                             ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_objection_reason),
-                                                objectionDetails.reason ?: placeholder,
+                                                objectionDetails.reason ?: objectionDetails.requestDesc ?: placeholder,
                                                 null
-                                            )
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_user_desc),
+                                                objectionDetails.userDesc ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_answer_date),
+                                                objectionDetails.answerDate ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_investigation_result),
+                                                objectionDetails.answerTypeDesc ?: placeholder,
+                                                null
+                                            ),
+                                            Triple(
+                                                stringResource(UserRequestRes.string.user_request_detail_expert_explanation),
+                                                objectionDetails.resultDesc ?: placeholder,
+                                                null
+                                            ),
                                         ),
                                         modifier = Modifier.padding(horizontal = Spacing.page)
                                     )

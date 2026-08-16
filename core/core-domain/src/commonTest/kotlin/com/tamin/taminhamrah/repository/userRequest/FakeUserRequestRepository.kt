@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.userRequest
 
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
@@ -47,11 +48,32 @@ class FakeUserRequestRepository : UserRequestRepository {
     }
 
     var userRequestDetailResult: UserRequestDN? = null
+    var showRequestInfoResult: UserRequestDetailsDN? = null
+    var downloadedDocument: String = ""
+    var lastReferenceId: String? = null
+    var lastRequestTypeId: Long? = null
+    var lastDocumentGuid: String? = null
 
     override suspend fun getUserRequestDetail(id: Long): UserRequestDN {
         lastRequestId = id
         if (shouldThrowError) throw error
         return userRequestDetailResult ?: throw RuntimeException("No user request detail set in fake repository")
+    }
+
+    override suspend fun getShowRequestInfo(
+        referenceId: String,
+        requestTypeId: Long,
+    ): UserRequestDetailsDN? {
+        lastReferenceId = referenceId
+        lastRequestTypeId = requestTypeId
+        if (shouldThrowError) throw error
+        return showRequestInfoResult
+    }
+
+    override suspend fun downloadUserRequestDocument(guid: String): String {
+        lastDocumentGuid = guid
+        if (shouldThrowError) throw error
+        return downloadedDocument
     }
 }
 

@@ -39,6 +39,8 @@ import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -209,6 +211,8 @@ val domainModule = module {
     factoryOf(::GetUserRequestErrorsUseCase)
     factoryOf(::GetSmartGuideListUseCase)
     factoryOf(::GetUserRequestDetailUseCase)
+    factoryOf(::GetShowRequestInfoUseCase)
+    factoryOf(::DownloadUserRequestDocumentUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)

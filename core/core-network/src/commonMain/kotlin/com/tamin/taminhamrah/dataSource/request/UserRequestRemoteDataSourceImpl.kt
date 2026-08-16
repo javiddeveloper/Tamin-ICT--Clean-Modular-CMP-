@@ -2,7 +2,13 @@ package com.tamin.taminhamrah.dataSource.request
 
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.userRequest.Article16RequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentInfoDTO
+import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionHistoryDTO
+import com.tamin.taminhamrah.model.userRequest.PregnancyLookupDTO
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDTO
+import com.tamin.taminhamrah.model.userRequest.ShortTermRequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.ShortTermRequestStatusDTO
 import com.tamin.taminhamrah.model.userRequest.SmartGuideDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
@@ -37,20 +43,50 @@ class UserRequestRemoteDataSourceImpl(
     }
 
     override suspend fun getUserRequestDetail(id: Long): UserRequestDTO {
-        return try {
-            requestApiService.getUserRequestDetail(id).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+        return fetchData { requestApiService.getUserRequestDetail(id) }
+    }
+
+    override suspend fun getShortTermRequestStatus(referenceId: String): ListData<ShortTermRequestStatusDTO> {
+        return fetchListData { requestApiService.getShortTermRequestStatus(referenceId) }
+    }
+
+    override suspend fun getShortTermRequestLoadData(referenceId: String): ListData<ShortTermRequestInfoDTO> {
+        return fetchListData { requestApiService.getShortTermRequestLoadData(referenceId) }
+    }
+
+    override suspend fun getPregnancyStatus(): ListData<PregnancyLookupDTO> {
+        return fetchListData { requestApiService.getPregnancyStatus() }
+    }
+
+    override suspend fun getPregnancyTypes(): ListData<PregnancyLookupDTO> {
+        return fetchListData { requestApiService.getPregnancyTypes() }
+    }
+
+    override suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDTO {
+        return fetchData { requestApiService.getArticle16RequestInfo(objectionNumber) }
+    }
+
+    override suspend fun getDeferredInstallmentInfo(requestId: String): DeferredInstallmentInfoDTO {
+        return fetchData { requestApiService.getDeferredInstallmentInfo(requestId) }
+    }
+
+    override suspend fun getFollowUpObjectionHistory(
+        referenceId: String
+    ): ListData<FollowUpObjectionHistoryDTO> {
+        return fetchListData { requestApiService.getFollowUpObjectionHistory(referenceId) }
+    }
+
+    override suspend fun downloadDocument(guid: String): String {
+        return fetchData { requestApiService.downloadDocument(guid) }
     }
 
     private suspend fun <T> fetchListData(
         call: suspend () -> BaseDTO<ListData<T>>
     ): ListData<T> {
+        return fetchData(call)
+    }
+
+    private suspend fun <T> fetchData(call: suspend () -> BaseDTO<T>): T {
         return try {
             call().extractData()
         } catch (e: TaminErrorUriException) {
