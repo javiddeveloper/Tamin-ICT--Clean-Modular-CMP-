@@ -18,7 +18,10 @@ data class OrotezProtezOptionUi(
 )
 
 /** Which picker sheet is open, if any — only one can be at a time. */
-enum class OrotezProtezPicker { NONE, BRANCH, INSURED_PERSON, DATE }
+enum class OrotezProtezPicker { NONE, BRANCH, INSURED_PERSON, DATE, DOCUMENT_SOURCE }
+
+/** Where a document image would come from — the choice made in the step-3 source sheet. */
+enum class OrotezProtezImageSource { CAMERA, GALLERY }
 
 /**
  * One document slot in step 3's upload checklist. Backed by a mock list today (see
@@ -58,6 +61,8 @@ data class OrotezProtezUiState(
     /** Registry detail per insured-person id — loaded once, looked up by [insuredPerson]. */
     val insuredPersonDetails: ImmutableMap<String, OrotezProtezInsuredDetailUi> = persistentMapOf(),
     val picker: OrotezProtezPicker = OrotezProtezPicker.NONE,
+    /** The document whose card was tapped to open [OrotezProtezPicker.DOCUMENT_SOURCE]. */
+    val activeDocumentId: String? = null,
 ) {
     val canGoNext: Boolean
         get() = branch != null && insuredPerson != null && prescriptionDateLabel != null
@@ -76,6 +81,7 @@ data class OrotezProtezUiState(
             val insuredPersonDetails: ImmutableMap<String, OrotezProtezInsuredDetailUi>,
         ) : PartialState
         data class PickerChanged(val picker: OrotezProtezPicker) : PartialState
+        data class DocumentSourceRequested(val documentId: String) : PartialState
         data class BranchSelected(val branch: OrotezProtezOptionUi) : PartialState
         data class InsuredPersonSelected(val insuredPerson: OrotezProtezOptionUi) : PartialState
         data class PrescriptionDateSelected(val label: String) : PartialState
@@ -90,6 +96,12 @@ sealed interface OrotezProtezIntent {
     data class OnBranchPicked(val option: OrotezProtezOptionUi) : OrotezProtezIntent
     data class OnInsuredPersonPicked(val option: OrotezProtezOptionUi) : OrotezProtezIntent
     data class OnPrescriptionDatePicked(val label: String) : OrotezProtezIntent
+    data class OnDocumentCardClicked(val documentId: String) : OrotezProtezIntent
+    /** Chosen in the step-3 source sheet. Only closes the sheet for now — no camera/gallery/upload yet. */
+    data class OnDocumentSourceSelected(
+        val documentId: String,
+        val source: OrotezProtezImageSource,
+    ) : OrotezProtezIntent
     data object OnNextStepClicked : OrotezProtezIntent
     data object OnConfirmInsuredInfoClicked : OrotezProtezIntent
     /** Goes to the previous step, or exits the feature (via [OrotezProtezEvent.NavigateBack]) from step 1. */

@@ -65,6 +65,15 @@ class OrotezProtezViewModel(
             emit(PartialState.PickerChanged(OrotezProtezPicker.NONE))
         }
 
+        is OrotezProtezIntent.OnDocumentCardClicked -> flow {
+            emit(PartialState.DocumentSourceRequested(intent.documentId))
+        }
+
+        // Source is recorded nowhere yet — picking/upload lands in a later task.
+        is OrotezProtezIntent.OnDocumentSourceSelected -> flow {
+            emit(PartialState.PickerChanged(OrotezProtezPicker.NONE))
+        }
+
         is OrotezProtezIntent.OnNextStepClicked -> flow {
             if (uiState.value.canGoNext) {
                 emit(PartialState.StepChanged(OrotezProtezStep.InsuredInfo))
@@ -152,7 +161,18 @@ class OrotezProtezViewModel(
             insuredPersonOptions = partialState.insuredPersonOptions,
             insuredPersonDetails = partialState.insuredPersonDetails,
         )
-        is PartialState.PickerChanged -> currentState.copy(picker = partialState.picker)
+        is PartialState.PickerChanged -> currentState.copy(
+            picker = partialState.picker,
+            activeDocumentId = if (partialState.picker == OrotezProtezPicker.DOCUMENT_SOURCE) {
+                currentState.activeDocumentId
+            } else {
+                null
+            },
+        )
+        is PartialState.DocumentSourceRequested -> currentState.copy(
+            picker = OrotezProtezPicker.DOCUMENT_SOURCE,
+            activeDocumentId = partialState.documentId,
+        )
         is PartialState.BranchSelected -> currentState.copy(branch = partialState.branch)
         is PartialState.InsuredPersonSelected -> currentState.copy(insuredPerson = partialState.insuredPerson)
         is PartialState.PrescriptionDateSelected -> currentState.copy(prescriptionDateLabel = partialState.label)

@@ -478,5 +478,10 @@
     <string name="orotez_protez_document_ear_mold">نوار گوش (سمعک)</string>
     <string name="orotez_protez_document_hearing_aid_warranty">گارانتی سمعک</string>
     <string name="orotez_protez_submit_request">ارسال درخواست</string>
+    <string name="orotez_protez_document_source_subtitle">منبع تصویر را انتخاب کنید</string>
+    <string name="orotez_protez_document_source_camera_title">دوربین</string>
+    <string name="orotez_protez_document_source_camera_subtitle">گرفتن عکس جدید</string>
+    <string name="orotez_protez_document_source_gallery_title">گالری تصاویر</string>
+    <string name="orotez_protez_document_source_gallery_subtitle">انتخاب از فایل‌های دستگاه</string>
 </resources>
 

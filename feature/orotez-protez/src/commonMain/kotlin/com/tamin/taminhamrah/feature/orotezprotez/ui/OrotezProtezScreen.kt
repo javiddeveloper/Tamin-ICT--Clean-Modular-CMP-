@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezDocumentSourceSheet
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezHeader
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezOptionSheet
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentUi
@@ -198,6 +199,7 @@ private fun OrotezProtezContent(
                     )
 
                     OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
+                        onIntent = onIntent,
                         onBack = onBackClicked,
                     )
                 }
@@ -226,6 +228,24 @@ private fun OrotezProtezContent(
             onSelect = { onIntent(OrotezProtezIntent.OnInsuredPersonPicked(it)) },
             onDismiss = { onIntent(OrotezProtezIntent.OnPickerDismissed) },
         )
+
+        OrotezProtezPicker.DOCUMENT_SOURCE -> {
+            val activeDocument = OrotezProtezDocumentChecklist.find { it.id == state.activeDocumentId }
+            if (activeDocument != null) {
+                OrotezProtezDocumentSourceSheet(
+                    title = stringResource(activeDocument.titleRes),
+                    onSelect = {
+                        onIntent(
+                            OrotezProtezIntent.OnDocumentSourceSelected(
+                                documentId = activeDocument.id,
+                                source = it,
+                            )
+                        )
+                    },
+                    onDismiss = { onIntent(OrotezProtezIntent.OnPickerDismissed) },
+                )
+            }
+        }
 
         OrotezProtezPicker.DATE -> TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.orotez_protez_field_prescription_date),
@@ -488,6 +508,7 @@ private fun OrotezProtezBackStepButton(
  */
 @Composable
 private fun OrotezProtezDocumentsStep(
+    onIntent: (OrotezProtezIntent) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -514,7 +535,10 @@ private fun OrotezProtezDocumentsStep(
         Spacer(Modifier.height(Spacing.lg))
 
         OrotezProtezDocumentChecklist.forEachIndexed { index, document ->
-            OrotezProtezDocumentCard(document = document, onClick = {})
+            OrotezProtezDocumentCard(
+                document = document,
+                onClick = { onIntent(OrotezProtezIntent.OnDocumentCardClicked(document.id)) },
+            )
             if (index != OrotezProtezDocumentChecklist.lastIndex) {
                 Spacer(Modifier.height(Spacing.md))
             }
@@ -728,6 +752,30 @@ private fun PreviewOrotezProtezDocumentsStepDark() {
     }
 }
 
+@PreviewRtlTheme
+@Composable
+private fun PreviewOrotezProtezDocumentSourceSheetLight() {
+    PreviewRtlThemeContent {
+        OrotezProtezContent(
+            state = PreviewDocumentSourceState,
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewOrotezProtezDocumentSourceSheetDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        OrotezProtezContent(
+            state = PreviewDocumentSourceState,
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
 private val PreviewState = OrotezProtezUiState(
     branch = OrotezProtezOptionUi(
         id = "branch-1",
@@ -762,4 +810,9 @@ private val PreviewInsuredInfoState = OrotezProtezUiState(
 
 private val PreviewDocumentsState = PreviewInsuredInfoState.copy(
     currentStep = OrotezProtezStep.Documents,
+)
+
+private val PreviewDocumentSourceState = PreviewDocumentsState.copy(
+    picker = OrotezProtezPicker.DOCUMENT_SOURCE,
+    activeDocumentId = OrotezProtezDocumentChecklist.first().id,
 )
