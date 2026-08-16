@@ -139,6 +139,9 @@ import org.koin.dsl.module
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 
@@ -255,6 +258,10 @@ val domainModule = module {
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)
+    factoryOf(::GetMedicalConfirmationsUseCase)
+    factoryOf(::GetMedicalConfirmationPDFUseCase)
+    factoryOf(::SendToInboxMedicalConfirmationUseCase)
+
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)
