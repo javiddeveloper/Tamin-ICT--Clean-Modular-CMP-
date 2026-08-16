@@ -39,10 +39,10 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -112,26 +112,33 @@ fun EdictHeader(
                 )
             },
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.md, bottom = Spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            ) {
-                EdictPensionerChip(
-                    state = state,
-                    onIntent = onIntent,
-                    modifier = Modifier.align(
-                        Alignment.CenterHorizontally
-                    )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                DecorativeBackgroundCircle(
+                    size = 190.dp,
+                    xOffset = 450.dp,
+                    yOffset = (-150).dp,
                 )
-                if (state.isDateFilteredBySearch && state.startDate.isNotEmpty()) {
-                    EdictYearFilterChip(
-                        startDate = state.startDate,
-                        onClear = { onIntent(EdictIntent.ClearDateFilter) },
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Spacing.md, bottom = Spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                ) {
+                    EdictPensionerChip(
+                        state = state,
+                        onIntent = onIntent,
+                        modifier = Modifier.align(
+                            Alignment.CenterHorizontally
+                        )
                     )
-                } else {
-                    EdictDateChipsRow(state = state, onIntent = onIntent)
+                    if (state.isDateFilteredBySearch && state.startDate.isNotEmpty()) {
+                        EdictYearFilterChip(
+                            startDate = state.startDate,
+                            onClear = { onIntent(EdictIntent.ClearDateFilter) },
+                        )
+                    } else {
+                        EdictDateChipsRow(state = state, onIntent = onIntent)
+                    }
                 }
             }
         }
