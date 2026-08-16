@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
+
 /**
  * Minimal fake [UserRepository] used only to satisfy `IdentityInfoUseCase` in
  * [com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel]. The identity lookup
@@ -66,6 +67,13 @@ class FakeUserRepository : UserRepository {
             mobile = "09123456789"
         )
     )
+
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flowOf(null)
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         PdfDownloadDN()
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
@@ -80,3 +88,6 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flowOf(emptyList())
 }
+
+
+

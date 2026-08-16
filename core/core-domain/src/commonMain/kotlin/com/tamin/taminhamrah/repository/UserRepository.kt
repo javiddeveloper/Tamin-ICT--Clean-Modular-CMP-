@@ -47,6 +47,13 @@ interface UserRepository {
 
     fun checkUserIsNew(nationalId: String): Flow<Boolean>
 
+    suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?>
+
     suspend fun getStatusCertificateReport(
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<String>

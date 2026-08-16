@@ -24,6 +24,7 @@ aboutlibraries = "12.1.2"
 onnxruntime-android = "1.20.0"
 core-ktx = "1.18.0"
 androidx-browser = "1.8.0"
+androidx-biometric = "1.1.0"
 
 # Added from tamin catalog
 kotlinxCoroutines = "1.10.2"
@@ -164,6 +165,7 @@ androidx-navigation-compose = { module = "org.jetbrains.androidx.navigation:navi
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "androidx-lifecycle-viewmodel-navigation3" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "androidx-biometric" }
 
 # Jetbrains Lifecycle
 jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "composeLifecycle" }

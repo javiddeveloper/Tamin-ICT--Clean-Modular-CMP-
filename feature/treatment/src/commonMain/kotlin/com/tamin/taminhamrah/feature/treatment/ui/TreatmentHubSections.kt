@@ -285,6 +285,7 @@ internal fun TreatmentQuickAccess(
 internal fun TreatmentCategories(
     onOpenPrescriptions: () -> Unit,
     onOpenMiscClaims: () -> Unit,
+    onOpenApprovals: () -> Unit = {},
 ) {
     val colors = LocalTaminColors.current
     Row(
@@ -304,7 +305,7 @@ internal fun TreatmentCategories(
             icon = vectorResource(Res.drawable.ic_tamin_medical_approvals),
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
-            onClick = {},
+            onClick = onOpenApprovals,
             modifier = Modifier.weight(1f),
         )
         CategoryTile(
@@ -317,6 +318,7 @@ internal fun TreatmentCategories(
         )
     }
 }
+
 
 /**
  * Current-year spend, split between the insured person and the organization. Amounts show
