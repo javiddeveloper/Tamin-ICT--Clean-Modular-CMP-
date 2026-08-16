@@ -206,6 +206,7 @@ class EdictViewModel(
         )
         is PartialState.EdictLoaded -> currentState.copy(
             isLoading = false,
+            hasLoadedOnce = true,
             edictPensioner = partialState.edict
         )
         is PartialState.ShowPensionerSheet -> currentState.copy(showPensionerSheet = partialState.show)

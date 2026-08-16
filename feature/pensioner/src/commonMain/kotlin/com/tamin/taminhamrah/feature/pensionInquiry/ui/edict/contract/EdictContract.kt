@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 @Immutable
 data class EdictUiState(
     val isLoading: Boolean = false,
+    val hasLoadedOnce: Boolean = false,
     val isSendingToInbox: Boolean = false,
     val error: String? = null,
     val pensionerIds: List<PensionIdPR> = emptyList(),

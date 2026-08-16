@@ -143,7 +143,7 @@ fun EdictHeader(
                         spotColor = TaminIdentityCardShadow,
                     ),
             )
-        } else if (!state.isLoading) {
+        } else if (state.hasLoadedOnce && !state.isLoading) {
             EdictEmptyCard(
                 onShowAll = { onIntent(EdictIntent.ClearDateFilter) },
                 modifier = Modifier
