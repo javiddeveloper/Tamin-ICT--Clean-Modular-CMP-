@@ -105,6 +105,8 @@ import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
+import com.tamin.taminhamrah.feature.security.SecurityRoute
+import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -373,6 +375,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToMyInbox = {
                         navController.navigate(MyInboxRoute)
                     },
+                    onNavigateToSecurity = {
+                        navController.navigate(SecurityRoute)
+                    },
                     onNavigateToAddDependent = {
                         navController.navigate(AddDependentRoute)
                     },
@@ -452,6 +457,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         }
                     }
                 )
+
+                securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }

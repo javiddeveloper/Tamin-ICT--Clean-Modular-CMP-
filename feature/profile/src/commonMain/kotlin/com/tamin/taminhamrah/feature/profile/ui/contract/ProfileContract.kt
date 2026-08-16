@@ -60,5 +60,6 @@ sealed interface ProfileEvent {
     data class OpenUrl(val url: String) : ProfileEvent
     data class ShowToast(val message: String) : ProfileEvent
     data object NavigateToBankAccount : ProfileEvent
+    data object NavigateToSecurity : ProfileEvent
 }
 
