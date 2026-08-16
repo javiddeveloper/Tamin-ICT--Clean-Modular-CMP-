@@ -284,6 +284,7 @@ private fun OrotezProtezUserStep(
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
             color = colors.textPrimary,
         )
+
         Spacer(Modifier.height(Spacing.xs))
 
         Text(
@@ -302,6 +303,7 @@ private fun OrotezProtezUserStep(
             showChevron = true,
             onClick = { onIntent(OrotezProtezIntent.OnPickerRequested(OrotezProtezPicker.BRANCH)) },
         )
+
         Spacer(Modifier.height(Spacing.sm))
 
         PickerRow(
@@ -312,6 +314,7 @@ private fun OrotezProtezUserStep(
             showChevron = true,
             onClick = { onIntent(OrotezProtezIntent.OnPickerRequested(OrotezProtezPicker.INSURED_PERSON)) },
         )
+
         Spacer(Modifier.height(Spacing.sm))
 
         PickerRow(

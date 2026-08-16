@@ -22,6 +22,8 @@ import com.tamin.taminhamrah.apiService.health.HealthApiService
 import com.tamin.taminhamrah.apiService.health.createHealthApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
+import com.tamin.taminhamrah.apiService.orotezProtez.OrotezProtezApiService
+import com.tamin.taminhamrah.apiService.orotezProtez.createOrotezProtezApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
@@ -129,6 +131,11 @@ val ApiClientsModule = module {
     single<AgentApiService>(named("agentApiService")) {
         val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
+    }
+
+    single<OrotezProtezApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createOrotezProtezApiService()
     }
 
 }

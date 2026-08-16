@@ -8,12 +8,23 @@ import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezOption
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezPicker
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState.PartialState
+import com.tamin.taminhamrah.mapper.orotezProtez.toBranchWorkshopPresentationList
+import com.tamin.taminhamrah.model.orotezProtez.BranchWorkshopPR
+import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
-class OrotezProtezViewModel : BaseViewModel<OrotezProtezUiState, PartialState, OrotezProtezEvent, OrotezProtezIntent>(
+class OrotezProtezViewModel(
+    private val getRequestInsuredMainInfoUseCase: GetRequestInsuredMainInfoUseCase,
+) : BaseViewModel<OrotezProtezUiState, PartialState, OrotezProtezEvent, OrotezProtezIntent>(
     initialState = OrotezProtezUiState()
 ) {
 
@@ -68,18 +79,33 @@ class OrotezProtezViewModel : BaseViewModel<OrotezProtezUiState, PartialState, O
         }
     }
 
+    /** Step 1's branch/workshop sheet is fed by the real API; the insured-person sheet is still mocked. */
     private fun loadInitialData(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        emit(
-            PartialState.DataLoaded(
-                branch = MOCK_BRANCH_OPTIONS.first(),
-                branchOptions = MOCK_BRANCH_OPTIONS,
-                insuredPersonOptions = MOCK_INSURED_PERSON_OPTIONS,
-                insuredPersonDetails = MOCK_INSURED_PERSON_DETAILS,
-            )
-        )
+        getRequestInsuredMainInfoUseCase()
+            .map { info ->
+                val branchOptions = info.toBranchOptions()
+                PartialState.DataLoaded(
+                    branch = branchOptions.firstOrNull(),
+                    branchOptions = branchOptions,
+                    insuredPersonOptions = MOCK_INSURED_PERSON_OPTIONS,
+                    insuredPersonDetails = MOCK_INSURED_PERSON_DETAILS,
+                ) as PartialState
+            }
+            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .collect { emit(it) }
         emit(PartialState.Loading(false))
     }
+
+    /** DN -> PR (core-ui) -> this feature's generic picker-row model, kept as three separate steps per the project's layering convention. */
+    private fun RequestInsuredMainInfoDN?.toBranchOptions(): ImmutableList<OrotezProtezOptionUi> {
+        return this?.toBranchWorkshopPresentationList()
+            ?.map { it.toOptionUi() }
+            ?.toPersistentList()
+            ?: persistentListOf()
+    }
+
+    private fun BranchWorkshopPR.toOptionUi() = OrotezProtezOptionUi(id = id, label = label)
 
     override fun reduceState(
         currentState: OrotezProtezUiState,
@@ -103,11 +129,6 @@ class OrotezProtezViewModel : BaseViewModel<OrotezProtezUiState, PartialState, O
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 
     private companion object {
-        val MOCK_BRANCH_OPTIONS = persistentListOf(
-            OrotezProtezOptionUi(id = "branch-1", label = "یک تهران - شرکت ارد پارس اسپادانا"),
-            OrotezProtezOptionUi(id = "branch-2", label = "دو کرج - کارگاه صنعتی البرز"),
-            OrotezProtezOptionUi(id = "branch-3", label = "سه شیراز - دفتر مرکزی"),
-        )
         val MOCK_INSURED_PERSON_OPTIONS = persistentListOf(
             OrotezProtezOptionUi(
                 id = "insured-1",

@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -187,6 +188,7 @@ val domainModule = module {
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
+    factoryOf(::GetRequestInsuredMainInfoUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)
