@@ -136,37 +136,33 @@ fun EdictHeader(
             }
         }
 
+        val cardModifier = Modifier
+            .fillMaxWidth()
+            .rideUpIntoHeader(
+                progress = collapseProgress,
+                expandedOverlap = HEADER_OVERLAP,
+                collapsedOverlap = HEADER_OVERLAP,
+            )
+            .padding(horizontal = Spacing.lg)
+
         if (edict != null) {
             EdictMainCard(
                 edict = edict,
                 collapseProgress = collapseProgress,
                 selectedDate = state.startDate,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .rideUpIntoHeader(
-                        progress = collapseProgress,
-                        expandedOverlap = HEADER_OVERLAP,
-                        collapsedOverlap = HEADER_OVERLAP,
-                    )
-                    .padding(horizontal = Spacing.lg)
-                    .shadow(
-                        elevation = 20.dp,
-                        shape = RoundedCornerShape(CornerRadius.card),
-                        ambientColor = TaminIdentityCardShadow,
-                        spotColor = TaminIdentityCardShadow,
-                    ),
+                modifier = cardModifier.shadow(
+                    elevation = 20.dp,
+                    shape = RoundedCornerShape(CornerRadius.card),
+                    ambientColor = TaminIdentityCardShadow,
+                    spotColor = TaminIdentityCardShadow,
+                ),
             )
+        } else if (!state.hasLoadedOnce && state.isLoading) {
+            EdictSkeletonMainCard(modifier = cardModifier)
         } else if (state.hasLoadedOnce && !state.isLoading) {
             EdictEmptyCard(
                 onShowAll = { onIntent(EdictIntent.ClearDateFilter) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .rideUpIntoHeader(
-                        progress = collapseProgress,
-                        expandedOverlap = HEADER_OVERLAP,
-                        collapsedOverlap = HEADER_OVERLAP,
-                    )
-                    .padding(horizontal = Spacing.lg),
+                modifier = cardModifier,
             )
         }
     }

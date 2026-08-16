@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictComparisonCard
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictSkeletonBodyCards
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictDetailsSection
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictHeader
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictPensionerSheet
@@ -181,7 +182,13 @@ fun EdictContent(
                 .verticalScroll(scrollState),
         ) {
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            if (edict != null) {
+            if (!state.hasLoadedOnce && state.isLoading) {
+                EdictSkeletonBodyCards(
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.lg)
+                        .padding(top = Spacing.lg),
+                )
+            } else if (edict != null) {
                 val staggerKey = state.selectedPensionerId to state.startDate
                 val staggerState = rememberStaggeredEntranceState(key = staggerKey)
 
@@ -249,7 +256,7 @@ fun EdictContent(
             )
         }
 
-        if (state.isLoading) {
+        if (state.isLoading && state.hasLoadedOnce) {
             LoadingStateOverlay()
         }
     }
