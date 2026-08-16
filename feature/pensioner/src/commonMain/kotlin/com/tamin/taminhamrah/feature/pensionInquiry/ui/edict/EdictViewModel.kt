@@ -139,6 +139,10 @@ class EdictViewModel(
                 emit(PartialState.ShowSearchSheet(true))
             }
             is EdictIntent.DismissSearchSheet -> {
+                val startDate = uiState.value.startDate
+                val committedYear = if (startDate.length >= 4) startDate.take(4)
+                                    else PersianDateFormatter.currentJalaliYear().toString()
+                emit(PartialState.SearchYearChanged(committedYear))
                 emit(PartialState.ShowSearchSheet(false))
             }
             is EdictIntent.ChangeSearchYear -> {
@@ -173,6 +177,7 @@ class EdictViewModel(
                 emit(PartialState.DateFilteredBySearch(false))
                 val defaultDate = defaultEdictStartDate()
                 emit(PartialState.StartDateChanged(defaultDate))
+                emit(PartialState.SearchYearChanged(defaultDate.take(4)))
                 if (pensionerId.isNullOrEmpty()) return@flow
                 emit(PartialState.Loading(true))
                 try {

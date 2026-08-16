@@ -102,8 +102,8 @@ fun EdictMainCard(
     val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
     val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
     val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0 //increase percentage compared to after
-//    val rawDate = formatEdictDateLabel(selectedDate)
-//    val dateLabelText = if (rawDate.isNotEmpty()) " \u00B7 $rawDate" else ""
+    val rawDate = formatEdictDateLabel(selectedDate)
+    val dateLabelText = if (rawDate.isNotEmpty()) " \u00B7 $rawDate" else ""
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -122,12 +122,12 @@ fun EdictMainCard(
                         .vanishOnCollapse(collapseProgress),
                 )
                 // DateLabel: "فروردین ۱۴۰۰" – travels from beside the hint to the start edge
-//                TaminText(
-//                    text = dateLabelText,
-//                    style = MaterialTheme.typography.bodySmall,
-//                    color = taminColors.textSecondary,
-//                    modifier = Modifier.layoutId(EdictCardSlot.DateLabel),
-//                )
+                TaminText(
+                    text = dateLabelText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.textSecondary,
+                    modifier = Modifier.layoutId(EdictCardSlot.DateLabel),
+                )
                 // Badge: PercentBadge – stays visible, rides vertically into the compact bar
                 Box(modifier = Modifier.layoutId(EdictCardSlot.Badge)) {
                     if (pct > 0) PercentBadge(pct, taminColors)
