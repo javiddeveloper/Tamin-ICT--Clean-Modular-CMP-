@@ -44,6 +44,11 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.Survivor
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictUiState
+import com.tamin.taminhamrah.model.pension.EdictInfoPR
+import com.tamin.taminhamrah.model.pension.EdictPensionerDetailPR
+import com.tamin.taminhamrah.model.pension.EdictPensionerPR
+import com.tamin.taminhamrah.model.pension.PensionIdPR
+import com.tamin.taminhamrah.model.pension.SurvivorInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -309,6 +314,90 @@ private fun EdictBottomBar(
 
 // ─── Preview ──────────────────────────────────────────────────────────────────
 
+private val PreviewEdictInfo = EdictInfoPR(
+    pensionerId = "1003406938",
+    nationalCode = "0012345678",
+    firstName = "محمد",
+    lastName = "احمدی",
+    fatherName = "علی",
+    birthDate = "1350/06/15",
+    idNumber = "123456",
+    gender = "مرد",
+    insuranceType = "بازنشستگی",
+    pensionStartDate = "1401/01/01",
+    originalHistoryYear = "30",
+    originalHistoryMonth = "6",
+    originalHistoryDay = "0",
+    additionalYear = "2",
+    additionalMonth = "0",
+    additionalDay = "0",
+    basisImplementation = "ماده ۷۶",
+    pensionBeforeIncrease = "45000000",
+    pensionAfterIncrease = "52200000",
+    edictDescription = "حکم مستمری بازنشستگی",
+    id = "ED-1405-001",
+    firstStageTotalPensionAndProportional = "50000000",
+    totalPensionBeforeIncrease = "45000000",
+    firstStageTotalProportional = "5000000",
+    totalAmount = "52200000",
+    payableMonthly = "52,200,000",
+    lettersPayableMonthly = "پنجاه و دو میلیون و دویست هزار ریال",
+)
+
+private val PreviewSurvivor = SurvivorInfoPR(
+    pensionAfterIncrease = "26100000",
+    previousPension = "22500000",
+    originalHistoryDay = "0",
+    originalHistoryMonth = "6",
+    originalHistoryYear = "30",
+    leniencyYear = "2",
+    leniencyMonth = "0",
+    leniencyDay = "0",
+    edictDescription = "حکم مستمری بازماندگی",
+    id = "SV-1405-001",
+    insuranceType = "بازماندگی",
+    lastName = "احمدی",
+    firstName = "فاطمه",
+    firstStageTotalPensionAndProportional = "25000000",
+    firstStageTotalProportional = "2500000",
+    differenceProportionalityBasedHistory = "1000000",
+    nationalCode = "0098765432",
+    pensionerId = "1003406938",
+    quota = "50",
+    totalAmount = "26100000",
+)
+
+private val PreviewEdictDetails = listOf(
+    EdictPensionerDetailPR(fieldDesc = "مستمری پایه", fieldValue = "38,000,000", index = "1", packageName = "پایه"),
+    EdictPensionerDetailPR(fieldDesc = "اضافه ارزیابی", fieldValue = "7,000,000", index = "2", packageName = "ارزیابی"),
+    EdictPensionerDetailPR(fieldDesc = "مزایای تکمیلی", fieldValue = "4,500,000", index = "3", packageName = "تکمیلی"),
+    EdictPensionerDetailPR(fieldDesc = "حق عائله‌مندی", fieldValue = "2,700,000", index = "4", packageName = "عائله"),
+)
+
+private val PreviewEdictPensioner = EdictPensionerPR(
+    lastName = "احمدی",
+    branchName = "شعبه تهران مرکز",
+    insuranceId = "۱۲۳۴۵۶۷۸",
+    title = "بازنشسته",
+    edictYear = "1405",
+    edictMonth = "01",
+    edictInfo = PreviewEdictInfo,
+    survivorInfo = listOf(PreviewSurvivor),
+    detail = PreviewEdictDetails,
+)
+
+private val PreviewEdictUiState = EdictUiState(
+    isLoading = false,
+    hasLoadedOnce = true,
+    selectedPensionerId = "1003406938",
+    startDate = "140501",
+    pensionerIds = listOf(
+        PensionIdPR("1003406938"),
+        PensionIdPR("1003406939"),
+    ),
+    edictPensioner = PreviewEdictPensioner,
+)
+
 @PreviewRtlTheme
 @Composable
 private fun EdictContentPreview() {
@@ -316,8 +405,34 @@ private fun EdictContentPreview() {
         EdictContent(
             state = EdictUiState(
                 selectedPensionerId = "1003406938",
-                startDate = "139905",
+                startDate = "140501",
             ),
+            onIntent = {},
+            onBack = {},
+            onDownloadPdf = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun EdictContentFullPreview() {
+    PreviewRtlThemeContent {
+        EdictContent(
+            state = PreviewEdictUiState,
+            onIntent = {},
+            onBack = {},
+            onDownloadPdf = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun EdictContentFullDarkPreview() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        EdictContent(
+            state = PreviewEdictUiState,
             onIntent = {},
             onBack = {},
             onDownloadPdf = {},

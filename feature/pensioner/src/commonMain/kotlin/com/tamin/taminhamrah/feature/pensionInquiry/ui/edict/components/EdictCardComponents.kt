@@ -456,25 +456,6 @@ fun SurvivorShareCard(survivor: SurvivorInfoPR, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(Spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                TaminText(
-                    text = stringResource(
-                        Res.string.edict_survivor_share_title,
-                        "${survivor.firstName} ${survivor.lastName}",
-                    ),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.height(Spacing.xs))
-                TaminText(
-                    text = stringResource(Res.string.edict_survivor_desc, survivor.lastName),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textSecondary,
-                    lineHeight = 18.sp,
-                )
-            }
-
-            Spacer(Modifier.width(Spacing.md))
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
                 CircularProgressIndicator(
@@ -489,9 +470,29 @@ fun SurvivorShareCard(survivor: SurvivorInfoPR, modifier: Modifier = Modifier) {
                     text = "${survivor.quota}%",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = taminColors.blueText,
+                    color = taminColors.teal,
                 )
             }
+            Spacer(Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                TaminText(
+                    text = stringResource(
+                        Res.string.edict_survivor_share_title,
+                        "${survivor.firstName} ${survivor.lastName}",
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = taminColors.textPrimary
+                )
+                Spacer(Modifier.height(Spacing.xs))
+                TaminText(
+                    text = stringResource(Res.string.edict_survivor_desc, survivor.lastName),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.textSecondary,
+                    lineHeight = 18.sp,
+                )
+            }
+
         }
     }
 }
