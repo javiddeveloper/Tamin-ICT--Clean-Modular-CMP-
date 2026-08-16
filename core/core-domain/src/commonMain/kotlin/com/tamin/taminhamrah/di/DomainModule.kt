@@ -69,8 +69,9 @@ import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUs
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
-import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -139,6 +140,9 @@ import org.koin.dsl.module
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
@@ -206,6 +210,7 @@ val domainModule = module {
     factoryOf(::GetUserRequestTypesUseCase)
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
+    factoryOf(::GetHistoryJobInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
@@ -274,6 +279,10 @@ val domainModule = module {
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)
+    factoryOf(::GetMedicalConfirmationsUseCase)
+    factoryOf(::GetMedicalConfirmationPDFUseCase)
+    factoryOf(::SendToInboxMedicalConfirmationUseCase)
+
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)

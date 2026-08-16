@@ -50,6 +50,8 @@ internal object TreatmentDimens {
 
     /** A quarter turn: the disclosure chevron points back when closed, down when open. */
     const val chevronOpenDegrees = -90f
+    const val chevronClosedDegrees = 0f
+
 
     // Category tiles & badges
     val categoryTileIconSize = 40.dp

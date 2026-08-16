@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui.model
 
 import com.tamin.taminhamrah.feature.treatment.ui.contract.*
+import com.tamin.taminhamrah.mapper.treatment.toPresentation
 import com.tamin.taminhamrah.model.treatment.*
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -144,4 +145,60 @@ object TreatmentMocks {
         prescriptionDetailList = listOf(prescriptionDetail, prescriptionDetail.copy(serviceName = "کپسول آموکسی‌سیلین")),
         prescriptionPriceList = persistentListOf(prescriptionPrice)
     )
+
+    /**
+     * Wire-shaped, taken from a live `commission-confrimation` response: unseparated dates,
+     * Arabic ي throughout, day counts as strings, and no `repId` -- the service sends none.
+     *
+     * Already trimmed, because this is a domain model and the trim happens upstream of it in the
+     * DTO mapper. Every preview row below runs through the real presentation mapper rather than
+     * holding pre-formatted literals, so a preview stops looking right the moment the date
+     * formatter or the letter normalizer breaks.
+     */
+    private val medicalConfirmationDn = MedicalConfirmationDN(
+        repId = null,
+        supportType = "غرامت دستمزد",
+        treatmentCenter = "شوراي پزشکي تهران-پلي کلينيک قدس",
+        outpatientRestStartDate = "14011011",
+        outpatientRestEndDate = "14011210",
+        numberOfOutpatientDays = "60",
+        inpatientRestStartDate = "14010328",
+        inpatientRestEndDate = "14010401",
+        numberOfInpatientDays = "5",
+        unapprovedFromDate = null,
+        unapprovedToDate = null,
+        branchName = "بيست تهران",
+        branchStatus = "تائيد شعبه",
+        description = "استراحت‌های پزشکی نامبرده به علت High risk pregnancy مورد تایید می‌باشد (سرپایی)",
+        statusDesc = "تائيد شده",
+    )
+
+    val medicalConfirmation = medicalConfirmationDn.toPresentation()
+
+    val confirmationsUiState = ConfirmationsUiState(
+        confirmationList = persistentListOf(
+            medicalConfirmation,
+            // Pending, with an unapproved period and no inpatient rest.
+            medicalConfirmationDn.copy(
+                supportType = "کمک‌هزینهٔ بارداری",
+                treatmentCenter = "شوراي پزشکي تهران-درمانگاه شهيد مطهري",
+                numberOfOutpatientDays = "30",
+                inpatientRestStartDate = null,
+                inpatientRestEndDate = null,
+                numberOfInpatientDays = "0",
+                unapprovedFromDate = "14020215",
+                unapprovedToDate = "14020220",
+                branchStatus = "در حال بررسي در شعبه",
+                statusDesc = "در انتظار تاييد",
+            ).toPresentation(),
+            // The spelling that used to classify as approved because it contains «تايئد».
+            // Also, the only row with a repId, so it previews the card's certificate actions.
+            medicalConfirmationDn.copy(
+                repId = "3",
+                treatmentCenter = "شوراي پزشکي تهران-بيمارستان دکتر انصاري",
+                statusDesc = "تايئد نشده",
+            ).toPresentation(),
+        )
+    )
 }
+

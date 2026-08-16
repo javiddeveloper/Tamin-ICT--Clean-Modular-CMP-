@@ -4,13 +4,17 @@ import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.model.history.DastmozdInfoPR
-import kotlin.jvm.JvmName
-import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
-import com.tamin.taminhamrah.model.history.TalfighInfoPR
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoItemPR
+import com.tamin.taminhamrah.model.history.HistoryJobInfoPR
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
+import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
+import com.tamin.taminhamrah.model.history.TalfighInfoPR
 import com.tamin.taminhamrah.model.history.WageDetailDN
 import com.tamin.taminhamrah.model.history.WageDetailPR
+import kotlin.jvm.JvmName
 
 fun TalfighInfoItemDN.toPresentation(): TalfighInfoItemPR {
     return TalfighInfoItemPR(
@@ -73,6 +77,30 @@ fun List<DastmozdInfoItemDN>.toPresentation(): List<DastmozdInfoItemPR> {
 
 fun DastmozdInfoDN.toPresentation(): DastmozdInfoPR {
     return DastmozdInfoPR(
+        list = list?.toPresentation() ?: emptyList(),
+        total = total ?: 0
+    )
+}
+
+fun HistoryJobInfoItemDN.toPresentation(): HistoryJobInfoItemPR {
+    return HistoryJobInfoItemPR(
+        risuid = risuid ?: "",
+        rwshName = rwshName ?: "",
+        brhcode = brhcode ?: "",
+        id = id ?: 0,
+        jobDesc = jobDesc ?: "",
+        startDate = startDate ?: "",
+        rwshId = rwshId ?: ""
+    )
+}
+
+@JvmName("toPresentationHistoryJobInfo")
+fun List<HistoryJobInfoItemDN>.toPresentation(): List<HistoryJobInfoItemPR> {
+    return this.map { it.toPresentation() }
+}
+
+fun HistoryJobInfoDN.toPresentation(): HistoryJobInfoPR {
+    return HistoryJobInfoPR(
         list = list?.toPresentation() ?: emptyList(),
         total = total ?: 0
     )
