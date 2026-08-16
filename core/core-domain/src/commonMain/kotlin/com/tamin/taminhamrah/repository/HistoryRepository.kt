@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 
 interface HistoryRepository {
@@ -12,4 +13,9 @@ interface HistoryRepository {
     suspend fun getDastmozdInfos(
         filters: List<ApiFilterDN> = emptyList()
     ): DastmozdInfoDN
+
+    suspend fun getUserInfos(): UserInfoDN
+
+    suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean)
 }
+

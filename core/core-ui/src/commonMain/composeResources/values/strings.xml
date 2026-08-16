@@ -442,5 +442,30 @@
     <string name="error_cancel_license_message">لغو مجوز با خطا مواجه شد</string>
     <string name="error_issue_license_message">صدور مجوز با خطا مواجه شد</string>
     <string name="error_unknown_fallback">Unknown Error</string>
+
+    <!-- Send History To Institutions -->
+    <string name="send_history_title">اعلام سابقه</string>
+    <string name="send_history_subtitle">اعلام سابقه به مؤسسات</string>
+    <string name="send_history_step_type">نوع سابقه</string>
+    <string name="send_history_step_confirm">تأیید و ارسال</string>
+    <string name="send_history_issue_certificate">صدور گواهی</string>
+    <string name="send_history_select_type_placeholder">انتخاب نوع سابقه</string>
+    <string name="send_history_select_type_title">انتخاب نوع سابقه</string>
+    <string name="send_history_type_all">کلیه سوابق</string>
+    <string name="send_history_type_wages">سوابق و ریز دستمزدها بعد از سال ۸۶</string>
+    <string name="send_history_type_combined">سوابق تلفیقی</string>
+    <string name="send_history_confirm_sheet">تأیید</string>
+    <string name="send_history_next_step">مرحله بعد</string>
+    <string name="send_history_disclaimer">قبل از ارسال سابقه به صندوق شخصی برای اعلام سابقه، لطفاً تمامی سوابق خود را مشاهده و بررسی نمایید و درصورت اطمینان از صحت سابقه، آن را ارسال فرمایید.</string>
+    <string name="send_history_review_title">بازبینی و تأیید</string>
+    <string name="send_history_label_full_name">نام و نام خانوادگی</string>
+    <string name="send_history_label_insurance_number">شمارهٔ بیمه</string>
+    <string name="send_history_label_destination">مقصد گواهی</string>
+    <string name="send_history_destination_value">صندوق شخصی</string>
+    <string name="send_history_label_selected_type">نوع سابقهٔ انتخاب‌شده</string>
+    <string name="send_history_submit_button">صدور گواهی و ارسال به صندوق شخصی</string>
+    <string name="send_history_success_title">درخواست شما با موفقیت ثبت شد</string>
+    <string name="send_history_success_description">ارسال سابقه به مؤسسات با موفقیت انجام شد</string>
+    <string name="send_history_success_action">متوجه شدم</string>
 </resources>
 

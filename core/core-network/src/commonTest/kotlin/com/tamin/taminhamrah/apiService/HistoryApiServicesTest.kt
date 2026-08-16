@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class HistoryApiServicesTest : BaseApiTest() {
 
@@ -86,6 +87,47 @@ class HistoryApiServicesTest : BaseApiTest() {
         assertNotNull(response.data)
         assertEquals(0, response.data?.total)
         assertEquals(0, response.data?.list?.size)
+    }
+
+    @Test
+    fun `getUserInfos should return successful response with data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = HistoryTestData.userInfoSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createHistoryApiServices()
+
+        val response = apiService.getUserInfos()
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNotNull(response.data)
+        assertEquals("عادل", response.data?.firstName)
+        assertEquals("حسين پناهي", response.data?.lastName)
+        assertEquals("2062144681", response.data?.socialSecurityNumber)
+        assertEquals("0082984639", response.data?.insuranceNumber)
+        assertEquals("1361/10/01", response.data?.birthDate)
+        assertEquals("5589743451", response.data?.nationalID)
+        assertEquals("2782294052", response.data?.id)
+        assertNull(response.data?.militaryServiceCode)
+        assertNull(response.data?.marriageCode)
+    }
+
+    @Test
+    fun `sendToInstitution should return successful response with null data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = HistoryTestData.sendToInstitutionSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createHistoryApiServices()
+
+        val response = apiService.sendToInstitution(type1 = true, type2 = true, type3 = true)
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
     }
 }
 
@@ -206,4 +248,35 @@ object HistoryTestData {
             "total": 0
         }
     """.trimIndent()
+
+    val userInfoSuccess = """
+        {
+            "serial1": "ا19",
+            "militaryServiceCode": null,
+            "fatherName": "فرج اله",
+            "lastName": "حسين پناهي",
+            "serial2": "632661",
+            "creationTime": 1470332948237,
+            "lastModificationTime": 1771136020155,
+            "cityCode": "1514",
+            "socialSecurityNumber": "2062144681",
+            "lastModifiedBy": "3790166227",
+            "issueplaceName": "دهگلان",
+            "birthDate": "1361/10/01",
+            "firstName": "عادل",
+            "insuranceNumber": "0082984639",
+            "genderCode": "01",
+            "nationalID": "5589743451",
+            "marriageCode": null,
+            "createdBy": "5589127671",
+            "identityNumber": "5",
+            "countryCode": "0001",
+            "id": "2782294052",
+            "birthDateTimestamp": 409350600000,
+            "issueplace": "1514",
+            "nationCode": "01"
+        }
+    """.trimIndent()
+
+    val sendToInstitutionSuccess = """null"""
 }
