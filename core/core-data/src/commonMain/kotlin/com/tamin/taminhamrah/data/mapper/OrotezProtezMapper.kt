@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.orotezProtez.BranchWorkshopDN
 import com.tamin.taminhamrah.model.orotezProtez.BranchWorkshopDTO
+import com.tamin.taminhamrah.model.orotezProtez.InsuredPersonDN
+import com.tamin.taminhamrah.model.orotezProtez.InsuredPersonDTO
 import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN
 import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDTO
 
@@ -29,5 +31,20 @@ fun BranchWorkshopDTO.toDomain(): BranchWorkshopDN {
         branchName = branchName,
         workshopCode = workshopCode,
         workshopName = workshopName,
+    )
+}
+
+fun InsuredPersonDTO.toDomain(): InsuredPersonDN {
+    return InsuredPersonDN(
+        insuredId = risuId,
+        firstName = firstName,
+        lastName = lastName,
+        nationalCode = nationCode,
+        birthCertificateNumber = birthCertificateNumber,
+        cityName = cityName,
+        birthDate = birthDate,
+        relationship = relationship,
+        relationshipCode = relationshipCode,
+        bookletValidUntil = bookletValidUntil,
     )
 }

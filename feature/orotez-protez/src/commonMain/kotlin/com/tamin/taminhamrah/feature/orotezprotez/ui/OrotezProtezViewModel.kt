@@ -9,21 +9,28 @@ import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezPicker
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState.PartialState
 import com.tamin.taminhamrah.mapper.orotezProtez.toBranchWorkshopPresentationList
+import com.tamin.taminhamrah.mapper.orotezProtez.toPresentation
 import com.tamin.taminhamrah.model.orotezProtez.BranchWorkshopPR
+import com.tamin.taminhamrah.model.orotezProtez.InsuredPersonPR
 import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.orotez_protez_insured_person_subtitle
 
 class OrotezProtezViewModel(
     private val getRequestInsuredMainInfoUseCase: GetRequestInsuredMainInfoUseCase,
+    private val getInsuredPersonsUseCase: GetInsuredPersonsUseCase,
 ) : BaseViewModel<OrotezProtezUiState, PartialState, OrotezProtezEvent, OrotezProtezIntent>(
     initialState = OrotezProtezUiState()
 ) {
@@ -79,21 +86,23 @@ class OrotezProtezViewModel(
         }
     }
 
-    /** Step 1's branch/workshop sheet is fed by the real API; the insured-person sheet is still mocked. */
+    /** Step 1's branch/workshop sheet and insured-person sheet are both fed by the real API. */
     private fun loadInitialData(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        getRequestInsuredMainInfoUseCase()
-            .map { info ->
-                val branchOptions = info.toBranchOptions()
+        try {
+            val branchOptions = getRequestInsuredMainInfoUseCase().first().toBranchOptions()
+            val insuredPersons = getInsuredPersonsUseCase().first().map { it.toPresentation() }
+            emit(
                 PartialState.DataLoaded(
                     branch = branchOptions.firstOrNull(),
                     branchOptions = branchOptions,
-                    insuredPersonOptions = MOCK_INSURED_PERSON_OPTIONS,
-                    insuredPersonDetails = MOCK_INSURED_PERSON_DETAILS,
-                ) as PartialState
-            }
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
-            .collect { emit(it) }
+                    insuredPersonOptions = insuredPersons.toOptionUiList(),
+                    insuredPersonDetails = insuredPersons.toDetailUiMap(),
+                )
+            )
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        }
         emit(PartialState.Loading(false))
     }
 
@@ -106,6 +115,30 @@ class OrotezProtezViewModel(
     }
 
     private fun BranchWorkshopPR.toOptionUi() = OrotezProtezOptionUi(id = id, label = label)
+
+    private suspend fun List<InsuredPersonPR>.toOptionUiList(): ImmutableList<OrotezProtezOptionUi> {
+        return map { person ->
+            OrotezProtezOptionUi(
+                id = person.id,
+                label = person.label,
+                subtitle = getString(Res.string.orotez_protez_insured_person_subtitle, person.id),
+            )
+        }.toPersistentList()
+    }
+
+    private fun List<InsuredPersonPR>.toDetailUiMap(): ImmutableMap<String, OrotezProtezInsuredDetailUi> {
+        return associate { person ->
+            person.id to OrotezProtezInsuredDetailUi(
+                fullName = person.fullName,
+                relation = person.relation,
+                nationalCode = person.nationalCode,
+                birthCertificateNumber = person.birthCertificateNumber,
+                issuePlace = person.issuePlace,
+                birthDateLabel = person.birthDateLabel,
+                bookletValidUntilLabel = person.bookletValidUntilLabel,
+            )
+        }.toPersistentMap()
+    }
 
     override fun reduceState(
         currentState: OrotezProtezUiState,
@@ -127,55 +160,4 @@ class OrotezProtezViewModel(
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
-
-    private companion object {
-        val MOCK_INSURED_PERSON_OPTIONS = persistentListOf(
-            OrotezProtezOptionUi(
-                id = "insured-1",
-                label = "اصلی (خود) - رضا دریکوند",
-                subtitle = "شماره بیمه ۰۰۵۳۱۸۵۲۴۲",
-            ),
-            OrotezProtezOptionUi(
-                id = "insured-2",
-                label = "همسر - مریم دریکوند",
-                subtitle = "شماره بیمه ۰۰۵۳۱۸۵۲۴۳",
-            ),
-            OrotezProtezOptionUi(
-                id = "insured-3",
-                label = "فرزند - امیرعلی دریکوند",
-                subtitle = "شماره بیمه ۰۰۵۳۱۸۵۲۴۴",
-            ),
-        )
-
-        // Step 2's whole read-only card is looked up from here by the step-1 selection's id.
-        val MOCK_INSURED_PERSON_DETAILS = persistentMapOf(
-            "insured-1" to OrotezProtezInsuredDetailUi(
-                fullName = "رضا دریکوند",
-                relation = "اصلی (خود)",
-                nationalCode = "۴۰۶۰۴۳۴۰۶۱",
-                birthCertificateNumber = "۴۰۶۰۴۳۴۰۶۱",
-                issuePlace = "خرم آباد",
-                birthDateLabel = "۱۳۷۰/۰۷/۱۳",
-                bookletValidUntilLabel = "۱۴۰۵/۰۶/۱۵",
-            ),
-            "insured-2" to OrotezProtezInsuredDetailUi(
-                fullName = "مریم دریکوند",
-                relation = "همسر",
-                nationalCode = "۴۰۶۰۴۳۴۰۶۲",
-                birthCertificateNumber = "۴۰۶۰۴۳۴۰۶۲",
-                issuePlace = "خرم آباد",
-                birthDateLabel = "۱۳۷۲/۰۳/۰۲",
-                bookletValidUntilLabel = "۱۴۰۵/۰۶/۱۵",
-            ),
-            "insured-3" to OrotezProtezInsuredDetailUi(
-                fullName = "امیرعلی دریکوند",
-                relation = "فرزند",
-                nationalCode = "۴۰۶۰۴۳۴۰۶۳",
-                birthCertificateNumber = "۴۰۶۰۴۳۴۰۶۳",
-                issuePlace = "خرم آباد",
-                birthDateLabel = "۱۳۹۸/۱۱/۲۰",
-                bookletValidUntilLabel = "۱۴۰۵/۰۶/۱۵",
-            ),
-        )
-    }
 }

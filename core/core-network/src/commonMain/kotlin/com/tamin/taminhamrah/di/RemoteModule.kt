@@ -184,6 +184,7 @@ val remoteModule = module {
     single<OrotezProtezRemoteDataSource> {
         OrotezProtezRemoteDataSourceImpl(
             orotezProtezApiService = get(),
+            apiQueryBuilder = get(),
             errorParser = get()
         )
     }

@@ -456,6 +456,7 @@
     <string name="orotez_protez_pick_branch_subtitle">شعبهٔ رسیدگی‌کننده به درخواست</string>
     <string name="orotez_protez_pick_insured_person_title">فرد استفاده‌کننده</string>
     <string name="orotez_protez_pick_insured_person_subtitle">بیمه‌شدهٔ اصلی یا افراد تحت تکفل</string>
+    <string name="orotez_protez_insured_person_subtitle">شماره بیمه %1$s</string>
     <string name="orotez_protez_next_step">مرحله بعد</string>
     <string name="orotez_protez_step_info_title">اطلاعات بیمه‌شده</string>
     <string name="orotez_protez_step_info_description">اطلاعات فرد انتخاب‌شده را بررسی و تأیید کنید.</string>
