@@ -8,6 +8,18 @@
     <string name="user_request_tracking_code_copied">کد پیگیری کپی شد</string>
     <string name="user_request_smart_guide_not_found">راهنمای هوشمند برای وضعیت فعلی این درخواست موجود نیست.</string>
 
+    <!-- Status Matching Keywords (matched against server-returned statusDesc values) -->
+    <string name="user_request_keyword_in_progress">در جریان</string>
+    <string name="user_request_keyword_review">بررسی</string>
+    <string name="user_request_keyword_defect">نقص</string>
+    <string name="user_request_keyword_disapproval">عدم</string>
+    <string name="user_request_keyword_action">اقدام</string>
+    <string name="user_request_keyword_error">خطا</string>
+    <string name="user_request_keyword_approved">تایید</string>
+    <string name="user_request_keyword_closed">مختومه</string>
+    <string name="user_request_keyword_completed">تکمیل</string>
+    <string name="user_request_keyword_pregnancy">بارداری</string>
+
     <!-- Request Status Tabs -->
     <string name="user_request_tab_all">همه</string>
     <string name="user_request_tab_in_progress">در جریان</string>
@@ -36,6 +48,7 @@
     <string name="user_request_step_branch_delivery">تحویل شعبه</string>
     <string name="user_request_step_processing_complete">تکمیل رسیدگی</string>
     <string name="user_request_step_result">نتیجه</string>
+    <string name="user_request_step_error_indicator">!</string>
 
     <!-- Bottom Sheets & Dialogs -->
     <string name="user_request_errors_sheet_title">خطاهای ثبت‌شده</string>
@@ -73,4 +86,12 @@
     <string name="user_request_detail_sample_national_id">۶۳۱۹۸۸۹۳۹۱</string>
     <string name="user_request_detail_sample_pension_num">۱۰۰۳ND06938</string>
     <string name="user_request_detail_placeholder_dash">-</string>
+    <string name="user_request_detail_start_date">تاریخ شروع</string>
+    <string name="user_request_detail_end_date">تاریخ پایان</string>
+    <string name="user_request_detail_employer_name">نام کارفرما</string>
+    <string name="user_request_detail_amount">مبلغ</string>
+    <string name="user_request_detail_objection_date">تاریخ ثبت اعتراض</string>
+    <string name="user_request_detail_objection_reason">علت اعتراض</string>
+    <string name="user_request_detail_article16_date">تاریخ طرح در هیات</string>
+    <string name="user_request_detail_article16_result">رای هیات</string>
 </resources>

@@ -36,6 +36,18 @@ class UserRequestRemoteDataSourceImpl(
         return fetchListData { requestApiService.getSmartGuideList(params) }
     }
 
+    override suspend fun getUserRequestDetail(id: Long): UserRequestDTO {
+        return try {
+            requestApiService.getUserRequestDetail(id).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     private suspend fun <T> fetchListData(
         call: suspend () -> BaseDTO<ListData<T>>
     ): ListData<T> {

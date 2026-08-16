@@ -19,5 +19,7 @@ interface UserRequestRemoteDataSource {
      * NOT the standard filter JSON array used by other endpoints.
      */
     suspend fun getSmartGuideList(params: Map<String, String>): ListData<SmartGuideDTO>
+
+    suspend fun getUserRequestDetail(id: Long): UserRequestDTO
 }
 

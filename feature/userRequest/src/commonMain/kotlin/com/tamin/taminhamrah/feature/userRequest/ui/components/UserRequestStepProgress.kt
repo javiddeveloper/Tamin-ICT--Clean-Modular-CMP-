@@ -28,7 +28,14 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
+import taminx.feature.userrequest.generated.resources.user_request_keyword_approved
+import taminx.feature.userrequest.generated.resources.user_request_keyword_closed
+import taminx.feature.userrequest.generated.resources.user_request_keyword_completed
+import taminx.feature.userrequest.generated.resources.user_request_keyword_defect
+import taminx.feature.userrequest.generated.resources.user_request_keyword_disapproval
+import taminx.feature.userrequest.generated.resources.user_request_keyword_error
 import taminx.feature.userrequest.generated.resources.user_request_step_branch_delivery
+import taminx.feature.userrequest.generated.resources.user_request_step_error_indicator
 import taminx.feature.userrequest.generated.resources.user_request_step_preprocessing
 import taminx.feature.userrequest.generated.resources.user_request_step_processing_complete
 import taminx.feature.userrequest.generated.resources.user_request_step_result
@@ -50,8 +57,15 @@ fun UserRequestStepProgress(
     statusDesc: String,
     modifier: Modifier = Modifier,
 ) {
-    val isCompleted = statusDesc.contains("تایید") || statusDesc.contains("مختومه") || statusDesc.contains("تکمیل")
-    val isError = statusDesc.contains("عدم") || statusDesc.contains("نقص") || statusDesc.contains("خطا")
+    val kwApproved = stringResource(UserRequestRes.string.user_request_keyword_approved)
+    val kwClosed = stringResource(UserRequestRes.string.user_request_keyword_closed)
+    val kwCompleted = stringResource(UserRequestRes.string.user_request_keyword_completed)
+    val kwDisapproval = stringResource(UserRequestRes.string.user_request_keyword_disapproval)
+    val kwDefect = stringResource(UserRequestRes.string.user_request_keyword_defect)
+    val kwError = stringResource(UserRequestRes.string.user_request_keyword_error)
+
+    val isCompleted = statusDesc.contains(kwApproved) || statusDesc.contains(kwClosed) || statusDesc.contains(kwCompleted)
+    val isError = statusDesc.contains(kwDisapproval) || statusDesc.contains(kwDefect) || statusDesc.contains(kwError)
 
     val steps = if (isCompleted) {
         listOf(
@@ -175,7 +189,7 @@ private fun StepNode(
                 contentAlignment = Alignment.Center
             ) {
                 TaminText(
-                    text = "!",
+                    text = stringResource(UserRequestRes.string.user_request_step_error_indicator),
                     style = MaterialTheme.typography.labelMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold

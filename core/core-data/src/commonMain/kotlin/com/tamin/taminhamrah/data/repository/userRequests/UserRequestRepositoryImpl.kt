@@ -84,6 +84,10 @@ internal class UserRequestRepositoryImpl(
         return response.list.orEmpty().map { it.toDomain() }
     }
 
+    override suspend fun getUserRequestDetail(id: Long): UserRequestDN {
+        return requestRemoteDataSource.getUserRequestDetail(id).toDomain()
+    }
+
     private fun buildQuery(search: UserRequestSearchParams): ApiQueryParamDN = ApiQueryParamDN(
         filters = UserRequestFilter.buildFilters(search),
         sorts = UserRequestSort.defaultSorts(),

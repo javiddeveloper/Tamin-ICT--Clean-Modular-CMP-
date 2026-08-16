@@ -1,5 +1,3 @@
-package com.tamin.taminhamrah.feature.userRequest.ui
-
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
@@ -68,7 +66,8 @@ class UserRequestsViewModel(
         getUserRequestsUseCase(search)
             .catch { emit(PartialState.Error(it.message)) }
             .collect { requests ->
-                emit(PartialState.RequestsLoaded(requests.toPresentation()))
+                val presentation = requests.toPresentation()
+                emit(PartialState.RequestsLoaded(presentation))
             }
     }
 
@@ -113,9 +112,8 @@ class UserRequestsViewModel(
             UserRequestsEvent.NavigateToDetail(
                 requestId = intent.request.id,
                 refCode = intent.request.refCode,
-                requestTypeId = 22L,
+                requestTypeId = intent.request.requestTypeId,
                 title = intent.request.title
-
             )
         )
     }

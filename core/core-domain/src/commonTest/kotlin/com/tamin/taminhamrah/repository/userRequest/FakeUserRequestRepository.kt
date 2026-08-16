@@ -45,5 +45,13 @@ class FakeUserRequestRepository : UserRequestRepository {
         if (shouldThrowError) throw error
         return smartGuideResult
     }
+
+    var userRequestDetailResult: UserRequestDN? = null
+
+    override suspend fun getUserRequestDetail(id: Long): UserRequestDN {
+        lastRequestId = id
+        if (shouldThrowError) throw error
+        return userRequestDetailResult ?: throw RuntimeException("No user request detail set in fake repository")
+    }
 }
 

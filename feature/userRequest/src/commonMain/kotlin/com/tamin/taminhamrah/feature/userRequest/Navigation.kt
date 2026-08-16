@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.userRequest.ui.UserRequestsScreen
-import com.tamin.taminhamrah.feature.userRequest.ui.screens.UserRequestDetailScreen
+import com.tamin.taminhamrah.feature.userRequest.ui.screens.UserRequestDetailRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -44,9 +44,10 @@ fun NavGraphBuilder.userRequestGraph(
 
     composable<UserRequestRoute.Detail> { backStackEntry ->
         val route: UserRequestRoute.Detail = backStackEntry.toRoute()
-        UserRequestDetailScreen(
+        UserRequestDetailRoute(
             requestId = route.requestId,
             refCode = route.refCode,
+            requestTypeId = route.requestTypeId,
             onBackClick = { navController.popBackStack() },
             title = route.title
         )

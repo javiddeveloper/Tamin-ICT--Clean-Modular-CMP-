@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.userRequest.ui
 
+import UserRequestsViewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +34,6 @@ import com.tamin.taminhamrah.feature.userRequest.ui.components.UserRequestCard
 import com.tamin.taminhamrah.feature.userRequest.ui.components.UserRequestFilterPanel
 import com.tamin.taminhamrah.feature.userRequest.ui.components.UserRequestStatusTabs
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.RequestStatusTab
-import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestKeywords
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsUiState
@@ -53,6 +53,15 @@ import taminx.feature.userrequest.generated.resources.user_request_default_guide
 import taminx.feature.userrequest.generated.resources.user_request_demo_details_dialog
 import taminx.feature.userrequest.generated.resources.user_request_empty_list
 import taminx.feature.userrequest.generated.resources.user_request_header_subtitle
+import taminx.feature.userrequest.generated.resources.user_request_keyword_action
+import taminx.feature.userrequest.generated.resources.user_request_keyword_approved
+import taminx.feature.userrequest.generated.resources.user_request_keyword_closed
+import taminx.feature.userrequest.generated.resources.user_request_keyword_completed
+import taminx.feature.userrequest.generated.resources.user_request_keyword_defect
+import taminx.feature.userrequest.generated.resources.user_request_keyword_disapproval
+import taminx.feature.userrequest.generated.resources.user_request_keyword_in_progress
+import taminx.feature.userrequest.generated.resources.user_request_keyword_pregnancy
+import taminx.feature.userrequest.generated.resources.user_request_keyword_review
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -100,15 +109,26 @@ fun UserRequestsContent(
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
+
+    val kwInProgress = stringResource(UserRequestRes.string.user_request_keyword_in_progress)
+    val kwReview = stringResource(UserRequestRes.string.user_request_keyword_review)
+    val kwDefect = stringResource(UserRequestRes.string.user_request_keyword_defect)
+    val kwDisapproval = stringResource(UserRequestRes.string.user_request_keyword_disapproval)
+    val kwAction = stringResource(UserRequestRes.string.user_request_keyword_action)
+    val kwApproved = stringResource(UserRequestRes.string.user_request_keyword_approved)
+    val kwClosed = stringResource(UserRequestRes.string.user_request_keyword_closed)
+    val kwCompleted = stringResource(UserRequestRes.string.user_request_keyword_completed)
+    val kwPregnancy = stringResource(UserRequestRes.string.user_request_keyword_pregnancy)
+
     val allCount = state.requests.size
     val inProgressCount = state.requests.count {
-        it.statusDesc.contains(UserRequestKeywords.IN_PROGRESS) || it.statusDesc.contains(UserRequestKeywords.REVIEW)
+        it.statusDesc.contains(kwInProgress) || it.statusDesc.contains(kwReview)
     }
     val actionRequiredCount = state.requests.count {
-        it.statusDesc.contains(UserRequestKeywords.DEFECT) || it.statusDesc.contains(UserRequestKeywords.DISAPPROVAL) || it.statusDesc.contains(UserRequestKeywords.ACTION)
+        it.statusDesc.contains(kwDefect) || it.statusDesc.contains(kwDisapproval) || it.statusDesc.contains(kwAction)
     }
     val completedCount = state.requests.count {
-        it.statusDesc.contains(UserRequestKeywords.APPROVED) || it.statusDesc.contains(UserRequestKeywords.CLOSED) || it.statusDesc.contains(UserRequestKeywords.COMPLETED)
+        it.statusDesc.contains(kwApproved) || it.statusDesc.contains(kwClosed) || it.statusDesc.contains(kwCompleted)
     }
 
     val counts = mapOf(
@@ -234,7 +254,7 @@ fun UserRequestsContent(
                     UserRequestCard(
                         request = request,
                         onViewDetails = {
-                            if (request.title.contains(UserRequestKeywords.PREGNANCY)) {
+                            if (request.title.contains(kwPregnancy)) {
                                 onIntent(UserRequestsIntent.ShowInfoDialog(demoDetailsMsg))
                             } else {
                                 onIntent(UserRequestsIntent.ViewDetails(request))

@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
 
 interface UserRequestApiService {
@@ -30,5 +31,10 @@ interface UserRequestApiService {
     suspend fun getSmartGuideList(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<SmartGuideDTO>>
+
+    @GET("requests/{id}")
+    suspend fun getUserRequestDetail(
+        @Path("id") id: Long
+    ): BaseDTO<UserRequestDTO>
 }
 

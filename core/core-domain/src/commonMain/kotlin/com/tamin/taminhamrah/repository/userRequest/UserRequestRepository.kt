@@ -17,5 +17,7 @@ interface UserRequestRepository {
     suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN>
 
     suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN>
+
+    suspend fun getUserRequestDetail(id: Long): UserRequestDN
 }
 

@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestKeywords
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -42,6 +41,12 @@ import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 import taminx.feature.userrequest.generated.resources.user_request_errors_btn
 import taminx.feature.userrequest.generated.resources.user_request_follow_up_objection
 import taminx.feature.userrequest.generated.resources.user_request_guide_btn
+import taminx.feature.userrequest.generated.resources.user_request_keyword_approved
+import taminx.feature.userrequest.generated.resources.user_request_keyword_closed
+import taminx.feature.userrequest.generated.resources.user_request_keyword_completed
+import taminx.feature.userrequest.generated.resources.user_request_keyword_defect
+import taminx.feature.userrequest.generated.resources.user_request_keyword_disapproval
+import taminx.feature.userrequest.generated.resources.user_request_keyword_error
 import taminx.feature.userrequest.generated.resources.user_request_other_requests
 import taminx.feature.userrequest.generated.resources.user_request_tracking_code_prefix
 import taminx.feature.userrequest.generated.resources.user_request_view_request
@@ -124,12 +129,19 @@ fun UserRequestCard(
 ) {
     val clipboardManager = LocalClipboardManager.current
 
-    val isStatusError = request.statusDesc.contains(UserRequestKeywords.DISAPPROVAL) ||
-            request.statusDesc.contains(UserRequestKeywords.DEFECT) ||
-            request.statusDesc.contains(UserRequestKeywords.ERROR)
-    val isStatusApproved = request.statusDesc.contains(UserRequestKeywords.APPROVED) ||
-            request.statusDesc.contains(UserRequestKeywords.CLOSED) ||
-            request.statusDesc.contains(UserRequestKeywords.COMPLETED)
+    val kwDisapproval = stringResource(UserRequestRes.string.user_request_keyword_disapproval)
+    val kwDefect = stringResource(UserRequestRes.string.user_request_keyword_defect)
+    val kwError = stringResource(UserRequestRes.string.user_request_keyword_error)
+    val kwApproved = stringResource(UserRequestRes.string.user_request_keyword_approved)
+    val kwClosed = stringResource(UserRequestRes.string.user_request_keyword_closed)
+    val kwCompleted = stringResource(UserRequestRes.string.user_request_keyword_completed)
+
+    val isStatusError = request.statusDesc.contains(kwDisapproval) ||
+            request.statusDesc.contains(kwDefect) ||
+            request.statusDesc.contains(kwError)
+    val isStatusApproved = request.statusDesc.contains(kwApproved) ||
+            request.statusDesc.contains(kwClosed) ||
+            request.statusDesc.contains(kwCompleted)
 
     val statusBg = when {
         isStatusError -> Color(0xFFFEE2E2)

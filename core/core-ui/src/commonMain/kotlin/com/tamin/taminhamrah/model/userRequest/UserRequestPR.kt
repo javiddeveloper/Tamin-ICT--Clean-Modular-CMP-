@@ -14,4 +14,6 @@ data class UserRequestPR(
     val statusCode: String,
     val requestTypeId: Long,
     val requestTypeTitle: String,
+    val requestDetails: String? = null,
+    val details: UserRequestDetailsPR? = null,
 )

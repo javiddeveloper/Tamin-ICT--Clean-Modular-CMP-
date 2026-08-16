@@ -10,6 +10,8 @@ data class UserRequestDN(
     val status: UserRequestStatusDN?,
     val requestType: UserRequestTypeDN?,
     val referenceId: String?,
+    val requestDetails: String?,
+    val details: UserRequestDetailsDN? = null,
 )
 
 data class UserRequestStatusDN(
