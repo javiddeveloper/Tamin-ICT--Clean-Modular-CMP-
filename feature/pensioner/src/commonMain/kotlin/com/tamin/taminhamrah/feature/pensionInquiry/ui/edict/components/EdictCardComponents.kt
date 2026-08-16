@@ -72,6 +72,8 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminColors
+import com.tamin.taminhamrah.ui.toLongStringOrZero
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -154,7 +156,7 @@ fun EdictMainCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TaminText(
-                        text = info.payableMonthly,
+                        text = info.payableMonthly.replace(",", "").toLongStringOrZero().toPriceFormat(),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.textPrimary,
@@ -331,7 +333,7 @@ fun BreakdownLegendItem(detail: EdictPensionerDetailPR, index: Int) {
         )
         Spacer(Modifier.width(Spacing.sm))
         TaminText(
-            text = detail.fieldValue,
+            text = detail.fieldValue.replace(",", "").toLongStringOrZero().toPriceFormat(),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = taminColors.textPrimary,
@@ -380,21 +382,21 @@ fun EdictComparisonCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) 
 
             ComparisonBar(
                 label = stringResource(Res.string.edict_comparison_before),
-                amount = info.pensionBeforeIncrease,
+                amount = info.pensionBeforeIncrease.replace(",", "").toLongStringOrZero().toPriceFormat(),
                 progress = (beforeAmt / maxAmt).toFloat(),
                 color = taminColors.textMuted,
             )
             Spacer(Modifier.height(Spacing.md))
             ComparisonBar(
                 label = stringResource(Res.string.edict_comparison_after),
-                amount = info.pensionAfterIncrease,
+                amount = info.pensionAfterIncrease.replace(",", "").toLongStringOrZero().toPriceFormat(),
                 progress = (afterAmt / maxAmt).toFloat(),
                 color = taminColors.blueText,
             )
 
                 Spacer(Modifier.height(Spacing.md))
                 TaminText(
-                    text = "مستمری ماهانهٔ شما نسبت به حکم پیشین معادل ${(afterAmt-beforeAmt).toLong()} ریال افزایش یافته است.",
+                    text = "مستمری ماهانهٔ شما نسبت به حکم پیشین معادل ${(afterAmt-beforeAmt).toLong().toPriceFormat()} ریال افزایش یافته است.",
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
                     lineHeight = 20.sp,
@@ -815,7 +817,7 @@ private fun EdictBreakdownList(edict: EdictPensionerPR) {
                         color = Color.White,
                     )
                     TaminText(
-                        text = "${info.payableMonthly} $rial",
+                        text = "${info.payableMonthly.replace(",", "").toLongStringOrZero().toPriceFormat()} $rial",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -886,7 +888,7 @@ private fun BreakdownSection(
                     )
 
                     TaminText(
-                        text = "${item.value} $rial",
+                        text = "${item.value.replace(",", "").toLongStringOrZero().toPriceFormat()} $rial",
                         style = MaterialTheme.typography.bodySmall.copy(color = taminColors.textPrimary),
                         fontWeight = FontWeight.SemiBold,
                     )
