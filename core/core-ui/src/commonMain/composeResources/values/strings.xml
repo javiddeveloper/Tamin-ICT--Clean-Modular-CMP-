@@ -457,5 +457,16 @@
     <string name="orotez_protez_pick_insured_person_title">فرد استفاده‌کننده</string>
     <string name="orotez_protez_pick_insured_person_subtitle">بیمه‌شدهٔ اصلی یا افراد تحت تکفل</string>
     <string name="orotez_protez_next_step">مرحله بعد</string>
+    <string name="orotez_protez_step_info_title">اطلاعات بیمه‌شده</string>
+    <string name="orotez_protez_step_info_description">اطلاعات فرد انتخاب‌شده را بررسی و تأیید کنید.</string>
+    <string name="orotez_protez_detail_full_name">نام و نام خانوادگی</string>
+    <string name="orotez_protez_detail_relation">نسبت</string>
+    <string name="orotez_protez_detail_national_code">کد ملی</string>
+    <string name="orotez_protez_detail_birth_certificate_number">شماره شناسنامه</string>
+    <string name="orotez_protez_detail_issue_place">محل صدور شناسنامه</string>
+    <string name="orotez_protez_detail_birth_date">تاریخ تولد</string>
+    <string name="orotez_protez_detail_booklet_valid_until">خاتمه اعتبار دفترچه</string>
+    <string name="orotez_protez_confirm_and_continue">تأیید و ادامه</string>
+    <string name="orotez_protez_documents_placeholder">این بخش به‌زودی تکمیل می‌شود.</string>
 </resources>
 
