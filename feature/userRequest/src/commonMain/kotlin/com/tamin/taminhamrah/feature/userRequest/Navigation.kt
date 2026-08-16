@@ -18,7 +18,8 @@ sealed interface UserRequestRoute {
         val requestId: Long,
         val refCode: String,
         val requestTypeId: Long,
-        val title : String
+        val title: String,
+        val referenceId: String = "",
     ) : UserRequestRoute
 }
 
@@ -26,8 +27,22 @@ fun NavController.navigateToUserRequests() {
     navigate(UserRequestRoute.List)
 }
 
-fun NavController.navigateToUserRequestDetail(requestId: Long, refCode: String, requestTypeId: Long , title: String) {
-    navigate(UserRequestRoute.Detail(requestId, refCode, requestTypeId ,title = title ))
+fun NavController.navigateToUserRequestDetail(
+    requestId: Long,
+    refCode: String,
+    requestTypeId: Long,
+    title: String,
+    referenceId: String,
+) {
+    navigate(
+        UserRequestRoute.Detail(
+            requestId = requestId,
+            refCode = refCode,
+            requestTypeId = requestTypeId,
+            title = title,
+            referenceId = referenceId,
+        )
+    )
 }
 
 fun NavGraphBuilder.userRequestGraph(
@@ -36,8 +51,14 @@ fun NavGraphBuilder.userRequestGraph(
     composable<UserRequestRoute.List> {
         UserRequestsScreen(
             onBackClick = { navController.popBackStack() },
-            onNavigateToDetail = { requestId, refCode, requestTypeId , title->
-                navController.navigateToUserRequestDetail(requestId, refCode, requestTypeId , title)
+            onNavigateToDetail = { requestId, refCode, requestTypeId, title, referenceId ->
+                navController.navigateToUserRequestDetail(
+                    requestId = requestId,
+                    refCode = refCode,
+                    requestTypeId = requestTypeId,
+                    title = title,
+                    referenceId = referenceId,
+                )
             }
         )
     }
@@ -49,7 +70,8 @@ fun NavGraphBuilder.userRequestGraph(
             refCode = route.refCode,
             requestTypeId = route.requestTypeId,
             onBackClick = { navController.popBackStack() },
-            title = route.title
+            title = route.title,
+            referenceId = route.referenceId,
         )
     }
 }

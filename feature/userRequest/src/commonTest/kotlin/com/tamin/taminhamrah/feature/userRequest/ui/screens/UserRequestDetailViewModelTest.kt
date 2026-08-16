@@ -3,13 +3,9 @@ package com.tamin.taminhamrah.feature.userRequest.ui.screens
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.userRequest.ui.screens.contract.UserRequestDetailIntent
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentDetailDN
-import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
-import com.tamin.taminhamrah.model.userRequest.UserRequestStatusDN
-import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
 import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -22,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserRequestDetailViewModelTest {
@@ -35,7 +32,6 @@ class UserRequestDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = FakeUserRequestRepository()
         viewModel = UserRequestDetailViewModel(
-            getUserRequestDetailUseCase = GetUserRequestDetailUseCase(repository),
             getShowRequestInfoUseCase = GetShowRequestInfoUseCase(repository),
         )
     }
@@ -44,19 +40,7 @@ class UserRequestDetailViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `load detail overlays show request info onto header`() = runTest(testDispatcher) {
-        repository.userRequestDetailResult = UserRequestDN(
-            id = 491371155L,
-            refCode = "1075558440",
-            title = "گواهی کسر اقساط معوق",
-            comment = null,
-            creationTime = 1785215695428L,
-            createByName = "سیدرحمت اله میرفضلی",
-            status = UserRequestStatusDN("0018", "تایید نهایی"),
-            requestType = UserRequestTypeDN(22L, "گواهی کسر اقساط معوق", null),
-            referenceId = "req-22",
-            requestDetails = null,
-        )
+    fun `load detail calls show request info with list reference id not request header`() = runTest(testDispatcher) {
         repository.showRequestInfoResult = UserRequestDetailsDN(
             deferredInstallment = DeferredInstallmentDetailDN(
                 borrowerName = "علی محمدی",
@@ -73,6 +57,7 @@ class UserRequestDetailViewModelTest {
                     refCode = "1075558440",
                     requestTypeId = UserRequestTypeIds.DEFERRED_INSTALLMENT,
                     title = "گواهی کسر اقساط معوق",
+                    referenceId = "491371155",
                 )
             )
             var state = awaitItem()
@@ -81,7 +66,31 @@ class UserRequestDetailViewModelTest {
             assertFalse(state.isLoading)
             assertNotNull(state.request)
             assertEquals("علی محمدی", state.request?.details?.deferredInstallment?.borrowerName)
-            assertEquals("req-22", repository.lastReferenceId)
+            assertEquals("491371155", repository.lastReferenceId)
+            assertNull(repository.lastRequestId)
+        }
+    }
+
+    @Test
+    fun `load detail falls back to request id when reference id is blank`() = runTest(testDispatcher) {
+        repository.showRequestInfoResult = UserRequestDetailsDN()
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(
+                UserRequestDetailIntent.LoadDetail(
+                    requestId = 491371155L,
+                    refCode = "1075558440",
+                    requestTypeId = UserRequestTypeIds.DEFERRED_INSTALLMENT,
+                    title = "گواهی کسر اقساط معوق",
+                    referenceId = "",
+                )
+            )
+            var state = awaitItem()
+            while (state.request == null) state = awaitItem()
+
+            assertEquals("491371155", repository.lastReferenceId)
+            assertNull(repository.lastRequestId)
         }
     }
 }

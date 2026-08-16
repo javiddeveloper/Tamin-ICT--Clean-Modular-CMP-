@@ -22,6 +22,7 @@ sealed interface UserRequestDetailIntent {
         val refCode: String,
         val requestTypeId: Long,
         val title: String,
+        val referenceId: String = "",
     ) : UserRequestDetailIntent
 
     data object NavigateBack : UserRequestDetailIntent

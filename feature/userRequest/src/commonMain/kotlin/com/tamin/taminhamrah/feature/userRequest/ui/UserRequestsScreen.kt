@@ -70,7 +70,7 @@ import taminx.core.core_ui.profile_requests
 @Composable
 fun UserRequestsScreen(
     onBackClick: () -> Unit,
-    onNavigateToDetail: (Long, String, Long, String) -> Unit,
+    onNavigateToDetail: (Long, String, Long, String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: UserRequestsViewModel = koinViewModel(),
 ) {
@@ -86,7 +86,13 @@ fun UserRequestsScreen(
             when (event) {
                 is UserRequestsEvent.ShowToast -> { /* Handle Toast */ }
                 is UserRequestsEvent.NavigateToDetail -> {
-                    onNavigateToDetail(event.requestId, event.refCode, event.requestTypeId , event.title)
+                    onNavigateToDetail(
+                        event.requestId,
+                        event.refCode,
+                        event.requestTypeId,
+                        event.title,
+                        event.referenceId,
+                    )
                 }
             }
         }

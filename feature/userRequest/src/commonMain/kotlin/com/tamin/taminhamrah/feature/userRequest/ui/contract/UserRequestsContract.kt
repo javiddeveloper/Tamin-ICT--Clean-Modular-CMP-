@@ -123,5 +123,11 @@ sealed interface UserRequestsIntent {
 
 sealed interface UserRequestsEvent {
     data class ShowToast(val message: String) : UserRequestsEvent
-    data class NavigateToDetail(val requestId: Long, val refCode: String, val requestTypeId: Long ,val title: String) : UserRequestsEvent
+    data class NavigateToDetail(
+        val requestId: Long,
+        val refCode: String,
+        val requestTypeId: Long,
+        val title: String,
+        val referenceId: String,
+    ) : UserRequestsEvent
 }

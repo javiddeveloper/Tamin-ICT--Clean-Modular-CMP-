@@ -16,4 +16,5 @@ data class UserRequestPR(
     val requestTypeTitle: String,
     val requestDetails: String? = null,
     val details: UserRequestDetailsPR? = null,
+    val referenceId: String = "",
 )

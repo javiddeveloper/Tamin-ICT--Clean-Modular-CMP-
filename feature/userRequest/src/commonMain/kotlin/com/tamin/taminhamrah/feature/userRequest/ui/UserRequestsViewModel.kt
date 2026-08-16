@@ -113,7 +113,8 @@ class UserRequestsViewModel(
                 requestId = intent.request.id,
                 refCode = intent.request.refCode,
                 requestTypeId = intent.request.requestTypeId,
-                title = intent.request.title
+                title = intent.request.title,
+                referenceId = intent.request.referenceId,
             )
         )
     }

@@ -79,17 +79,19 @@ fun UserRequestDetailRoute(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     title: String,
+    referenceId: String = "",
     viewModel: UserRequestDetailViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(requestId, refCode, requestTypeId) {
+    LaunchedEffect(requestId, refCode, requestTypeId, referenceId) {
         viewModel.sendIntent(
             UserRequestDetailIntent.LoadDetail(
                 requestId = requestId,
                 refCode = refCode,
                 requestTypeId = requestTypeId,
                 title = title,
+                referenceId = referenceId,
             )
         )
     }

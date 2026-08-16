@@ -9,12 +9,10 @@ import com.tamin.taminhamrah.mapper.userRequest.toPresentation
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class UserRequestDetailViewModel(
-    private val getUserRequestDetailUseCase: GetUserRequestDetailUseCase,
     private val getShowRequestInfoUseCase: GetShowRequestInfoUseCase,
 ) : BaseViewModel<UserRequestDetailState, PartialState, UserRequestDetailEvent, UserRequestDetailIntent>(
     initialState = UserRequestDetailState()
@@ -33,20 +31,24 @@ class UserRequestDetailViewModel(
         if (uiState.value.isLoading) return@flow
         emit(PartialState.Loading(true))
 
-        val header = runCatching { getUserRequestDetailUseCase(intent.requestId) }.getOrNull()
-        val requestTypeId = header?.requestType?.id ?: intent.requestTypeId
-        val referenceId = header?.referenceId?.takeIf { it.isNotBlank() } ?: intent.refCode
+        // Same key as my-tamin-droid MyRequestListFragment.createBundle.
+        val referenceId = intent.referenceId.takeIf { it.isNotBlank() }
+            ?: intent.requestId.takeIf { it > 0L }?.toString().orEmpty()
         val showInfo = runCatching {
-            getShowRequestInfoUseCase(referenceId, requestTypeId)
+            getShowRequestInfoUseCase(referenceId, intent.requestTypeId)
         }.getOrNull()
 
-        val merged = (header ?: fallbackRequest(intent)).copy(
-            details = showInfo ?: header?.details,
+        emit(
+            PartialState.Loaded(
+                fallbackRequest(intent, referenceId).copy(details = showInfo).toPresentation()
+            )
         )
-        emit(PartialState.Loaded(merged.toPresentation()))
     }
 
-    private fun fallbackRequest(intent: UserRequestDetailIntent.LoadDetail): UserRequestDN {
+    private fun fallbackRequest(
+        intent: UserRequestDetailIntent.LoadDetail,
+        referenceId: String,
+    ): UserRequestDN {
         return UserRequestDN(
             id = intent.requestId,
             refCode = intent.refCode,
@@ -60,7 +62,7 @@ class UserRequestDetailViewModel(
                 title = intent.title,
                 description = null,
             ),
-            referenceId = intent.refCode,
+            referenceId = referenceId,
             requestDetails = null,
         )
     }

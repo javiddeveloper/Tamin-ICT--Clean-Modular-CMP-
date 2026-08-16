@@ -37,6 +37,7 @@ fun UserRequestDN.toPresentation(): UserRequestPR {
         requestTypeTitle = requestType?.title ?: "",
         requestDetails = requestDetails,
         details = details?.toPresentation(),
+        referenceId = referenceId.orEmpty(),
     )
 }
 
