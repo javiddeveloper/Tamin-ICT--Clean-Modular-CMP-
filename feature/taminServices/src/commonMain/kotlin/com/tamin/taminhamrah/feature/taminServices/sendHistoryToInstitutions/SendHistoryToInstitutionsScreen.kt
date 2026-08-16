@@ -20,7 +20,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -69,11 +71,12 @@ fun SendHistoryToInstitutionsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
+    var showSuccessModal by remember { mutableStateOf(false) }
 
     HandleSendHistoryEvents(
         events = viewModel.events,
         toaster = toaster,
-        onNavigateBack = onDone
+        onShowSuccessModal = { showSuccessModal = true }
     )
 
     SendHistoryContent(
@@ -84,18 +87,25 @@ fun SendHistoryToInstitutionsScreen(
         },
         onIntent = viewModel::sendIntent
     )
+
+    if (showSuccessModal) {
+        SuccessModal(onDismiss = {
+            showSuccessModal = false
+            onDone()
+        })
+    }
 }
 
 @Composable
 private fun HandleSendHistoryEvents(
     events: kotlinx.coroutines.flow.Flow<SendHistoryToInstitutionsEvent>,
     toaster: com.tamin.taminhamrah.ui.components.toast.ToasterState,
-    onNavigateBack: () -> Unit
+    onShowSuccessModal: () -> Unit
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is SendHistoryToInstitutionsEvent.ShowToast -> toaster.error(event.message)
-            is SendHistoryToInstitutionsEvent.NavigateBack -> onNavigateBack()
+            is SendHistoryToInstitutionsEvent.DisplaySuccessModal -> onShowSuccessModal()
         }
     }
 }
@@ -232,10 +242,6 @@ private fun SendHistoryContent(
                 }
             }
         }
-    }
-
-    if (uiState.isSendSuccess) {
-        SuccessModal(onDismiss = { onIntent(SendHistoryToInstitutionsIntent.DismissSendSuccess) })
     }
 }
 

@@ -101,64 +101,10 @@ class HistoryRepositoryImplReportTest {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private fun createUserInfoDTO(
-        serial1: String? = "ا19",
-        militaryServiceCode: String? = null,
-        fatherName: String? = "فرج اله",
-        lastName: String? = "حسين پناهي",
-        serial2: String? = "632661",
-        creationTime: Long? = 1470332948237L,
-        lastModificationTime: Long? = 1771136020155L,
-        cityCode: String? = "1514",
-        socialSecurityNumber: String? = "2062144681",
-        lastModifiedBy: String? = "3790166227",
-        issueplaceName: String? = "دهگلان",
-        birthDate: String? = "1361/10/01",
-        firstName: String? = "عادل",
-        insuranceNumber: String? = "0082984639",
-        genderCode: String? = "01",
-        nationalID: String? = "5589743451",
-        marriageCode: String? = null,
-        createdBy: String? = "5589127671",
-        identityNumber: String? = "5",
-        countryCode: String? = "0001",
-        id: String? = "2782294052",
-        birthDateTimestamp: Long? = 409350600000L,
-        issueplace: String? = "1514",
-        nationCode: String? = "01"
-    ) = UserInfoDTO(
-        serial1 = serial1,
-        militaryServiceCode = militaryServiceCode,
-        fatherName = fatherName,
-        lastName = lastName,
-        serial2 = serial2,
-        creationTime = creationTime,
-        lastModificationTime = lastModificationTime,
-        cityCode = cityCode,
-        socialSecurityNumber = socialSecurityNumber,
-        lastModifiedBy = lastModifiedBy,
-        issueplaceName = issueplaceName,
-        birthDate = birthDate,
-        firstName = firstName,
-        insuranceNumber = insuranceNumber,
-        genderCode = genderCode,
-        nationalID = nationalID,
-        marriageCode = marriageCode,
-        createdBy = createdBy,
-        identityNumber = identityNumber,
-        countryCode = countryCode,
-        id = id,
-        birthDateTimestamp = birthDateTimestamp,
-        issueplace = issueplace,
-        nationCode = nationCode
-    )
-
     // ── Fake ──────────────────────────────────────────────────────────────────
 
     private class FakeHistoryRemoteDataSource : HistoryRemoteDataSource {
-        var userInfoResult: UserInfoDTO = UserInfoDTO()
+        var userInfoResult: UserInfoDTO = createUserInfoDTO()
         var shouldThrowOnGetUserInfos = false
         var shouldThrowOnSendToInstitution = false
 
@@ -185,3 +131,55 @@ class HistoryRepositoryImplReportTest {
         }
     }
 }
+
+private fun createUserInfoDTO(
+    serial1: String? = "ا19",
+    militaryServiceCode: String? = null,
+    fatherName: String? = "فرج اله",
+    lastName: String? = "حسين پناهي",
+    serial2: String? = "632661",
+    creationTime: Long? = 1470332948237L,
+    lastModificationTime: Long? = 1771136020155L,
+    cityCode: String? = "1514",
+    socialSecurityNumber: String? = "2062144681",
+    lastModifiedBy: String? = "3790166227",
+    issueplaceName: String? = "دهگلان",
+    birthDate: String? = "1361/10/01",
+    firstName: String? = "عادل",
+    insuranceNumber: String? = "0082984639",
+    genderCode: String? = "01",
+    nationalID: String? = "5589743451",
+    marriageCode: String? = null,
+    createdBy: String? = "5589127671",
+    identityNumber: String? = "5",
+    countryCode: String? = "0001",
+    id: String? = "2782294052",
+    birthDateTimestamp: Long? = 409350600000L,
+    issueplace: String? = "1514",
+    nationCode: String? = "01"
+) = UserInfoDTO(
+    serial1 = serial1,
+    militaryServiceCode = militaryServiceCode,
+    fatherName = fatherName,
+    lastName = lastName,
+    serial2 = serial2,
+    creationTime = creationTime,
+    lastModificationTime = lastModificationTime,
+    cityCode = cityCode,
+    socialSecurityNumber = socialSecurityNumber,
+    lastModifiedBy = lastModifiedBy,
+    issueplaceName = issueplaceName,
+    birthDate = birthDate,
+    firstName = firstName,
+    insuranceNumber = insuranceNumber,
+    genderCode = genderCode,
+    nationalID = nationalID,
+    marriageCode = marriageCode,
+    createdBy = createdBy,
+    identityNumber = identityNumber,
+    countryCode = countryCode,
+    id = id,
+    birthDateTimestamp = birthDateTimestamp,
+    issueplace = issueplace,
+    nationCode = nationCode
+)

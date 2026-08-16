@@ -26,7 +26,6 @@ class SendHistoryToInstitutionsViewModel(
             is SendHistoryToInstitutionsIntent.GoToNextStep -> handleGoToNextStep()
             is SendHistoryToInstitutionsIntent.GoToPreviousStep -> handleGoToPreviousStep()
             is SendHistoryToInstitutionsIntent.SendToInstitution -> handleSendToInstitution()
-            is SendHistoryToInstitutionsIntent.DismissSendSuccess -> handleDismissSendSuccess()
         }
     }
 
@@ -66,16 +65,12 @@ class SendHistoryToInstitutionsViewModel(
         emit(PartialState.Loading(true))
         try {
             sendToInstitutionUseCase(state.isType1Selected, state.isType2Selected, state.isType3Selected)
-            emit(PartialState.SendSuccess)
+            emit(PartialState.Loading(false))
+            sendEvent(SendHistoryToInstitutionsEvent.DisplaySuccessModal)
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
             sendEvent(SendHistoryToInstitutionsEvent.ShowToast(e.message ?: ""))
         }
-    }
-
-    private fun handleDismissSendSuccess(): Flow<PartialState> = flow {
-        emit(PartialState.ClearSendSuccess)
-        sendEvent(SendHistoryToInstitutionsEvent.NavigateBack)
     }
 
     override fun reduceState(
@@ -84,12 +79,7 @@ class SendHistoryToInstitutionsViewModel(
     ): SendHistoryToInstitutionsUiState = when (partialState) {
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
-        is PartialState.UserInfoLoaded -> currentState.copy(
-            isLoading = false,
-            userInfo = partialState.userInfo
-        )
-        is PartialState.SendSuccess -> currentState.copy(isLoading = false, isSendSuccess = true)
-        is PartialState.ClearSendSuccess -> currentState.copy(isSendSuccess = false)
+        is PartialState.UserInfoLoaded -> currentState.copy(isLoading = false, userInfo = partialState.userInfo)
         is PartialState.SetTypes -> currentState.copy(
             isType1Selected = partialState.type1,
             isType2Selected = partialState.type2,

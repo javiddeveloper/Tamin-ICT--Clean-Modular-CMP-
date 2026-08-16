@@ -185,7 +185,6 @@ internal fun ReviewStep(
                 modifier = Modifier.weight(1f),
                 enabled = uiState.userInfo != null,
                 isLoading = isSending,
-                icon = Icons.AutoMirrored.Filled.KeyboardArrowRight
             )
         }
 
