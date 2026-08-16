@@ -468,6 +468,15 @@
     <string name="orotez_protez_detail_birth_date">تاریخ تولد</string>
     <string name="orotez_protez_detail_booklet_valid_until">خاتمه اعتبار دفترچه</string>
     <string name="orotez_protez_confirm_and_continue">تأیید و ادامه</string>
-    <string name="orotez_protez_documents_placeholder">این بخش به‌زودی تکمیل می‌شود.</string>
+    <string name="orotez_protez_documents_title">بارگذاری مدارک</string>
+    <string name="orotez_protez_documents_description">تصویر jpeg و حداکثر ۲ مگابایت. نسخه پزشک و فاکتور خرید الزامی است.</string>
+    <string name="orotez_protez_document_required">الزامی</string>
+    <string name="orotez_protez_document_optional">اختیاری</string>
+    <string name="orotez_protez_document_pick_placeholder">انتخاب از دوربین یا گالری</string>
+    <string name="orotez_protez_document_prescription">نسخه تجویز پزشک</string>
+    <string name="orotez_protez_document_invoice">فاکتور خرید</string>
+    <string name="orotez_protez_document_ear_mold">نوار گوش (سمعک)</string>
+    <string name="orotez_protez_document_hearing_aid_warranty">گارانتی سمعک</string>
+    <string name="orotez_protez_submit_request">ارسال درخواست</string>
 </resources>
 

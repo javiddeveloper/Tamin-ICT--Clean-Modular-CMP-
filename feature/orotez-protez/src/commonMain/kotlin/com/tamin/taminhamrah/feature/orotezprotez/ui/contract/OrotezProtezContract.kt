@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import org.jetbrains.compose.resources.StringResource
 
 /** One selectable row inside the branch/insured-person picker sheets. */
 @Immutable
@@ -18,6 +19,19 @@ data class OrotezProtezOptionUi(
 
 /** Which picker sheet is open, if any — only one can be at a time. */
 enum class OrotezProtezPicker { NONE, BRANCH, INSURED_PERSON, DATE }
+
+/**
+ * One document slot in step 3's upload checklist. Backed by a mock list today (see
+ * `OrotezProtezScreen.kt`); once picking/upload is implemented, per-document upload state
+ * (file, progress, error) can be looked up by [id] the same way step 2 looks up
+ * [OrotezProtezInsuredDetailUi] by insured-person id.
+ */
+@Immutable
+data class OrotezProtezDocumentUi(
+    val id: String,
+    val titleRes: StringResource,
+    val isRequired: Boolean,
+)
 
 /** The read-only registry record shown on step 2, keyed off the step-1 [OrotezProtezOptionUi.id]. */
 @Immutable

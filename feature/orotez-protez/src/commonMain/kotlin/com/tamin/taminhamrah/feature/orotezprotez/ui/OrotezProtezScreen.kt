@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,9 +33,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezHeader
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezOptionSheet
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezEvent
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezInsuredDetailUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezIntent
@@ -46,19 +53,21 @@ import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.PickerRow
+import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.koin.compose.viewmodel.koinViewModel
@@ -78,7 +87,15 @@ import taminx.core.core_ui.orotez_protez_detail_full_name
 import taminx.core.core_ui.orotez_protez_detail_issue_place
 import taminx.core.core_ui.orotez_protez_detail_national_code
 import taminx.core.core_ui.orotez_protez_detail_relation
-import taminx.core.core_ui.orotez_protez_documents_placeholder
+import taminx.core.core_ui.orotez_protez_document_ear_mold
+import taminx.core.core_ui.orotez_protez_document_hearing_aid_warranty
+import taminx.core.core_ui.orotez_protez_document_invoice
+import taminx.core.core_ui.orotez_protez_document_optional
+import taminx.core.core_ui.orotez_protez_document_pick_placeholder
+import taminx.core.core_ui.orotez_protez_document_prescription
+import taminx.core.core_ui.orotez_protez_document_required
+import taminx.core.core_ui.orotez_protez_documents_description
+import taminx.core.core_ui.orotez_protez_documents_title
 import taminx.core.core_ui.orotez_protez_field_branch_placeholder
 import taminx.core.core_ui.orotez_protez_field_insured_person
 import taminx.core.core_ui.orotez_protez_field_prescription_date
@@ -94,9 +111,11 @@ import taminx.core.core_ui.orotez_protez_step_info_title
 import taminx.core.core_ui.orotez_protez_step_user
 import taminx.core.core_ui.orotez_protez_step_user_description
 import taminx.core.core_ui.orotez_protez_step_user_title
+import taminx.core.core_ui.orotez_protez_submit_request
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import taminx.core.core_ui.ic_branch
+import taminx.core.core_ui.ic_place
 
 @Composable
 fun OrotezProtezScreen(
@@ -178,7 +197,9 @@ private fun OrotezProtezContent(
                         onBack = onBackClicked,
                     )
 
-                    OrotezProtezStep.Documents -> OrotezProtezDocumentsStep()
+                    OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
+                        onBack = onBackClicked,
+                    )
                 }
             }
         }
@@ -461,14 +482,179 @@ private fun OrotezProtezBackStepButton(
     }
 }
 
-/** Step 3 placeholder: document upload UI is not designed yet. */
+/**
+ * Step 3 of the wizard: the document upload checklist. Only the empty state of each card is
+ * implemented here — picking, uploading, progress and result states are separate follow-up tasks.
+ */
 @Composable
-private fun OrotezProtezDocumentsStep() {
-    TaminEmptyState(
-        message = stringResource(Res.string.orotez_protez_documents_placeholder),
-        modifier = Modifier.padding(horizontal = Spacing.page, vertical = Spacing.lg),
-    )
+private fun OrotezProtezDocumentsStep(
+    onBack: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+    ) {
+        Text(
+            text = stringResource(Res.string.orotez_protez_documents_title),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
+            color = colors.textPrimary,
+        )
+
+        Spacer(Modifier.height(Spacing.xs))
+
+        Text(
+            text = stringResource(Res.string.orotez_protez_documents_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textMuted,
+        )
+
+        Spacer(Modifier.height(Spacing.lg))
+
+        OrotezProtezDocumentChecklist.forEachIndexed { index, document ->
+            OrotezProtezDocumentCard(document = document, onClick = {})
+            if (index != OrotezProtezDocumentChecklist.lastIndex) {
+                Spacer(Modifier.height(Spacing.md))
+            }
+        }
+
+        Spacer(Modifier.height(Spacing.xl))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            OrotezProtezBackStepButton(onClick = onBack)
+            LoadingButton(
+                modifier = Modifier.weight(1f),
+                text = stringResource(Res.string.orotez_protez_submit_request),
+                onClick = {},
+                enabled = false,
+            )
+        }
+    }
 }
+
+/**
+ * One document slot: dashed empty-state card with its title, required/optional [StatusPill] and
+ * a pick affordance. [onClick] is wired up in a later task — picking, upload and result states
+ * (per-card success/error/progress) aren't implemented yet.
+ */
+@Composable
+private fun OrotezProtezDocumentCard(
+    document: OrotezProtezDocumentUi,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.card)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawRoundRect(
+                    color = colors.border,
+                    style = Stroke(
+                        width = Thickness.medium.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f),
+                    ),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(CornerRadius.card.toPx()),
+                )
+            }
+            .clip(shape)
+            .clickable(onClick = onClick)
+            .background(colors.bgSurface)
+            .padding(Spacing.lg),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(IconSize.xlarge)
+                    .clip(RoundedCornerShape(CornerRadius.iconTile))
+                    .background(colors.chipBg),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_place),
+                    contentDescription = null,
+                    tint = colors.blueText,
+                    modifier = Modifier.size(IconSize.banner),
+                )
+            }
+
+            Column {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(document.titleRes),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = colors.textPrimary,
+                    )
+                    StatusPill(
+                        text = stringResource(
+                            if (document.isRequired) {
+                                Res.string.orotez_protez_document_required
+                            } else {
+                                Res.string.orotez_protez_document_optional
+                            },
+                        ),
+                        containerColor = if (document.isRequired) colors.blueBg else colors.bgPage,
+                        contentColor = if (document.isRequired) colors.blueText else colors.textMuted,
+                    )
+                }
+
+                Spacer(Modifier.height(Spacing.xxs))
+
+                Text(
+                    text = stringResource(Res.string.orotez_protez_document_pick_placeholder),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textMuted,
+                )
+            }
+        }
+
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            contentDescription = null,
+            tint = colors.textMuted,
+            modifier = Modifier.size(IconSize.small),
+        )
+    }
+}
+
+/** Mock checklist for step 3 — swapped for real state once upload is wired up. */
+private val OrotezProtezDocumentChecklist: ImmutableList<OrotezProtezDocumentUi> = persistentListOf(
+    OrotezProtezDocumentUi(
+        id = "prescription",
+        titleRes = Res.string.orotez_protez_document_prescription,
+        isRequired = true,
+    ),
+    OrotezProtezDocumentUi(
+        id = "invoice",
+        titleRes = Res.string.orotez_protez_document_invoice,
+        isRequired = true,
+    ),
+    OrotezProtezDocumentUi(
+        id = "ear-mold",
+        titleRes = Res.string.orotez_protez_document_ear_mold,
+        isRequired = false,
+    ),
+    OrotezProtezDocumentUi(
+        id = "hearing-aid-warranty",
+        titleRes = Res.string.orotez_protez_document_hearing_aid_warranty,
+        isRequired = false,
+    ),
+)
 
 @PreviewRtlTheme
 @Composable
@@ -518,6 +704,30 @@ private fun PreviewOrotezProtezInsuredInfoStepDark() {
     }
 }
 
+@PreviewRtlTheme
+@Composable
+private fun PreviewOrotezProtezDocumentsStepLight() {
+    PreviewRtlThemeContent {
+        OrotezProtezContent(
+            state = PreviewDocumentsState,
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewOrotezProtezDocumentsStepDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        OrotezProtezContent(
+            state = PreviewDocumentsState,
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
 private val PreviewState = OrotezProtezUiState(
     branch = OrotezProtezOptionUi(
         id = "branch-1",
@@ -548,4 +758,8 @@ private val PreviewInsuredInfoState = OrotezProtezUiState(
             bookletValidUntilLabel = "۱۴۰۵/۰۶/۱۵",
         ),
     ),
+)
+
+private val PreviewDocumentsState = PreviewInsuredInfoState.copy(
+    currentStep = OrotezProtezStep.Documents,
 )
