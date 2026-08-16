@@ -29,10 +29,13 @@ enum class BottomSheetTarget {
     BRANCH
 }
 
+const val DOC_TYPE_ID_FIRST_PAGE = "1"
+const val DOC_TYPE_SPOUSE_ID = "2"
+const val DOC_TYPE_MARRIAGE_CERTIFICATE = "3"
+
 @Immutable
 data class DocType(
     val code: String,
-    val title: String,
     val isDisabled: Boolean = false
 )
 

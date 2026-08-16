@@ -42,7 +42,7 @@ sealed class ProfileIntent {
     data class OnItemClick(val item: ProfileMenuItem) : ProfileIntent()
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 
-    data object LoadSubDominants : ProfileIntent()
+    data object NavigateToDependentsList : ProfileIntent()
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 

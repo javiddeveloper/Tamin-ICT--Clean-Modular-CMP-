@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
-import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
@@ -36,7 +35,6 @@ class ProfileViewModel(
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
-    private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
@@ -57,7 +55,7 @@ class ProfileViewModel(
                 intent.branchCode,
                 intent.filter
             )
-            is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
+            is ProfileIntent.NavigateToDependentsList -> handleNavigateToDependentsList()
             is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
     }
@@ -144,7 +142,7 @@ class ProfileViewModel(
     }
 
 
-    private fun handleLoadSubDominants(): Flow<PartialState> {
+    private fun handleNavigateToDependentsList(): Flow<PartialState> {
         return flow {
             sendEvent(ProfileEvent.NavigateToDependentsList)
         }

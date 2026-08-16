@@ -502,6 +502,7 @@
     <string name="error_select_relationship">لطفا نسبت خانوادگی را انتخاب کنید</string>
     <string name="error_inquiry_registry_failed">خطا در استعلام ثبت احوال</string>
     <string name="error_enter_education_code">لطفا کد استعلام تحصیلی را وارد کنید</string>
+    <string name="error_education_inquiry_required">لطفا استعلام کد تحصیلی را انجام دهید</string>
     <string name="error_inquiry_education_failed">خطا در استعلام کد تحصیلی</string>
     <string name="error_upload_failed">خطا در آپلود مدرک</string>
     <string name="error_complete_additional_info">لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید</string>

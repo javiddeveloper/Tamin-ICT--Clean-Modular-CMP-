@@ -425,7 +425,7 @@ fun ProfileContent(
                                     textColor = taminColors.blueText
                                 ),
                                 showArrow = true,
-                                onClick = { onIntent(ProfileIntent.LoadSubDominants) }
+                                onClick = { onIntent(ProfileIntent.NavigateToDependentsList) }
                             ),
                             ListItemData(
                                 title = stringResource(Res.string.profile_active_relation),

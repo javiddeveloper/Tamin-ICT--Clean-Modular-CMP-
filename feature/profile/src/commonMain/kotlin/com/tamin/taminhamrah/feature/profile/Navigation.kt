@@ -22,6 +22,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsRoute
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 
@@ -117,8 +119,8 @@ fun NavGraphBuilder.profileGraph(
         }
 
         composable<ProfileRoute.DependentsList> {
-            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel>()
-            com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute(
+            val viewModel = koinViewModel<DependentsListViewModel>()
+            DependentsListRoute(
                 viewModel = viewModel,
                 onNavigateToAddDependent = onNavigateToAddDependent,
                 onBackClicked = { navController.popBackStack() }
