@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -78,11 +79,13 @@ fun EdictHeader(
     collapseProgress: () -> Float = { 0f },
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
     val edict = state.edictPensioner
 
     Column(modifier = modifier.fillMaxWidth()) {
         TaminTopAppBar(
             title = stringResource(Res.string.edict_title),
+            background = taminTopAppBarGradient(taminColors.profileGradientStops),
             bottomPadding = HEADER_OVERLAP,
             navigationIcon = {
                 TaminTopAppBarButton(

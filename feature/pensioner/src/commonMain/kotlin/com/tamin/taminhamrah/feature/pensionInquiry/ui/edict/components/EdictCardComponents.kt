@@ -326,7 +326,7 @@ fun BreakdownLegendItem(detail: EdictPensionerDetailPR, index: Int) {
 // ─── Comparison Card ───────────────────────────────────────────────────────────
 
 @Composable
-fun EdictComparisonCard(edict: EdictPensionerPR) {
+fun EdictComparisonCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     val info = edict.edictInfo ?: return
 
@@ -335,7 +335,7 @@ fun EdictComparisonCard(edict: EdictPensionerPR) {
     val maxAmt = maxOf(beforeAmt, afterAmt).takeIf { it > 0 } ?: 1.0
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CornerRadius.card),
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
         border = BorderStroke(1.dp, taminColors.border),
@@ -429,10 +429,10 @@ private fun ComparisonBar(label: String, amount: String, progress: Float, color:
 // ─── Survivor Share Card ───────────────────────────────────────────────────────
 
 @Composable
-fun SurvivorShareCard(survivor: SurvivorInfoPR) {
+fun SurvivorShareCard(survivor: SurvivorInfoPR, modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CornerRadius.card),
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
         border = BorderStroke(1.dp, taminColors.border),
@@ -484,7 +484,7 @@ fun SurvivorShareCard(survivor: SurvivorInfoPR) {
 // ─── Details Section (Tabs) ────────────────────────────────────────────────────
 
 @Composable
-fun EdictDetailsSection(edict: EdictPensionerPR) {
+fun EdictDetailsSection(edict: EdictPensionerPR, modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf(
@@ -492,7 +492,7 @@ fun EdictDetailsSection(edict: EdictPensionerPR) {
         stringResource(Res.string.edict_tab_info),
     )
 
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

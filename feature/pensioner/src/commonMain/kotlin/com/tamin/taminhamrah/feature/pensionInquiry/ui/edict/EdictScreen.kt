@@ -51,6 +51,8 @@ import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -181,15 +183,41 @@ fun EdictContent(
         ) {
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             if (edict != null) {
+                val staggerKey = state.selectedPensionerId to state.startDate
+                val staggerState = rememberStaggeredEntranceState(key = staggerKey)
+
                 Column(
                     modifier = Modifier
                         .padding(horizontal = Spacing.lg)
                         .padding(top = Spacing.lg),
                     verticalArrangement = Arrangement.spacedBy(Spacing.lg),
                 ) {
-                    EdictComparisonCard(edict)
-                    edict.survivorInfo.forEach { SurvivorShareCard(it) }
-                    EdictDetailsSection(edict)
+                    EdictComparisonCard(
+                        edict,
+                        modifier = Modifier.staggeredItemEntrance(
+                            index = 0,
+                            key = "comparison_$staggerKey",
+                            state = staggerState,
+                        ),
+                    )
+                    edict.survivorInfo.forEachIndexed { i, survivor ->
+                        SurvivorShareCard(
+                            survivor,
+                            modifier = Modifier.staggeredItemEntrance(
+                                index = i + 1,
+                                key = "survivor_${i}_$staggerKey",
+                                state = staggerState,
+                            ),
+                        )
+                    }
+                    EdictDetailsSection(
+                        edict,
+                        modifier = Modifier.staggeredItemEntrance(
+                            index = edict.survivorInfo.size + 1,
+                            key = "details_$staggerKey",
+                            state = staggerState,
+                        ),
+                    )
                     Spacer(
                         modifier = Modifier.height(
                             80.dp + WindowInsets.navigationBars
