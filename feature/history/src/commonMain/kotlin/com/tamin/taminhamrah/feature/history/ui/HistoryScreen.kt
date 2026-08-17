@@ -71,17 +71,18 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.action_back
 import taminx.feature.history.Res as HistoryRes
-import taminx.feature.history.history_all_empty
-import taminx.feature.history.history_all_empty_title
-import taminx.feature.history.history_all_list_header
-import taminx.feature.history.history_all_list_hint
-import taminx.feature.history.history_all_subtitle
-import taminx.feature.history.history_all_title
+import taminx.feature.history.history_combined_empty
+import taminx.feature.history.history_combined_empty_title
+import taminx.feature.history.history_combined_list_header
+import taminx.feature.history.history_combined_list_hint
+import taminx.feature.history.history_combined_subtitle
+import taminx.feature.history.history_combined_title
 import androidx.compose.ui.unit.lerp as dpLerp
 
 private val HeaderIconOffset = (-30).dp
@@ -128,7 +129,8 @@ fun HandleHistoryEvents(
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
-            is HistoryEvent.ShowToast -> toaster.error(event.message)
+            // Resolved here, where a composition exists to resolve it in.
+            is HistoryEvent.ShowToast -> toaster.error(getString(event.message))
         }
     }
 }
@@ -194,8 +196,8 @@ fun HistoryContent(
                     item(key = EMPTY_STATE_KEY) {
                         EmptyStateMessage(
                             icon = Icons.Outlined.History,
-                            title = stringResource(HistoryRes.string.history_all_empty_title),
-                            subtitle = stringResource(HistoryRes.string.history_all_empty),
+                            title = stringResource(HistoryRes.string.history_combined_empty_title),
+                            subtitle = stringResource(HistoryRes.string.history_combined_empty),
                             showIconTile = true,
                             modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl),
                         )
@@ -269,7 +271,7 @@ private fun HistoryHeader(
                     )
 
                     Text(
-                        text = stringResource(HistoryRes.string.history_all_title),
+                        text = stringResource(HistoryRes.string.history_combined_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         modifier = Modifier
@@ -295,7 +297,7 @@ private fun HistoryHeader(
                         AnimatedRingHeaderIcon(icon = Icons.Outlined.History)
                         Spacer(modifier = Modifier.height(Spacing.xs))
                         Text(
-                            text = stringResource(HistoryRes.string.history_all_subtitle),
+                            text = stringResource(HistoryRes.string.history_combined_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.85f),
                             textAlign = TextAlign.Center,
@@ -336,13 +338,13 @@ private fun YearListHeader() {
         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Text(
-            text = stringResource(HistoryRes.string.history_all_list_header),
+            text = stringResource(HistoryRes.string.history_combined_list_header),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = taminColors.textPrimary,
         )
         Text(
-            text = stringResource(HistoryRes.string.history_all_list_hint),
+            text = stringResource(HistoryRes.string.history_combined_list_hint),
             style = MaterialTheme.typography.bodySmall,
             color = taminColors.textMuted,
         )

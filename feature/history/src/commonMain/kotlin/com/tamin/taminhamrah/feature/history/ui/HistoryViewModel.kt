@@ -17,10 +17,13 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import taminx.feature.history.Res
+import taminx.feature.history.history_combined_wage_unavailable
 
 class HistoryViewModel(
     private val getTalfighInfosUseCase: GetTalfighInfosUseCase,
@@ -41,24 +44,50 @@ class HistoryViewModel(
      * Both lists at once, because neither waits on the other.
      *
      * Only the years are load-bearing: they are the page. The wage rows fill the per-year sheet, so
-     * their failure costs one sheet's contents and is swallowed here rather than emptying the whole
+     * their failure costs one sheet's contents and is reported rather than emptying the whole
      * screen — the previous app aborted on it, which is listed as a defect in the spec, not a rule
      * to carry over.
      */
     private fun load(): Flow<PartialState> = flow {
+        // BaseViewModel merges intents rather than switching between them, so a second tap on
+        // «تلاش دوباره» while the first is still in flight would run two loads at once and let the
+        // slower one write last. One at a time, and the retry button simply does nothing until the
+        // current attempt finishes.
+        if (uiState.value.isLoading) return@flow
+
         // The list already on screen stays there while this runs, so a retry never blanks the page.
         emit(PartialState.Loading(true))
         try {
             coroutineScope {
                 val years = async { getTalfighInfosUseCase() }
-                val wages = async { runCatching { getDastmozdInfosUseCase() }.getOrNull() }
+                // Not `runCatching`: it catches CancellationException too, so when the years fail
+                // and this scope tears its children down, the wage call would report itself as a
+                // wage failure and warn about something that was never attempted.
+                val wages = async {
+                    try {
+                        getDastmozdInfosUseCase()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
 
                 val history = years.await().list?.toPresentation().orEmpty()
+                val wageRows = wages.await()
+
+                // Said out loud rather than swallowed: the years are all there, but every sheet
+                // opened from them will be missing its workshops, and a person looking for a
+                // workshop deserves to know it failed rather than read the blank as "none".
+                if (wageRows == null) {
+                    sendEvent(HistoryEvent.ShowToast(Res.string.history_combined_wage_unavailable))
+                }
+
                 emit(
                     PartialState.HistoryLoaded(
                         years = history.mergeByYear(),
                         careerTotal = history.careerTotal(),
-                        wageByYear = wages.await()?.list?.toPresentation()?.groupByYear()
+                        wageByYear = wageRows?.list?.toPresentation()?.groupByYear()
                             ?: persistentMapOf(),
                     )
                 )

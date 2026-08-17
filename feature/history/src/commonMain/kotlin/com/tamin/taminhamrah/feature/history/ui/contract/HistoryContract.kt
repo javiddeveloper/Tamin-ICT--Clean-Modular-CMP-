@@ -8,9 +8,10 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import org.jetbrains.compose.resources.StringResource
 
 /**
- * What «کلیه سوابق» shows.
+ * What «مجموع سوابق» shows.
  *
  * Everything here is already in the shape the screen draws: the years are merged, the career total
  * is normalized and the wage rows are grouped by year. Doing that work in the ViewModel rather than
@@ -59,5 +60,9 @@ sealed interface HistoryIntent {
 }
 
 sealed interface HistoryEvent {
-    data class ShowToast(val message: String) : HistoryEvent
+    /**
+     * Carries the resource, not the resolved text: reading a string in a ViewModel needs a
+     * composition, which is also why it hangs a unit test. The screen resolves it.
+     */
+    data class ShowToast(val message: StringResource) : HistoryEvent
 }

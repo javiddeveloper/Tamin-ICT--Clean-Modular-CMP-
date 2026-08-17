@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
     when (flag) {
+        // «مجموع سوابق» — the insured years added up. Menu id 8; it reached nothing before.
+        FeatureFlag.COMBINED_RECORD -> navigateToHistory()
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()

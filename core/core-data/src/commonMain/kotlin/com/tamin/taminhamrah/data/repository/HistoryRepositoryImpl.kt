@@ -14,6 +14,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
+/**
+ * How many rows «مجموع سوابق» asks for in one go.
+ *
+ * These two endpoints are not paged, and cannot be: the screen merges the years an employer reports
+ * more than once and adds up a career total, so a page boundary would split a year in half and make
+ * both figures wrong. The previous app sent the same 60 for the same reason — its own comment on
+ * the endpoint reads "response of this API used for chart ⇒ can not use lazy load" — while
+ * [ApiQueryParamDN]'s default of 10 is meant for genuinely paged lists.
+ */
+private const val UNPAGED_HISTORY_LIMIT = 60
+
 class HistoryRepositoryImpl(
     private val remoteDataSource: HistoryRemoteDataSource,
     private val historyJobInfoDao: HistoryJobInfoDao
@@ -21,14 +32,14 @@ class HistoryRepositoryImpl(
     override suspend fun getTalfighInfos(
         filters: List<ApiFilterDN>
     ): TalfighInfoDN {
-        val query = ApiQueryParamDN(filters = filters)
+        val query = ApiQueryParamDN(filters = filters, limit = UNPAGED_HISTORY_LIMIT)
         return remoteDataSource.getTalfighInfos(query).toDomain()
     }
 
     override suspend fun getDastmozdInfos(
         filters: List<ApiFilterDN>
     ): DastmozdInfoDN {
-        val query = ApiQueryParamDN(filters = filters)
+        val query = ApiQueryParamDN(filters = filters, limit = UNPAGED_HISTORY_LIMIT)
         return remoteDataSource.getDastmozdInfos(query).toDomain()
     }
 

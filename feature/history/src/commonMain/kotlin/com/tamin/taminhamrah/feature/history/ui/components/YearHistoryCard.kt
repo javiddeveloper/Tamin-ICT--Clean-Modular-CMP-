@@ -26,9 +26,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.history.Res
-import taminx.feature.history.history_all_year_complete
-import taminx.feature.history.history_all_year_days
-import taminx.feature.history.history_all_year_partial
+import taminx.feature.history.history_combined_year_complete
+import taminx.feature.history.history_combined_year_days
+import taminx.feature.history.history_combined_year_partial
 
 private val BorderWidth = 1.dp
 
@@ -66,7 +66,7 @@ fun YearHistoryCard(
             )
             Text(
                 text = stringResource(
-                    Res.string.history_all_year_days,
+                    Res.string.history_combined_year_days,
                     year.totalDays.toString().toPersianDigits(),
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -82,8 +82,8 @@ fun YearHistoryCard(
         ) {
             Text(
                 text = stringResource(
-                    if (complete) Res.string.history_all_year_complete
-                    else Res.string.history_all_year_partial,
+                    if (complete) Res.string.history_combined_year_complete
+                    else Res.string.history_combined_year_partial,
                 ),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,

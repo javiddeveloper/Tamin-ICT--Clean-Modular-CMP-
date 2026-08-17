@@ -35,23 +35,23 @@ import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.history.Res
-import taminx.feature.history.history_all_detail_title
-import taminx.feature.history.history_all_no_workshop
-import taminx.feature.history.history_all_season_autumn
-import taminx.feature.history.history_all_season_spring
-import taminx.feature.history.history_all_season_summer
-import taminx.feature.history.history_all_season_winter
-import taminx.feature.history.history_all_workshops
-import taminx.feature.history.history_all_year_days
+import taminx.feature.history.history_combined_detail_title
+import taminx.feature.history.history_combined_no_workshop
+import taminx.feature.history.history_combined_season_autumn
+import taminx.feature.history.history_combined_season_spring
+import taminx.feature.history.history_combined_season_summer
+import taminx.feature.history.history_combined_season_winter
+import taminx.feature.history.history_combined_workshops
+import taminx.feature.history.history_combined_year_days
 
 /** Months to a season, and the four the Jalali year is read in. */
 private const val MONTHS_PER_SEASON = 3
 
 private val SeasonLabels: List<StringResource> = listOf(
-    Res.string.history_all_season_spring,
-    Res.string.history_all_season_summer,
-    Res.string.history_all_season_autumn,
-    Res.string.history_all_season_winter,
+    Res.string.history_combined_season_spring,
+    Res.string.history_combined_season_summer,
+    Res.string.history_combined_season_autumn,
+    Res.string.history_combined_season_winter,
 )
 
 /**
@@ -95,7 +95,7 @@ fun YearDetailSheet(
             }
 
             Text(
-                text = stringResource(Res.string.history_all_workshops),
+                text = stringResource(Res.string.history_combined_workshops),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
@@ -103,7 +103,7 @@ fun YearDetailSheet(
 
             if (workshops.isEmpty()) {
                 Text(
-                    text = stringResource(Res.string.history_all_no_workshop),
+                    text = stringResource(Res.string.history_combined_no_workshop),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted,
                 )
@@ -125,7 +125,7 @@ private fun SheetHeader(year: YearHistoryPR) {
         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Text(
-            text = stringResource(Res.string.history_all_detail_title),
+            text = stringResource(Res.string.history_combined_detail_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = colors.textPrimary,
@@ -137,7 +137,7 @@ private fun SheetHeader(year: YearHistoryPR) {
         )
         Text(
             text = stringResource(
-                Res.string.history_all_year_days,
+                Res.string.history_combined_year_days,
                 year.totalDays.toString().toPersianDigits(),
             ),
             style = MaterialTheme.typography.bodySmall,

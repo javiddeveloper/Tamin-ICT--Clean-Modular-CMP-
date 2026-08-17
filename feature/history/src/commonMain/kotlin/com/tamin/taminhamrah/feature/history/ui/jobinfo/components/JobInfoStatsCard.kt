@@ -14,7 +14,7 @@ import taminx.feature.history.history_job_info_stat_workshop
 /**
  * The job-titles page's header figures.
  *
- * Draws through `core-ui`'s [StatRowCard], the same card «کلیه سوابق» hangs its career total in, so
+ * Draws through `core-ui`'s [StatRowCard], the same card «مجموع سوابق» hangs its career total in, so
  * the two pages of this feature cannot drift apart in radius, border or divider.
  */
 @Composable

@@ -9,9 +9,9 @@ import com.tamin.taminhamrah.ui.components.StatRowCard
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.history.Res
-import taminx.feature.history.history_all_stat_days
-import taminx.feature.history.history_all_stat_months
-import taminx.feature.history.history_all_stat_years
+import taminx.feature.history.history_combined_stat_days
+import taminx.feature.history.history_combined_stat_months
+import taminx.feature.history.history_combined_stat_years
 
 /**
  * How long the person has been insured, as the three figures the service reports.
@@ -28,20 +28,20 @@ fun CareerTotalCard(
     StatRowCard(modifier = modifier) {
         StatColumn(
             value = total.years.toString().toPersianDigits(),
-            label = stringResource(Res.string.history_all_stat_years),
+            label = stringResource(Res.string.history_combined_stat_years),
             highlight = true,
             modifier = Modifier.weight(1f),
         )
         StatDivider()
         StatColumn(
             value = total.months.toString().toPersianDigits(),
-            label = stringResource(Res.string.history_all_stat_months),
+            label = stringResource(Res.string.history_combined_stat_months),
             modifier = Modifier.weight(1f),
         )
         StatDivider()
         StatColumn(
             value = total.days.toString().toPersianDigits(),
-            label = stringResource(Res.string.history_all_stat_days),
+            label = stringResource(Res.string.history_combined_stat_days),
             modifier = Modifier.weight(1f),
         )
     }
