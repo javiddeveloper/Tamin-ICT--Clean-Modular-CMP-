@@ -63,77 +63,19 @@ sealed interface OrotezProtezDocumentState {
     data class Uploading(
         val platformFile: PlatformFile,
         val bytes: ByteArray,
-    ) : OrotezProtezDocumentState {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other == null || this::class != other::class) return false
-
-            other as Uploading
-
-            if (platformFile != other.platformFile) return false
-            if (!bytes.contentEquals(other.bytes)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = platformFile.hashCode()
-            result = 31 * result + bytes.contentHashCode()
-            return result
-        }
-    }
+    ) : OrotezProtezDocumentState
 
     data class Uploaded(
         val guid: String,
         val platformFile: PlatformFile,
         val bytes: ByteArray,
-    ) : OrotezProtezDocumentState {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other == null || this::class != other::class) return false
-
-            other as Uploaded
-
-            if (guid != other.guid) return false
-            if (platformFile != other.platformFile) return false
-            if (!bytes.contentEquals(other.bytes)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = guid.hashCode()
-            result = 31 * result + platformFile.hashCode()
-            result = 31 * result + bytes.contentHashCode()
-            return result
-        }
-    }
+    ) : OrotezProtezDocumentState
 
     data class Failed(
         val message: String,
         val platformFile: PlatformFile? = null,
         val bytes: ByteArray? = null,
-    ) : OrotezProtezDocumentState {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other == null || this::class != other::class) return false
-
-            other as Failed
-
-            if (message != other.message) return false
-            if (platformFile != other.platformFile) return false
-            if (!bytes.contentEquals(other.bytes)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = message.hashCode()
-            result = 31 * result + (platformFile?.hashCode() ?: 0)
-            result = 31 * result + (bytes?.contentHashCode() ?: 0)
-            return result
-        }
-    }
+    ) : OrotezProtezDocumentState
 }
 
 fun OrotezProtezDocumentState.platformFileOrNull(): PlatformFile? = when (this) {
