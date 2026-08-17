@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -37,8 +38,12 @@ class HistoryRepositoryImpl(
         return remoteDataSource.getUserInfos().toDomain()
     }
 
-    override suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean) {
-        remoteDataSource.sendToInstitution(type1, type2, type3)
+    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
+        remoteDataSource.sendToInstitution(
+            allHistorySelected = HistoryCertificateType.ALL in selectedTypes,
+            historyAndWageSelected = HistoryCertificateType.WAGES in selectedTypes,
+            combineHistorySelected = HistoryCertificateType.COMBINED in selectedTypes,
+        )
     }
 
     override suspend fun getHistoryJobInfos(

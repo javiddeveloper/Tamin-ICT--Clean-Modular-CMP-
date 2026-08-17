@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.data.local.entity.HistoryJobInfoEntity
 import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.UserInfoDTO
@@ -80,21 +81,21 @@ class HistoryRepositoryImplReportTest {
     // ── sendToInstitution ─────────────────────────────────────────────────────
 
     @Test
-    fun `sendToInstitution should delegate to remote data source with correct params`() = runTest {
-        repository.sendToInstitution(type1 = true, type2 = true, type3 = true)
+    fun `sendToInstitution should delegate to remote data source with all types selected`() = runTest {
+        repository.sendToInstitution(setOf(HistoryCertificateType.ALL, HistoryCertificateType.WAGES, HistoryCertificateType.COMBINED))
 
-        assertEquals(true, remoteDataSource.lastSentType1)
-        assertEquals(true, remoteDataSource.lastSentType2)
-        assertEquals(true, remoteDataSource.lastSentType3)
+        assertEquals(true, remoteDataSource.lastSentAllHistory)
+        assertEquals(true, remoteDataSource.lastSentHistoryAndWage)
+        assertEquals(true, remoteDataSource.lastSentCombineHistory)
     }
 
     @Test
-    fun `sendToInstitution should pass false params correctly`() = runTest {
-        repository.sendToInstitution(type1 = false, type2 = true, type3 = false)
+    fun `sendToInstitution should map only selected types to true`() = runTest {
+        repository.sendToInstitution(setOf(HistoryCertificateType.WAGES))
 
-        assertEquals(false, remoteDataSource.lastSentType1)
-        assertEquals(true, remoteDataSource.lastSentType2)
-        assertEquals(false, remoteDataSource.lastSentType3)
+        assertEquals(false, remoteDataSource.lastSentAllHistory)
+        assertEquals(true, remoteDataSource.lastSentHistoryAndWage)
+        assertEquals(false, remoteDataSource.lastSentCombineHistory)
     }
 
     @Test
@@ -102,7 +103,7 @@ class HistoryRepositoryImplReportTest {
         remoteDataSource.shouldThrowOnSendToInstitution = true
 
         assertFailsWith<RuntimeException> {
-            repository.sendToInstitution(true, true, true)
+            repository.sendToInstitution(setOf(HistoryCertificateType.ALL, HistoryCertificateType.WAGES, HistoryCertificateType.COMBINED))
         }
     }
 
@@ -113,9 +114,9 @@ class HistoryRepositoryImplReportTest {
         var shouldThrowOnGetUserInfos = false
         var shouldThrowOnSendToInstitution = false
 
-        var lastSentType1: Boolean? = null
-        var lastSentType2: Boolean? = null
-        var lastSentType3: Boolean? = null
+        var lastSentAllHistory: Boolean? = null
+        var lastSentHistoryAndWage: Boolean? = null
+        var lastSentCombineHistory: Boolean? = null
 
         override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO =
             TalfighInfoDTO(list = emptyList(), total = 0)
@@ -128,11 +129,11 @@ class HistoryRepositoryImplReportTest {
             return userInfoResult
         }
 
-        override suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean) {
+        override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
             if (shouldThrowOnSendToInstitution) throw RuntimeException("Remote failure")
-            lastSentType1 = type1
-            lastSentType2 = type2
-            lastSentType3 = type3
+            lastSentAllHistory = allHistorySelected
+            lastSentHistoryAndWage = historyAndWageSelected
+            lastSentCombineHistory = combineHistorySelected
         }
 
         override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =

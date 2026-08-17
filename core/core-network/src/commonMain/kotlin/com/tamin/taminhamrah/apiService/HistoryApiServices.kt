@@ -31,9 +31,9 @@ interface HistoryApiServices {
 
     @GET("historyreport-services/sendinstitution")
     suspend fun sendToInstitution(
-        @Query("type1") type1: Boolean,
-        @Query("type2") type2: Boolean,
-        @Query("type3") type3: Boolean
+        @Query("type1") allHistorySelected: Boolean,
+        @Query("type2") historyAndWageSelected: Boolean,
+        @Query("type3") combineHistorySelected: Boolean
     ): BaseDTO<JsonElement?>
 
 }

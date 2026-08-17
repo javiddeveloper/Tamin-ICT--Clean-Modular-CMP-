@@ -10,7 +10,7 @@ interface HistoryRemoteDataSource {
     suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO
     suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO
     suspend fun getUserInfos(): UserInfoDTO
-    suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean)
+    suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean)
     suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO
 }
 

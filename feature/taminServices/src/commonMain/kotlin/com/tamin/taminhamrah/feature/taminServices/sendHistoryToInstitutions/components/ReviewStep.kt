@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsIntent
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsUiState
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -119,9 +120,9 @@ internal fun ReviewStep(
             )
 
             val selectedIndices = buildList {
-                if (uiState.isType1Selected) add(0)
-                if (uiState.isType2Selected) add(1)
-                if (uiState.isType3Selected) add(2)
+                if (HistoryCertificateType.ALL in uiState.selectedTypes) add(0)
+                if (HistoryCertificateType.WAGES in uiState.selectedTypes) add(1)
+                if (HistoryCertificateType.COMBINED in uiState.selectedTypes) add(2)
             }
 
             FlowRow(

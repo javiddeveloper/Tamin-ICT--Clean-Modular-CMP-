@@ -166,7 +166,7 @@ class HistoryApiServicesTest : BaseApiTest() {
         val ktorfit = createMockKtorfit(jsonResponse)
         val apiService = ktorfit.createHistoryApiServices()
 
-        val response = apiService.sendToInstitution(type1 = true, type2 = true, type3 = true)
+        val response = apiService.sendToInstitution(allHistorySelected = true, historyAndWageSelected = true, combineHistorySelected = true)
 
         assertEquals(200, response.status)
         assertEquals("SUCCESSFUL", response.family)

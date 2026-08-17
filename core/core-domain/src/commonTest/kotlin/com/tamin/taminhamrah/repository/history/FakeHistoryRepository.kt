@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.history
 
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
@@ -13,9 +14,7 @@ class FakeHistoryRepository : HistoryRepository {
     var error: Throwable = RuntimeException("Error")
 
     var userInfoResult: UserInfoDN = emptyUserInfoDN()
-    var lastSentType1: Boolean? = null
-    var lastSentType2: Boolean? = null
-    var lastSentType3: Boolean? = null
+    var lastSentTypes: Set<HistoryCertificateType>? = null
 
     var historyJobInfoResult: HistoryJobInfoDN = HistoryJobInfoDN(list = emptyList(), total = 0)
 
@@ -30,11 +29,9 @@ class FakeHistoryRepository : HistoryRepository {
         return userInfoResult
     }
 
-    override suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean) {
+    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
         if (shouldThrowError) throw error
-        lastSentType1 = type1
-        lastSentType2 = type2
-        lastSentType3 = type3
+        lastSentTypes = selectedTypes
     }
 
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =

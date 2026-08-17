@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
@@ -18,7 +19,7 @@ interface HistoryRepository {
 
     suspend fun getUserInfos(): UserInfoDN
 
-    suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean)
+    suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>)
 
     suspend fun getHistoryJobInfos(
         filters: List<ApiFilterDN> = emptyList()

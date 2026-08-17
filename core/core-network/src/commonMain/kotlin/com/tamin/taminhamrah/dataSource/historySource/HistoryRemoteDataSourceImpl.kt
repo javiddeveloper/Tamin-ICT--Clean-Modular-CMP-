@@ -71,9 +71,9 @@ internal class HistoryRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun sendToInstitution(type1: Boolean, type2: Boolean, type3: Boolean) {
+    override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
         try {
-            val response = apiServices.sendToInstitution(type1, type2, type3)
+            val response = apiServices.sendToInstitution(allHistorySelected, historyAndWageSelected, combineHistorySelected)
             response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

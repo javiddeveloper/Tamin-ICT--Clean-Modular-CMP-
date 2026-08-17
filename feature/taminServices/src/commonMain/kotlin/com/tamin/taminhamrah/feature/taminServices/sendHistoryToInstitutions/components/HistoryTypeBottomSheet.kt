@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -34,22 +35,17 @@ import taminx.core.core_ui.send_history_select_type_title
 
 @Composable
 internal fun HistoryTypeBottomSheet(
-    initialType1: Boolean,
-    initialType2: Boolean,
-    initialType3: Boolean,
+    initialTypes: Set<HistoryCertificateType>,
     typeLabels: List<String>,
     typeColors: List<Color>,
     typeTextColors: List<Color>,
-    onConfirm: (Boolean, Boolean, Boolean) -> Unit,
+    onConfirm: (Set<HistoryCertificateType>) -> Unit,
     onDismiss: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var draft1 by remember { mutableStateOf(initialType1) }
-    var draft2 by remember { mutableStateOf(initialType2) }
-    var draft3 by remember { mutableStateOf(initialType3) }
-    val drafts = listOf(draft1, draft2, draft3)
-    val hasAnyDraft = draft1 || draft2 || draft3
+    var draftTypes by remember { mutableStateOf(initialTypes) }
+    val hasAnyDraft = draftTypes.isNotEmpty()
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -80,18 +76,14 @@ internal fun HistoryTypeBottomSheet(
                     .padding(bottom = Spacing.md),
             )
 
-            typeLabels.forEachIndexed { index, label ->
+            HistoryCertificateType.entries.forEachIndexed { index, type ->
                 HistoryTypeRow(
-                    label = label,
-                    isSelected = drafts[index],
+                    label = typeLabels[index],
+                    isSelected = type in draftTypes,
                     bgColor = typeColors[index],
                     borderAccentColor = typeTextColors[index],
                     onToggle = {
-                        when (index) {
-                            0 -> draft1 = !draft1
-                            1 -> draft2 = !draft2
-                            2 -> draft3 = !draft3
-                        }
+                        draftTypes = if (type in draftTypes) draftTypes - type else draftTypes + type
                     }
                 )
                 Spacer(modifier = Modifier.height(Spacing.sm))
@@ -101,7 +93,7 @@ internal fun HistoryTypeBottomSheet(
 
             TaminFilledButton(
                 text = stringResource(Res.string.send_history_confirm_sheet),
-                onClick = { onConfirm(draft1, draft2, draft3) },
+                onClick = { onConfirm(draftTypes) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = hasAnyDraft
             )

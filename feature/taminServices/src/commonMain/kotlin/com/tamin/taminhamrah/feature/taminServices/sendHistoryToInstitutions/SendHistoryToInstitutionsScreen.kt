@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.components.AccessDeniedModal
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.components.ReviewStep
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.components.SelectTypeStep
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.components.SuccessModal
@@ -36,6 +37,7 @@ import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.con
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsEvent
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsIntent
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsUiState
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.UserInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -75,6 +77,7 @@ fun SendHistoryToInstitutionsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
     var showSuccessModal by remember { mutableStateOf(false) }
+    var accessDeniedMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(SendHistoryToInstitutionsIntent.LoadUserInfo)
@@ -83,7 +86,9 @@ fun SendHistoryToInstitutionsScreen(
     HandleSendHistoryEvents(
         events = viewModel.events,
         toaster = toaster,
-        onShowSuccessModal = { showSuccessModal = true }
+        onShowSuccessModal = { showSuccessModal = true },
+        onShowAccessDeniedModal = { message -> accessDeniedMessage = message },
+        onNavigateBack = onBack,
     )
 
     SendHistoryContent(
@@ -101,18 +106,32 @@ fun SendHistoryToInstitutionsScreen(
             onDone()
         })
     }
+
+    accessDeniedMessage?.let { message ->
+        AccessDeniedModal(
+            message = message,
+            onDismiss = {
+                accessDeniedMessage = null
+                onBack()
+            }
+        )
+    }
 }
 
 @Composable
 private fun HandleSendHistoryEvents(
     events: kotlinx.coroutines.flow.Flow<SendHistoryToInstitutionsEvent>,
     toaster: com.tamin.taminhamrah.ui.components.toast.ToasterState,
-    onShowSuccessModal: () -> Unit
+    onShowSuccessModal: () -> Unit,
+    onShowAccessDeniedModal: (String) -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is SendHistoryToInstitutionsEvent.ShowToast -> toaster.error(event.message)
+            is SendHistoryToInstitutionsEvent.DisplayAccessDeniedModal -> onShowAccessDeniedModal(event.message)
             is SendHistoryToInstitutionsEvent.DisplaySuccessModal -> onShowSuccessModal()
+            is SendHistoryToInstitutionsEvent.NavigateBack -> onNavigateBack()
         }
     }
 }
@@ -273,9 +292,7 @@ private fun SendHistoryReviewPreview() {
         SendHistoryContent(
             uiState = SendHistoryToInstitutionsUiState(
                 currentStep = SendHistoryStep.Review,
-                isType1Selected = true,
-                isType2Selected = true,
-                isType3Selected = true,
+                selectedTypes = HistoryCertificateType.entries.toSet(),
                 userInfo = UserInfoPR(
                     firstName = "سنا",
                     lastName = "حقیقی",

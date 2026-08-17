@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.useCases.history
 
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.repository.history.FakeHistoryRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
@@ -20,30 +21,23 @@ class SendToInstitutionUseCaseTest : BaseUseCaseTest() {
     }
 
     @Test
-    fun `invoke should delegate to repository with all params true`() = runTest {
-        useCase(type1 = true, type2 = true, type3 = true)
-
-        assertEquals(true, repository.lastSentType1)
-        assertEquals(true, repository.lastSentType2)
-        assertEquals(true, repository.lastSentType3)
+    fun `invoke should delegate to repository with all types selected`() = runTest {
+        val allTypes = setOf(HistoryCertificateType.ALL, HistoryCertificateType.WAGES, HistoryCertificateType.COMBINED)
+        useCase(allTypes)
+        assertEquals(allTypes, repository.lastSentTypes)
     }
 
     @Test
-    fun `invoke should pass mixed params correctly`() = runTest {
-        useCase(type1 = false, type2 = true, type3 = false)
-
-        assertEquals(false, repository.lastSentType1)
-        assertEquals(true, repository.lastSentType2)
-        assertEquals(false, repository.lastSentType3)
+    fun `invoke should pass a single type correctly`() = runTest {
+        val types = setOf(HistoryCertificateType.WAGES)
+        useCase(types)
+        assertEquals(types, repository.lastSentTypes)
     }
 
     @Test
-    fun `invoke should pass all params false`() = runTest {
-        useCase(type1 = false, type2 = false, type3 = false)
-
-        assertEquals(false, repository.lastSentType1)
-        assertEquals(false, repository.lastSentType2)
-        assertEquals(false, repository.lastSentType3)
+    fun `invoke should pass empty set correctly`() = runTest {
+        useCase(emptySet())
+        assertEquals(emptySet(), repository.lastSentTypes)
     }
 
     @Test
@@ -51,7 +45,7 @@ class SendToInstitutionUseCaseTest : BaseUseCaseTest() {
         repository.shouldThrowError = true
 
         assertFailsWith<RuntimeException> {
-            useCase(type1 = true, type2 = true, type3 = true)
+            useCase(setOf(HistoryCertificateType.ALL))
         }
     }
 }
