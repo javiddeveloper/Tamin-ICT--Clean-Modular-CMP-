@@ -130,6 +130,7 @@ fun ProfileScreen(
     onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onBackClicked: () -> Unit
@@ -160,6 +161,7 @@ fun ProfileScreen(
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToSecurity = onNavigateToSecurity,
         onNavigateToDependentsList = onNavigateToDependentsList,
+        onNavigateToSettings = onNavigateToSettings,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -187,6 +189,7 @@ fun HandleProfileEvents(
     onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -197,9 +200,9 @@ fun HandleProfileEvents(
                 onBackClicked()
             }
 
-            // Settings has no destination yet; the row is still shown, so the event is
-            // swallowed rather than removed from the contract.
-            ProfileEvent.NavigateToSettings -> Unit
+            ProfileEvent.NavigateToSettings -> {
+                onNavigateToSettings()
+            }
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()
@@ -349,7 +352,7 @@ fun ProfileContent(
                                 )
                                 Column {
                                     Text(
-                                        text = state.identityInfo?.fullName ?: "تست تست تست",
+                                        text = state.identityInfo?.fullName ?: "",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = taminColors.txtNameProfile
                                     )
@@ -373,8 +376,8 @@ fun ProfileContent(
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = Spacing.lg),
                     title = "نام نویسی شده تست",
-                    subtitle = "حساب شما تأیید و فعال است تست",
-                    badgeText = "معتبر تست ",
+                    subtitle = "حساب شما تأیید و فعال است",
+                    badgeText = "معتبر",
                     isValid = true
                 )
             }

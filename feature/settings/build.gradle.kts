@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.tamin.taminhamrah.feature.security"
+    namespace = "com.tamin.taminhamrah.feature.settings"
 }
 
 kotlin {
@@ -13,7 +13,6 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
-            // Add other dependencies as needed
         }
     }
 }
