@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -51,6 +52,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
  */
 
 private val PRIMARY_BUTTON_HEIGHT = 52.dp
+
+/** The navy cast under the primary button. Public so a caller can tint its own shadow to match. */
+val PrimaryButtonShadow = Color(0x47173D7E)
 
 /**
  * A gradient sweeping along the reading direction — right to left under a right-to-left
@@ -258,6 +262,7 @@ fun DetailRow(
             style = MaterialTheme.typography.bodySmall,
             color = LocalTaminColors.current.textMuted,
         )
+        Spacer(modifier = Modifier.width(8.dp))
         when {
             // Number and unit are separate children so the unit stays physically left of the digits:
             // in the RTL row the number is the right child, the unit the left one.
@@ -405,9 +410,9 @@ fun TaminFilledButton(
     contentColor: Color = Color.White,
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    /** Defaults to the navy cast the primary button drops; teal buttons pass their own. */
+    shadowColor: Color = PrimaryButtonShadow,
 ) {
-    val shadowColor = Color(0x47173D7E)
-
     val showIconBeforeText =
         (LocalLayoutDirection.current == LayoutDirection.Ltr && iconPosition == IconPosition.Start) ||
             (LocalLayoutDirection.current == LayoutDirection.Rtl && iconPosition == IconPosition.End)

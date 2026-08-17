@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -33,6 +34,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     var treatmentCostsResult: List<TreatmentCostDN> = emptyList()
     var treatmentCostsPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
     var sendToInboxResult: String = "SUCCESS"
+    var medicalConfirmationsResult: List<MedicalConfirmationDN> = emptyList()
 
     private fun <T> result(value: T): Flow<T> = flow {
         if (shouldThrowError) throw error
@@ -75,4 +77,14 @@ class FakeTreatmentRepository : TreatmentRepository {
 
     override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> =
         result(sendToInboxResult)
+
+    override suspend fun getMedicalConfirmations(): Flow<List<MedicalConfirmationDN>> =
+        result(medicalConfirmationsResult)
+
+    override suspend fun getMedicalConfirmationPdf(repId: String): Flow<PdfDownloadDN> =
+        result(treatmentCostsPdfResult)
+
+    override suspend fun sendToInboxMedicalConfirmation(repId: String): Flow<String> =
+        result(sendToInboxResult)
 }
+

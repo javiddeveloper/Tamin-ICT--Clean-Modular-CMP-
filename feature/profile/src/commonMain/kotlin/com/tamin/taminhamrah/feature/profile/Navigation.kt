@@ -22,6 +22,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsRoute
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 
@@ -50,6 +52,9 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object ContactUs : ProfileRoute
+    @Serializable
+    data object DependentsList : ProfileRoute
+
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -60,6 +65,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToAddDependent: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -80,6 +86,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToMyInbox = onNavigateToMyInbox,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onNavigateToSecurity = onNavigateToSecurity,
+                onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
                 onNavigateToSettings = onNavigateToSettings,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
@@ -109,6 +116,15 @@ fun NavGraphBuilder.profileGraph(
 
             VersionHistoryRoute(
                 viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.DependentsList> {
+            val viewModel = koinViewModel<DependentsListViewModel>()
+            DependentsListRoute(
+                viewModel = viewModel,
+                onNavigateToAddDependent = onNavigateToAddDependent,
                 onBackClicked = { navController.popBackStack() }
             )
         }

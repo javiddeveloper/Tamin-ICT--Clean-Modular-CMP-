@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
 import com.tamin.taminhamrah.feature.security.di.securityModule
 import com.tamin.taminhamrah.feature.settings.di.settingsModule
+import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -49,6 +50,7 @@ val sharedModules: List<Module>
         changeMobileModule,
         myInboxModule,
         securityModule,
+        addDependentModule,
         settingsModule
     )
 
