@@ -34,6 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.DOC_TYPE_ID_FIRST_PAGE
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.DOC_TYPE_MARRIAGE_CERTIFICATE
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.DOC_TYPE_SPOUSE_ID
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.DocType
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.UploadedDocument
 import com.tamin.taminhamrah.ui.components.BannerCard
@@ -50,6 +53,9 @@ import taminx.core.core_ui.upload_desc
 import taminx.core.core_ui.upload_slot_placeholder
 import taminx.core.core_ui.upload_slot_success
 import taminx.core.core_ui.upload_title
+import taminx.core.core_ui.doc_type_id_first_page
+import taminx.core.core_ui.doc_type_marriage_certificate
+import taminx.core.core_ui.doc_type_spouse_id
 import taminx.core.core_ui.error_file_read_fallback
 import org.jetbrains.compose.resources.getString
 
@@ -182,7 +188,7 @@ private fun DocumentSlotCard(
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(
-                text = docType.title,
+                text = documentTypeTitle(docType.code),
                 color = colors.textPrimary,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyMedium
@@ -217,3 +223,13 @@ private fun DocumentSlotCard(
         }
     }
 }
+
+@Composable
+private fun documentTypeTitle(code: String): String = stringResource(
+    when (code) {
+        DOC_TYPE_ID_FIRST_PAGE -> Res.string.doc_type_id_first_page
+        DOC_TYPE_SPOUSE_ID -> Res.string.doc_type_spouse_id
+        DOC_TYPE_MARRIAGE_CERTIFICATE -> Res.string.doc_type_marriage_certificate
+        else -> Res.string.doc_type_id_first_page
+    }
+)

@@ -21,6 +21,9 @@ class FakeTreatmentRepository : TreatmentRepository {
     var getTreatmentCostsResult: List<TreatmentCostDN> = emptyList()
     var getTreatmentCostsPDFResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
     var sendToInboxTreatmentCostsResult: String = ""
+    var getMedicalConfirmationsResult: List<MedicalConfirmationDN> = emptyList()
+    var getMedicalConfirmationPdfResult: PdfDownloadDN = PdfDownloadDN(pdf = InputStreamDN(pdf = null))
+    var sendToInboxMedicalConfirmationResult: String = ""
 
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> = flow {
         if (shouldThrowError) throw error
@@ -82,5 +85,20 @@ class FakeTreatmentRepository : TreatmentRepository {
     override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> = flow {
         if (shouldThrowError) throw error
         emit(sendToInboxTreatmentCostsResult)
+    }
+
+    override suspend fun getMedicalConfirmations(): Flow<List<MedicalConfirmationDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(getMedicalConfirmationsResult)
+    }
+
+    override suspend fun getMedicalConfirmationPdf(repId: String): Flow<PdfDownloadDN> = flow {
+        if (shouldThrowError) throw error
+        emit(getMedicalConfirmationPdfResult)
+    }
+
+    override suspend fun sendToInboxMedicalConfirmation(repId: String): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(sendToInboxMedicalConfirmationResult)
     }
 }

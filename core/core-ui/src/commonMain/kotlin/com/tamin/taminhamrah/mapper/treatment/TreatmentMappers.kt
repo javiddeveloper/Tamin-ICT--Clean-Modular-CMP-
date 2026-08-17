@@ -1,7 +1,11 @@
 package com.tamin.taminhamrah.mapper.treatment
 
+import com.tamin.taminhamrah.ui.normalizeArabicLetters
+import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.ui.orZero
 import com.tamin.taminhamrah.ui.toLongStringOrZero
 import com.tamin.taminhamrah.model.treatment.*
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import kotlin.jvm.JvmName
 
 fun DeservedTreatmentDN.toPresentation(): DeservedTreatmentPR {
@@ -151,5 +155,36 @@ fun TreatmentCostDN.toPresentation(): TreatmentCostPR {
 fun List<TreatmentCostDN>.toPresentation(): List<TreatmentCostPR> {
     return this.map { it.toPresentation() }
 }
+
+fun MedicalConfirmationDN.toPresentation(): MedicalConfirmationPR {
+    return MedicalConfirmationPR(
+        repId = repId.orEmpty(),
+        // Left blank rather than filled in here: the card substitutes its own wording from the
+        // string resources, so a fallback at this layer only pre-empts it -- and defaulting
+        // supportType to a *particular* support type invents data the service never sent.
+        supportType = supportType.orEmpty(),
+        treatmentCenter = treatmentCenter.orEmpty(),
+        outpatientRestStartDate = outpatientRestStartDate.orDash().toJalaliDateLabel(),
+        outpatientRestEndDate = outpatientRestEndDate.orDash().toJalaliDateLabel(),
+        numberOfOutpatientDays = numberOfOutpatientDays.orZero(),
+        inpatientRestStartDate = inpatientRestStartDate.orDash().toJalaliDateLabel(),
+        inpatientRestEndDate = inpatientRestEndDate.orDash().toJalaliDateLabel(),
+        numberOfInpatientDays = numberOfInpatientDays.orZero(),
+        unapprovedFromDate = unapprovedFromDate.orEmpty().toJalaliDateLabel(),
+        unapprovedToDate = unapprovedToDate.orEmpty().toJalaliDateLabel(),
+        branchName = branchName.orEmpty(),
+        branchStatus = branchStatus.orEmpty().normalizeArabicLetters(),
+        description = description.orEmpty(),
+        statusDesc = statusDesc.orEmpty().normalizeArabicLetters(),
+    )
+}
+
+
+@JvmName("toConfirmationPresentation")
+fun List<MedicalConfirmationDN>.toPresentation(): List<MedicalConfirmationPR> {
+    return this.map { it.toPresentation() }
+}
+
+
 
 

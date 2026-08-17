@@ -7,6 +7,11 @@ android {
     namespace = "com.tamin.taminhamrah.feature.history"
 }
 
+compose.resources {
+    packageOfResClass = "taminx.feature.history"
+    publicResClass = true
+}
+
 kotlin {
     sourceSets {
         commonMain.dependencies {

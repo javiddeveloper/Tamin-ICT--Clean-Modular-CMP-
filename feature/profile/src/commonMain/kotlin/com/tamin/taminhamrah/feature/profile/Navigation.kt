@@ -6,6 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountRoute
+import com.tamin.taminhamrah.feature.profile.ui.bankAccount.BankAccountViewModel
 import com.tamin.taminhamrah.feature.profile.ui.ProfileScreen
 import com.tamin.taminhamrah.feature.profile.ui.ProfileViewModel
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.ElectronicFileRoute
@@ -20,6 +22,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsRoute
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 
@@ -41,13 +45,15 @@ sealed interface ProfileRoute {
     data object VersionHistory : ProfileRoute
 
     @Serializable
+    data object BankAccount : ProfileRoute
+
+    @Serializable
     data object ActiveRelation : ProfileRoute
 
     @Serializable
     data object ContactUs : ProfileRoute
     @Serializable
     data object DependentsList : ProfileRoute
-
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -56,6 +62,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
+    onNavigateToSecurity: () -> Unit,
     onNavigateToAddDependent: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
@@ -73,8 +80,10 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToVersionHistory = { navController.navigate(ProfileRoute.VersionHistory) },
                 onNavigateToActiveRelation = { navController.navigate(ProfileRoute.ActiveRelation) },
                 onNavigateToChangeMobile = onNavigateToChangeMobile,
+                onNavigateToBankAccount = { navController.navigate(ProfileRoute.BankAccount) },
                 onNavigateToMyInbox = onNavigateToMyInbox,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
+                onNavigateToSecurity = onNavigateToSecurity,
                 onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
@@ -109,11 +118,20 @@ fun NavGraphBuilder.profileGraph(
         }
 
         composable<ProfileRoute.DependentsList> {
-            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel>()
-            com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute(
+            val viewModel = koinViewModel<DependentsListViewModel>()
+            DependentsListRoute(
                 viewModel = viewModel,
                 onNavigateToAddDependent = onNavigateToAddDependent,
                 onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composableWithFadeTransitions<ProfileRoute.BankAccount> {
+            val viewModel = koinViewModel<BankAccountViewModel>()
+
+            BankAccountRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() },
             )
         }
 

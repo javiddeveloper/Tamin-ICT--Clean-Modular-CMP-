@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDN
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDTO
 
 
 fun DeservedTreatmentDTO.toDomain() = DeservedTreatmentDN(
@@ -118,4 +120,29 @@ fun TreatmentCostDTO.toDomain() = TreatmentCostDN(
     estimatePayDate = estimatePayDate,
     returnReason = returnReason
 )
+
+/**
+ * Every field is trimmed: this service pads its text. A live payload returns
+ * `"branchName": "بيست تهران "` and `"confirmOk": "تائيد شعبه "`, and a trailing space is the
+ * difference between a label that lines up and one that does not.
+ */
+fun MedicalConfirmationDTO.toDomain() = MedicalConfirmationDN(
+    repId = repId?.trim(),
+    supportType = supportType?.trim(),
+    treatmentCenter = treatmentCenter?.trim(),
+    outpatientRestStartDate = outpatientRestStartDate?.trim(),
+    outpatientRestEndDate = outpatientRestEndDate?.trim(),
+    numberOfOutpatientDays = numberOfOutpatientDays?.trim(),
+    inpatientRestStartDate = inpatientRestStartDate?.trim(),
+    inpatientRestEndDate = inpatientRestEndDate?.trim(),
+    numberOfInpatientDays = numberOfInpatientDays?.trim(),
+    unapprovedFromDate = unapprovedFromDate?.trim(),
+    unapprovedToDate = unapprovedToDate?.trim(),
+    branchName = branchName?.trim(),
+    branchStatus = branchStatus?.trim(),
+    description = description?.trim(),
+    statusDesc = statusDesc?.trim()
+)
+
+
 

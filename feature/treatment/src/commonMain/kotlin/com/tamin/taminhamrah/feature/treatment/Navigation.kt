@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
 import com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts.TreatmentCostsRoute
+import com.tamin.taminhamrah.feature.treatment.ui.medicalConfirmations.MedicalConfirmationsRoute
 import kotlinx.serialization.Serializable
 
 /**
@@ -48,6 +49,10 @@ sealed interface TreatmentRoute {
     @Serializable
     data object TreatmentCosts : TreatmentRoute
 
+    /** «تاییدیه‌های پزشکی» — medical confirmations and council decisions. */
+    @Serializable
+    data object MedicalConfirmations : TreatmentRoute
+
     /** One record: prescribed items, cost breakdown and the PDF exports. */
     @Serializable
     data class RecordDetail(
@@ -55,9 +60,6 @@ sealed interface TreatmentRoute {
         val noteHeadId: String,
         val type: String,
         val flagSata: String,
-        // Passed through because the detail screen's own list is empty — it loads only the detail
-        // and price, so these header fields come from the record that was tapped, as the old app
-        // carried them in the navigation bundle.
         val docName: String,
         val prescDate: String,
         val trackingCode: String,
@@ -67,8 +69,6 @@ sealed interface TreatmentRoute {
 fun NavGraphBuilder.treatmentGraph(
     navController: NavController,
     onBack: () -> Unit,
-    // Health profile is its own feature module now, reached at the app level; the hub tile routes
-    // out through this rather than owning the destination.
     onNavigateToHealthProfile: (nationalCode: String) -> Unit,
 ) {
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
@@ -82,11 +82,16 @@ fun NavGraphBuilder.treatmentGraph(
                 },
                 onOpenHealthProfile = onNavigateToHealthProfile,
                 onOpenMiscClaims = { navController.navigate(TreatmentRoute.TreatmentCosts) },
+                onOpenApprovals = { navController.navigate(TreatmentRoute.MedicalConfirmations) },
             )
         }
 
         composable<TreatmentRoute.TreatmentCosts> {
             TreatmentCostsRoute(onBackClicked = onBack)
+        }
+
+        composable<TreatmentRoute.MedicalConfirmations> {
+            MedicalConfirmationsRoute(onBackClicked = onBack)
         }
 
         composableWithFadeTransitions<TreatmentRoute.MedicalRecords> { backStackEntry ->
@@ -126,3 +131,4 @@ fun NavGraphBuilder.treatmentGraph(
         }
     }
 }
+
