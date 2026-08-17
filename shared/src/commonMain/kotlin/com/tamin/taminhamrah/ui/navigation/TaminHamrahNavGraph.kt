@@ -75,6 +75,7 @@ import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
+import com.tamin.taminhamrah.feature.history.historyJobInfoScreen
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
@@ -94,6 +95,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
+import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
@@ -377,7 +380,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToSecurity = {
                         navController.navigate(SecurityRoute)
                     },
+                    onNavigateToAddDependent = {
+                        navController.navigate(AddDependentRoute)
+                    },
                     onOpenUrl = { url -> openUrl(url) },
+                    onBack = { navController.popBackStack() }
+                )
+
+                addDependentGraph(
+                    navController = navController,
                     onBack = { navController.popBackStack() }
                 )
 
@@ -414,6 +425,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()
+                historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
                     onBack = { navController.popBackStack() },

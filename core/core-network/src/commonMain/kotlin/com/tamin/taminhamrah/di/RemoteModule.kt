@@ -36,6 +36,8 @@ import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSource
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
@@ -136,6 +138,14 @@ val remoteModule = module {
     single<HealthRemoteDataSource> {
         HealthRemoteDataSourceImpl(
             apiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<AddDependentRemoteDataSource> {
+        AddDependentRemoteDataSourceImpl(
+            apiService = get(),
+            apiQueryBuilder = get(),
             errorParser = get()
         )
     }

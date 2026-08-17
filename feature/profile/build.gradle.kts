@@ -16,6 +16,8 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.datetime)
             implementation(libs.chrisbanes.haze)
+            implementation(libs.filekit.dialog.compose)
+            implementation(libs.filekit.core)
         }
     }
 }

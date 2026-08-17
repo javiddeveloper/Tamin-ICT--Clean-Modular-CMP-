@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -71,8 +72,9 @@ import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUs
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
-import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -141,10 +143,31 @@ import org.koin.dsl.module
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationsUseCase
+import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
+import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
+import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
+import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
+import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
+import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
+import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
+import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 
 val domainModule = module {
+    // Add Dependent UseCases
+    factoryOf(::GetActiveBranchesUseCase)
+    factoryOf(::GetFamilyRelationshipsFromProxyUseCase)
+    factoryOf(::GetFamilyRelationshipsUseCase)
+    factoryOf(::InquiryRegistryUseCase)
+    factoryOf(::InquiryEducationCodeUseCase)
+    factoryOf(::UploadDependentImageUseCase)
+    factoryOf(::AddNewDependentUseCase)
+    factoryOf(::GetDependentInfoUseCase)
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
@@ -163,6 +186,7 @@ val domainModule = module {
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
+    factoryOf(::MockSubdominantUseCase)
     factoryOf(::SignOutUseCase)
     factoryOf(::GetSignOutUrlUseCase)
     factoryOf(::GetBankAccountListUseCase)
@@ -180,6 +204,7 @@ val domainModule = module {
     factoryOf(::CheckGirlSurvivorConditionsUseCase)
     factoryOf(::GetConfirmSurvivorsListUseCase)
     factoryOf(::GetAgeUseCase)
+    factoryOf(::GetCitiesUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
@@ -188,6 +213,7 @@ val domainModule = module {
     factoryOf(::GetUserRequestTypesUseCase)
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
+    factoryOf(::GetHistoryJobInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
     factoryOf(::GetRequestInsuredMainInfoUseCase)
@@ -259,6 +285,10 @@ val domainModule = module {
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)
+    factoryOf(::GetMedicalConfirmationsUseCase)
+    factoryOf(::GetMedicalConfirmationPDFUseCase)
+    factoryOf(::SendToInboxMedicalConfirmationUseCase)
+
 
     // Health UseCases
     factoryOf(::GetPatientGeneralUseCase)

@@ -11,6 +11,7 @@ data class SubdominantItemDN(
     val lastName: String? = null,
     val fatherName: String? = null,
     val nationalCode: String? = null,
+    val dateOfBirthTimestamp: Long? = null,
     val relationDescription: String? = null,
     val status: String? = null,
     val insuranceId: String? = null

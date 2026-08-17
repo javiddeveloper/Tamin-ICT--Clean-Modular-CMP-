@@ -30,10 +30,12 @@ import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.orotezProtez.OrotezProtezRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
+import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import com.tamin.taminhamrah.repository.VersionHistoryRepository
 import com.tamin.taminhamrah.data.repository.ContactUsRepositoryImpl
 import com.tamin.taminhamrah.repository.ContactUsRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
+import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import org.koin.core.module.dsl.bind
@@ -57,6 +59,7 @@ val dataKoinModule = module {
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
     singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
+    singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
     singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }

@@ -36,6 +36,12 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
+
+enum class LoadingButtonIconPosition {
+    LEADING,
+    TRAILING
+}
+
 @Composable
 fun LoadingButton(
     text: String,
@@ -45,7 +51,7 @@ fun LoadingButton(
     isLoading: Boolean = false,
     icon: ImageVector? = null,
     /** Defaults to every existing caller's expectation: icon before text. */
-    iconPosition: IconPosition = IconPosition.End,
+    iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
 ) {
     val taminColors = LocalTaminColors.current
     val backgroundBrush = if (enabled) {
@@ -55,9 +61,6 @@ fun LoadingButton(
     }
     val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
     val shadowColor = if (enabled) taminColors.shadowPrimary else Color.Transparent
-    val showIconBeforeText =
-        (LocalLayoutDirection.current == LayoutDirection.Ltr && iconPosition == IconPosition.Start) ||
-            (LocalLayoutDirection.current == LayoutDirection.Rtl && iconPosition == IconPosition.End)
 
     Box(
         modifier = modifier
@@ -83,42 +86,39 @@ fun LoadingButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally)
         ) {
-            if (showIconBeforeText) {
-                LoadingButtonIcon(icon = icon, isLoading = isLoading, contentColor = contentColor)
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = contentColor
-            )
-            if (!showIconBeforeText) {
-                LoadingButtonIcon(icon = icon, isLoading = isLoading, contentColor = contentColor)
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoadingButtonIcon(
-    icon: ImageVector?,
-    isLoading: Boolean,
-    contentColor: Color,
-) {
-    Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
-        Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
-            if (loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
-                    color = contentColor,
-                    strokeWidth = ButtonDimens.loadingIndicatorStroke
+            val label = @Composable {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = contentColor
                 )
-            } else if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = contentColor,
-                    modifier = Modifier.size(IconSize.medium)
-                )
+            }
+            val indicator = @Composable {
+                Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
+                    Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
+                        if (loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
+                                color = contentColor,
+                                strokeWidth = ButtonDimens.loadingIndicatorStroke
+                            )
+                        } else if (icon != null) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = contentColor,
+                                modifier = Modifier.size(IconSize.medium)
+                            )
+                        }
+                    }
+                }
+            }
+            if (iconPosition == LoadingButtonIconPosition.LEADING) {
+                indicator()
+                label()
+            } else {
+                label()
+                indicator()
             }
         }
     }
