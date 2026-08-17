@@ -95,6 +95,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
+import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
@@ -378,7 +380,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToSecurity = {
                         navController.navigate(SecurityRoute)
                     },
+                    onNavigateToAddDependent = {
+                        navController.navigate(AddDependentRoute)
+                    },
                     onOpenUrl = { url -> openUrl(url) },
+                    onBack = { navController.popBackStack() }
+                )
+
+                addDependentGraph(
+                    navController = navController,
                     onBack = { navController.popBackStack() }
                 )
 
