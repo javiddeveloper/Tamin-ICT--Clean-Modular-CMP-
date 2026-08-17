@@ -2,9 +2,10 @@ package com.tamin.taminhamrah.apiService.treatment
 
 import com.tamin.taminhamrah.model.treatment.DependantUserUnderEighteenDTO
 import com.tamin.taminhamrah.model.treatment.DeservedTreatmentDTO
-import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
+import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDTO
 import com.tamin.taminhamrah.model.treatment.TreatmentCostDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -77,6 +78,34 @@ internal interface TreatmentApiService {
 
     @GET("health/tcr-price-certificate/announcement/{repId}")
     suspend fun sendToInboxTreatmentCosts(
+        @Path("repId") repId: String
+    ): BaseDTO<String>
+
+    /**
+     * `confrimation` is misspelt **on the server**. Leave it exactly as written -- correcting it
+     * to `confirmation` gives a 404. The query keys this takes (`page`, `start`, `limit`,
+     * `filter`, `sort`) are the ones `ApiQueryBuilder` already emits.
+     */
+    @GET("shortterm-request/commission-confrimation")
+    suspend fun getMedicalConfirmations(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<MedicalConfirmationDTO>>
+
+    /**
+     * **Unverified route.** The old app has no certificate download for medical confirmations --
+     * `shortterm-request` exposes no `report`/`announcement` sibling, and the list payload carries
+     * no `repId` to address a row with. The path below is modeled on the tcr-price-certificate
+     * pair, which is a guess, not a contract. The UI keeps both actions hidden until a row
+     * actually arrives with a `repId`, so nothing calls this until the service grows one.
+     */
+    @GET("shortterm-request/commission-confrimation/report/{repId}")
+    suspend fun getMedicalConfirmationPdf(
+        @Path("repId") repId: String
+    ): HttpStatement
+
+    /** Unverified route -- see [getMedicalConfirmationPdf]. */
+    @GET("shortterm-request/commission-confrimation/announcement/{repId}")
+    suspend fun sendToInboxMedicalConfirmation(
         @Path("repId") repId: String
     ): BaseDTO<String>
 }

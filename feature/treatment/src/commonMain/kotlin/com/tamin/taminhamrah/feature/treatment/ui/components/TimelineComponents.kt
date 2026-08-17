@@ -48,6 +48,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
@@ -137,11 +138,17 @@ fun MedicalRecordCard(
 }
 
 /**
- * Paints the 4dp category stripe down the card's leading edge — the right side under
+ * Paints the category stripe down the card's leading edge — the right side under
  * the app's right-to-left layout, the left side if it is ever rendered left-to-right.
+ *
+ * [width] defaults to the records card's 4dp; the design draws a narrower 3dp stripe on the
+ * confirmations cards, so the caller decides rather than every card sharing one number.
  */
-internal fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
-    val barWidth = TreatmentDimens.accentBarWidth.toPx()
+internal fun Modifier.accentStripe(
+    color: Color,
+    width: Dp = TreatmentDimens.accentBarWidth,
+): Modifier = drawBehind {
+    val barWidth = width.toPx()
     val x = if (layoutDirection == LayoutDirection.Rtl) size.width - barWidth else 0f
     drawRect(
         color = color,

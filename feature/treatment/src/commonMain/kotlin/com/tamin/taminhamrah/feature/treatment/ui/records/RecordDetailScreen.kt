@@ -34,7 +34,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentRecordPdfExport
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
-import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent

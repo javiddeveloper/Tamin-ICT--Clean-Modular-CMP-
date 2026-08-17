@@ -44,7 +44,6 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.rememberJalaliMonthNames
 import com.tamin.taminhamrah.feature.treatment.ui.model.rememberRecordTabLabels
 import com.tamin.taminhamrah.feature.treatment.ui.model.toCategoryLabel
-import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliMonthLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
@@ -69,6 +68,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
