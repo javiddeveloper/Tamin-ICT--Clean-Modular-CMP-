@@ -42,6 +42,13 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.profile_version_history_version_prefix
+import taminx.core.core_ui.profile_version_history_release_date
+import taminx.core.core_ui.profile_version_history_new_features
+import taminx.core.core_ui.profile_version_history_bug_fixes_and_improvements
+import taminx.core.core_ui.profile_version_history_latest_badge
 
 @Composable
 internal fun VersionHistoryItemCard(
@@ -82,7 +89,7 @@ internal fun VersionHistoryItemCard(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
                         Text(
-                            text = "نسخه ${item.versionName.toPersianDigits()}",
+                            text = stringResource(Res.string.profile_version_history_version_prefix, item.versionName.toPersianDigits()),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = taminColors.blueText
@@ -115,7 +122,7 @@ internal fun VersionHistoryItemCard(
                 Spacer(modifier = Modifier.height(Spacing.xs))
 
                 Text(
-                    text = "تاریخ انتشار: ${item.releaseDate}",
+                    text = stringResource(Res.string.profile_version_history_release_date, item.releaseDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textMuted
                 )
@@ -140,7 +147,7 @@ internal fun VersionHistoryItemCard(
                     // New Features Section
                     if (item.newFeatures.isNotEmpty()) {
                         Text(
-                            text = "ویژگی‌های جدید",
+                            text = stringResource(Res.string.profile_version_history_new_features),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = taminColors.teal
@@ -162,7 +169,7 @@ internal fun VersionHistoryItemCard(
                     // Bug Fixes & Improvements Section
                     if (item.debug.isNotEmpty()) {
                         Text(
-                            text = "رفع اشکال و بهینه‌سازی",
+                            text = stringResource(Res.string.profile_version_history_bug_fixes_and_improvements),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = taminColors.orangeText
@@ -236,7 +243,7 @@ private fun LatestBadge(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "جدیدترین",
+            text = stringResource(Res.string.profile_version_history_latest_badge),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = taminColors.greenText

@@ -73,6 +73,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchName") BRANCH_NAME("branchName"),
     @SerialName("target") TARGET("target"),
     @SerialName("statusCode") STATUS_CODE("statusCode"),
+    @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
 }
 
 @Serializable

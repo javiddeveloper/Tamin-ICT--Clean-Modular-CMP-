@@ -36,6 +36,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_history
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.profile_version_history
+import taminx.core.core_ui.profile_version_history_last_updated
 
 @Composable
 internal fun VersionHistoryHeader(
@@ -111,7 +112,7 @@ internal fun VersionHistoryHeader(
 
         // Subtitle
         Text(
-            text = "آخرین به‌روزرسانی: $lastUpdatedDate",
+            text = stringResource(Res.string.profile_version_history_last_updated, lastUpdatedDate),
             style = MaterialTheme.typography.bodySmall,
             color = taminColors.txtNatProfile
         )

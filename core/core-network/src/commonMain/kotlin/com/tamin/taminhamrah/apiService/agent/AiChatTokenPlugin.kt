@@ -30,7 +30,7 @@ val AiChatTokenPlugin = createClientPlugin("AiChatTokenPlugin", createConfigurat
 
     on(Send) { request ->
         val originalCall = proceed(request)
-        
+
         val path = request.url.encodedPath
         if (path.contains("chat-allowed") || (!path.contains("search/service") && !path.contains("search/rule"))) {
             return@on originalCall
@@ -39,18 +39,18 @@ val AiChatTokenPlugin = createClientPlugin("AiChatTokenPlugin", createConfigurat
         // Save the call so its body can be read multiple times (replaces the need for DoubleReceive)
         val savedCall = originalCall.save()
         val response = savedCall.response
-        
+
         val bodyText = try {
             response.bodyAsText()
         } catch (e: Exception) {
             ""
         }
-        
+
         val isTokenExpired = response.status.value == 400 || bodyText.contains("INVALID_OR_EXPIRED_TOKEN")
-        
+
         if (isTokenExpired) {
-            Logger.d(tag = "AiChatTokenPlugin") { "Token expired. Fetching new token..." }
-            
+            Logger.withTag("AiChatTokenPlugin").d { "Token expired. Fetching new token..." }
+
             var newToken: String? = null
             try {
                 // Fetch new token
@@ -64,18 +64,18 @@ val AiChatTokenPlugin = createClientPlugin("AiChatTokenPlugin", createConfigurat
                         header(HttpHeaders.Authorization, authHeader)
                     }
                 }
-                
+
                 if (checkAllowedResponse.status.value == 200) {
                     val allowedDto = checkAllowedResponse.body<ChatAllowedDTO>()
                     newToken = allowedDto.data?.chatToken
                 }
             } catch (e: Exception) {
-                Logger.e(tag = "AiChatTokenPlugin", throwable = e) { "Failed to fetch new token" }
+                Logger.withTag("AiChatTokenPlugin").e(e) { "Failed to fetch new token" }
             }
 
             if (newToken != null) {
-                Logger.d(tag = "AiChatTokenPlugin") { "Got new token, retrying request..." }
-                
+                Logger.withTag("AiChatTokenPlugin").d { "Got new token, retrying request..." }
+
                 // Rebuild the request body with the new token
                 val oldBody = request.body as? TextContent
                 val newBodyContent = if (oldBody != null) {
@@ -97,14 +97,14 @@ val AiChatTokenPlugin = createClientPlugin("AiChatTokenPlugin", createConfigurat
 
                 val retryRequest = io.ktor.client.request.HttpRequestBuilder().apply { takeFrom(request) }
                 retryRequest.setBody(newBodyContent)
-                
+
                 return@on proceed(retryRequest)
             } else {
                 // If we couldn't get a new token, throw an exception so the flow handles it
                 throw RuntimeException("خطای سرور")
             }
         }
-        
+
         savedCall
     }
 }
