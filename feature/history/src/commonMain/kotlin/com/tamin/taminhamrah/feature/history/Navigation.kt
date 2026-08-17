@@ -23,9 +23,9 @@ fun NavController.navigateToHistoryJobInfo() {
     navigate(HistoryJobInfoRoute)
 }
 
-fun NavGraphBuilder.historyScreen() {
+fun NavGraphBuilder.historyScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<HistoryRoute> {
-        HistoryScreen()
+        HistoryScreen(onBackClicked = onBack)
     }
 }
 

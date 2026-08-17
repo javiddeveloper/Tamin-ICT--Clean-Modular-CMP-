@@ -423,7 +423,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 pensionSurvivorScreen(onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
-                historyScreen()
+                historyScreen(onBack = { navController.popBackStack() })
                 historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
