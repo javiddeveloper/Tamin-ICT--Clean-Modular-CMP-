@@ -1,11 +1,18 @@
 package com.tamin.taminhamrah.feature.orotezprotez.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -92,10 +100,10 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.PI
+import kotlin.math.sin
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -810,94 +818,184 @@ private fun OrotezProtezDocumentCard(
         is OrotezProtezDocumentState.Uploading -> modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(colors.bgSurface)
             .border(Thickness.border, colors.border, shape)
             .clickable(onClick = onClick)
             .padding(Spacing.lg)
     }
 
-    Column(modifier = rowModifier) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                OrotezProtezDocumentIconTile(documentState)
-
-                Column {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(document.titleRes),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = colors.textPrimary,
-                        )
-                        StatusPill(
-                            text = stringResource(
-                                if (document.isRequired) {
-                                    Res.string.orotez_protez_document_required
-                                } else {
-                                    Res.string.orotez_protez_document_optional
-                                },
-                            ),
-                            containerColor = if (document.isRequired) colors.blueBg else colors.bgPage,
-                            contentColor = if (document.isRequired) colors.blueText else colors.textMuted,
-                        )
-                    }
-
-                    Spacer(Modifier.height(Spacing.xxs))
-
-                    Text(
-                        text = documentState.statusText(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (documentState is OrotezProtezDocumentState.Failed) {
-                            colors.dangerText
-                        } else {
-                            colors.textMuted
-                        },
-                    )
-                }
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (documentState is OrotezProtezDocumentState.Uploaded) {
-                    Icon(
-                        imageVector = Icons.Outlined.Image,
-                        contentDescription = stringResource(document.titleRes),
-                        tint = colors.greenText,
-                        modifier = Modifier
-                            .size(IconSize.small)
-                            .clickable(onClick = onPreviewRequested),
-                    )
-                }
-                if (documentState !is OrotezProtezDocumentState.Uploading) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                        contentDescription = null,
-                        tint = colors.textMuted,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                }
-            }
-        }
-
+    Box {
         if (documentState is OrotezProtezDocumentState.Uploading) {
-            Spacer(Modifier.height(Spacing.sm))
-            LinearProgressIndicator(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(CornerRadius.sm)),
+                    .matchParentSize()
+                    .clip(shape)
+                    .background(colors.bgSurface),
+            )
+            LiquidWaveProgressBar(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(shape),
             )
         }
+
+        Column(modifier = rowModifier) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OrotezProtezDocumentIconTile(documentState)
+
+                    Column {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = stringResource(document.titleRes),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = colors.textPrimary,
+                            )
+                            StatusPill(
+                                text = stringResource(
+                                    if (document.isRequired) {
+                                        Res.string.orotez_protez_document_required
+                                    } else {
+                                        Res.string.orotez_protez_document_optional
+                                    },
+                                ),
+                                containerColor = if (document.isRequired) colors.blueBg else colors.bgPage,
+                                contentColor = if (document.isRequired) colors.blueText else colors.textMuted,
+                            )
+                        }
+
+                        Spacer(Modifier.height(Spacing.xxs))
+
+                        Text(
+                            text = documentState.statusText(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (documentState is OrotezProtezDocumentState.Failed) {
+                                colors.dangerText
+                            } else {
+                                colors.textMuted
+                            },
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (documentState is OrotezProtezDocumentState.Uploaded) {
+                        Icon(
+                            imageVector = Icons.Outlined.Image,
+                            contentDescription = stringResource(document.titleRes),
+                            tint = colors.greenText,
+                            modifier = Modifier
+                                .size(IconSize.small)
+                                .clickable(onClick = onPreviewRequested),
+                        )
+                    }
+                    if (documentState !is OrotezProtezDocumentState.Uploading) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                            contentDescription = null,
+                            tint = colors.textMuted,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private const val LiquidFillMaxFraction = 0.875f
+private val LiquidWaveAmplitudeMax = 8.dp
+private const val LiquidWaveSampleCount = 32
+
+/**
+ * Indeterminate liquid-fill effect: a solid band that grows from the card's right edge toward
+ * its left edge (since no real upload progress percentage is available, it loops indefinitely
+ * instead of settling at 100%), bounded by a sinusoidal "water surface" edge that keeps
+ * wiggling as it advances. Used as a background overlay while a document is
+ * [OrotezProtezDocumentState.Uploading].
+ */
+@Composable
+private fun LiquidWaveProgressBar(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    val infiniteTransition = rememberInfiniteTransition(label = "LiquidFill")
+
+    val fillFraction by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "LiquidFillFraction",
+    )
+    val wavePhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "LiquidWavePhase",
+    )
+
+    val fillColor = colors.blueText.copy(alpha = 0.18f)
+    val waveColor = colors.blueText.copy(alpha = 0.3f)
+
+    Canvas(modifier = modifier) {
+        val canvasWidth = size.width
+        val canvasHeight = size.height
+        val leadingEdgeX = canvasWidth - canvasWidth * LiquidFillMaxFraction * fillFraction
+        val amplitude = (canvasHeight * 0.05f).coerceAtMost(LiquidWaveAmplitudeMax.toPx())
+        val waveLength = canvasHeight * 1.4f
+        val step = (canvasHeight / LiquidWaveSampleCount).coerceAtLeast(1f)
+
+        fun edgeX(y: Float): Float =
+            leadingEdgeX + amplitude * sin((y / waveLength) * 2f * PI.toFloat() + wavePhase)
+
+        // `buildList`'s receiver is a MutableList, whose own `size: Int` would shadow
+        // DrawScope's `size: Size` here — canvasHeight above avoids relying on that name.
+        val edgeYs = buildList {
+            var y = 0f
+            while (y < canvasHeight) {
+                add(y)
+                y += step
+            }
+            add(canvasHeight)
+        }
+
+        val fillPath = Path().apply {
+            moveTo(canvasWidth, 0f)
+            lineTo(canvasWidth, canvasHeight)
+            for (y in edgeYs.asReversed()) {
+                lineTo(edgeX(y), y)
+            }
+            close()
+        }
+        drawPath(path = fillPath, color = fillColor)
+
+        val wavePath = Path().apply {
+            edgeYs.forEachIndexed { index, y ->
+                val x = edgeX(y)
+                if (index == 0) moveTo(x, y) else lineTo(x, y)
+            }
+        }
+        drawPath(
+            path = wavePath,
+            color = waveColor,
+            style = Stroke(width = 2.dp.toPx()),
+        )
     }
 }
 
@@ -918,10 +1016,11 @@ private fun OrotezProtezDocumentIconTile(documentState: OrotezProtezDocumentStat
         contentAlignment = Alignment.Center,
     ) {
         when (documentState) {
-            is OrotezProtezDocumentState.Uploading -> CircularProgressIndicator(
-                modifier = Modifier.size(IconSize.banner - Spacing.xs),
-                strokeWidth = 2.dp,
-                color = colors.blueText,
+            is OrotezProtezDocumentState.Uploading -> Icon(
+                imageVector = vectorResource(Res.drawable.ic_place),
+                contentDescription = null,
+                tint = colors.blueText,
+                modifier = Modifier.size(IconSize.banner),
             )
             is OrotezProtezDocumentState.Uploaded -> Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_check),
