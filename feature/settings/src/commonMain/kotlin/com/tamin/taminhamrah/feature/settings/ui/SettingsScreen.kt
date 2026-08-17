@@ -304,36 +304,3 @@ private fun SettingsScreenDarkPreview() {
     }
 }
 
-@PreviewRtlTheme
-@Composable
-private fun TaminSwitchPreviewLight() {
-    PreviewRtlThemeContent {
-        TaminSwitchPreviewContent()
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun TaminSwitchPreviewDark() {
-    PreviewRtlThemeContent(darkTheme = true) {
-        TaminSwitchPreviewContent()
-    }
-}
-
-@Composable
-private fun TaminSwitchPreviewContent() {
-    var checkedOn by remember { mutableStateOf(true) }
-    var checkedOff by remember { mutableStateOf(false) }
-    Column(
-        modifier = Modifier
-            .background(LocalTaminColors.current.bgPage)
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        TaminSwitchButton(checked = checkedOn, onCheckedChange = { checkedOn = it })
-        TaminSwitchButton(checked = checkedOff, onCheckedChange = { checkedOff = it })
-        TaminSwitchButton(checked = true, onCheckedChange = null, enabled = false)
-        TaminSwitchButton(checked = false, onCheckedChange = null, enabled = false)
-    }
-}
-
