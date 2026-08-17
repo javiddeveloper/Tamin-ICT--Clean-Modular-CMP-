@@ -213,3 +213,29 @@ object WorkshopTestData {
     val workshopStackholdersSuccess: String
         get() = readResourceFile("mocks/workshop_stackholders_success.json")
 }
+
+object HistoryTestData {
+    val dastmozdInfosSuccess: String
+        get() = readResourceFile("mocks/history/dastmozd_infos_success.json")
+
+    val dastmozdInfosEmpty: String
+        get() = readResourceFile("mocks/history/dastmozd_infos_empty.json")
+
+    val talfighInfosSuccess: String
+        get() = readResourceFile("mocks/history/talfigh_infos_success.json")
+
+    val talfighInfosEmpty: String
+        get() = readResourceFile("mocks/history/talfigh_infos_empty.json")
+
+    val userInfoSuccess: String
+        get() = readResourceFile("mocks/history/user_info_success.json")
+
+    val historyJobInfosSuccess: String
+        get() = readResourceFile("mocks/history/history_job_infos_success.json")
+
+    val historyJobInfosEmpty: String
+        get() = readResourceFile("mocks/history/history_job_infos_empty.json")
+
+    val sendToInstitutionSuccess: String
+        get() = readResourceFile("mocks/history/send_to_institution_success.json")
+}

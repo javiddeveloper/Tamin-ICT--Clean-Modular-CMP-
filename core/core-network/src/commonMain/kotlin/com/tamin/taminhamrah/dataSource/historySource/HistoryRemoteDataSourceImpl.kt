@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.dataSource.historySource
 
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
+import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -10,6 +11,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
 
 internal class HistoryRemoteDataSourceImpl(
     private val apiServices: HistoryApiServices,
@@ -55,4 +57,31 @@ internal class HistoryRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun getUserInfos(): UserInfoDTO {
+        return try {
+            val response = apiServices.getUserInfos()
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
+        try {
+            val response = apiServices.sendToInstitution(allHistorySelected, historyAndWageSelected, combineHistorySelected)
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }
+

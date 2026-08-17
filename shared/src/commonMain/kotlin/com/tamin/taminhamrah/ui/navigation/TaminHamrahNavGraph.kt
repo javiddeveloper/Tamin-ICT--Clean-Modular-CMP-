@@ -99,6 +99,7 @@ import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
@@ -414,6 +415,11 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToService = { flag -> navController.navigateToFeature(flag) },
                     onOpenUrl = { url -> openUrl(url) },
                     onBackClicked = { navController.popBackStack() }
+                )
+
+                sendInsuranceHistoryToInstitutionsScreen(
+                    onBack = { navController.popBackStack() },
+                    onDone = { navController.popBackStack() }
                 )
 
                 pensionInquiryScreen()
