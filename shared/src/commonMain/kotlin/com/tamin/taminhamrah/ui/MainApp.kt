@@ -65,7 +65,8 @@ fun MainApp(
     }
 
     TaminHamrahTheme(
-        darkTheme = darkTheme
+        darkTheme = darkTheme,
+        fontSizeOption = uiState.fontSizeOption,
     ) {
         AppToastHost {
             StatusBarIcons(darkIcons = !darkTheme)

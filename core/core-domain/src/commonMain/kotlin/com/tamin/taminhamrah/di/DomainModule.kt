@@ -56,6 +56,7 @@ import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.common.SetBiometricEnabledUseCase
 import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUseCase
+import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -303,6 +304,7 @@ val domainModule = module {
     factoryOf(::SetThemeUseCase)
     factoryOf(::SetBiometricEnabledUseCase)
     factoryOf(::CompleteBiometricEnrollmentPromptUseCase)
+    factoryOf(::SetFontSizeUseCase)
     factoryOf(::GetAllProvincesUseCase)
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)

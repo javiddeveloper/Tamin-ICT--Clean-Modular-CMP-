@@ -1,8 +1,9 @@
-package com.tamin.taminhamrah.repository
+package com.tamin.taminhamrah.feature.settings.fake
 
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.model.UserData
+import com.tamin.taminhamrah.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -30,6 +30,7 @@ class TaminHamrahKmpFeaturePlugin : Plugin<Project> {
                         implementation(libs.findLibrary("koin-compose-viewmodel").get())
                         implementation(libs.findLibrary("androidx-lifecycle-viewmodel").get())
                         implementation(libs.findLibrary("kotlinx-coroutines-core").get())
+                        implementation(libs.findLibrary("kotlinx-collections-immutable").get())
                     }
 
                     androidMain.dependencies {

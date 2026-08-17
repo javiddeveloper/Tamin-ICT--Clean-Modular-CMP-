@@ -108,6 +108,8 @@ import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
+import com.tamin.taminhamrah.feature.settings.SettingsRoute
+import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -383,6 +385,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToAddDependent = {
                         navController.navigate(AddDependentRoute)
                     },
+                    onNavigateToSettings = {
+                        navController.navigate(SettingsRoute)
+                    },
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
                 )
@@ -438,6 +443,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 workshopsScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
+
+                settingsScreen(onNavigateBack = { navController.popBackStack() })
 
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
 
