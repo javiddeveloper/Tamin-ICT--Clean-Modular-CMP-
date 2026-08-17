@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.profile.ui.bankAccount
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -52,11 +57,14 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.pushBack
+import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
@@ -67,6 +75,8 @@ import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
@@ -113,6 +123,29 @@ private val DecorCircleY = (-150).dp
  */
 private val AddButtonBrush = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900))
 
+/**
+ * Which of the three bodies the page is showing.
+ *
+ * Declared shallowest-first on purpose: the order *is* the depth, and it is the whole rule that
+ * tells a swap whether it is a step in (push) or a step back out (pop).
+ */
+private enum class BankAccountPane { LOADING, LIST, ADD }
+
+private val BankAccountUiState.pane: BankAccountPane
+    get() = when {
+        isLoading && accounts.isEmpty() -> BankAccountPane.LOADING
+        mode == BankAccountMode.ADD -> BankAccountPane.ADD
+        else -> BankAccountPane.LIST
+    }
+
+/**
+ * The skeleton turning into the list is one page finishing its load, not a step into another, so
+ * it crosses over instead of sliding. Built once at class-init: the spec has nothing to key on.
+ */
+private val LoadCrossfade =
+    fadeIn(tween(Duration.normal, easing = Easing.standard)) togetherWith
+        fadeOut(tween(Duration.normal, easing = Easing.standard))
+
 @Composable
 fun BankAccountRoute(
     viewModel: BankAccountViewModel,
@@ -151,29 +184,51 @@ fun BankAccountScreen(
     onIntent: (BankAccountIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Above the swap on purpose: the state is what remembers a card has already arrived, so
+    // leaving the list for the form and coming back does not replay every entrance underneath the
+    // slide. Keyed as before, so a reload that changes the list still animates it in.
+    val staggerState = rememberStaggeredEntranceState(state.accounts.size)
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { BankAccountHeader(onBack = { onIntent(BankAccountIntent.OnBackClicked) }) },
     ) { padding ->
-        Box(
+        // The header stays put and only the body travels, which is what makes the form read as a
+        // second view of this page rather than a page of its own.
+        //
+        // The transition runs entirely in the graphics layer, so a frame of it costs no
+        // recomposition; the body inside is only recomposed by its own state changing.
+        AnimatedContent(
+            targetState = state.pane,
+            transitionSpec = {
+                when {
+                    initialState == BankAccountPane.LOADING ||
+                        targetState == BankAccountPane.LOADING -> LoadCrossfade
+
+                    targetState > initialState -> pushForward()
+                    else -> pushBack()
+                }
+            },
+            label = "bank-account-pane",
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
                 .navigationBarsPadding(),
-        ) {
-            when {
-                state.isLoading && state.accounts.isEmpty() -> BankAccountListSkeleton()
+        ) { pane ->
+            when (pane) {
+                BankAccountPane.LOADING -> BankAccountListSkeleton()
 
-                state.mode == BankAccountMode.ADD -> AddView(
+                BankAccountPane.ADD -> AddView(
                     draft = state.draft,
                     showValidation = state.showValidation,
                     isSubmitting = state.isSubmitting,
                     onIntent = onIntent,
                 )
 
-                else -> ListView(
+                BankAccountPane.LIST -> ListView(
                     accounts = state.accounts,
                     canShowEmptyState = state.hasLoadedOnce,
+                    staggerState = staggerState,
                     onIntent = onIntent,
                 )
             }
@@ -245,11 +300,10 @@ private fun BankAccountHeader(onBack: () -> Unit) {
 private fun ListView(
     accounts: ImmutableList<BankAccountPR>,
     canShowEmptyState: Boolean,
+    /** Held by the page, not by this list: it has to outlive the swap to the form and back. */
+    staggerState: StaggeredEntranceState,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
-    // Held across scrolls so a card that has already arrived does not fade in again.
-    val staggerState = rememberStaggeredEntranceState(accounts.size)
-
     // The add button is the first row of the list and scrolls with it, as in the design -- not a
     // floating bar, which would sit on top of the last card.
     LazyColumn(

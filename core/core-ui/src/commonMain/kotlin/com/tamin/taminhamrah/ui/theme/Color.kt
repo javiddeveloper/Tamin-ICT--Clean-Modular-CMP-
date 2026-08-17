@@ -253,3 +253,17 @@ val TaminBankSepahChipSurface = Color(0xFF2E3192).copy(alpha = 0.10f)
 val TaminBankUnknownSurfaceTop = Color(0xFFECEFF7)
 val TaminBankUnknownSurfaceBottom = Color(0xFFC5CFE5)
 val TaminBankUnknownInk = TaminNavy900
+
+/* ---- Ink on accent surfaces ------------------------------------------------------------------ */
+
+/**
+ * White at the strengths the design uses on a filled or gradient surface — a hero subtitle over the
+ * header bar, a label on a teal button.
+ *
+ * These do not vary by theme, and that is the point: the surface underneath is the brand gradient
+ * in both, so the ink on it has to be white in both. Reaching for a *background* token here instead
+ * — `bgSurface` is white in light — reads correctly until the day someone opens the app in dark and
+ * finds the text has gone navy on teal.
+ */
+val TaminOnAccentInk = Color(0xFFFFFFFF)
+val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
