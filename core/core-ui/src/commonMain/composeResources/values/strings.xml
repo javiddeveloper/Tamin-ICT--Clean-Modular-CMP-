@@ -483,5 +483,16 @@
     <string name="orotez_protez_document_source_camera_subtitle">گرفتن عکس جدید</string>
     <string name="orotez_protez_document_source_gallery_title">گالری تصاویر</string>
     <string name="orotez_protez_document_source_gallery_subtitle">انتخاب از فایل‌های دستگاه</string>
+    <string name="orotez_protez_document_source_remove">حذف تصویر</string>
+    <string name="orotez_protez_document_status_uploading">در حال بارگذاری...</string>
+    <string name="orotez_protez_document_status_uploaded">بارگذاری شد • برای تغییر یا حذف ضربه بزنید</string>
+    <string name="orotez_protez_document_status_error_tap_to_retry">برای تلاش دوباره ضربه بزنید</string>
+    <string name="orotez_protez_document_format_error">فقط تصاویر با فرمت jpeg و حداکثر ۲ مگابایت مجاز است.</string>
+    <string name="orotez_protez_document_duplicate_error">این تصویر قبلاً برای یکی از مدارک انتخاب شده است.</string>
+    <string name="orotez_protez_document_camera_permission_error">برای گرفتن عکس، دسترسی دوربین لازم است.</string>
+    <string name="orotez_protez_document_upload_error">بارگذاری تصویر با خطا مواجه شد.</string>
+    <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
+    <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
+    <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
 </resources>
 

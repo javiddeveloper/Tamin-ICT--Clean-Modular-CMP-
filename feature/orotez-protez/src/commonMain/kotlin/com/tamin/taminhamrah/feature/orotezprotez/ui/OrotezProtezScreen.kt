@@ -30,24 +30,34 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.orotezprotez.camera.rememberCameraPermission
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezDocumentSourceSheet
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezHeader
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezOptionSheet
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentChecklist
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezEvent
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezImageSource
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezInsuredDetailUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezIntent
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezOptionUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezPicker
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.bytesOrNull
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
@@ -59,6 +69,7 @@ import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
@@ -68,12 +79,20 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
-import kotlinx.collections.immutable.ImmutableList
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -116,7 +135,16 @@ import taminx.core.core_ui.orotez_protez_submit_request
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import taminx.core.core_ui.ic_branch
+import taminx.core.core_ui.ic_check
+import taminx.core.core_ui.ic_check_label
 import taminx.core.core_ui.ic_place
+import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_check_circle
+import taminx.core.core_ui.ic_warning
+import taminx.core.core_ui.orotez_protez_document_camera_permission_error
+import taminx.core.core_ui.orotez_protez_document_status_error_tap_to_retry
+import taminx.core.core_ui.orotez_protez_document_status_uploaded
+import taminx.core.core_ui.orotez_protez_document_status_uploading
 
 @Composable
 fun OrotezProtezScreen(
@@ -124,10 +152,59 @@ fun OrotezProtezScreen(
     onBackClicked: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
+
+    // The document id an in-flight camera/gallery pick belongs to — set right before launching,
+    // read back (and cleared) once the platform picker returns.
+    var pendingDocumentId by remember { mutableStateOf<String?>(null) }
+    val cameraPermission = rememberCameraPermission()
+    val cameraPermissionDeniedMessage = stringResource(Res.string.orotez_protez_document_camera_permission_error)
+
+    val galleryLauncher = rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? ->
+        val documentId = pendingDocumentId
+        pendingDocumentId = null
+        if (documentId != null && file != null) {
+            viewModel.sendIntent(OrotezProtezIntent.OnDocumentImagePicked(documentId, file))
+        }
+    }
+    val cameraLauncher = rememberCameraPickerLauncher { file: PlatformFile? ->
+        val documentId = pendingDocumentId
+        pendingDocumentId = null
+        if (documentId != null && file != null) {
+            viewModel.sendIntent(OrotezProtezIntent.OnDocumentImagePicked(documentId, file))
+        }
+    }
 
     viewModel.events.collectWithLifecycleAware { event ->
         when (event) {
             OrotezProtezEvent.NavigateBack -> onBackClicked()
+            is OrotezProtezEvent.LaunchImagePicker -> when (event.source) {
+                OrotezProtezImageSource.GALLERY -> {
+                    pendingDocumentId = event.documentId
+                    galleryLauncher.launch()
+                }
+                OrotezProtezImageSource.CAMERA -> {
+                    if (cameraPermission.granted) {
+                        pendingDocumentId = event.documentId
+                        cameraLauncher.launch()
+                    } else {
+                        // AVFoundation's permission callback can fire on a background queue on iOS —
+                        // hop back onto the composition's own dispatcher before touching Compose state.
+                        cameraPermission.request { granted ->
+                            scope.launch {
+                                if (granted) {
+                                    pendingDocumentId = event.documentId
+                                    cameraLauncher.launch()
+                                } else {
+                                    viewModel.sendIntent(
+                                        OrotezProtezIntent.OnDocumentImagePickFailed(cameraPermissionDeniedMessage),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -199,6 +276,7 @@ private fun OrotezProtezContent(
                     )
 
                     OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
+                        state = state,
                         onIntent = onIntent,
                         onBack = onBackClicked,
                     )
@@ -232,8 +310,12 @@ private fun OrotezProtezContent(
         OrotezProtezPicker.DOCUMENT_SOURCE -> {
             val activeDocument = OrotezProtezDocumentChecklist.find { it.id == state.activeDocumentId }
             if (activeDocument != null) {
+                val hasFile = state.documents[activeDocument.id]?.let {
+                    it !is OrotezProtezDocumentState.Empty
+                } == true
                 OrotezProtezDocumentSourceSheet(
                     title = stringResource(activeDocument.titleRes),
+                    showRemoveOption = hasFile,
                     onSelect = {
                         onIntent(
                             OrotezProtezIntent.OnDocumentSourceSelected(
@@ -242,6 +324,7 @@ private fun OrotezProtezContent(
                             )
                         )
                     },
+                    onRemove = { onIntent(OrotezProtezIntent.OnDocumentRemoveClicked(activeDocument.id)) },
                     onDismiss = { onIntent(OrotezProtezIntent.OnPickerDismissed) },
                 )
             }
@@ -502,16 +585,15 @@ private fun OrotezProtezBackStepButton(
     }
 }
 
-/**
- * Step 3 of the wizard: the document upload checklist. Only the empty state of each card is
- * implemented here — picking, uploading, progress and result states are separate follow-up tasks.
- */
+/** Step 3 of the wizard: the document upload checklist. */
 @Composable
 private fun OrotezProtezDocumentsStep(
+    state: OrotezProtezUiState,
     onIntent: (OrotezProtezIntent) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    var previewDocumentId by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -537,11 +619,31 @@ private fun OrotezProtezDocumentsStep(
         OrotezProtezDocumentChecklist.forEachIndexed { index, document ->
             OrotezProtezDocumentCard(
                 document = document,
+                documentState = state.documents[document.id] ?: OrotezProtezDocumentState.Empty,
                 onClick = { onIntent(OrotezProtezIntent.OnDocumentCardClicked(document.id)) },
+                onPreviewRequested = { previewDocumentId = document.id },
             )
             if (index != OrotezProtezDocumentChecklist.lastIndex) {
                 Spacer(Modifier.height(Spacing.md))
             }
+        }
+
+        state.documentPickError?.let { message ->
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.dangerText,
+            )
+        }
+
+        state.documentValidationError?.let { message ->
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.dangerText,
+            )
         }
 
         Spacer(Modifier.height(Spacing.xl))
@@ -554,29 +656,56 @@ private fun OrotezProtezDocumentsStep(
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_submit_request),
-                onClick = {},
-                enabled = false,
+                onClick = { onIntent(OrotezProtezIntent.OnSubmitDocumentsClicked) },
+                enabled = !state.isAnyDocumentUploading,
             )
         }
     }
+
+    val previewDocument = OrotezProtezDocumentChecklist.find { it.id == previewDocumentId }
+    val previewBytes = previewDocumentId?.let { state.documents[it]?.bytesOrNull() }
+    if (previewDocument != null && previewBytes != null) {
+        OrotezProtezDocumentPreviewDialog(
+            title = stringResource(previewDocument.titleRes),
+            bytes = previewBytes,
+            onDismiss = { previewDocumentId = null },
+        )
+    }
+}
+
+@OptIn(ExperimentalEncodingApi::class)
+@Composable
+private fun OrotezProtezDocumentPreviewDialog(
+    title: String,
+    bytes: ByteArray,
+    onDismiss: () -> Unit,
+) {
+    val base64 = remember(bytes) { Base64.Default.encode(bytes) }
+    TaminImageViewer(
+        title = title,
+        url = base64,
+        onDismiss = onDismiss,
+    )
 }
 
 /**
- * One document slot: dashed empty-state card with its title, required/optional [StatusPill] and
- * a pick affordance. [onClick] is wired up in a later task — picking, upload and result states
- * (per-card success/error/progress) aren't implemented yet.
+ * One document slot. Renders the empty (dashed), uploading, uploaded (green) or failed (danger)
+ * state, driven by [documentState]. Tapping the row always reopens the source sheet (camera /
+ * gallery / remove); [onPreviewRequested] is a separate affordance shown only once a file exists.
  */
 @Composable
 private fun OrotezProtezDocumentCard(
     document: OrotezProtezDocumentUi,
+    documentState: OrotezProtezDocumentState,
     onClick: () -> Unit,
+    onPreviewRequested: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.card)
 
-    Row(
-        modifier = modifier
+    val rowModifier = when (documentState) {
+        is OrotezProtezDocumentState.Empty -> modifier
             .fillMaxWidth()
             .drawBehind {
                 drawRoundRect(
@@ -591,94 +720,170 @@ private fun OrotezProtezDocumentCard(
             .clip(shape)
             .clickable(onClick = onClick)
             .background(colors.bgSurface)
-            .padding(Spacing.lg),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(IconSize.xlarge)
-                    .clip(RoundedCornerShape(CornerRadius.iconTile))
-                    .background(colors.chipBg),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_place),
-                    contentDescription = null,
-                    tint = colors.blueText,
-                    modifier = Modifier.size(IconSize.banner),
-                )
-            }
+            .padding(Spacing.lg)
 
-            Column {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+        is OrotezProtezDocumentState.Uploaded -> modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(colors.greenBg)
+            .border(Thickness.border, colors.greenBorder, shape)
+            .clickable(onClick = onClick)
+            .padding(Spacing.lg)
+
+        is OrotezProtezDocumentState.Failed -> modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(colors.dangerBg)
+            .border(Thickness.border, colors.dangerBorder, shape)
+            .clickable(onClick = onClick)
+            .padding(Spacing.lg)
+
+        is OrotezProtezDocumentState.Uploading -> modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, shape)
+            .clickable(onClick = onClick)
+            .padding(Spacing.lg)
+    }
+
+    Column(modifier = rowModifier) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OrotezProtezDocumentIconTile(documentState)
+
+                Column {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(document.titleRes),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = colors.textPrimary,
+                        )
+                        StatusPill(
+                            text = stringResource(
+                                if (document.isRequired) {
+                                    Res.string.orotez_protez_document_required
+                                } else {
+                                    Res.string.orotez_protez_document_optional
+                                },
+                            ),
+                            containerColor = if (document.isRequired) colors.blueBg else colors.bgPage,
+                            contentColor = if (document.isRequired) colors.blueText else colors.textMuted,
+                        )
+                    }
+
+                    Spacer(Modifier.height(Spacing.xxs))
+
                     Text(
-                        text = stringResource(document.titleRes),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = colors.textPrimary,
-                    )
-                    StatusPill(
-                        text = stringResource(
-                            if (document.isRequired) {
-                                Res.string.orotez_protez_document_required
-                            } else {
-                                Res.string.orotez_protez_document_optional
-                            },
-                        ),
-                        containerColor = if (document.isRequired) colors.blueBg else colors.bgPage,
-                        contentColor = if (document.isRequired) colors.blueText else colors.textMuted,
+                        text = documentState.statusText(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (documentState is OrotezProtezDocumentState.Failed) {
+                            colors.dangerText
+                        } else {
+                            colors.textMuted
+                        },
                     )
                 }
+            }
 
-                Spacer(Modifier.height(Spacing.xxs))
-
-                Text(
-                    text = stringResource(Res.string.orotez_protez_document_pick_placeholder),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.textMuted,
-                )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (documentState is OrotezProtezDocumentState.Uploaded) {
+                    Icon(
+                        imageVector = Icons.Outlined.Image,
+                        contentDescription = stringResource(document.titleRes),
+                        tint = colors.greenText,
+                        modifier = Modifier
+                            .size(IconSize.small)
+                            .clickable(onClick = onPreviewRequested),
+                    )
+                }
+                if (documentState !is OrotezProtezDocumentState.Uploading) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                        contentDescription = null,
+                        tint = colors.textMuted,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
             }
         }
 
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-            contentDescription = null,
-            tint = colors.textMuted,
-            modifier = Modifier.size(IconSize.small),
-        )
+        if (documentState is OrotezProtezDocumentState.Uploading) {
+            Spacer(Modifier.height(Spacing.sm))
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(CornerRadius.sm)),
+            )
+        }
     }
 }
 
-/** Mock checklist for step 3 — swapped for real state once upload is wired up. */
-private val OrotezProtezDocumentChecklist: ImmutableList<OrotezProtezDocumentUi> = persistentListOf(
-    OrotezProtezDocumentUi(
-        id = "prescription",
-        titleRes = Res.string.orotez_protez_document_prescription,
-        isRequired = true,
-    ),
-    OrotezProtezDocumentUi(
-        id = "invoice",
-        titleRes = Res.string.orotez_protez_document_invoice,
-        isRequired = true,
-    ),
-    OrotezProtezDocumentUi(
-        id = "ear-mold",
-        titleRes = Res.string.orotez_protez_document_ear_mold,
-        isRequired = false,
-    ),
-    OrotezProtezDocumentUi(
-        id = "hearing-aid-warranty",
-        titleRes = Res.string.orotez_protez_document_hearing_aid_warranty,
-        isRequired = false,
-    ),
-)
+@Composable
+private fun OrotezProtezDocumentIconTile(documentState: OrotezProtezDocumentState) {
+    val colors = LocalTaminColors.current
+    val tileColor = when (documentState) {
+        is OrotezProtezDocumentState.Uploaded -> colors.greenText
+        is OrotezProtezDocumentState.Failed -> colors.dangerText
+        else -> colors.chipBg
+    }
+
+    Box(
+        modifier = Modifier
+            .size(IconSize.xlarge)
+            .clip(RoundedCornerShape(CornerRadius.iconTile))
+            .background(tileColor),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (documentState) {
+            is OrotezProtezDocumentState.Uploading -> CircularProgressIndicator(
+                modifier = Modifier.size(IconSize.banner - Spacing.xs),
+                strokeWidth = 2.dp,
+                color = colors.blueText,
+            )
+            is OrotezProtezDocumentState.Uploaded -> Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_check),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.banner),
+            )
+            is OrotezProtezDocumentState.Failed -> Icon(
+                imageVector = vectorResource(Res.drawable.ic_warning),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.banner),
+            )
+            OrotezProtezDocumentState.Empty -> Icon(
+                imageVector = vectorResource(Res.drawable.ic_place),
+                contentDescription = null,
+                tint = colors.blueText,
+                modifier = Modifier.size(IconSize.banner),
+            )
+        }
+    }
+}
+
+@Composable
+private fun OrotezProtezDocumentState.statusText(): String = when (this) {
+    OrotezProtezDocumentState.Empty -> stringResource(Res.string.orotez_protez_document_pick_placeholder)
+    is OrotezProtezDocumentState.Uploading -> stringResource(Res.string.orotez_protez_document_status_uploading)
+    is OrotezProtezDocumentState.Uploaded -> stringResource(Res.string.orotez_protez_document_status_uploaded)
+    is OrotezProtezDocumentState.Failed ->
+        "$message ${stringResource(Res.string.orotez_protez_document_status_error_tap_to_retry)}"
+}
 
 @PreviewRtlTheme
 @Composable

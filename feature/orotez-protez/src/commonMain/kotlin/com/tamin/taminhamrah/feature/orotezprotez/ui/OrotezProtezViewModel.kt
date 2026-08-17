@@ -1,36 +1,58 @@
 package com.tamin.taminhamrah.feature.orotezprotez.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentChecklist
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezEvent
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezImageSource
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezInsuredDetailUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezIntent
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezOptionUi
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezPicker
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState.PartialState
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.bytesOrNull
+import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.platformFileOrNull
 import com.tamin.taminhamrah.mapper.orotezProtez.toBranchWorkshopPresentationList
 import com.tamin.taminhamrah.mapper.orotezProtez.toPresentation
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.orotezProtez.BranchWorkshopPR
 import com.tamin.taminhamrah.model.orotezProtez.InsuredPersonPR
 import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.delete
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.orotez_protez_document_duplicate_error
+import taminx.core.core_ui.orotez_protez_document_format_error
+import taminx.core.core_ui.orotez_protez_document_pick_read_error
+import taminx.core.core_ui.orotez_protez_document_upload_error
+import taminx.core.core_ui.orotez_protez_document_validation_min_count
+import taminx.core.core_ui.orotez_protez_document_validation_required
 import taminx.core.core_ui.orotez_protez_insured_person_subtitle
 
 class OrotezProtezViewModel(
     private val getRequestInsuredMainInfoUseCase: GetRequestInsuredMainInfoUseCase,
     private val getInsuredPersonsUseCase: GetInsuredPersonsUseCase,
+    private val uploadImageUseCase: UploadImageUseCase,
 ) : BaseViewModel<OrotezProtezUiState, PartialState, OrotezProtezEvent, OrotezProtezIntent>(
     initialState = OrotezProtezUiState()
 ) {
@@ -69,9 +91,17 @@ class OrotezProtezViewModel(
             emit(PartialState.DocumentSourceRequested(intent.documentId))
         }
 
-        // Source is recorded nowhere yet — picking/upload lands in a later task.
         is OrotezProtezIntent.OnDocumentSourceSelected -> flow {
             emit(PartialState.PickerChanged(OrotezProtezPicker.NONE))
+            sendEvent(OrotezProtezEvent.LaunchImagePicker(intent.documentId, intent.source))
+        }
+
+        is OrotezProtezIntent.OnDocumentRemoveClicked -> handleDocumentRemoveClicked(intent.documentId)
+
+        is OrotezProtezIntent.OnDocumentImagePicked -> handleDocumentImagePicked(intent.documentId, intent.file)
+
+        is OrotezProtezIntent.OnDocumentImagePickFailed -> flow {
+            emit(PartialState.DocumentPickRejected(intent.message))
         }
 
         is OrotezProtezIntent.OnNextStepClicked -> flow {
@@ -84,7 +114,111 @@ class OrotezProtezViewModel(
             emit(PartialState.StepChanged(OrotezProtezStep.Documents))
         }
 
+        is OrotezProtezIntent.OnSubmitDocumentsClicked -> handleSubmitDocumentsClicked()
+
         is OrotezProtezIntent.BackToPreviousStep -> handleBackStep()
+    }
+
+    /**
+     * Reads, validates (format/size/duplicate) and immediately uploads a picked/captured image.
+     * Any file that fails validation is deleted right away — it's never stored in state. A file
+     * that replaces an already-uploaded document for the same slot causes the *old* temp file to
+     * be deleted once the new one has passed validation.
+     */
+    private fun handleDocumentImagePicked(documentId: String, file: PlatformFile): Flow<PartialState> = flow {
+        val fileName = file.name
+        if (!isJpegFileName(fileName)) {
+            deleteFileQuietly(file)
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            return@flow
+        }
+
+        val bytes = try {
+            file.readBytes()
+        } catch (e: Exception) {
+            deleteFileQuietly(file)
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_pick_read_error)))
+            return@flow
+        }
+
+        if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
+            deleteFileQuietly(file)
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            return@flow
+        }
+
+        val duplicateOfId = findDuplicateDocumentId(excludeId = documentId, bytes = bytes)
+        if (duplicateOfId != null) {
+            deleteFileQuietly(file)
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_duplicate_error)))
+            return@flow
+        }
+
+        // Past this point the new file is accepted for this slot — drop whatever it replaces.
+        uiState.value.documents[documentId]?.platformFileOrNull()?.let { deleteFileQuietly(it) }
+
+        emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Uploading(file, bytes)))
+        try {
+            val guid = uploadImageUseCase(UploadImageRequestDN(fileName = fileName, bytes = bytes)).first()
+            emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Uploaded(guid, file, bytes)))
+        } catch (e: Exception) {
+            val message = e.toSingleLineMessage().ifBlank { getString(Res.string.orotez_protez_document_upload_error) }
+            emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Failed(message, file, bytes)))
+        }
+    }
+
+    private fun handleDocumentRemoveClicked(documentId: String): Flow<PartialState> = flow {
+        uiState.value.documents[documentId]?.platformFileOrNull()?.let { deleteFileQuietly(it) }
+        emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Empty))
+        emit(PartialState.PickerChanged(OrotezProtezPicker.NONE))
+    }
+
+    /**
+     * Validates the checklist (min document count, required documents present) and, if it
+     * passes, marks documents ready. The actual "submit the whole request" network call is out
+     * of scope — no backend contract for it exists yet — so this only prepares/validates
+     * [OrotezProtezUiState.documentSubmissionPayload].
+     */
+    private fun handleSubmitDocumentsClicked(): Flow<PartialState> = flow {
+        val state = uiState.value
+        val uploadedIds = state.uploadedDocumentIds
+        val missingRequired = OrotezProtezDocumentChecklist.any { it.isRequired && it.id !in uploadedIds }
+        val message = when {
+            uploadedIds.size < MIN_REQUIRED_DOCUMENT_COUNT ->
+                getString(Res.string.orotez_protez_document_validation_min_count)
+            missingRequired ->
+                getString(Res.string.orotez_protez_document_validation_required)
+            else -> null
+        }
+        if (message != null) {
+            emit(PartialState.DocumentValidationFailed(message))
+        } else {
+            emit(PartialState.DocumentsReadyForSubmission)
+        }
+    }
+
+    private fun findDuplicateDocumentId(excludeId: String, bytes: ByteArray): String? =
+        uiState.value.documents.entries.firstOrNull { (id, state) ->
+            id != excludeId && state.bytesOrNull()?.contentEquals(bytes) == true
+        }?.key
+
+    private suspend fun deleteFileQuietly(file: PlatformFile) {
+        runCatching { file.delete(mustExist = false) }
+    }
+
+    private fun isJpegFileName(fileName: String): Boolean {
+        val lower = fileName.lowercase()
+        return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+    }
+
+    /** Best-effort cleanup of every still-owned temp file once the screen (and this ViewModel) goes away. */
+    override fun onCleared() {
+        super.onCleared()
+        val filesToDelete = uiState.value.documents.values.mapNotNull { it.platformFileOrNull() }
+        if (filesToDelete.isEmpty()) return
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            filesToDelete.forEach { file -> runCatching { file.delete(mustExist = false) } }
+        }
     }
 
     private fun handleBackStep(): Flow<PartialState> = flow {
@@ -177,7 +311,20 @@ class OrotezProtezViewModel(
         is PartialState.InsuredPersonSelected -> currentState.copy(insuredPerson = partialState.insuredPerson)
         is PartialState.PrescriptionDateSelected -> currentState.copy(prescriptionDateLabel = partialState.label)
         is PartialState.StepChanged -> currentState.copy(currentStep = partialState.step)
+        is PartialState.DocumentStateChanged -> currentState.copy(
+            documents = currentState.documents.toPersistentMap().put(partialState.documentId, partialState.state),
+            documentPickError = null,
+            documentValidationError = null,
+        )
+        is PartialState.DocumentPickRejected -> currentState.copy(documentPickError = partialState.message)
+        is PartialState.DocumentValidationFailed -> currentState.copy(documentValidationError = partialState.message)
+        PartialState.DocumentsReadyForSubmission -> currentState.copy(documentValidationError = null)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
+
+    private companion object {
+        const val MIN_REQUIRED_DOCUMENT_COUNT = 2
+        const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
+    }
 }
