@@ -6,6 +6,9 @@ import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentIntent
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.AddDependentState.PartialState
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.BottomSheetTarget
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.DOC_TYPE_ID_FIRST_PAGE
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.DOC_TYPE_MARRIAGE_CERTIFICATE
+import com.tamin.taminhamrah.feature.addDependent.ui.contract.DOC_TYPE_SPOUSE_ID
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.DocType
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_DOCUMENTS
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_INQUIRY
@@ -50,21 +53,15 @@ import taminx.core.core_ui.picker_relationship_title
 import taminx.core.core_ui.error_select_birth_date
 import taminx.core.core_ui.error_select_relationship
 import taminx.core.core_ui.error_enter_education_code
+import taminx.core.core_ui.error_education_inquiry_required
 import taminx.core.core_ui.error_complete_additional_info
 import taminx.core.core_ui.error_daughter_commitment_required
 import taminx.core.core_ui.error_upload_all_docs
-import taminx.core.core_ui.doc_type_id_first_page
-import taminx.core.core_ui.doc_type_spouse_id
-import taminx.core.core_ui.doc_type_marriage_certificate
 
 private const val MAX_UPLOAD_SIZE_BYTES = 2_000_000
 private const val RELATION_CODE_SPOUSE = "01"
 private const val RELATION_CODE_SON = "02"
 private const val RELATION_CODE_DAUGHTER = "03"
-
-private const val DOC_TYPE_ID_FIRST_PAGE = "1"
-private const val DOC_TYPE_SPOUSE_ID = "2"
-private const val DOC_TYPE_MARRIAGE_CERTIFICATE = "3"
 private const val SON_EDUCATION_AGE_THRESHOLD = 19
 private const val DAUGHTER_COMMITMENT_AGE_THRESHOLD = 18
 private const val REGISTRY_STATE_ID_CARD_ON_FILE = "1"
@@ -212,20 +209,19 @@ class AddDependentViewModel(
     private fun submitInquiryRegistry(): Flow<PartialState> = flow {
         val state = uiState.value
         if (state.isLoading) return@flow
-        val errorTitle = getString(Res.string.error_title)
         if (state.birthDateTimeStamp.isBlank() && state.birthDatePersian.isBlank()) {
-            sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_select_birth_date)))
+            showErrorDialog(getString(Res.string.error_select_birth_date))
             return@flow
         }
         if (state.selectedRelationship == null) {
-            sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_select_relationship)))
+            showErrorDialog(getString(Res.string.error_select_relationship))
             return@flow
         }
         emit(PartialState.Loading(true))
         val relationshipCode = state.selectedRelationship.relationCode.orEmpty()
         inquiryRegistryUseCase(state.dependentNationalId, state.birthDateTimeStamp, relationshipCode)
             .map { it.toPresentation() }
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .catch { e -> this@flow.emit(PartialState.Error(e.toSingleLineMessage())) }
             .collect { registryPR ->
                 emit(PartialState.RegistryInquirySuccess(registryPR, evaluateStepperMode(registryPR, relationshipCode), evaluateDocumentRequirements(registryPR, relationshipCode)))
                 emit(PartialState.StepChanged(STEP_VERIFICATION))
@@ -234,33 +230,33 @@ class AddDependentViewModel(
 
     private fun submitInquiryEducation(): Flow<PartialState> = flow {
         val state = uiState.value
+        if (state.isLoading) return@flow
         if (state.educationCode.isBlank()) {
-            val errorTitle = getString(Res.string.error_title)
-            sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_enter_education_code)))
+            showErrorDialog(getString(Res.string.error_enter_education_code))
             return@flow
         }
         emit(PartialState.Loading(true))
         inquiryEducationCodeUseCase(state.dependentNationalId, state.educationCode)
             .map { PartialState.EducationInquirySuccess(it) as PartialState }
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .catch { e -> this@flow.emit(PartialState.Error(e.toSingleLineMessage())) }
             .collect { emit(it) }
     }
 
     private fun uploadDocument(fileBytes: ByteArray, fileName: String, docType: String): Flow<PartialState> = flow {
         if (uiState.value.isLoading) return@flow
         if (fileBytes.size > MAX_UPLOAD_SIZE_BYTES) {
-            sendEvent(AddDependentEvent.ShowErrorDialog(getString(Res.string.error_title), getString(Res.string.error_file_too_large)))
+            showErrorDialog(getString(Res.string.error_file_too_large))
             return@flow
         }
         val newFileHash = fileBytes.contentHashCode()
         if (uiState.value.uploadedDocuments.any { it.contentHash == newFileHash }) {
-            sendEvent(AddDependentEvent.ShowErrorDialog(getString(Res.string.error_title), getString(Res.string.error_image_duplicate)))
+            showErrorDialog(getString(Res.string.error_image_duplicate))
             return@flow
         }
         emit(PartialState.Loading(true))
         uploadDependentImageUseCase(fileBytes, fileName, resolveMimeType(fileName))
             .map { it.toPresentation() }
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .catch { e -> this@flow.emit(PartialState.Error(e.toSingleLineMessage())) }
             .collect { uploadPR ->
                 emit(PartialState.DocumentUploaded(UploadedDocument(uploadPR.guid, docType, fileName, newFileHash)))
             }
@@ -274,28 +270,31 @@ class AddDependentViewModel(
 
     private fun onNextStepClicked(): Flow<PartialState> = flow {
         val state = uiState.value
-        val errorTitle = getString(Res.string.error_title)
+        if (state.isLoading) return@flow
         when (state.currentStep) {
             STEP_VERIFICATION -> {
                 if (state.selectedCityBirth == null || state.selectedCityIssuance == null || state.selectedBranch == null) {
-                    sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_complete_additional_info)))
+                    showErrorDialog(getString(Res.string.error_complete_additional_info))
                     return@flow
                 }
                 when (state.stepperMode) {
-
                     StepperMode.SON_MODE -> if (state.needCallInquiryEducation) {
-                        submitInquiryEducation().collect { partialState ->
-                            emit(partialState)
-                            if (partialState is PartialState.EducationInquirySuccess) {
-                                emit(PartialState.StepChanged(STEP_DOCUMENTS))
-                            }
+                        val educationError = if (state.educationCode.isBlank()) {
+                            getString(Res.string.error_enter_education_code)
+                        } else {
+                            getString(Res.string.error_education_inquiry_required)
                         }
+                        showErrorDialog(educationError)
                     } else emit(PartialState.StepChanged(STEP_DOCUMENTS))
-                    StepperMode.DAUGHTER_MODE -> if (!state.isDaughterCommitmentChecked) sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_daughter_commitment_required))) else emit(PartialState.StepChanged(STEP_DOCUMENTS))
+                    StepperMode.DAUGHTER_MODE -> if (!state.isDaughterCommitmentChecked) {
+                        showErrorDialog(getString(Res.string.error_daughter_commitment_required))
+                    } else emit(PartialState.StepChanged(STEP_DOCUMENTS))
                     StepperMode.DEFAULT_MODE -> emit(PartialState.StepChanged(STEP_DOCUMENTS))
                 }
             }
-            STEP_DOCUMENTS -> if (!areRequiredDocumentsUploaded(state)) sendEvent(AddDependentEvent.ShowErrorDialog(errorTitle, getString(Res.string.error_upload_all_docs))) else submitFinalRequest().collect { emit(it) }
+            STEP_DOCUMENTS -> if (!areRequiredDocumentsUploaded(state)) {
+                showErrorDialog(getString(Res.string.error_upload_all_docs))
+            } else submitFinalRequest().collect { emit(it) }
         }
     }
 
@@ -306,7 +305,6 @@ class AddDependentViewModel(
 
     private fun submitFinalRequest(): Flow<PartialState> = flow {
         val state = uiState.value
-
         if (state.isLoading) return@flow
         emit(PartialState.Loading(true))
         val requestPR = RequestAddDependentPR(
@@ -323,7 +321,7 @@ class AddDependentViewModel(
         )
         addNewDependentUseCase(requestPR.toDomain())
             .map { PartialState.StepChanged(STEP_SUCCESS) as PartialState }
-            .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+            .catch { e -> this@flow.emit(PartialState.Error(e.toSingleLineMessage())) }
             .collect { emit(it) }
     }
 
@@ -336,22 +334,22 @@ class AddDependentViewModel(
             }
         } ?: StepperMode.DEFAULT_MODE
 
-    private suspend fun evaluateDocumentRequirements(data: RegistryDataPR, relationCode: String): List<DocType> {
-        val idFirstPage = getString(Res.string.doc_type_id_first_page)
-        val spouseId = getString(Res.string.doc_type_spouse_id)
-        val marriageCertificate = getString(Res.string.doc_type_marriage_certificate)
-        return when (relationCode) {
+    private fun evaluateDocumentRequirements(data: RegistryDataPR, relationCode: String): List<DocType> =
+        when (relationCode) {
             RELATION_CODE_SPOUSE -> listOf(
-                DocType(DOC_TYPE_ID_FIRST_PAGE, idFirstPage),
-                DocType(DOC_TYPE_SPOUSE_ID, spouseId),
-                DocType(DOC_TYPE_MARRIAGE_CERTIFICATE, marriageCertificate)
+                DocType(DOC_TYPE_ID_FIRST_PAGE),
+                DocType(DOC_TYPE_SPOUSE_ID),
+                DocType(DOC_TYPE_MARRIAGE_CERTIFICATE)
             )
             RELATION_CODE_SON, RELATION_CODE_DAUGHTER -> listOf(
-                DocType(DOC_TYPE_ID_FIRST_PAGE, idFirstPage, data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE),
-                DocType(DOC_TYPE_MARRIAGE_CERTIFICATE, marriageCertificate, true)
+                DocType(DOC_TYPE_ID_FIRST_PAGE, data.registryConfirmState == REGISTRY_STATE_ID_CARD_ON_FILE),
+                DocType(DOC_TYPE_MARRIAGE_CERTIFICATE, isDisabled = true)
             )
-            else -> listOf(DocType(DOC_TYPE_ID_FIRST_PAGE, idFirstPage))
+            else -> listOf(DocType(DOC_TYPE_ID_FIRST_PAGE))
         }
+
+    private suspend fun showErrorDialog(message: String) {
+        sendEvent(AddDependentEvent.ShowErrorDialog(getString(Res.string.error_title), message))
     }
 
     override fun reduceState(currentState: AddDependentState, partialState: PartialState): AddDependentState = when (partialState) {
@@ -363,7 +361,7 @@ class AddDependentViewModel(
         is PartialState.BirthDateSelected -> currentState.resetInquiry().copy(birthDatePersian = partialState.persianDate, birthDateGregorian = partialState.gregorianDate, birthDateTimeStamp = partialState.timestamp)
         is PartialState.RelationshipSelected -> currentState.resetInquiry().copy(selectedRelationship = partialState.relationship)
         is PartialState.RegistryInquirySuccess -> currentState.copy(isLoading = false, registryData = partialState.registryData, stepperMode = partialState.stepperMode, requiredDocTypes = partialState.requiredDocTypes, needCallInquiryRegistry = false, error = null)
-        is PartialState.EducationCodeChanged -> currentState.copy(educationCode = partialState.code, needCallInquiryEducation = true)
+        is PartialState.EducationCodeChanged -> currentState.copy(educationCode = partialState.code, universityName = "", needCallInquiryEducation = true)
         is PartialState.EducationInquirySuccess -> currentState.copy(isLoading = false, universityName = partialState.universityName, needCallInquiryEducation = false, error = null)
         is PartialState.DaughterCommitmentToggled -> currentState.copy(isDaughterCommitmentChecked = partialState.isChecked)
         is PartialState.CityBirthSelected -> currentState.copy(selectedCityBirth = partialState.city)
@@ -377,7 +375,6 @@ class AddDependentViewModel(
     }
 
     private fun AddDependentState.resetInquiry(): AddDependentState {
-
         val hasInquired = !needCallInquiryRegistry
         return copy(needCallInquiryRegistry = true, registryData = if (hasInquired) null else registryData, uploadedDocuments = if (hasInquired) emptyList() else uploadedDocuments)
     }

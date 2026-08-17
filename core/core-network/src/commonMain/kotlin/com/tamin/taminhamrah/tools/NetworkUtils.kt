@@ -6,14 +6,13 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 
 /**
- * Checks if the string contains at least one Persian/Arabic character.
- * Used to determine if a server error message (like the 'reason' field)
- * contains human-readable Persian text that can be shown to the user.
+ * Arabic-script heuristic used to decide whether a backend string is safe
+ * to show to the user. Same Unicode ranges as old_android's
+ * `ValidationUtil.isProbablyArabic()` — Persian, Arabic, and related presentation forms.
  */
-fun String.isPersian(): Boolean {
-    val persianRegex = Regex("[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]")
-    return persianRegex.containsMatchIn(this)
-}
+private val ARABIC_SCRIPT_REGEX = Regex("[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]")
+
+fun String.looksLikeArabicScript(): Boolean = ARABIC_SCRIPT_REGEX.containsMatchIn(this)
 
 /**
  * Runs [block], normalizing every failure through [ErrorParser].

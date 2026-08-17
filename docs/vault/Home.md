@@ -22,6 +22,7 @@ tags: [moc]
 
 - [[Naming-Conventions]] — the file-naming contract (and why the build does not enforce it) ⚠️
 - [[Adding-a-Feature]] — checklist for a new screen or feature module
+- [[Typography]] — Vazirmatn, `ss01` Persian digits vs `toPersianDigits()`
 
 ## Build and release
 

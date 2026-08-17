@@ -8,6 +8,7 @@
 package com.tamin.taminhamrah.tools
 
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.HttpStatusErrorMapper
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -128,32 +129,47 @@ private fun <T> BaseDTO<T>.throwProblemError(): Nothing {
  * Handles error statuses and throws appropriate TaminErrorUriException.
  */
 private fun <T> BaseDTO<T>.handleCommonErrors(): Nothing {
-    val errorPrefix = when (status) {
-        in 400..499 -> "CLIENT_ERROR"
-        in 500..599 -> "SERVER_ERROR"
-        else -> "UNKNOWN_ERROR"
-    }
-    println("BaseDTO: $errorPrefix: $reason")
+    val mapped = HttpStatusErrorMapper.map(
+        status = status,
+        rawMessage = rawErrorText(),
+        cause = errorCause()
+    )
+    println("BaseDTO: HTTP $status -> ${mapped.uri}: $reason")
     throw TaminErrorUriException(
-        uri = ErrorUri.fromString("$errorPrefix: $reason"),
-        serverMessage = getServerMessage()
+        uri = mapped.uri,
+        serverMessage = mapped.userMessage,
+        navigateBack = mapped.navigateBack
     )
 }
 
 /**
- * Probes 'data', 'problems', and 'reason' for a Persian message to show the user.
+ * Probes 'data', 'problems', and 'reason' for a user-facing backend message.
  * Priority: 1. data.message (if data is ErrorCarrier or JsonObject)
  *           2. problems envelope
  *           3. reason field
  */
-private fun <T> BaseDTO<T>.getServerMessage(): String? {
+private fun <T> BaseDTO<T>.rawErrorText(): String? {
     val fromData = when (val d = data) {
         is ErrorCarrier -> d.message
         is JsonObject -> d["message"]?.jsonPrimitive?.contentOrNull
+        is JsonPrimitive -> d.contentOrNull
         else -> null
     }
-    return (fromData ?: problemMessage ?: reason).takeIf { it.isPersian() }
+    return fromData ?: problemMessage ?: reason
 }
+
+private fun <T> BaseDTO<T>.errorCause(): String? = when (val d = data) {
+    is ErrorCarrier -> d.cause
+    is JsonObject -> d["cause"]?.jsonPrimitive?.contentOrNull
+    else -> null
+}
+
+/**
+ * Same probe as [rawErrorText], but only keeps copy that looks like Arabic script.
+ * Used by the `hasError`/`problems` envelope, which is already localized when present.
+ */
+private fun <T> BaseDTO<T>.getServerMessage(): String? =
+    rawErrorText()?.takeIf { it.looksLikeArabicScript() }
 
 /**
  * Outcome of a [BaseDTO] extraction that does not throw when the backend

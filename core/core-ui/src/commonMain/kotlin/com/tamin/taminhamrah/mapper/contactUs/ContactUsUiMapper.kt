@@ -41,7 +41,7 @@ fun SocialChannelType.toPresentation(): SocialChannelTypePR = when (this) {
     SocialChannelType.WHATSAPP -> SocialChannelTypePR.WHATSAPP
     SocialChannelType.IGAP -> SocialChannelTypePR.IGAP
     SocialChannelType.BALE -> SocialChannelTypePR.BALE
-    SocialChannelType.BISPHONE -> SocialChannelTypePR.BISPHONE
+    SocialChannelType.APARAT -> SocialChannelTypePR.APARAT
     SocialChannelType.GAP -> SocialChannelTypePR.GAP
     SocialChannelType.SOROUSH -> SocialChannelTypePR.SOROUSH
     SocialChannelType.RUBIKA -> SocialChannelTypePR.RUBIKA

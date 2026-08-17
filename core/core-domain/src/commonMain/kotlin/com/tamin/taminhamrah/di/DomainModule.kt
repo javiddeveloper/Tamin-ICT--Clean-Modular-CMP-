@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
+import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
@@ -58,6 +59,7 @@ import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.common.SetBiometricEnabledUseCase
 import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUseCase
+import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -186,6 +188,7 @@ val domainModule = module {
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
     factoryOf(::GetEdictPensionerUseCase)
+    factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
@@ -308,6 +311,7 @@ val domainModule = module {
     factoryOf(::SetThemeUseCase)
     factoryOf(::SetBiometricEnabledUseCase)
     factoryOf(::CompleteBiometricEnrollmentPromptUseCase)
+    factoryOf(::SetFontSizeUseCase)
     factoryOf(::GetAllProvincesUseCase)
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)

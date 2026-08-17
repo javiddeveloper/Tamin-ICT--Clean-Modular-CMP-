@@ -44,5 +44,5 @@ include(":feature:change-mobile")
 include(":feature:my-inbox")
 include(":feature:addDependent")
 include(":feature:userRequest")
-
 include(":feature:security")
+include(":feature:settings")

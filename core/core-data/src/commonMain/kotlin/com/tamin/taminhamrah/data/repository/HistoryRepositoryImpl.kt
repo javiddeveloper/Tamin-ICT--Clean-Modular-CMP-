@@ -5,11 +5,13 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.HistoryRepository
+import com.tamin.taminhamrah.model.history.UserInfoDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -30,6 +32,18 @@ class HistoryRepositoryImpl(
     ): DastmozdInfoDN {
         val query = ApiQueryParamDN(filters = filters)
         return remoteDataSource.getDastmozdInfos(query).toDomain()
+    }
+
+    override suspend fun getUserInfos(): UserInfoDN {
+        return remoteDataSource.getUserInfos().toDomain()
+    }
+
+    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
+        remoteDataSource.sendToInstitution(
+            allHistorySelected = HistoryCertificateType.ALL in selectedTypes,
+            historyAndWageSelected = HistoryCertificateType.WAGES in selectedTypes,
+            combineHistorySelected = HistoryCertificateType.COMBINED in selectedTypes,
+        )
     }
 
     override suspend fun getHistoryJobInfos(
@@ -58,3 +72,4 @@ class HistoryRepositoryImpl(
         }
     }
 }
+

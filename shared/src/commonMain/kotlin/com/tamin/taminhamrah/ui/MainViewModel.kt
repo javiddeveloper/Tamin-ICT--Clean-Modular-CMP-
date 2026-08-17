@@ -46,6 +46,7 @@ class MainViewModel(
                 sendIntent(MainIntent.UpdateDarkThemeConfig(userData.darkThemeConfig))
                 sendIntent(MainIntent.UpdateBiometricEnabled(userData.isBiometricEnabled))
                 sendIntent(MainIntent.UpdateHasAskedToEnableBiometric(userData.hasAskedToEnableBiometric))
+                sendIntent(MainIntent.UpdateFontSizeOption(userData.fontSize))
             }
         }
         viewModelScope.launch {
@@ -85,6 +86,9 @@ class MainViewModel(
             is MainIntent.UpdateDarkThemeConfig -> {
                 emit(PartialState.SetDarkThemeConfig(intent.config))
             }
+            is MainIntent.UpdateFontSizeOption -> {
+                emit(PartialState.SetFontSizeOption(intent.fontSizeOption))
+            }
             MainIntent.Login -> {
                 val url = authAuthorizeUrlUseCase()
                 sendEvent(MainEvent.OpenUrl(url))
@@ -111,6 +115,9 @@ class MainViewModel(
         return when (partialState) {
             is PartialState.SetDarkThemeConfig -> currentState.copy(
                 darkThemeConfig = partialState.config
+            )
+            is PartialState.SetFontSizeOption -> currentState.copy(
+                fontSizeOption = partialState.fontSizeOption
             )
             is PartialState.SetLoginStatus -> currentState.copy(
                 isLoggedIn = partialState.isLoggedIn,

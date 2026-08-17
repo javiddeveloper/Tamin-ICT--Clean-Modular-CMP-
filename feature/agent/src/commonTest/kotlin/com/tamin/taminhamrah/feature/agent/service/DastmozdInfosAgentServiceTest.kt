@@ -7,7 +7,9 @@ import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.impl.DastmozdInfosAgentService
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
+import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.history.WageDetailDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.HistoryRepository
@@ -22,6 +24,10 @@ class FakeHistoryRepository(
     private val expectedResult: DastmozdInfoDN
 ) : HistoryRepository {
     override suspend fun getDastmozdInfos(filters: List<ApiFilterDN>): DastmozdInfoDN = expectedResult
+    override suspend fun getUserInfos(): UserInfoDN = TODO()
+
+    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) = TODO()
+
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = TODO()
     override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): com.tamin.taminhamrah.model.history.TalfighInfoDN = TODO()
 }

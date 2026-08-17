@@ -47,6 +47,7 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -307,6 +308,7 @@ private fun AddDependentBottomBar(
                     onClick = { onIntent(AddDependentIntent.SubmitInquiryRegistry) },
                     isLoading = state.isLoading,
                     icon = vectorResource(Res.drawable.ic_tamin_search),
+                    iconPosition = LoadingButtonIconPosition.TRAILING,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -321,6 +323,7 @@ private fun AddDependentBottomBar(
                         onClick = { onIntent(AddDependentIntent.OnNextStepClicked) },
                         isLoading = state.isLoading,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                        iconPosition = LoadingButtonIconPosition.TRAILING,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -342,6 +345,7 @@ private fun AddDependentBottomBar(
                         enabled = allUploaded,
                         isLoading = state.isLoading,
                         icon = Icons.Filled.CheckCircle,
+                        iconPosition = LoadingButtonIconPosition.TRAILING,
                         modifier = Modifier.weight(1f)
                     )
                 }
