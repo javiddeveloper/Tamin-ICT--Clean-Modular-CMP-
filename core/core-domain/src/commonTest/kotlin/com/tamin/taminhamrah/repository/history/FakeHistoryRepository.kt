@@ -1,10 +1,12 @@
 package com.tamin.taminhamrah.repository.history
 
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.HistoryRepository
+import kotlinx.coroutines.flow.Flow
 
 class FakeHistoryRepository : HistoryRepository {
     var shouldThrowError = false
@@ -14,6 +16,8 @@ class FakeHistoryRepository : HistoryRepository {
     var lastSentType1: Boolean? = null
     var lastSentType2: Boolean? = null
     var lastSentType3: Boolean? = null
+
+    var historyJobInfoResult: HistoryJobInfoDN = HistoryJobInfoDN(list = emptyList(), total = 0)
 
     override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): TalfighInfoDN =
         TalfighInfoDN(list = emptyList(), total = 0)
@@ -32,6 +36,12 @@ class FakeHistoryRepository : HistoryRepository {
         lastSentType2 = type2
         lastSentType3 = type3
     }
+
+    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
+        kotlinx.coroutines.flow.flow {
+            if (shouldThrowError) throw error
+            emit(historyJobInfoResult)
+        }
 }
 
 private fun emptyUserInfoDN() = UserInfoDN(
