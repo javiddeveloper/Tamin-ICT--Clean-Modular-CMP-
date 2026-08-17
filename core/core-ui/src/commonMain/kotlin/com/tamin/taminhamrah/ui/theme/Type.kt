@@ -8,9 +8,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * OpenType Font Features:
- * - "ss01": Stylistic Set 1. In most Persian fonts (IRANSans, Vazir, etc.), this maps Latin digits to Persian digits.
- * - "tnum": Tabular Numbers. Ensures all digits have the same width, preventing layout jumps in prices/dates.
+ * Default OpenType features applied to every [TextStyle] in [taminHamrahTypography].
+ *
+ * The bundled UI font is Vazirmatn (v33.003). Its `ss01` stylistic set substitutes ASCII
+ * digits `0-9` for Persian digits `U+06F0`–`U+06F9` at paint time; `tnum` makes those
+ * glyphs equal-width so prices and dates do not shift as values change. Verified against
+ * the GSUB table of `core-ui/.../font/regular.ttf`.
+ *
+ * This is visual only: the Compose string still holds ASCII codepoints, so copy/paste,
+ * APIs, and logs keep Latin digits. When the *string* itself must contain Persian numeral
+ * characters (share text, clipboard, notifications, non-Compose surfaces), use
+ * [com.tamin.taminhamrah.util.toPersianDigits] instead. The two coexist on purpose —
+ * `ss01` is a no-op on digits that are already `U+06F0`–`U+06F9`.
+ *
+ * Do not copy `fontFeatureSettings` unless you intend to replace this default.
+ * `TextStyle.copy(fontFeatureSettings = "tnum")` drops `ss01`.
  */
 private const val FONT_FEATURE_PERSIAN_DIGITS = "ss01"
 private const val FONT_FEATURE_TABULAR_NUMBERS = "tnum"
