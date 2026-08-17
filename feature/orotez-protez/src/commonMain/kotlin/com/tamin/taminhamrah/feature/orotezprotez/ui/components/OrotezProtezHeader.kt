@@ -40,11 +40,6 @@ import taminx.core.core_ui.orotez_protez_help_dialog_title
 import taminx.core.core_ui.orotez_protez_subtitle
 import taminx.core.core_ui.orotez_protez_title
 
-/**
- * The gradient hero bar: back on the right, a help affordance on the left that shows the cost
- * assistance guide dialog, and the feature's own icon and subtitle underneath — the same icon
- * already assigned to this service in the main menu (see `ServiceCard.getIconForName("crutch")`).
- */
 @Composable
 internal fun OrotezProtezHeader(
     onBackClicked: () -> Unit,

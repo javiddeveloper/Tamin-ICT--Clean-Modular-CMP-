@@ -37,12 +37,6 @@ import taminx.core.core_ui.orotez_protez_document_source_remove
 import taminx.core.core_ui.orotez_protez_document_source_subtitle
 
 private val OptionRowMinHeight = 64.dp
-
-/**
- * The image-source picker for a step-3 document card: camera or gallery, plus — once the
- * document already has a file — a destructive "remove" row.
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrotezProtezDocumentSourceSheet(
     title: String,

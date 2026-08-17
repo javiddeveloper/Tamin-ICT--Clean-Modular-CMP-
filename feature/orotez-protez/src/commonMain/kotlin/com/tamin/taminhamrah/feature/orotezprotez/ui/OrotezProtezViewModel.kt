@@ -126,13 +126,6 @@ class OrotezProtezViewModel(
 
         is OrotezProtezIntent.BackToPreviousStep -> handleBackStep()
     }
-
-    /**
-     * Reads, validates (format/size/duplicate) and immediately uploads a picked/captured image.
-     * Any file that fails validation is deleted right away — it's never stored in state. A file
-     * that replaces an already-uploaded document for the same slot causes the *old* temp file to
-     * be deleted once the new one has passed validation.
-     */
     private fun handleDocumentImagePicked(documentId: String, file: PlatformFile): Flow<PartialState> = flow {
         val fileName = file.name
         if (!isJpegFileName(fileName)) {
@@ -162,7 +155,6 @@ class OrotezProtezViewModel(
             return@flow
         }
 
-        // Past this point the new file is accepted for this slot — drop whatever it replaces.
         uiState.value.documents[documentId]?.platformFileOrNull()?.let { deleteFileQuietly(it) }
 
         emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Uploading(file, bytes)))
@@ -181,10 +173,6 @@ class OrotezProtezViewModel(
         emit(PartialState.PickerChanged(OrotezProtezPicker.NONE))
     }
 
-    /**
-     * Validates the checklist (min document count, required documents present) and, if it
-     * passes, builds the request body from what step 1/2/3 have already gathered and submits it.
-     */
     private fun handleSubmitDocumentsClicked(): Flow<PartialState> = flow {
         val state = uiState.value
         val uploadedIds = state.uploadedDocumentIds
@@ -217,15 +205,6 @@ class OrotezProtezViewModel(
         }
     }
 
-    /**
-     * Assembles the final submit body from state gathered across all three steps: the
-     * policyholder ([OrotezProtezUiState.mainInfo], step 1), the selected branch
-     * ([OrotezProtezUiState.branchDetails], step 1), the selected insured person
-     * ([OrotezProtezUiState.selectedInsuredDetail], step 1/2) and the uploaded documents
-     * ([OrotezProtezUiState.documentSubmissionPayload], step 3). Null if any of these is missing,
-     * which should not happen once [OrotezProtezUiState.canGoNext] has gated steps 2/3 — this is
-     * only a defensive guard against submitting a malformed request.
-     */
     private fun OrotezProtezUiState.toSaveShortTermOrthosisRequestDN(): SaveShortTermOrthosisRequestDN? {
         val mainInfo = mainInfo ?: return null
         val branchDetail = branch?.id?.let { branchDetails[it] } ?: return null
@@ -267,7 +246,6 @@ class OrotezProtezViewModel(
         return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
     }
 
-    /** Best-effort cleanup of every still-owned temp file once the screen (and this ViewModel) goes away. */
     override fun onCleared() {
         super.onCleared()
         val filesToDelete = uiState.value.documents.values.mapNotNull { it.platformFileOrNull() }
@@ -285,7 +263,6 @@ class OrotezProtezViewModel(
         }
     }
 
-    /** Step 1's branch/workshop sheet and insured-person sheet are both fed by the real API. */
     private fun loadInitialData(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
@@ -308,7 +285,6 @@ class OrotezProtezViewModel(
         emit(PartialState.Loading(false))
     }
 
-    /** DN -> PR (core-ui) -> this feature's generic picker-row model, kept as three separate steps per the project's layering convention. */
     private fun RequestInsuredMainInfoDN?.toBranchOptions(): ImmutableList<OrotezProtezOptionUi> {
         return this?.toBranchWorkshopPresentationList()
             ?.map { it.toOptionUi() }

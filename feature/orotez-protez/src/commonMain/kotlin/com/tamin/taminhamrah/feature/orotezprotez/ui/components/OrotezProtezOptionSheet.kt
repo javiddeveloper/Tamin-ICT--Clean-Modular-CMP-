@@ -41,12 +41,6 @@ import taminx.core.core_ui.ic_tamin_check
 
 private val SheetCorner = 28.dp
 private val OptionRowMinHeight = 64.dp
-
-/** How much darker than the selected fill the selected border sits. */
-private const val SELECTED_BORDER_DARKEN = 0.12f
-
-/** The mock branch / insured-person chooser: one card per option, each with its own outline. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrotezProtezOptionSheet(
     title: String,
