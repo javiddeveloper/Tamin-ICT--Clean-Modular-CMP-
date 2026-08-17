@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.orotezprotez.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -37,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -804,7 +806,27 @@ private fun OrotezProtezDocumentCard(
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.card)
 
-    val rowModifier = when (documentState) {
+    // The wave-fill animation always plays once, all the way to the end of the card, before the
+    // card switches to its "uploaded" look — even if the network call finishes before the
+    // animation does. A failed upload bypasses this: errors surface immediately. Seeded from the
+    // current state (not hardcoded false) so a document that's already Uploaded when this card
+    // first enters composition — e.g. navigating back to this step — shows its finished state
+    // right away instead of replaying the fill animation from scratch.
+    var fillAnimationComplete by remember(document.id) {
+        mutableStateOf(documentState is OrotezProtezDocumentState.Uploaded)
+    }
+    LaunchedEffect(document.id, documentState is OrotezProtezDocumentState.Uploading) {
+        if (documentState is OrotezProtezDocumentState.Uploading) {
+            fillAnimationComplete = false
+        }
+    }
+    val displayState = if (documentState is OrotezProtezDocumentState.Uploaded && !fillAnimationComplete) {
+        OrotezProtezDocumentState.Uploading(documentState.platformFile, documentState.bytes)
+    } else {
+        documentState
+    }
+
+    val rowModifier = when (displayState) {
         is OrotezProtezDocumentState.Empty -> modifier
             .fillMaxWidth()
             .drawBehind {
@@ -847,7 +869,7 @@ private fun OrotezProtezDocumentCard(
     }
 
     Box {
-        if (documentState is OrotezProtezDocumentState.Uploading) {
+        if (displayState is OrotezProtezDocumentState.Uploading) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -858,6 +880,7 @@ private fun OrotezProtezDocumentCard(
                 modifier = Modifier
                     .matchParentSize()
                     .clip(shape),
+                onFillComplete = { fillAnimationComplete = true },
             )
         }
 
@@ -871,7 +894,7 @@ private fun OrotezProtezDocumentCard(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    OrotezProtezDocumentIconTile(documentState)
+                    OrotezProtezDocumentIconTile(displayState)
 
                     Column {
                         Row(
@@ -899,9 +922,9 @@ private fun OrotezProtezDocumentCard(
                         Spacer(Modifier.height(Spacing.xxs))
 
                         Text(
-                            text = documentState.statusText(),
+                            text = displayState.statusText(),
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (documentState is OrotezProtezDocumentState.Failed) {
+                            color = if (displayState is OrotezProtezDocumentState.Failed) {
                                 colors.dangerText
                             } else {
                                 colors.textMuted
@@ -914,7 +937,7 @@ private fun OrotezProtezDocumentCard(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (documentState is OrotezProtezDocumentState.Uploaded) {
+                    if (displayState is OrotezProtezDocumentState.Uploaded) {
                         Icon(
                             imageVector = Icons.Outlined.Image,
                             contentDescription = stringResource(document.titleRes),
@@ -924,7 +947,7 @@ private fun OrotezProtezDocumentCard(
                                 .clickable(onClick = onPreviewRequested),
                         )
                     }
-                    if (documentState !is OrotezProtezDocumentState.Uploading) {
+                    if (displayState !is OrotezProtezDocumentState.Uploading) {
                         Icon(
                             imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                             contentDescription = null,
@@ -938,31 +961,33 @@ private fun OrotezProtezDocumentCard(
     }
 }
 
-private const val LiquidFillMaxFraction = 0.875f
 private val LiquidWaveAmplitudeMax = 8.dp
 private const val LiquidWaveSampleCount = 32
+private const val LiquidFillDurationMillis = 1600
 
 /**
- * Indeterminate liquid-fill effect: a solid band that grows from the card's right edge toward
- * its left edge (since no real upload progress percentage is available, it loops indefinitely
- * instead of settling at 100%), bounded by a sinusoidal "water surface" edge that keeps
- * wiggling as it advances. Used as a background overlay while a document is
- * [OrotezProtezDocumentState.Uploading].
+ * One-shot liquid-fill effect: a solid band that grows from the card's right edge all the way to
+ * its left edge exactly once, bounded by a sinusoidal "water surface" edge that keeps wiggling as
+ * it advances. Used as a background overlay while a document is
+ * [OrotezProtezDocumentState.Uploading]; [onFillComplete] fires once the fill reaches the far
+ * edge, so the caller can hold off switching to the "uploaded" look until the animation is done.
  */
 @Composable
-private fun LiquidWaveProgressBar(modifier: Modifier = Modifier) {
+private fun LiquidWaveProgressBar(
+    modifier: Modifier = Modifier,
+    onFillComplete: () -> Unit = {},
+) {
     val colors = LocalTaminColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "LiquidFill")
 
-    val fillFraction by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2600, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "LiquidFillFraction",
-    )
+    val fillFraction = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        fillFraction.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = LiquidFillDurationMillis, easing = LinearEasing),
+        )
+        onFillComplete()
+    }
     val wavePhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = (2f * PI).toFloat(),
@@ -979,7 +1004,7 @@ private fun LiquidWaveProgressBar(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         val canvasWidth = size.width
         val canvasHeight = size.height
-        val leadingEdgeX = canvasWidth - canvasWidth * LiquidFillMaxFraction * fillFraction
+        val leadingEdgeX = canvasWidth - canvasWidth * fillFraction.value
         val amplitude = (canvasHeight * 0.05f).coerceAtMost(LiquidWaveAmplitudeMax.toPx())
         val waveLength = canvasHeight * 1.4f
         val step = (canvasHeight / LiquidWaveSampleCount).coerceAtLeast(1f)
