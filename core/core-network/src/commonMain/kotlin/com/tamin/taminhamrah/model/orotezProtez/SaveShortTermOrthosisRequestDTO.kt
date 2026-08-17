@@ -12,7 +12,7 @@ data class SaveShortTermOrthosisRequestDTO(
     @SerialName("useRfName") val userFirstName: String? = null,
     @SerialName("useRisuId") val userInsuredId: String? = null,
     @SerialName("useRlName") val userLastName: String? = null,
-    @SerialName("useTajTimeStamp") val userBirthDateTimeStamp: Long? = null,
+    @SerialName("useTajTimeStamp") val prescriptionDateTimeStamp: Long? = null,
 )
 
 @Serializable

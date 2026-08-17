@@ -42,29 +42,28 @@ data class OrotezProtezDocumentUi(
 )
 
 /**
- * The step-3 document checklist. [OrotezProtezDocumentUi.id] doubles as the provisional
- * `documentType`/`imageType` code sent in [OrotezProtezDocumentSubmissionUi] — there is no real
- * backend contract for the orotez-protez submit request yet (no legacy reference was available),
- * so these ids are a placeholder until the real codes are confirmed.
+ * The step-3 document checklist. [OrotezProtezDocumentUi.id] doubles as the `documentType` code
+ * sent in [OrotezProtezDocumentSubmissionUi] — these are the real backend codes (Constants.kt's
+ * `*_OROTEZ_IMAGE_TYPE`/`*_HEARING_AIDS_IMAGE_TYPE` in the legacy client).
  */
 val OrotezProtezDocumentChecklist: ImmutableList<OrotezProtezDocumentUi> = persistentListOf(
     OrotezProtezDocumentUi(
-        id = "prescription",
+        id = "0401",
         titleRes = Res.string.orotez_protez_document_prescription,
         isRequired = true,
     ),
     OrotezProtezDocumentUi(
-        id = "invoice",
+        id = "0402",
         titleRes = Res.string.orotez_protez_document_invoice,
         isRequired = true,
     ),
     OrotezProtezDocumentUi(
-        id = "ear-mold",
+        id = "0403",
         titleRes = Res.string.orotez_protez_document_ear_mold,
         isRequired = false,
     ),
     OrotezProtezDocumentUi(
-        id = "hearing-aid-warranty",
+        id = "0404",
         titleRes = Res.string.orotez_protez_document_hearing_aid_warranty,
         isRequired = false,
     ),
@@ -115,10 +114,8 @@ fun OrotezProtezDocumentState.bytesOrNull(): ByteArray? = when (this) {
 }
 
 /**
- * What step 3's final submit would send for one uploaded document — `documentFile` is the
- * upload's guid, `documentType` is [OrotezProtezDocumentUi.id] (see its kdoc: provisional until
- * the real backend codes are known). The full submit-request network call is out of scope here;
- * this is the payload shape it would need.
+ * What the final submit sends for one uploaded document — `documentFile` is the upload's guid,
+ * `documentType` is [OrotezProtezDocumentUi.id].
  */
 data class OrotezProtezDocumentSubmissionUi(
     val documentFile: String,
@@ -129,12 +126,35 @@ data class OrotezProtezDocumentSubmissionUi(
 @Immutable
 data class OrotezProtezInsuredDetailUi(
     val fullName: String,
+    val firstName: String,
+    val lastName: String,
     val relation: String,
+    val relationCode: String,
     val nationalCode: String,
     val birthCertificateNumber: String,
     val issuePlace: String,
     val birthDateLabel: String,
     val bookletValidUntilLabel: String,
+)
+
+/** Raw branch/workshop codes behind a step-1 [OrotezProtezOptionUi], needed for the final submit body. */
+@Immutable
+data class OrotezProtezBranchDetailUi(
+    val branchCode: String?,
+    val branchName: String?,
+)
+
+/**
+ * The policyholder fields loaded once in step 1 ([com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN])
+ * and carried forward untouched to the final submit body — never re-entered or derived from UI state.
+ */
+@Immutable
+data class OrotezProtezMainInfoUi(
+    val risuid: String?,
+    val nationalCode: String?,
+    val firstName: String?,
+    val lastName: String?,
+    val mobileNumber: String?,
 )
 
 @Immutable
@@ -145,10 +165,16 @@ data class OrotezProtezUiState(
     val branch: OrotezProtezOptionUi? = null,
     val insuredPerson: OrotezProtezOptionUi? = null,
     val prescriptionDateLabel: String? = null,
+    /** Midnight local-time of [prescriptionDateLabel]'s Jalali date, set alongside it. Needed by the final submit body. */
+    val prescriptionDateTimeStamp: Long? = null,
     val branchOptions: ImmutableList<OrotezProtezOptionUi> = persistentListOf(),
     val insuredPersonOptions: ImmutableList<OrotezProtezOptionUi> = persistentListOf(),
     /** Registry detail per insured-person id — loaded once, looked up by [insuredPerson]. */
     val insuredPersonDetails: ImmutableMap<String, OrotezProtezInsuredDetailUi> = persistentMapOf(),
+    /** Raw branch/workshop codes per [OrotezProtezOptionUi.id] — loaded once, looked up by [branch]. */
+    val branchDetails: ImmutableMap<String, OrotezProtezBranchDetailUi> = persistentMapOf(),
+    /** The policyholder loaded once in step 1, carried forward for the final submit body. */
+    val mainInfo: OrotezProtezMainInfoUi? = null,
     val picker: OrotezProtezPicker = OrotezProtezPicker.NONE,
     /** The document whose card was tapped to open [OrotezProtezPicker.DOCUMENT_SOURCE]. */
     val activeDocumentId: String? = null,
@@ -158,9 +184,16 @@ data class OrotezProtezUiState(
     val documentPickError: String? = null,
     /** Set only after a submit attempt fails validation — cleared on the next successful pick/remove. */
     val documentValidationError: String? = null,
+    val isSubmitting: Boolean = false,
+    /** The final submit network call's failure message, if the last attempt failed. */
+    val submitError: String? = null,
+    /** Whether the final submit has already succeeded once — the submit button stays disabled past that point. */
+    val hasSubmitted: Boolean = false,
+    /** The backend's own confirmation text, when the final submit succeeds and it returns one. */
+    val submittedResultMessage: String? = null,
 ) {
     val canGoNext: Boolean
-        get() = branch != null && insuredPerson != null && prescriptionDateLabel != null
+        get() = branch != null && insuredPerson != null && prescriptionDateTimeStamp != null
 
     /** Step 2's whole content: derived from the step-1 selection, never stored independently. */
     val selectedInsuredDetail: OrotezProtezInsuredDetailUi?
@@ -169,7 +202,7 @@ data class OrotezProtezUiState(
     val isAnyDocumentUploading: Boolean
         get() = documents.values.any { it is OrotezProtezDocumentState.Uploading }
 
-    /** The exact payload step 3's (not-yet-implemented) final submit would send for documents. */
+    /** The exact payload the final submit sends for documents. */
     val documentSubmissionPayload: List<OrotezProtezDocumentSubmissionUi>
         get() = documents.entries.mapNotNull { (documentId, state) ->
             (state as? OrotezProtezDocumentState.Uploaded)?.let {
@@ -186,19 +219,24 @@ data class OrotezProtezUiState(
         data class DataLoaded(
             val branch: OrotezProtezOptionUi?,
             val branchOptions: ImmutableList<OrotezProtezOptionUi>,
+            val branchDetails: ImmutableMap<String, OrotezProtezBranchDetailUi>,
             val insuredPersonOptions: ImmutableList<OrotezProtezOptionUi>,
             val insuredPersonDetails: ImmutableMap<String, OrotezProtezInsuredDetailUi>,
+            val mainInfo: OrotezProtezMainInfoUi?,
         ) : PartialState
         data class PickerChanged(val picker: OrotezProtezPicker) : PartialState
         data class DocumentSourceRequested(val documentId: String) : PartialState
         data class BranchSelected(val branch: OrotezProtezOptionUi) : PartialState
         data class InsuredPersonSelected(val insuredPerson: OrotezProtezOptionUi) : PartialState
-        data class PrescriptionDateSelected(val label: String) : PartialState
+        data class PrescriptionDateSelected(val millis: Long, val label: String) : PartialState
         data class StepChanged(val step: OrotezProtezStep) : PartialState
         data class DocumentStateChanged(val documentId: String, val state: OrotezProtezDocumentState) : PartialState
         data class DocumentPickRejected(val message: String) : PartialState
         data class DocumentValidationFailed(val message: String) : PartialState
         data object DocumentsReadyForSubmission : PartialState
+        data class Submitting(val isSubmitting: Boolean) : PartialState
+        data class SubmitSucceeded(val resultMessage: String?) : PartialState
+        data class SubmitFailed(val message: String) : PartialState
     }
 }
 
@@ -208,7 +246,7 @@ sealed interface OrotezProtezIntent {
     data object OnPickerDismissed : OrotezProtezIntent
     data class OnBranchPicked(val option: OrotezProtezOptionUi) : OrotezProtezIntent
     data class OnInsuredPersonPicked(val option: OrotezProtezOptionUi) : OrotezProtezIntent
-    data class OnPrescriptionDatePicked(val label: String) : OrotezProtezIntent
+    data class OnPrescriptionDatePicked(val millis: Long, val label: String) : OrotezProtezIntent
     data class OnDocumentCardClicked(val documentId: String) : OrotezProtezIntent
     /** Chosen in the step-3 source sheet — closes the sheet and asks the UI to launch the matching FileKit picker. */
     data class OnDocumentSourceSelected(

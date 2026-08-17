@@ -55,6 +55,9 @@ fun InsuredPersonDTO.toDomain(): InsuredPersonDN {
     )
 }
 
+/** "04" = short-term-orthosis/prosthesis help type, fixed for this endpoint (01 = sick-leave pay, 02 = maternity). */
+private const val SHORT_TERM_ORTHOSIS_HELP_TYPE = "04"
+
 fun SaveShortTermOrthosisRequestDN.toDTO(): SaveShortTermOrthosisRequestDTO {
     return SaveShortTermOrthosisRequestDTO(
         shorttermRequest = ShortTermOrthosisRequestDTO(
@@ -64,11 +67,13 @@ fun SaveShortTermOrthosisRequestDN.toDTO(): SaveShortTermOrthosisRequestDTO {
             insuranceLastName = insuranceLastName,
             mobileNumber = mobileNumber,
             nationalCode = nationalCode,
-            request = requestId?.let { ShortTermOrthosisRequestIdDTO(id = it) },
+            // Always an "empty" reference — the client never fills in an existing request id here.
+            request = ShortTermOrthosisRequestIdDTO(id = null),
             requestFileList = requestFileList.map { it.toDTO() },
-            requestHelpType = requestHelpType,
+            requestHelpType = SHORT_TERM_ORTHOSIS_HELP_TYPE,
             risuid = risuid,
-            serviceDateTimeStamp = serviceDateTimeStamp,
+            // Always 0 for this endpoint — not the prescription date (that's useTajTimeStamp below).
+            serviceDateTimeStamp = 0L,
         ),
         userNationalCode = userNationalCode,
         userRelation = userRelation,
@@ -76,7 +81,7 @@ fun SaveShortTermOrthosisRequestDN.toDTO(): SaveShortTermOrthosisRequestDTO {
         userFirstName = userFirstName,
         userInsuredId = userInsuredId,
         userLastName = userLastName,
-        userBirthDateTimeStamp = userBirthDateTimeStamp,
+        prescriptionDateTimeStamp = prescriptionDateTimeStamp,
     )
 }
 

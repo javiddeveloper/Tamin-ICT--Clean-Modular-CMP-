@@ -143,6 +143,7 @@ import taminx.core.core_ui.orotez_protez_step_user
 import taminx.core.core_ui.orotez_protez_step_user_description
 import taminx.core.core_ui.orotez_protez_step_user_title
 import taminx.core.core_ui.orotez_protez_submit_request
+import taminx.core.core_ui.orotez_protez_submit_success_fallback
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import taminx.core.core_ui.ic_branch
@@ -349,6 +350,8 @@ private fun OrotezProtezContent(
             onConfirm = { year, month, day ->
                 onIntent(
                     OrotezProtezIntent.OnPrescriptionDatePicked(
+                        // Local midnight — the backend expects the device's own timezone here, not UTC.
+                        millis = PersianDateFormatter.toEpochMillis(year, month, day),
                         label = PersianDateFormatter.format(year, month, day),
                     )
                 )
@@ -721,6 +724,25 @@ private fun OrotezProtezDocumentsStep(
             )
         }
 
+        state.submitError?.let { message ->
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.dangerText,
+            )
+        }
+
+        if (state.hasSubmitted) {
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = state.submittedResultMessage
+                    ?: stringResource(Res.string.orotez_protez_submit_success_fallback),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.greenText,
+            )
+        }
+
         Spacer(Modifier.height(Spacing.xl))
 
         Row(
@@ -734,7 +756,8 @@ private fun OrotezProtezDocumentsStep(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_submit_request),
                 onClick = { onIntent(OrotezProtezIntent.OnSubmitDocumentsClicked) },
-                enabled = !state.isAnyDocumentUploading,
+                enabled = !state.isAnyDocumentUploading && !state.isSubmitting && !state.hasSubmitted,
+                isLoading = state.isSubmitting,
             )
         }
     }
@@ -1171,7 +1194,10 @@ private val PreviewInsuredInfoState = OrotezProtezUiState(
     insuredPersonDetails = persistentMapOf(
         "insured-1" to OrotezProtezInsuredDetailUi(
             fullName = "رضا دریکوند",
+            firstName = "رضا",
+            lastName = "دریکوند",
             relation = "اصلی (خود)",
+            relationCode = "1",
             nationalCode = "۴۰۶۰۴۳۴۰۶۱",
             birthCertificateNumber = "۴۰۶۰۴۳۴۰۶۱",
             issuePlace = "خرم آباد",

@@ -11,6 +11,8 @@ fun BranchWorkshopDN.toPresentation(): BranchWorkshopPR {
     return BranchWorkshopPR(
         id = "$branchCode-$workshopCode",
         label = listOfNotNull(branchName, workshopName).joinToString(" - "),
+        branchCode = branchCode,
+        branchName = branchName,
     )
 }
 
@@ -23,7 +25,10 @@ fun InsuredPersonDN.toPresentation(): InsuredPersonPR {
         id = insuredId.orEmpty(),
         label = listOfNotNull(relationship, fullName.ifBlank { null }).joinToString(" - "),
         fullName = fullName,
+        firstName = firstName.orEmpty(),
+        lastName = lastName.orEmpty(),
         relation = relationship.orEmpty(),
+        relationCode = relationshipCode.orEmpty(),
         nationalCode = nationalCode.orEmpty(),
         birthCertificateNumber = birthCertificateNumber.orEmpty(),
         issuePlace = cityName.orEmpty(),

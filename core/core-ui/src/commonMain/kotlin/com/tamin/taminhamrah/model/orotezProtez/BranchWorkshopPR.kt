@@ -6,4 +6,6 @@ import androidx.compose.runtime.Immutable
 data class BranchWorkshopPR(
     val id: String,
     val label: String,
+    val branchCode: String?,
+    val branchName: String?,
 )
