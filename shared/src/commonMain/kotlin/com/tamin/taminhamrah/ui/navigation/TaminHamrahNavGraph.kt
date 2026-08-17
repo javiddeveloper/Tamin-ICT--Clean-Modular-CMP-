@@ -75,6 +75,7 @@ import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
+import com.tamin.taminhamrah.feature.history.historyJobInfoScreen
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
@@ -419,6 +420,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()
+                historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
                     onBack = { navController.popBackStack() },

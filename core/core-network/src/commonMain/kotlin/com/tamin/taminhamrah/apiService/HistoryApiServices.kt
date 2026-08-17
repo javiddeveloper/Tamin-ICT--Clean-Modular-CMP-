@@ -1,8 +1,9 @@
 package com.tamin.taminhamrah.apiService
 
-import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
 import com.tamin.taminhamrah.model.history.UserInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
+import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
@@ -21,6 +22,10 @@ interface HistoryApiServices {
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<TalfighInfoDTO>
 
+    @GET("history-services/historyjobinfos")
+    suspend fun getHistoryJobInfos(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<HistoryJobInfoDTO>
     @GET("history-services/userinfos")
     suspend fun getUserInfos(): BaseDTO<UserInfoDTO>
 

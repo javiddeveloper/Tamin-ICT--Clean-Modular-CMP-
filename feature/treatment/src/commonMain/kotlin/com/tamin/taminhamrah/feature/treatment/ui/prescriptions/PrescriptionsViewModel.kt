@@ -63,7 +63,7 @@ class PrescriptionsViewModel(
     }
 
     private fun loadList(intent: PrescriptionsIntent.LoadList): Flow<PartialState> = flow {
-        // Emit Loading(true) while retaining existing list during refresh so PullToRefresh overlay renders cleanly without screen flickers.
+        // The existing list is kept while this is in flight, so a reload does not blank the screen.
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
         // Defaults to the «۶ ماه اخیر» period the records filter advertises.

@@ -91,6 +91,48 @@ class HistoryApiServicesTest : BaseApiTest() {
     }
 
     @Test
+    fun `getHistoryJobInfos should return successful response with data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = HistoryTestData.historyJobInfosSuccess
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createHistoryApiServices()
+
+        val parameters = mapOf("param1" to "value1")
+        val response = apiService.getHistoryJobInfos(parameters)
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNotNull(response.data)
+        assertEquals(1, response.data?.total)
+        assertEquals(1, response.data?.list?.size)
+        assertEquals("0081631829", response.data?.list?.first()?.risuid)
+        assertEquals("کارمند اداری ۱", response.data?.list?.first()?.jobDesc)
+        assertEquals("139810", response.data?.list?.first()?.startDate)
+        assertEquals("6393610019", response.data?.list?.first()?.rwshId)
+    }
+
+    @Test
+    fun `getHistoryJobInfos should return empty list when no data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = HistoryTestData.historyJobInfosEmpty
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createHistoryApiServices()
+
+        val parameters = mapOf("param1" to "value1")
+        val response = apiService.getHistoryJobInfos(parameters)
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNotNull(response.data)
+        assertEquals(0, response.data?.total)
+        assertEquals(0, response.data?.list?.size)
+    }
+
+    @Test
     fun `getUserInfos should return successful response with data`() = runTest {
         val jsonResponse = ApiTestUtils.createJsonResponse(
             dataJson = HistoryTestData.userInfoSuccess

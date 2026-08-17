@@ -1,15 +1,20 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.data.local.entity.HistoryJobInfoEntity
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDTO
-import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDN
+import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDTO
+import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
-import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDTO
+import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
 import com.tamin.taminhamrah.model.history.WageDetailDN
 
 fun TalfighInfoItemDTO.toDomain(): TalfighInfoItemDN {
@@ -106,5 +111,48 @@ fun UserInfoDTO.toDomain(): UserInfoDN {
         birthDateTimestamp = birthDateTimestamp,
         issueplace = issueplace,
         nationCode = nationCode
+    )
+}
+
+fun HistoryJobInfoItemDTO.toEntity(): HistoryJobInfoEntity {
+    return HistoryJobInfoEntity(
+        risuid = risuid.orEmpty(),
+        rwshName = rwshName.orEmpty(),
+        brhcode = brhcode.orEmpty(),
+        id = id ?: 0,
+        jobDesc = jobDesc.orEmpty(),
+        startDate = startDate.orEmpty(),
+        rwshId = rwshId.orEmpty()
+    )
+}
+
+fun HistoryJobInfoEntity.toDomain(): HistoryJobInfoItemDN {
+    return HistoryJobInfoItemDN(
+        risuid = risuid,
+        rwshName = rwshName,
+        brhcode = brhcode,
+        id = id,
+        jobDesc = jobDesc,
+        startDate = startDate,
+        rwshId = rwshId
+    )
+}
+
+fun HistoryJobInfoItemDTO.toDomain(): HistoryJobInfoItemDN {
+    return HistoryJobInfoItemDN(
+        risuid = risuid,
+        rwshName = rwshName,
+        brhcode = brhcode,
+        id = id,
+        jobDesc = jobDesc,
+        startDate = startDate,
+        rwshId = rwshId
+    )
+}
+
+fun HistoryJobInfoDTO.toDomain(): HistoryJobInfoDN {
+    return HistoryJobInfoDN(
+        list = list?.map { it.toDomain() },
+        total = total
     )
 }

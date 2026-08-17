@@ -9,7 +9,9 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDTO
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDTO
 import com.tamin.taminhamrah.model.treatment.TreatmentCostDTO
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDTO
 import com.tamin.taminhamrah.model.utils.ListData
+
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
@@ -152,6 +154,37 @@ internal class TreatmentRemoteDataSourceImpl(
     override suspend fun sendToInboxTreatmentCosts(repId: String): String {
         return try {
             apiService.sendToInboxTreatmentCosts(repId).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getMedicalConfirmations(params: Map<String, String>): ListData<MedicalConfirmationDTO>? {
+        return try {
+            val response = apiService.getMedicalConfirmations(params)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getMedicalConfirmationPdf(repId: String): PdfDownloadDTO {
+        return try {
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = apiService.getMedicalConfirmationPdf(repId).readPdfChannel()))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun sendToInboxMedicalConfirmation(repId: String): String {
+        return try {
+            apiService.sendToInboxMedicalConfirmation(repId).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
