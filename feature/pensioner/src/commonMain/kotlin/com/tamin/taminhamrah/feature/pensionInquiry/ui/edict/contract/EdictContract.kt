@@ -21,6 +21,7 @@ data class EdictUiState(
     val searchMonth: String = "",
     val isDateFilteredBySearch: Boolean = false,
     val showSendSuccess: Boolean = false,
+    val showNoPensionerDialog: Boolean = false,
     val viewerPdf: PdfDownloadPR? = null,
     val viewerDownloadFailed: Boolean = false,
 ) {
@@ -38,6 +39,7 @@ data class EdictUiState(
         data class SearchMonthChanged(val month: String) : PartialState
         data class DateFilteredBySearch(val filtered: Boolean) : PartialState
         data class ShowSendSuccess(val show: Boolean) : PartialState
+        data class ShowNoPensionerDialog(val show: Boolean) : PartialState
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data object ViewerDownloadFailed : PartialState
     }
@@ -60,8 +62,10 @@ sealed interface EdictIntent {
     data class ChangeSearchMonth(val month: String) : EdictIntent
     data object ApplySearch : EdictIntent
     data object ClearDateFilter : EdictIntent
+    data object DismissNoPensionerDialog : EdictIntent
 }
 
 sealed interface EdictEvent {
     data class ShowToast(val message: String) : EdictEvent
+    data object NavigateBack : EdictEvent
 }

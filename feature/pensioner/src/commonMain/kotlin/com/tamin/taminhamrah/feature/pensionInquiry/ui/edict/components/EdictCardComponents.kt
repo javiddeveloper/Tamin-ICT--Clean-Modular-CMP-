@@ -83,6 +83,7 @@ import taminx.core.core_ui.edict_comparison_before
 import taminx.core.core_ui.edict_comparison_title
 import taminx.core.core_ui.edict_description_title
 import taminx.core.core_ui.edict_payable_monthly_hint
+import taminx.core.core_ui.edict_survivor_payable_hint
 import taminx.core.core_ui.edict_survivor_desc
 import taminx.core.core_ui.edict_survivor_share_title
 import taminx.core.core_ui.edict_tab_breakdown
@@ -115,11 +116,28 @@ fun EdictMainCard(
     selectedDate: String = "",
 ) {
     val taminColors = LocalTaminColors.current
-    val info = edict.edictInfo ?: return
+    val info = edict.edictInfo
+    val firstSurvivor = edict.survivorInfo.firstOrNull()
+    if (info == null && firstSurvivor == null) return
 
-    val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
-    val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
-    val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0 //increase percentage compared to after
+    val isSurvivorOnly = info == null
+    val beforeAmt = if (isSurvivorOnly) {
+        firstSurvivor!!.previousPension.replace(",", "").toDoubleOrNull() ?: 0.0
+    } else {
+        info!!.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
+    }
+    val afterAmt = if (isSurvivorOnly) {
+        firstSurvivor!!.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
+    } else {
+        info!!.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
+    }
+    val payableMonthly = if (isSurvivorOnly) firstSurvivor!!.pensionAfterIncrease else info!!.payableMonthly
+    val pct = if (beforeAmt > 0) ((afterAmt - beforeAmt) / beforeAmt * 100).toInt() else 0
+    val labelHintText = if (isSurvivorOnly) {
+        stringResource(Res.string.edict_survivor_payable_hint)
+    } else {
+        stringResource(Res.string.edict_payable_monthly_hint)
+    }
     val rawDate = formatEdictDateLabel(selectedDate)
     val dateLabelText = if (rawDate.isNotEmpty()) " \u00B7 $rawDate" else ""
 
@@ -130,9 +148,9 @@ fun EdictMainCard(
     ) {
         Layout(
             content = {
-                // LabelHint: "مبلغ قابل پرداخت ماهانه" – vanishes on collapse
+                // LabelHint: pensioner or survivor amount label – vanishes on collapse
                 TaminText(
-                    text = stringResource(Res.string.edict_payable_monthly_hint),
+                    text = labelHintText,
                     style = MaterialTheme.typography.bodySmall,
                     color = taminColors.textSecondary,
                     modifier = Modifier
@@ -156,7 +174,7 @@ fun EdictMainCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TaminText(
-                        text = info.payableMonthly.replace(",", "").toLongStringOrZero().toPriceFormat(),
+                        text = payableMonthly.replace(",", "").toLongStringOrZero().toPriceFormat(),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.textPrimary,
@@ -346,10 +364,14 @@ fun BreakdownLegendItem(detail: EdictPensionerDetailPR, index: Int) {
 @Composable
 fun EdictComparisonCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
-    val info = edict.edictInfo ?: return
+    val info = edict.edictInfo
+    val firstSurvivor = edict.survivorInfo.firstOrNull()
+    if (info == null && firstSurvivor == null) return
 
-    val beforeAmt = info.pensionBeforeIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
-    val afterAmt = info.pensionAfterIncrease.replace(",", "").toDoubleOrNull() ?: 0.0
+    val beforeAmt = ((info?.pensionBeforeIncrease ?: firstSurvivor?.previousPension) ?: "0")
+        .replace(",", "").toDoubleOrNull() ?: 0.0
+    val afterAmt = ((info?.pensionAfterIncrease ?: firstSurvivor?.pensionAfterIncrease) ?: "0")
+        .replace(",", "").toDoubleOrNull() ?: 0.0
     val maxAmt = maxOf(beforeAmt, afterAmt).takeIf { it > 0 } ?: 1.0
 
     Card(
@@ -382,14 +404,14 @@ fun EdictComparisonCard(edict: EdictPensionerPR, modifier: Modifier = Modifier) 
 
             ComparisonBar(
                 label = stringResource(Res.string.edict_comparison_before),
-                amount = info.pensionBeforeIncrease.replace(",", "").toLongStringOrZero().toPriceFormat(),
+                amount = beforeAmt.toLong().toPriceFormat(),
                 progress = (beforeAmt / maxAmt).toFloat(),
                 color = taminColors.textMuted,
             )
             Spacer(Modifier.height(Spacing.md))
             ComparisonBar(
                 label = stringResource(Res.string.edict_comparison_after),
-                amount = info.pensionAfterIncrease.replace(",", "").toLongStringOrZero().toPriceFormat(),
+                amount = afterAmt.toLong().toPriceFormat(),
                 progress = (afterAmt / maxAmt).toFloat(),
                 color = taminColors.blueText,
             )
@@ -581,62 +603,128 @@ fun EdictDetailsSection(edict: EdictPensionerPR, modifier: Modifier = Modifier) 
 @Composable
 private fun EdictInfoList(edict: EdictPensionerPR) {
     val taminColors = LocalTaminColors.current
-    val info = edict.edictInfo ?: return
+    val info = edict.edictInfo
+    val firstSurvivor = edict.survivorInfo.firstOrNull()
+    if (info == null && firstSurvivor == null) return
 
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(CornerRadius.card),
-            colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-            border = BorderStroke(1.dp, taminColors.border),
-        ) {
-            Column(
-                modifier = Modifier.padding(Spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
-                InfoRow(label = "شعبه", value = edict.branchName)
-                InfoRow(label = "نام و نام خانوادگی", value = "${info.firstName} ${info.lastName}")
-                InfoRow(label = "نام پدر", value = info.fatherName)
-                InfoRow(label = "اساس برقراری", value = info.basisImplementation)
-                InfoRow(label = "تاریخ برقراری", value = info.pensionStartDate)
-                if (edict.edictYear.isNotEmpty() && edict.edictYear != "0") {
-                    InfoRow(
-                        label = "تاریخ اجرای حکم",
-                        value = "${edict.edictYear}/${edict.edictMonth.padStart(2, '0')}/01".toPersianDigits(),
-                    )
-                }
-                InfoRow(
-                    label = "سابقه اصلی",
-                    value = "${info.originalHistoryYear} سال و ${info.originalHistoryMonth} ماه و ${info.originalHistoryDay} روز",
-                )
-                InfoRow(
-                    label = "سابقه ارفاقی",
-                    value = "${info.additionalYear} سال و ${info.additionalMonth} ماه و ${info.additionalDay} روز",
-                )
-                InfoRow(label = "نوع حکم", value = edict.title)
-            }
-        }
-
-        if (info.edictDescription.isNotEmpty()) {
+        if (info != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(CornerRadius.card),
                 colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
                 border = BorderStroke(1.dp, taminColors.border),
             ) {
-                Column(modifier = Modifier.padding(Spacing.lg)) {
-                    TaminText(
-                        text = stringResource(Res.string.edict_description_title),
-                        style = MaterialTheme.typography.titleSmall.copy(color = taminColors.textPrimary),
-                        fontWeight = FontWeight.Bold,
+                Column(
+                    modifier = Modifier.padding(Spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    InfoRow(label = "شعبه", value = edict.branchName)
+                    InfoRow(label = "نام و نام خانوادگی", value = "${info.firstName} ${info.lastName}")
+                    InfoRow(label = "نام پدر", value = info.fatherName)
+                    InfoRow(label = "اساس برقراری", value = info.basisImplementation)
+                    InfoRow(label = "تاریخ برقراری", value = info.pensionStartDate)
+                    if (edict.edictYear.isNotEmpty() && edict.edictYear != "0") {
+                        InfoRow(
+                            label = "تاریخ اجرای حکم",
+                            value = "${edict.edictYear}/${edict.edictMonth.padStart(2, '0')}/01".toPersianDigits(),
+                        )
+                    }
+                    InfoRow(
+                        label = "سابقه اصلی",
+                        value = "${info.originalHistoryYear} سال و ${info.originalHistoryMonth} ماه و ${info.originalHistoryDay} روز",
                     )
-                    Spacer(Modifier.height(Spacing.sm))
-                    TaminText(
-                        text = info.edictDescription,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = taminColors.textSecondary,
-                        lineHeight = 20.sp,
+                    InfoRow(
+                        label = "سابقه ارفاقی",
+                        value = "${info.additionalYear} سال و ${info.additionalMonth} ماه و ${info.additionalDay} روز",
                     )
+                    InfoRow(label = "نوع حکم", value = edict.title)
+                }
+            }
+
+            if (info.edictDescription.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(CornerRadius.card),
+                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                    border = BorderStroke(1.dp, taminColors.border),
+                ) {
+                    Column(modifier = Modifier.padding(Spacing.lg)) {
+                        TaminText(
+                            text = stringResource(Res.string.edict_description_title),
+                            style = MaterialTheme.typography.titleSmall.copy(color = taminColors.textPrimary),
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Spacer(Modifier.height(Spacing.sm))
+                        TaminText(
+                            text = info.edictDescription,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = taminColors.textSecondary,
+                            lineHeight = 20.sp,
+                        )
+                    }
+                }
+            }
+        } else {
+            // Survivor-only response: show survivor-specific details
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(CornerRadius.card),
+                colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                border = BorderStroke(1.dp, taminColors.border),
+            ) {
+                Column(
+                    modifier = Modifier.padding(Spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    InfoRow(label = "شعبه", value = edict.branchName)
+                    InfoRow(label = "نام و نام خانوادگی", value = "${firstSurvivor!!.firstName} ${firstSurvivor.lastName}")
+                    InfoRow(label = "کد ملی", value = firstSurvivor.nationalCode)
+                    InfoRow(label = "شناسه مستمری", value = firstSurvivor.pensionerId)
+                    InfoRow(label = "نوع بیمه", value = firstSurvivor.insuranceType)
+                    if (edict.edictYear.isNotEmpty() && edict.edictYear != "0") {
+                        InfoRow(
+                            label = "تاریخ اجرای حکم",
+                            value = "${edict.edictYear}/${edict.edictMonth.padStart(2, '0')}/01".toPersianDigits(),
+                        )
+                    }
+                    InfoRow(
+                        label = "سابقه اصلی",
+                        value = "${firstSurvivor.originalHistoryYear} سال و ${firstSurvivor.originalHistoryMonth} ماه و ${firstSurvivor.originalHistoryDay} روز",
+                    )
+                    InfoRow(
+                        label = "مستمری قبل از افزایش",
+                        value = firstSurvivor.previousPension.replace(",", "").toLongStringOrZero().toPriceFormat(),
+                    )
+                    InfoRow(
+                        label = "مستمری پس از افزایش",
+                        value = firstSurvivor.pensionAfterIncrease.replace(",", "").toLongStringOrZero().toPriceFormat(),
+                    )
+                    InfoRow(label = "سهم", value = "${firstSurvivor.quota}٪")
+                }
+            }
+
+            if (firstSurvivor!!.edictDescription.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(CornerRadius.card),
+                    colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+                    border = BorderStroke(1.dp, taminColors.border),
+                ) {
+                    Column(modifier = Modifier.padding(Spacing.lg)) {
+                        TaminText(
+                            text = stringResource(Res.string.edict_description_title),
+                            style = MaterialTheme.typography.titleSmall.copy(color = taminColors.textPrimary),
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Spacer(Modifier.height(Spacing.sm))
+                        TaminText(
+                            text = firstSurvivor.edictDescription,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = taminColors.textSecondary,
+                            lineHeight = 20.sp,
+                        )
+                    }
                 }
             }
         }
@@ -699,65 +787,6 @@ private fun InfoRow(label: String, value: String?) {
         HorizontalDivider(color = taminColors.divider, thickness = 0.5.dp)
     }
 }
-
-/*@Composable
-private fun EdictBreakdownList(edict: EdictPensionerPR) {
-    val taminColors = LocalTaminColors.current
-    val info = edict.edictInfo
-    val rial = stringResource(Res.string.unit_rial)
-
-    val packageNames = edict.detail.map { it.packageName }.distinct()
-    val grouped = edict.detail.groupBy { it.packageName }
-    val payableItems = grouped[packageNames.getOrNull(0)] ?: emptyList()
-    val deductionItems = if (packageNames.size > 1) grouped[packageNames[1]] ?: emptyList() else emptyList()
-
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        BreakdownSection(
-            title = "مبالغ پرداختی",
-            dotColor = taminColors.blueText,
-            items = payableItems,
-            rial = rial,
-        )
-
-        if (deductionItems.isNotEmpty()) {
-            BreakdownSection(
-                title = "کسورات",
-                dotColor = taminColors.orangeText,
-                items = deductionItems,
-                rial = rial,
-            )
-        }
-
-        if (info != null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(CornerRadius.card),
-                colors = CardDefaults.cardColors(containerColor = taminColors.blueText),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TaminText(
-                        text = info.payableMonthly + " " + rial,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = taminColors.bgSurface,
-                    )
-                    TaminText(
-                        text = "جمع کل حکم",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = taminColors.bgSurface,
-                    )
-                }
-            }
-        }
-    }
-}*/
 
 @Composable
 private fun EdictBreakdownList(edict: EdictPensionerPR) {

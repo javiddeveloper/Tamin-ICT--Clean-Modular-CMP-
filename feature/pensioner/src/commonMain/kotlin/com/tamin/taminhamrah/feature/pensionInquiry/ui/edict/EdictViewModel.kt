@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
@@ -40,25 +41,31 @@ class EdictViewModel(
                     getPensionerIdUseCase().collect { list ->
                         val presentationList = list.toPresentation()
                         emit(PartialState.PensionerIdsLoaded(presentationList))
-                        if (presentationList.isNotEmpty()) {
-                            val pensionerId = presentationList.first().pensionerId
-                            emit(PartialState.SelectedPensionerIdChanged(pensionerId))
+                        if (presentationList.isEmpty()) {
+                            emit(PartialState.ShowNoPensionerDialog(true))
+                            return@collect
+                        }
+                        val pensionerId = presentationList.first().pensionerId
+                        emit(PartialState.SelectedPensionerIdChanged(pensionerId))
 
-                            // Auto-load the most recent edict (فروردین or مرداد of the current year).
-                            val defaultDate = defaultEdictStartDate()
-                            emit(PartialState.StartDateChanged(defaultDate))
-                            try {
-                                val query = ApiQueryParamDN(filters = edictFilters(pensionerId, defaultDate))
-                                getEdictPensionerUseCase(query).collect { edict ->
-                                    emit(PartialState.EdictLoaded(edict?.toPresentation()))
-                                }
-                            } catch (e: Exception) {
-                                emit(PartialState.Error(e.message))
+                        // Auto-load the most recent edict (فروردین of the current year).
+                        val defaultDate = defaultEdictStartDate()
+                        emit(PartialState.StartDateChanged(defaultDate))
+                        try {
+                            val query = ApiQueryParamDN(filters = edictFilters(pensionerId, defaultDate))
+                            getEdictPensionerUseCase(query).collect { edict ->
+                                emit(PartialState.EdictLoaded(edict?.toPresentation()))
                             }
+                        } catch (e: Exception) {
+                            val msg = e.toSingleLineMessage()
+                            emit(PartialState.Error(msg))
+                            sendEvent(EdictEvent.ShowToast(msg))
                         }
                     }
                 } catch (e: Exception) {
-                    emit(PartialState.Error(e.message))
+                    val msg = e.toSingleLineMessage()
+                    emit(PartialState.Error(msg))
+                    sendEvent(EdictEvent.ShowToast(msg))
                 }
             }
             is EdictIntent.ChangeSelectedPensionerId -> {
@@ -82,7 +89,9 @@ class EdictViewModel(
                         emit(PartialState.EdictLoaded(edict?.toPresentation()))
                     }
                 } catch (e: Exception) {
-                    emit(PartialState.Error(e.message))
+                    val msg = e.toSingleLineMessage()
+                    emit(PartialState.Error(msg))
+                    sendEvent(EdictEvent.ShowToast(msg))
                 }
             }
             is EdictIntent.RequestSendToInbox -> {
@@ -100,8 +109,10 @@ class EdictViewModel(
                         emit(PartialState.ShowSendSuccess(true))
                     }
                 } catch (e: Exception) {
+                    val msg = e.toSingleLineMessage()
                     emit(PartialState.SendingToInbox(false))
-                    emit(PartialState.Error(e.message))
+                    emit(PartialState.Error(msg))
+                    sendEvent(EdictEvent.ShowToast(msg))
                 }
             }
             is EdictIntent.DismissSendSuccess -> {
@@ -122,8 +133,10 @@ class EdictViewModel(
                         emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
                     }
                 } catch (e: Exception) {
-                    emit(PartialState.Error(e.message))
+                    val msg = e.toSingleLineMessage()
+                    emit(PartialState.Error(msg))
                     emit(PartialState.ViewerDownloadFailed)
+                    sendEvent(EdictEvent.ShowToast(msg))
                 }
             }
             is EdictIntent.DismissPdfViewer -> {
@@ -167,7 +180,9 @@ class EdictViewModel(
                         emit(PartialState.EdictLoaded(edict?.toPresentation()))
                     }
                 } catch (e: Exception) {
-                    emit(PartialState.Error(e.message))
+                    val msg = e.toSingleLineMessage()
+                    emit(PartialState.Error(msg))
+                    sendEvent(EdictEvent.ShowToast(msg))
                 }
             }
             is EdictIntent.ClearDateFilter -> {
@@ -186,8 +201,14 @@ class EdictViewModel(
                         emit(PartialState.EdictLoaded(edict?.toPresentation()))
                     }
                 } catch (e: Exception) {
-                    emit(PartialState.Error(e.message))
+                    val msg = e.toSingleLineMessage()
+                    emit(PartialState.Error(msg))
+                    sendEvent(EdictEvent.ShowToast(msg))
                 }
+            }
+            is EdictIntent.DismissNoPensionerDialog -> {
+                emit(PartialState.ShowNoPensionerDialog(false))
+                sendEvent(EdictEvent.NavigateBack)
             }
         }
     }
@@ -220,6 +241,7 @@ class EdictViewModel(
         is PartialState.SearchMonthChanged -> currentState.copy(searchMonth = partialState.month)
         is PartialState.DateFilteredBySearch -> currentState.copy(isDateFilteredBySearch = partialState.filtered)
         is PartialState.ShowSendSuccess -> currentState.copy(showSendSuccess = partialState.show)
+        is PartialState.ShowNoPensionerDialog -> currentState.copy(isLoading = false, showNoPensionerDialog = partialState.show)
         is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,
             viewerPdf = partialState.pdf,

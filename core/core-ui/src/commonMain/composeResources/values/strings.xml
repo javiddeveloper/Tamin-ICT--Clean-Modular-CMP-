@@ -68,7 +68,10 @@
     <string name="edict_search_change">تغییر</string>
     <string name="edict_search_year_edicts">احکام صادرشدهٔ این سال</string>
     <string name="edict_search_select_month">ماه را انتخاب کنید</string>
-    <string name="edict_search_edict_note">* حکم مستمری هر سال در فروردین صادر می‌شود و در برخی سال‌ها حکم اصلاحی مرداد هم صادر می‌گردد.</string>
+    <string name="edict_no_pensioner_title">شما مستمری‌بگیر نیستید</string>
+    <string name="edict_no_pensioner_desc">اطلاعات مستمری برای این حساب یافت نشد. لطفاً با شعبه تأمین اجتماعی خود تماس بگیرید.</string>
+    <string name="edict_search_edict_note">* حکم افزایش مستمری هر سال در فروردین صادر می‌شود.</string>
+    <string name="edict_survivor_payable_hint">مبلغ ناخالص قابل پرداخت</string>
     <string name="edict_search_year_info">۱ حکم در سال %1$s صادر شده است</string>
     <string name="edict_year_filter">سال %1$s</string>
     <string name="edict_empty_title">حکمی برای این بازه یافت نشد</string>

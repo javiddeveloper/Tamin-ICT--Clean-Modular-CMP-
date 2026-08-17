@@ -39,6 +39,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictDet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictHeader
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictPensionerSheet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictSearchSheet
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictNoPensionerDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.EdictSuccessDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.components.SurvivorShareCard
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.contract.EdictEvent
@@ -89,6 +90,7 @@ fun EdictScreen(
     HandleEdictEvents(
         events = viewModel.events,
         onShowToast = { toaster.error(it) },
+        onNavigateBack = onBack,
     )
 
     EdictContent(
@@ -124,6 +126,12 @@ fun EdictScreen(
         )
     }
 
+    if (state.showNoPensionerDialog) {
+        EdictNoPensionerDialog(
+            onDismiss = { viewModel.sendIntent(EdictIntent.DismissNoPensionerDialog) },
+        )
+    }
+
     if (state.showSendSuccess) {
         EdictSuccessDialog(
             title = stringResource(Res.string.edict_send_success_title),
@@ -152,10 +160,12 @@ fun EdictScreen(
 fun HandleEdictEvents(
     events: Flow<EdictEvent>,
     onShowToast: (String) -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is EdictEvent.ShowToast -> onShowToast(event.message)
+            is EdictEvent.NavigateBack -> onNavigateBack()
         }
     }
 }

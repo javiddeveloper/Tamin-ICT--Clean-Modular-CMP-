@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -21,6 +22,8 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.btn_understood
 import taminx.core.core_ui.edict_confirm_send
+import taminx.core.core_ui.edict_no_pensioner_desc
+import taminx.core.core_ui.edict_no_pensioner_title
 import taminx.core.core_ui.edict_send_confirm_desc
 import taminx.core.core_ui.edict_send_confirm_title
 import taminx.core.core_ui.edict_send_success_desc
@@ -81,6 +84,29 @@ fun EdictSuccessDialog(
                 height = 50.dp,
                 shape = RoundedCornerShape(CornerRadius.md),
                 background = Brush.horizontalGradient(listOf(taminColors.greenText, taminColors.teal)),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onDismiss,
+    )
+}
+
+@Composable
+fun EdictNoPensionerDialog(onDismiss: () -> Unit) {
+    val taminColors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.edict_no_pensioner_title),
+        description = stringResource(Res.string.edict_no_pensioner_desc),
+        icon = Icons.Outlined.Info,
+        iconTint = taminColors.blueText,
+        iconBackground = taminColors.blueBg,
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.btn_understood),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                height = 50.dp,
+                shape = RoundedCornerShape(CornerRadius.md),
             )
         },
         dismissButton = {},
