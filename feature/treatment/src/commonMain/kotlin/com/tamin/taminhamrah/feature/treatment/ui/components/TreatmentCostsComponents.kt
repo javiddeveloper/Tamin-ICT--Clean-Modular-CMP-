@@ -37,6 +37,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostsDimens
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+import com.tamin.taminhamrah.feature.treatment.ui.model.NO_AMOUNT
+import com.tamin.taminhamrah.feature.treatment.ui.model.isActionable
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
@@ -54,8 +56,6 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCostsAccentBottom
 import com.tamin.taminhamrah.ui.theme.TaminCostsAccentTop
-import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsEnd
-import com.tamin.taminhamrah.ui.theme.TaminCostsOperationsStart
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -66,15 +66,17 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.category_misc_claims
 import taminx.core.core_ui.costs_action_operations
+import taminx.core.core_ui.costs_admission_date
 import taminx.core.core_ui.costs_admission_label
 import taminx.core.core_ui.costs_center_name
 import taminx.core.core_ui.costs_empty
-import taminx.core.core_ui.costs_file_payment
 import taminx.core.core_ui.costs_file_status
 import taminx.core.core_ui.costs_list_section_title
 import taminx.core.core_ui.costs_main_insured
 import taminx.core.core_ui.costs_other_services_payment
 import taminx.core.core_ui.costs_patient_national_code
+import taminx.core.core_ui.costs_prosthesis_payment
+import taminx.core.core_ui.costs_refund_amount
 import taminx.core.core_ui.costs_refund_date
 import taminx.core.core_ui.costs_return_reason
 import taminx.core.core_ui.costs_send_to_inbox
@@ -133,7 +135,7 @@ internal fun CertificateList(
                         onOpenCertificate = onOpenCertificate,
                         onSendToInbox = onSendToInbox,
                         modifier = Modifier
-                            .staggeredItemEntrance(index = index, key = item.repId, state = staggerState)
+                            .staggeredItemEntrance(index = index, key = item.noPazir, state = staggerState)
                             .padding(horizontal = Spacing.page)
                             .padding(
                                 top = Spacing.xs,
@@ -149,10 +151,6 @@ internal fun CertificateList(
         }
     }
 }
-
-/** The «عملیات» button is green rather than the card's teal. */
-private val OperationsGradient =
-    Brush.linearGradient(listOf(TaminCostsOperationsStart, TaminCostsOperationsEnd))
 
 /**
  * One refund row, mapped onto the shared [RecordCard].
@@ -170,7 +168,9 @@ private fun CertificateCard(
     val colors = LocalTaminColors.current
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
-    var expanded by remember(item.repId) { mutableStateOf(false) }
+    // Keyed on the admission number, not repId: a certificate the service never issued reports
+    // repId "0", so several rows would share one key and bleed each other's expansion state.
+    var expanded by remember(item.noPazir) { mutableStateOf(false) }
 
     val viewLabel = stringResource(Res.string.costs_view_certificate)
     val sendLabel = stringResource(Res.string.costs_send_to_inbox)
@@ -211,11 +211,17 @@ private fun CertificateCard(
         expanded = expanded,
         onExpandedChange = { expanded = it },
         modifier = modifier,
+        actionsEnabled = item.isActionable,
     ) {
         DetailRow(
             label = stringResource(Res.string.costs_patient_national_code),
             value = item.maliCode,
             divider = RowDivider.Solid,
+        )
+        DetailRow(
+            label = stringResource(Res.string.costs_admission_date),
+            value = item.datePaz,
+            valueColor = colors.blueText,
         )
         DetailRow(
             label = stringResource(Res.string.costs_main_insured),
@@ -240,13 +246,22 @@ private fun CertificateCard(
             label = stringResource(Res.string.costs_center_name),
             value = item.healthcenterName,
         )
+        // A reported zero is drawn muted rather than colored: the previous app used the color to
+        // say "something was actually paid under this heading", not merely "here is a number".
         DetailRow(
-            label = stringResource(Res.string.costs_file_payment),
+            label = stringResource(Res.string.costs_prosthesis_payment),
             value = item.payService.toRialAmount(ABSENT_VALUE),
+            valueColor = if (item.payService == NO_AMOUNT) colors.textMuted else colors.blueText,
         )
-        DetailPillRow(
+        DetailRow(
             label = stringResource(Res.string.costs_other_services_payment),
-            amount = item.payOtherService.toRialAmount(ABSENT_VALUE),
+            value = item.payOtherService.toRialAmount(ABSENT_VALUE),
+            valueColor = if (item.payOtherService == NO_AMOUNT) colors.textMuted else colors.greenText,
+        )
+        // The refund total closes the list in a pill: it is the number the screen exists for.
+        DetailPillRow(
+            label = stringResource(Res.string.costs_refund_amount),
+            amount = item.payPrice.toRialAmount(ABSENT_VALUE),
         )
     }
 }

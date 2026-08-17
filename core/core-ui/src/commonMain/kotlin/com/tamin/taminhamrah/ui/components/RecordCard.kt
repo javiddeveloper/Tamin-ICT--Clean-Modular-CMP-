@@ -78,7 +78,6 @@ private val FooterBottom = 16.dp
 private val FooterGap = 9.dp
 private val FooterButtonCorner = 14.dp
 private val FooterButtonHeight = 44.dp
-private val ChevronSize = 15.dp
 
 private const val TOP_WASH_ALPHA = 0.05f
 private const val TOGGLE_WEIGHT = 1.5f
@@ -96,6 +95,9 @@ private const val CHEVRON_CLOSED_DEGREES = 90f
  *
  * The rail is drawn at the *physical* right in [drawBehind] rather than aligned to an edge:
  * `End` follows the reading direction and would put it on the left of a Persian page.
+ *
+ * [actionsEnabled] `false` drops the actions button entirely, for a record the service has not
+ * issued yet: there is nothing to open or post, and offering it would send a malformed request.
  */
 @Composable
 fun <T> RecordCard(
@@ -118,6 +120,7 @@ fun <T> RecordCard(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    actionsEnabled: Boolean = true,
     details: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -282,7 +285,7 @@ fun <T> RecordCard(
 
             // The weight belongs on the Box: TaminFilledButton fills its width from the inside, so
             // an unweighted wrapper takes the whole row and starves the toggle.
-            Box(modifier = Modifier.weight(ACTIONS_WEIGHT)) {
+            if (actionsEnabled) Box(modifier = Modifier.weight(ACTIONS_WEIGHT)) {
                 TaminFilledButton(
                     text = actionsLabel,
                     onClick = { menuOpen = true },
