@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -63,7 +65,6 @@ import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.LoadingButton
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.PickerRow
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.StepIndicator
@@ -79,6 +80,7 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -265,10 +267,14 @@ private fun OrotezProtezContent(
             ) { step ->
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     when (step) {
-                        OrotezProtezStep.UserSelection -> OrotezProtezUserStep(
-                            state = state,
-                            onIntent = onIntent,
-                        )
+                        OrotezProtezStep.UserSelection -> if (state.isLoading) {
+                            OrotezProtezUserStepShimmer()
+                        } else {
+                            OrotezProtezUserStep(
+                                state = state,
+                                onIntent = onIntent,
+                            )
+                        }
 
                         OrotezProtezStep.InsuredInfo -> OrotezProtezInsuredInfoStep(
                             state = state,
@@ -284,9 +290,6 @@ private fun OrotezProtezContent(
                     }
                 }
             }
-        }
-        if (state.isLoading) {
-            LoadingStateOverlay()
         }
     }
 
@@ -463,6 +466,64 @@ private fun OrotezProtezUserStep(
     }
 }
 
+private val ShimmerTitleWidth = 160.dp
+private val ShimmerLineHeight = 16.dp
+private const val ShimmerSubtitleWidthFraction = 0.7f
+private val ShimmerPickerRowHeight = 56.dp
+
+/** Shimmer placeholder for step 1 while the branch and insured-person options are loading. */
+@Composable
+private fun OrotezProtezUserStepShimmer(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+    ) {
+        Box(
+            modifier = Modifier
+                .width(ShimmerTitleWidth)
+                .height(ShimmerLineHeight)
+                .clip(RoundedCornerShape(CornerRadius.sm))
+                .shimmer(),
+        )
+
+        Spacer(Modifier.height(Spacing.xs))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(ShimmerSubtitleWidthFraction)
+                .height(ShimmerLineHeight)
+                .clip(RoundedCornerShape(CornerRadius.sm))
+                .shimmer(),
+        )
+
+        Spacer(Modifier.height(Spacing.lg))
+
+        repeat(3) { index ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ShimmerPickerRowHeight)
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .shimmer(),
+            )
+            if (index != 2) {
+                Spacer(Modifier.height(Spacing.sm))
+            }
+        }
+
+        Spacer(Modifier.height(Spacing.xl))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ButtonDimens.height)
+                .clip(RoundedCornerShape(CornerRadius.xl))
+                .shimmer(),
+        )
+    }
+}
+
 /**
  * Step 2 of the wizard: a read-only summary of the insured person selected in step 1.
  * Every value here is looked up from [OrotezProtezUiState.selectedInsuredDetail] — nothing is
@@ -547,7 +608,9 @@ private fun OrotezProtezInsuredInfoStep(
         Spacer(Modifier.height(Spacing.xl))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             OrotezProtezBackStepButton(onClick = onBack)
@@ -653,7 +716,9 @@ private fun OrotezProtezDocumentsStep(
         Spacer(Modifier.height(Spacing.xl))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             OrotezProtezBackStepButton(onClick = onBack)
