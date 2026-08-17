@@ -256,33 +256,11 @@ class EdictViewModel(
     override fun createErrorState(message: String): PartialState =
         PartialState.Error(message)
 
-    /**
-     * Builds the edict filter list for a given pensioner and start date.
-     * START_DATE is always included; END_DATE is added for فروردین/مرداد start months.
-     * endDate is always the CURRENT Jalali year's opposite edict month, so the query
-     * spans from the selected startDate up to the latest edict period:
-     *   startDate month فروردین (01)  →  endDate = currentYear + مرداد (05)
-     *   startDate month مرداد  (05)   →  endDate = currentYear + فروردین (01)
-     */
-    private fun edictFilters(pensionerId: String, startDateYYYYMM: String): List<ApiFilterDN> = buildList {
-        add(ApiFilterDN(FilterProperty.PENSIONER_ID, pensionerId, FilterOperator.EQUAL))
-        add(ApiFilterDN(FilterProperty.START_DATE, startDateYYYYMM + "01", FilterOperator.EQUAL))
-        computeEdictEndDate(startDateYYYYMM)?.let { endDate ->
-            add(ApiFilterDN(FilterProperty.END_DATE, endDate, FilterOperator.EQUAL))
-        }
-    }
+    private fun edictFilters(pensionerId: String, startDateYYYYMM: String): List<ApiFilterDN> = listOf(
+        ApiFilterDN(FilterProperty.PENSIONER_ID, pensionerId, FilterOperator.EQUAL),
+        ApiFilterDN(FilterProperty.START_DATE, startDateYYYYMM + "01", FilterOperator.EQUAL),
+    )
 
-    /** Returns فروردین of the current Jalali year as a YYYYMM string (e.g. "140501"). */
     private fun defaultEdictStartDate(): String =
         "${PersianDateFormatter.currentJalaliYear()}01"
-
-    private fun computeEdictEndDate(startDateYYYYMM: String): String? {
-        if (startDateYYYYMM.length < 6) return null
-        val currentYear = PersianDateFormatter.currentJalaliYear()
-        return when (startDateYYYYMM.drop(4).take(2)) {
-            "01" -> "${currentYear}0501"
-            "05" -> "${currentYear}0101"
-            else -> null
-        }
-    }
 }
