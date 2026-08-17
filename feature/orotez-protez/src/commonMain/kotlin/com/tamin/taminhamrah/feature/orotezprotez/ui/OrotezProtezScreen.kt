@@ -295,9 +295,9 @@ private fun OrotezProtezContent(
                 label = "OrotezProtezStepTransition",
                 modifier = Modifier.weight(1f),
             ) { step ->
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    when (step) {
-                        OrotezProtezStep.UserSelection -> if (state.isLoading) {
+                when (step) {
+                    OrotezProtezStep.UserSelection -> Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        if (state.isLoading) {
                             OrotezProtezUserStepShimmer()
                         } else {
                             OrotezProtezUserStep(
@@ -305,19 +305,19 @@ private fun OrotezProtezContent(
                                 onIntent = onIntent,
                             )
                         }
-
-                        OrotezProtezStep.InsuredInfo -> OrotezProtezInsuredInfoStep(
-                            state = state,
-                            onIntent = onIntent,
-                            onBack = onBackClicked,
-                        )
-
-                        OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
-                            state = state,
-                            onIntent = onIntent,
-                            onBack = onBackClicked,
-                        )
                     }
+
+                    OrotezProtezStep.InsuredInfo -> OrotezProtezInsuredInfoStep(
+                        state = state,
+                        onIntent = onIntent,
+                        onBack = onBackClicked,
+                    )
+
+                    OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
+                        state = state,
+                        onIntent = onIntent,
+                        onBack = onBackClicked,
+                    )
                 }
             }
         }
@@ -560,78 +560,81 @@ private fun OrotezProtezInsuredInfoStep(
     val colors = LocalTaminColors.current
     val detail = state.selectedInsuredDetail
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.page, vertical = Spacing.lg),
-    ) {
-        Text(
-            text = stringResource(Res.string.orotez_protez_step_info_title),
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
-            color = colors.textPrimary,
-        )
-        Spacer(Modifier.height(Spacing.xs))
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+        ) {
+            Text(
+                text = stringResource(Res.string.orotez_protez_step_info_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
+                color = colors.textPrimary,
+            )
+            Spacer(Modifier.height(Spacing.xs))
 
-        Text(
-            text = stringResource(Res.string.orotez_protez_step_info_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textMuted,
-        )
+            Text(
+                text = stringResource(Res.string.orotez_protez_step_info_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted,
+            )
 
-        Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.lg))
 
-        if (detail != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .taminSurface()
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
-            ) {
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_full_name),
-                    value = detail.fullName,
-                    numeric = false,
-                )
-                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_relation),
-                    value = detail.relation,
-                    numeric = false,
-                )
-                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_national_code),
-                    value = detail.nationalCode,
-                )
-                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_birth_certificate_number),
-                    value = detail.birthCertificateNumber,
-                )
-                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_issue_place),
-                    value = detail.issuePlace,
-                    numeric = false,
-                )
-                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_birth_date),
-                    value = detail.birthDateLabel,
-                )
-                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                DetailRow(
-                    label = stringResource(Res.string.orotez_protez_detail_booklet_valid_until),
-                    value = detail.bookletValidUntilLabel,
-                )
+            if (detail != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .taminSurface()
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
+                ) {
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_full_name),
+                        value = detail.fullName,
+                        numeric = false,
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_relation),
+                        value = detail.relation,
+                        numeric = false,
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_national_code),
+                        value = detail.nationalCode,
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_birth_certificate_number),
+                        value = detail.birthCertificateNumber,
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_issue_place),
+                        value = detail.issuePlace,
+                        numeric = false,
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_birth_date),
+                        value = detail.birthDateLabel,
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                    DetailRow(
+                        label = stringResource(Res.string.orotez_protez_detail_booklet_valid_until),
+                        value = detail.bookletValidUntilLabel,
+                    )
+                }
             }
         }
-
-        Spacer(Modifier.height(Spacing.xl))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.md)
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
@@ -682,81 +685,84 @@ private fun OrotezProtezDocumentsStep(
     val colors = LocalTaminColors.current
     var previewDocumentId by remember { mutableStateOf<String?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.page, vertical = Spacing.lg),
-    ) {
-        Text(
-            text = stringResource(Res.string.orotez_protez_documents_title),
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
-            color = colors.textPrimary,
-        )
-
-        Spacer(Modifier.height(Spacing.xs))
-
-        Text(
-            text = stringResource(Res.string.orotez_protez_documents_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textMuted,
-        )
-
-        Spacer(Modifier.height(Spacing.lg))
-
-        OrotezProtezDocumentChecklist.forEachIndexed { index, document ->
-            OrotezProtezDocumentCard(
-                document = document,
-                documentState = state.documents[document.id] ?: OrotezProtezDocumentState.Empty,
-                onClick = { onIntent(OrotezProtezIntent.OnDocumentCardClicked(document.id)) },
-                onPreviewRequested = { previewDocumentId = document.id },
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+        ) {
+            Text(
+                text = stringResource(Res.string.orotez_protez_documents_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
+                color = colors.textPrimary,
             )
-            if (index != OrotezProtezDocumentChecklist.lastIndex) {
-                Spacer(Modifier.height(Spacing.md))
+
+            Spacer(Modifier.height(Spacing.xs))
+
+            Text(
+                text = stringResource(Res.string.orotez_protez_documents_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted,
+            )
+
+            Spacer(Modifier.height(Spacing.lg))
+
+            OrotezProtezDocumentChecklist.forEachIndexed { index, document ->
+                OrotezProtezDocumentCard(
+                    document = document,
+                    documentState = state.documents[document.id] ?: OrotezProtezDocumentState.Empty,
+                    onClick = { onIntent(OrotezProtezIntent.OnDocumentCardClicked(document.id)) },
+                    onPreviewRequested = { previewDocumentId = document.id },
+                )
+                if (index != OrotezProtezDocumentChecklist.lastIndex) {
+                    Spacer(Modifier.height(Spacing.md))
+                }
+            }
+
+            state.documentPickError?.let { message ->
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.dangerText,
+                )
+            }
+
+            state.documentValidationError?.let { message ->
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.dangerText,
+                )
+            }
+
+            state.submitError?.let { message ->
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.dangerText,
+                )
+            }
+
+            if (state.hasSubmitted) {
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    text = state.submittedResultMessage
+                        ?: stringResource(Res.string.orotez_protez_submit_success_fallback),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.greenText,
+                )
             }
         }
-
-        state.documentPickError?.let { message ->
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.dangerText,
-            )
-        }
-
-        state.documentValidationError?.let { message ->
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.dangerText,
-            )
-        }
-
-        state.submitError?.let { message ->
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.dangerText,
-            )
-        }
-
-        if (state.hasSubmitted) {
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = state.submittedResultMessage
-                    ?: stringResource(Res.string.orotez_protez_submit_success_fallback),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.greenText,
-            )
-        }
-
-        Spacer(Modifier.height(Spacing.xl))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.md)
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
