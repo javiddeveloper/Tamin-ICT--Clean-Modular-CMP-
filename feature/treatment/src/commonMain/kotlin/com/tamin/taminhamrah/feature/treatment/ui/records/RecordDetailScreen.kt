@@ -335,15 +335,15 @@ private fun RecordDetailShimmerSkeleton() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
                 .raisedCard(CornerRadius.card)
+                .height(TreatmentDimens.detailPdfPlaceholderTall)
                 .shimmer(),
         )
         repeat(3) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .height(TreatmentDimens.detailPdfPlaceholderShort)
                     .raisedCard(CornerRadius.cardCompact)
                     .shimmer(),
             )

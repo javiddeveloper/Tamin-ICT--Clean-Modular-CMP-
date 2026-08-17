@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.MedicalRecordCard
@@ -620,6 +621,7 @@ private fun RecordsShimmerSkeleton() {
                     .fillMaxWidth()
                     .height(100.dp)
                     .raisedCard(CornerRadius.cardCompact)
+                    .height(TreatmentDimens.recordsFooterSpacer)
                     .shimmer(),
             )
         }
