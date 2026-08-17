@@ -12,12 +12,17 @@ import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import com.tamin.taminhamrah.ui.components.GlassIconTile
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -29,15 +34,16 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_help
 import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.orotez_protez_help_dialog_confirm
+import taminx.core.core_ui.orotez_protez_help_dialog_description
+import taminx.core.core_ui.orotez_protez_help_dialog_title
 import taminx.core.core_ui.orotez_protez_subtitle
 import taminx.core.core_ui.orotez_protez_title
 
 /**
- * The gradient hero bar: back on the right, a decorative help affordance on the left (no target
- * screen exists for it yet, so it is a no-op like the equivalent button in
- * [com.tamin.taminhamrah.feature.profile.ui.contactUs.components.ContactUsHeader]), and the
- * feature's own icon and subtitle underneath — the same icon already assigned to this service in
- * the main menu (see `ServiceCard.getIconForName("crutch")`).
+ * The gradient hero bar: back on the right, a help affordance on the left that shows the cost
+ * assistance guide dialog, and the feature's own icon and subtitle underneath — the same icon
+ * already assigned to this service in the main menu (see `ServiceCard.getIconForName("crutch")`).
  */
 @Composable
 internal fun OrotezProtezHeader(
@@ -48,6 +54,7 @@ internal fun OrotezProtezHeader(
     val gradient = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
+    var showHelpDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -72,7 +79,7 @@ internal fun OrotezProtezHeader(
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_help),
                     contentDescription = null,
-                    onClick = {},
+                    onClick = { showHelpDialog = true },
                     bordered = true,
                 )
             },
@@ -85,6 +92,23 @@ internal fun OrotezProtezHeader(
             text = stringResource(Res.string.orotez_protez_subtitle),
             style = MaterialTheme.typography.labelLarge,
             color = taminColors.textHeaderSubtitle,
+        )
+    }
+
+    if (showHelpDialog) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.orotez_protez_help_dialog_title),
+            description = stringResource(Res.string.orotez_protez_help_dialog_description),
+            icon = vectorResource(Res.drawable.ic_info),
+            onDismissRequest = { showHelpDialog = false },
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.orotez_protez_help_dialog_confirm),
+                    onClick = { showHelpDialog = false },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
         )
     }
 }

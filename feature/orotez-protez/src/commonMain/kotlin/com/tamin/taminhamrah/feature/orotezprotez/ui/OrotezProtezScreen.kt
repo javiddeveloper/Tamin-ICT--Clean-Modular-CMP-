@@ -61,6 +61,7 @@ import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.bytesOrNull
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.PickerRow
@@ -239,9 +240,7 @@ private fun OrotezProtezContent(
             .background(colors.bgPage),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize(),
         ) {
             OrotezProtezHeader(onBackClicked = onBackClicked)
 
@@ -262,24 +261,27 @@ private fun OrotezProtezContent(
                     }
                 },
                 label = "OrotezProtezStepTransition",
+                modifier = Modifier.weight(1f),
             ) { step ->
-                when (step) {
-                    OrotezProtezStep.UserSelection -> OrotezProtezUserStep(
-                        state = state,
-                        onIntent = onIntent,
-                    )
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    when (step) {
+                        OrotezProtezStep.UserSelection -> OrotezProtezUserStep(
+                            state = state,
+                            onIntent = onIntent,
+                        )
 
-                    OrotezProtezStep.InsuredInfo -> OrotezProtezInsuredInfoStep(
-                        state = state,
-                        onIntent = onIntent,
-                        onBack = onBackClicked,
-                    )
+                        OrotezProtezStep.InsuredInfo -> OrotezProtezInsuredInfoStep(
+                            state = state,
+                            onIntent = onIntent,
+                            onBack = onBackClicked,
+                        )
 
-                    OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
-                        state = state,
-                        onIntent = onIntent,
-                        onBack = onBackClicked,
-                    )
+                        OrotezProtezStep.Documents -> OrotezProtezDocumentsStep(
+                            state = state,
+                            onIntent = onIntent,
+                            onBack = onBackClicked,
+                        )
+                    }
                 }
             }
         }
@@ -456,6 +458,7 @@ private fun OrotezProtezUserStep(
             onClick = { onIntent(OrotezProtezIntent.OnNextStepClicked) },
             enabled = state.canGoNext,
             icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            iconPosition = IconPosition.Start,
         )
     }
 }
@@ -554,6 +557,7 @@ private fun OrotezProtezInsuredInfoStep(
                 onClick = { onIntent(OrotezProtezIntent.OnConfirmInsuredInfoClicked) },
                 enabled = detail != null,
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                iconPosition = IconPosition.Start,
             )
         }
     }

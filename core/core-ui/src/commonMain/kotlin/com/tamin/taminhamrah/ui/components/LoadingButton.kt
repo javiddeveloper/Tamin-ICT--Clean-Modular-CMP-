@@ -25,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
@@ -42,6 +44,8 @@ fun LoadingButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
+    /** Defaults to every existing caller's expectation: icon before text. */
+    iconPosition: IconPosition = IconPosition.End,
 ) {
     val taminColors = LocalTaminColors.current
     val backgroundBrush = if (enabled) {
@@ -51,6 +55,9 @@ fun LoadingButton(
     }
     val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
     val shadowColor = if (enabled) taminColors.shadowPrimary else Color.Transparent
+    val showIconBeforeText =
+        (LocalLayoutDirection.current == LayoutDirection.Ltr && iconPosition == IconPosition.Start) ||
+            (LocalLayoutDirection.current == LayoutDirection.Rtl && iconPosition == IconPosition.End)
 
     Box(
         modifier = modifier
@@ -76,29 +83,43 @@ fun LoadingButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally)
         ) {
-            Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
-                Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
-                            color = contentColor,
-                            strokeWidth = ButtonDimens.loadingIndicatorStroke
-                        )
-                    } else if (icon != null) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = contentColor,
-                            modifier = Modifier.size(IconSize.medium)
-                        )
-                    }
-                }
+            if (showIconBeforeText) {
+                LoadingButtonIcon(icon = icon, isLoading = isLoading, contentColor = contentColor)
             }
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleMedium,
                 color = contentColor
             )
+            if (!showIconBeforeText) {
+                LoadingButtonIcon(icon = icon, isLoading = isLoading, contentColor = contentColor)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadingButtonIcon(
+    icon: ImageVector?,
+    isLoading: Boolean,
+    contentColor: Color,
+) {
+    Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
+        Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
+                    color = contentColor,
+                    strokeWidth = ButtonDimens.loadingIndicatorStroke
+                )
+            } else if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(IconSize.medium)
+                )
+            }
         }
     }
 }

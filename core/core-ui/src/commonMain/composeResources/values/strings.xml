@@ -444,6 +444,9 @@
     <string name="error_unknown_fallback">Unknown Error</string>
     <string name="orotez_protez_title">کمک هزینه اروتز و پروتز</string>
     <string name="orotez_protez_subtitle">کمک‌هزینهٔ خرید وسایل اروتز و پروتز</string>
+    <string name="orotez_protez_help_dialog_title">راهنمای کمک هزینه</string>
+    <string name="orotez_protez_help_dialog_description">پس از خرید وسیله، نسخهٔ تجویز پزشک و فاکتور خرید را بارگذاری کنید. برای سمعک، نوار گوش و گارانتی نیز در بررسی پرونده مؤثر است.</string>
+    <string name="orotez_protez_help_dialog_confirm">متوجه شدم</string>
     <string name="orotez_protez_step_user">استفاده‌کننده</string>
     <string name="orotez_protez_step_info">اطلاعات</string>
     <string name="orotez_protez_step_documents">مدارک</string>
