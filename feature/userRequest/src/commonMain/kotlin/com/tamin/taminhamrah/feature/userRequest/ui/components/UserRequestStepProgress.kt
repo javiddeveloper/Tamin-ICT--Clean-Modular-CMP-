@@ -23,17 +23,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.model.userRequest.UserRequestProgressPhase
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
-import taminx.feature.userrequest.generated.resources.user_request_keyword_approved
-import taminx.feature.userrequest.generated.resources.user_request_keyword_closed
-import taminx.feature.userrequest.generated.resources.user_request_keyword_completed
-import taminx.feature.userrequest.generated.resources.user_request_keyword_defect
-import taminx.feature.userrequest.generated.resources.user_request_keyword_disapproval
-import taminx.feature.userrequest.generated.resources.user_request_keyword_error
 import taminx.feature.userrequest.generated.resources.user_request_step_branch_delivery
 import taminx.feature.userrequest.generated.resources.user_request_step_error_indicator
 import taminx.feature.userrequest.generated.resources.user_request_step_preprocessing
@@ -54,27 +51,19 @@ data class RequestStepItem(
 
 @Composable
 fun UserRequestStepProgress(
-    statusDesc: String,
+    phase: UserRequestProgressPhase,
     modifier: Modifier = Modifier,
 ) {
-    val kwApproved = stringResource(UserRequestRes.string.user_request_keyword_approved)
-    val kwClosed = stringResource(UserRequestRes.string.user_request_keyword_closed)
-    val kwCompleted = stringResource(UserRequestRes.string.user_request_keyword_completed)
-    val kwDisapproval = stringResource(UserRequestRes.string.user_request_keyword_disapproval)
-    val kwDefect = stringResource(UserRequestRes.string.user_request_keyword_defect)
-    val kwError = stringResource(UserRequestRes.string.user_request_keyword_error)
+    val colorScheme = MaterialTheme.colorScheme
 
-    val isCompleted = statusDesc.contains(kwApproved) || statusDesc.contains(kwClosed) || statusDesc.contains(kwCompleted)
-    val isError = statusDesc.contains(kwDisapproval) || statusDesc.contains(kwDefect) || statusDesc.contains(kwError)
-
-    val steps = if (isCompleted) {
+    val steps = if (phase == UserRequestProgressPhase.COMPLETED) {
         listOf(
             RequestStepItem(stringResource(UserRequestRes.string.user_request_step_preprocessing), StepState.COMPLETED),
             RequestStepItem(stringResource(UserRequestRes.string.user_request_step_branch_delivery), StepState.COMPLETED),
             RequestStepItem(stringResource(UserRequestRes.string.user_request_step_processing_complete), StepState.COMPLETED),
             RequestStepItem(stringResource(UserRequestRes.string.user_request_step_result), StepState.COMPLETED),
         )
-    } else if (isError) {
+    } else if (phase == UserRequestProgressPhase.ERROR) {
         listOf(
             RequestStepItem(stringResource(UserRequestRes.string.user_request_step_preprocessing), StepState.COMPLETED),
             RequestStepItem(stringResource(UserRequestRes.string.user_request_step_branch_delivery), StepState.COMPLETED),
@@ -90,20 +79,20 @@ fun UserRequestStepProgress(
         )
     }
 
-    val barColor = if (isCompleted) Color(0xFF03794A) else if (isError) Color(0xFFDC2626) else Color(0xFF1F4FA3)
+    val barColor = colorScheme.primary
 
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl),
             contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(3.dp)
+                    .height(Spacing.xxs + Thickness.border)
                     .background(barColor)
             )
 
@@ -118,7 +107,7 @@ fun UserRequestStepProgress(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.tabSelector))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -128,7 +117,7 @@ fun UserRequestStepProgress(
                 TaminText(
                     text = step.title,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        color = if (step.state == StepState.ERROR) Color(0xFFDC2626) else LocalTaminColors.current.textSecondary,
+                        color = if (step.state == StepState.ERROR) colorScheme.error else colorScheme.primary,
                         fontWeight = if (step.state == StepState.ERROR) FontWeight.Bold else FontWeight.Normal,
                         textAlign = TextAlign.Center
                     ),
@@ -144,7 +133,9 @@ private fun StepNode(
     step: RequestStepItem,
     barColor: Color,
 ) {
-    val nodeSize = 22.dp
+    val taminColors = LocalTaminColors.current
+    val colorScheme = MaterialTheme.colorScheme
+    val nodeSize = IconSize.banner
 
     when (step.state) {
         StepState.COMPLETED -> {
@@ -158,8 +149,8 @@ private fun StepNode(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(14.dp)
+                    tint = colorScheme.onPrimary,
+                    modifier = Modifier.size(Spacing.smd)
                 )
             }
         }
@@ -168,13 +159,13 @@ private fun StepNode(
                 modifier = Modifier
                     .size(nodeSize)
                     .clip(CircleShape)
-                    .background(Color.White)
-                    .border(3.dp, barColor, CircleShape),
+                    .background(taminColors.bgSurface)
+                    .border(Spacing.xxs + Thickness.border, barColor, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(Spacing.sm)
                         .clip(CircleShape)
                         .background(barColor)
                 )
@@ -185,13 +176,13 @@ private fun StepNode(
                 modifier = Modifier
                     .size(nodeSize)
                     .clip(CircleShape)
-                    .background(Color(0xFFDC2626)),
+                    .background(colorScheme.error),
                 contentAlignment = Alignment.Center
             ) {
                 TaminText(
                     text = stringResource(UserRequestRes.string.user_request_step_error_indicator),
                     style = MaterialTheme.typography.labelMedium.copy(
-                        color = Color.White,
+                        color = colorScheme.onError,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -202,8 +193,8 @@ private fun StepNode(
                 modifier = Modifier
                     .size(nodeSize)
                     .clip(CircleShape)
-                    .background(Color.White)
-                    .border(2.dp, Color(0xFFCBD5E1), CircleShape)
+                    .background(taminColors.bgSurface)
+                    .border(Thickness.medium, taminColors.outerBorder, CircleShape)
             )
         }
     }
@@ -213,7 +204,7 @@ private fun StepNode(
 @Composable
 private fun UserRequestStepProgressPreview() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
-        UserRequestStepProgress(statusDesc = "نقص مدارک ارسالی")
+        UserRequestStepProgress(phase = UserRequestProgressPhase.ERROR)
     }
 }
 

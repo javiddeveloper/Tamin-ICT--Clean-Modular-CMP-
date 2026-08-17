@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.userRequest.ui.components.RequestErrorsBottomSheet
@@ -37,11 +36,14 @@ import com.tamin.taminhamrah.feature.userRequest.ui.contract.RequestStatusTab
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsUiState
+import com.tamin.taminhamrah.model.userRequest.UserRequestTabCategory
+import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -53,15 +55,6 @@ import taminx.feature.userrequest.generated.resources.user_request_default_guide
 import taminx.feature.userrequest.generated.resources.user_request_demo_details_dialog
 import taminx.feature.userrequest.generated.resources.user_request_empty_list
 import taminx.feature.userrequest.generated.resources.user_request_header_subtitle
-import taminx.feature.userrequest.generated.resources.user_request_keyword_action
-import taminx.feature.userrequest.generated.resources.user_request_keyword_approved
-import taminx.feature.userrequest.generated.resources.user_request_keyword_closed
-import taminx.feature.userrequest.generated.resources.user_request_keyword_completed
-import taminx.feature.userrequest.generated.resources.user_request_keyword_defect
-import taminx.feature.userrequest.generated.resources.user_request_keyword_disapproval
-import taminx.feature.userrequest.generated.resources.user_request_keyword_in_progress
-import taminx.feature.userrequest.generated.resources.user_request_keyword_pregnancy
-import taminx.feature.userrequest.generated.resources.user_request_keyword_review
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -116,32 +109,17 @@ fun UserRequestsContent(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val kwInProgress = stringResource(UserRequestRes.string.user_request_keyword_in_progress)
-    val kwReview = stringResource(UserRequestRes.string.user_request_keyword_review)
-    val kwDefect = stringResource(UserRequestRes.string.user_request_keyword_defect)
-    val kwDisapproval = stringResource(UserRequestRes.string.user_request_keyword_disapproval)
-    val kwAction = stringResource(UserRequestRes.string.user_request_keyword_action)
-    val kwApproved = stringResource(UserRequestRes.string.user_request_keyword_approved)
-    val kwClosed = stringResource(UserRequestRes.string.user_request_keyword_closed)
-    val kwCompleted = stringResource(UserRequestRes.string.user_request_keyword_completed)
-    val kwPregnancy = stringResource(UserRequestRes.string.user_request_keyword_pregnancy)
-
-    val allCount = state.requests.size
-    val inProgressCount = state.requests.count {
-        it.statusDesc.contains(kwInProgress) || it.statusDesc.contains(kwReview)
-    }
-    val actionRequiredCount = state.requests.count {
-        it.statusDesc.contains(kwDefect) || it.statusDesc.contains(kwDisapproval) || it.statusDesc.contains(kwAction)
-    }
-    val completedCount = state.requests.count {
-        it.statusDesc.contains(kwApproved) || it.statusDesc.contains(kwClosed) || it.statusDesc.contains(kwCompleted)
-    }
-
     val counts = mapOf(
-        RequestStatusTab.ALL to allCount,
-        RequestStatusTab.IN_PROGRESS to inProgressCount,
-        RequestStatusTab.ACTION_REQUIRED to actionRequiredCount,
-        RequestStatusTab.COMPLETED to completedCount,
+        RequestStatusTab.ALL to state.requests.size,
+        RequestStatusTab.IN_PROGRESS to state.requests.count {
+            it.tabCategory == UserRequestTabCategory.IN_PROGRESS
+        },
+        RequestStatusTab.ACTION_REQUIRED to state.requests.count {
+            it.tabCategory == UserRequestTabCategory.ACTION_REQUIRED
+        },
+        RequestStatusTab.COMPLETED to state.requests.count {
+            it.tabCategory == UserRequestTabCategory.COMPLETED
+        },
     )
 
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
@@ -157,8 +135,8 @@ fun UserRequestsContent(
                 background = profileGradientBrush,
                 bottomPadding = Spacing.xl,
                 shape = RoundedCornerShape(
-                    bottomStart = 40.dp,
-                    bottomEnd = 40.dp
+                    bottomStart = CornerRadius.x3l,
+                    bottomEnd = CornerRadius.x3l
                 ),
                 navigationIcon = {
                     TaminTopAppBarButton(
@@ -236,7 +214,7 @@ fun UserRequestsContent(
                             .height(200.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFF1F4FA3))
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
             } else if (state.filteredRequests.isEmpty()) {
@@ -260,7 +238,7 @@ fun UserRequestsContent(
                     UserRequestCard(
                         request = request,
                         onViewDetails = {
-                            if (request.title.contains(kwPregnancy)) {
+                            if (request.requestTypeId == UserRequestTypeIds.PREGNANCY) {
                                 onIntent(UserRequestsIntent.ShowInfoDialog(demoDetailsMsg))
                             } else {
                                 onIntent(UserRequestsIntent.ViewDetails(request))

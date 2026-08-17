@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.userRequest.RequestErrorPR
 import com.tamin.taminhamrah.model.userRequest.SmartGuidePR
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
+import com.tamin.taminhamrah.model.userRequest.UserRequestTabCategory
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 
 import org.jetbrains.compose.resources.StringResource
@@ -20,39 +21,10 @@ enum class RequestStatusTab(val labelRes: StringResource) {
     COMPLETED(Res.string.user_request_tab_completed),
 }
 
-/**
- * Maps server-returned requestCode integer values to semantic processing stages.
- * Source: MyRequestListResponse.getColor() in my-tamin-droid (legacy Android app).
- */
-enum class UserRequestStatus(val code: Int) {
-    PRE_PROCESSING(2),          // پیش پردازش      — step 1 active (blue)
-    SHOW_ERRORS(6),             // نمایش خطاها     — early stage, errors visible
-    BRANCH_DELIVERED(9),        // تحویل شعبه      — step 2 active
-    AWAITING_COMPLETION(14),    // در انتظار تکمیل — action required
-    PROCESSING_COMPLETE(16),    // تکمیل رسیدگی    — step 3 active
-    FINAL_APPROVED(18),         // تایید نهایی     — all steps done ✅ (green)
-    DISAPPROVED(19),            // عدم تایید       — step 4 error ❌  (red)
-    DOCUMENT_DEFECT(21),        // نقص مدارک       — step 4 error ❌  (red)
-    ARTICLE16_APPROVED(2602);   // ماده ۱۶ تایید   — all steps done ✅
-
-    companion object {
-        private val ACTION_REQUIRED_CODES = setOf(14, 19, 21)
-        private val COMPLETED_CODES       = setOf(16, 18, 2602)
-
-        /** Resolves a raw requestCode string to a [UserRequestStatus], or null if unrecognised. */
-        fun fromCode(statusCode: String): UserRequestStatus? =
-            statusCode.toIntOrNull()?.let { c -> entries.find { it.code == c } }
-
-        /** Maps a requestCode to its [RequestStatusTab] category for tab filtering and counts. */
-        fun categorize(statusCode: String): RequestStatusTab {
-            val code = statusCode.toIntOrNull() ?: return RequestStatusTab.IN_PROGRESS
-            return when (code) {
-                in COMPLETED_CODES       -> RequestStatusTab.COMPLETED
-                in ACTION_REQUIRED_CODES -> RequestStatusTab.ACTION_REQUIRED
-                else                     -> RequestStatusTab.IN_PROGRESS
-            }
-        }
-    }
+fun UserRequestTabCategory.toStatusTab(): RequestStatusTab = when (this) {
+    UserRequestTabCategory.IN_PROGRESS -> RequestStatusTab.IN_PROGRESS
+    UserRequestTabCategory.ACTION_REQUIRED -> RequestStatusTab.ACTION_REQUIRED
+    UserRequestTabCategory.COMPLETED -> RequestStatusTab.COMPLETED
 }
 
 
@@ -81,7 +53,7 @@ data class UserRequestsUiState(
     val filteredRequests: List<UserRequestPR>
         get() = when (selectedTab) {
             RequestStatusTab.ALL -> requests
-            else -> requests.filter { UserRequestStatus.categorize(it.statusCode) == selectedTab }
+            else -> requests.filter { it.tabCategory.toStatusTab() == selectedTab }
         }
 
     sealed class PartialState {
