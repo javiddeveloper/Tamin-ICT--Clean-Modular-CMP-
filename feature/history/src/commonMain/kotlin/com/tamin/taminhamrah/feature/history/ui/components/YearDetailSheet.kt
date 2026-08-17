@@ -17,6 +17,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -32,6 +35,7 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.history.Res
@@ -69,10 +73,25 @@ fun YearDetailSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
+    /*
+     * Closing runs the hide animation to its end and only then reports the dismissal.
+     *
+     * The sheet lives in the tree because the state holds a selected year, so telling the state
+     * first would take the sheet out from under its own animation and it would disappear on the
+     * spot. Every way out — the scrim, the drag, the system back — goes through here, so they all
+     * slide out the same way.
+     */
+    val dismiss: () -> Unit = {
+        scope.launch { sheetState.hide() }
+            .invokeOnCompletion { if (!sheetState.isVisible) onDismiss() }
+    }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = dismiss,
+        sheetState = sheetState,
         containerColor = colors.bgSurface,
     ) {
         Column(
@@ -219,9 +238,29 @@ private fun MonthCell(
     }
 }
 
+/**
+ * One workshop's year: who it was, and what it paid month by month.
+ *
+ * The wage rows come off the wire as `hismonN`/`hiswageN` pairs, and the model keeps the wire's
+ * names: `WageDetailPR.month` carries the **days** worked, and the month itself is the position in
+ * the list. Read that way here rather than renamed, so the field the service sends and the field
+ * the app reads stay the same field.
+ */
 @Composable
 private fun WorkshopRow(workshop: DastmozdInfoItemPR) {
     val colors = LocalTaminColors.current
+
+    // Only the months this workshop actually reported. A year at one employer is a handful of
+    // months, and twelve rows of zero would bury them. Kept in a remember so scrolling the sheet
+    // does not re-filter twelve entries per workshop per frame.
+    val activeMonths = remember(workshop) {
+        workshop.wageDetails.mapIndexedNotNull { index, detail ->
+            val days = detail.month.toIntOrNull() ?: 0
+            val wage = detail.wage.toLongOrNull() ?: 0L
+            if (days == 0 && wage == 0L) null else WorkedMonth(index, days, detail.wage)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -252,6 +291,46 @@ private fun WorkshopRow(workshop: DastmozdInfoItemPR) {
                 color = colors.textMuted,
             )
         }
+
+        activeMonths.forEach { worked ->
+            WorkedMonthRow(worked = worked)
+        }
+    }
+}
+
+/** A month this workshop reported: which one, how many days, and what it paid. */
+private data class WorkedMonth(
+    val monthIndex: Int,
+    val days: Int,
+    val wage: String,
+)
+
+@Composable
+private fun WorkedMonthRow(worked: WorkedMonth) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Text(
+            text = PersianDateFormatter.monthNames.getOrElse(worked.monthIndex) { "" },
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+        )
+        Text(
+            text = stringResource(
+                Res.string.history_combined_year_days,
+                worked.days.toString().toPersianDigits(),
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textMuted,
+        )
+        Box(modifier = Modifier.weight(1f))
+        NumericText(
+            text = worked.wage.toRialAmount().toPersianDigits(),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textPrimary,
+        )
     }
 }
 

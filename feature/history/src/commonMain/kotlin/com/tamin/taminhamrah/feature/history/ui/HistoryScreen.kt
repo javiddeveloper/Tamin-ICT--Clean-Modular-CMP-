@@ -95,9 +95,13 @@ private val DecorCircleY = (-150).dp
 /** What a year card measures, so the skeleton stands in for one without the list jumping. */
 private val YearCardHeight = 76.dp
 
+/**
+ * [onBackClicked] deliberately has no default: it is what «بستن» on a failed load and the app bar's
+ * chevron both lead to, and a defaulted no-op here is a screen the user cannot leave.
+ */
 @Composable
 fun HistoryScreen(
-    onBackClicked: () -> Unit = {},
+    onBackClicked: () -> Unit,
     viewModel: HistoryViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
