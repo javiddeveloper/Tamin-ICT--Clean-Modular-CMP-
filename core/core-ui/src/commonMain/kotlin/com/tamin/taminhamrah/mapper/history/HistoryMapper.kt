@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.history.HistoryJobInfoItemPR
 import com.tamin.taminhamrah.model.history.HistoryJobInfoPR
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
+import com.tamin.taminhamrah.model.history.UserInfoDN
+import com.tamin.taminhamrah.model.history.UserInfoPR
 import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
 import com.tamin.taminhamrah.model.history.TalfighInfoPR
 import com.tamin.taminhamrah.model.history.WageDetailDN
@@ -79,6 +81,35 @@ fun DastmozdInfoDN.toPresentation(): DastmozdInfoPR {
     return DastmozdInfoPR(
         list = list?.toPresentation() ?: emptyList(),
         total = total ?: 0
+    )
+}
+
+fun UserInfoDN.toPresentation(): UserInfoPR {
+    return UserInfoPR(
+        serial1 = serial1 ?: "",
+        militaryServiceCode = militaryServiceCode ?: "",
+        fatherName = fatherName ?: "",
+        lastName = lastName ?: "",
+        serial2 = serial2 ?: "",
+        creationTime = creationTime ?: 0L,
+        lastModificationTime = lastModificationTime ?: 0L,
+        cityCode = cityCode ?: "",
+        socialSecurityNumber = socialSecurityNumber ?: "",
+        lastModifiedBy = lastModifiedBy ?: "",
+        issueplaceName = issueplaceName ?: "",
+        birthDate = birthDate ?: "",
+        firstName = firstName ?: "",
+        insuranceNumber = insuranceNumber ?: "",
+        genderCode = genderCode ?: "",
+        nationalID = nationalID ?: "",
+        marriageCode = marriageCode ?: "",
+        createdBy = createdBy ?: "",
+        identityNumber = identityNumber ?: "",
+        countryCode = countryCode ?: "",
+        id = id ?: "",
+        birthDateTimestamp = birthDateTimestamp ?: 0L,
+        issueplace = issueplace ?: "",
+        nationCode = nationCode ?: ""
     )
 }
 

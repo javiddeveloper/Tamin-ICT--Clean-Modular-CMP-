@@ -1,10 +1,12 @@
 package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.util.ApiTestUtils
+import com.tamin.taminhamrah.util.HistoryTestData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class HistoryApiServicesTest : BaseApiTest() {
 
@@ -129,147 +131,45 @@ class HistoryApiServicesTest : BaseApiTest() {
         assertEquals(0, response.data?.total)
         assertEquals(0, response.data?.list?.size)
     }
-}
 
-object HistoryTestData {
-    val dastmozdInfosSuccess = """
-        {
-            "list": [
-                {
-                    "hismon1": null,
-                    "hismon2": null,
-                    "hismon3": null,
-                    "hismon4": null,
-                    "hismon5": null,
-                    "hismon6": null,
-                    "hismon7": null,
-                    "hismon8": null,
-                    "hismon9": null,
-                    "hismon10": null,
-                    "hismon11": null,
-                    "hismon12": null,
-                    "hiswage1": "1000",
-                    "hiswage2": null,
-                    "hiswage3": null,
-                    "hiswage4": null,
-                    "hiswage5": null,
-                    "hiswage6": null,
-                    "hiswage7": null,
-                    "hiswage8": null,
-                    "hiswage9": null,
-                    "hiswage10": null,
-                    "hiswage11": null,
-                    "hiswage12": null,
-                    "hisyear": "1402",
-                    "id": 1,
-                    "risufname": null,
-                    "risubirthdate": null,
-                    "risuidserial2": null,
-                    "risuidserial1": null,
-                    "rwshname": null,
-                    "expcitycode": null,
-                    "brhcode": null,
-                    "risuidno": null,
-                    "risudname": null,
-                    "risuid": "123456",
-                    "risulname": null,
-                    "risunatcode": null,
-                    "brhname": null,
-                    "historytypedesc": null,
-                    "rwshid": null
-                }
-            ],
-            "total": 1
-        }
-    """.trimIndent()
+    @Test
+    fun `getUserInfos should return successful response with data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = HistoryTestData.userInfoSuccess
+        )
 
-    val dastmozdInfosEmpty = """
-        {
-            "list": [],
-            "total": 0
-        }
-    """.trimIndent()
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createHistoryApiServices()
 
-    val talfighInfosSuccess = """
-        {
-            "list": [
-                {
-                    "id": 1,
-                    "hisMonth1": "30",
-                    "hisMonth2": null,
-                    "hisMonth3": null,
-                    "hisMonth4": null,
-                    "hisMonth5": null,
-                    "hisMonth6": null,
-                    "hisMonth7": null,
-                    "hisMonth8": null,
-                    "hisMonth9": null,
-                    "hisMonth10": null,
-                    "hisMonth11": null,
-                    "hisMonth12": null,
-                    "hisYear": "1402",
-                    "historyDays": null,
-                    "historyMonths": null,
-                    "historyYears": 10,
-                    "risuid": null,
-                    "sumHistoryYears": null,
-                    "sumYear": null
-                },
-                {
-                    "id": 2,
-                    "hisMonth1": "31",
-                    "hisMonth2": null,
-                    "hisMonth3": null,
-                    "hisMonth4": null,
-                    "hisMonth5": null,
-                    "hisMonth6": null,
-                    "hisMonth7": null,
-                    "hisMonth8": null,
-                    "hisMonth9": null,
-                    "hisMonth10": null,
-                    "hisMonth11": null,
-                    "hisMonth12": null,
-                    "hisYear": "1401",
-                    "historyDays": null,
-                    "historyMonths": null,
-                    "historyYears": 5,
-                    "risuid": null,
-                    "sumHistoryYears": null,
-                    "sumYear": null
-                }
-            ],
-            "total": 2
-        }
-    """.trimIndent()
+        val response = apiService.getUserInfos()
 
-    val talfighInfosEmpty = """
-        {
-            "list": [],
-            "total": 0
-        }
-    """.trimIndent()
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNotNull(response.data)
+        assertEquals("عادل", response.data?.firstName)
+        assertEquals("حسين پناهي", response.data?.lastName)
+        assertEquals("2062144681", response.data?.socialSecurityNumber)
+        assertEquals("0082984639", response.data?.insuranceNumber)
+        assertEquals("1361/10/01", response.data?.birthDate)
+        assertEquals("5589743451", response.data?.nationalID)
+        assertEquals("2782294052", response.data?.id)
+        assertNull(response.data?.militaryServiceCode)
+        assertNull(response.data?.marriageCode)
+    }
 
-    val historyJobInfosSuccess = """
-        {
-            "list": [
-                {
-                    "risuid": "0081631829",
-                    "rwshName": "شرکت صنایع دما بخار مشهد",
-                    "brhcode": "6400",
-                    "id": 1,
-                    "jobDesc": "کارمند اداری ۱",
-                    "startDate": "139810",
-                    "rwshId": "6393610019"
-                }
-            ],
-            "total": 1
-        }
-    """.trimIndent()
+    @Test
+    fun `sendToInstitution should return successful response with null data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = HistoryTestData.sendToInstitutionSuccess
+        )
 
-    val historyJobInfosEmpty = """
-        {
-            "list": [],
-            "total": 0
-        }
-    """.trimIndent()
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createHistoryApiServices()
+
+        val response = apiService.sendToInstitution(allHistorySelected = true, historyAndWageSelected = true, combineHistorySelected = true)
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
+    }
 }
