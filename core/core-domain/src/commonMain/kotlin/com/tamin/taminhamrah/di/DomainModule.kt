@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.di
 
+
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.AuthAuthorizeUrlUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
@@ -318,5 +319,15 @@ val domainModule = module {
     factoryOf(::SyncDrugAllergiesUseCase)
     factoryOf(::GetActFrequenciesUseCase)
     factoryOf(::GetContactUsUseCase)
+
+    // Add Dependent UseCases
+    factoryOf(::GetDependentInfoUseCase)
+    factoryOf(::GetActiveBranchesUseCase)
+    factoryOf(::GetFamilyRelationshipsUseCase)
+    factoryOf(::GetFamilyRelationshipsFromProxyUseCase)
+    factoryOf(::InquiryRegistryUseCase)
+    factoryOf(::InquiryEducationCodeUseCase)
+    factoryOf(::UploadDependentImageUseCase)
+    factoryOf(::AddNewDependentUseCase)
 }
 
