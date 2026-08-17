@@ -255,3 +255,57 @@ val TaminBankSepahChipSurface = Color(0xFF2E3192).copy(alpha = 0.10f)
 val TaminBankUnknownSurfaceTop = Color(0xFFECEFF7)
 val TaminBankUnknownSurfaceBottom = Color(0xFFC5CFE5)
 val TaminBankUnknownInk = TaminNavy900
+
+/* ---- Treatment costs ------------------------------------------------------------------------ */
+
+/**
+ * The refund card's own gradients, from the design.
+ *
+ * Fixed in both themes like the bank palettes: the card is a document, and its accent identifies
+ * the service rather than following the app's light/dark surface.
+ */
+val TaminCostsAccentTop = Color(0xFF2FB9BC)
+val TaminCostsAccentBottom = Color(0xFF0E7C82)
+
+/** The «عملیات» button is green, not the card's teal. */
+val TaminCostsOperationsStart = Color(0xFF16C26B)
+val TaminCostsOperationsEnd = Color(0xFF03794A)
+
+/**
+ * Ink on the operations button. Named rather than `Color.White` at the call site so the button's
+ * two colors are declared together, and fixed in both themes because its background is.
+ */
+val TaminCostsOperationsInk = Color(0xFFFFFFFF)
+
+/* ---- Insurance card -------------------------------------------------------------------------- */
+
+/**
+ * Ink and translucency layers on the insured-person card.
+ *
+ * Fixed rather than theme-varying: the card carries its own dark teal gradient in both themes, so
+ * everything on it is a wash of white at a set strength rather than a surface colour.
+ */
+val TaminInsuranceCardInk = Color(0xFFFFFFFF)
+val TaminInsuranceCardInkMuted = TaminInsuranceCardInk.copy(alpha = 0.75f)
+
+/** The translucent chips and pills the card sets on its own gradient. */
+val TaminInsuranceCardChipBg = TaminInsuranceCardInk.copy(alpha = 0.13f)
+val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
+
+/* ---- Ink on accent surfaces ------------------------------------------------------------------ */
+
+/**
+ * White at the strengths the design uses on a filled or gradient surface — selected chips, the hub
+ * header, the costs hero, timeline actions.
+ *
+ * Named rather than `Color.White.copy(alpha = …)` at each call site so the set is countable: every
+ * value here is one the design actually specifies, and a new one has to be added deliberately.
+ */
+val TaminOnAccentInk = Color(0xFFFFFFFF)
+val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
+val TaminOnAccentInkMuted = TaminOnAccentInk.copy(alpha = 0.80f)
+
+/** Translucent fills and hairlines the same surfaces set on themselves. */
+val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
+val TaminOnAccentFillStrong = TaminOnAccentInk.copy(alpha = 0.16f)
+val TaminOnAccentBorder = TaminOnAccentInk.copy(alpha = 0.18f)
