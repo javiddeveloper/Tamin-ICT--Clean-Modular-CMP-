@@ -8,9 +8,9 @@ import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
 import com.tamin.taminhamrah.feature.agent.service.base.formatAmount
 import com.tamin.taminhamrah.feature.agent.service.base.getFilters
-import com.tamin.taminhamrah.feature.agent.service.base.orDash
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
+import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 
 /**

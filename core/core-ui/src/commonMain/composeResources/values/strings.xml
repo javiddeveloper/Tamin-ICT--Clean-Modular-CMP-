@@ -101,6 +101,20 @@
     <string name="profile_personal_inbox">صندوق شخصی</string>
     <string name="profile_security_settings">امنیت و تنظیمات</string>
     <string name="profile_security">امنیت</string>
+    <string name="security_account_title">امنیت حساب</string>
+    <string name="security_change_password">تغییر رمز عبور</string>
+    <string name="security_2fa">ورود دومرحله‌ای</string>
+    <string name="security_fingerprint">ورود با اثر انگشت</string>
+    <string name="security_pattern">ورود با الگو</string>
+    <string name="biometric_prompt_title">احراز هویت</string>
+    <string name="biometric_prompt_subtitle">لطفاً اثر انگشت خود را تأیید کنید</string>
+    <string name="biometric_gate_title">ورود با اثر انگشت</string>
+    <string name="biometric_gate_description">برای دسترسی به اپلیکیشن، هویت خود را با اثر انگشت تأیید کنید</string>
+    <string name="biometric_enable_prompt_title">فعال‌سازی ورود با اثر انگشت</string>
+    <string name="biometric_enable_prompt_description">می‌خواهید برای ورودهای بعدی از اثر انگشت استفاده کنید؟</string>
+    <string name="biometric_gate_unavailable_title">اثر انگشت دیگر در دسترس نیست</string>
+    <string name="biometric_gate_unavailable_description">به نظر می‌رسد اثر انگشت روی این دستگاه دیگر ثبت نشده است. می‌توانید ورود با اثر انگشت را غیرفعال کرده و به روش دیگری وارد شوید.</string>
+    <string name="biometric_gate_disable_action">غیرفعال‌سازی و ادامه</string>
     <string name="profile_settings">تنظیمات</string>
     <string name="profile_support_section">پشتیبانی</string>
     <string name="profile_support">پشتیبانی</string>
@@ -250,8 +264,47 @@
     <string name="costs_other_services_payment">پرداختی سایر خدمات پزشکی</string>
     <string name="costs_view_certificate">مشاهده گواهی</string>
     <string name="costs_send_to_inbox">ارسال به صندوق شخصی</string>
+    <string name="costs_action_operations">عملیات</string>
+    <string name="costs_official_doc_subtitle">گواهی رسمی</string>
     <!-- The previous app's confirmation, kept word for word. -->
+
     <string name="costs_sent_to_inbox">گواهی بازپرداخت هزینه های درمانی به صندوق شخصی شما ارسال شد</string>
+
+    <!-- Medical confirmations -->
+    <string name="confirmations_hero_subtitle">تاییدیه‌های دریافتی از مراجع پزشکی</string>
+    <string name="confirmations_empty">تاییدیه‌ای برای نمایش وجود ندارد.</string>
+    <string name="confirmations_saved_title">تصویر تاییدیه ذخیره شد</string>
+    <string name="confirmations_saved_body">فایل تاییدیهٔ مرجع پزشکی در صندوق شخصی شما قابل مشاهده است</string>
+    <string name="confirmations_saved_acknowledge">متوجه شدم</string>
+    <string name="confirmations_filter_all">همه</string>
+    <string name="confirmations_filter_approved">تائید شده</string>
+    <string name="confirmations_filter_pending">در انتظار تایید</string>
+    <string name="confirmations_filter_empty">تاییدیه‌ای با این فیلتر یافت نشد.</string>
+    <!-- Not a filter chip: only the fallback label when a rejected row arrives with no wording. -->
+    <string name="confirmations_status_rejected">تایید نشده</string>
+    <string name="confirmations_medical_authority_label">مرجع پزشکی</string>
+    <string name="confirmations_outpatient_rest_label">استراحت سرپایی</string>
+    <string name="confirmations_unit_day">روز</string>
+    <string name="confirmations_branch_approval">تائید شعبه</string>
+    <string name="confirmations_inpatient_days_count">تعداد روز بستری</string>
+    <string name="confirmations_unapproved_period">دورهٔ تایید نشده</string>
+    <!-- The service sends the unapproved period as two separate dates; this joins them. -->
+    <string name="confirmations_unapproved_period_range">%1$s تا %2$s</string>
+    <string name="confirmations_download_image_action">دریافت تصویر تاییدیه</string>
+    <string name="confirmations_default_support_type">غرامت دستمزد</string>
+    <string name="confirmations_default_center">شورای پزشکی تهران</string>
+    <!-- The service sends the bare branch name ("بيست تهران"); the card adds the word. -->
+    <string name="confirmations_default_branch">بیست تهران</string>
+    <string name="confirmations_branch_named">شعبهٔ %1$s</string>
+    <string name="confirmations_details_title">جزئیات تاییدیه</string>
+    <string name="confirmations_inpatient_rest_header">استراحت بستری</string>
+    <string name="confirmations_review_status_header">وضعیت رسیدگی</string>
+    <string name="confirmations_opinion_header">شرح رای مرجع پزشکی</string>
+    <string name="confirmations_branch_reviewer_label">شعبۀ رسیدگی‌کننده</string>
+    <string name="confirmations_branch_status_label">وضعیت شعبه</string>
+    <string name="confirmations_start_date_label">تاریخ شروع</string>
+    <string name="confirmations_end_date_label">تاریخ پایان</string>
+    <string name="confirmations_action_details">جزئیات</string>
 
     <!-- Surfaced by the treatment view models -->
     <string name="error_identity_not_found">اطلاعات کاربری یافت نشد.</string>

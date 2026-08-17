@@ -194,6 +194,20 @@ internal class TreatmentRepositoryImpl(
     override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> = flow {
         emit(treatmentRemoteDataSource.sendToInboxTreatmentCosts(repId))
     }
+
+    override suspend fun getMedicalConfirmations(): Flow<List<MedicalConfirmationDN>> = flow {
+        val result = treatmentRemoteDataSource.getMedicalConfirmations(treatmentQuery())
+        val remote = result?.list?.map { it.toDomain() } ?: emptyList()
+        emit(remote)
+    }
+
+    override suspend fun getMedicalConfirmationPdf(repId: String): Flow<PdfDownloadDN> = flow {
+        emit(treatmentRemoteDataSource.getMedicalConfirmationPdf(repId).toDomain())
+    }
+
+    override suspend fun sendToInboxMedicalConfirmation(repId: String): Flow<String> = flow {
+        emit(treatmentRemoteDataSource.sendToInboxMedicalConfirmation(repId))
+    }
 }
 
 /**

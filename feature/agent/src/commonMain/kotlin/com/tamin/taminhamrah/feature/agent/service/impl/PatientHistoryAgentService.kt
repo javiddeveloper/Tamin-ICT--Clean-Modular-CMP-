@@ -5,10 +5,10 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.service.base.orDash
 import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.health.PatientGeneralDN
+import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import kotlinx.coroutines.flow.firstOrNull
