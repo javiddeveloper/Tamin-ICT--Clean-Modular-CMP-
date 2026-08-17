@@ -62,6 +62,7 @@ fun TreatmentScreen(
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenPrescriptions: (String) -> Unit = {},
     onOpenMiscClaims: () -> Unit = {},
+    onOpenApprovals: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -86,6 +87,7 @@ fun TreatmentScreen(
             onIntent = viewModel::sendIntent,
             onOpenHealthProfile = onOpenHealthProfile,
             onOpenMiscClaims = onOpenMiscClaims,
+            onOpenApprovals = onOpenApprovals,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
@@ -94,6 +96,7 @@ fun TreatmentScreen(
         )
     }
 }
+
 
 @Composable
 fun HandleTreatmentEvents(
@@ -133,6 +136,7 @@ fun TreatmentContent(
     modifier: Modifier = Modifier,
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
     onOpenMiscClaims: () -> Unit = {},
+    onOpenApprovals: () -> Unit = {},
 ) {
     // Keyed on the data the cards are built from, not on the whole state: selecting a patient
     // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
@@ -158,19 +162,13 @@ fun TreatmentContent(
         onIntent = onIntent,
     )
 
-    // Folds the header from the body's drag (before the body scrolls), snapping on release. Read
-    // only inside the card morph's layout/draw lambdas, so the fold never recomposes the hub.
     val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
-    // =================================================================================
-    // MEMOIZED CALLBACK LAMBDAS
-    // Hoisted and wrapped in `remember` so child composables (TreatmentQuickAccess, TreatmentCategories)
-    // receive stable function references and completely skip recomposition when patient cards are swiped.
-    // =================================================================================
     val mainUserNationalCode = state.mainUserNationalCode
     val currentOnOpenHealthProfile by rememberUpdatedState(onOpenHealthProfile)
     val currentOnOpenMiscClaims by rememberUpdatedState(onOpenMiscClaims)
+    val currentOnOpenApprovals by rememberUpdatedState(onOpenApprovals)
 
     val handleOpenMedicalRecords = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) } }
     val handleOpenHealthProfile = remember(mainUserNationalCode) {
@@ -178,6 +176,7 @@ fun TreatmentContent(
     }
     val handleOpenPrescriptions = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) } }
     val handleOpenMiscClaims = remember { { currentOnOpenMiscClaims() } }
+    val handleOpenApprovals = remember { { currentOnOpenApprovals() } }
     val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
 
     Box(
@@ -188,12 +187,9 @@ fun TreatmentContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // The body's drag first folds the header, then scrolls the sections, and only what
-                // neither wanted reaches the rubber band — so the fold always wins over the bounce.
                 .nestedScroll(collapse.nestedScrollConnection)
                 .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
-            // Stands in for the floating header, which is measured rather than fixed.
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentQuickAccess(
@@ -205,6 +201,7 @@ fun TreatmentContent(
             TreatmentCategories(
                 onOpenPrescriptions = handleOpenPrescriptions,
                 onOpenMiscClaims = handleOpenMiscClaims,
+                onOpenApprovals = handleOpenApprovals,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCostSummary(
@@ -212,9 +209,9 @@ fun TreatmentContent(
                 organizationShare = state.organizationShareTotal,
                 isLoading = state.isLoading,
             )
-            // Clears the floating navigation bar, as the pre-collapse layout did.
             Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
         }
+
 
         // The header floats on top so that as content scrolls up, it passes underneath the header.
         TreatmentHubHeader(

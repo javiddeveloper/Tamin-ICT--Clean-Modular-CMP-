@@ -38,6 +38,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.isActionable
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
+import com.tamin.taminhamrah.ui.ABSENT_VALUE
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -84,9 +85,6 @@ import taminx.core.core_ui.unit_rial
  * Kept beside the other treatment component files so the screen stays a description of the page's
  * shape rather than of every row in it.
  */
-
-/** Shown where the service sent nothing, matching the previous app's placeholder. */
-private const val ABSENT_VALUE = "-"
 
 @Composable
 internal fun CertificateList(
