@@ -25,14 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.userRequest.SmartGuidePR
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 import taminx.feature.userrequest.generated.resources.user_request_action_close
@@ -47,13 +48,15 @@ fun SmartGuideBottomSheet(
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val taminColors = LocalTaminColors.current
+    val colorScheme = MaterialTheme.colorScheme
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         modifier = modifier,
-        containerColor = LocalTaminColors.current.bgSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        containerColor = taminColors.bgSurface,
+        shape = RoundedCornerShape(topStart = CornerRadius.x2l, topEnd = CornerRadius.x2l)
     ) {
         Column(
             modifier = Modifier
@@ -72,27 +75,27 @@ fun SmartGuideBottomSheet(
                     TaminText(
                         text = stringResource(UserRequestRes.string.user_request_smart_guide_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LocalTaminColors.current.textPrimary
+                        color = taminColors.textPrimary
                     )
                     TaminText(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
-                        color = LocalTaminColors.current.textTertiary
+                        color = taminColors.textTertiary
                     )
                 }
 
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFEFF6FF)),
+                        .size(IconSize.large)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .background(taminColors.chipBg),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Info,
                         contentDescription = null,
-                        tint = Color(0xFF1F4FA3),
-                        modifier = Modifier.size(20.dp)
+                        tint = colorScheme.primary,
+                        modifier = Modifier.size(IconSize.banner)
                     )
                 }
             }
@@ -106,20 +109,20 @@ fun SmartGuideBottomSheet(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, LocalTaminColors.current.divider, RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(CornerRadius.xl))
+                            .border(Thickness.border, taminColors.divider, RoundedCornerShape(CornerRadius.xl))
                             .padding(Spacing.md)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                             TaminText(
                                 text = "• ${item.question}",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = LocalTaminColors.current.textPrimary
+                                color = taminColors.textPrimary
                             )
                             TaminText(
                                 text = item.reply,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = LocalTaminColors.current.textSecondary
+                                color = taminColors.textSecondary
                             )
                         }
                     }

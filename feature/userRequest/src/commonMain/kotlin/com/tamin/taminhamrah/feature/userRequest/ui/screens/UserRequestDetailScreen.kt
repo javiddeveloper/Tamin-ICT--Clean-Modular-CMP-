@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,7 +22,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,8 +45,11 @@ import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
 import com.tamin.taminhamrah.ui.toPriceFormat
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -56,10 +59,7 @@ import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 import taminx.feature.userrequest.generated.resources.*
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
-
-// Sentinel color constants used to tag specific detail rows for semantic coloring
-private val COLOR_REPAYMENT_AMOUNT = Color(0xFF16A34A)
-private val COLOR_GUARANTEE_AMOUNT = Color(0xFFD97706)
+import taminx.core.core_ui.unit_rial
 
 // Request type IDs — same values as RequestTypeEnumClass in my-tamin-droid
 private const val REQUEST_TYPE_FOLLOW_UP_OBJECTION = UserRequestTypeIds.FOLLOW_UP_OBJECTION
@@ -150,15 +150,15 @@ fun UserRequestDetailScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = LocalTaminColors.current.bgPage,
+        containerColor = taminColors.bgPage,
         topBar = {
             TaminTopAppBar(
                 title = title,
                 background = profileGradientBrush,
                 bottomPadding = Spacing.xl,
                 shape = RoundedCornerShape(
-                    bottomStart = 40.dp,
-                    bottomEnd = 40.dp
+                    bottomStart = CornerRadius.x3l,
+                    bottomEnd = CornerRadius.x3l
                 ),
                 navigationIcon = {
                     TaminTopAppBarButton(
@@ -181,13 +181,6 @@ fun UserRequestDetailScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AnimatedRingHeaderIcon(icon = Icons.Default.Description)
-                        Spacer(modifier = Modifier.height(Spacing.md))
-                        Text(
-                            text = stringResource(UserRequestRes.string.user_request_header_subtitle),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = taminColors.textHeaderSubtitle,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }
@@ -203,7 +196,7 @@ fun UserRequestDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF1F4FA3))
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
 
@@ -218,7 +211,7 @@ fun UserRequestDetailScreen(
                     TaminText(
                         text = error,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = LocalTaminColors.current.textTertiary,
+                        color = taminColors.textTertiary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = Spacing.page)
                     )
@@ -228,6 +221,9 @@ fun UserRequestDetailScreen(
             // ── Content ──────────────────────────────────────────────────────
             else -> {
                 val placeholder = stringResource(UserRequestRes.string.user_request_detail_placeholder_dash)
+                val rialUnit = stringResource(Res.string.unit_rial)
+                val repaymentAmountColor = taminColors.greenText
+                val guaranteeAmountColor = taminColors.orangeText
 
                 LazyColumn(
                     modifier = Modifier
@@ -235,6 +231,11 @@ fun UserRequestDetailScreen(
                         .padding(innerPadding),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
+
+                    item {
+                        Spacer(modifier = Modifier.height(Spacing.md))
+                    }
+
                     // Section 1: Common request summary card
                     item {
                         RequestSummaryCard(
@@ -321,8 +322,8 @@ fun UserRequestDetailScreen(
                                             ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_repayment_amount),
-                                                deferredDetails.repaymentAmount?.toPriceFormat()?.let { "$it ریال" } ?: placeholder,
-                                                COLOR_REPAYMENT_AMOUNT
+                                                deferredDetails.repaymentAmount?.toPriceFormat()?.let { "$it $rialUnit" } ?: placeholder,
+                                                repaymentAmountColor
                                             ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_installment_count_label),
@@ -331,13 +332,13 @@ fun UserRequestDetailScreen(
                                             ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_installment_amount_label),
-                                                deferredDetails.installmentAmount?.toPriceFormat()?.let { "$it ریال" } ?: placeholder,
+                                                deferredDetails.installmentAmount?.toPriceFormat()?.let { "$it $rialUnit" } ?: placeholder,
                                                 null
                                             ),
                                             Triple(
                                                 stringResource(UserRequestRes.string.user_request_detail_guarantee_amount_label),
-                                                deferredDetails.guaranteeAmount?.toPriceFormat()?.let { "$it ریال" } ?: placeholder,
-                                                COLOR_GUARANTEE_AMOUNT
+                                                deferredDetails.guaranteeAmount?.toPriceFormat()?.let { "$it $rialUnit" } ?: placeholder,
+                                                guaranteeAmountColor
                                             )
                                         ),
                                         modifier = Modifier.padding(horizontal = Spacing.page)
@@ -415,8 +416,8 @@ fun UserRequestDetailScreen(
                                             illDetails.amount?.let { amount ->
                                                 Triple(
                                                     stringResource(UserRequestRes.string.user_request_detail_amount),
-                                                    amount.toPriceFormat().let { "$it ریال" },
-                                                    COLOR_REPAYMENT_AMOUNT
+                                                    amount.toPriceFormat().let { "$it $rialUnit" },
+                                                    repaymentAmountColor
                                                 )
                                             },
                                         ),
@@ -628,11 +629,14 @@ private fun RequestSummaryCard(
     creationTime: String,
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
+    val colorScheme = MaterialTheme.colorScheme
+
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = LocalTaminColors.current.bgSurface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(CornerRadius.cardCompact),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        elevation = CardDefaults.cardElevation(defaultElevation = Elevation.xs)
     ) {
         Column(
             modifier = Modifier
@@ -648,19 +652,19 @@ private fun RequestSummaryCard(
                 TaminText(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = LocalTaminColors.current.textPrimary
+                    color = taminColors.textPrimary
                 )
                 if (statusDesc.isNotBlank()) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0xFFEFF6FF))
+                            .clip(RoundedCornerShape(CornerRadius.avatarTile))
+                            .background(taminColors.chipBg)
                             .padding(horizontal = Spacing.md, vertical = Spacing.xs)
                     ) {
                         TaminText(
                             text = statusDesc,
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color(0xFF1F4FA3)
+                            color = colorScheme.primary
                         )
                     }
                 }
@@ -674,12 +678,12 @@ private fun RequestSummaryCard(
                     TaminText(
                         text = stringResource(UserRequestRes.string.user_request_detail_national_id),
                         style = MaterialTheme.typography.bodySmall,
-                        color = LocalTaminColors.current.textTertiary
+                        color = taminColors.textTertiary
                     )
                     TaminText(
                         text = refCode,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LocalTaminColors.current.textPrimary
+                        color = taminColors.textPrimary
                     )
                 }
             }
@@ -692,12 +696,12 @@ private fun RequestSummaryCard(
                     TaminText(
                         text = stringResource(UserRequestRes.string.user_request_detail_birth_date),
                         style = MaterialTheme.typography.bodySmall,
-                        color = LocalTaminColors.current.textTertiary
+                        color = taminColors.textTertiary
                     )
                     TaminText(
                         text = creationTime,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LocalTaminColors.current.textPrimary
+                        color = taminColors.textPrimary
                     )
                 }
             }
@@ -711,11 +715,13 @@ private fun DetailSectionCard(
     items: List<Triple<String, String, Color?>>,
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
+
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = LocalTaminColors.current.bgSurface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(CornerRadius.cardCompact),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        elevation = CardDefaults.cardElevation(defaultElevation = Elevation.xs)
     ) {
         Column(
             modifier = Modifier
@@ -729,15 +735,15 @@ private fun DetailSectionCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(Spacing.sm)
                         .clip(CircleShape)
-                        .background(Color(0xFF1F4FA3))
+                        .background(MaterialTheme.colorScheme.primary)
                 )
                 Spacer(modifier = Modifier.size(Spacing.xs))
                 TaminText(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = LocalTaminColors.current.textPrimary
+                    color = taminColors.textPrimary
                 )
             }
 
@@ -752,12 +758,12 @@ private fun DetailSectionCard(
                     TaminText(
                         text = label,
                         style = MaterialTheme.typography.bodySmall,
-                        color = LocalTaminColors.current.textTertiary
+                        color = taminColors.textTertiary
                     )
                     TaminText(
                         text = value,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = valueColor ?: LocalTaminColors.current.textPrimary
+                        color = valueColor ?: taminColors.textPrimary
                     )
                 }
             }

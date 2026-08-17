@@ -32,14 +32,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 import taminx.feature.userrequest.generated.resources.user_request_all_types
@@ -61,14 +63,15 @@ fun UserRequestFilterPanel(
     modifier: Modifier = Modifier,
 ) {
     var isDropdownOpen by remember { mutableStateOf(false) }
+    val taminColors = LocalTaminColors.current
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = Spacing.sm),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = LocalTaminColors.current.bgSurface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        shape = RoundedCornerShape(CornerRadius.cardCompact),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        elevation = CardDefaults.cardElevation(defaultElevation = Elevation.xs)
     ) {
         Column(
             modifier = Modifier
@@ -84,22 +87,22 @@ fun UserRequestFilterPanel(
                 TaminText(
                     text = stringResource(UserRequestRes.string.user_request_search_title),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = LocalTaminColors.current.textPrimary
+                    color = taminColors.textPrimary
                 )
 
                 Box(
                     modifier = Modifier
-                        .size(30.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(LocalTaminColors.current.bgPage)
+                        .size(IconSize.badge)
+                        .clip(RoundedCornerShape(CornerRadius.avatarTile))
+                        .background(taminColors.bgPage)
                         .clickable { onClose() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(UserRequestRes.string.user_request_filter_close_desc),
-                        tint = LocalTaminColors.current.textSecondary,
-                        modifier = Modifier.size(16.dp)
+                        tint = taminColors.textSecondary,
+                        modifier = Modifier.size(IconSize.small)
                     )
                 }
             }
@@ -112,15 +115,15 @@ fun UserRequestFilterPanel(
                     TaminText(
                         text = stringResource(UserRequestRes.string.user_request_search_ref_code_placeholder),
                         style = MaterialTheme.typography.bodySmall,
-                        color = LocalTaminColors.current.textTertiary
+                        color = taminColors.textTertiary
                     )
                 },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(CornerRadius.chip),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = LocalTaminColors.current.divider,
-                    focusedBorderColor = LocalTaminColors.current.blueText
+                    unfocusedBorderColor = taminColors.divider,
+                    focusedBorderColor = taminColors.blueText
                 )
             )
 
@@ -129,8 +132,8 @@ fun UserRequestFilterPanel(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .border(1.dp, LocalTaminColors.current.divider, RoundedCornerShape(14.dp))
+                        .clip(RoundedCornerShape(CornerRadius.chip))
+                        .border(Thickness.border, taminColors.divider, RoundedCornerShape(CornerRadius.chip))
                         .clickable { isDropdownOpen = true }
                         .padding(horizontal = Spacing.md, vertical = Spacing.md),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -139,13 +142,13 @@ fun UserRequestFilterPanel(
                     TaminText(
                         text = selectedTypeName ?: stringResource(UserRequestRes.string.user_request_type_placeholder),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (selectedTypeName != null) LocalTaminColors.current.textPrimary else LocalTaminColors.current.textTertiary
+                        color = if (selectedTypeName != null) taminColors.textPrimary else taminColors.textTertiary
                     )
 
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = null,
-                        tint = LocalTaminColors.current.textSecondary
+                        tint = taminColors.textSecondary
                     )
                 }
 

@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.userRequest.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,10 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -33,13 +33,15 @@ fun RequestInfoDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
+
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp)),
-            color = LocalTaminColors.current.bgSurface,
-            shadowElevation = 8.dp
+                .clip(RoundedCornerShape(CornerRadius.x2l)),
+            color = taminColors.bgSurface,
+            shadowElevation = Elevation.button
         ) {
             Column(
                 modifier = Modifier
@@ -51,13 +53,13 @@ fun RequestInfoDialog(
                 TaminText(
                     text = stringResource(UserRequestRes.string.user_request_info_dialog_title),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = LocalTaminColors.current.textPrimary
+                    color = taminColors.textPrimary
                 )
 
                 TaminText(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center),
-                    color = LocalTaminColors.current.textSecondary
+                    color = taminColors.textSecondary
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.xs))

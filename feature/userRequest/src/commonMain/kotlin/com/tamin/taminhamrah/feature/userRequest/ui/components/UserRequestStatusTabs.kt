@@ -14,13 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.RequestStatusTab
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 import org.jetbrains.compose.resources.stringResource
 
@@ -31,6 +31,9 @@ fun UserRequestStatusTabs(
     onTabSelected: (RequestStatusTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val taminColors = LocalTaminColors.current
+    val colorScheme = MaterialTheme.colorScheme
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -42,16 +45,16 @@ fun UserRequestStatusTabs(
             val isSelected = tab == selectedTab
             val count = counts[tab] ?: 0
 
-            val bg = if (isSelected) Color(0xFFEFF6FF) else LocalTaminColors.current.bgSurface
-            val textCol = if (isSelected) Color(0xFF1F4FA3) else LocalTaminColors.current.textSecondary
-            val borderCol = if (isSelected) Color(0xFFBFDBFE) else LocalTaminColors.current.divider
+            val bg = if (isSelected) taminColors.chipBg else taminColors.bgSurface
+            val textCol = if (isSelected) colorScheme.primary else taminColors.textSecondary
+            val borderCol = if (isSelected) taminColors.hawkesBlue else taminColors.divider
 
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(CornerRadius.xl))
                     .background(bg)
-                    .border(1.dp, borderCol, RoundedCornerShape(16.dp))
+                    .border(Thickness.border, borderCol, RoundedCornerShape(CornerRadius.xl))
                     .clickable { onTabSelected(tab) }
                     .padding(vertical = Spacing.sm),
                 contentAlignment = Alignment.Center
