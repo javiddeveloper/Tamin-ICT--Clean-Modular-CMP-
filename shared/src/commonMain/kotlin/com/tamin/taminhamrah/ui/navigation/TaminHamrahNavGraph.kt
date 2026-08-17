@@ -75,6 +75,7 @@ import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
+import com.tamin.taminhamrah.feature.history.historyJobInfoScreen
 import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
@@ -105,6 +106,8 @@ import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
+import com.tamin.taminhamrah.feature.security.SecurityRoute
+import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -375,6 +378,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToMyInbox = {
                         navController.navigate(MyInboxRoute)
                     },
+                    onNavigateToSecurity = {
+                        navController.navigate(SecurityRoute)
+                    },
                     onNavigateToAddDependent = {
                         navController.navigate(AddDependentRoute)
                     },
@@ -424,6 +430,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()
+                historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
                     onBack = { navController.popBackStack() },
@@ -460,6 +467,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         }
                     }
                 )
+
+                securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }

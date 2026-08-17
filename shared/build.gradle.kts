@@ -46,6 +46,7 @@ kotlin {
             api(project(":feature:addDependent"))
             api(project(":feature:userRequest"))
 
+            api(project(":feature:security"))
 //            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)

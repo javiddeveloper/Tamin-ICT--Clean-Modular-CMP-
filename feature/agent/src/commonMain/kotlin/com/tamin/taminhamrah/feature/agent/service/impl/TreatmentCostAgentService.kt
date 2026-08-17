@@ -6,10 +6,10 @@ import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
 import com.tamin.taminhamrah.feature.agent.service.base.formatAmount
-import com.tamin.taminhamrah.feature.agent.service.base.orDash
 import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
+import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import kotlinx.coroutines.flow.firstOrNull
 

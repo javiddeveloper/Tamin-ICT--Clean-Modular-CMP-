@@ -50,6 +50,50 @@ fun currentTime(): String {
     return time.toPersianDigits()
 }
 
+/**
+ * Renders a Jalali date as `۱۴۰۵/۰۱/۳۱`.
+ *
+ * Several endpoints return dates unseparated (`14050131`, confirmed against a live
+ * `commission-confrimation` payload), so showing the raw value gives an unreadable run of digits.
+ * Values that already carry separators, and values that are a placeholder rather than a date, are
+ * passed through with only their digits converted.
+ */
+fun String.toJalaliDateLabel(): String {
+    val parts = toJalaliParts() ?: return toPersianDigits()
+    val (year, month, day) = parts
+    val monthText = month.toString().padStart(2, '0')
+    val dayText = day.toString().padStart(2, '0')
+    return "$year/$monthText/$dayText".toPersianDigits()
+}
+
+/**
+ * Splits a Jalali date into year/month/day.
+ *
+ * Handles both shapes the API sends: `1404/02/15` and the unseparated `14050131`.
+ */
+fun String.toJalaliParts(): Triple<Int, Int, Int>? {
+    val digits = filter { it.isDigit() }
+    return when {
+        contains("/") -> {
+            val parts = split("/")
+            val y = parts.getOrNull(0)?.toIntOrNull() ?: return null
+            val m = parts.getOrNull(1)?.toIntOrNull() ?: return null
+            val d = parts.getOrNull(2)?.toIntOrNull() ?: 1
+            Triple(y, m, d)
+        }
+
+        digits.length == COMPACT_DATE_LENGTH -> Triple(
+            digits.substring(0, 4).toInt(),
+            digits.substring(4, 6).toInt(),
+            digits.substring(6, 8).toInt(),
+        )
+
+        else -> null
+    }
+}
+
+private const val COMPACT_DATE_LENGTH = 8
+
 object PersianDateFormatter {
 
     fun formatTimestamp(timestamp: Long?): String {

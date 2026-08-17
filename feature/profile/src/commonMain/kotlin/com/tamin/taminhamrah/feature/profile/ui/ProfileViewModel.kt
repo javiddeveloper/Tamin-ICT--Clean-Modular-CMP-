@@ -129,6 +129,7 @@ class ProfileViewModel(
             ProfileMenuItem.BANK_ACCOUNTS -> sendEvent(ProfileEvent.NavigateToBankAccount)
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
             ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
+            ProfileMenuItem.SECURITY -> sendEvent(ProfileEvent.NavigateToSecurity)
             ProfileMenuItem.REQUESTS -> sendEvent(ProfileEvent.NavigateToUserContracts)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }

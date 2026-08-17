@@ -51,10 +51,32 @@ class UserPreferencesRepositoryImpl(private val settings: Settings, ) : UserPref
     override val observeDarkThemeConfig: Flow<DarkThemeConfig>
         get() = _userData.map { it.darkThemeConfig }
 
+    override val observeBiometricEnabled: Flow<Boolean>
+        get() = _userData.map { it.isBiometricEnabled }
+
     override suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig) =
         withContext(Dispatchers.IO) {
             val currentPreference = settings.getUserPreference()
             val newPreference = currentPreference.copy(darkThemeConfig = darkThemeConfig)
+            settings.putUserPreference(newPreference)
+            _userData.value = newPreference
+        }
+
+    override suspend fun setBiometricEnabled(enabled: Boolean) =
+        withContext(Dispatchers.IO) {
+            val currentPreference = settings.getUserPreference()
+            val newPreference = currentPreference.copy(isBiometricEnabled = enabled)
+            settings.putUserPreference(newPreference)
+            _userData.value = newPreference
+        }
+
+    override suspend fun completeBiometricEnrollmentPrompt(enabled: Boolean) =
+        withContext(Dispatchers.IO) {
+            val currentPreference = settings.getUserPreference()
+            val newPreference = currentPreference.copy(
+                isBiometricEnabled = enabled,
+                hasAskedToEnableBiometric = true,
+            )
             settings.putUserPreference(newPreference)
             _userData.value = newPreference
         }

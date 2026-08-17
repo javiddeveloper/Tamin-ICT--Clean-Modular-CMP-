@@ -53,6 +53,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 private val PRIMARY_BUTTON_HEIGHT = 52.dp
 
+/** The navy cast under the primary button. Public so a caller can tint its own shadow to match. */
+val PrimaryButtonShadow = Color(0x47173D7E)
+
 /**
  * A gradient sweeping along the reading direction — right to left under a right-to-left
  * layout, left to right otherwise.
@@ -407,9 +410,9 @@ fun TaminFilledButton(
     contentColor: Color = Color.White,
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    /** Defaults to the navy cast the primary button drops; teal buttons pass their own. */
+    shadowColor: Color = PrimaryButtonShadow,
 ) {
-    val shadowColor = Color(0x47173D7E)
-
     val showIconBeforeText =
         (LocalLayoutDirection.current == LayoutDirection.Ltr && iconPosition == IconPosition.Start) ||
             (LocalLayoutDirection.current == LayoutDirection.Rtl && iconPosition == IconPosition.End)

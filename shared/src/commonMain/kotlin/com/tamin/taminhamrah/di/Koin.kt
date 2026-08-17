@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranceContractModule
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
+import com.tamin.taminhamrah.feature.security.di.securityModule
 import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.feature.userRequest.di.userRequestModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
@@ -50,6 +51,7 @@ val sharedModules: List<Module>
         myInboxModule,
         addDependentModule,
         userRequestModule,
+        securityModule
     )
 
 
