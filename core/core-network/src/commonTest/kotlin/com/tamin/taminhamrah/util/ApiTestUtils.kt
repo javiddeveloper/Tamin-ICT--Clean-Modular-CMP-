@@ -230,6 +230,12 @@ object HistoryTestData {
     val userInfoSuccess: String
         get() = readResourceFile("mocks/history/user_info_success.json")
 
+    val historyJobInfosSuccess: String
+        get() = readResourceFile("mocks/history/history_job_infos_success.json")
+
+    val historyJobInfosEmpty: String
+        get() = readResourceFile("mocks/history/history_job_infos_empty.json")
+
     val sendToInstitutionSuccess: String
         get() = readResourceFile("mocks/history/send_to_institution_success.json")
 }
