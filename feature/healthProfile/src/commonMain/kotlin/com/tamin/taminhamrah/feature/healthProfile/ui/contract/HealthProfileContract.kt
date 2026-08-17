@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientGeneralPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.PatientSelfDeclarativePR
 
+import taminx.feature.healthprofile.generated.resources.*
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Wizard Step Enum
 // ─────────────────────────────────────────────────────────────────────────────
@@ -78,7 +80,8 @@ data class ContactStepState(
 data class EmergencyStepState(
     val emergencyName: String = "",
     val emergencyFamily: String = "",
-    val emergencyRelation: String = "",
+    val emergencyRelationId: Int? = null,
+    val emergencyRelationLabel: String = "",
     val emergencyMobile: String = ""
 )
 
@@ -104,16 +107,16 @@ data class DiseasesStepState(
         illnessGroups: List<IllnessGroupPR>
     ): TaminBottomSheetConfig? {
         val group = illnessGroups.findGroup(type) ?: return null
-        val (subtitle, selectedIds) = when (type) {
-            TaminBottomSheetType.ILLNESS_HISTORY -> "نوع بیماری خود را انتخاب کنید:" to chronicDiseaseIds
-            TaminBottomSheetType.MENTAL          -> "نوع عارضه را انتخاب کنید:" to mentalIllnessIds
-            TaminBottomSheetType.CANCER          -> "نوع سرطان را انتخاب کنید:" to cancerIds
-            else                            -> "" to emptySet()
+        val (subtitleRes, selectedIds) = when (type) {
+            TaminBottomSheetType.ILLNESS_HISTORY -> Res.string.health_bs_chronic_subtitle to chronicDiseaseIds
+            TaminBottomSheetType.MENTAL          -> Res.string.health_bs_mental_subtitle to mentalIllnessIds
+            TaminBottomSheetType.CANCER          -> Res.string.health_bs_cancer_subtitle to cancerIds
+            else                            -> null to emptySet()
         }
 
         return TaminBottomSheetConfig(
             title = group.groupTitle,
-            subtitle = subtitle,
+            subtitleRes = subtitleRes,
             type = type,
             singleSelection = false,
             items = group.illnesses.map { item ->
@@ -221,6 +224,7 @@ data class HealthProfileUiState(
 
     // ── Lookup / dropdown lists (loaded from API on init) ─────────────────────
     val maritalStatusOptions: List<LookupItemPR> = emptyList(),   // Step 2
+    val relationTypeOptions: List<LookupItemPR> = emptyList(),    // Step 5
     val provinceOptions: List<LookupItemPR> = emptyList(),        // Step 3
     val cityOptions: List<LookupItemPR> = emptyList(),            // Step 3 (filtered by selected province)
     val bloodGroupOptions: List<LookupItemPR> = emptyList(),      // Step 8
@@ -248,6 +252,7 @@ data class HealthProfileUiState(
 
         // ── Lookup lists loaded ───────────────────────────────────────────────
         data class MaritalStatusLoaded(val options: List<LookupItemPR>) : PartialState
+        data class RelationTypesLoaded(val options: List<LookupItemPR>) : PartialState
         data class ProvincesLoaded(val options: List<LookupItemPR>) : PartialState
         data class CitiesLoaded(val options: List<LookupItemPR>) : PartialState
         data class BloodGroupsLoaded(val options: List<LookupItemPR>) : PartialState
@@ -288,6 +293,7 @@ enum class ErrorSource {
     PATIENT_LIFESTYLE,
     PATIENT_ALLERGIES,
     MARITAL_STATUS,
+    RELATION_TYPES,
     PROVINCES,
     CITIES,
     BLOOD_GROUPS,

@@ -60,6 +60,20 @@
     <string name="profile_personal_inbox">صندوق شخصی</string>
     <string name="profile_security_settings">امنیت و تنظیمات</string>
     <string name="profile_security">امنیت</string>
+    <string name="security_account_title">امنیت حساب</string>
+    <string name="security_change_password">تغییر رمز عبور</string>
+    <string name="security_2fa">ورود دومرحله‌ای</string>
+    <string name="security_fingerprint">ورود با اثر انگشت</string>
+    <string name="security_pattern">ورود با الگو</string>
+    <string name="biometric_prompt_title">احراز هویت</string>
+    <string name="biometric_prompt_subtitle">لطفاً اثر انگشت خود را تأیید کنید</string>
+    <string name="biometric_gate_title">ورود با اثر انگشت</string>
+    <string name="biometric_gate_description">برای دسترسی به اپلیکیشن، هویت خود را با اثر انگشت تأیید کنید</string>
+    <string name="biometric_enable_prompt_title">فعال‌سازی ورود با اثر انگشت</string>
+    <string name="biometric_enable_prompt_description">می‌خواهید برای ورودهای بعدی از اثر انگشت استفاده کنید؟</string>
+    <string name="biometric_gate_unavailable_title">اثر انگشت دیگر در دسترس نیست</string>
+    <string name="biometric_gate_unavailable_description">به نظر می‌رسد اثر انگشت روی این دستگاه دیگر ثبت نشده است. می‌توانید ورود با اثر انگشت را غیرفعال کرده و به روش دیگری وارد شوید.</string>
+    <string name="biometric_gate_disable_action">غیرفعال‌سازی و ادامه</string>
     <string name="profile_settings">تنظیمات</string>
     <string name="profile_support_section">پشتیبانی</string>
     <string name="profile_support">پشتیبانی</string>
@@ -102,6 +116,8 @@
 
     <!-- Shared wording -->
     <string name="action_retry">تلاش دوباره</string>
+    <string name="action_close">بستن</string>
+    <string name="error_updating-infos">خطا در دریافت اطلاعات</string>
     <string name="action_confirm">تایید</string>
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
@@ -117,7 +133,6 @@
     <string name="amount_total">جمع کل</string>
     <!-- Stands in for an amount that has not loaded; must never read as a real figure. -->
     <string name="amount_unknown">—</string>
-    <string name="error_pull_to_retry">برای تلاش دوباره، صفحه را به پایین بکشید.</string>
 
     <!-- Treatment hub -->
     <string name="hub_empty_patients">بیمه‌شده‌ای برای نمایش وجود ندارد</string>
@@ -208,8 +223,47 @@
     <string name="costs_other_services_payment">پرداختی سایر خدمات پزشکی</string>
     <string name="costs_view_certificate">مشاهده گواهی</string>
     <string name="costs_send_to_inbox">ارسال به صندوق شخصی</string>
+    <string name="costs_action_operations">عملیات</string>
+    <string name="costs_official_doc_subtitle">گواهی رسمی</string>
     <!-- The previous app's confirmation, kept word for word. -->
+
     <string name="costs_sent_to_inbox">گواهی بازپرداخت هزینه های درمانی به صندوق شخصی شما ارسال شد</string>
+
+    <!-- Medical confirmations -->
+    <string name="confirmations_hero_subtitle">تاییدیه‌های دریافتی از مراجع پزشکی</string>
+    <string name="confirmations_empty">تاییدیه‌ای برای نمایش وجود ندارد.</string>
+    <string name="confirmations_saved_title">تصویر تاییدیه ذخیره شد</string>
+    <string name="confirmations_saved_body">فایل تاییدیهٔ مرجع پزشکی در صندوق شخصی شما قابل مشاهده است</string>
+    <string name="confirmations_saved_acknowledge">متوجه شدم</string>
+    <string name="confirmations_filter_all">همه</string>
+    <string name="confirmations_filter_approved">تائید شده</string>
+    <string name="confirmations_filter_pending">در انتظار تایید</string>
+    <string name="confirmations_filter_empty">تاییدیه‌ای با این فیلتر یافت نشد.</string>
+    <!-- Not a filter chip: only the fallback label when a rejected row arrives with no wording. -->
+    <string name="confirmations_status_rejected">تایید نشده</string>
+    <string name="confirmations_medical_authority_label">مرجع پزشکی</string>
+    <string name="confirmations_outpatient_rest_label">استراحت سرپایی</string>
+    <string name="confirmations_unit_day">روز</string>
+    <string name="confirmations_branch_approval">تائید شعبه</string>
+    <string name="confirmations_inpatient_days_count">تعداد روز بستری</string>
+    <string name="confirmations_unapproved_period">دورهٔ تایید نشده</string>
+    <!-- The service sends the unapproved period as two separate dates; this joins them. -->
+    <string name="confirmations_unapproved_period_range">%1$s تا %2$s</string>
+    <string name="confirmations_download_image_action">دریافت تصویر تاییدیه</string>
+    <string name="confirmations_default_support_type">غرامت دستمزد</string>
+    <string name="confirmations_default_center">شورای پزشکی تهران</string>
+    <!-- The service sends the bare branch name ("بيست تهران"); the card adds the word. -->
+    <string name="confirmations_default_branch">بیست تهران</string>
+    <string name="confirmations_branch_named">شعبهٔ %1$s</string>
+    <string name="confirmations_details_title">جزئیات تاییدیه</string>
+    <string name="confirmations_inpatient_rest_header">استراحت بستری</string>
+    <string name="confirmations_review_status_header">وضعیت رسیدگی</string>
+    <string name="confirmations_opinion_header">شرح رای مرجع پزشکی</string>
+    <string name="confirmations_branch_reviewer_label">شعبۀ رسیدگی‌کننده</string>
+    <string name="confirmations_branch_status_label">وضعیت شعبه</string>
+    <string name="confirmations_start_date_label">تاریخ شروع</string>
+    <string name="confirmations_end_date_label">تاریخ پایان</string>
+    <string name="confirmations_action_details">جزئیات</string>
 
     <!-- Surfaced by the treatment view models -->
     <string name="error_identity_not_found">اطلاعات کاربری یافت نشد.</string>
@@ -292,6 +346,76 @@
     <string name="identity_gender_male">مرد</string>
     <string name="identity_gender_female">زن</string>
     <string name="identity_gender_unknown">نامشخص</string>
+
+    <!-- Bank account -->
+    <string name="bank_account_title">شماره حساب بانکی</string>
+    <string name="bank_account_subtitle">استعلام و ثبت شماره حساب‌های بانکی</string>
+    <string name="bank_account_add">افزودن حساب بانکی</string>
+    <string name="bank_account_empty_title">نتیجه‌ای یافت نشد</string>
+    <string name="bank_account_empty_description">هنوز حساب بانکی ثبت نکرده‌اید</string>
+    <string name="bank_account_active">حساب فعال</string>
+    <string name="bank_account_start_date">از تاریخ</string>
+    <string name="bank_account_end_date">تا تاریخ</string>
+    <string name="bank_account_no_date">—</string>
+
+    <!-- Bank names, spelled as the picker in the previous app spelled them. The list endpoint
+         returns its own wording ("رفاه کارگران"), which is why nothing is matched by name. -->
+    <string name="bank_name_refah">بانک رفاه</string>
+    <string name="bank_name_melli">بانک ملی ایران</string>
+    <string name="bank_name_mellat">بانک ملت</string>
+    <string name="bank_name_tejarat">بانک تجارت</string>
+    <string name="bank_name_saderat">بانک صادرات</string>
+    <string name="bank_name_sepah">بانک سپه</string>
+
+    <string name="bank_account_type_interest_free">قرض‌الحسنه</string>
+    <string name="bank_account_type_savings">پس‌انداز عادی</string>
+    <string name="bank_account_type_savings_companion">پس‌انداز همراه</string>
+    <string name="bank_account_type_current">جاری عادی</string>
+    <string name="bank_account_type_current_companion">جاری همراه</string>
+
+    <!-- Add form -->
+    <string name="bank_account_form_title">اطلاعات شماره حساب</string>
+    <string name="bank_account_field_start_date">تاریخ افتتاح حساب</string>
+    <string name="bank_account_field_bank">انتخاب بانک</string>
+    <string name="bank_account_field_type">نوع حساب</string>
+    <string name="bank_account_field_number">شماره حساب</string>
+    <string name="bank_account_submit">ثبت و تأیید اطلاعات حساب بانکی</string>
+    <string name="bank_account_picker_bank">انتخاب بانک</string>
+    <string name="bank_account_picker_type">نوع حساب</string>
+    <string name="bank_account_number_hint">ابتدا بانک را انتخاب کنید؛ تعداد ارقام شمارهٔ حساب در هر بانک متفاوت است.</string>
+
+    <!-- The help sheet explaining which part of an IBAN the account number is -->
+    <string name="bank_account_iban_understood">متوجه شدم</string>
+
+    <!-- Validation -->
+    <string name="bank_account_error_incomplete">لطفاً بانک، نوع حساب، تاریخ و شمارهٔ حساب را کامل وارد کنید.</string>
+    <string name="bank_account_error_length">شمارهٔ حساب %1$s باید دقیقاً %2$s رقم باشد؛ %3$s رقم وارد کرده‌اید.</string>
+    <string name="bank_account_digits_of_bank">شمارهٔ حساب %1$s شامل %2$s رقم است.</string>
+    <string name="bank_account_digit_counter">%1$s/%2$s</string>
+    <string name="bank_account_help_mobile_bank">برای پیدا کردن شماره حساب یا شبا، بهتر است وارد همراه‌بانک یا اینترنت‌بانک بانک خود شوید و آن را از بخش «اطلاعات حساب» کپی کنید.</string>
+    <string name="bank_account_help_ussd">اگر به همراه‌بانک دسترسی ندارید، می‌توانید با شماره‌گیری کد دستوری بانک خود یا مراجعه به نزدیک‌ترین شعبه، شماره شبا را دریافت کنید.</string>
+    <string name="bank_account_digits_suffix">%1$s رقم</string>
+    <string name="bank_account_error_title">خطا در دریافت اطلاعات</string>
+    <string name="bank_account_registered_description">پس از بررسی و تأیید، این حساب به فهرست حساب‌های بانکی شما افزوده می‌شود.</string>
+    <!-- A label now, not a sentence: the code sits beside it in its own copyable row. -->
+    <string name="bank_account_tracking_code">کد پیگیری</string>
+    <string name="bank_account_registered">حساب بانکی با موفقیت ثبت شد.</string>
+
+    <!-- Document viewer strings -->
+    <string name="document_viewer_close">بستن</string>
+    <string name="document_viewer_title">نمایش سند</string>
+    <string name="document_viewer_file_unavailable">فایل در دسترس نیست</string>
+    <string name="document_zoom_hint">برای بزرگ‌نمایی، دو بار ضربه بزنید</string>
+    <string name="prescription_viewer_title">نمایش نسخه</string>
+    <string name="lab_result_viewer_title">نتیجه آزمایش</string>
+
+    <!-- Electronic File -->
+    <string name="electronic_file_title">پروندهٔ الکترونیک من</string>
+    <string name="electronic_file_section">تصاویر مدارک ثبت‌شده در سیستم</string>
+    <string name="electronic_file_registered">مدارک ثبت‌شده</string>
+    <string name="electronic_file_registered_subtitle">مشاهدهٔ مدارک ثبت‌شده در سیستم</string>
+    <string name="electronic_file_empty">مدرکی در سیستم ثبت نشده است</string>
+    <string name="electronic_file_category">(%1$s)</string>
 
     <!-- Active Relation -->
     <string name="active_relation_active">دارای ارتباط فعال</string>
@@ -417,6 +541,7 @@
     <string name="error_select_relationship">لطفا نسبت خانوادگی را انتخاب کنید</string>
     <string name="error_inquiry_registry_failed">خطا در استعلام ثبت احوال</string>
     <string name="error_enter_education_code">لطفا کد استعلام تحصیلی را وارد کنید</string>
+    <string name="error_education_inquiry_required">لطفا استعلام کد تحصیلی را انجام دهید</string>
     <string name="error_inquiry_education_failed">خطا در استعلام کد تحصیلی</string>
     <string name="error_upload_failed">خطا در آپلود مدرک</string>
     <string name="error_complete_additional_info">لطفا اطلاعات محل تولد، صدور و شعبه را تکمیل کنید</string>
@@ -471,5 +596,26 @@
     <string name="dependents_list_status">وضعیت</string>
     <string name="dependents_list_insurance_id">شماره بیمه</string>
 
+    <!-- Bottom Sheet Strings -->
+    <string name="bs_submit">ثبت</string>
+    <string name="bs_risk_factor">آیا سابقه بالا بودن هر یک از موارد زیر را دارید؟</string>
+    <string name="bs_illness_history">آیا سابقه ابتلا به بیماری دارید؟</string>
+    <string name="bs_mental">آیا بیماری اعصاب و روان دارید؟</string>
+    <string name="bs_cancer">ایا سابقه ابتلا به سرطان دارید ؟</string>
+    <string name="bs_family_diseases">آیا در بین اعضای خانواده سابقه ابتلا به موارد زیر وجود دارد؟</string>
+    <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
+    <string name="bs_province">استان</string>
+    <string name="bs_city">شهر</string>
+    <string name="bs_blood_group">گروه خونی</string>
+    <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
+    <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>
+    <string name="bs_alcohol_addiction">آیا الکل مصرف دارید؟</string>
+    <string name="bs_exercise">آیا ورزش می کنید؟</string>
+    <string name="bs_marital_status">وضعیت تاهل</string>
+    <string name="bs_relation_type">نسبت با شما</string>
+    <string name="bs_emergency_contact">تماس اضطراری</string>
+    <string name="search_hint">جستجو...</string>
+    <string name="description_label">توضیحات</string>
+    <string name="close_content_description">بستن</string>
 </resources>
 

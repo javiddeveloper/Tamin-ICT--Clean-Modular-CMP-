@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.ui.components.bottomsheet
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,6 +50,8 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,9 +59,10 @@ fun TaminBottomSheet(
     config: TaminBottomSheetConfig,
     onDismissRequest: () -> Unit,
     onSubmit: (TaminBottomSheetResult) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val submitBtnText = config.submitText ?: stringResource(Res.string.bs_submit)
 
     val selectedIds = remember(config.items) {
         mutableStateListOf<Int>().apply {
@@ -108,15 +110,16 @@ fun TaminBottomSheet(
                     Icon(
                         modifier = Modifier.size(Spacing.lg),
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(Res.string.action_close),
                         tint = LocalTaminColors.current.textSecondary
                     )
                 }
             }
 
-            if (config.subtitle != null) {
+            val subtitleText = config.subtitle ?: config.subtitleRes?.let { stringResource(it) }
+            if (subtitleText != null) {
                 TaminText(
-                    text = config.subtitle,
+                    text = subtitleText,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = LocalTaminColors.current.textTertiary,
                         textAlign = TextAlign.End
@@ -143,7 +146,7 @@ fun TaminBottomSheet(
                 CustomSearchBar(
                     query = inputText,
                     onQueryChange = { inputText = it },
-                    placeHolder = config.searchInputHint ?: "جستجو...",
+                    placeHolder = config.searchInputHint ?: stringResource(Res.string.active_relation_search_placeholder),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -175,7 +178,7 @@ fun TaminBottomSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         TaminText(
-                            text = "موردی یافت نشد",
+                            text = stringResource(Res.string.no_items_found),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalTaminColors.current.textTertiary
                         )
@@ -266,7 +269,7 @@ fun TaminBottomSheet(
             if (config.description != null) {
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 TaminText(
-                    text = "توضیحات",
+                    text = stringResource(Res.string.description_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = LocalTaminColors.current.textSecondary,
                     modifier = Modifier.fillMaxWidth(),
@@ -312,7 +315,7 @@ fun TaminBottomSheet(
                         modifier = Modifier.weight(1f)
                     )
                     TaminFilledButton(
-                        text = config.submitText,
+                        text = submitBtnText,
                         onClick = {
                             onSubmit(
                                 TaminBottomSheetResult(
@@ -329,7 +332,7 @@ fun TaminBottomSheet(
             } else {
                 TaminFilledButton(
                     enabled = selectedIds.isNotEmpty(),
-                    text = config.submitText,
+                    text = submitBtnText,
                     onClick = {
                         onSubmit(
                             TaminBottomSheetResult(
@@ -337,7 +340,7 @@ fun TaminBottomSheet(
                                 selectedItemIds = selectedIds.toList(),
                                 text = inputText.takeIf { it.isNotBlank() },
                                 description = descriptionText.takeIf { it.isNotBlank() }
-                            )
+                              )
                         )
                     }
                 )

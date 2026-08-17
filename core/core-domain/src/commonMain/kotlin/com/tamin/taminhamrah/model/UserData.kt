@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserData(
     val darkThemeConfig: DarkThemeConfig,
+    val isBiometricEnabled: Boolean = false,
+    val hasAskedToEnableBiometric: Boolean = false,
 ) {
     companion object {
         val DEFAULT = UserData(darkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM)

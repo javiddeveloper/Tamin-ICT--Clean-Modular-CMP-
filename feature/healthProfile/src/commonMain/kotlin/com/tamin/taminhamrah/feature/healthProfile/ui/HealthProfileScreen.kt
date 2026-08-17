@@ -236,8 +236,9 @@ fun HealthProfileMainContent(
     // them stuck on a dead error screen until they notice and tap retry manually.
     fun errorSourcesFor(step: SelfDeclarationStep): Array<ErrorSource> = when (step) {
         SelfDeclarationStep.IDENTITY,
-        SelfDeclarationStep.EMERGENCY,
         SelfDeclarationStep.PHYSICAL -> arrayOf(ErrorSource.PATIENT_GENERAL)
+
+        SelfDeclarationStep.EMERGENCY -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.RELATION_TYPES)
 
         SelfDeclarationStep.PERSONAL -> arrayOf(ErrorSource.PATIENT_GENERAL, ErrorSource.MARITAL_STATUS)
 
@@ -346,8 +347,9 @@ fun HealthProfileMainContent(
                 SelfDeclarationStep.EMERGENCY -> {
                     SelfDeclarationEmergencyScreen(
                         state = selfDecState.emergency,
+                        relationTypeOptions = state.relationTypeOptions,
                         isLoading = combinedLoading,
-                        error = getError(ErrorSource.PATIENT_GENERAL),
+                        error = getError(ErrorSource.PATIENT_GENERAL, ErrorSource.RELATION_TYPES),
                         onIntent = wrappedOnIntent,
                         onBackClicked = navigateBack,
                         onCloseClicked = onExitRequested

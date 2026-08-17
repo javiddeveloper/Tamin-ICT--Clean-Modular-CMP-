@@ -195,7 +195,8 @@ fun DependentsListScreen(
                 state.isLoading && state.dependentsList.isEmpty() -> LoadingStateOverlay()
                 state.error != null -> ErrorStateView(
                     message = state.error,
-                    onRetry = { onIntent(DependentsListIntent.OnRefreshClicked) }
+                    onRetry = { onIntent(DependentsListIntent.OnRefreshClicked) },
+                    onDismiss = onBackClicked
                 )
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -325,7 +326,7 @@ private fun DependentCard(
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
                 DetailRow(label = stringResource(Res.string.identity_field_national_code), value = dependent.nationalCode, numeric = true)
-                DetailRow(label = stringResource(Res.string.identity_field_birth_date), value = dependent.birthDate.ifBlank { "-" }, numeric = true)
+                DetailRow(label = stringResource(Res.string.identity_field_birth_date), value = dependent.birthDateJalali.ifBlank { "-" }, numeric = true)
                 DetailRow(label = stringResource(Res.string.identity_field_father_name), value = dependent.fatherName.ifBlank { "-" }, numeric = false)
                 DetailRow(label = stringResource(Res.string.dependents_list_insurance_id), value = dependent.insuranceId.ifBlank { "-" }, numeric = true)
                 DetailRow(label = stringResource(Res.string.dependents_list_status), value = dependent.status.ifBlank { "-" }, numeric = false)

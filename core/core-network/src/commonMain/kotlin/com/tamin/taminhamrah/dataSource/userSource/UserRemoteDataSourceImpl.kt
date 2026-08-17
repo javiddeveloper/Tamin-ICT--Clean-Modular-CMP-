@@ -14,21 +14,25 @@ import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.certificate.RecipientDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.user.EditMobileResponseDto
-import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
+import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
+import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.util.NetworkConstants
-
-import com.tamin.taminhamrah.model.user.UserProfileDto
-import co.touchlab.kermit.Logger
+import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
@@ -152,10 +156,26 @@ internal class UserRemoteDataSourceImpl(
 
     override suspend fun getElectronicFile(
         query: ApiQueryParamDN
-    ): ListData<com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO>? {
+    ): ListData<ElectronicFileDTO>? {
         return try {
             val response = userApiService.getElectronicFile(queryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun downloadDocument(url: String): PdfDownloadDTO {
+        return try {
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = userApiService.downloadDocument(url).readPdfChannel()
+                )
+            )
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -219,6 +239,21 @@ internal class UserRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun registerBankAccount(
+        request: BankAccountRequestDTO,
+    ): BankAccountCreatedDTO? {
+        return try {
+            val response = userApiService.registerBankAccount(request)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 

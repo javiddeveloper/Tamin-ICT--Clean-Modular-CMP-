@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
@@ -18,6 +19,7 @@ import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+
 
 /**
  * Minimal fake [UserRepository] used only to satisfy `IdentityInfoUseCase` in
@@ -66,6 +68,14 @@ class FakeUserRepository : UserRepository {
         )
     )
 
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flowOf(null)
+    override suspend fun downloadDocument(url: String): PdfDownloadDN =
+        PdfDownloadDN()
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
 
@@ -78,3 +88,6 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flowOf(emptyList())
 }
+
+
+

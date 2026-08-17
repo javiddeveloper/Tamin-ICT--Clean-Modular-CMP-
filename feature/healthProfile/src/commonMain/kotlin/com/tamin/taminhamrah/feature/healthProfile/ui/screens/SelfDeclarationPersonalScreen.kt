@@ -2,12 +2,14 @@ package com.tamin.taminhamrah.feature.healthProfile.ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -110,6 +112,10 @@ fun SelfDeclarationPersonalScreen(
                 )
 
                 StyledTextField(
+                    inputRestriction = InputRestriction.LettersOnly,
+                    maxLength = 20,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     value = state.job,
                     onValueChange = { jobStr ->
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(job = jobStr)))
@@ -120,6 +126,10 @@ fun SelfDeclarationPersonalScreen(
                 )
 
                 StyledTextField(
+                    inputRestriction = InputRestriction.LettersOnly,
+                    maxLength = 20,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     value = state.citizenship,
                     onValueChange = { cit ->
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(citizenship = cit)))
@@ -130,6 +140,10 @@ fun SelfDeclarationPersonalScreen(
                 )
 
                 StyledTextField(
+                    inputRestriction = InputRestriction.LettersOnly,
+                    maxLength = 20,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     value = state.nationality,
                     onValueChange = { nat ->
                         onIntent(HealthProfileIntent.UpdatePersonal(state.copy(nationality = nat)))

@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDTO
 import com.tamin.taminhamrah.model.health.PatientVisitDTO
 import com.tamin.taminhamrah.model.health.ProvinceCitiesDTO
 import com.tamin.taminhamrah.model.health.ProvincesDTO
+import com.tamin.taminhamrah.model.health.RelationTypeDTO
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessesByGroupDTO
 import com.tamin.taminhamrah.model.health.SmokingStatusDTO
 import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequestDTO
@@ -45,6 +46,7 @@ interface HealthRemoteDataSource {
     // --- Lookup ---
     suspend fun getBloodGroups(): List<BloodGroupDTO>?
     suspend fun getMaritalStatus(): List<MaritalStatusDTO>?
+    suspend fun getRelationTypes(): List<RelationTypeDTO>?
     suspend fun getSmokingStatus(): List<SmokingStatusDTO>?
     suspend fun getActFrequencies(): List<ActFrequencyDTO>?
 

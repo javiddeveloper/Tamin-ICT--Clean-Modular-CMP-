@@ -125,6 +125,21 @@ fun SegmentedControl(
 /**
  * Custom stylized text input with validation ticks, prefix icons, and error states.
  */
+enum class InputRestriction {
+    None,
+    LettersOnly,
+    DigitsOnly,
+    LettersAndDigits
+}
+
+private fun Char.isLetterAllowed(): Boolean {
+    return isLetter() || isWhitespace()
+}
+
+private fun Char.isDigitAllowed(): Boolean {
+    return isDigit() || this in '۰'..'۹'
+}
+
 @Composable
 fun StyledTextField(
     value: String,
@@ -143,25 +158,31 @@ fun StyledTextField(
     readOnly: Boolean = false,
     isRequired: Boolean = false,
     onClick: (() -> Unit)? = null,
-    onFocusChanged: ((Boolean) -> Unit)? = null
+    onFocusChanged: ((Boolean) -> Unit)? = null,
+    maxLength: Int? = null,
+    inputRestriction: InputRestriction = InputRestriction.None
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
 
-    // Colors mapping based on focus and validation state
     val borderColor = when {
         isValid == false -> taminColors.dangerText
         isFocused -> taminColors.blueText
         else -> taminColors.border
     }
 
-    val leadingIconColor = if (isFocused) taminColors.blueText else taminColors.textMuted
-    val trailingIconColor = if (isFocused) taminColors.blueText else taminColors.textSecondary
+    val leadingIconColor =
+        if (isFocused) taminColors.blueText else taminColors.textMuted
+
+    val trailingIconColor =
+        if (isFocused) taminColors.blueText else taminColors.textSecondary
 
     val annotatedLabel = buildAnnotatedString {
         append(label)
         if (isRequired) {
-            withStyle(SpanStyle(color = taminColors.dangerText)) {
+            withStyle(
+                SpanStyle(color = taminColors.dangerText)
+            ) {
                 append(" *")
             }
         }
@@ -169,6 +190,7 @@ fun StyledTextField(
 
     Box(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth()) {
+
             TaminText(
                 text = annotatedLabel,
                 fontSize = 12.5.sp,
@@ -181,8 +203,14 @@ fun StyledTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
-                    .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
+                    .background(
+                        taminColors.bgSurface,
+                        RoundedCornerShape(13.dp)
+                    )
+                    .border(
+                        BorderStroke(1.5.dp, borderColor),
+                        RoundedCornerShape(13.dp)
+                    )
                     .onFocusChanged { focusState ->
                         isFocused = focusState.isFocused
                         onFocusChanged?.invoke(focusState.isFocused)
@@ -190,7 +218,6 @@ fun StyledTextField(
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Leading Icon
                 if (leadingIconPainter != null) {
                     Icon(
                         painter = leadingIconPainter,
@@ -209,10 +236,31 @@ fun StyledTextField(
                     Spacer(modifier = Modifier.width(10.dp))
                 }
 
-                // Input field
                 BasicTextField(
                     value = value,
-                    onValueChange = onValueChange,
+                    onValueChange = { newValue ->
+
+                        val restrictedValue = when (inputRestriction) {
+                            InputRestriction.None -> newValue
+
+                            InputRestriction.LettersOnly ->
+                                newValue.filter { it.isLetter() || it.isWhitespace() }
+
+                            InputRestriction.DigitsOnly ->
+                                newValue.filter { it.isDigit() }
+
+                            InputRestriction.LettersAndDigits ->
+                                newValue.filter {
+                                    it.isLetter() || it.isDigit() || it.isWhitespace()
+                                }
+                        }
+
+                        val limitedValue = maxLength?.let {
+                            restrictedValue.take(it)
+                        } ?: restrictedValue
+
+                        onValueChange(limitedValue)
+                    },
                     singleLine = singleLine,
                     readOnly = readOnly || onClick != null,
                     keyboardOptions = keyboardOptions,
@@ -235,7 +283,6 @@ fun StyledTextField(
                     }
                 )
 
-                // Suffix validation / status checkmark or trailing icon
                 if (isValid == true) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
@@ -263,7 +310,6 @@ fun StyledTextField(
                 }
             }
 
-            // Error message below
             if (isValid == false && !errorText.isNullOrEmpty()) {
                 Row(
                     modifier = Modifier.padding(top = 6.dp),
@@ -286,7 +332,6 @@ fun StyledTextField(
             }
         }
 
-        // Overlay transparent Box over entire field when onClick != null
         if (onClick != null) {
             Box(
                 modifier = Modifier

@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.health.PatientSelfDeclarativeDTO
 import com.tamin.taminhamrah.model.health.PatientVisitDTO
 import com.tamin.taminhamrah.model.health.ProvinceCitiesDTO
 import com.tamin.taminhamrah.model.health.ProvincesDTO
+import com.tamin.taminhamrah.model.health.RelationTypeDTO
 import com.tamin.taminhamrah.model.health.SelfDeclarableIllnessesByGroupDTO
 import com.tamin.taminhamrah.model.health.SmokingStatusDTO
 import com.tamin.taminhamrah.model.health.SyncDrugAllergiesRequestDTO
@@ -117,6 +118,11 @@ internal class HealthRemoteDataSourceImpl(
     override suspend fun getMaritalStatus(): List<MaritalStatusDTO>? =
         errorParser.safeCall("getMaritalStatus") {
             apiService.getMaritalStatus()
+        }
+
+    override suspend fun getRelationTypes(): List<RelationTypeDTO>? =
+        safeCall("getRelationTypes") {
+            apiService.getRelationTypes()
         }
 
     override suspend fun getSmokingStatus(): List<SmokingStatusDTO>? =

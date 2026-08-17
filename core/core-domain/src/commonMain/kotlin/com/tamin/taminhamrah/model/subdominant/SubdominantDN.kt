@@ -11,9 +11,7 @@ data class SubdominantItemDN(
     val lastName: String? = null,
     val fatherName: String? = null,
     val nationalCode: String? = null,
-    // Raw epoch-millis timestamp from the backend — format with PersianDateFormatter at the
-    // presentation layer rather than here, so the domain model stays free of display concerns.
-    val dateOfBirth: Long? = null,
+    val dateOfBirthTimestamp: Long? = null,
     val relationDescription: String? = null,
     val status: String? = null,
     val insuranceId: String? = null

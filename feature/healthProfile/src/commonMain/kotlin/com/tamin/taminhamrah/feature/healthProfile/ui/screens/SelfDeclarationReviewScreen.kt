@@ -156,11 +156,7 @@ fun SelfDeclarationReviewScreen(
                         value = selfDecState.personal.nationality.ifEmpty { stringResource(Res.string.health_allergy_unknows) })
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_personal_marriage),
-                        value = selfDecState.personal.maritalStatusLabel.ifEmpty {
-                            stringResource(
-                                Res.string.health_allergy_unknows
-                            )
-                        })
+                        value = selfDecState.personal.maritalStatusLabel.ifEmpty { stringResource(Res.string.health_allergy_unknows) })
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_personal_job),
                         value = selfDecState.personal.job.ifEmpty { stringResource(Res.string.health_allergy_unknows) },
@@ -187,11 +183,7 @@ fun SelfDeclarationReviewScreen(
                     )
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_contact_province_city),
-                        value = "${selfDecState.contact.cityLabel} / ${selfDecState.contact.provinceLabel}".ifEmpty {
-                            stringResource(
-                                Res.string.health_allergy_unknows
-                            )
-                        })
+                        value = "${selfDecState.contact.cityLabel} / ${selfDecState.contact.provinceLabel}".ifEmpty { stringResource(Res.string.health_allergy_unknows) })
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_contact_postal_code),
                         value = selfDecState.contact.postcode,
@@ -221,11 +213,7 @@ fun SelfDeclarationReviewScreen(
                         value = selfDecState.emergency.emergencyMobile.ifEmpty { stringResource(Res.string.health_allergy_unknows) })
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_contact_emergency_relation),
-                        value = selfDecState.emergency.emergencyRelation.ifEmpty {
-                            stringResource(
-                                Res.string.health_allergy_unknows
-                            )
-                        },
+                        value = selfDecState.emergency.emergencyRelationLabel.ifEmpty { stringResource(Res.string.health_allergy_unknows) },
                         showDivider = false
                     )
                 }
@@ -245,14 +233,10 @@ fun SelfDeclarationReviewScreen(
                 ) {
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_contact_height),
-                        value = selfDecState.physical.height?.let { "$it ${stringResource(Res.string.health_physical_unit_cm)}" }
-                            ?: stringResource(
-                                Res.string.health_bmi_unselected_category
-                            ))
+                        value = selfDecState.physical.height?.let { "$it ${stringResource(Res.string.health_physical_unit_cm)}" } ?: stringResource(Res.string.health_bmi_unselected_category))
                     IdentityRow(
                         label = stringResource(Res.string.health_identity_section_contact_weight),
-                        value = selfDecState.physical.weight?.let { "$it ${stringResource(Res.string.health_physical_unit_kg)}" } ?: stringResource(
-                            Res.string.health_bmi_unselected_category),
+                        value = selfDecState.physical.weight?.let { "$it ${stringResource(Res.string.health_physical_unit_kg)}" } ?: stringResource(Res.string.health_bmi_unselected_category),
                         showDivider = false
                     )
                 }
@@ -582,7 +566,7 @@ fun SelfDeclarationReviewScreenPreview() {
                     ),
                     emergency = EmergencyStepState(
                         emergencyName = "محمد",
-                        emergencyRelation = "پدر"
+                        emergencyRelationLabel = "پدر"
                     ),
                     physical = PhysicalStepState(height = 180, weight = 80),
                     bloodGroup = BloodGroupStepState(
@@ -613,7 +597,7 @@ fun SelfDeclarationReviewScreenWithErrorsPreview() {
                     ),
                     emergency = EmergencyStepState(
                         emergencyName = "محمد",
-                        emergencyRelation = "پدر"
+                        emergencyRelationLabel = "پدر"
                     ),
                     physical = PhysicalStepState(height = 180, weight = 80),
                     bloodGroup = BloodGroupStepState(

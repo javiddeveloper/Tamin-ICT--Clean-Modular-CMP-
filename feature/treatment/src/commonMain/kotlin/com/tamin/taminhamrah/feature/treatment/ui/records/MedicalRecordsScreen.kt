@@ -1,7 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,37 +8,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.tamin.taminhamrah.ui.components.taminSurface
-import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
-import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
-import com.tamin.taminhamrah.ui.theme.shimmer
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentViewModel
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
@@ -56,11 +39,10 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordPeriod
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.rememberJalaliMonthNames
 import com.tamin.taminhamrah.feature.treatment.ui.model.rememberRecordTabLabels
 import com.tamin.taminhamrah.feature.treatment.ui.model.toCategoryLabel
-import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
-import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliMonthLabel
 import com.tamin.taminhamrah.feature.treatment.ui.model.toPatientList
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
@@ -69,19 +51,23 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.RecordFilterMenu
-import com.tamin.taminhamrah.ui.RecordFilterMenu
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Elevation
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -91,10 +77,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.amount_total
-import taminx.core.core_ui.error_pull_to_retry
-import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_health_profile
 import taminx.core.core_ui.ic_tamin_medical_approvals
 import taminx.core.core_ui.ic_tamin_medical_centers
@@ -145,49 +128,16 @@ private fun periodLabel(period: RecordPeriod, customRange: Pair<String, String>?
     return "$from - $to"
 }
 
-/**
- * Failure state for the records list: what went wrong and how to recover, nothing more.
- *
- * No retry affordance: recovering from a failure means re-entering the screen.
- */
-@Composable
-private fun RecordsErrorState(message: String) {
-    val colors = LocalTaminColors.current
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(Spacing.page),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-            contentDescription = null,
-            tint = colors.dangerText,
-            modifier = Modifier.size(IconSize.large),
-        )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = stringResource(Res.string.error_pull_to_retry),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textSecondary,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
 /** The one place the list request is built, so a retry always repeats the current filters. */
 private fun retryIntent(
     nationalCode: String,
     tab: RecordTab,
     period: RecordPeriod,
     customRange: Pair<String, String>? = null,
+    prescType: String? = null,
 ) = PrescriptionsIntent.LoadList(
     nationalCode = nationalCode,
-    requestTypeIds = tab.requestTypeIds,
+    requestTypeIds = RecordSearchCriteria(tab = tab, prescType = prescType).requestTypeIds(),
     startDate = customRange?.first ?: period.startTimestamp(),
     endDate = customRange?.second,
 )
@@ -256,9 +206,17 @@ fun MedicalRecordsScreen(
 
     // Patient, period and category are all endpoint parameters, so any change re-queries.
     // Held until a patient resolves, so the shortcut path never fires a blank-code query.
-    LaunchedEffect(selectedPatient, selectedPeriod, selectedTab, customRange) {
+    LaunchedEffect(selectedPatient, selectedPeriod, selectedTab, customRange, searchCriteria.prescType) {
         if (selectedPatient.isBlank()) return@LaunchedEffect
-        viewModel.sendIntent(retryIntent(selectedPatient, selectedTab, selectedPeriod, customRange))
+        viewModel.sendIntent(
+            retryIntent(
+                selectedPatient,
+                selectedTab,
+                selectedPeriod,
+                customRange,
+                searchCriteria.prescType,
+            ),
+        )
     }
 
     // «سهم شما» is not in the list response, so it comes from the price endpoint — one request per
@@ -285,10 +243,25 @@ fun MedicalRecordsScreen(
         selectedTab = selectedTab,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
-        onTabSelected = { selectedTab = it },
+        // The tab row cannot show داروخانه, so choosing a tab has to drop it or the tap does nothing.
+        onTabSelected = {
+            selectedTab = it
+            searchCriteria = searchCriteria.copy(tab = it, prescType = null)
+        },
         onPatientSelected = { selectedPatient = it },
         onPeriodSelected = { selectedPeriod = it },
         onRecordSelected = { onOpenRecord(it, selectedPatient) },
+        onRetry = {
+            viewModel.sendIntent(
+                retryIntent(
+                    selectedPatient,
+                    selectedTab,
+                    selectedPeriod,
+                    customRange,
+                    searchCriteria.prescType,
+                ),
+            )
+        },
         onCustomRangePicked = { start, end ->
             customRange = start to end
             selectedPeriod = RecordPeriod.CUSTOM
@@ -345,6 +318,7 @@ fun MedicalRecordsContent(
     onPatientSelected: (String) -> Unit,
     onPeriodSelected: (RecordPeriod) -> Unit,
     onRecordSelected: (ElectronicPrescriptionPR) -> Unit,
+    onRetry: () -> Unit,
     onCustomRangePicked: (startDate: String, endDate: String) -> Unit,
     searchCriteria: RecordSearchCriteria,
     onSearchApplied: (RecordSearchCriteria) -> Unit,
@@ -416,6 +390,10 @@ fun MedicalRecordsContent(
     }
 
     val staggerState = rememberStaggeredEntranceState(key = selectedPatient to selectedPeriod to selectedTab)
+
+    // Outside the list: a dialog cannot live in a LazyColumn item, and the failure is the only
+    // thing worth attending to while it is up.
+    ErrorStateView(message = state.error, onDismiss = onBack, onRetry = onRetry)
 
     Scaffold(
         modifier = modifier,
@@ -502,11 +480,9 @@ fun MedicalRecordsContent(
                 state.isLoading && state.prescriptionList.isEmpty() ->
                     item { RecordsShimmerSkeleton() }
 
-                // A failed request and a genuinely empty result read very differently, so they
-                // get different states.
-                state.error != null -> item { RecordsErrorState(message = state.error) }
-
-                visibleRecords.isEmpty() -> item {
+                // Guarded on error: a failed request cannot tell an empty period from an
+                // unreachable one.
+                state.error == null && visibleRecords.isEmpty() -> item {
                     TaminEmptyState(
                         message = if (searchCriteria.nameQuery.isNotBlank()) {
                             stringResource(Res.string.records_empty_search, searchCriteria.nameQuery)
@@ -670,6 +646,7 @@ fun MedicalRecordsPreview() {
                 dependantRelation = stringResource(Res.string.patient_dependant_relation),
             ),
             selectedPatient = "1234567890",
+            onRetry = {},
             selectedPeriod = RecordPeriod.LAST_SIX_MONTHS,
             customRange = null,
             selectedTab = RecordTab.MEDICINE,

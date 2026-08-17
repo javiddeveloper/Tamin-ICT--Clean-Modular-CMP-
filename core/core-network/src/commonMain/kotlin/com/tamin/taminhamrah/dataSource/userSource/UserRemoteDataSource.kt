@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
 import com.tamin.taminhamrah.model.certificate.RecipientDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
@@ -21,6 +22,8 @@ import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
 
 import com.tamin.taminhamrah.model.user.UserProfileDto
+import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
+import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 interface UserRemoteDataSource {
     suspend fun getIdentityInfo(): IdentityInfoDto
@@ -49,6 +52,8 @@ interface UserRemoteDataSource {
         query: ApiQueryParamDN
     ): ListData<ElectronicFileDTO>?
 
+    suspend fun downloadDocument(url: String): PdfDownloadDTO
+
     suspend fun getUserProfile(): UserProfileDto?
 
     suspend fun getStatusCertificateReport(
@@ -58,4 +63,8 @@ interface UserRemoteDataSource {
     suspend fun getRecipients(
         query: ApiQueryParamDN
     ): ListData<RecipientDTO>?
+
+    suspend fun registerBankAccount(
+        request: BankAccountRequestDTO,
+    ): BankAccountCreatedDTO?
 }

@@ -138,11 +138,6 @@ fun IdentityInScreen(
             when {
                 state.isLoading && sections == null -> LoadingStateOverlay()
 
-                state.error != null -> ErrorStateView(
-                    message = state.error,
-                    onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
-                )
-
                 sections != null -> {
                     RegistryVerifiedNotice(
                         modifier = Modifier.padding(horizontal = Spacing.page),
@@ -157,12 +152,16 @@ fun IdentityInScreen(
             Spacer(modifier = Modifier.height(Spacing.xxl))
         }
 
+        ErrorStateView(
+            message = state.error,
+            onDismiss = onBack,
+            onRetry = { onIntent(IdentityInIntent.LoadIdentity) },
+        )
+
         // The header floats on top so the body passes underneath it as it scrolls away.
         IdentityHeader(
             progress = collapse.progressProvider,
             info = info,
-            nationality = nationality,
-            gender = gender,
             photo = state.profileImage,
             onBack = onBack,
             modifier = Modifier
@@ -182,8 +181,6 @@ fun IdentityInScreen(
 private fun IdentityHeader(
     progress: () -> Float,
     info: IdentityInfoPR?,
-    nationality: String,
-    gender: String,
     photo: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -214,7 +211,6 @@ private fun IdentityHeader(
                     ),
             ) {
                 IdentityCard(
-                    firstName = info.firstName,
                     lastName = info.lastName,
                     fullName = info.fullName,
                     fatherName = info.fatherName,

@@ -33,8 +33,9 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCar
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentRecordPdfExport
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
-import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -44,6 +45,7 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -52,6 +54,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.lab_result_viewer_title
+import taminx.core.core_ui.prescription_viewer_title
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.amount_total
 import taminx.core.core_ui.detail_doctor
@@ -69,21 +73,6 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
 private const val UNKNOWN_VALUE = "—"
-
-/**
- * The exports this screen can show. Each names its own file, which is what lets the viewer
- * recognize one it has downloaded before and skip the request entirely.
- */
-private enum class PdfExport {
-    PRESCRIPTION,
-    LAB_RESULT,
-    ;
-
-    fun fileName(noteHeadId: String): String = when (this) {
-        PRESCRIPTION -> "prescription_$noteHeadId.pdf"
-        LAB_RESULT -> "lab_result_$noteHeadId.pdf"
-    }
-}
 
 /**
  * One medical record: the prescribed items, the cost breakdown, and the PDF exports.
@@ -166,7 +155,7 @@ fun RecordDetailContent(
 
     // Which export is on screen. Opening the viewer no longer means a download has happened: it
     // decides for itself whether the file needs fetching, so the tap only says which one to show.
-    var showing by remember { mutableStateOf<PdfExport?>(null) }
+    var showing by remember { mutableStateOf<TreatmentRecordPdfExport?>(null) }
 
     Scaffold(
         modifier = modifier,
@@ -189,12 +178,12 @@ fun RecordDetailContent(
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
                                 contentDescription = stringResource(Res.string.prescription_download_cd),
-                                onClick = { showing = PdfExport.PRESCRIPTION },
+                                onClick = { showing = TreatmentRecordPdfExport.PRESCRIPTION },
                             )
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_tamin_download),
                                 contentDescription = stringResource(Res.string.prescription_lab_result_cd),
-                                onClick = { showing = PdfExport.LAB_RESULT },
+                                onClick = { showing = TreatmentRecordPdfExport.LAB_RESULT },
                             )
                         }
                     },
@@ -203,13 +192,10 @@ fun RecordDetailContent(
                 when {
                     state.isLoading -> RecordDetailShimmerSkeleton()
 
-                    // A failed lookup offers a retry; a genuinely empty prescription does not.
-                    state.error != null -> ErrorStateView(
-                        message = state.error,
-                        onRetry = onRetry,
-                    )
-
-                    state.prescriptionDetailList.isEmpty() ->
+                    // Guarded on error: a failed lookup knows nothing about whether the
+                    // prescription has items, and saying it is empty would be a lie the dialog
+                    // then contradicts.
+                    state.error == null && state.prescriptionDetailList.isEmpty() ->
                         TaminEmptyState(message = stringResource(Res.string.prescription_empty))
 
                     else -> Column(
@@ -250,6 +236,10 @@ fun RecordDetailContent(
                 Box(modifier = Modifier.height(TreatmentDimens.bottomBarClearance))
             }
 
+            // Over the page rather than instead of it: the body falls through to its empty
+            // state, so dismissing the dialog does not leave a bare top bar behind.
+            ErrorStateView(message = state.error, onDismiss = onBack, onRetry = onRetry)
+
             price?.let {
                 CostTotalsBar(
                     modifier = Modifier.align(Alignment.BottomCenter),
@@ -267,12 +257,17 @@ fun RecordDetailContent(
     showing?.let { export ->
         TaminPdfViewer(
             fileName = export.fileName(noteHeadId),
+            title = when (export) {
+                TreatmentRecordPdfExport.PRESCRIPTION -> stringResource(Res.string.prescription_viewer_title)
+                TreatmentRecordPdfExport.LAB_RESULT -> stringResource(Res.string.lab_result_viewer_title)
+            },
+            background = taminTopAppBarGradient(colors.topAppBarStops),
             pdf = state.viewerPdf,
             downloadFailed = state.viewerDownloadFailed,
             onRequestDownload = {
                 when (export) {
-                    PdfExport.PRESCRIPTION -> onDownloadPdf()
-                    PdfExport.LAB_RESULT -> onDownloadLabResult()
+                    TreatmentRecordPdfExport.PRESCRIPTION -> onDownloadPdf()
+                    TreatmentRecordPdfExport.LAB_RESULT -> onDownloadLabResult()
                 }
             },
             onDismiss = {
