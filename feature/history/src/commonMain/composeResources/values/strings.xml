@@ -13,4 +13,25 @@
     <string name="history_job_info_workshop_id">کد کارگاه</string>
     <string name="history_job_info_insurance_id">شماره بیمه</string>
     <string name="history_job_info_copy_label">کپی %1$s</string>
+
+    <!-- کلیه سوابق -->
+    <string name="history_all_title">کلیه سوابق</string>
+    <string name="history_all_subtitle">سوابق بیمه‌ای شما به تفکیک سال</string>
+    <string name="history_all_stat_years">سال</string>
+    <string name="history_all_stat_months">ماه</string>
+    <string name="history_all_stat_days">روز</string>
+    <string name="history_all_list_header">سابقه به تفکیک سال</string>
+    <string name="history_all_list_hint">با انتخاب هر سال، جزئیات سوابق به تفکیک ماه قابل مشاهده است</string>
+    <string name="history_all_year_days">%1$s روز</string>
+    <string name="history_all_year_complete">کامل</string>
+    <string name="history_all_year_partial">ناقص</string>
+    <string name="history_all_empty_title">سابقه‌ای یافت نشد</string>
+    <string name="history_all_empty">اطلاعات سابقه شما یافت نشد.</string>
+    <string name="history_all_detail_title">جزئیات سابقه</string>
+    <string name="history_all_season_spring">بهار</string>
+    <string name="history_all_season_summer">تابستان</string>
+    <string name="history_all_season_autumn">پاییز</string>
+    <string name="history_all_season_winter">زمستان</string>
+    <string name="history_all_workshops">کارگاه‌ها</string>
+    <string name="history_all_no_workshop">برای این سال اطلاعات کارگاهی ثبت نشده است.</string>
 </resources>
