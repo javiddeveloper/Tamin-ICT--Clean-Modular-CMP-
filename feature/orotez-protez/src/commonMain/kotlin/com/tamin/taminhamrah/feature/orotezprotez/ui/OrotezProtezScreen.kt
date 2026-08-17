@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.orotezprotez.camera.CameraPermission
 import com.tamin.taminhamrah.feature.orotezprotez.camera.rememberCameraPermission
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezDocumentSourceSheet
 import com.tamin.taminhamrah.feature.orotezprotez.ui.components.OrotezProtezHeader
@@ -98,6 +99,8 @@ import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -168,13 +171,9 @@ fun OrotezProtezScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
-
-    // The document id an in-flight camera/gallery pick belongs to — set right before launching,
-    // read back (and cleared) once the platform picker returns.
     var pendingDocumentId by remember { mutableStateOf<String?>(null) }
     val cameraPermission = rememberCameraPermission()
     val cameraPermissionDeniedMessage = stringResource(Res.string.orotez_protez_document_camera_permission_error)
-
     val galleryLauncher = rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? ->
         val documentId = pendingDocumentId
         pendingDocumentId = null
@@ -190,40 +189,23 @@ fun OrotezProtezScreen(
         }
     }
 
-    viewModel.events.collectWithLifecycleAware { event ->
-        when (event) {
-            OrotezProtezEvent.NavigateBack -> onBackClicked()
-            is OrotezProtezEvent.LaunchImagePicker -> when (event.source) {
-                OrotezProtezImageSource.GALLERY -> {
-                    pendingDocumentId = event.documentId
-                    galleryLauncher.launch()
-                }
-                OrotezProtezImageSource.CAMERA -> {
-                    if (cameraPermission.granted) {
-                        pendingDocumentId = event.documentId
-                        cameraLauncher.launch()
-                    } else {
-                        // AVFoundation's permission callback can fire on a background queue on iOS —
-                        // hop back onto the composition's own dispatcher before touching Compose state.
-                        cameraPermission.request { granted ->
-                            scope.launch {
-                                if (granted) {
-                                    pendingDocumentId = event.documentId
-                                    cameraLauncher.launch()
-                                } else {
-                                    viewModel.sendIntent(
-                                        OrotezProtezIntent.OnDocumentImagePickFailed(cameraPermissionDeniedMessage),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    HandleOrotezProtezEvents(
+        events = viewModel.events,
+        cameraPermission = cameraPermission,
+        cameraPermissionDeniedMessage = cameraPermissionDeniedMessage,
+        scope = scope,
+        onBackClicked = onBackClicked,
+        onLaunchGallery = { documentId ->
+            pendingDocumentId = documentId
+            galleryLauncher.launch()
+        },
+        onLaunchCamera = { documentId ->
+            pendingDocumentId = documentId
+            cameraLauncher.launch()
+        },
+        onIntent = viewModel::sendIntent,
+    )
 
-    // Step 1's back leaves the feature; step 2/3's back returns to the previous step, keeping state.
     val handleBack: () -> Unit = {
         if (uiState.currentStep == OrotezProtezStep.UserSelection) {
             onBackClicked()
@@ -237,6 +219,42 @@ fun OrotezProtezScreen(
         onIntent = viewModel::sendIntent,
         onBackClicked = handleBack,
     )
+}
+
+@Composable
+fun HandleOrotezProtezEvents(
+    events: Flow<OrotezProtezEvent>,
+    cameraPermission: CameraPermission,
+    cameraPermissionDeniedMessage: String,
+    scope: CoroutineScope,
+    onBackClicked: () -> Unit,
+    onLaunchGallery: (documentId: String) -> Unit,
+    onLaunchCamera: (documentId: String) -> Unit,
+    onIntent: (OrotezProtezIntent) -> Unit,
+) {
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            OrotezProtezEvent.NavigateBack -> onBackClicked()
+            is OrotezProtezEvent.LaunchImagePicker -> when (event.source) {
+                OrotezProtezImageSource.GALLERY -> onLaunchGallery(event.documentId)
+                OrotezProtezImageSource.CAMERA -> {
+                    if (cameraPermission.granted) {
+                        onLaunchCamera(event.documentId)
+                    } else {
+                        cameraPermission.request { granted ->
+                            scope.launch {
+                                if (granted) {
+                                    onLaunchCamera(event.documentId)
+                                } else {
+                                    onIntent(OrotezProtezIntent.OnDocumentImagePickFailed(cameraPermissionDeniedMessage))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -353,7 +371,6 @@ private fun OrotezProtezContent(
             onConfirm = { year, month, day ->
                 onIntent(
                     OrotezProtezIntent.OnPrescriptionDatePicked(
-                        // Local midnight — the backend expects the device's own timezone here, not UTC.
                         millis = PersianDateFormatter.toEpochMillis(year, month, day),
                         label = PersianDateFormatter.format(year, month, day),
                     )
@@ -370,8 +387,6 @@ private fun OrotezProtezContent(
         onRetry = { onIntent(OrotezProtezIntent.LoadInitialData) },
     )
 }
-
-/** The stepper header, shared across all three steps and reflecting the real flow position. */
 @Composable
 private fun OrotezProtezStepIndicator(
     currentStep: OrotezProtezStep,
@@ -409,7 +424,6 @@ private fun OrotezProtezStepIndicator(
     )
 }
 
-/** Step 1 of the wizard: who the branch, insured person and prescription date are for. */
 @Composable
 private fun OrotezProtezUserStep(
     state: OrotezProtezUiState,
@@ -485,7 +499,6 @@ private val ShimmerLineHeight = 16.dp
 private const val ShimmerSubtitleWidthFraction = 0.7f
 private val ShimmerPickerRowHeight = 56.dp
 
-/** Shimmer placeholder for step 1 while the branch and insured-person options are loading. */
 @Composable
 private fun OrotezProtezUserStepShimmer(modifier: Modifier = Modifier) {
     Column(
@@ -538,11 +551,6 @@ private fun OrotezProtezUserStepShimmer(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Step 2 of the wizard: a read-only summary of the insured person selected in step 1.
- * Every value here is looked up from [OrotezProtezUiState.selectedInsuredDetail] — nothing is
- * re-entered or stored independently.
- */
 @Composable
 private fun OrotezProtezInsuredInfoStep(
     state: OrotezProtezUiState,
@@ -640,7 +648,6 @@ private fun OrotezProtezInsuredInfoStep(
     }
 }
 
-/** Square outline button placed next to the primary action, for a one-tap return to the previous step. */
 @Composable
 private fun OrotezProtezBackStepButton(
     onClick: () -> Unit,
@@ -666,7 +673,6 @@ private fun OrotezProtezBackStepButton(
     }
 }
 
-/** Step 3 of the wizard: the document upload checklist. */
 @Composable
 private fun OrotezProtezDocumentsStep(
     state: OrotezProtezUiState,
@@ -791,11 +797,6 @@ private fun OrotezProtezDocumentPreviewDialog(
     )
 }
 
-/**
- * One document slot. Renders the empty (dashed), uploading, uploaded (green) or failed (danger)
- * state, driven by [documentState]. Tapping the row always reopens the source sheet (camera /
- * gallery / remove); [onPreviewRequested] is a separate affordance shown only once a file exists.
- */
 @Composable
 private fun OrotezProtezDocumentCard(
     document: OrotezProtezDocumentUi,
@@ -806,13 +807,6 @@ private fun OrotezProtezDocumentCard(
 ) {
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.card)
-
-    // The wave-fill animation always plays once, all the way to the end of the card, before the
-    // card switches to its "uploaded" look — even if the network call finishes before the
-    // animation does. A failed upload bypasses this: errors surface immediately. Seeded from the
-    // current state (not hardcoded false) so a document that's already Uploaded when this card
-    // first enters composition — e.g. navigating back to this step — shows its finished state
-    // right away instead of replaying the fill animation from scratch.
     var fillAnimationComplete by remember(document.id) {
         mutableStateOf(documentState is OrotezProtezDocumentState.Uploaded)
     }
@@ -966,13 +960,6 @@ private val LiquidWaveAmplitudeMax = 8.dp
 private const val LiquidWaveSampleCount = 32
 private const val LiquidFillDurationMillis = 1600
 
-/**
- * One-shot liquid-fill effect: a solid band that grows from the card's right edge all the way to
- * its left edge exactly once, bounded by a sinusoidal "water surface" edge that keeps wiggling as
- * it advances. Used as a background overlay while a document is
- * [OrotezProtezDocumentState.Uploading]; [onFillComplete] fires once the fill reaches the far
- * edge, so the caller can hold off switching to the "uploaded" look until the animation is done.
- */
 @Composable
 private fun LiquidWaveProgressBar(
     modifier: Modifier = Modifier,
@@ -1012,9 +999,6 @@ private fun LiquidWaveProgressBar(
 
         fun edgeX(y: Float): Float =
             leadingEdgeX + amplitude * sin((y / waveLength) * 2f * PI.toFloat() + wavePhase)
-
-        // `buildList`'s receiver is a MutableList, whose own `size: Int` would shadow
-        // DrawScope's `size: Size` here — canvasHeight above avoids relying on that name.
         val edgeYs = buildList {
             var y = 0f
             while (y < canvasHeight) {
