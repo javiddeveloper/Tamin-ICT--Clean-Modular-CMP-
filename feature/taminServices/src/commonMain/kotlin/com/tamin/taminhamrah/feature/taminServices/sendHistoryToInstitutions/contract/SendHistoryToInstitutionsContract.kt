@@ -12,14 +12,12 @@ data class SendHistoryToInstitutionsUiState(
     val isType1Selected: Boolean = false,
     val isType2Selected: Boolean = false,
     val isType3Selected: Boolean = false,
-    val userInfo: UserInfoPR? = null,
-    val error: String? = null
+    val userInfo: UserInfoPR? = null
 ) {
     val hasAnyTypeSelected: Boolean get() = isType1Selected || isType2Selected || isType3Selected
 
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
-        data class Error(val message: String?) : PartialState
         data class UserInfoLoaded(val userInfo: UserInfoPR) : PartialState
         data class SetTypes(val type1: Boolean, val type2: Boolean, val type3: Boolean) : PartialState
         data object GoToNextStep : PartialState

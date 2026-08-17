@@ -81,68 +81,72 @@ internal fun SelectTypeStep(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(color = taminColors.bgSurface)
-                .border(1.dp, taminColors.border, RoundedCornerShape(18.dp))
-                .clickable { showSheet = true }
-                .padding(horizontal = Spacing.md, vertical = Spacing.smd),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            if (selectedIndices.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.send_history_select_type_placeholder),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = taminColors.textMuted
-                )
-            } else {
-                FlowRow(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = Spacing.xs),
-                    maxItemsInEachRow = 3,
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.Start),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
-                ) {
-                    selectedIndices.forEach { index ->
-                        HistoryTypeChip(
-                            label = typeLabels[index],
-                            bgColor = typeColors[index],
-                            textColor = typeTextColors[index]
-                        )
+        if (uiState.isLoading && uiState.userInfo == null) {
+            SendToInstitutionSkeleton()
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(color = taminColors.bgSurface)
+                    .border(1.dp, taminColors.border, RoundedCornerShape(18.dp))
+                    .clickable { showSheet = true }
+                    .padding(horizontal = Spacing.md, vertical = Spacing.smd),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (selectedIndices.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.send_history_select_type_placeholder),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = taminColors.textMuted
+                    )
+                } else {
+                    FlowRow(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = Spacing.xs),
+                        maxItemsInEachRow = 3,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.Start),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                    ) {
+                        selectedIndices.forEach { index ->
+                            HistoryTypeChip(
+                                label = typeLabels[index],
+                                bgColor = typeColors[index],
+                                textColor = typeTextColors[index]
+                            )
+                        }
                     }
                 }
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                    contentDescription = null,
+                    tint = taminColors.chevron,
+                    modifier = Modifier.size(20.dp).rotate(270f)
+                )
             }
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                contentDescription = null,
-                tint = taminColors.chevron,
-                modifier = Modifier.size(20.dp).rotate(270f)
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            Text(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                text = stringResource(Res.string.send_history_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = taminColors.textSecondary,
+                textAlign = TextAlign.Justify
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.xl))
+
+            TaminFilledButton(
+                text = stringResource(Res.string.send_history_next_step),
+                icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                onClick = { onIntent(SendHistoryToInstitutionsIntent.GoToNextStep) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = uiState.hasAnyTypeSelected
             )
         }
-
-        Spacer(modifier = Modifier.height(Spacing.lg))
-
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            text = stringResource(Res.string.send_history_disclaimer),
-            style = MaterialTheme.typography.bodySmall,
-            color = taminColors.textSecondary,
-            textAlign = TextAlign.Justify
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.xl))
-
-        TaminFilledButton(
-            text = stringResource(Res.string.send_history_next_step),
-            icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            onClick = { onIntent(SendHistoryToInstitutionsIntent.GoToNextStep) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.hasAnyTypeSelected
-        )
 
         Spacer(modifier = Modifier.height(Spacing.lg))
     }

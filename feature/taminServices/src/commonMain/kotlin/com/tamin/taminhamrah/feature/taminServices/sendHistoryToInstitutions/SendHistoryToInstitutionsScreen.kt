@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,8 @@ import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.send_history_subtitle
 import taminx.core.core_ui.send_history_title
+import taminx.core.core_ui.send_history_step_type
+import taminx.core.core_ui.send_history_step_confirm
 import taminx.core.core_ui.send_history_type_all
 import taminx.core.core_ui.send_history_type_combined
 import taminx.core.core_ui.send_history_type_wages
@@ -72,6 +75,10 @@ fun SendHistoryToInstitutionsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
     var showSuccessModal by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(SendHistoryToInstitutionsIntent.LoadUserInfo)
+    }
 
     HandleSendHistoryEvents(
         events = viewModel.events,
@@ -134,10 +141,12 @@ private fun SendHistoryContent(
     )
     val typeTextColors = listOf(taminColors.greenText, taminColors.blueText, taminColors.fuchsiaBlue)
 
-    val steps = remember(uiState.currentStep) {
+    val step1Title = stringResource(Res.string.send_history_step_type)
+    val step2Title = stringResource(Res.string.send_history_step_confirm)
+    val steps = remember(uiState.currentStep, step1Title, step2Title) {
         persistentListOf(
             StepIndicatorModel(
-                title = "نوع سابقه",
+                title = step1Title,
                 stepNumber = "۱",
                 state = when (uiState.currentStep) {
                     SendHistoryStep.SelectType -> StepState.Active
@@ -145,7 +154,7 @@ private fun SendHistoryContent(
                 }
             ),
             StepIndicatorModel(
-                title = "تأیید و ارسال",
+                title = step2Title,
                 stepNumber = "۲",
                 state = when (uiState.currentStep) {
                     SendHistoryStep.SelectType -> StepState.Inactive

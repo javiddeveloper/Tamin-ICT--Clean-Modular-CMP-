@@ -31,13 +31,8 @@ class SendHistoryToInstitutionsViewModel(
 
     private fun handleLoadUserInfo(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        try {
-            val userInfo = getUserInfosUseCase()
-            emit(PartialState.UserInfoLoaded(userInfo.toPresentation()))
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-            sendEvent(SendHistoryToInstitutionsEvent.ShowToast(e.message ?: ""))
-        }
+        val userInfo = getUserInfosUseCase()
+        emit(PartialState.UserInfoLoaded(userInfo.toPresentation()))
     }
 
     private fun handleConfirmTypeSelection(type1: Boolean, type2: Boolean, type3: Boolean): Flow<PartialState> = flow {
@@ -46,14 +41,6 @@ class SendHistoryToInstitutionsViewModel(
 
     private fun handleGoToNextStep(): Flow<PartialState> = flow {
         emit(PartialState.GoToNextStep)
-        emit(PartialState.Loading(true))
-        try {
-            val userInfo = getUserInfosUseCase()
-            emit(PartialState.UserInfoLoaded(userInfo.toPresentation()))
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-            sendEvent(SendHistoryToInstitutionsEvent.ShowToast(e.message ?: ""))
-        }
     }
 
     private fun handleGoToPreviousStep(): Flow<PartialState> = flow {
@@ -63,22 +50,16 @@ class SendHistoryToInstitutionsViewModel(
     private fun handleSendToInstitution(): Flow<PartialState> = flow {
         val state = uiState.value
         emit(PartialState.Loading(true))
-        try {
-            sendToInstitutionUseCase(state.isType1Selected, state.isType2Selected, state.isType3Selected)
-            emit(PartialState.Loading(false))
-            sendEvent(SendHistoryToInstitutionsEvent.DisplaySuccessModal)
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-            sendEvent(SendHistoryToInstitutionsEvent.ShowToast(e.message ?: ""))
-        }
+        sendToInstitutionUseCase(state.isType1Selected, state.isType2Selected, state.isType3Selected)
+        emit(PartialState.Loading(false))
+        sendEvent(SendHistoryToInstitutionsEvent.DisplaySuccessModal)
     }
 
     override fun reduceState(
         currentState: SendHistoryToInstitutionsUiState,
         partialState: PartialState
     ): SendHistoryToInstitutionsUiState = when (partialState) {
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
-        is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
+        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
         is PartialState.UserInfoLoaded -> currentState.copy(isLoading = false, userInfo = partialState.userInfo)
         is PartialState.SetTypes -> currentState.copy(
             isType1Selected = partialState.type1,
@@ -89,6 +70,8 @@ class SendHistoryToInstitutionsViewModel(
         is PartialState.GoToPreviousStep -> currentState.copy(currentStep = SendHistoryStep.SelectType)
     }
 
-    override fun createErrorState(message: String): PartialState =
-        PartialState.Error(message)
+    override fun createErrorState(message: String): PartialState {
+        sendEvent(SendHistoryToInstitutionsEvent.ShowToast(message))
+        return PartialState.Loading(false)
+    }
 }

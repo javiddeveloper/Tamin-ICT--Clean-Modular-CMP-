@@ -85,61 +85,57 @@ internal fun ReviewStep(
                 .border(1.dp, taminColors.border, RoundedCornerShape(18.dp))
                 .padding(Spacing.md)
         ) {
-            if (uiState.isLoading && uiState.userInfo == null) {
-                SendToInstitutionSkeleton()
-            } else {
-                uiState.userInfo?.let { user ->
-                    DetailRow(
-                        verticalPadding = 12.dp,
-                        label = stringResource(Res.string.send_history_label_full_name),
-                        value = "${user.firstName} ${user.lastName}",
-                        numeric = false
-                    )
-                    TaminDivider()
-                    DetailRow(
-                        verticalPadding = 12.dp,
-                        label = stringResource(Res.string.send_history_label_insurance_number),
-                        value = user.insuranceNumber
-                    )
-                    TaminDivider()
-                }
+            uiState.userInfo?.let { user ->
                 DetailRow(
                     verticalPadding = 12.dp,
-                    label = stringResource(Res.string.send_history_label_destination),
-                    value = stringResource(Res.string.send_history_destination_value),
+                    label = stringResource(Res.string.send_history_label_full_name),
+                    value = "${user.firstName} ${user.lastName}",
                     numeric = false
                 )
                 TaminDivider()
-
-                Text(
-                    text = stringResource(Res.string.send_history_label_selected_type),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textMuted,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = Spacing.xs),
-                    textAlign = TextAlign.Start
+                DetailRow(
+                    verticalPadding = 12.dp,
+                    label = stringResource(Res.string.send_history_label_insurance_number),
+                    value = user.insuranceNumber
                 )
+                TaminDivider()
+            }
+            DetailRow(
+                verticalPadding = 12.dp,
+                label = stringResource(Res.string.send_history_label_destination),
+                value = stringResource(Res.string.send_history_destination_value),
+                numeric = false
+            )
+            TaminDivider()
 
-                val selectedIndices = buildList {
-                    if (uiState.isType1Selected) add(0)
-                    if (uiState.isType2Selected) add(1)
-                    if (uiState.isType3Selected) add(2)
-                }
+            Text(
+                text = stringResource(Res.string.send_history_label_selected_type),
+                style = MaterialTheme.typography.bodySmall,
+                color = taminColors.textMuted,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.xs),
+                textAlign = TextAlign.Start
+            )
 
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
-                ) {
-                    selectedIndices.forEach { index ->
-                        HistoryTypeChip(
-                            label = typeLabels[index],
-                            bgColor = typeColors[index],
-                            textColor = typeTextColors[index],
-                            modifier = Modifier.padding(start = Spacing.xs)
-                        )
-                    }
+            val selectedIndices = buildList {
+                if (uiState.isType1Selected) add(0)
+                if (uiState.isType2Selected) add(1)
+                if (uiState.isType3Selected) add(2)
+            }
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            ) {
+                selectedIndices.forEach { index ->
+                    HistoryTypeChip(
+                        label = typeLabels[index],
+                        bgColor = typeColors[index],
+                        textColor = typeTextColors[index],
+                        modifier = Modifier.padding(start = Spacing.xs)
+                    )
                 }
             }
         }
