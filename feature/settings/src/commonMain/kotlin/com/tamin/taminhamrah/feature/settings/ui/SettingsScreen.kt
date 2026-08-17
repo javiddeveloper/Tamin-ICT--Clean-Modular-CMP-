@@ -81,14 +81,17 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.ic_font_scale
 import taminx.core.core_ui.ic_moon
+import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_sun
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.profile_settings
 import taminx.core.core_ui.settings_appearance_section
+import taminx.core.core_ui.settings_follow_system
 import taminx.core.core_ui.settings_font_size
 import taminx.core.core_ui.settings_font_size_large
 import taminx.core.core_ui.settings_font_size_medium
 import taminx.core.core_ui.settings_font_size_small
+import taminx.core.core_ui.settings_font_title
 import taminx.core.core_ui.settings_night_mode
 
 @Composable
@@ -178,6 +181,7 @@ private fun SettingsContent(
                                 TaminSwitchButton(
                                     checked = isDark,
                                     onCheckedChange = { onIntent(SettingsIntent.ToggleNightMode(it)) },
+                                    enabled = !state.isFollowSystem,
                                     showThemeIcon = true,
                                 )
                             },
@@ -186,6 +190,28 @@ private fun SettingsContent(
                                 leadingIconTintColor = colors.iconTintSubtle
                             )
                         ),
+                        ListItemData(
+                            title = stringResource(Res.string.settings_follow_system),
+                            leadingIconPainter = painterResource(Res.drawable.ic_setting),
+                            showArrow = false,
+                            customTrailingContent = {
+                                TaminSwitchButton(
+                                    checked = state.isFollowSystem,
+                                    onCheckedChange = { onIntent(SettingsIntent.ToggleFollowSystem(it)) },
+                                )
+                            },
+                            colors = ListItemColors(
+                                leadingIconBackgroundColor = colors.iconBgSubtle,
+                                leadingIconTintColor = colors.iconTintSubtle
+                            )
+                        ),
+                    ),
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                SectionHeaderTitle(title = stringResource(Res.string.settings_font_title))
+                ListGroupView(
+                    containerBorder = defaultBorder,
+                    items = persistentListOf(
                         ListItemData(
                             title = stringResource(Res.string.settings_font_size),
                             leadingIconPainter = painterResource(Res.drawable.ic_font_scale),

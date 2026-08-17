@@ -30,17 +30,31 @@ class SettingsViewModel(
                 sendIntent(SettingsIntent.UpdateFontSize(fontSize))
             }
         }
+        viewModelScope.launch {
+            userPreferencesRepository.observeDarkThemeConfig.collect { config ->
+                sendIntent(SettingsIntent.UpdateFollowSystem(config == DarkThemeConfig.FOLLOW_SYSTEM))
+            }
+        }
     }
 
     override fun handleIntent(intent: SettingsIntent): Flow<PartialState> = when (intent) {
         is SettingsIntent.ToggleNightMode -> handleToggleNightMode(intent.isDark)
+        is SettingsIntent.ToggleFollowSystem -> handleToggleFollowSystem(intent.enabled)
         is SettingsIntent.SelectFontSize -> handleSelectFontSize(intent.option)
         is SettingsIntent.UpdateFontSize -> flow { emit(PartialState.SetFontSize(intent.fontSize)) }
+        is SettingsIntent.UpdateFollowSystem -> flow { emit(PartialState.SetFollowSystem(intent.isFollowSystem)) }
         SettingsIntent.OnBackClicked -> flow { sendEvent(SettingsEvent.NavigateBack) }
     }
     private fun handleToggleNightMode(isDark: Boolean): Flow<PartialState> {
         viewModelScope.launch {
             val config = if (isDark) DarkThemeConfig.DARK else DarkThemeConfig.LIGHT
+            setThemeUseCase(config)
+        }
+        return emptyFlow()
+    }
+    private fun handleToggleFollowSystem(enabled: Boolean): Flow<PartialState> {
+        viewModelScope.launch {
+            val config = if (enabled) DarkThemeConfig.FOLLOW_SYSTEM else DarkThemeConfig.LIGHT
             setThemeUseCase(config)
         }
         return emptyFlow()
@@ -55,6 +69,7 @@ class SettingsViewModel(
         partialState: PartialState
     ): SettingsUiState = when (partialState) {
         is PartialState.SetFontSize -> currentState.copy(fontSize = partialState.fontSize)
+        is PartialState.SetFollowSystem -> currentState.copy(isFollowSystem = partialState.isFollowSystem)
         PartialState.NoOp -> currentState
     }
 
