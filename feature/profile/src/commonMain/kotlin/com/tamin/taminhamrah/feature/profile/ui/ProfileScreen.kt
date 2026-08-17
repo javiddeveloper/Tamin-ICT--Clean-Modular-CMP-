@@ -125,6 +125,7 @@ fun ProfileScreen(
     onNavigateToElectronicFile: () -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToActiveRelation: () -> Unit = {},
+    onNavigateToDependentsList: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
@@ -158,6 +159,7 @@ fun ProfileScreen(
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToSecurity = onNavigateToSecurity,
+        onNavigateToDependentsList = onNavigateToDependentsList,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -180,6 +182,7 @@ fun HandleProfileEvents(
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
     onNavigateToActiveRelation: () -> Unit,
+    onNavigateToDependentsList: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
@@ -212,6 +215,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToActiveRelation -> {
                 onNavigateToActiveRelation()
+            }
+
+            ProfileEvent.NavigateToDependentsList -> {
+                onNavigateToDependentsList()
             }
 
             ProfileEvent.NavigateToChangeMobile -> {
@@ -418,7 +425,7 @@ fun ProfileContent(
                                     textColor = taminColors.blueText
                                 ),
                                 showArrow = true,
-                                onClick = { onIntent(ProfileIntent.LoadSubDominants) }
+                                onClick = { onIntent(ProfileIntent.NavigateToDependentsList) }
                             ),
                             ListItemData(
                                 title = stringResource(Res.string.profile_active_relation),

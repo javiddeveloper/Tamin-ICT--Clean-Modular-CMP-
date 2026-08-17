@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Personal(
-    @SerialName("dateOfBirth") val dateOfBirth: String? = null,
+    @SerialName("dateOfBirth") val dateOfBirthTimestamp: Long? = null,
+    @SerialName("fatherName") val fatherName: String? = null,
     @SerialName("firstName") val firstName: String? = null,
     @SerialName("gender") val gender: Gender? = null,
     @SerialName("idCardNumber") val idCardNumber: String? = null,
@@ -13,5 +14,4 @@ data class Personal(
     @SerialName("idCardSerial2") val idCardSerial2: String? = null,
     @SerialName("lastName") val lastName: String? = null,
     @SerialName("nationalId") val nationalId: String? = null,
-    @SerialName("subDominant") val subDominant: SubDominant? = null,
 )

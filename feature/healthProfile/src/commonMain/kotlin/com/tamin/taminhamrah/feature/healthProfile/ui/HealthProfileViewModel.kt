@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.feature.healthProfile.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.*
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.healthProfile.ui.mapper.*
@@ -143,19 +143,19 @@ class HealthProfileViewModel(
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val type = currentDiseases.activeBottomSheet
                 val reverted = when (type) {
-                    BottomSheetType.ILLNESS_HISTORY ->
+                    TaminBottomSheetType.ILLNESS_HISTORY ->
                         if (currentDiseases.chronicDiseaseIds.isEmpty()) currentDiseases.copy(
                             hasChronicDisease = false
                         )
                         else currentDiseases
 
-                    BottomSheetType.MENTAL ->
+                    TaminBottomSheetType.MENTAL ->
                         if (currentDiseases.mentalIllnessIds.isEmpty()) currentDiseases.copy(
                             hasMentalIllness = false
                         )
                         else currentDiseases
 
-                    BottomSheetType.CANCER ->
+                    TaminBottomSheetType.CANCER ->
                         if (currentDiseases.cancerIds.isEmpty()) currentDiseases.copy(hasCancer = false)
                         else currentDiseases
 
@@ -167,22 +167,22 @@ class HealthProfileViewModel(
             is HealthProfileIntent.SetDiseaseAnswer -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val updatedDiseases = when (intent.type) {
-                    BottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(
+                    TaminBottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(
                         hasChronicDisease = intent.isYes,
                         chronicDiseaseIds = if (!intent.isYes) emptySet() else currentDiseases.chronicDiseaseIds,
-                        activeBottomSheet = if (intent.isYes) BottomSheetType.ILLNESS_HISTORY else null
+                        activeBottomSheet = if (intent.isYes) TaminBottomSheetType.ILLNESS_HISTORY else null
                     )
 
-                    BottomSheetType.MENTAL -> currentDiseases.copy(
+                    TaminBottomSheetType.MENTAL -> currentDiseases.copy(
                         hasMentalIllness = intent.isYes,
                         mentalIllnessIds = if (!intent.isYes) emptySet() else currentDiseases.mentalIllnessIds,
-                        activeBottomSheet = if (intent.isYes) BottomSheetType.MENTAL else null
+                        activeBottomSheet = if (intent.isYes) TaminBottomSheetType.MENTAL else null
                     )
 
-                    BottomSheetType.CANCER -> currentDiseases.copy(
+                    TaminBottomSheetType.CANCER -> currentDiseases.copy(
                         hasCancer = intent.isYes,
                         cancerIds = if (!intent.isYes) emptySet() else currentDiseases.cancerIds,
-                        activeBottomSheet = if (intent.isYes) BottomSheetType.CANCER else null
+                        activeBottomSheet = if (intent.isYes) TaminBottomSheetType.CANCER else null
                     )
 
                     else -> currentDiseases
@@ -193,22 +193,22 @@ class HealthProfileViewModel(
             is HealthProfileIntent.UpdateDiseaseSelections -> flow {
                 val currentDiseases = uiState.value.selfDeclaration.diseases
                 val updatedDiseases = when (intent.type) {
-                    BottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(
+                    TaminBottomSheetType.ILLNESS_HISTORY -> currentDiseases.copy(
                         chronicDiseaseIds = intent.selectedIds,
                         hasChronicDisease = intent.selectedIds.isNotEmpty()
                     )
 
-                    BottomSheetType.MENTAL -> currentDiseases.copy(
+                    TaminBottomSheetType.MENTAL -> currentDiseases.copy(
                         mentalIllnessIds = intent.selectedIds,
                         hasMentalIllness = intent.selectedIds.isNotEmpty()
                     )
 
-                    BottomSheetType.CANCER -> currentDiseases.copy(
+                    TaminBottomSheetType.CANCER -> currentDiseases.copy(
                         cancerIds = intent.selectedIds,
                         hasCancer = intent.selectedIds.isNotEmpty()
                     )
 
-                    BottomSheetType.RISK_FACTOR -> currentDiseases.copy(riskFactorIds = intent.selectedIds)
+                    TaminBottomSheetType.RISK_FACTOR -> currentDiseases.copy(riskFactorIds = intent.selectedIds)
                     else -> currentDiseases
                 }
                 emit(PartialState.DiseasesUpdated(updatedDiseases))
