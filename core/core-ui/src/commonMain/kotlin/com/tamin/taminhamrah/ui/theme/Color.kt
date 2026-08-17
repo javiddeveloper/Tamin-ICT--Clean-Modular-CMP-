@@ -308,16 +308,3 @@ val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
 val TaminOnAccentFillStrong = TaminOnAccentInk.copy(alpha = 0.16f)
 val TaminOnAccentBorder = TaminOnAccentInk.copy(alpha = 0.18f)
 
-/* ---- Ink on accent surfaces ------------------------------------------------------------------ */
-
-/**
- * White at the strengths the design uses on a filled or gradient surface — a hero subtitle over the
- * header bar, a label on a teal button.
- *
- * These do not vary by theme, and that is the point: the surface underneath is the brand gradient
- * in both, so the ink on it has to be white in both. Reaching for a *background* token here instead
- * — `bgSurface` is white in light — reads correctly until the day someone opens the app in dark and
- * finds the text has gone navy on teal.
- */
-val TaminOnAccentInk = Color(0xFFFFFFFF)
-val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
