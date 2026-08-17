@@ -619,7 +619,6 @@ private fun RecordsShimmerSkeleton() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
                     .raisedCard(CornerRadius.cardCompact)
                     .height(TreatmentDimens.recordsFooterSpacer)
                     .shimmer(),
