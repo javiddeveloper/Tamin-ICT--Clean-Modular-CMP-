@@ -148,6 +148,7 @@ import taminx.core.core_ui.orotez_protez_submit_request
 import taminx.core.core_ui.orotez_protez_submit_success_fallback
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_check
 import taminx.core.core_ui.ic_check_label
@@ -474,7 +475,7 @@ private fun OrotezProtezUserStep(
             onClick = { onIntent(OrotezProtezIntent.OnNextStepClicked) },
             enabled = state.canGoNext,
             icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-            iconPosition = IconPosition.Start,
+            iconPosition = LoadingButtonIconPosition.TRAILING,
         )
     }
 }
@@ -633,7 +634,7 @@ private fun OrotezProtezInsuredInfoStep(
                 onClick = { onIntent(OrotezProtezIntent.OnConfirmInsuredInfoClicked) },
                 enabled = detail != null,
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                iconPosition = IconPosition.Start,
+                iconPosition = LoadingButtonIconPosition.TRAILING,
             )
         }
     }
