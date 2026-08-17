@@ -1,12 +1,17 @@
 package com.tamin.taminhamrah.model.workshop
 
 import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
 
+/** One کارکنان row. */
 @Immutable
-@Serializable
 data class WorkshopMemberPR(
-    val leavingWorkStatus: String?,
-    val leavingWorkDate: String?,
-    val specialSubType: String?
+    val insuranceNumber: String = "",
+    val fullName: String = "",
+    val nationalId: String = "",
+    val idCardNumber: String = "",
+    val fatherName: String = "",
+    val nationality: String = "",
+    val relationType: String = "",
+    val leavingWorkStatus: String = "",
+    val leavingWorkDate: String = "",
 )

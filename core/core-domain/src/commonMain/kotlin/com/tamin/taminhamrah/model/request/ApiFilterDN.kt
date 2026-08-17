@@ -73,6 +73,21 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchName") BRANCH_NAME("branchName"),
     @SerialName("target") TARGET("target"),
     @SerialName("statusCode") STATUS_CODE("statusCode"),
+
+    // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
+    // two people-columns under a different prefix, which is why there is one entry per list
+    // rather than a shared "nationalId".
+    @SerialName("insurance.id") INSURANCE_ID("insurance.id"),
+    @SerialName("insurance.nationalId") INSURANCE_NATIONAL_ID("insurance.nationalId"),
+    @SerialName("personal.nationalId") PERSONAL_NATIONAL_ID("personal.nationalId"),
+    @SerialName("personal.request.status.requestCode")
+    PERSONAL_REQUEST_STATUS_CODE("personal.request.status.requestCode"),
+
+    /** The branch, on the `employers` list only — every other workshop list calls it a branch code. */
+    @SerialName("organizationId") ORGANIZATION_ID("organizationId"),
+
+    @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
+    @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
 }
 
 @Serializable

@@ -1,18 +1,14 @@
 package com.tamin.taminhamrah.model.workshop
 
+/** One ذینفع row of a workshop. [birthDate] is epoch millis. */
 data class WorkshopStackHolderDN(
-    val stackId: Int,
-    val mobile: String,
-    val birthDate: Long,
-    val telephon: String,
-    val userId: String,
-    val nationalId: String,
-    val stackType: String,
-    val startDate: Long,
-    val email: String
-)
-
-data class WorkshopStackHolderListDN(
-    val list: List<WorkshopStackHolderDN>,
-    val total: Int
-)
+    val stackId: Int? = null,
+    val nationalId: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val fatherName: String = "",
+    val birthDate: Long? = null,
+    val stackType: String = "",
+) {
+    val fullName: String get() = listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(" ")
+}

@@ -1,16 +1,41 @@
 package com.tamin.taminhamrah.model.workshop
 
 import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
 
-
+/**
+ * One بدهی row, shown by both the payable list and the objectionable list.
+ *
+ * [debitNumber] stays raw because it addresses documents, PDFs and the payment call;
+ * [debitNumberLabel] is the same value as the row prints it.
+ */
 @Immutable
-@Serializable
 data class WorkShopDebtPR(
-    val rowNum: Long?,
-    val debitNumber: String?,
-    val debitAmount: Long?,
-    val debitRemain: Long?,
-    val debitCreateReasonDesc: String?,
-    val debitStatDesc: String?
+    val debitNumber: String = "",
+    val debitNumberLabel: String = "",
+    val agreementRow: String = "",
+    val notifyDate: String = "",
+    val customerCode: String = "",
+    val amount: String = "",
+    val remainingAmount: String = "",
+    val fromDate: String = "",
+    val toDate: String = "",
+    /** The بدوی vote block is only part of the row when the service sent a vote number. */
+    val hasPrimaryVote: Boolean = false,
+    val primaryVoteNumber: String = "",
+    val primaryVoteDate: String = "",
+    val objectionKind: ObjectionKind = ObjectionKind.FILED,
+    /** Addresses the filed objection's PDF; null while no objection has been filed. */
+    val objectionSeqNo: Long? = null,
+)
+
+/** One سند مطالبه of a debt. */
+@Immutable
+data class WorkshopDemandDocPR(
+    val docNumber: String = "",
+    val docNumberLabel: String = "",
+    val docDate: String = "",
+    val docType: String = "",
+    val step: String = "",
+    val state: String = "",
+    val isViewable: Boolean = false,
 )

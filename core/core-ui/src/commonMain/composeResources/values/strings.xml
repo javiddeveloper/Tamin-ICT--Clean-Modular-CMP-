@@ -482,5 +482,139 @@
     <string name="error_cancel_license_message">لغو مجوز با خطا مواجه شد</string>
     <string name="error_issue_license_message">صدور مجوز با خطا مواجه شد</string>
     <string name="error_unknown_fallback">Unknown Error</string>
+
+    <!-- کارگاه‌های کارفرما — the workshop list and everything it launches -->
+    <string name="workshop_list_title">لیست کارگاه ها</string>
+    <string name="workshop_search_title">جستجوی کارگاه</string>
+    <string name="workshop_code">کد کارگاه</string>
+    <string name="workshop_name">نام کارگاه</string>
+    <string name="workshop_branch_code">کد شعبه</string>
+    <string name="workshop_branch_name">نام شعبه</string>
+    <string name="workshop_search">جستجو</string>
+    <string name="workshop_all_items">همه موارد</string>
+    <string name="workshop_show_detail">نمایش جزئیات</string>
+    <string name="workshop_hide_detail">مخفی کردن جزئیات</string>
+    <string name="workshop_actions">عملیات</string>
+    <string name="workshop_employer_type">نوع کارفرما</string>
+    <string name="workshop_start_activity_date">تاریخ شروع فعالیت</string>
+    <string name="workshop_activity_type">نوع فعالیت</string>
+    <string name="workshop_register_date">تاریخ ثبت کارگاه</string>
+    <string name="workshop_approve_date">تاریخ تایید کارگاه</string>
+    <string name="workshop_status_label">وضعیت: %1$s</string>
+    <string name="workshop_filter_title">فیلتر براساس فعالیت کارگاه</string>
+    <string name="workshop_select">انتخاب نمایید</string>
+    <string name="workshop_filter_clear">حذف فیلتر</string>
+    <string name="workshop_status_active">فعال</string>
+    <string name="workshop_status_semi_active">نیمه فعال</string>
+    <string name="workshop_status_inactive">غیر فعال</string>
+    <string name="workshop_empty_list">نتیجه‌ای یافت نشد</string>
+    <string name="workshop_error_receive_data">خطا در دریافت اطلاعات</string>
+    <string name="workshop_error_receive_file">خطا در دریافت فایل</string>
+    <string name="workshop_no_debt_found">لیست بدهی برای این کارگاه یافت نشد.</string>
+
+    <!-- Action menu -->
+    <string name="workshop_action_payment_sheets">برگ پرداخت‌ها</string>
+    <string name="workshop_action_debit_turnover">جزئیات محاسبه گردش حساب بدهی</string>
+    <string name="workshop_action_debt_inquiry">استعلام بدهی کارگاه</string>
+    <string name="workshop_action_objection">اعتراض به بدهی</string>
+    <string name="workshop_action_new_member">نام نویسی غیر حضوری بیمه شده</string>
+    <string name="workshop_action_article16">رسیدگی به بدهی ماده ۱۶</string>
+    <string name="workshop_action_members">کارکنان</string>
+    <string name="workshop_action_stackholders">ذینفعان</string>
+
+    <!-- برگ پرداخت‌ها -->
+    <string name="payment_sheet_debit_number">شماره بدهی</string>
+    <string name="payment_sheet_collect_date">تاریخ وصولی</string>
+    <string name="payment_sheet_amount">مبلغ</string>
+    <string name="payment_sheet_agreement_row">ردیف پیمان</string>
+    <string name="payment_sheet_status">وضعیت</string>
+    <string name="payment_sheet_issue_date">تاریخ صدور</string>
+    <string name="payment_sheet_pay_kind">نحوه پرداخت</string>
+    <string name="payment_sheet_debit_reason">علت ایجاد بدهی</string>
+    <string name="payment_sheet_document_number">شماره اوراق</string>
+    <string name="payment_sheet_type">نوع برگ پرداخت</string>
+    <string name="payment_sheet_type_void">باطل</string>
+    <string name="payment_sheet_type_collected">وصول</string>
+    <string name="payment_sheet_type_effective">موثر</string>
+    <string name="payment_sheet_number_from">از شماره</string>
+    <string name="payment_sheet_number_to">تا شماره</string>
+    <string name="payment_sheet_date_from">از تاریخ</string>
+    <string name="payment_sheet_date_to">تا تاریخ</string>
+
+    <!-- بدهی کارگاه -->
+    <string name="workshop_debt_notify_date">تاریخ ابلاغ</string>
+    <string name="workshop_debt_customer_code">کد طرف حساب</string>
+    <string name="workshop_debt_amount">مبلغ بدهی</string>
+    <string name="workshop_debt_remaining">مبلغ مانده بدهی</string>
+    <string name="workshop_debt_from_date">از تاریخ</string>
+    <string name="workshop_debt_to_date">تا تاریخ</string>
+    <string name="workshop_debt_primary_vote_number">شماره رای هیات بدوی</string>
+    <string name="workshop_debt_primary_vote_date">تاریخ رای هیات بدوی</string>
+    <string name="workshop_debt_documents">مشاهده اسناد مطالبه</string>
+    <string name="workshop_debt_pay">پرداخت بدهی</string>
+    <string name="workshop_debt_payment_refused">پرداخت غیرحضوری این بدهی امکان‌پذیر نیست.</string>
+    <string name="workshop_demand_doc_number">شماره سند</string>
+    <string name="workshop_demand_doc_date">تاریخ</string>
+    <string name="workshop_demand_doc_type">شرح نوع سند</string>
+    <string name="workshop_demand_doc_step">مرحله</string>
+    <string name="workshop_demand_doc_state">وضعیت</string>
+    <string name="workshop_demand_doc_calculation">مشاهده جزئیات محاسبه</string>
+
+    <!-- استعلام بدهی -->
+    <string name="workshop_inquiry_result">وضعیت بدهی</string>
+    <string name="workshop_inquiry_date">تاریخ</string>
+    <string name="workshop_inquiry_definitive">بدهی قطعی</string>
+    <string name="workshop_inquiry_divisible">قابل تقسیط</string>
+    <string name="workshop_inquiry_indivisible">غیر قابل تقسیط</string>
+
+    <!-- اعتراض به بدهی -->
+    <string name="objection_estimate">اعتراض به بدهی برآوردی</string>
+    <string name="objection_primary_vote">اعتراض به رای هیئت بدوی</string>
+    <string name="objection_view">مشاهده اعتراض</string>
+    <string name="objection_expired">مهلت اعتراض به این بدهی به پایان رسیده است.</string>
+
+    <!-- نام نویسی غیر حضوری -->
+    <string name="new_member_national_id">شماره ملی</string>
+    <string name="new_member_full_name">نام و نام خانوادگی</string>
+    <string name="new_member_birth_date">تاریخ تولد</string>
+    <string name="new_member_insurance_number">شماره بیمه</string>
+    <string name="new_member_register_date">تاریخ ثبت</string>
+    <string name="new_member_status">وضعیت نام نویسی</string>
+    <string name="new_member_confirm">تایید</string>
+    <string name="new_member_edit">مشاهده و ویرایش</string>
+    <string name="new_member_delete">حذف</string>
+    <string name="new_member_follow">پیگیری</string>
+    <string name="new_member_cannot_edit">این درخواست ثبت شده است و قابل تغییر نیست.</string>
+    <string name="new_member_confirmed">درخواست با کد رهگیری %1$s ثبت شد.</string>
+
+    <!-- ماده ۱۶ -->
+    <string name="article16_account_code">کد حساب</string>
+    <string name="article16_debt_amount">مبلغ بدهی (ریال)</string>
+    <string name="article16_debt_remaining">مانده بدهی (ریال)</string>
+    <string name="article16_executive_notify_date">تاریخ ابلاغ اجراییه</string>
+    <string name="article16_request_status">وضعیت درخواست</string>
+    <string name="article16_status_submitted">ثبت درخواست</string>
+    <string name="article16_status_document_defect">نقص مدارک</string>
+    <string name="article16_status_rejected">رد درخواست</string>
+    <string name="article16_status_approved">تایید درخواست</string>
+    <string name="article16_status_unknown">نامشخص</string>
+    <string name="article16_action_request">درخواست رسیدگی به بدهی</string>
+    <string name="article16_action_view_request">مشاهده درخواست</string>
+    <string name="article16_action_expert_message">پیام کارشناس</string>
+    <string name="article16_action_fix_request">اصلاح درخواست</string>
+    <string name="article16_deadline_passed">مهلت ثبت درخواست برای این بدهی به پایان رسیده است.</string>
+
+    <!-- کارکنان / ذینفعان -->
+    <string name="member_insurance_number">شماره بیمه</string>
+    <string name="member_full_name">نام و نام خانوادگی</string>
+    <string name="member_national_id">شماره ملی</string>
+    <string name="member_id_card_number">شماره شناسنامه</string>
+    <string name="member_father_name">نام پدر</string>
+    <string name="member_nationality">ملیت</string>
+    <string name="member_relation_type">نوع ارتباط</string>
+    <string name="member_leaving_status">وضعیت ترک کار</string>
+    <string name="member_leaving_date">تاریخ ترک کار</string>
+    <string name="stackholder_type">نوع ذینفع</string>
+    <string name="stackholder_birth_date">تاریخ تولد</string>
 </resources>
 
