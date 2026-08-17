@@ -8,5 +8,5 @@ data class RequestErrorPR(
     val errorMessage: String,
     val errorType: String,
     val errorStatus: String,
-    val creationTime: String,
+    val creationTimeJalali: String,
 )

@@ -25,14 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.userRequest.RequestErrorPR
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 import taminx.feature.userrequest.generated.resources.user_request_action_close
@@ -48,13 +49,15 @@ fun RequestErrorsBottomSheet(
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val taminColors = LocalTaminColors.current
+    val colorScheme = MaterialTheme.colorScheme
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         modifier = modifier,
-        containerColor = LocalTaminColors.current.bgSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        containerColor = taminColors.bgSurface,
+        shape = RoundedCornerShape(topStart = CornerRadius.x2l, topEnd = CornerRadius.x2l)
     ) {
         Column(
             modifier = Modifier
@@ -73,27 +76,27 @@ fun RequestErrorsBottomSheet(
                     TaminText(
                         text = stringResource(UserRequestRes.string.user_request_errors_sheet_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LocalTaminColors.current.textPrimary
+                        color = taminColors.textPrimary
                     )
                     TaminText(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
-                        color = LocalTaminColors.current.textTertiary
+                        color = taminColors.textTertiary
                     )
                 }
 
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFFEE2E2)),
+                        .size(IconSize.large)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .background(taminColors.dangerBorder),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Warning,
                         contentDescription = null,
-                        tint = Color(0xFFDC2626),
-                        modifier = Modifier.size(20.dp)
+                        tint = colorScheme.error,
+                        modifier = Modifier.size(IconSize.banner)
                     )
                 }
             }
@@ -107,21 +110,21 @@ fun RequestErrorsBottomSheet(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, LocalTaminColors.current.divider, RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(CornerRadius.xl))
+                            .border(Thickness.border, taminColors.divider, RoundedCornerShape(CornerRadius.xl))
                             .padding(Spacing.md)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                             TaminText(
                                 text = "• ${item.errorMessage}",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFFDC2626)
+                                color = colorScheme.error
                             )
-                            if (item.creationTime.isNotBlank()) {
+                            if (item.creationTimeJalali.isNotBlank()) {
                                 TaminText(
-                                    text = stringResource(UserRequestRes.string.user_request_error_registered_at, item.creationTime),
+                                    text = stringResource(UserRequestRes.string.user_request_error_registered_at, item.creationTimeJalali),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = LocalTaminColors.current.textTertiary
+                                    color = taminColors.textTertiary
                                 )
                             }
                         }
@@ -153,14 +156,14 @@ private fun RequestErrorsBottomSheetPreview() {
                     errorMessage = "مدارک آپلود شده خوانا نمی‌باشد",
                     errorType = "",
                     errorStatus = "",
-                    creationTime = "۱۴۰۵/۰۲/۲۹"
+                    creationTimeJalali = "۱۴۰۵/۰۲/۲۹"
                 ),
                 RequestErrorPR(
                     id = 2L,
                     errorMessage = "تصویر گواهی استراحت پزشکی ناقص است",
                     errorType = "",
                     errorStatus = "",
-                    creationTime = "۱۴۰۵/۰۳/۰۲"
+                    creationTimeJalali = "۱۴۰۵/۰۳/۰۲"
                 )
             ),
             onDismissRequest = {}

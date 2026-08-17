@@ -17,13 +17,19 @@ import com.tamin.taminhamrah.model.userRequest.SmartGuidePR
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsPR
+import com.tamin.taminhamrah.model.userRequest.UserRequestListPolicy
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypePR
+import com.tamin.taminhamrah.model.userRequest.UserRequestWorkflowStatus
+import com.tamin.taminhamrah.model.userRequest.userRequestProgressPhase
+import com.tamin.taminhamrah.model.userRequest.userRequestStatusTone
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toFormattedDate
 
 fun UserRequestDN.toPresentation(): UserRequestPR {
+    val typeId = requestType?.id ?: 0L
+    val statusCode = status?.requestCode ?: ""
     return UserRequestPR(
         id = id,
         refCode = refCode ?: "",
@@ -32,12 +38,17 @@ fun UserRequestDN.toPresentation(): UserRequestPR {
         creationTime = creationTime?.let { PersianDateFormatter.formatTimestamp(it) } ?: "",
         createByName = createByName ?: "",
         statusDesc = status?.requestDesc ?: "",
-        statusCode = status?.requestCode ?: "",
-        requestTypeId = requestType?.id ?: 0L,
+        statusCode = statusCode,
+        requestTypeId = typeId,
         requestTypeTitle = requestType?.title ?: "",
         requestDetails = requestDetails,
         details = details?.toPresentation(),
         referenceId = referenceId.orEmpty(),
+        viewCapability = UserRequestListPolicy.viewCapability(typeId, statusCode),
+        showErrorsAction = UserRequestListPolicy.canShowErrors(typeId, statusCode),
+        statusTone = userRequestStatusTone(statusCode),
+        progressPhase = userRequestProgressPhase(statusCode),
+        tabCategory = UserRequestWorkflowStatus.tabCategory(statusCode),
     )
 }
 
@@ -160,7 +171,7 @@ fun RequestErrorDN.toErrorPresentation(): RequestErrorPR {
         errorMessage = errorMessage.orEmpty(),
         errorType = errorType.orEmpty(),
         errorStatus = errorStatus.orEmpty(),
-        creationTime = creationTime?.toString().orEmpty(),
+        creationTimeJalali = PersianDateFormatter.formatTimestamp(creationTime),
     )
 }
 

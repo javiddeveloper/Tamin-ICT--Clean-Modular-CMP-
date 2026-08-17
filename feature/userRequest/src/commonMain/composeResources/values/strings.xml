@@ -52,7 +52,7 @@
 
     <!-- Bottom Sheets & Dialogs -->
     <string name="user_request_errors_sheet_title">خطاهای ثبت‌شده</string>
-    <string name="user_request_error_registered_at">ثبت‌شده در %s</string>
+    <string name="user_request_error_registered_at">ثبت‌شده در %1$s</string>
     <string name="user_request_action_close">بستن</string>
     <string name="user_request_info_dialog_title">اطلاعیه درخواست</string>
     <string name="user_request_action_got_it">متوجه شدم</string>
