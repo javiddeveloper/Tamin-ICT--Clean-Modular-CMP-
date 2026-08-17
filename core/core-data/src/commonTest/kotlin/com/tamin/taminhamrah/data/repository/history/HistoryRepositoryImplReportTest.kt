@@ -1,12 +1,17 @@
 package com.tamin.taminhamrah.data.repository.history
 
+import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
+import com.tamin.taminhamrah.data.local.entity.HistoryJobInfoEntity
 import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.HistoryRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -22,7 +27,7 @@ class HistoryRepositoryImplReportTest {
     @BeforeTest
     fun setup() {
         remoteDataSource = FakeHistoryRemoteDataSource()
-        repository = HistoryRepositoryImpl(remoteDataSource)
+        repository = HistoryRepositoryImpl(remoteDataSource, FakeHistoryJobInfoDao())
     }
 
     // ── getUserInfos ──────────────────────────────────────────────────────────
@@ -129,6 +134,15 @@ class HistoryRepositoryImplReportTest {
             lastSentType2 = type2
             lastSentType3 = type3
         }
+
+        override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =
+            HistoryJobInfoDTO(list = emptyList(), total = 0)
+    }
+
+    private class FakeHistoryJobInfoDao : HistoryJobInfoDao {
+        override fun getAllJobInfos(): Flow<List<HistoryJobInfoEntity>> = flowOf(emptyList())
+        override suspend fun insertJobInfos(jobInfos: List<HistoryJobInfoEntity>) = Unit
+        override suspend fun clearAll() = Unit
     }
 }
 
