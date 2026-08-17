@@ -110,6 +110,28 @@ class HistoryViewModelTest {
         assertNull(state.error, "a wage failure is not a page failure")
     }
 
+    /**
+     * A failed page must not also complain about the workshops.
+     *
+     * `safeCall` converts anything it does not recognize — a cancelled sibling call included — into
+     * an ordinary failure, so the ordering inside the load is what keeps the two apart: the years
+     * are awaited first, and a page that never got them never reaches the wage warning.
+     */
+    @Test
+    fun load_whenTheYearsFail_doesNotAlsoWarnAboutTheWages() = runTest(testDispatcher) {
+        repository.talfighError = IllegalStateException("boom")
+        repository.dastmozdError = IllegalStateException("cancelled with it")
+
+        viewModel.events.test {
+            viewModel.sendIntent(HistoryIntent.Load)
+            advanceUntilIdle()
+
+            expectNoEvents()
+        }
+
+        assertNotNull(viewModel.uiState.value.error, "the page failure is still reported")
+    }
+
     @Test
     fun load_whenNothingComesBack_isEmptyRatherThanFailed() = runTest(testDispatcher) {
         viewModel.sendIntent(HistoryIntent.Load)

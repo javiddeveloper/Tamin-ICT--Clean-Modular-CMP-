@@ -8,14 +8,14 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.safeApiCall
+import com.tamin.taminhamrah.tools.safeCall
 
 /**
  * The three «سوابق» endpoints.
  *
- * Every call goes through [safeApiCall] rather than a private try/catch: these three answered a
- * plain-text 500 and a torn-down sibling request as "خطای اتصال، لطفا اتصال اینترنت خود را بررسی
- * کنید", which sends the user to check a connection that was never the problem.
+ * Each goes through the shared [safeCall], the same wrapper the other data sources use: the
+ * envelope's own status is already classified by `BaseDTO.extractData` through
+ * `HttpStatusErrorMapper`, and anything that never reached that point is a failed call.
  */
 internal class HistoryRemoteDataSourceImpl(
     private val apiServices: HistoryApiServices,
@@ -24,17 +24,17 @@ internal class HistoryRemoteDataSourceImpl(
 ) : HistoryRemoteDataSource {
 
     override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO =
-        errorParser.safeApiCall(TAG_TALFIGH) {
+        errorParser.safeCall(TAG_TALFIGH) {
             apiServices.getTalfighInfos(queryBuilder.buildQuery(query)).extractData()
         }
 
     override suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO =
-        errorParser.safeApiCall(TAG_DASTMOZD) {
+        errorParser.safeCall(TAG_DASTMOZD) {
             apiServices.getDastmozdInfos(queryBuilder.buildQuery(query)).extractData()
         }
 
     override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =
-        errorParser.safeApiCall(TAG_JOB_INFO) {
+        errorParser.safeCall(TAG_JOB_INFO) {
             apiServices.getHistoryJobInfos(queryBuilder.buildQuery(query)).extractData()
         }
 

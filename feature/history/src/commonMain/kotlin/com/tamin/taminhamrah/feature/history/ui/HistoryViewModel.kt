@@ -60,9 +60,8 @@ class HistoryViewModel(
         try {
             coroutineScope {
                 val years = async { getTalfighInfosUseCase() }
-                // Not `runCatching`: it catches CancellationException too, so when the years fail
-                // and this scope tears its children down, the wage call would report itself as a
-                // wage failure and warn about something that was never attempted.
+                // Not `runCatching`: it catches CancellationException too, so a wage call torn down
+                // with its scope would report itself as a wage failure.
                 val wages = async {
                     try {
                         getDastmozdInfosUseCase()
@@ -73,6 +72,10 @@ class HistoryViewModel(
                     }
                 }
 
+                // The years are awaited first on purpose. They are the page, so if they failed this
+                // throws here and the wage result is never inspected — which is what stops a page
+                // failure from also complaining that the workshops are missing. Only a load that
+                // got its years reaches the warning below.
                 val history = years.await().list?.toPresentation().orEmpty()
                 val wageRows = wages.await()
 
