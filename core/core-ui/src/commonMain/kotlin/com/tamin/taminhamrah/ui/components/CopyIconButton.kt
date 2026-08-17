@@ -68,13 +68,6 @@ fun CopyIconButton(
  * For the places where the tap target is bigger than the glyph — a whole row carrying a code, a
  * chip — so they get the same clipboard write and the same confirmation as [CopyIconButton] rather
  * than repeating both.
- */
-/**
- * Copying [value] to the clipboard and announcing it, as a plain action.
- *
- * For the places where the tap target is bigger than the glyph — a whole row carrying a code, a
- * chip — so they get the same clipboard write and the same confirmation as [CopyIconButton] rather
- * than repeating both.
  *
  * The write is suspending on the current clipboard API, so it runs in the composition's scope; the
  * confirmation follows it rather than racing it.

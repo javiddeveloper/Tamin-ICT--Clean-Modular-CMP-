@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
-import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -28,14 +23,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
+import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordSummaryCard
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
-import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentRecordPdfExport
+import com.tamin.taminhamrah.feature.treatment.ui.model.RecordExport
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
-import com.tamin.taminhamrah.feature.treatment.ui.model.hasLabResult
-import com.tamin.taminhamrah.feature.treatment.ui.model.toJalaliDateLabel
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentRecordPdfExport
 import com.tamin.taminhamrah.feature.treatment.ui.prescriptions.PrescriptionsViewModel
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -45,37 +42,36 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
-import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.lab_result_viewer_title
-import taminx.core.core_ui.prescription_viewer_title
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.amount_total
 import taminx.core.core_ui.detail_doctor
-import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_share
-import taminx.core.core_ui.ic_tamin_download
-import taminx.core.core_ui.ic_tamin_print
-import taminx.core.core_ui.prescription_download_cd
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.lab_result_viewer_title
 import taminx.core.core_ui.prescription_empty
 import taminx.core.core_ui.prescription_items
-import taminx.core.core_ui.prescription_lab_result_cd
 import taminx.core.core_ui.prescription_share_body
 import taminx.core.core_ui.prescription_share_cd
 import taminx.core.core_ui.prescription_title
+import taminx.core.core_ui.prescription_viewer_title
 import taminx.core.core_ui.records_doctor_named
 import taminx.core.core_ui.share_organization
 import taminx.core.core_ui.share_yours
-import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
-import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 
 /** Shown when a field has not loaded, so a blank never reads as missing data. */
 private const val UNKNOWN_VALUE = "—"
@@ -115,7 +111,7 @@ fun RecordDetailScreen(
     RecordDetailContent(
         state = state,
         noteHeadId = noteHeadId,
-        type = type,
+        flagSata = flagSata,
         docName = docName,
         prescDate = prescDate,
         trackingCode = trackingCode,
@@ -143,8 +139,8 @@ fun RecordDetailScreen(
 fun RecordDetailContent(
     state: PrescriptionsUiState,
     noteHeadId: String,
-    /** The record's `prescType`; decides whether a lab result exists to offer. */
-    type: String = "",
+    /** The record's own `flagSata`; decides what it can be downloaded as, if anything. */
+    flagSata: String = "",
     docName: String = "",
     prescDate: String = "",
     trackingCode: String = "",
@@ -192,6 +188,9 @@ fun RecordDetailContent(
         totals.total.toPriceFormat(),
     )
 
+    // What this record can be downloaded as -- null when it offers nothing.
+    val export = remember(flagSata) { RecordExport.forFlagSata(flagSata) }
+
     // Which export is on screen. Opening the viewer no longer means a download has happened: it
     // decides for itself whether the file needs fetching, so the tap only says which one to show.
     var showing by remember { mutableStateOf<TreatmentRecordPdfExport?>(null) }
@@ -219,19 +218,19 @@ fun RecordDetailContent(
                                 contentDescription = stringResource(Res.string.prescription_share_cd),
                                 onClick = { launcher.shareText(shareBody, shareTitle) },
                             )
-                            TaminTopAppBarButton(
-                                icon = vectorResource(Res.drawable.ic_tamin_download),
-                                contentDescription = stringResource(Res.string.prescription_download_cd),
-                                onClick = { showing = TreatmentRecordPdfExport.PRESCRIPTION },
-                            )
-                            // Paraclinic records only. Two identical download glyphs sat here
-                            // before, one of which could only fail on a drug prescription --
-                            // invisible until the bar stopped clipping its own actions.
-                            if (type.hasLabResult()) TaminTopAppBarButton(
-                                icon = vectorResource(Res.drawable.ic_tamin_print),
-                                contentDescription = stringResource(Res.string.prescription_lab_result_cd),
-                                onClick = { showing = TreatmentRecordPdfExport.LAB_RESULT },
-                            )
+                            // One download, and only when this record actually has one. Which
+                            // export it is, and whether it exists at all, is a property of the
+                            // record -- its `flagSata` -- not of the category it belongs to.
+                            // Keying it on PARACLINIC instead put a lab-result button on every
+                            // paraclinic record, including the ones whose result is not ready,
+                            // where it can only fail. See RecordExport.
+                            export?.let { available ->
+                                TaminTopAppBarButton(
+                                    icon = vectorResource(available.icon),
+                                    contentDescription = stringResource(available.contentDescription),
+                                    onClick = { showing = available.export },
+                                )
+                            }
                         }
                     },
                 )

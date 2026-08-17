@@ -20,8 +20,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -105,7 +111,18 @@ fun TaminTopAppBar(
          *
          * So the caps are pinned to the two edges and the title is centred over the whole width
          * underneath them. It is drawn first, which keeps the buttons on top and hittable.
+         *
+         * The clearance is the wider of the two caps as actually measured, not one button's worth
+         * assumed: a screen with a share *and* a download in one cap would otherwise run a long
+         * title underneath them. Both caps report their width, and the title keeps the larger on
+         * both sides so it stays centred on the bar rather than on the gap.
          */
+        var navCapWidth by remember { mutableIntStateOf(0) }
+        var actionCapWidth by remember { mutableIntStateOf(0) }
+        val capClearance = with(LocalDensity.current) {
+            maxOf(navCapWidth, actionCapWidth).toDp()
+        }
+
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
@@ -113,7 +130,7 @@ fun TaminTopAppBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = HEADER_BUTTON_SIZE + Spacing.sm),
+                    .padding(horizontal = capClearance + Spacing.sm),
             ) {
                 if (titleContent != null) {
                     titleContent()
@@ -135,8 +152,12 @@ fun TaminTopAppBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                HeaderSlot { navigationIcon?.invoke() }
-                HeaderSlot { action?.invoke() }
+                HeaderSlot(
+                    modifier = Modifier.onSizeChanged { navCapWidth = it.width },
+                ) { navigationIcon?.invoke() }
+                HeaderSlot(
+                    modifier = Modifier.onSizeChanged { actionCapWidth = it.width },
+                ) { action?.invoke() }
             }
         }
         content()
@@ -211,9 +232,9 @@ fun TaminTopAppBarButton(
  * button, so a bar with a download and a share showed only the download.
  */
 @Composable
-private fun HeaderSlot(content: @Composable () -> Unit) {
+private fun HeaderSlot(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .defaultMinSize(minWidth = HEADER_BUTTON_SIZE, minHeight = HEADER_BUTTON_SIZE),
         contentAlignment = Alignment.Center,
         content = { content() },

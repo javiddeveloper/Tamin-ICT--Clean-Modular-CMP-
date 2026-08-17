@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -23,7 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -55,6 +53,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -68,7 +67,6 @@ import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
@@ -96,7 +94,6 @@ import taminx.core.core_ui.bank_account_title
 import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.ic_number
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_copy
 
 private const val ADD_BUTTON_KEY = "add"
 private const val EMPTY_STATE_KEY = "empty"
@@ -456,11 +453,12 @@ private fun TrackingCodeRow(code: String) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.textPrimary,
             )
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-                contentDescription = copyDescription,
+            // The row already copies, so the glyph is affordance only — no second tap target and
+            // no second announcement for a screen reader.
+            CopyIconButton(
+                value = code,
                 tint = colors.blueText,
-                modifier = Modifier.size(IconSize.small),
+                interactive = false,
             )
         }
     }

@@ -33,14 +33,6 @@ enum class RecordType(val id: String, val label: StringResource) {
     MEDICAL_SERVICE("5", Res.string.tab_medical_service),
     ;
 
-    /**
-     * Whether a record of this kind can have a lab result behind it.
-     *
-     * Only paraclinic records do. A prescription for cough syrup has no test to print, so offering
-     * the download on one is a button that can only fail.
-     */
-    val hasLabResult: Boolean get() = this == PARACLINIC
-
     companion object {
         /** `null` for an id the endpoint has grown since; the caller shows the raw value then. */
         fun fromId(id: String): RecordType? = entries.firstOrNull { it.id == id }
@@ -93,8 +85,6 @@ enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>
  *
  * Lives with the categories it maps rather than in the screen that renders them.
  */
-fun String.hasLabResult(): Boolean = RecordType.fromId(this)?.hasLabResult == true
-
 fun String.toCategoryLabel(): StringResource? = RecordType.fromId(this)?.label
 
 /**
