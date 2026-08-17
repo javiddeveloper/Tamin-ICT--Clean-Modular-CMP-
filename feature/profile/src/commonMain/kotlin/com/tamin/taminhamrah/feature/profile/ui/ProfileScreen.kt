@@ -251,7 +251,7 @@ fun HandleProfileEvents(
             }
 
             is ProfileEvent.Support -> {
-                onOpenUrl("tel:$1420")
+                onOpenUrl("tel:${it.phone}")
             }
         }
     }

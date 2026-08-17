@@ -239,7 +239,7 @@ private fun getSampleContactUsPR() = ContactUsPR(
         SocialChannelPR("3", "واتساپ", SocialChannelTypePR.WHATSAPP, "https://wa.me/989000000000"),
         SocialChannelPR("4", "آی‌گپ", SocialChannelTypePR.IGAP, "https://igap.net/tamin"),
         SocialChannelPR("5", "بله", SocialChannelTypePR.BALE, "https://ble.ir/tamin"),
-        SocialChannelPR("6", "بیسفون", SocialChannelTypePR.APARAT, "https://aparat.com"),
+        SocialChannelPR("6", "آپارات", SocialChannelTypePR.APARAT, "https://aparat.com"),
         SocialChannelPR("7", "گپ", SocialChannelTypePR.GAP, "https://gap.im/tamin"),
         SocialChannelPR("8", "سروش", SocialChannelTypePR.SOROUSH, "https://splus.ir/tamin"),
         SocialChannelPR("9", "روبیکا", SocialChannelTypePR.RUBIKA, "https://rubika.ir/tamin"),
