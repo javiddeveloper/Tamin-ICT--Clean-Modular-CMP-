@@ -7,8 +7,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.ui.LocalThemeRevealController
 import com.tamin.taminhamrah.ui.ThemeRevealHost
 import com.tamin.taminhamrah.ui.rememberThemeRevealController
@@ -56,16 +60,22 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun TaminHamrahTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    fontSizeOption: FontSizeOption = FontSizeOption.MEDIUM,
     content: @Composable () -> Unit,
 ) {
     val extendedColors = if (darkTheme) DarkTaminColors else LightTaminColors
     val materialColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     val revealController = rememberThemeRevealController()
+    val baseDensity = LocalDensity.current
+    val scaledDensity = remember(baseDensity, fontSizeOption) {
+        Density(density = baseDensity.density, fontScale = fontSizeOption.scale)
+    }
 
     CompositionLocalProvider(
         LocalTaminColors provides extendedColors,
         LocalLayoutDirection provides LayoutDirection.Rtl,
         LocalThemeRevealController provides revealController,
+        LocalDensity provides scaledDensity,
     ) {
         MaterialTheme(
             colorScheme = materialColorScheme,

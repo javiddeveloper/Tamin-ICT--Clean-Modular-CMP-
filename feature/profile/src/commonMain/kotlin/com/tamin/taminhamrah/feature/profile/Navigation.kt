@@ -63,6 +63,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToAddDependent: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
@@ -85,6 +86,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onNavigateToSecurity = onNavigateToSecurity,
                 onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
+                onNavigateToSettings = onNavigateToSettings,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
