@@ -78,7 +78,11 @@ REQUEST_TIMEOUT_60_SEC = 60_000L   REQUEST_TIMEOUT_5_MIN = 300_000L
 - `extractMessage()` — for endpoints that return only a message
 - `extractDataOrProblems()` / `extractMessageOrProblems()` — return `ApiOutcome` instead of throwing when the backend sent a `problems` list
 
-`tools/NetworkUtils.kt` holds `ErrorParser.safeCall(tag) { … }`, which wraps a call and normalizes failures. Note that its catch-all branch maps every unexpected exception to `NO_CONNECTION_ERROR`, and that `ErrorUri.fromString("CLIENT_ERROR: $reason")` never matches an enum name, so it always resolves to `UNKNOWN`.
+HTTP 4xx/5xx is mapped by `HttpStatusErrorMapper` (ported from old_android `BaseRemoteDataSource.handleError`): exact status, then known backend tokens (`sso.to.sa.connection.exception`, missing bank account, open pension request, …), then Arabic-script passthrough via `looksLikeArabicScript()`, then a per-status Persian fallback. 403 also sets `navigateBack` on the exception (VPN/proxy copy). Screens can read it with `Throwable.shouldNavigateBack()`.
+
+401 in this layer maps to `INVALID_AUTH` with login copy. Token refresh is **not** re-implemented here — it already lives in the `mainHttpClient` / `uploadHttpClient` Ktor Auth plugin. A 401 that still reaches `BaseDTO` is the post-refresh failure.
+
+`tools/NetworkUtils.kt` holds `ErrorParser.safeCall(tag) { … }`, which wraps a call and normalizes failures. Its catch-all branch maps every unexpected exception to `NO_CONNECTION_ERROR`.
 
 ## Logging
 
