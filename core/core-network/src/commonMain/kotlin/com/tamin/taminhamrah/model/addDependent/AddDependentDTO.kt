@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.model.addDependent
 
+import com.tamin.taminhamrah.tools.ErrorCarrier
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -74,7 +75,9 @@ data class RegistryDataDTO(
     @SerialName("nationalId") val nationalId: String? = null,
     @SerialName("gender") val gender: String? = null,
     @SerialName("insuranceId") val registryConfirmState: String? = null,
-)
+    @SerialName("message") override val message: String? = null,
+    @SerialName("cause") override val cause: String? = null,
+) : ErrorCarrier
 
 
 @Serializable
@@ -104,9 +107,9 @@ data class UploadImageResponseDTO(
 @Serializable
 data class GeneralResponseDTO(
     @SerialName("isSuccess") val isSuccess: Boolean = false,
-    @SerialName("message") val message: String? = null,
+    @SerialName("message") override val message: String? = null,
     @SerialName("code") val code: Int? = null
-)
+) : ErrorCarrier
 
 @Serializable
 data class DependentInfoDTO(

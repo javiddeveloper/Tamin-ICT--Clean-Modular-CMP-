@@ -20,5 +20,6 @@ val profileModule = module {
     viewModelOf(::DependentsListViewModel)
     viewModelOf(::ActiveRelationViewModel)
     viewModelOf(::ContactUsViewModel)
+    viewModelOf(::DependentsListViewModel)
 }
 

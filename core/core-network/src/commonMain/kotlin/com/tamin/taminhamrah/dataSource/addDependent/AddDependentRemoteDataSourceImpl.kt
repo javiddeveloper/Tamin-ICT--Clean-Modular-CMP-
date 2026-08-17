@@ -13,9 +13,8 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.safeCall
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
@@ -27,117 +26,61 @@ class AddDependentRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : AddDependentRemoteDataSource {
 
-    override suspend fun getDependentInfo(): List<DependentInfoDTO> {
-        return try {
-            val response = apiService.getDependentInfo()
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+    override suspend fun getDependentInfo(): List<DependentInfoDTO> =
+        errorParser.safeCall("getDependentInfo") {
+            apiService.getDependentInfo().extractData()
         }
-    }
 
-    override suspend fun getActiveBranches(): List<BranchDTO> {
-        return try {
-            val response = apiService.getActiveBranches()
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+    override suspend fun getActiveBranches(): List<BranchDTO> =
+        errorParser.safeCall("getActiveBranches") {
+            apiService.getActiveBranches().extractData()
         }
-    }
 
     override suspend fun getFamilyRelationships(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipDTO> {
-        return try {
-            val parameters = if (filter.isEmpty()) {
-                emptyMap()
-            } else {
-                mapOf("query" to apiQueryBuilder.buildFilterJson(filter))
-            }
-            val response = apiService.getFamilyRelationships(parameters)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+    ): List<FamilyRelationshipDTO> = errorParser.safeCall("getFamilyRelationships") {
+        val parameters = if (filter.isEmpty()) {
+            emptyMap()
+        } else {
+            mapOf("query" to apiQueryBuilder.buildFilterJson(filter))
         }
+        apiService.getFamilyRelationships(parameters).extractData()
     }
 
     override suspend fun getFamilyRelationshipsFromProxy(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipProxyDTO> {
-        return try {
-            val parameters = apiQueryBuilder.buildQuery(
-                ApiQueryParamDN(page = 1, filters = filter)
-            )
-            val response = apiService.getFamilyRelationshipsFromProxy(parameters)
-            response.extractData().list.orEmpty()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): List<FamilyRelationshipProxyDTO> = errorParser.safeCall("getFamilyRelationshipsFromProxy") {
+        val parameters = apiQueryBuilder.buildQuery(
+            ApiQueryParamDN(page = 1, filters = filter)
+        )
+        apiService.getFamilyRelationshipsFromProxy(parameters).extractData().list.orEmpty()
     }
 
     override suspend fun inquiryRegistry(
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): RegistryDataDTO {
-        return try {
-            val response = apiService.inquiryRegistry(dependentNationalId, birthDateTimeStamp, dependencyCode)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): RegistryDataDTO = errorParser.safeCall("inquiryRegistry") {
+        apiService.inquiryRegistry(
+            dependentNationalId,
+            birthDateTimeStamp,
+            dependencyCode
+        ).extractData()
     }
 
     override suspend fun inquiryEducationCode(
         nationalId: String,
         educationCode: String
-    ): String {
-        return try {
-            val response = apiService.inquiryEducationCode(nationalId, educationCode)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): String = errorParser.safeCall("inquiryEducationCode") {
+        apiService.inquiryEducationCode(nationalId, educationCode).extractData()
     }
 
     override suspend fun uploadImage(
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): UploadImageResponseDTO {
-        return try {
-            apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): UploadImageResponseDTO = errorParser.safeCall("uploadImage") {
+        apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
     }
 
     private fun createUploadImageRequest(
@@ -155,16 +98,8 @@ class AddDependentRemoteDataSourceImpl(
         )
     }
 
-    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO {
-        return try {
-            val response = apiService.addNewDependent(request)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO =
+        errorParser.safeCall("addNewDependent") {
+            apiService.addNewDependent(request).extractData()
         }
-    }
 }
