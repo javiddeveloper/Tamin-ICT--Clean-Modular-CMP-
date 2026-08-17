@@ -16,13 +16,14 @@ internal class ErrorParserImpl : ErrorParser {
             return TaminApiException(
                 title = "خطا",
                 subtitle = serverMessage,
-                cause = exception
+                cause = exception,
+                navigateBack = exception.navigateBack
             )
         }
 
         val (title, subtitle) = when (exception.uri) {
             ErrorUri.INVALID_AUTH -> "خطای احراز هویت" to "لطفا دوباره وارد شوید"
-            ErrorUri.FORBIDDEN -> "دسترسی غیرمجاز" to "شما اجازه دسترسی به این بخش را ندارید"
+            ErrorUri.FORBIDDEN -> "خطا" to HttpErrorCopy.FORBIDDEN_VPN
             ErrorUri.RESOURCE_NOT_FOUND -> "یافت نشد" to "اطلاعات درخواستی یافت نشد"
             ErrorUri.SERVICE_TIMEOUT -> "اتمام زمان" to "زمان درخواست به پایان رسید"
             ErrorUri.INTERNAL_ERROR -> "خطای سرور" to "لطفا بعدا تلاش کنید"
@@ -45,7 +46,8 @@ internal class ErrorParserImpl : ErrorParser {
         return TaminApiException(
             title = title,
             subtitle = subtitle,
-            cause = exception
+            cause = exception,
+            navigateBack = exception.navigateBack
         )
     }
 }
