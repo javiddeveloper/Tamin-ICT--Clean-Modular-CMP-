@@ -703,4 +703,19 @@
     <string name="send_history_success_action">متوجه شدم</string>
     <string name="send_history_access_denied_title">عدم دسترسی به سرویس</string>
     <string name="send_history_access_denied_action">متوجه شدم</string>
+
+    <!-- ===================== Pension Status Inquiry ===================== -->
+    <string name="pension_status_inquiry_title">استعلام وضعیت مستمری</string>
+    <string name="pension_status_pension_number">شماره مستمری</string>
+    <string name="pension_status_insurance_number">شماره بیمه</string>
+    <string name="pension_status_main_insured_number">شماره بیمه‌شده اصلی</string>
+    <string name="pension_status_establishment_date">تاریخ برقراری</string>
+    <string name="pension_status_payment_date">تاریخ پرداخت</string>
+    <string name="pension_status_order_type">نوع حکم</string>
+    <string name="pension_status_org_unit">واحد سازمانی: %1$s</string>
+    <string name="pension_status_active_header">مستمری بگیر فعال هستید</string>
+    <string name="pension_status_empty_title">موردی یافت نشد</string>
+    <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
+    <string name="pension_status_send_success_title">ارسال گواهی</string>
+    <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
 </resources>
