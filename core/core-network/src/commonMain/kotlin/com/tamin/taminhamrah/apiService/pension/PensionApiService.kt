@@ -69,6 +69,12 @@ interface PensionApiService {
         @QueryMap parameters: Map<String, String>
     ): HttpStatement
 
+    @Streaming
+    @GET("hokm/report")
+    suspend fun getEdictReportPDF(
+        @QueryMap parameters: Map<String, String>
+    ): HttpStatement
+
     @GET("pension-request")
     suspend fun getRetirementRequestInfo(
         @QueryMap parameters: Map<String, String>
@@ -96,9 +102,9 @@ interface PensionApiService {
         @Path("requestId") requestId: String,
         @Body body: RetirementSaveDocumentRequest
     ): BaseDTO<String?>
-    @GET("hokm/announcement")
+    @GET("hokm/annoncment")
     suspend fun sendEdictPensionerToMyInbox(
         @QueryMap parameters: Map<String, String>
-    ): BaseDTO<String?>
+    ): BaseDTO<JsonElement?>
 
 }

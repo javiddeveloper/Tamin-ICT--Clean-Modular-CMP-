@@ -7,6 +7,7 @@ import platform.UIKit.UIApplication
 import platform.Foundation.NSString
 import platform.Foundation.create
 import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
+import platform.UIKit.UIActivityViewController
 
 actual class ExternalAppLauncher actual constructor() {
 
@@ -39,5 +40,19 @@ actual class ExternalAppLauncher actual constructor() {
         if (UIApplication.sharedApplication.canOpenURL(url)) {
             UIApplication.sharedApplication.openURL(url)
         }
+    }
+
+    actual fun shareText(text: String) {
+        val activityViewController = UIActivityViewController(
+            activityItems = listOf(text),
+            applicationActivities = null
+        )
+
+        val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+        rootViewController?.presentViewController(
+            activityViewController,
+            animated = true,
+            completion = null
+        )
     }
 }

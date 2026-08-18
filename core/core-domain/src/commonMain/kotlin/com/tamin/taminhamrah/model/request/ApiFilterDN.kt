@@ -73,6 +73,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchName") BRANCH_NAME("branchName"),
     @SerialName("target") TARGET("target"),
     @SerialName("statusCode") STATUS_CODE("statusCode"),
+    @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
     // two people-columns under a different prefix, which is why there is one entry per list

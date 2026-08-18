@@ -1,6 +1,5 @@
-package com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet
+package com.tamin.taminhamrah.ui.components.bottomsheet
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,8 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +22,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -43,28 +41,28 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
+import com.tamin.taminhamrah.ui.components.InteractiveChoiceChips
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.*
 
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.InteractiveChoiceChips
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HealthBottomSheet(
-    config: BottomSheetConfig,
+fun TaminBottomSheet(
+    config: TaminBottomSheetConfig,
     onDismissRequest: () -> Unit,
-    onSubmit: (BottomSheetResult) -> Unit,
-    modifier: Modifier = Modifier
+    onSubmit: (TaminBottomSheetResult) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val submitBtnText = config.submitText ?: stringResource(Res.string.bs_submit)
 
     val selectedIds = remember(config.items) {
         mutableStateListOf<Int>().apply {
@@ -94,10 +92,7 @@ fun HealthBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-
                 TaminText(
-                    modifier = Modifier,
                     text = config.title,
                     style = MaterialTheme.typography.titleLarge.copy(
                         textAlign = TextAlign.End,
@@ -115,20 +110,20 @@ fun HealthBottomSheet(
                     Icon(
                         modifier = Modifier.size(Spacing.lg),
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(Res.string.action_close),
                         tint = LocalTaminColors.current.textSecondary
                     )
                 }
             }
 
-            if (config.subtitle != null) {
+            val subtitleText = config.subtitle ?: config.subtitleRes?.let { stringResource(it) }
+            if (subtitleText != null) {
                 TaminText(
-                    text = config.subtitle,
+                    text = subtitleText,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = LocalTaminColors.current.textTertiary,
                         textAlign = TextAlign.End
                     ),
-                    modifier = Modifier
                 )
             }
 
@@ -151,7 +146,7 @@ fun HealthBottomSheet(
                 CustomSearchBar(
                     query = inputText,
                     onQueryChange = { inputText = it },
-                    placeHolder = config.searchInputHint ?: "جستجو...",
+                    placeHolder = config.searchInputHint ?: stringResource(Res.string.active_relation_search_placeholder),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -183,7 +178,7 @@ fun HealthBottomSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         TaminText(
-                            text = "موردی یافت نشد",
+                            text = stringResource(Res.string.no_items_found),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalTaminColors.current.textTertiary
                         )
@@ -274,7 +269,7 @@ fun HealthBottomSheet(
             if (config.description != null) {
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 TaminText(
-                    text = "توضیحات",
+                    text = stringResource(Res.string.description_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = LocalTaminColors.current.textSecondary,
                     modifier = Modifier.fillMaxWidth(),
@@ -320,10 +315,10 @@ fun HealthBottomSheet(
                         modifier = Modifier.weight(1f)
                     )
                     TaminFilledButton(
-                        text = config.submitText,
+                        text = submitBtnText,
                         onClick = {
                             onSubmit(
-                                BottomSheetResult(
+                                TaminBottomSheetResult(
                                     type = config.type,
                                     selectedItemIds = selectedIds.toList(),
                                     text = inputText.takeIf { it.isNotBlank() },
@@ -335,137 +330,21 @@ fun HealthBottomSheet(
                     )
                 }
             } else {
-
-
                 TaminFilledButton(
                     enabled = selectedIds.isNotEmpty(),
-                    text = config.submitText,
+                    text = submitBtnText,
                     onClick = {
                         onSubmit(
-                            BottomSheetResult(
+                            TaminBottomSheetResult(
                                 type = config.type,
                                 selectedItemIds = selectedIds.toList(),
                                 text = inputText.takeIf { it.isNotBlank() },
                                 description = descriptionText.takeIf { it.isNotBlank() }
-                            )
+                              )
                         )
                     }
                 )
             }
-        }
-    }
-}
-
-@PreviewRtlTheme
-@Preview
-@Composable
-private fun HealthBottomSheetPreview() {
-    PreviewRtlThemeContent {
-        var showSheet by remember { mutableStateOf(true) }
-        if (showSheet) {
-            HealthBottomSheet(
-                config = BottomSheetConfig(
-                    title = "وضعیت تاهل",
-                    subtitle = "در قسمت زیر می\u200Cتوانید وضعیت تأهل خود را انتخاب کنید",
-                    type = BottomSheetType.MARITAL_STATUS,
-                    singleSelection = true,
-                    items = listOf(
-                        BottomSheetItem(1, "مجرد"),
-                        BottomSheetItem(2, "متاهل", isSelected = true),
-                        BottomSheetItem(3, "همسر فوت شده"),
-                        BottomSheetItem(4, "رابطه خارج ازدواج")
-                    )
-                ),
-                onDismissRequest = { showSheet = false },
-                onSubmit = { showSheet = false }
-            )
-        }
-    }
-}
-
-@PreviewRtlTheme
-@Preview
-@Composable
-private fun HealthBottomSheetMultiSelectionPreview() {
-    PreviewRtlThemeContent {
-        var showSheet by remember { mutableStateOf(true) }
-        if (showSheet) {
-            HealthBottomSheet(
-                config = BottomSheetConfig(
-                    title = "آیا سابقه ابتلا به بیماری دارید؟",
-                    type = BottomSheetType.ILLNESS_HISTORY,
-                    singleSelection = false,
-                    items = listOf(
-                        BottomSheetItem(1, "فشار خون"),
-                        BottomSheetItem(2, "دیابت", isSelected = true),
-                        BottomSheetItem(3, "بیماری قلبی"),
-                        BottomSheetItem(4, "آسم", isSelected = true)
-                    )
-                ),
-                onDismissRequest = { showSheet = false },
-                onSubmit = { showSheet = false }
-            )
-        }
-    }
-}
-
-@PreviewRtlTheme
-@Preview
-@Composable
-private fun CitySelectionPreview() {
-    PreviewRtlThemeContent {
-        var showSheet by remember { mutableStateOf(true) }
-        if (showSheet) {
-            HealthBottomSheet(
-                config = BottomSheetConfig(
-                    title = "شهر",
-                    type = BottomSheetType.CITY,
-                    singleSelection = true,
-                    showSearchInput = true,
-                    searchInputHint = "جستجوی شهر...",
-                    items = listOf(
-                        BottomSheetItem(1, "تهران", isSelected = true),
-                        BottomSheetItem(2, "مشهد"),
-                        BottomSheetItem(3, "اصفهان"),
-                        BottomSheetItem(4, "شیراز"),
-                        BottomSheetItem(5, "تبریز")
-                    )
-                ),
-                onDismissRequest = { showSheet = false },
-                onSubmit = { showSheet = false }
-            )
-        }
-    }
-}
-
-@PreviewRtlTheme
-@Preview
-@Composable
-private fun DrugAllergyPreview() {
-    PreviewRtlThemeContent {
-        var showSheet by remember { mutableStateOf(true) }
-        if (showSheet) {
-            HealthBottomSheet(
-                config = BottomSheetConfig(
-                    title = "انتخاب دارو",
-                    subtitle = "دارویی که به آن حساسیت دارید را انتخاب کنید.",
-                    description = "در دوران حاملگی به این دارو حساسیت داشتم.",
-                    type = BottomSheetType.CUSTOM,
-                    singleSelection = false,
-                    submitText = "افزودن",
-                    cancelText = "انصراف",
-                    items = listOf(
-                        BottomSheetItem(1, "استامینوفن", isSelected = true),
-                        BottomSheetItem(2, "پنی‌سیلین"),
-                        BottomSheetItem(3, "ایبوپروفن"),
-                        BottomSheetItem(4, "آموکسی‌سیلین"),
-                        BottomSheetItem(5, "کوتریماکسازول"),
-                        BottomSheetItem(6, "سیپروفلوکساسین")
-                    )
-                ),
-                onDismissRequest = { showSheet = false },
-                onSubmit = { showSheet = false }
-            )
         }
     }
 }

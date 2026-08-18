@@ -1,6 +1,12 @@
 package com.tamin.taminhamrah.tools
 
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.HttpErrorCopy
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.errorHandling.shouldNavigateBack
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -103,5 +109,84 @@ class BaseDTOTest {
         val outcome = dto.extractMessageOrProblems()
         assertEquals("Saved successfully", outcome.data)
         assertTrue(outcome.problems.isEmpty())
+    }
+
+    // --- HTTP status mapping / Arabic-script extraction ---
+
+    @Test
+    fun `extractData prefers JsonObject message over English reason`() {
+        val dto = BaseDTO(
+            status = 400,
+            family = "CLIENT_ERROR",
+            reason = "BadRequest",
+            data = buildJsonObject { put("message", "کد ملی نامعتبر است") }
+        )
+        val error = assertFailsWith<TaminErrorUriException> { dto.extractData() }
+        assertEquals(ErrorUri.INVALID_REQUEST, error.uri)
+        assertEquals("کد ملی نامعتبر است", error.serverMessage)
+        assertFalse(error.navigateBack)
+    }
+
+    @Test
+    fun `extractData on 500 with English reason uses generic Persian fallback`() {
+        val dto = BaseDTO<String>(status = 500, family = "SERVER_ERROR", reason = "Internal Server Error", data = null)
+        val error = assertFailsWith<TaminErrorUriException> { dto.extractData() }
+        assertEquals(ErrorUri.INTERNAL_ERROR, error.uri)
+        assertEquals(HttpErrorCopy.GENERIC_SERVER, error.serverMessage)
+    }
+
+    @Test
+    fun `extractData on 403 uses VPN copy and navigateBack`() {
+        val dto = BaseDTO<String>(status = 403, family = "CLIENT_ERROR", reason = "Forbidden", data = null)
+        val error = assertFailsWith<TaminErrorUriException> { dto.extractData() }
+        assertEquals(ErrorUri.FORBIDDEN, error.uri)
+        assertEquals(HttpErrorCopy.FORBIDDEN_VPN, error.serverMessage)
+        assertTrue(error.navigateBack)
+
+        val parsed = ErrorParserImpl().parseGeneralError(error)
+        assertTrue(parsed.shouldNavigateBack())
+        assertEquals(HttpErrorCopy.FORBIDDEN_VPN, parsed.subtitle)
+    }
+
+    @Test
+    fun `extractData prefers ErrorCarrier message`() {
+        val dto = BaseDTO(
+            status = 500,
+            family = "SERVER_ERROR",
+            reason = "INTERNAL_SERVER_ERROR",
+            data = object : ErrorCarrier {
+                override val message: String = "خطای دیتای تایپ‌شده"
+            }
+        )
+        val error = assertFailsWith<TaminErrorUriException> { dto.extractData() }
+        assertEquals("خطای دیتای تایپ‌شده", error.serverMessage)
+    }
+
+    @Test
+    fun `extractData maps 502 and 503 separately`() {
+        val badGateway = assertFailsWith<TaminErrorUriException> {
+            BaseDTO<String>(status = 502, family = "SERVER_ERROR", reason = "Bad Gateway").extractData()
+        }
+        assertEquals(HttpErrorCopy.BAD_GATEWAY, badGateway.serverMessage)
+
+        val unavailable = assertFailsWith<TaminErrorUriException> {
+            BaseDTO<String>(status = 503, family = "SERVER_ERROR", reason = "Service Unavailable").extractData()
+        }
+        assertEquals(HttpErrorCopy.SERVICE_UNAVAILABLE, unavailable.serverMessage)
+    }
+
+    @Test
+    fun `persian problemMessage on hasError still passes through`() {
+        val dto = BaseDTO<String>(
+            status = 801,
+            family = "System",
+            reason = "ServerException",
+            data = null,
+            hasError = true,
+            problems = listOf(ProblemDTO(errorCode = 1, errorMsg = "شناسه نامعتبر است"))
+        )
+        val error = assertFailsWith<TaminErrorUriException> { dto.extractData() }
+        assertEquals(ErrorUri.SERVER_PROBLEM, error.uri)
+        assertEquals("شناسه نامعتبر است", error.serverMessage)
     }
 }

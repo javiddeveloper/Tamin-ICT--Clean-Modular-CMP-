@@ -11,10 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.*
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.EmergencyStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.SelfDeclarationStep
@@ -23,6 +19,10 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.util.ValidationUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -179,18 +179,18 @@ fun SelfDeclarationEmergencyScreen(
 
     if (showRelationBottomSheet) {
         val bottomSheetItems = relationTypeOptions.map { option ->
-            BottomSheetItem(
+            TaminBottomSheetItem(
                 id = option.id,
                 title = option.label,
                 isSelected = option.id == state.emergencyRelationId
             )
         }
 
-        HealthBottomSheet(
-            config = BottomSheetConfig(
+        TaminBottomSheet(
+            config = TaminBottomSheetConfig(
                 title = "نسبت با فرد",
                 subtitle = "نسبت فرد تماس اضطراری با شما را انتخاب کنید",
-                type = BottomSheetType.RELATION_TYPE,
+                type = TaminBottomSheetType.RELATION_TYPE,
                 singleSelection = true,
                 items = bottomSheetItems
             ),

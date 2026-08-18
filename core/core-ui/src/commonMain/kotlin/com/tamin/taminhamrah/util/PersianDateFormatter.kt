@@ -11,9 +11,17 @@ import kotlinx.datetime.toLocalDateTime
 private const val PERSIAN_ZERO = '۰'
 
 /**
- * Converts the ASCII digits in this string to Persian-Indic digits, leaving every
- * other character untouched. Shared by the date and price formatters so both render
- * numerals the same way.
+ * Converts the ASCII digits in this string to Persian-Indic digits (`U+06F0`–`U+06F9`),
+ * leaving every other character untouched. Shared by the date and price formatters so
+ * both produce numerals the same way.
+ *
+ * Use this when the characters themselves must be Persian — share/copy payloads,
+ * notifications, and any surface that does not inherit
+ * [com.tamin.taminhamrah.ui.theme.taminHamrahTypography].
+ * Compose UI that uses the theme typography already paints ASCII digits as Persian
+ * via Vazirmatn `ss01`; converting here as well is harmless but not required.
+ *
+ * See `DEFAULT_FONT_FEATURES` in `Type.kt` for the render-time mechanism.
  */
 fun String.toPersianDigits(): String = map { char ->
     if (char in '0'..'9') PERSIAN_ZERO + (char - '0') else char

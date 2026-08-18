@@ -31,10 +31,10 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.ui.tooling.preview.Preview
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetConfig
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetItem
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.DrugAllergyItemPR
 import com.tamin.taminhamrah.feature.healthProfile.ui.model.LookupItemPR
@@ -223,17 +223,17 @@ fun SelfDeclarationAllergyScreen(
     }
 
     if (showBottomsheet) {
-        HealthBottomSheet(
-            config = BottomSheetConfig(
+        TaminBottomSheet(
+            config = TaminBottomSheetConfig(
                 title = stringResource(Res.string.health_allergy_choose_drug),
                 subtitle = stringResource(Res.string.health_allergy_choose_your_allergy),
                 description = "",
-                type = BottomSheetType.CUSTOM,
+                type = TaminBottomSheetType.CUSTOM,
                 singleSelection = true,
                 submitText = stringResource(Res.string.health_allergy_add),
                 cancelText = stringResource(Res.string.health_btn_cancel),
                 items = drugOptions.map { drug ->
-                    BottomSheetItem(
+                    TaminBottomSheetItem(
                         id = drug.id,
                         title = drug.label,
                         isSelected = drug.id == state.selectedDrugId
