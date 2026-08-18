@@ -32,6 +32,8 @@ mapper/         DN → PR mappers
 
 Search `core-ui/ui/components/` before building any new component — the odds are good it already exists.
 
+Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersianDigits()` changes the string.
+
 ## feature
 
 ⚠️ Folder names do not match package names. Translation table:

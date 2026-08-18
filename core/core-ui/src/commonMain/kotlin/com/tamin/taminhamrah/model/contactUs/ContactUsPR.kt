@@ -37,7 +37,7 @@ enum class SocialChannelTypePR {
     WHATSAPP,
     IGAP,
     BALE,
-    BISPHONE,
+    APARAT,
     GAP,
     SOROUSH,
     RUBIKA,

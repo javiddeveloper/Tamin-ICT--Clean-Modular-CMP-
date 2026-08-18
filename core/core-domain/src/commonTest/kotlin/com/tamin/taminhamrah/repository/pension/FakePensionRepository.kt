@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.personal.AgeDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ class FakePensionRepository : PensionRepository {
     var payRollResult: List<PayRollDN> = emptyList()
     var userAgeResult: AgeDN? = null
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
+    var edictPdfReportResult : PdfDownloadDN? = null
     var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
     var retirementRequestInfoResult: List<RetirementRequestDN> = emptyList()
     var retirementStatusResult: RetirementStatusDN? = null
@@ -99,6 +101,13 @@ class FakePensionRepository : PensionRepository {
             }
             emit(payRollPDFResult!!)
         }
+
+    override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> =   flow {
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(edictPdfReportResult!!)
+    }
 
 
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
