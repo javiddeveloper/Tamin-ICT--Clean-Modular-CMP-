@@ -2,18 +2,18 @@ package com.tamin.taminhamrah.dataSource.historySource
 
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
-import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
+import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.safeCall
 
 /**
- * The three «سوابق» endpoints.
+ * The «سوابق» endpoints.
  *
  * Each goes through the shared [safeCall], the same wrapper the other data sources use: the
  * envelope's own status is already classified by `BaseDTO.extractData` through
@@ -40,36 +40,31 @@ internal class HistoryRemoteDataSourceImpl(
             apiServices.getHistoryJobInfos(queryBuilder.buildQuery(query)).extractData()
         }
 
+    /** Who the signed-in person is, which is what decides whether this service has anything to show. */
+    override suspend fun getUserInfos(): UserInfoDTO =
+        errorParser.safeCall(TAG_USER_INFO) {
+            apiServices.getUserInfos().extractData()
+        }
+
+    override suspend fun sendToInstitution(
+        allHistorySelected: Boolean,
+        historyAndWageSelected: Boolean,
+        combineHistorySelected: Boolean
+    ) {
+        errorParser.safeCall(TAG_SEND_TO_INSTITUTION) {
+            apiServices.sendToInstitution(
+                allHistorySelected,
+                historyAndWageSelected,
+                combineHistorySelected
+            ).extractMessage()
+        }
+    }
+
     private companion object {
         const val TAG_TALFIGH = "getTalfighInfos"
         const val TAG_DASTMOZD = "getDastmozdInfos"
         const val TAG_JOB_INFO = "getHistoryJobInfos"
-    }
-
-    override suspend fun getUserInfos(): UserInfoDTO {
-        return try {
-            val response = apiServices.getUserInfos()
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
-        try {
-            val response = apiServices.sendToInstitution(allHistorySelected, historyAndWageSelected, combineHistorySelected)
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+        const val TAG_USER_INFO = "getUserInfos"
+        const val TAG_SEND_TO_INSTITUTION = "sendToInstitution"
     }
 }
-
