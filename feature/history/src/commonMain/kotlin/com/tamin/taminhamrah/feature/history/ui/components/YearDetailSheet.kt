@@ -26,6 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.model.history.WageDetailPR
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -91,12 +94,6 @@ fun YearDetailSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
-    // Read once per year rather than per redraw: it decides one label and never changes under it.
-    val jalaliYear = remember(year.year) { year.year.toIntOrNull() }
-    val isLeapYear = remember(jalaliYear) {
-        jalaliYear?.let { PersianDateFormatter.isLeapYear(it) } == true
-    }
-
     /*
      * Closing runs the hide animation to its end and only then reports the dismissal.
      *
@@ -115,55 +112,82 @@ fun YearDetailSheet(
         sheetState = sheetState,
         containerColor = colors.bgSurface,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding()
-                .padding(horizontal = Spacing.page)
-                .padding(bottom = Spacing.xl),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
-            SheetHeader(year = year)
+        YearDetailContent(
+            year = year,
+            workshops = workshops,
+            wagesUnavailable = wagesUnavailable,
+        )
+    }
+}
 
-            for (season in SeasonLabels.indices) {
-                SeasonBlock(
-                    label = stringResource(SeasonLabels[season]),
-                    firstMonth = season * MONTHS_PER_SEASON,
-                    monthDays = year.monthDays,
-                    isLeapYear = isLeapYear,
-                )
-            }
+/**
+ * The sheet's contents, on their own so a preview can show them.
+ *
+ * A [ModalBottomSheet] renders as a full-screen scrim in a preview and shows nothing of what it
+ * holds, so what is worth looking at lives here instead.
+ */
+@Composable
+internal fun YearDetailContent(
+    year: YearHistoryPR,
+    workshops: ImmutableList<DastmozdInfoItemPR>,
+    wagesUnavailable: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
 
-            Text(
-                text = stringResource(Res.string.history_combined_workshops),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary,
+    // Read once per year rather than per redraw: it decides one label and never changes under it.
+    val jalaliYear = remember(year.year) { year.year.toIntOrNull() }
+    val isLeapYear = remember(jalaliYear) {
+        jalaliYear?.let { PersianDateFormatter.isLeapYear(it) } == true
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+            .padding(horizontal = Spacing.page)
+            .padding(bottom = Spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        SheetHeader(year = year)
+
+        for (season in SeasonLabels.indices) {
+            SeasonBlock(
+                label = stringResource(SeasonLabels[season]),
+                firstMonth = season * MONTHS_PER_SEASON,
+                monthDays = year.monthDays,
+                isLeapYear = isLeapYear,
             )
+        }
 
-            if (workshops.isEmpty()) {
-                // Three different blanks, and only one of them means "no workshops": the wage call
-                // failing is not knowing, and a year before the service began is not knowable.
-                Text(
-                    text = stringResource(
-                        when {
-                            wagesUnavailable ->
-                                Res.string.history_combined_workshops_unavailable
+        Text(
+            text = stringResource(Res.string.history_combined_workshops),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = colors.textPrimary,
+        )
 
-                            jalaliYear != null && jalaliYear < FIRST_WAGE_YEAR ->
-                                Res.string.history_combined_wage_from_1386
+        if (workshops.isEmpty()) {
+            // Three different blanks, and only one of them means "no workshops": the wage call
+            // failing is not knowing, and a year before the service began is not knowable.
+            Text(
+                text = stringResource(
+                    when {
+                        wagesUnavailable -> Res.string.history_combined_workshops_unavailable
 
-                            else -> Res.string.history_combined_no_workshop
-                        },
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.textMuted,
-                )
-            } else {
-                workshops.forEach { workshop ->
-                    WorkshopRow(workshop = workshop)
-                }
+                        jalaliYear != null && jalaliYear < FIRST_WAGE_YEAR ->
+                            Res.string.history_combined_wage_from_1386
+
+                        else -> Res.string.history_combined_no_workshop
+                    },
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted,
+            )
+        } else {
+            workshops.forEach { workshop ->
+                WorkshopRow(workshop = workshop)
             }
         }
     }
@@ -378,3 +402,71 @@ private fun WorkedMonthRow(worked: WorkedMonth) {
 
 /** Nothing recorded for this year, which is a legitimate answer rather than a failure. */
 internal val NoWorkshops: ImmutableList<DastmozdInfoItemPR> = persistentListOf()
+
+/** A leap year with two employers — اسفند carries its «کبیسه» mark and both workshops are listed. */
+@PreviewRtlTheme
+@Composable
+private fun YearDetailContentPreview() {
+    PreviewRtlThemeContent {
+        YearDetailContent(
+            year = PreviewYear,
+            workshops = persistentListOf(PreviewWorkshop),
+            wagesUnavailable = false,
+        )
+    }
+}
+
+/** The wage call failed: the panel must say so rather than claim nothing was recorded. */
+@PreviewRtlTheme
+@Composable
+private fun YearDetailContentWagesUnavailablePreview() {
+    PreviewRtlThemeContent {
+        YearDetailContent(
+            year = PreviewYear,
+            workshops = NoWorkshops,
+            wagesUnavailable = true,
+        )
+    }
+}
+
+/** Before ۱۳۸۶ there are no wage rows to have, which is a different sentence again. */
+@PreviewRtlTheme
+@Composable
+private fun YearDetailContentBeforeWageServicePreview() {
+    PreviewRtlThemeContent {
+        YearDetailContent(
+            year = PreviewYear.copy(year = "1384"),
+            workshops = NoWorkshops,
+            wagesUnavailable = false,
+        )
+    }
+}
+
+private val PreviewYear = YearHistoryPR(
+    year = "1403",
+    monthDays = persistentListOf(31, 31, 31, 0, 0, 0, 30, 30, 30, 30, 30, 30),
+    totalDays = 273,
+)
+
+private val PreviewWorkshop = DastmozdInfoItemPR(
+    wageDetails = List(12) { index ->
+        if (index < 3) WageDetailPR(month = "31", wage = "120000000") else WageDetailPR("0", "0")
+    },
+    hisyear = "1403",
+    id = 1,
+    risufname = "",
+    risubirthdate = "",
+    risuidserial2 = "",
+    risuidserial1 = "",
+    rwshname = "شرکت نمونه تأمین",
+    expcitycode = "",
+    brhcode = "",
+    risuidno = "",
+    risudname = "",
+    risuid = "",
+    risulname = "",
+    risunatcode = "",
+    brhname = "شعبه یک تهران",
+    historytypedesc = "اجباری",
+    rwshid = "1",
+)

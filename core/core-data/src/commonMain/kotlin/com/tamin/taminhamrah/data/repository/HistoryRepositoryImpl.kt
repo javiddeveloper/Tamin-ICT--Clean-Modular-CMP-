@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.data.repository
 import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toUserRole
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.HistoryCertificateType

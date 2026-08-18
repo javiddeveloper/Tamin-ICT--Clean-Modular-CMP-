@@ -5,16 +5,19 @@ import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
+import com.tamin.taminhamrah.model.history.UserRoleDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.HistoryRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * A [HistoryRepository] whose two calls can succeed, fail or be slow independently — which is the
- * whole point, since this screen survives one of them failing.
+ * A [HistoryRepository] whose calls can succeed, fail or be slow independently — which is the whole
+ * point, since this screen survives all but one of them failing.
  */
 class FakeHistoryRepository : HistoryRepository {
 
@@ -50,33 +53,37 @@ class FakeHistoryRepository : HistoryRepository {
 
     /**
      * Insured by default, because that is what every other test is about. A test that wants a
-     * مستمری‌بگیر or a کارفرما sets [notInsuredUser] — the person the service has no years for.
+     * مستمری‌بگیر — the one role the screen turns away — sets [UserRoleDN.PENSIONER].
      */
-    var userInfoResult: UserInfoDN = insuredUser()
-    var userInfoError: Throwable? = null
+    var userRoleResult: UserRoleDN = UserRoleDN.INSURED
+    var userRoleError: Throwable? = null
 
-    override suspend fun getUserInfos(): UserInfoDN {
-        userInfoError?.let { throw it }
-        return userInfoResult
+    override suspend fun getUserRole(): UserRoleDN {
+        userRoleError?.let { throw it }
+        return userRoleResult
     }
 
+    override suspend fun getUserInfos(): UserInfoDN = error("not used by this screen")
+
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) = Unit
+
+    /**
+     * The report the download returns, and which one was asked for.
+     *
+     * No channel in it: draining one belongs to the viewer, and naming the ktor type here would put
+     * it on the test module's classpath for no gain.
+     */
+    var reportResult: PdfDownloadDN = PdfDownloadDN()
+    var reportError: Throwable? = null
+    var lastReportRequested: HistoryCertificateType? = null
+        private set
+
+    override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> = flow {
+        lastReportRequested = type
+        reportError?.let { throw it }
+        emit(reportResult)
+    }
 
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
         flowOf(HistoryJobInfoDN(list = emptyList(), total = 0))
 }
-
-private fun blankUser() = UserInfoDN(
-    serial1 = null, militaryServiceCode = null, fatherName = null, lastName = null,
-    serial2 = null, creationTime = null, lastModificationTime = null, cityCode = null,
-    socialSecurityNumber = null, lastModifiedBy = null, issueplaceName = null, birthDate = null,
-    firstName = null, insuranceNumber = null, genderCode = null, nationalID = null,
-    marriageCode = null, createdBy = null, identityNumber = null, countryCode = null,
-    id = null, birthDateTimestamp = null, issueplace = null, nationCode = null,
-)
-
-/** Someone the history endpoints will answer for: they have an insurance number. */
-fun insuredUser(): UserInfoDN = blankUser().copy(insuranceNumber = "0081631829")
-
-/** A مستمری‌بگیر or کارفرما: no insurance number, and so no insured years to ask for. */
-fun notInsuredUser(): UserInfoDN = blankUser().copy(insuranceNumber = null)

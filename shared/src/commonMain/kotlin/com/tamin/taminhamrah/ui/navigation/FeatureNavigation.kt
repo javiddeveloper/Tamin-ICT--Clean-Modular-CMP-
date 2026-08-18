@@ -28,6 +28,9 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         // «مجموع سوابق» — the insured years added up. Menu id 8; it reached nothing before.
         FeatureFlag.COMBINED_RECORD -> navigateToHistory()
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
+        // «سوابق و دستمزد» — menu id 7. The same page: it is where the wage rows are read, and it
+        // reached nothing before.
+        FeatureFlag.WAGE_AND_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
         FeatureFlag.STUDENT_INSURANCE -> navigateToStudentInsuranceContract()

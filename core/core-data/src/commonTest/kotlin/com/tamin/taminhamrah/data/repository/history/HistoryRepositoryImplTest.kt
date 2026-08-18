@@ -17,6 +17,8 @@ import kotlin.test.assertEquals
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemDTO
+import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
 
 /**
  * The page size these two endpoints are asked for is not cosmetic.
@@ -48,18 +50,68 @@ class HistoryRepositoryImplTest {
         assertEquals(0, remote.lastDastmozdQuery?.start)
     }
 
+    /**
+     * A response cut off at the limit is not a shorter list, it is a wrong total — the screen adds
+     * these rows up. The envelope says how many exist, so the repository asks again for all of them.
+     */
+    @Test
+    fun aTruncatedResponseIsFetchedAgainInFull() = runTest {
+        remote.reportedTotal = 84
+        remote.rowsReturned = 84
+
+        val result = repository.getTalfighInfos()
+
+        assertEquals(listOf(60, 84), remote.talfighLimits, "asked again for exactly what exists")
+        assertEquals(84, result.list?.size)
+    }
+
+    @Test
+    fun aCompleteResponseIsNotFetchedTwice() = runTest {
+        remote.reportedTotal = 12
+        remote.rowsReturned = 12
+
+        repository.getDastmozdInfos()
+
+        assertEquals(listOf(60), remote.dastmozdLimits, "one call is enough")
+    }
+
+    /** A total beyond any plausible career describes something other than one person's history. */
+    @Test
+    fun anImplausibleTotalIsNotChased() = runTest {
+        remote.reportedTotal = 50_000
+        remote.rowsReturned = 50_000
+
+        repository.getTalfighInfos()
+
+        assertEquals(listOf(60), remote.talfighLimits, "the second request is refused")
+    }
+
     private class RecordingRemoteDataSource : HistoryRemoteDataSource {
         var lastTalfighQuery: ApiQueryParamDN? = null
         var lastDastmozdQuery: ApiQueryParamDN? = null
+        val talfighLimits = mutableListOf<Int>()
+        val dastmozdLimits = mutableListOf<Int>()
+
+        /** `total` the responses report, against a list of [rowsReturned] rows. */
+        var reportedTotal: Int = 0
+        var rowsReturned: Int = 0
 
         override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO {
             lastTalfighQuery = query
-            return TalfighInfoDTO(list = emptyList(), total = 0)
+            talfighLimits += query.limit
+            return TalfighInfoDTO(
+                list = List(rowsReturned.coerceAtMost(query.limit)) { TalfighInfoItemDTO() },
+                total = reportedTotal,
+            )
         }
 
         override suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO {
             lastDastmozdQuery = query
-            return DastmozdInfoDTO(list = emptyList(), total = 0)
+            dastmozdLimits += query.limit
+            return DastmozdInfoDTO(
+                list = List(rowsReturned.coerceAtMost(query.limit)) { DastmozdInfoItemDTO() },
+                total = reportedTotal,
+            )
         }
 
         override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =

@@ -2,16 +2,18 @@ package com.tamin.taminhamrah.feature.history.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.history.fake.FakeHistoryRepository
-import com.tamin.taminhamrah.feature.history.fake.notInsuredUser
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
+import com.tamin.taminhamrah.model.history.UserRoleDN
+import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
-import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -42,7 +44,8 @@ class HistoryViewModelTest {
         viewModel = HistoryViewModel(
             getTalfighInfosUseCase = GetTalfighInfosUseCase(repository),
             getDastmozdInfosUseCase = GetDastmozdInfosUseCase(repository),
-            getUserInfosUseCase = GetUserInfosUseCase(repository),
+            getUserRoleUseCase = GetUserRoleUseCase(repository),
+            downloadHistoryReportUseCase = DownloadHistoryReportUseCase(repository),
         )
     }
 
@@ -61,6 +64,7 @@ class HistoryViewModelTest {
         assertEquals(1, state.years.size, "one card per year")
         assertEquals(180, state.years.first().totalDays)
         assertEquals(2, state.wageByYear["1400"]?.size, "both 1400 workshops")
+        assertEquals(false, state.wagesUnavailable, "the wages arrived")
         assertTrue(state.hasLoadedOnce)
         assertNull(state.error)
     }
@@ -110,6 +114,7 @@ class HistoryViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(1, state.years.size, "the years survive a wage failure")
         assertTrue(state.wageByYear.isEmpty())
+        assertTrue(state.wagesUnavailable, "the sheet must not read the blank as 'none recorded'")
         assertNull(state.error, "a wage failure is not a page failure")
     }
 
@@ -145,7 +150,7 @@ class HistoryViewModelTest {
     @Test
     fun load_whenThePersonCannotHaveHistory_refusesWithoutCallingTheEndpoints() =
         runTest(testDispatcher) {
-            repository.userInfoResult = notInsuredUser()
+            repository.userRoleResult = UserRoleDN.PENSIONER
 
             viewModel.sendIntent(HistoryIntent.Load)
             advanceUntilIdle()
@@ -217,6 +222,85 @@ class HistoryViewModelTest {
         viewModel.sendIntent(HistoryIntent.DismissYearDetail)
         advanceUntilIdle()
         assertNull(viewModel.uiState.value.selectedYear)
+    }
+
+    /**
+     * A gate exists to explain a service, not to guard it. If the role call is the thing that is
+     * down, refusing would keep an insured person off a page they can use — so the load carries on
+     * and the history endpoints answer for themselves.
+     */
+    @Test
+    fun load_whenTheRoleCheckFails_carriesOnRatherThanRefusing() = runTest(testDispatcher) {
+        repository.userRoleError = IllegalStateException("logininfo down")
+        repository.talfighResult = talfigh(year("1403", days = "30"))
+
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(false, state.accessDenied, "an outage on the gate is not a refusal")
+        assertEquals(1, repository.talfighCalls, "the years are still requested")
+        assertEquals(1, state.years.size)
+    }
+
+    @Test
+    fun selectingAReportOpensTheViewerForThatReportAndDismissingClosesIt() =
+        runTest(testDispatcher) {
+            viewModel.sendIntent(HistoryIntent.ShowReportMenu)
+            advanceUntilIdle()
+            assertTrue(viewModel.uiState.value.showReportMenu)
+
+            viewModel.sendIntent(HistoryIntent.SelectReport(HistoryCertificateType.WAGES))
+            advanceUntilIdle()
+
+            val opened = viewModel.uiState.value
+            assertEquals(HistoryCertificateType.WAGES, opened.selectedReport)
+            assertEquals(false, opened.showReportMenu, "choosing closes the menu")
+            assertNull(opened.reportPdf, "the previous report's bytes must not be reused")
+
+            viewModel.sendIntent(HistoryIntent.DismissReport)
+            advanceUntilIdle()
+            assertNull(viewModel.uiState.value.selectedReport)
+        }
+
+    /** The viewer asks for the bytes, so the report it asks for must be the one it is showing. */
+    @Test
+    fun downloadingAReportFetchesTheOneOnScreen() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryIntent.SelectReport(HistoryCertificateType.COMBINED))
+        advanceUntilIdle()
+
+        viewModel.sendIntent(HistoryIntent.DownloadReport)
+        advanceUntilIdle()
+
+        assertEquals(HistoryCertificateType.COMBINED, repository.lastReportRequested)
+        assertNotNull(viewModel.uiState.value.reportPdf)
+        assertEquals(false, viewModel.uiState.value.reportDownloadFailed)
+    }
+
+    /**
+     * A failed download is the viewer's own business: it shows "file unavailable" itself, and an
+     * error dialog over an open viewer would bury the thing it is talking about.
+     */
+    @Test
+    fun aFailedReportDownloadTellsTheViewerRatherThanThePage() = runTest(testDispatcher) {
+        repository.reportError = IllegalStateException("report down")
+        viewModel.sendIntent(HistoryIntent.SelectReport(HistoryCertificateType.ALL))
+        advanceUntilIdle()
+
+        viewModel.sendIntent(HistoryIntent.DownloadReport)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.reportDownloadFailed, "the viewer must stop waiting")
+        assertNull(state.error, "the page did not fail")
+    }
+
+    @Test
+    fun downloadingWithNoReportOpenAsksForNothing() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryIntent.DownloadReport)
+        advanceUntilIdle()
+
+        assertNull(repository.lastReportRequested)
     }
 
     private fun talfigh(vararg rows: TalfighInfoItemDN) =

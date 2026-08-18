@@ -42,10 +42,18 @@ import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState
 import com.tamin.taminhamrah.feature.history.ui.model.CareerTotalPR
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
+import com.tamin.taminhamrah.mapper.history.labelRes
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.BarChartItem
+import com.tamin.taminhamrah.ui.components.TaminBarChart
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
@@ -69,13 +77,18 @@ import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_download
 import taminx.feature.history.Res as HistoryRes
 import taminx.feature.history.history_combined_empty
 import taminx.feature.history.history_combined_empty_title
@@ -83,7 +96,10 @@ import taminx.feature.history.history_combined_list_header
 import taminx.feature.history.history_combined_list_hint
 import taminx.feature.history.history_combined_not_insured
 import taminx.feature.history.history_combined_subtitle
+import taminx.feature.history.history_combined_chart_title
 import taminx.feature.history.history_combined_title
+import taminx.feature.history.history_report_action
+import taminx.feature.history.history_report_menu_title
 import androidx.compose.ui.unit.lerp as dpLerp
 
 private val HeaderIconOffset = (-30).dp
@@ -150,7 +166,6 @@ fun HistoryContent(
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
-    val headerProgress = motionState.progress
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
@@ -162,11 +177,11 @@ fun HistoryContent(
         containerColor = taminColors.bgPage,
         topBar = {
             HistoryHeader(
-                headerProgress = headerProgress,
                 motionState = motionState,
                 background = profileGradientBrush,
                 careerTotal = uiState.careerTotal,
                 onBackClicked = onBackClicked,
+                onDownloadClicked = { onIntent(HistoryIntent.ShowReportMenu) },
             )
         },
     ) { padding ->
@@ -179,6 +194,15 @@ fun HistoryContent(
                 overscrollEffect = rememberJellyOverscroll(),
             ) {
                 if (uiState.years.isNotEmpty()) {
+                    item(key = CHART_KEY) {
+                        YearChart(
+                            years = uiState.years,
+                            // The bar reports the year it drew, never its index, so the sheet
+                            // cannot be opened on a different year than the one tapped.
+                            onYearClick = { year -> onIntent(HistoryIntent.SelectYear(year)) },
+                        )
+                    }
+
                     item(key = LIST_HEADER_KEY) { YearListHeader() }
                 }
 
@@ -238,11 +262,33 @@ fun HistoryContent(
         YearDetailSheet(
             year = year,
             workshops = uiState.wageByYear[year.year] ?: NoWorkshops,
+            wagesUnavailable = uiState.wagesUnavailable,
             onDismiss = { onIntent(HistoryIntent.DismissYearDetail) },
+        )
+    }
+
+    if (uiState.showReportMenu) {
+        ReportMenu(
+            onSelect = { onIntent(HistoryIntent.SelectReport(it)) },
+            onDismiss = { onIntent(HistoryIntent.DismissReportMenu) },
+        )
+    }
+
+    // The same viewer every downloaded document in the app opens in: it renders a copy already on
+    // the device without asking, saves the one it fetches, and refuses a body that is not a PDF.
+    uiState.selectedReport?.let { report ->
+        TaminPdfViewer(
+            fileName = report.fileName(),
+            pdf = uiState.reportPdf,
+            downloadFailed = uiState.reportDownloadFailed,
+            onRequestDownload = { onIntent(HistoryIntent.DownloadReport) },
+            onDismiss = { onIntent(HistoryIntent.DismissReport) },
+            title = stringResource(report.labelRes()),
         )
     }
 }
 
+private const val CHART_KEY = "chart"
 private const val LIST_HEADER_KEY = "header"
 private const val EMPTY_STATE_KEY = "empty"
 private const val SKELETON_KEY = "skeleton"
@@ -255,13 +301,17 @@ private const val SKELETON_KEY = "skeleton"
  */
 @Composable
 private fun HistoryHeader(
-    headerProgress: Float,
     motionState: ScrollMotionState,
     background: Brush,
     careerTotal: CareerTotalPR,
     onBackClicked: () -> Unit,
+    onDownloadClicked: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
+
+    // Read here and nowhere higher. `progress` changes on every frame of a scroll, so a read in
+    // `HistoryContent` would recompose the chart and the whole year list along with the header.
+    val headerProgress = motionState.progress
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -272,6 +322,14 @@ private fun HistoryHeader(
                         icon = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(CoreRes.string.action_back),
                         onClick = onBackClicked,
+                        bordered = true,
+                    )
+                },
+                action = {
+                    TaminTopAppBarButton(
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_download),
+                        contentDescription = stringResource(HistoryRes.string.history_report_action),
+                        onClick = onDownloadClicked,
                         bordered = true,
                     )
                 },
@@ -366,6 +424,110 @@ private fun YearListHeader() {
     }
 }
 
+/**
+ * The three «سوابق» reports, in the order the previous app listed them.
+ *
+ * Built on the shared bottom sheet rather than a menu of its own: single-select is what it already
+ * does, and the labels come from the one table both this screen and اعلام سابقه read.
+ */
+@Composable
+private fun ReportMenu(
+    onSelect: (HistoryCertificateType) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val title = stringResource(HistoryRes.string.history_report_menu_title)
+    val allLabel = stringResource(ReportTypes[0].labelRes())
+    val wagesLabel = stringResource(ReportTypes[1].labelRes())
+    val combinedLabel = stringResource(ReportTypes[2].labelRes())
+
+    // Keyed on the resolved strings themselves. Keying on a list built at the call site would key
+    // on a new instance every time and rebuild the config on every recomposition.
+    val config = remember(title, allLabel, wagesLabel, combinedLabel) {
+        TaminBottomSheetConfig(
+            title = title,
+            singleSelection = true,
+            items = listOf(
+                TaminBottomSheetItem(id = 0, title = allLabel),
+                TaminBottomSheetItem(id = 1, title = wagesLabel),
+                TaminBottomSheetItem(id = 2, title = combinedLabel),
+            ),
+        )
+    }
+
+    TaminBottomSheet(
+        config = config,
+        onDismissRequest = onDismiss,
+        onSubmit = { result ->
+            // Single-select, so there is at most one; nothing chosen simply closes the sheet.
+            val chosen = result.selectedItemIds.firstOrNull()?.let(ReportTypes::getOrNull)
+            if (chosen == null) onDismiss() else onSelect(chosen)
+        },
+    )
+}
+
+/** Declared beside the sheet that orders them, so the order is not a coincidence of the enum. */
+private val ReportTypes = listOf(
+    HistoryCertificateType.ALL,
+    HistoryCertificateType.WAGES,
+    HistoryCertificateType.COMBINED,
+)
+
+/**
+ * What the saved file is called on the device.
+ *
+ * Stable per report, because [TaminPdfViewer] uses the name to decide whether it already has the
+ * file — a name with a timestamp in it would download the same report again every time.
+ */
+private fun HistoryCertificateType.fileName(): String = when (this) {
+    HistoryCertificateType.ALL -> "history_all.pdf"
+    HistoryCertificateType.WAGES -> "history_wages.pdf"
+    HistoryCertificateType.COMBINED -> "history_combined.pdf"
+}
+
+/**
+ * The years as bars, which is how the previous app opened this page.
+ *
+ * The list below says the same thing in words; the chart is what makes a gap or a short year
+ * visible without reading every row. Tapping a bar opens the same sheet the card does.
+ */
+@Composable
+private fun YearChart(
+    years: ImmutableList<YearHistoryPR>,
+    onYearClick: (YearHistoryPR) -> Unit,
+) {
+    val taminColors = LocalTaminColors.current
+
+    // Rebuilt only when the years themselves change: without this the whole series would be
+    // reallocated on every recomposition of the page, scrolling included.
+    val bars = remember(years) {
+        years.map { year ->
+            BarChartItem(
+                id = year.year,
+                label = year.year.toPersianDigits(),
+                value = year.totalDays,
+                highlighted = year.isComplete,
+            )
+        }.toImmutableList()
+    }
+    val byYear = remember(years) { years.associateBy { it.year } }
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Text(
+            text = stringResource(HistoryRes.string.history_combined_chart_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = taminColors.textPrimary,
+        )
+        TaminBarChart(
+            bars = bars,
+            onBarClick = { id -> byYear[id]?.let(onYearClick) },
+        )
+    }
+}
+
 @PreviewRtlTheme
 @Composable
 private fun HistoryScreenPreview() {
@@ -422,6 +584,38 @@ private fun HistoryScreenDarkPreview() {
                 years = PreviewYears,
                 careerTotal = CareerTotalPR(years = 12, months = 4, days = 18, totalDays = 4518),
             ),
+            lazyListState = rememberLazyListState(),
+            motionState = rememberScrollMotionState(maxMotionDistance = MaxMotionDistance),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun HistoryScreenErrorPreview() {
+    PreviewRtlThemeContent {
+        HistoryContent(
+            uiState = HistoryUiState(
+                hasLoadedOnce = true,
+                error = "در دریافت اطلاعات مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
+            ),
+            lazyListState = rememberLazyListState(),
+            motionState = rememberScrollMotionState(maxMotionDistance = MaxMotionDistance),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+/** The one state with no «تلاش دوباره»: nothing failed, so there is nothing to retry. */
+@PreviewRtlTheme
+@Composable
+private fun HistoryScreenAccessDeniedPreview() {
+    PreviewRtlThemeContent {
+        HistoryContent(
+            uiState = HistoryUiState(accessDenied = true),
             lazyListState = rememberLazyListState(),
             motionState = rememberScrollMotionState(maxMotionDistance = MaxMotionDistance),
             onIntent = {},

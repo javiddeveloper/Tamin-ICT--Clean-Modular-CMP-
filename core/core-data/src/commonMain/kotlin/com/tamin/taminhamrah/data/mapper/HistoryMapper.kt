@@ -88,16 +88,20 @@ fun DastmozdInfoDTO.toDomain(): DastmozdInfoDN {
 }
 
 /**
- * The relation code `login-services/logininfo` answers with, read as a role.
+ * The relation codes `login-services/logininfo` answers with, read as a role.
  *
  * `"05"` in the first position is a مستمری‌بگیر — the previous app's own test, kept letter for
- * letter because the code is the server's vocabulary, not ours. An absent list means the service
- * has nothing on this person yet, which is [UserRoleDN.UNKNOWN] rather than a guess either way.
+ * letter because the code is the server's vocabulary, not ours. The three cases are its three cases
+ * too: no list at all is a person the service has nothing on yet, while an empty list is an insured
+ * person with no other relation on file.
  */
-fun ListData<String>.toUserRole(): UserRoleDN = when {
-    list == null -> UserRoleDN.UNKNOWN
-    list.firstOrNull() == PENSIONER_RELATION_CODE -> UserRoleDN.PENSIONER
-    else -> UserRoleDN.INSURED
+fun ListData<String>.toUserRole(): UserRoleDN {
+    val codes = list ?: return UserRoleDN.UNKNOWN
+    return if (codes.firstOrNull() == PENSIONER_RELATION_CODE) {
+        UserRoleDN.PENSIONER
+    } else {
+        UserRoleDN.INSURED
+    }
 }
 
 private const val PENSIONER_RELATION_CODE = "05"
