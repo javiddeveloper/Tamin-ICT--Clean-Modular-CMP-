@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -18,13 +20,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -95,19 +104,33 @@ fun TaminTopAppBar(
                 bottom = bottomPadding,
             ),
     ) {
-        Row(
+        /*
+         * The title is centred against the bar, not against the space left over between the two
+         * end caps. Those caps are only equal in width while each holds one button -- give one
+         * side a second action and a title laid out between them slides off center.
+         *
+         * So the caps are pinned to the two edges and the title is centred over the whole width
+         * underneath them. It is drawn first, which keeps the buttons on top and hittable.
+         *
+         * The clearance is the wider of the two caps as actually measured, not one button's worth
+         * assumed: a screen with a share *and* a download in one cap would otherwise run a long
+         * title underneath them. Both caps report their width, and the title keeps the larger on
+         * both sides so it stays centred on the bar rather than on the gap.
+         */
+        var navCapWidth by remember { mutableIntStateOf(0) }
+        var actionCapWidth by remember { mutableIntStateOf(0) }
+        val capClearance = with(LocalDensity.current) {
+            maxOf(navCapWidth, actionCapWidth).toDp()
+        }
+
+        Box(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            contentAlignment = Alignment.Center,
         ) {
-            // A centred title needs an end cap on both sides even when empty, so the
-            // title sits between equal margins. A start-aligned one does not.
-            if (centerTitle || navigationIcon != null) {
-                HeaderSlot { navigationIcon?.invoke() }
-            }
             Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = Spacing.sm),
+                    .fillMaxWidth()
+                    .padding(horizontal = capClearance + Spacing.sm),
             ) {
                 if (titleContent != null) {
                     titleContent()
@@ -117,12 +140,24 @@ fun TaminTopAppBar(
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
-            if (centerTitle || action != null) {
-                HeaderSlot { action?.invoke() }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                HeaderSlot(
+                    modifier = Modifier.onSizeChanged { navCapWidth = it.width },
+                ) { navigationIcon?.invoke() }
+                HeaderSlot(
+                    modifier = Modifier.onSizeChanged { actionCapWidth = it.width },
+                ) { action?.invoke() }
             }
         }
         content()
@@ -146,6 +181,10 @@ fun taminTopAppBarGradient(
  * Translucent chip holding a single bar icon — a back chevron, a search or share action.
  * The design gives every one of these the same container, so the bar owns it rather than
  * leaving each caller to rebuild it.
+ *
+ * The colors default to the treatment header's white-on-teal. A caller placing one of these on a
+ * plain surface — a sheet's close button, say — overrides them rather than hand-rolling a second
+ * kind of icon button, so the size, shape and touch target stay the app's single answer.
  */
 @Composable
 fun TaminTopAppBarButton(
@@ -154,17 +193,20 @@ fun TaminTopAppBarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     bordered: Boolean = false,
-    shape : Shape =  RoundedCornerShape(CornerRadius.chip)
+    shape: Shape = RoundedCornerShape(CornerRadius.chip),
+    containerColor: Color = Color.White.copy(alpha = 0.125f),
+    contentColor: Color = Color.White,
+    borderColor: Color = Color.White.copy(alpha = 0.2f),
 ) {
 
     Box(
         modifier = modifier
             .size(HEADER_BUTTON_SIZE)
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.125f))
+            .background(containerColor)
             .then(
                 if (bordered) {
-                    Modifier.border(1.dp, Color.White.copy(alpha = 0.2f), shape)
+                    Modifier.border(1.dp, borderColor, shape)
                 } else {
                     Modifier
                 },
@@ -175,17 +217,25 @@ fun TaminTopAppBarButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = Color.White,
+            tint = contentColor,
             modifier = Modifier.size(HEADER_BUTTON_ICON_SIZE),
         )
     }
 }
 
-/** Fixed-width end cap so the title stays optically centred with 0, 1 or 2 actions. */
+/**
+ * End cap holding the navigation icon or the actions.
+ *
+ * One button wide *at minimum*, not exactly — that is what keeps the title optically centred when
+ * a bar has an icon on one side only. It has to grow past that when a caller supplies more than one
+ * action, though: pinning it to [HEADER_BUTTON_SIZE] silently clipped everything after the first
+ * button, so a bar with a download and a share showed only the download.
+ */
 @Composable
-private fun HeaderSlot(content: @Composable () -> Unit) {
+private fun HeaderSlot(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier.size(HEADER_BUTTON_SIZE),
+        modifier = modifier
+            .defaultMinSize(minWidth = HEADER_BUTTON_SIZE, minHeight = HEADER_BUTTON_SIZE),
         contentAlignment = Alignment.Center,
         content = { content() },
     )

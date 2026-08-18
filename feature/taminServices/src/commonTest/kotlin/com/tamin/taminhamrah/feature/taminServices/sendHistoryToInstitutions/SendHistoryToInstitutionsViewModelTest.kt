@@ -4,12 +4,17 @@ import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryStep
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsEvent
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.contract.SendHistoryToInstitutionsIntent
+import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
-import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
+import com.tamin.taminhamrah.model.pension.EdictPensionerDN
+import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
+import com.tamin.taminhamrah.model.pension.PensionInquiryDN
+import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -79,7 +84,7 @@ class SendHistoryToInstitutionsViewModelTest {
                 state = awaitItem()
             }
             assertNotNull(state.userInfo)
-            assertEquals("عادل", state.userInfo!!.firstName)
+            assertEquals("عادل", state.userInfo.firstName)
             assertFalse(state.isLoading)
             cancelAndIgnoreRemainingEvents()
         }
@@ -260,17 +265,14 @@ class SendHistoryToInstitutionsViewModelTest {
         }
 
         // Unused stubs
-        override suspend fun getPensionInquiry(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.PensionInquiryDN>> { TODO() }
-        override suspend fun getEdictPensioner(query: ApiQueryParamDN) = flow<com.tamin.taminhamrah.model.pension.EdictPensionerDN?> { TODO() }
-        override suspend fun sendRequestDeferredInstallmentCertificate(request: com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN) = flow<com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN> { TODO() }
-        override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.PayRollDN>> { TODO() }
-        override suspend fun getDisabilityPersonalInfo() = flow<com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN> { TODO() }
+        override suspend fun getPensionInquiry(filters: List<ApiFilterDN>) = flow<List<PensionInquiryDN>> { TODO() }
+        override suspend fun getEdictPensioner(query: ApiQueryParamDN) = flow<EdictPensionerDN?> { TODO() }
+        override suspend fun sendRequestDeferredInstallmentCertificate(request: DeferredInstallmentRequestDN) = flow<com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN> { TODO() }
+        override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>) = flow<List<PayRollDN>> { TODO() }
+        override suspend fun getDisabilityPersonalInfo() = flow<DisabilityPersonalInfoDN> { TODO() }
         override suspend fun getUserAge(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.personal.AgeDN> { TODO() }
-        override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> { TODO() }
-        override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> {
-            TODO("Not yet implemented")
-        }
-
+        override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>) = flow<PdfDownloadDN> { TODO() }
+        override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> = flow { TODO() }
         override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN>> { TODO() }
         override suspend fun checkRetirementStatus() = flow<com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN> { TODO() }
         override suspend fun sendRetirementDocument(requestId: String, request: com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN) = flow<String?> { TODO() }

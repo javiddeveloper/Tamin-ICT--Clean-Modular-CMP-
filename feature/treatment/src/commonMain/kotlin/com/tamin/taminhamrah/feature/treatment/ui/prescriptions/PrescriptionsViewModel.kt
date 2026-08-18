@@ -20,9 +20,15 @@ import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 
 class PrescriptionsViewModel(
@@ -62,38 +68,88 @@ class PrescriptionsViewModel(
         NO_NATIONAL_CODE
     }
 
-    private fun loadList(intent: PrescriptionsIntent.LoadList): Flow<PartialState> = flow {
-        // The existing list is kept while this is in flight, so a reload does not blank the screen.
+    /**
+     * What the list is currently showing. Emitting a new query supersedes the one in flight.
+     *
+     * A [MutableSharedFlow] rather than a [kotlinx.coroutines.flow.MutableStateFlow] on purpose:
+     * a state flow drops a value equal to the current one, which would make «تلاش دوباره» after a
+     * failure do nothing at all. `replay = 1` hands the pending query to the pipeline the moment it
+     * subscribes, so the first request is never lost.
+     */
+    private val listQuery = MutableSharedFlow<RecordListQuery>(
+        replay = 1,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
+    /** Guards [listPipeline] so the reducer is handed it once and never a second copy. */
+    private var listPipelineStarted = false
+
+    /**
+     * Re-queries the list, cancelling whatever request was still running.
+     *
+     * Every other intent here finishes and frees its slot; a list request never does, because the
+     * repository ends in `emitAll` over a Room query that stays open. [BaseViewModel] merges intent
+     * flows rather than switching between them, so returning a fresh flow per `LoadList` left every
+     * earlier request alive:
+     *
+     *  - each one kept writing *its* tab's rows into the state whenever Room changed, so the list
+     *    could revert to the previous tab's contents — or to an empty one, which the screen shows
+     *    as «چیزی یافت نشد»;
+     *  - and `flatMapMerge` only runs `DEFAULT_CONCURRENCY` (16) flows at once, so after about
+     *    sixteen tab switches or searches it stopped collecting new intents entirely and the screen
+     *    froze on whatever it last had.
+     *
+     * Handing the reducer one long-lived pipeline and switching the query inside it fixes both: one
+     * slot for the life of the ViewModel, and `flatMapLatest` cancels the superseded request.
+     */
+    private fun loadList(intent: PrescriptionsIntent.LoadList): Flow<PartialState> {
+        listQuery.tryEmit(
+            RecordListQuery(
+                patientNationalCode = intent.nationalCode,
+                requestTypeIds = intent.requestTypeIds,
+                startDate = intent.startDate,
+                endDate = intent.endDate,
+            ),
+        )
+        if (listPipelineStarted) return emptyFlow()
+        listPipelineStarted = true
+        return listPipeline()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun listPipeline(): Flow<PartialState> =
+        listQuery.flatMapLatest { query -> records(query) }
+
+    private fun records(query: RecordListQuery): Flow<PartialState> = flow {
+        // Loading(true) keeps the existing list on screen during a refresh, so PullToRefresh
+        // overlays cleanly instead of blanking the page.
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
         // Defaults to the «۶ ماه اخیر» period the records filter advertises.
-        val startD = intent.startDate ?: getSixMonthsAgoTimestamp()
-        val endD = intent.endDate ?: getCurrentTimestamp()
+        val startD = query.startDate ?: getSixMonthsAgoTimestamp()
+        val endD = query.endDate ?: getCurrentTimestamp()
 
-        try {
-            // One request per category. «همه» asks for each type and the lists are merged here,
-            // newest first; a single-type tab is just a list of one. The repository encodes how
-            // "self" versus a dependant is addressed, so the raw patient code is handed straight in.
-            val perType = intent.requestTypeIds.map { requestTypeId ->
-                getElectronicPrescriptionListUseCase(
-                    requestTypeId,
-                    nationalCode,
-                    intent.nationalCode,
-                    startD,
-                    endD,
-                )
-            }
-            combine(perType) { lists ->
-                lists.toList()
-                    .flatten()
-                    .sortedByDescending { it.prescDate }
-            }.collect { merged ->
-                emit(PartialState.PrescriptionsLoaded(merged.toPresentation()))
-            }
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.toSingleLineMessage()))
+        // One request per category. «همه» asks for each type and the lists are merged here,
+        // newest first; a single-type tab is just a list of one. The repository encodes how
+        // "self" versus a dependant is addressed, so the raw patient code is handed straight in.
+        val perType = query.requestTypeIds.map { requestTypeId ->
+            getElectronicPrescriptionListUseCase(
+                requestTypeId,
+                nationalCode,
+                query.patientNationalCode,
+                startD,
+                endD,
+            )
         }
-    }
+        combine(perType) { lists ->
+            lists.toList()
+                .flatten()
+                .sortedByDescending { it.prescDate }
+        }.collect { merged ->
+            emit(PartialState.PrescriptionsLoaded(merged.toPresentation()))
+        }
+    }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
     private fun selectPrescription(intent: PrescriptionsIntent.SelectPrescription): Flow<PartialState> = flow {
         emit(PartialState.PrescriptionSelected(intent.noteHeadID))
@@ -215,3 +271,16 @@ class PrescriptionsViewModel(
 
 /** Placeholder for an unknown national code, matching the previous app's path segment. */
 private const val NO_NATIONAL_CODE = "0"
+
+/**
+ * Everything the records list is queried by.
+ *
+ * A value type so the pipeline can be driven by "the current query" rather than by a stream of
+ * intents — swapping one for another is what lets the previous request be canceled.
+ */
+private data class RecordListQuery(
+    val patientNationalCode: String,
+    val requestTypeIds: List<String>,
+    val startDate: String?,
+    val endDate: String?,
+)

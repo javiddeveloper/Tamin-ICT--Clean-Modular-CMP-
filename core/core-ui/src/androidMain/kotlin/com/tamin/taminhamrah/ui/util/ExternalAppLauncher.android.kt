@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.core.text.HtmlCompat
 import org.koin.core.context.GlobalContext
+import androidx.core.net.toUri
 
 actual class ExternalAppLauncher actual constructor() {
 
@@ -27,14 +28,14 @@ actual class ExternalAppLauncher actual constructor() {
             }
         }
 
-        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse(uriString)).apply {
+        val intent = Intent(Intent.ACTION_SENDTO, uriString.toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     }
 
     actual fun openPhone(phone: String) {
-        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")).apply {
+        val intent = Intent(Intent.ACTION_DIAL, "tel:$phone".toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
@@ -42,13 +43,16 @@ actual class ExternalAppLauncher actual constructor() {
 
     actual fun openWhatsApp(phone: String) {
         val phoneNumber = phone.filter { it.isDigit() }
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://wa.me/$phoneNumber")
-        ).apply {
+        openUrl("https://wa.me/$phoneNumber")
+    }
+
+    actual fun openUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        context.startActivity(intent)
+        // A device with no browser throws ActivityNotFoundException; opening a web page is never
+        // the point of the screen that offers it, so it fails quietly rather than taking the app.
+        runCatching { context.startActivity(intent) }
     }
 
     actual fun shareText(text: String) {
