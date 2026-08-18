@@ -14,6 +14,11 @@ import org.jetbrains.compose.resources.ThemeQualifier
  * function reference in `ResourceEnvironmentKt` explicitly commented "will be overridden for
  * tests" — but `internal` blocks a normal Kotlin call from a different Gradle module, so this
  * reaches it via reflection, the same way calling a public-in-bytecode member from Java would.
+ *
+ * The property is declared as `internal var getResourceEnvironment = ::getSystemEnvironment`, so
+ * its inferred type — and the setter's erased parameter type — is `kotlin.reflect.KFunction`, not
+ * `kotlin.jvm.functions.Function0`. The replacement must likewise be a real function reference
+ * ([buildEnvironment]), not a lambda, or the assigned value won't be a `KFunction` either.
  */
 @OptIn(InternalResourceApi::class)
 internal object FakeComposeResourceEnvironment {
@@ -24,13 +29,12 @@ internal object FakeComposeResourceEnvironment {
     fun install() {
         if (installed) return
 
-        val provider: () -> ResourceEnvironment = { buildEnvironment() }
         val holder = Class.forName("org.jetbrains.compose.resources.ResourceEnvironmentKt")
         val setter = holder.getDeclaredMethod(
             "setGetResourceEnvironment",
-            kotlin.jvm.functions.Function0::class.java,
+            kotlin.reflect.KFunction::class.java,
         ).apply { isAccessible = true }
-        setter.invoke(null, provider)
+        setter.invoke(null, ::buildEnvironment)
 
         installed = true
     }
