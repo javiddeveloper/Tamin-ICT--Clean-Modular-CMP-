@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
@@ -216,7 +215,7 @@ fun RecordDetailContent(
                             TaminTopAppBarButton(
                                 icon = vectorResource(Res.drawable.ic_share),
                                 contentDescription = stringResource(Res.string.prescription_share_cd),
-                                onClick = { launcher.shareText(shareBody, shareTitle) },
+                                onClick = { launcher.shareText(shareBody) },
                             )
                             // One download, and only when this record actually has one. Which
                             // export it is, and whether it exists at all, is a property of the
