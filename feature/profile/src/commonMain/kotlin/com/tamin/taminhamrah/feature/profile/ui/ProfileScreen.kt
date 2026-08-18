@@ -435,11 +435,13 @@ fun ProfileContent(
                                     leadingIconTintColor = taminColors.bgIconProfile,
                                     leadingIconBackgroundGradient = taminColors.iconGradientPrimary
                                 ),
-                                badge = ListItemBadge(
-                                    text = stringResource(Res.string.profile_dependents_badge_test),
-                                    backgroundColor = taminColors.blueBg,
-                                    textColor = taminColors.blueText
-                                ),
+                                badge = state.dependentsCount.takeIf { it > 0 }?.let { count ->
+                                    ListItemBadge(
+                                        text = "$count نفر ",
+                                        backgroundColor = taminColors.blueBg,
+                                        textColor = taminColors.blueText
+                                    )
+                                },
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.NavigateToDependentsList) }
                             ),

@@ -19,11 +19,13 @@ import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -35,6 +37,7 @@ class ProfileViewModel(
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
+    private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
@@ -90,8 +93,13 @@ class ProfileViewModel(
                 )
             }
         }
+        val dependentsCountFlow = flow {
+            subdominantUseCase().collect { subdominant ->
+                emit(PartialState.DependentsCountLoaded(subdominant.list?.size ?: 0))
+            }
+        }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow).collect {
+        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow).collect {
             emit(it)
         }
     }
@@ -204,6 +212,10 @@ class ProfileViewModel(
 
         is PartialState.TaminRelationLoaded -> currentState.copy(
             taminRelation = partialState.relation
+        )
+
+        is PartialState.DependentsCountLoaded -> currentState.copy(
+            dependentsCount = partialState.count
         )
 
         is PartialState.ImageRequestLoading -> currentState.copy(
