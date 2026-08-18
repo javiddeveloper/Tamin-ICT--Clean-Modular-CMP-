@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
@@ -95,6 +96,8 @@ internal fun OrotezProtezHeader(
             title = stringResource(Res.string.orotez_protez_help_dialog_title),
             description = stringResource(Res.string.orotez_protez_help_dialog_description),
             icon = vectorResource(Res.drawable.ic_info),
+            iconTint = Color.White,
+            iconBackgroundBrush = taminColors.iconGradientPrimary,
             onDismissRequest = { showHelpDialog = false },
             confirmButton = {
                 TaminFilledButton(
