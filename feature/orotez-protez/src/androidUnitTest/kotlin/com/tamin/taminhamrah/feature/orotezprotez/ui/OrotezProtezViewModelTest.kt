@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.orotezprotez.fake.FakeContractsRepository
 import com.tamin.taminhamrah.feature.orotezprotez.fake.FakeOrotezProtezRepository
+import com.tamin.taminhamrah.feature.orotezprotez.test.FakeComposeResourceEnvironment
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezEvent
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezIntent
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezOptionUi
@@ -30,6 +31,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * Lives in androidUnitTest (not commonTest) because [loadInitialData] resolves insured-person
+ * subtitle strings via `getString(Res.string...)`, which on the Android target needs
+ * [FakeComposeResourceEnvironment] installed to avoid the "not mocked" `Resources.getSystem()`
+ * crash under plain JVM unit tests.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class OrotezProtezViewModelTest {
 
@@ -40,6 +47,7 @@ class OrotezProtezViewModelTest {
 
     @BeforeTest
     fun setUp() {
+        FakeComposeResourceEnvironment.install()
         Dispatchers.setMain(testDispatcher)
         orotezProtezRepository = FakeOrotezProtezRepository().apply {
             mainInfoResult = RequestInsuredMainInfoDN(

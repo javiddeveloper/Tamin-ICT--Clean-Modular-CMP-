@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.orotezprotez.fake.FakeContractsRepository
 import com.tamin.taminhamrah.feature.orotezprotez.fake.FakeOrotezProtezRepository
+import com.tamin.taminhamrah.feature.orotezprotez.test.FakeComposeResourceEnvironment
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentChecklist
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezDocumentState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezEvent
@@ -52,6 +53,7 @@ class OrotezProtezDocumentUploadTest {
 
     @BeforeTest
     fun setUp() {
+        FakeComposeResourceEnvironment.install()
         Dispatchers.setMain(testDispatcher)
         orotezProtezRepository = FakeOrotezProtezRepository().apply {
             mainInfoResult = RequestInsuredMainInfoDN(
