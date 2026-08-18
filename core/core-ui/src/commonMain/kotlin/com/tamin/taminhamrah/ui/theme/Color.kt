@@ -70,6 +70,8 @@ val TaminLightGreenBg = Color(0xFFE6F7ED)
 val TaminLightBlueBg = Color(0xFFEFF6FF)
 val TaminLightOrangeBg = Color(0xFFFFF8E1)
 val TaminLightDangerBorder = Color(0xFFFDECEC)
+val TaminLightIconBgSubtle = Color(0xFFEEF2FB)
+val TaminLightIconTintSubtle = Color(0xFF5E7392)
 
 // Dark mode collapses every screen's hero onto one teal-to-blue wash.
 val TaminDarkHeroStart = Color(0xFF10AEB9)

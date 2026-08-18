@@ -25,7 +25,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.security.ui.contract.SecurityEvent
@@ -75,16 +74,39 @@ fun SecurityScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val biometricAuthenticator = rememberBiometricAuthenticator()
+    val scope = rememberCoroutineScope()
+    val biometricPromptTitle = stringResource(Res.string.biometric_prompt_title)
+    val biometricPromptSubtitle = stringResource(Res.string.biometric_prompt_subtitle)
+    val biometricPromptNegativeButton = stringResource(Res.string.action_cancel)
+    val onIntent = viewModel::sendIntent
 
     HandleSecurityEvents(
         events = viewModel.events,
         onNavigateBack = onNavigateBack
     )
 
+    LaunchedEffect(Unit) {
+        val available = biometricAuthenticator.availability() == BiometricAvailability.AVAILABLE
+        onIntent(SecurityIntent.UpdateBiometricAvailability(available))
+    }
+
     SecurityContent(
         state = uiState,
-        onIntent = viewModel::sendIntent,
-        onNavigateBack = onNavigateBack
+        onIntent = onIntent,
+        onNavigateBack = onNavigateBack,
+        onBiometricToggleRequested = { newValue ->
+            scope.launch {
+                val result = biometricAuthenticator.authenticate(
+                    title = biometricPromptTitle,
+                    subtitle = biometricPromptSubtitle,
+                    negativeButtonText = biometricPromptNegativeButton
+                )
+                if (result is BiometricAuthResult.Success) {
+                    onIntent(SecurityIntent.SetBiometricEnabled(newValue))
+                }
+            }
+        }
     )
 }
 
@@ -105,24 +127,13 @@ private fun SecurityContent(
     modifier: Modifier = Modifier,
     state: SecurityUiState,
     onIntent: (SecurityIntent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onBiometricToggleRequested: (Boolean) -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
     val topBarGradient = remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
     val defaultBorder = remember(taminColors) { BorderStroke(1.dp, taminColors.border) }
-    var patternEnabled by remember { mutableStateOf(false) }
-
-    val biometricAuthenticator = rememberBiometricAuthenticator()
-    val scope = rememberCoroutineScope()
-    val biometricPromptTitle = stringResource(Res.string.biometric_prompt_title)
-    val biometricPromptSubtitle = stringResource(Res.string.biometric_prompt_subtitle)
-    val biometricPromptNegativeButton = stringResource(Res.string.action_cancel)
-
-    LaunchedEffect(Unit) {
-        val available = biometricAuthenticator.availability() == BiometricAvailability.AVAILABLE
-        onIntent(SecurityIntent.UpdateBiometricAvailability(available))
-    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -159,62 +170,42 @@ private fun SecurityContent(
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
                 SectionHeaderTitle(title = stringResource(Res.string.security_account_title))
-                ListGroupView(
-                    containerBorder = defaultBorder,
-                    items = persistentListOf(
+                val fingerprintTitle = stringResource(Res.string.security_fingerprint)
+                val fingerprintPainter = rememberVectorPainter(Icons.Rounded.Fingerprint)
+                val fingerprintIconBg = taminColors.iconBgSubtle
+                val fingerprintIconTint = taminColors.iconTintSubtle
+                val securityItems = remember(
+                    fingerprintTitle,
+                    fingerprintPainter,
+                    fingerprintIconBg,
+                    fingerprintIconTint,
+                    state.isBiometricEnabled,
+                    state.isBiometricAvailable,
+                    onBiometricToggleRequested
+                ) {
+                    persistentListOf(
                         ListItemData(
-                            title = stringResource(Res.string.security_change_password),
-                            leadingIconPainter = painterResource(Res.drawable.ic_privacy),
+                            title = fingerprintTitle,
+                            leadingIconPainter = fingerprintPainter,
                             colors = ListItemColors(
-                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral,
-                                leadingIconTintColor = Color.White
-                            ),
-                            showArrow = true,
-                            onClick = { /* Navigate to change password */ }
-                        ),
-                        ListItemData(
-                            title = stringResource(Res.string.security_2fa),
-                            leadingIconPainter = painterResource(Res.drawable.ic_tamin_shield_check),
-                            colors = ListItemColors(
-                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral,
-                                leadingIconTintColor = Color.White
-                            ),
-                            badge = ListItemBadge(
-                                text = "تست",
-                                backgroundColor = taminColors.greenBg,
-                                textColor = taminColors.greenText
-                            ),
-                            showArrow = true,
-                            onClick = { /* Navigate to 2FA */ }
-                        ),
-                        ListItemData(
-                            title = stringResource(Res.string.security_fingerprint),
-                            leadingIconPainter = rememberVectorPainter(Icons.Rounded.Fingerprint),
-                            colors = ListItemColors(
-                                leadingIconBackgroundColor = if (isDark) taminColors.blueBg else Color(0xFFEEF2FB),
-                                leadingIconTintColor = if (isDark) taminColors.textPrimary else Color(0xFF5E7392)
+                                leadingIconBackgroundColor = fingerprintIconBg,
+                                leadingIconTintColor = fingerprintIconTint
                             ),
                             showArrow = false,
                             customTrailingContent = {
                                 TaminSwitchButton(
                                     checked = state.isBiometricEnabled,
                                     enabled = state.isBiometricAvailable,
-                                    onCheckedChange = { newValue ->
-                                        scope.launch {
-                                            val result = biometricAuthenticator.authenticate(
-                                                title = biometricPromptTitle,
-                                                subtitle = biometricPromptSubtitle,
-                                                negativeButtonText = biometricPromptNegativeButton
-                                            )
-                                            if (result is BiometricAuthResult.Success) {
-                                                onIntent(SecurityIntent.SetBiometricEnabled(newValue))
-                                            }
-                                        }
-                                    }
+                                    onCheckedChange = onBiometricToggleRequested
                                 )
                             }
                         )
                     )
+                }
+
+                ListGroupView(
+                    containerBorder = defaultBorder,
+                    items = securityItems
                 )
             }
         }

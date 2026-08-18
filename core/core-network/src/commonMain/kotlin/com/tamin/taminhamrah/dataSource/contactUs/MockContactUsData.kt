@@ -5,7 +5,7 @@ import com.tamin.taminhamrah.model.contactUs.*
 val mockContactUsData = ContactUsInfoDto(
     hotline = HotlineDto(
         title = "مرکز تماس شبانه‌روزی",
-        number = "۱۴۲۰",
+        number = "1420",
         dialNumber = "1420"
     ),
     socialChannels = listOf(
@@ -25,7 +25,7 @@ val mockContactUsData = ContactUsInfoDto(
             id = "whatsapp",
             title = "واتساپ",
             type = "WHATSAPP",
-            actionUrl = "https://wa.me/989000000000"
+            actionUrl = "https://whatsapp.com/channel/0029VawcdiZHbFV4ws6Klm1X"
         ),
         SocialChannelDto(
             id = "igap",
@@ -37,37 +37,37 @@ val mockContactUsData = ContactUsInfoDto(
             id = "bale",
             title = "بله",
             type = "BALE",
-            actionUrl = "https://ble.ir/tamin"
+            actionUrl = "https://ble.ir/tamin_media"
         ),
         SocialChannelDto(
-            id = "bisphone",
-            title = "بیسفون",
-            type = "BISPHONE",
-            actionUrl = "https://bisphone.com"
+            id = "aparat",
+            title = "آپارات",
+            type = "APARAT",
+            actionUrl = "https://www.aparat.com/tamin_media"
         ),
         SocialChannelDto(
             id = "gap",
             title = "گپ",
             type = "GAP",
-            actionUrl = "https://gap.im/tamin"
+            actionUrl = "https://gap.im/tamin_media"
         ),
         SocialChannelDto(
             id = "soroush",
             title = "سروش",
             type = "SOROUSH",
-            actionUrl = "https://splus.ir/tamin"
+            actionUrl = "https://splus.ir/tamin_media"
         ),
         SocialChannelDto(
             id = "rubika",
             title = "روبیکا",
             type = "RUBIKA",
-            actionUrl = "https://rubika.ir/tamin"
+            actionUrl = "https://rubika.ir/tamin_media"
         ),
         SocialChannelDto(
             id = "eitaa",
             title = "ایتا",
             type = "EITAA",
-            actionUrl = "https://eitaa.com/tamin"
+            actionUrl = "https://www.eitaa.com/tamin_media"
         )
     ),
     contactDetails = listOf(
@@ -75,7 +75,7 @@ val mockContactUsData = ContactUsInfoDto(
             id = "phone",
             type = "PHONE",
             title = "تلفن",
-            value = "۰۲۱-۶۴۵۰۱",
+            value = "1420",
             actionUrl = "tel:02164501",
             canCopy = true
         ),
@@ -83,7 +83,7 @@ val mockContactUsData = ContactUsInfoDto(
             id = "fax",
             type = "FAX",
             title = "فکس",
-            value = "۰۲۱-۶۶۹۳۱۰۰۸",
+            value = "021-66931008",
             actionUrl = "tel:02166931008",
             canCopy = true
         ),
@@ -99,7 +99,7 @@ val mockContactUsData = ContactUsInfoDto(
             id = "postal_code",
             type = "POSTAL_CODE",
             title = "کد پستی",
-            value = "۱۴۵۷۹۶۵۵۹۵",
+            value = "1457965595",
             actionUrl = "",
             canCopy = true
         ),

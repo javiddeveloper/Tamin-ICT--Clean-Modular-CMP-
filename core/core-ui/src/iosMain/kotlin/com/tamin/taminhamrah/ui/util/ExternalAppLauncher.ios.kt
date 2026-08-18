@@ -9,6 +9,7 @@ import platform.UIKit.UIPopoverPresentationController
 import platform.Foundation.NSString
 import platform.Foundation.create
 import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
+import platform.UIKit.UIActivityViewController
 import platform.UIKit.popoverPresentationController
 
 actual class ExternalAppLauncher actual constructor() {
@@ -46,7 +47,7 @@ actual class ExternalAppLauncher actual constructor() {
         }
     }
 
-    actual fun shareText(text: String, title: String?) {
+    actual fun shareText(text: String) {
         val controller = UIActivityViewController(
             activityItems = listOf(text),
             applicationActivities = null,

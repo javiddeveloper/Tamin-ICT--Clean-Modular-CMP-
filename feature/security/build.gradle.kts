@@ -13,7 +13,6 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
-            implementation(libs.kotlinx.collections.immutable)
             // Add other dependencies as needed
         }
     }

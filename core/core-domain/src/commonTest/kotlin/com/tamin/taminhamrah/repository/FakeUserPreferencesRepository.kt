@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.model.UserData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,9 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
     override val observeBiometricEnabled: Flow<Boolean>
         get() = _userData.map { it.isBiometricEnabled }
 
+    override val observeFontSize: Flow<FontSizeOption>
+        get() = _userData.map { it.fontSize }
+
     override suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig) {
         _userData.value = _userData.value.copy(darkThemeConfig = darkThemeConfig)
     }
@@ -33,5 +37,9 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
             isBiometricEnabled = enabled,
             hasAskedToEnableBiometric = true
         )
+    }
+
+    override suspend fun setFontSize(fontSize: FontSizeOption) {
+        _userData.value = _userData.value.copy(fontSize = fontSize)
     }
 }
