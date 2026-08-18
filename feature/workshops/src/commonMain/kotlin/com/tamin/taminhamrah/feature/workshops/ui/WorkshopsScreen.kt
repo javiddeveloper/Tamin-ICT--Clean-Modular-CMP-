@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -124,9 +125,15 @@ fun WorkshopsScreen(
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
                     // Climbs into the gradient above it, the way the design overlaps the two.
+                    // A negative padding throws; this borrows the space during layout instead, and
+                    // gives back exactly as much below as it takes above.
                     WorkshopStatsCard(
                         stats = stats,
-                        modifier = Modifier.padding(top = StatsCardOverlap),
+                        modifier = Modifier.rideUpIntoHeader(
+                            progress = { 0f },
+                            expandedOverlap = StatsCardOverlap,
+                            collapsedOverlap = StatsCardOverlap,
+                        ),
                     )
                     if (isSearchOpen) {
                         WorkshopSearchPanel(
@@ -171,7 +178,7 @@ fun WorkshopsScreen(
 }
 
 /** How far the stats card climbs into the gradient header. */
-private val StatsCardOverlap = (-40).dp
+private val StatsCardOverlap = 40.dp
 
 /** Deep enough for the ring icon, the subtitle, and the card that overlaps them. */
 private val HeaderBottomPadding = 64.dp
