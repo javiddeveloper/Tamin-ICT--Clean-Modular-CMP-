@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material3.MaterialTheme
@@ -92,7 +92,7 @@ fun WorkshopsScreen(
             title = stringResource(Res.string.workshops_title),
             navigationIcon = {
                 TaminTopAppBarButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     onClick = onBack,
                 )

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Icon
@@ -227,6 +228,7 @@ fun WorkshopCard(
                 text = workshop.statusLabel,
                 containerColor = pillBackground,
                 contentColor = pillForeground,
+                icon = Icons.Default.Circle
             )
         }
 
@@ -300,6 +302,9 @@ private fun WorkshopCodeRow(
         }
     }
 }
+
+/** The design marks a status with a dot, which is smaller than any icon in the scale. */
+private val StatusDotSize = 6.dp
 
 private val StatShimmerWidth = 28.dp
 private val StatShimmerHeight = 20.dp
