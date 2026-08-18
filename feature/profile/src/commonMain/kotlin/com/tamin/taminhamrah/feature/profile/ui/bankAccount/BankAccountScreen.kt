@@ -1,28 +1,32 @@
 package com.tamin.taminhamrah.feature.profile.ui.bankAccount
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,12 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.AccountTypePickerSheet
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountCard
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.components.BankAccountForm
@@ -53,33 +54,37 @@ import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccount
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.contract.BankAccountUiState
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountDraftPR
 import com.tamin.taminhamrah.model.bankAccount.BankAccountPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.pushBack
+import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.toast.LocalToaster
-import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.theme.IconSize
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -94,13 +99,11 @@ import taminx.core.core_ui.bank_account_picker_bank
 import taminx.core.core_ui.bank_account_picker_type
 import taminx.core.core_ui.bank_account_registered
 import taminx.core.core_ui.bank_account_registered_description
-import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
+import taminx.core.core_ui.bank_account_tracking_code
 import taminx.core.core_ui.ic_number
-import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.toast_copy_tracking_code
 
 private const val ADD_BUTTON_KEY = "add"
 private const val EMPTY_STATE_KEY = "empty"
@@ -119,6 +122,29 @@ private val DecorCircleY = (-150).dp
  * there is nothing for a `remember` to key on.
  */
 private val AddButtonBrush = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900))
+
+/**
+ * Which of the three bodies the page is showing.
+ *
+ * Declared shallowest-first on purpose: the order *is* the depth, and it is the whole rule that
+ * tells a swap whether it is a step in (push) or a step back out (pop).
+ */
+private enum class BankAccountPane { LOADING, LIST, ADD }
+
+private val BankAccountUiState.pane: BankAccountPane
+    get() = when {
+        isLoading && accounts.isEmpty() -> BankAccountPane.LOADING
+        mode == BankAccountMode.ADD -> BankAccountPane.ADD
+        else -> BankAccountPane.LIST
+    }
+
+/**
+ * The skeleton turning into the list is one page finishing its load, not a step into another, so
+ * it crosses over instead of sliding. Built once at class-init: the spec has nothing to key on.
+ */
+private val LoadCrossfade =
+    fadeIn(tween(Duration.normal, easing = Easing.standard)) togetherWith
+        fadeOut(tween(Duration.normal, easing = Easing.standard))
 
 @Composable
 fun BankAccountRoute(
@@ -158,29 +184,51 @@ fun BankAccountScreen(
     onIntent: (BankAccountIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Above the swap on purpose: the state is what remembers a card has already arrived, so
+    // leaving the list for the form and coming back does not replay every entrance underneath the
+    // slide. Keyed as before, so a reload that changes the list still animates it in.
+    val staggerState = rememberStaggeredEntranceState(state.accounts.size)
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { BankAccountHeader(onBack = { onIntent(BankAccountIntent.OnBackClicked) }) },
     ) { padding ->
-        Box(
+        // The header stays put and only the body travels, which is what makes the form read as a
+        // second view of this page rather than a page of its own.
+        //
+        // The transition runs entirely in the graphics layer, so a frame of it costs no
+        // recomposition; the body inside is only recomposed by its own state changing.
+        AnimatedContent(
+            targetState = state.pane,
+            transitionSpec = {
+                when {
+                    initialState == BankAccountPane.LOADING ||
+                        targetState == BankAccountPane.LOADING -> LoadCrossfade
+
+                    targetState > initialState -> pushForward()
+                    else -> pushBack()
+                }
+            },
+            label = "bank-account-pane",
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
                 .navigationBarsPadding(),
-        ) {
-            when {
-                state.isLoading && state.accounts.isEmpty() -> BankAccountListSkeleton()
+        ) { pane ->
+            when (pane) {
+                BankAccountPane.LOADING -> BankAccountListSkeleton()
 
-                state.mode == BankAccountMode.ADD -> AddView(
+                BankAccountPane.ADD -> AddView(
                     draft = state.draft,
                     showValidation = state.showValidation,
                     isSubmitting = state.isSubmitting,
                     onIntent = onIntent,
                 )
 
-                else -> ListView(
+                BankAccountPane.LIST -> ListView(
                     accounts = state.accounts,
                     canShowEmptyState = state.hasLoadedOnce,
+                    staggerState = staggerState,
                     onIntent = onIntent,
                 )
             }
@@ -252,11 +300,10 @@ private fun BankAccountHeader(onBack: () -> Unit) {
 private fun ListView(
     accounts: ImmutableList<BankAccountPR>,
     canShowEmptyState: Boolean,
+    /** Held by the page, not by this list: it has to outlive the swap to the form and back. */
+    staggerState: StaggeredEntranceState,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
-    // Held across scrolls so a card that has already arrived does not fade in again.
-    val staggerState = rememberStaggeredEntranceState(accounts.size)
-
     // The add button is the first row of the list and scrolls with it, as in the design -- not a
     // floating bar, which would sit on top of the last card.
     LazyColumn(
@@ -430,20 +477,17 @@ private fun Overlays(
 @Composable
 private fun TrackingCodeRow(code: String) {
     val colors = LocalTaminColors.current
-    val clipboardManager = LocalClipboardManager.current
-    val toaster = LocalToaster.current
-    val copiedMessage = stringResource(Res.string.toast_copy_tracking_code)
     val copyDescription = stringResource(Res.string.bank_account_tracking_code)
+    // The clipboard write and its confirmation come from core-ui, so this row and every copy
+    // glyph elsewhere behave the same way rather than each growing its own version.
+    val copy = rememberCopyAction(code)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(TrackingCodeCorner))
             .background(colors.bgPage)
-            .clickable {
-                clipboardManager.setText(AnnotatedString(code))
-                toaster.success(copiedMessage)
-            }
+            .clickable(onClick = copy)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -463,11 +507,12 @@ private fun TrackingCodeRow(code: String) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.textPrimary,
             )
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-                contentDescription = copyDescription,
+            // The row already copies, so the glyph is affordance only — no second tap target and
+            // no second announcement for a screen reader.
+            CopyIconButton(
+                value = code,
                 tint = colors.blueText,
-                modifier = Modifier.size(IconSize.small),
+                interactive = false,
             )
         }
     }

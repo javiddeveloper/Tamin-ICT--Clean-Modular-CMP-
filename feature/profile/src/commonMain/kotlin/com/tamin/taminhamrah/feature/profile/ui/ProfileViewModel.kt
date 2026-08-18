@@ -138,6 +138,7 @@ class ProfileViewModel(
             ProfileMenuItem.SECURITY -> sendEvent(ProfileEvent.NavigateToSecurity)
             ProfileMenuItem.SHARE -> sendEvent(ProfileEvent.ShareAppLink("https://hamrah.tamin.ir/"))
             ProfileMenuItem.SUPPORT -> sendEvent(ProfileEvent.Support("1420"))
+            ProfileMenuItem.REQUESTS -> sendEvent(ProfileEvent.NavigateToUserContracts)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()

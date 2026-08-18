@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.isActionable
 import com.tamin.taminhamrah.feature.treatment.ui.model.isFileSettled
 import com.tamin.taminhamrah.feature.treatment.ui.model.isPaid
 import com.tamin.taminhamrah.model.treatment.TreatmentCostPR
+import com.tamin.taminhamrah.ui.ABSENT_VALUE
 import com.tamin.taminhamrah.ui.ActionMenuItem
 import com.tamin.taminhamrah.ui.components.RecordCard
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -49,7 +50,6 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -87,8 +87,6 @@ import taminx.core.core_ui.ic_tamin_eye
 import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.ic_tamin_misc_claims
 
-/** Shown where the service sent nothing, matching the previous app's placeholder. */
-private const val ABSENT_VALUE = "-"
 
 /** What the «عملیات» menu can do. */
 private enum class CostsAction { VIEW_CERTIFICATE, SEND_TO_INBOX }
@@ -423,7 +421,7 @@ private fun CostsShimmerSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(TreatmentDimens.certificateSkeletonHeight)
-                    .taminSurface(CornerRadius.card)
+                    .raisedCard(CornerRadius.card)
                     .shimmer(),
             )
         }
