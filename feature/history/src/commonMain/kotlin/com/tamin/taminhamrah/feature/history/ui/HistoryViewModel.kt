@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState.PartialState
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.canHaveInsuranceHistory
 import com.tamin.taminhamrah.feature.history.ui.model.careerTotal
 import com.tamin.taminhamrah.feature.history.ui.model.mergeByYear
@@ -54,6 +55,22 @@ class HistoryViewModel(
         is HistoryIntent.SelectYear -> flow { emit(PartialState.YearSelected(intent.year)) }
 
         is HistoryIntent.DismissYearDetail -> flow { emit(PartialState.YearSelected(null)) }
+
+        // Changing scope clears what was open inside the old one: a month index and a source
+        // position mean nothing in another year, and carrying them over would show the wrong wages.
+        is HistoryIntent.SelectScope -> flow {
+            emit(PartialState.ScopeChanged(intent.scope))
+            emit(PartialState.MonthSelected(null))
+            emit(PartialState.SourceSelected(null))
+        }
+
+        // Tapping the open month closes it, which is how the design's chart toggles.
+        is HistoryIntent.SelectMonth -> flow {
+            val next = intent.month.takeIf { it != uiState.value.selectedMonth }
+            emit(PartialState.MonthSelected(next))
+        }
+
+        is HistoryIntent.SelectSource -> flow { emit(PartialState.SourceSelected(intent.source)) }
 
         is HistoryIntent.ShowReportMenu -> flow { emit(PartialState.ReportMenuVisible(true)) }
 
@@ -172,6 +189,14 @@ class HistoryViewModel(
         }
     }
 
+    /** The scope to keep after a load: the one already chosen, unless its year did not come back. */
+    private fun PartialState.HistoryLoaded.scope(current: HistoryScope): HistoryScope =
+        if (current is HistoryScope.Year && years.none { it.year == current.year }) {
+            HistoryScope.All
+        } else {
+            current
+        }
+
     /** Grouped once here so opening a sheet is a lookup rather than a scan of every wage row. */
     private fun List<DastmozdInfoItemPR>.groupByYear():
         ImmutableMap<String, ImmutableList<DastmozdInfoItemPR>> =
@@ -193,10 +218,21 @@ class HistoryViewModel(
             careerTotal = partialState.careerTotal,
             wageByYear = partialState.wageByYear,
             wagesUnavailable = partialState.wagesUnavailable,
+            // A reload can return a different set of years; a scope pointing at one that is gone
+            // would leave the page counting a year it can no longer draw.
+            scope = partialState.scope(currentState.scope),
+            selectedMonth = null,
+            selectedSource = null,
             error = null,
         )
 
         is PartialState.YearSelected -> currentState.copy(selectedYear = partialState.year)
+
+        is PartialState.ScopeChanged -> currentState.copy(scope = partialState.scope)
+
+        is PartialState.MonthSelected -> currentState.copy(selectedMonth = partialState.month)
+
+        is PartialState.SourceSelected -> currentState.copy(selectedSource = partialState.source)
 
         is PartialState.ReportMenuVisible ->
             currentState.copy(showReportMenu = partialState.visible)

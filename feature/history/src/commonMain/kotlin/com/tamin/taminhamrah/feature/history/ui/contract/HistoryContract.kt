@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.history.ui.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.history.ui.model.CareerTotalPR
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
@@ -47,7 +48,19 @@ data class HistoryUiState(
      * way out.
      */
     val accessDenied: Boolean = false,
-    /** The year whose months are on screen, or null while the list is. */
+    /**
+     * Everything, or one year — what the orb counts and the chart plots.
+     *
+     * Kept in the state rather than remembered in the composable: it decides what is loaded into
+     * every part of the page at once, and a screen that recreates it on rotation would drop the
+     * year the person had chosen.
+     */
+    val scope: HistoryScope = HistoryScope.All,
+    /** The month whose wages are open under the chart, in year scope only. */
+    val selectedMonth: Int? = null,
+    /** Which employer the month bars are filtered to, or null for all of them together. */
+    val selectedSource: Int? = null,
+    /** The year whose months are on screen in the sheet, or null while the page is. */
     val selectedYear: YearHistoryPR? = null,
     /** The download menu is open. */
     val showReportMenu: Boolean = false,
@@ -71,6 +84,12 @@ data class HistoryUiState(
 
         data class YearSelected(val year: YearHistoryPR?) : PartialState
 
+        data class ScopeChanged(val scope: HistoryScope) : PartialState
+
+        data class MonthSelected(val month: Int?) : PartialState
+
+        data class SourceSelected(val source: Int?) : PartialState
+
         data class ReportMenuVisible(val visible: Boolean) : PartialState
 
         data class ReportSelected(val type: HistoryCertificateType?) : PartialState
@@ -92,6 +111,15 @@ sealed interface HistoryIntent {
     data class SelectYear(val year: YearHistoryPR) : HistoryIntent
 
     data object DismissYearDetail : HistoryIntent
+
+    /** Switch the page between all years and one of them. */
+    data class SelectScope(val scope: HistoryScope) : HistoryIntent
+
+    /** Open a month's wages under the chart; the same month again closes it. */
+    data class SelectMonth(val month: Int) : HistoryIntent
+
+    /** Filter the month bars to one employer, or null for all of them. */
+    data class SelectSource(val source: Int?) : HistoryIntent
 
     data object ShowReportMenu : HistoryIntent
 
