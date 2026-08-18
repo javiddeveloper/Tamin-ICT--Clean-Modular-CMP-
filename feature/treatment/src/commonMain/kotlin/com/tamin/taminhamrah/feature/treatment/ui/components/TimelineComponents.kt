@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,11 +54,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatTileStyle
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -98,7 +99,7 @@ fun MedicalRecordCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
+            .raisedCard(CornerRadius.card)
             .accentStripe(accentColor)
             .clickable(onClick = onClick)
             .padding(Spacing.lg),
@@ -323,9 +324,10 @@ fun TimelineFilterBar(
     personExpanded: Boolean = false,
     dateExpanded: Boolean = false,
     // Each chooser's menu is composed beside the chip that opens it, so the menu anchors there
-    // instead of floating somewhere the trigger has no relationship with.
-    personMenu: @Composable () -> Unit = {},
-    dateMenu: @Composable () -> Unit = {},
+    // instead of floating somewhere the trigger has no relationship with. The chip's own width is
+    // handed over so the menu can be sized against it.
+    personMenu: @Composable (anchorWidth: Dp) -> Unit = {},
+    dateMenu: @Composable (anchorWidth: Dp) -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -334,7 +336,10 @@ fun TimelineFilterBar(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.weight(1f)) {
+        // BoxWithConstraints rather than onSizeChanged: the chip's width is already fixed by the
+        // weight, so it can be read during composition instead of written back as state after
+        // layout — which would cost a recomposition and a frame every time the bar is laid out.
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
             FilterTrigger(
                 label = personLabel,
                 leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
@@ -343,9 +348,9 @@ fun TimelineFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = personExpanded,
             )
-            personMenu()
+            personMenu(maxWidth)
         }
-        Box(modifier = Modifier.weight(1f)) {
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
             FilterTrigger(
                 label = dateLabel,
                 leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
@@ -354,7 +359,7 @@ fun TimelineFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = dateExpanded,
             )
-            dateMenu()
+            dateMenu(maxWidth)
         }
         Box(
             modifier = Modifier
@@ -450,30 +455,69 @@ fun CostTotalsBar(
     totalAmount: String?,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
     TaminBottomBar(modifier = modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            StatTile(
-                label = insuredShareLabel,
-                amount = insuredShareAmount,
-                containerColor = colors.greenBg,
-                contentColor = colors.greenText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = organizationShareLabel,
-                amount = organizationShareAmount,
-                containerColor = colors.blueBg,
-                contentColor = colors.blueText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = totalLabel,
-                amount = totalAmount,
-                containerColor = colors.orangeBg,
-                contentColor = colors.orangeText,
-                modifier = Modifier.weight(1f),
-            )
-        }
+        CostSplitTiles(
+            insuredShareLabel = insuredShareLabel,
+            insuredShareAmount = insuredShareAmount,
+            organizationShareLabel = organizationShareLabel,
+            organizationShareAmount = organizationShareAmount,
+            totalLabel = totalLabel,
+            totalAmount = totalAmount,
+        )
+    }
+}
+
+/**
+ * The three-figure cost split — insured share, organization share, total — as one row of tiles.
+ *
+ * One definition for all three places it appears: pinned under the timeline, as the detail
+ * screen's total, and [dense] inside a single prescribed item. The colors carry the meaning, so
+ * they must not drift between those: green is what the person pays, blue what the organization
+ * pays, orange the two added up.
+ *
+ * Under the app's right-to-left layout the first child renders rightmost, so the order below reads
+ * on screen as total, organization, insured — left to right.
+ */
+@Composable
+fun CostSplitTiles(
+    insuredShareLabel: String,
+    /** `null` for a figure still being fetched; that tile shimmers on its own. */
+    insuredShareAmount: String?,
+    organizationShareLabel: String,
+    organizationShareAmount: String?,
+    totalLabel: String,
+    totalAmount: String?,
+    modifier: Modifier = Modifier,
+    dense: Boolean = false,
+) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(if (dense) Spacing.xs else Spacing.sm),
+    ) {
+        StatTile(
+            label = insuredShareLabel,
+            amount = insuredShareAmount,
+            containerColor = colors.greenBg,
+            contentColor = colors.greenText,
+            modifier = Modifier.weight(1f),
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
+        )
+        StatTile(
+            label = organizationShareLabel,
+            amount = organizationShareAmount,
+            containerColor = colors.blueBg,
+            contentColor = colors.blueText,
+            modifier = Modifier.weight(1f),
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
+        )
+        StatTile(
+            label = totalLabel,
+            amount = totalAmount,
+            containerColor = colors.orangeBg,
+            contentColor = colors.orangeText,
+            modifier = Modifier.weight(1f),
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
+        )
     }
 }

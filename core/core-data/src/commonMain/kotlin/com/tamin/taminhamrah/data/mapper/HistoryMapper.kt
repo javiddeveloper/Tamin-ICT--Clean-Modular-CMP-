@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.model.history.HistoryJobInfoItemDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
+import com.tamin.taminhamrah.model.history.UserInfoDN
+import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
 import com.tamin.taminhamrah.model.history.WageDetailDN
 
@@ -80,6 +82,35 @@ fun DastmozdInfoDTO.toDomain(): DastmozdInfoDN {
     return DastmozdInfoDN(
         list = list?.map { it.toDomain() },
         total = total
+    )
+}
+
+fun UserInfoDTO.toDomain(): UserInfoDN {
+    return UserInfoDN(
+        serial1 = serial1,
+        militaryServiceCode = militaryServiceCode,
+        fatherName = fatherName,
+        lastName = lastName,
+        serial2 = serial2,
+        creationTime = creationTime,
+        lastModificationTime = lastModificationTime,
+        cityCode = cityCode,
+        socialSecurityNumber = socialSecurityNumber,
+        lastModifiedBy = lastModifiedBy,
+        issueplaceName = issueplaceName,
+        birthDate = birthDate,
+        firstName = firstName,
+        insuranceNumber = insuranceNumber,
+        genderCode = genderCode,
+        nationalID = nationalID,
+        marriageCode = marriageCode,
+        createdBy = createdBy,
+        identityNumber = identityNumber,
+        countryCode = countryCode,
+        id = id,
+        birthDateTimestamp = birthDateTimestamp,
+        issueplace = issueplace,
+        nationCode = nationCode
     )
 }
 

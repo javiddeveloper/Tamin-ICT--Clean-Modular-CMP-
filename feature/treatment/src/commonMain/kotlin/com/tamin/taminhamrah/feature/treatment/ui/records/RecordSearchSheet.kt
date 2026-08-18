@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -23,8 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -48,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -135,7 +133,7 @@ fun RecordSearchSheet(
                 .padding(bottom = Spacing.xl),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            // Header Row: Title on right (first child in RTL), Cross icon without background container on left (second child in RTL)
+            // Header row: title on the right (first child under RTL), close button on the left.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -150,17 +148,15 @@ fun RecordSearchSheet(
                     color = colors.textPrimary,
                 )
 
-                IconButton(
+                // The app's one icon button, recolored for a sheet: same 36dp chip and touch
+                // target every other icon button in the app gets, rather than a bare glyph.
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_cross),
+                    contentDescription = stringResource(Res.string.btn_close),
                     onClick = onDismiss,
-                    modifier = Modifier.size(TreatmentDimens.searchHandleIconSize),
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-                        contentDescription = stringResource(Res.string.btn_close),
-                        tint = colors.textSecondary,
-                        modifier = Modifier.size(TreatmentDimens.searchHandleGlyphSize),
-                    )
-                }
+                    containerColor = colors.bgPage,
+                    contentColor = colors.textSecondary,
+                )
             }
 
             // Section 1: Service Type (نوع خدمت)

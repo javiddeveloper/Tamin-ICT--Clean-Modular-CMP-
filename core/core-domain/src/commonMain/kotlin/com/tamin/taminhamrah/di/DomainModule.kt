@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
+import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
@@ -34,8 +35,13 @@ import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -53,6 +59,7 @@ import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.common.SetBiometricEnabledUseCase
 import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUseCase
+import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -185,6 +192,7 @@ val domainModule = module {
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
     factoryOf(::GetEdictPensionerUseCase)
+    factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)
@@ -213,6 +221,12 @@ val domainModule = module {
     factoryOf(::GetMainMenuUseCase)
     factoryOf(::GetUserRequestsUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
+    factoryOf(::GetUserRequestErrorsUseCase)
+    factoryOf(::GetSmartGuideListUseCase)
+    factoryOf(::GetUserRequestDetailUseCase)
+    factoryOf(::GetShowRequestInfoUseCase)
+    factoryOf(::DownloadUserRequestDocumentUseCase)
+
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
@@ -305,6 +319,7 @@ val domainModule = module {
     factoryOf(::SetThemeUseCase)
     factoryOf(::SetBiometricEnabledUseCase)
     factoryOf(::CompleteBiometricEnrollmentPromptUseCase)
+    factoryOf(::SetFontSizeUseCase)
     factoryOf(::GetAllProvincesUseCase)
     factoryOf(::GetProvinceCitiesUseCase)
     factoryOf(::GetBloodGroupsUseCase)

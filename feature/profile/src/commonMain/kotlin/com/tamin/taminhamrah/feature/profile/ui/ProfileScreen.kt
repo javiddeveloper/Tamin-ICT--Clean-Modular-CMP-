@@ -68,6 +68,7 @@ import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -130,6 +131,8 @@ fun ProfileScreen(
     onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToUserRequests: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onBackClicked: () -> Unit
@@ -160,6 +163,8 @@ fun ProfileScreen(
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToSecurity = onNavigateToSecurity,
         onNavigateToDependentsList = onNavigateToDependentsList,
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToUserRequests = onNavigateToUserRequests,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -187,19 +192,24 @@ fun HandleProfileEvents(
     onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
+
+    val launcher = remember { ExternalAppLauncher() }
+
     events.collectWithLifecycleAware {
         when (it) {
             ProfileEvent.NavigateBack -> {
                 onBackClicked()
             }
 
-            // Settings has no destination yet; the row is still shown, so the event is
-            // swallowed rather than removed from the contract.
-            ProfileEvent.NavigateToSettings -> Unit
+            ProfileEvent.NavigateToSettings -> {
+                onNavigateToSettings()
+            }
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()
@@ -237,6 +247,10 @@ fun HandleProfileEvents(
                 onNavigateToMyInbox()
             }
 
+            ProfileEvent.NavigateToUserContracts ->{
+                onNavigateToUserRequests()
+            }
+
             is ProfileEvent.OpenUrl -> {
                 onOpenUrl(it.url)
             }
@@ -244,8 +258,17 @@ fun HandleProfileEvents(
             is ProfileEvent.ShowToast -> {
                 // Handle toast
             }
+
             ProfileEvent.NavigateToSecurity -> {
                 onNavigateToSecurity()
+            }
+
+            is ProfileEvent.ShareAppLink -> {
+                launcher.shareText(it.appLink)
+            }
+
+            is ProfileEvent.Support -> {
+                onOpenUrl("tel:${it.phone}")
             }
         }
     }
@@ -349,7 +372,7 @@ fun ProfileContent(
                                 )
                                 Column {
                                     Text(
-                                        text = state.identityInfo?.fullName ?: "تست تست تست",
+                                        text = state.identityInfo?.fullName ?: "",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = taminColors.txtNameProfile
                                     )
@@ -373,8 +396,8 @@ fun ProfileContent(
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = Spacing.lg),
                     title = "نام نویسی شده تست",
-                    subtitle = "حساب شما تأیید و فعال است تست",
-                    badgeText = "معتبر تست ",
+                    subtitle = "حساب شما تأیید و فعال است",
+                    badgeText = "معتبر",
                     isValid = true
                 )
             }
