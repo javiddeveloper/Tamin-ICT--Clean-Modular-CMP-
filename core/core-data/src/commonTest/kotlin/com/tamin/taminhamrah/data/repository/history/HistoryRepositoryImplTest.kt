@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
+import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -60,6 +61,22 @@ class HistoryRepositoryImplTest {
 
         override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =
             HistoryJobInfoDTO(list = emptyList(), total = 0)
+
+        override suspend fun getUserInfos(): UserInfoDTO = UserInfoDTO(
+            serial1 = null, militaryServiceCode = null, fatherName = null, lastName = null,
+            serial2 = null, creationTime = null, lastModificationTime = null, cityCode = null,
+            socialSecurityNumber = null, lastModifiedBy = null, issueplaceName = null,
+            birthDate = null, firstName = null, insuranceNumber = null, genderCode = null,
+            nationalID = null, marriageCode = null, createdBy = null, identityNumber = null,
+            countryCode = null, id = null, birthDateTimestamp = null, issueplace = null,
+            nationCode = null,
+        )
+
+        override suspend fun sendToInstitution(
+            allHistorySelected: Boolean,
+            historyAndWageSelected: Boolean,
+            combineHistorySelected: Boolean
+        ) = Unit
     }
 
     private class NoJobInfoDao : HistoryJobInfoDao {
