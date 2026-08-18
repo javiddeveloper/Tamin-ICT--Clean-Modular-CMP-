@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,19 +56,22 @@ import com.tamin.taminhamrah.model.treatment.ConfirmationStatus
 import com.tamin.taminhamrah.model.treatment.confirmationStatus
 import com.tamin.taminhamrah.ui.ABSENT_VALUE
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
-import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.pushBack
+import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.theme.TaminTeal500
 import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -205,14 +209,57 @@ internal fun ConfirmationsList(
     confirmations: ImmutableList<MedicalConfirmationPR>,
     isLoading: Boolean,
     error: String?,
+    /** Which chip is on. Held by the screen: the list is torn down while a detail is open. */
+    selectedFilterIndex: Int,
+    onFilterSelected: (Int) -> Unit,
+    staggerState: StaggeredEntranceState,
     onSelectDetail: (MedicalConfirmationPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
-    val staggerState = rememberStaggeredEntranceState()
-    var selectedFilterIndex by remember { mutableStateOf(0) }
-    val jellyOverscroll = rememberJellyOverscroll()
+    Column(modifier = modifier.fillMaxSize()) {
+        when {
+            isLoading && confirmations.isEmpty() -> ConfirmationsShimmerSkeleton()
 
+            error != null -> ConfirmationsErrorState(message = error)
+
+            confirmations.isEmpty() ->
+                TaminEmptyState(message = stringResource(Res.string.confirmations_empty))
+
+            else -> {
+                // The chips sit above the swap rather than scrolling with the rows: the control
+                // you just tapped has to stay under your thumb while its list travels.
+                ConfirmationsFilterRow(
+                    selectedIndex = selectedFilterIndex,
+                    onSelect = onFilterSelected,
+                )
+
+                // Each pane filters for its own chip, which is the whole reason this reads as a
+                // change of tab: the list on its way out keeps showing the rows it was showing,
+                // instead of both halves rendering the same already-filtered result.
+                AnimatedContent(
+                    targetState = selectedFilterIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) pushForward() else pushBack()
+                    },
+                    label = "confirmations-filter",
+                    modifier = Modifier.weight(1f),
+                ) { filterIndex ->
+                    ConfirmationRows(
+                        confirmations = confirmations,
+                        filterIndex = filterIndex,
+                        staggerState = staggerState,
+                        onSelectDetail = onSelectDetail,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** «همه» · «تأییدشده» · «در انتظار», the three the design offers. */
+@Composable
+private fun ConfirmationsFilterRow(selectedIndex: Int, onSelect: (Int) -> Unit) {
+    val colors = LocalTaminColors.current
     val filterAll = stringResource(Res.string.confirmations_filter_all)
     val filterApproved = stringResource(Res.string.confirmations_filter_approved)
     val filterPending = stringResource(Res.string.confirmations_filter_pending)
@@ -220,9 +267,55 @@ internal fun ConfirmationsList(
         listOf(filterAll, filterApproved, filterPending)
     }
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page)
+            .padding(top = Spacing.md, bottom = Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        filters.forEachIndexed { idx, label ->
+            val active = idx == selectedIndex
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(CornerRadius.chip))
+                    .background(
+                        if (active) colors.teal.copy(alpha = 0.12f)
+                        else colors.bgSurface
+                    )
+                    .border(
+                        width = Thickness.border,
+                        color = if (active) colors.teal else colors.border,
+                        shape = RoundedCornerShape(CornerRadius.chip)
+                    )
+                    .clickable { onSelect(idx) }
+                    .padding(vertical = Spacing.sm),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                    color = if (active) colors.teal else colors.textSecondary,
+                )
+            }
+        }
+    }
+}
+
+/** The rows one chip selects, as their own scrolling list so a chip's pane can travel whole. */
+@Composable
+private fun ConfirmationRows(
+    confirmations: ImmutableList<MedicalConfirmationPR>,
+    filterIndex: Int,
+    staggerState: StaggeredEntranceState,
+    onSelectDetail: (MedicalConfirmationPR) -> Unit,
+) {
+    val colors = LocalTaminColors.current
     // Filtered on the status itself. Filtering on "not approved" put rejected rows under «در انتظار».
-    val filteredList = remember(confirmations, selectedFilterIndex) {
-        when (selectedFilterIndex) {
+    val rows = remember(confirmations, filterIndex) {
+        when (filterIndex) {
             FILTER_APPROVED -> confirmations
                 .filter { it.confirmationStatus == ConfirmationStatus.APPROVED }
                 .toImmutableList()
@@ -235,101 +328,45 @@ internal fun ConfirmationsList(
         }
     }
 
+    if (rows.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = Spacing.xl),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(Res.string.confirmations_filter_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.textMuted,
+            )
+        }
+        return
+    }
+
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        overscrollEffect = jellyOverscroll,
+        modifier = Modifier.fillMaxSize(),
+        overscrollEffect = rememberJellyOverscroll(),
     ) {
-        when {
-            isLoading && confirmations.isEmpty() -> item { ConfirmationsShimmerSkeleton() }
-
-            error != null -> item { ConfirmationsErrorState(message = error) }
-
-            confirmations.isEmpty() -> item {
-                TaminEmptyState(message = stringResource(Res.string.confirmations_empty))
-            }
-
-            else -> {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = Spacing.page)
-                            .padding(top = Spacing.md, bottom = Spacing.sm),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                        ) {
-                            filters.forEachIndexed { idx, label ->
-                                val active = idx == selectedFilterIndex
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(CornerRadius.chip))
-                                        .background(
-                                            if (active) colors.teal.copy(alpha = 0.12f)
-                                            else colors.bgSurface
-                                        )
-                                        .border(
-                                            width = Thickness.border,
-                                            color = if (active) colors.teal else colors.border,
-                                            shape = RoundedCornerShape(CornerRadius.chip)
-                                        )
-                                        .clickable { selectedFilterIndex = idx }
-                                        .padding(vertical = Spacing.sm),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (active) colors.teal else colors.textSecondary,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (filteredList.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = Spacing.xl),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.confirmations_filter_empty),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.textMuted,
-                            )
-                        }
-                    }
-                } else {
-                    itemsIndexed(
-                        items = filteredList,
-                        key = { _, item -> item.listKey }
-                    ) { index, item ->
-                        MedicalConfirmationCard(
-                            item = item,
-                            onSelectDetail = { onSelectDetail(item) },
-                            modifier = Modifier
-                                .staggeredItemEntrance(index = index, key = item.listKey, state = staggerState)
-                                .padding(horizontal = Spacing.page)
-                                .padding(
-                                    top = Spacing.xs,
-                                    bottom = if (index == filteredList.lastIndex) {
-                                        Spacing.md
-                                    } else {
-                                        Spacing.cardGap
-                                    },
-                                ),
-                        )
-                    }
-                }
-            }
+        itemsIndexed(
+            items = rows,
+            key = { _, item -> item.listKey }
+        ) { index, item ->
+            MedicalConfirmationCard(
+                item = item,
+                onSelectDetail = { onSelectDetail(item) },
+                modifier = Modifier
+                    .staggeredItemEntrance(index = index, key = item.listKey, state = staggerState)
+                    .padding(horizontal = Spacing.page)
+                    .padding(
+                        top = Spacing.xs,
+                        bottom = if (index == rows.lastIndex) {
+                            Spacing.md
+                        } else {
+                            Spacing.cardGap
+                        },
+                    ),
+            )
         }
     }
 }
@@ -1016,17 +1053,19 @@ internal fun MedicalConfirmationDetailView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
+                // On the teal fill in both themes, so the ink is white in both. `bgSurface` reads
+                // white in light and navy in dark, which is how this went unnoticed.
                 Text(
                     text = stringResource(Res.string.confirmations_download_image_action),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = colors.bgSurface,
+                    color = TaminOnAccentInk,
                 )
                 Spacer(modifier = Modifier.width(Spacing.xs))
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_tamin_download),
                     contentDescription = null,
-                    tint = colors.bgSurface,
+                    tint = TaminOnAccentInk,
                     modifier = Modifier.size(TreatmentConfirmationsDimens.iconSizeMedium),
                 )
             }
