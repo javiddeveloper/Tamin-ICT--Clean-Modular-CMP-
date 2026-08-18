@@ -310,3 +310,73 @@ val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
 val TaminOnAccentFillStrong = TaminOnAccentInk.copy(alpha = 0.16f)
 val TaminOnAccentBorder = TaminOnAccentInk.copy(alpha = 0.18f)
 
+
+// ─── «کلیه سوابق» ─────────────────────────────────────────────────────────────
+// The insurance-history page paints a fixed dark hero and a bar chart whose fills carry meaning,
+// so these do not vary by theme — they are the design's own palette, named here rather than typed
+// into a composable. Values taken from the design source, not sampled from a screenshot.
+
+/** Hero gradient, top to bottom. */
+val TaminHistoryHeroTop = Color(0xFF081A3A)
+val TaminHistoryHeroMid = Color(0xFF0E2652)
+val TaminHistoryHeroBottom = Color(0xFF14336B)
+
+/** The faint 34dp grid ruled over the hero. */
+val TaminHistoryHeroGrid = Color(0x1278B4FF)
+
+/** The day-count orb: highlight, body, base — and the halo bloomed behind it. */
+val TaminHistoryOrbHighlight = Color(0xFF7FC0FF)
+val TaminHistoryOrbBody = Color(0xFF3B82F6)
+val TaminHistoryOrbBase = Color(0xFF1D4FB0)
+val TaminHistoryOrbGlow = Color(0x803B82F6)
+
+/** Year chips on the hero: the selected one is filled, the rest are glass. */
+val TaminHistoryChipSelectedStart = Color(0xFF8FC5FF)
+val TaminHistoryChipSelectedEnd = Color(0xFF3B82F6)
+val TaminHistoryChipSelectedText = Color(0xFF06183A)
+val TaminHistoryChipBg = Color(0x14FFFFFF)
+val TaminHistoryChipBorder = Color(0x29FFFFFF)
+val TaminHistoryChipSelectedBorder = Color(0x80FFFFFF)
+val TaminHistoryChipText = Color(0xC7FFFFFF)
+val TaminHistoryChipTextDisabled = Color(0x57FFFFFF)
+val TaminHistoryHeroCaption = Color(0xA8FFFFFF)
+val TaminHistoryHeroChipBg = Color(0x1AFFFFFF)
+val TaminHistoryHeroChipBorder = Color(0x2EFFFFFF)
+
+/** Chart bars. A full year and a full month share one fill; a short one is told apart by colour. */
+val TaminHistoryBarTrack = Color(0xFFF1F5FA)
+val TaminHistoryBarEmpty = Color(0xFFE7ECF3)
+val TaminHistoryBarFullTop = Color(0xFF5C92E8)
+val TaminHistoryBarFullBottom = Color(0xFF173D7E)
+val TaminHistoryBarPartialYearTop = Color(0xFF7FB0F0)
+val TaminHistoryBarPartialYearBottom = Color(0xFF2A5FB8)
+val TaminHistoryBarPartialMonthTop = Color(0xFFF7C173)
+val TaminHistoryBarPartialMonthBottom = Color(0xFFDE8A1F)
+val TaminHistoryBarSelectedTop = Color(0xFF2F6FD0)
+val TaminHistoryBarSelectedBottom = Color(0xFF0E2652)
+val TaminHistoryBarGlow = Color(0x3D1F4FA3)
+
+/** The cap marking a month worked at two employers at once. */
+val TaminHistoryConcurrentTop = Color(0xFF5FD8D2)
+val TaminHistoryConcurrentBottom = Color(0xFF0E7C82)
+
+/** The «۳۱ روز» bubble over a selected bar, and the page's filled button. */
+val TaminHistoryPillBg = Color(0xFF173D7E)
+val TaminHistoryButtonStart = Color(0xFF3B6FD4)
+val TaminHistoryButtonEnd = Color(0xFF173D7E)
+
+/** A month with nothing recorded, which is greyer than ordinary muted text. */
+val TaminHistoryZeroText = Color(0xFFC3CDDC)
+
+/** «سال ناقص» — its own amber, a shade off the app's ordinary orange. */
+val TaminHistoryPartialYearText = Color(0xFFB4711A)
+val TaminHistoryPartialYearBg = Color(0xFFFDF3E3)
+
+/** The teal information banner and the send tile. */
+val TaminHistoryTealBg = Color(0xFFEAF7F7)
+
+/** Season markers in the year sheet: spring, summer, autumn, winter. */
+val TaminHistorySeasonSpring = Color(0xFF22A06B)
+val TaminHistorySeasonSummer = Color(0xFFE08A21)
+val TaminHistorySeasonAutumn = Color(0xFF8C7CF6)
+val TaminHistorySeasonWinter = Color(0xFF1F4FA3)

@@ -5,122 +5,198 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarTrack
+import com.tamin.taminhamrah.ui.theme.TaminHistoryPillBg
 import kotlinx.collections.immutable.ImmutableList
 
 /**
  * One column of a [TaminBarChart].
  *
- * [id] is the bar's identity — it is what a tap reports back, so a caller never has to index into
- * the list it passed and can never open the wrong thing after the list changes underneath.
+ * [id] is the bar's identity — it is what a tap reports back, so a caller never indexes into the
+ * list it passed and can never open the wrong thing after the list changes underneath.
+ *
+ * Colours arrive as [Color]s rather than as a `Brush`: a brush is not a stable type, and one on this
+ * model would make every bar unskippable. The gradient is built from them inside the bar.
  */
 @Immutable
 data class BarChartItem(
     val id: String,
     val label: String,
-    val value: Int,
-    /** Drawn in the accent color, for the bars the page wants to single out. */
-    val highlighted: Boolean = false,
+    /** How much of the plot this bar fills, 0f..1f. */
+    val fraction: Float,
+    val fillTop: Color,
+    val fillBottom: Color,
+    val labelColor: Color,
+    /** Painted across the top of the fill — the design marks overlapping employment this way. */
+    val capTop: Color? = null,
+    val capBottom: Color? = null,
+    /** Shown in a bubble above the bar while it is the selected one. */
+    val pill: String? = null,
+    val labelBold: Boolean = false,
+    /** A bar with nothing behind it: still drawn, but it does not answer a tap. */
+    val enabled: Boolean = true,
 )
 
-private val BarWidth = 26.dp
-private val MinBarHeight = 4.dp
-
 /**
- * A row of proportional bars, scrolled horizontally, one tappable per [BarChartItem].
+ * A row of proportional bars, each tappable, sized to the width it is given.
  *
- * Deliberately not a charting library: the app carries no plotting dependency, and a comparison of
- * a few dozen totals is a row of rectangles. The bars are laid out lazily because a long career is
- * forty of them, and a `Row` would compose every one to show six.
+ * Deliberately not a charting library: the app carries no plotting dependency and a comparison of a
+ * few dozen totals is a row of rectangles. Every bar shares the plot's height and shows its own
+ * share of it, so the shape of a career reads without an axis to interpret.
  *
- * The tallest bar fills the plot; everything else is drawn against it, so the shape of the series
- * reads at a glance without an axis to interpret.
+ * [dense] is for a series too long to label every bar — the columns narrow, the corners tighten and
+ * the caller draws its own axis instead.
  */
 @Composable
 fun TaminBarChart(
     bars: ImmutableList<BarChartItem>,
     onBarClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    plotHeight: Dp = 120.dp,
+    plotHeight: Dp = PlotHeight,
+    dense: Boolean = false,
+    showLabels: Boolean = true,
 ) {
-    val colors = LocalTaminColors.current
-    val listState = rememberLazyListState()
+    val gap = if (dense) DenseGap else Gap
+    val corner = if (dense) DenseCorner else Corner
 
-    // The scale is a property of the series, not of a frame: recomputing it per redraw would walk
-    // every bar on every scroll.
-    val maxValue = remember(bars) { bars.maxOfOrNull { it.value }?.coerceAtLeast(1) ?: 1 }
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(plotHeight),
+            horizontalArrangement = Arrangement.spacedBy(gap),
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            bars.forEach { bar ->
+                Bar(
+                    bar = bar,
+                    corner = corner,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onBarClick(bar.id) },
+                )
+            }
+        }
 
-    LazyRow(
-        state = listState,
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        verticalAlignment = Alignment.Bottom,
-    ) {
-        items(bars, key = { it.id }) { bar ->
-            BarColumn(
-                bar = bar,
-                fillFraction = bar.value.toFloat() / maxValue,
-                plotHeight = plotHeight,
-                barColor = if (bar.highlighted) colors.greenText else colors.blueText,
-                labelColor = colors.textSecondary,
-                onClick = { onBarClick(bar.id) },
-            )
+        if (showLabels) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = LabelGap),
+                horizontalArrangement = Arrangement.spacedBy(gap),
+            ) {
+                bars.forEach { bar ->
+                    Text(
+                        text = bar.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = if (bar.labelBold) FontWeight.ExtraBold else FontWeight.SemiBold,
+                        color = bar.labelColor,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun BarColumn(
+private fun Bar(
     bar: BarChartItem,
-    fillFraction: Float,
-    plotHeight: Dp,
-    barColor: Color,
-    labelColor: Color,
+    corner: Dp,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    // Built here from the two stable colours, and only when they change.
+    val fill = remember(bar.fillTop, bar.fillBottom) {
+        Brush.verticalGradient(listOf(bar.fillTop, bar.fillBottom))
+    }
+    val cap = remember(bar.capTop, bar.capBottom) {
+        val top = bar.capTop
+        val bottom = bar.capBottom
+        if (top != null && bottom != null) Brush.verticalGradient(listOf(top, bottom)) else null
+    }
+
     Column(
-        modifier = Modifier
-            .width(BarWidth + Spacing.md)
-            .clip(RoundedCornerShape(CornerRadius.chip))
-            .clickable(onClick = onClick)
-            .padding(vertical = Spacing.xs),
+        modifier = modifier.clickable(enabled = bar.enabled, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
     ) {
+        // A fixed lane above the plot, so a bubble appearing never shifts the bars under it.
+        Box(
+            modifier = Modifier.height(PillLane).fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            bar.pill?.let { PillLabel(text = it) }
+        }
+
         Box(
             modifier = Modifier
-                .width(BarWidth)
-                // A year with a handful of days still has to be visible and tappable, so the bar
-                // has a floor rather than collapsing to nothing.
-                .height((plotHeight * fillFraction).coerceAtLeast(MinBarHeight))
-                .clip(RoundedCornerShape(topStart = CornerRadius.chip, topEnd = CornerRadius.chip))
-                .background(barColor),
-        )
-        NumericText(
-            text = bar.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = labelColor,
-            modifier = Modifier.padding(top = Spacing.xs),
-        )
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(RoundedCornerShape(corner))
+                .background(TaminHistoryBarTrack),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            // fillMaxHeight(fraction) rather than a measured Dp: the plot's height is whatever the
+            // row gives it, and the bar takes its share at layout time.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(bar.fraction.coerceIn(MinFraction, 1f))
+                    .clip(RoundedCornerShape(corner))
+                    .background(fill),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                cap?.let {
+                    Box(modifier = Modifier.fillMaxWidth().height(CapHeight).background(it))
+                }
+            }
+        }
     }
 }
+
+@Composable
+private fun PillLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.ExtraBold,
+        color = Color.White,
+        maxLines = 1,
+        modifier = Modifier
+            .clip(RoundedCornerShape(PillCorner))
+            .background(TaminHistoryPillBg)
+            .padding(horizontal = Spacing.sm, vertical = PillPadding),
+    )
+}
+
+private val PlotHeight = 164.dp
+private val PillLane = 30.dp
+private val Gap = 5.dp
+private val DenseGap = 2.dp
+private val Corner = 9.dp
+private val DenseCorner = 4.dp
+private val LabelGap = 7.dp
+private val CapHeight = 7.dp
+private val PillCorner = 100.dp
+private val PillPadding = 4.dp
+
+/** A bar with no days still has to be visible and tappable. */
+private const val MinFraction = 0.04f

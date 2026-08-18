@@ -101,6 +101,12 @@ import taminx.feature.history.history_combined_title
 import taminx.feature.history.history_report_action
 import taminx.feature.history.history_report_menu_title
 import androidx.compose.ui.unit.lerp as dpLerp
+import androidx.compose.foundation.layout.Row
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearTop
 
 private val HeaderIconOffset = (-30).dp
 private val MaxMotionDistance = 120.dp
@@ -499,17 +505,30 @@ private fun YearChart(
 
     // Rebuilt only when the years themselves change: without this the whole series would be
     // reallocated on every recomposition of the page, scrolling included.
+    //
+    // Most recent first and scaled against a full year rather than against the tallest bar, which
+    // is what the design plots: a short year has to look short next to a full one, not merely
+    // shorter than the best year this person had.
     val bars = remember(years) {
-        years.map { year ->
+        years.asReversed().map { year ->
+            val full = year.isComplete
             BarChartItem(
                 id = year.year,
                 label = year.year.toPersianDigits(),
-                value = year.totalDays,
-                highlighted = year.isComplete,
+                fraction = year.totalDays / DaysInFullYear,
+                fillTop = if (full) TaminHistoryBarFullTop else TaminHistoryBarPartialYearTop,
+                fillBottom = if (full) {
+                    TaminHistoryBarFullBottom
+                } else {
+                    TaminHistoryBarPartialYearBottom
+                },
+                labelColor = taminColors.textTertiary,
             )
         }.toImmutableList()
     }
     val byYear = remember(years) { years.associateBy { it.year } }
+    // The design switches to narrow bars and a three-point axis once a career outgrows its labels.
+    val dense = bars.size > DenseBarThreshold
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
@@ -524,7 +543,17 @@ private fun YearChart(
         TaminBarChart(
             bars = bars,
             onBarClick = { id -> byYear[id]?.let(onYearClick) },
+            dense = dense,
+            showLabels = !dense,
         )
+
+        if (dense) {
+            YearAxis(
+                oldest = bars.last().label,
+                middle = bars[bars.size / 2].label,
+                newest = bars.first().label,
+            )
+        }
     }
 }
 
@@ -591,6 +620,38 @@ private fun HistoryScreenDarkPreview() {
         )
     }
 }
+
+/** Three fixed points instead of a label under every bar, once the bars are too narrow to name. */
+@Composable
+private fun YearAxis(oldest: String, middle: String, newest: String) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        NumericText(
+            text = oldest,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textMuted,
+        )
+        NumericText(
+            text = middle,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textMuted,
+        )
+        NumericText(
+            text = newest,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = colors.blueText,
+        )
+    }
+}
+
+/** A full Jalali year in days — what a bar's height is measured against. */
+private const val DaysInFullYear = 366f
+
+/** Above this many years the design narrows the bars and drops their labels. */
+private const val DenseBarThreshold = 12
 
 @PreviewRtlTheme
 @Composable
