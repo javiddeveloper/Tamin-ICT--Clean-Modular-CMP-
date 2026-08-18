@@ -124,7 +124,24 @@ fun StatusPill(
     }
 }
 
-/** A small caption over an emphasized figure, on a tinted rounded background. */
+/**
+ * How much room a [StatTile] takes.
+ *
+ * One property rather than a pair of booleans: `dense` and `inline` would spell four states of
+ * which only these three mean anything.
+ */
+enum class StatTileStyle {
+    /** Caption over the figure. What a tile standing on its own uses. */
+    Standard,
+
+    /** The same stack, tighter — for a row of tiles sitting inside a list item. */
+    Dense,
+
+    /** Caption beside the figure, which is what actually halves the height. */
+    Inline,
+}
+
+/** A small caption over — or beside — an emphasized figure, on a tinted rounded background. */
 @Composable
 fun StatTile(
     label: String,
@@ -134,20 +151,47 @@ fun StatTile(
     contentColor: Color,
     modifier: Modifier = Modifier,
     labelColor: Color = contentColor,
+    style: StatTileStyle = StatTileStyle.Standard,
+    /**
+     * The opaque color the tint is composited over.
+     *
+     * [containerColor] is a low-alpha tint in the dark theme (16%), so painting it straight onto a
+     * card let the card's own gradient read through and the tile looked washed out. Laying it over
+     * a solid surface first keeps exactly the intended hue while making the tile itself opaque --
+     * the glass stays *around* the tiles, not inside them.
+     */
+    baseColor: Color = LocalTaminColors.current.bgSurface,
 ) {
-    Column(
-        modifier = modifier
-            .background(containerColor, RoundedCornerShape(CornerRadius.lg))
-            .padding(Spacing.md),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
+    val compact = style != StatTileStyle.Standard
+    val inline = style == StatTileStyle.Inline
+    val shape = RoundedCornerShape(if (compact) CornerRadius.md else CornerRadius.lg)
+    val container = modifier
+        .background(baseColor, shape)
+        .background(containerColor, shape)
+        .padding(
+            horizontal = Spacing.md,
+            // Inline is the only style read as a standalone chip rather than part of a group,
+            // and it sat at 11sp -- a size an older reader has to work at. Roomier on purpose.
+            vertical = when {
+                inline -> Spacing.sm
+                compact -> Spacing.xs
+                else -> Spacing.md
+            },
+        )
+
+    val labelText: @Composable () -> Unit = {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = when {
+                inline -> MaterialTheme.typography.labelMedium
+                compact -> MaterialTheme.typography.labelSmall
+                else -> MaterialTheme.typography.labelMedium
+            },
             color = labelColor,
             textAlign = TextAlign.Center,
         )
+    }
+    val amountText: @Composable () -> Unit = {
         if (amount == null) {
             ShimmerBlock(
                 modifier = Modifier
@@ -158,9 +202,35 @@ fun StatTile(
         } else {
             NumericText(
                 text = amount,
-                style = MaterialTheme.typography.titleMedium,
+                style = when {
+                    inline -> MaterialTheme.typography.titleSmall
+                    compact -> MaterialTheme.typography.labelMedium
+                    else -> MaterialTheme.typography.titleMedium
+                },
                 color = contentColor,
             )
+        }
+    }
+
+    if (style == StatTileStyle.Inline) {
+        Row(
+            modifier = container,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
+        ) {
+            labelText()
+            amountText()
+        }
+    } else {
+        Column(
+            modifier = container,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(
+                if (style == StatTileStyle.Dense) Spacing.xxs else Spacing.xs,
+            ),
+        ) {
+            labelText()
+            amountText()
         }
     }
 }
@@ -249,10 +319,22 @@ fun DetailRow(
     unit: String? = null,
     /** Row height, for callers whose cards breathe more than the default. */
     verticalPadding: Dp = Spacing.xs,
+    /**
+     * Makes the row copy this to the clipboard when tapped, and shows a copy glyph beside the
+     * value to say so.
+     *
+     * Separate from [value] because the two differ: a code is displayed in Persian digits and has
+     * to be copied in ASCII ones, or what gets pasted matches nothing.
+     *
+     * The whole row is the target, not the glyph — the glyph is 16dp and a poor thing to aim at.
+     */
+    copyValue: String? = null,
 ) {
+    val copy = copyValue?.let { rememberCopyAction(it) }
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .then(if (copy != null) Modifier.clickable(onClick = copy) else Modifier)
             .padding(vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -263,19 +345,29 @@ fun DetailRow(
             color = LocalTaminColors.current.textMuted,
         )
         Spacer(modifier = Modifier.width(8.dp))
-        when {
-            // Number and unit are separate children so the unit stays physically left of the digits:
-            // in the RTL row the number is the right child, the unit the left one.
-            unit != null -> Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
-            ) {
-                NumericText(text = value, style = valueStyle, color = valueColor)
-                Text(text = unit, style = valueStyle, color = valueColor)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            // First child, so under the app's right-to-left layout the glyph sits to the *right*
+            // of the value it copies rather than drifting off to the far edge.
+            if (copyValue != null) {
+                CopyIconButton(value = copyValue, label = label, interactive = false)
             }
+            when {
+                // Number and unit are separate children so the unit stays physically left of the
+                // digits: in the RTL row the number is the right child, the unit the left one.
+                unit != null -> Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                ) {
+                    NumericText(text = value, style = valueStyle, color = valueColor)
+                    Text(text = unit, style = valueStyle, color = valueColor)
+                }
 
-            numeric -> NumericText(text = value, style = valueStyle, color = valueColor)
-            else -> Text(text = value, style = valueStyle, color = valueColor)
+                numeric -> NumericText(text = value, style = valueStyle, color = valueColor)
+                else -> Text(text = value, style = valueStyle, color = valueColor)
+            }
         }
     }
 }

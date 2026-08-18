@@ -173,6 +173,8 @@
     <string name="date_picker_confirm">تأیید تاریخ</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
+    <string name="action_copy">کپی</string>
+    <string name="action_copied">در حافظه کپی شد</string>
     <string name="action_show_details">نمایش جزئیات</string>
     <string name="action_hide_details">مخفی کردن جزئیات</string>
     <string name="unit_rial">ریال</string>
@@ -221,17 +223,24 @@
     <!-- Prescription / record detail -->
     <string name="prescription_title">نسخهٔ الکترونیک</string>
     <string name="prescription_download_cd">دریافت نسخهٔ الکترونیک</string>
+    <string name="prescription_share_cd">هم‌رسانی نسخه</string>
+    <!-- What the share sheet sends: the record's identity and its total, one line each. -->
+    <string name="prescription_share_body">%1$s
+پزشک: %2$s
+کد رهگیری: %3$s
+تاریخ صدور: %4$s
+جمع کل: %5$s ریال</string>
     <string name="prescription_lab_result_cd">دریافت جواب آزمایش</string>
     <string name="prescription_empty">برای این نسخه قلمی ثبت نشده است.</string>
     <string name="prescription_items">اقلام دارویی</string>
     <string name="detail_doctor">پزشک</string>
     <string name="detail_tracking_code">کد رهگیری</string>
-    <string name="detail_date">تاریخ</string>
+    <string name="detail_date">تاریخ صدور</string>
     <string name="detail_dose">دستور مصرف</string>
     <string name="detail_prescribed">تجویزی</string>
     <string name="detail_received">دریافتی</string>
     <string name="detail_center">داروخانه/پاراکلینیک</string>
-    <string name="detail_action_date">تاریخ اقدام</string>
+   <string name="detail_action_date">تاریخ ارائهٔ خدمت</string>
     <string name="detail_patient_share">سهم بیمار</string>
     <string name="detail_visit_reason">دلیل مراجعه</string>
     <string name="detail_diagnosis">تشخیص</string>
