@@ -1,11 +1,13 @@
 package com.tamin.taminhamrah.feature.userRequest.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,11 +19,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,13 +41,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.tamin.taminhamrah.feature.userRequest.ui.screens.contract.DocumentPreview
 import com.tamin.taminhamrah.feature.userRequest.ui.screens.contract.UserRequestDetailEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.screens.contract.UserRequestDetailIntent
+import com.tamin.taminhamrah.model.userRequest.UserRequestDocumentPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -83,6 +93,7 @@ fun UserRequestDetailRoute(
     viewModel: UserRequestDetailViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(requestId, refCode, requestTypeId, referenceId) {
         viewModel.sendIntent(
@@ -99,6 +110,7 @@ fun UserRequestDetailRoute(
     HandleUserRequestDetailEvents(
         events = viewModel.events,
         onBackClick = onBackClick,
+        onShowToast = { message -> snackbarHostState.showSnackbar(message) },
     )
 
     UserRequestDetailScreen(
@@ -109,7 +121,21 @@ fun UserRequestDetailRoute(
         isLoading = state.isLoading,
         request = state.request,
         error = state.error,
+        downloadingDocumentGuid = state.downloadingDocumentGuid,
+        documentPreview = state.documentPreview,
+        snackbarHostState = snackbarHostState,
         onBackClick = onBackClick,
+        onDownloadDocument = { document, resolvedTitle ->
+            viewModel.sendIntent(
+                UserRequestDetailIntent.DownloadDocument(
+                    guid = document.guid,
+                    title = resolvedTitle,
+                )
+            )
+        },
+        onDismissDocumentPreview = {
+            viewModel.sendIntent(UserRequestDetailIntent.DismissDocumentPreview)
+        },
         modifier = modifier,
     )
 }
@@ -118,11 +144,12 @@ fun UserRequestDetailRoute(
 fun HandleUserRequestDetailEvents(
     events: Flow<UserRequestDetailEvent>,
     onBackClick: () -> Unit,
+    onShowToast: suspend (String) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is UserRequestDetailEvent.NavigateBack -> onBackClick()
-            is UserRequestDetailEvent.ShowToast -> { /* handled by caller if needed */ }
+            is UserRequestDetailEvent.ShowToast -> onShowToast(event.message)
         }
     }
 }
@@ -140,6 +167,11 @@ fun UserRequestDetailScreen(
     isLoading: Boolean = false,
     request: UserRequestPR? = null,
     error: String? = null,
+    downloadingDocumentGuid: String? = null,
+    documentPreview: DocumentPreview? = null,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onDownloadDocument: (UserRequestDocumentPR, String) -> Unit = { _, _ -> },
+    onDismissDocumentPreview: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
@@ -151,6 +183,7 @@ fun UserRequestDetailScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = taminColors.bgPage,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TaminTopAppBar(
                 title = title,
@@ -243,6 +276,7 @@ fun UserRequestDetailScreen(
                             title = request?.title ?: title,
                             statusDesc = request?.statusDesc ?: "",
                             creationTime = request?.creationTime ?: "",
+                            rejectReason = request?.details?.rejectReason,
                             modifier = Modifier.padding(horizontal = Spacing.page)
                         )
                     }
@@ -610,12 +644,32 @@ fun UserRequestDetailScreen(
                         }
                     }
 
+                    // Section: Submitted documents (shared across all request types)
+                    val documents = details?.documents.orEmpty()
+                    if (documents.isNotEmpty()) {
+                        item {
+                            SubmittedDocumentsCard(
+                                documents = documents,
+                                downloadingDocumentGuid = downloadingDocumentGuid,
+                                onDownloadDocument = onDownloadDocument,
+                                modifier = Modifier.padding(horizontal = Spacing.page)
+                            )
+                        }
+                    }
+
                     item {
                         Spacer(modifier = Modifier.height(Spacing.xl))
                     }
                 }
             }
         }
+    }
+
+    if (documentPreview != null) {
+        DocumentPreviewDialog(
+            preview = documentPreview,
+            onDismiss = onDismissDocumentPreview,
+        )
     }
 }
 
@@ -627,6 +681,7 @@ private fun RequestSummaryCard(
     title: String,
     statusDesc: String,
     creationTime: String,
+    rejectReason: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -705,6 +760,19 @@ private fun RequestSummaryCard(
                     )
                 }
             }
+
+            if (rejectReason != null && rejectReason.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    TaminText(
+                        text = stringResource(UserRequestRes.string.user_request_reject_reason_label, rejectReason),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.dangerText
+                    )
+                }
+            }
         }
     }
 }
@@ -764,6 +832,162 @@ private fun DetailSectionCard(
                         text = value,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = valueColor ?: taminColors.textPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubmittedDocumentsCard(
+    documents: List<UserRequestDocumentPR>,
+    downloadingDocumentGuid: String?,
+    onDownloadDocument: (UserRequestDocumentPR, String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CornerRadius.cardCompact),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        elevation = CardDefaults.cardElevation(defaultElevation = Elevation.xs)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.page),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(Spacing.sm)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Spacer(modifier = Modifier.size(Spacing.xs))
+                TaminText(
+                    text = stringResource(UserRequestRes.string.user_request_documents_section_title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = taminColors.textPrimary
+                )
+            }
+
+            documents.forEachIndexed { index, document ->
+                val resolvedTitle = document.documentType?.takeIf { it.isNotBlank() }
+                    ?: stringResource(
+                        UserRequestRes.string.user_request_document_fallback_title,
+                        (index + 1).toString()
+                    )
+                val isDownloading = downloadingDocumentGuid == document.guid
+                val isAnyDownloading = downloadingDocumentGuid != null
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(CornerRadius.cardCompact))
+                        .clickable(enabled = !isAnyDownloading) {
+                            onDownloadDocument(document, resolvedTitle)
+                        }
+                        .padding(vertical = Spacing.sm),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Description,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(Spacing.lg)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.sm))
+                        TaminText(
+                            text = resolvedTitle,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary
+                        )
+                    }
+
+                    if (isDownloading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(Spacing.lg)
+                        )
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TaminText(
+                                text = stringResource(UserRequestRes.string.user_request_document_view_action),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(Spacing.xs))
+                            Icon(
+                                imageVector = Icons.Default.RemoveRedEye,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(Spacing.lg)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DocumentPreviewDialog(
+    preview: DocumentPreview,
+    onDismiss: () -> Unit,
+) {
+    val taminColors = LocalTaminColors.current
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(CornerRadius.cardCompact),
+            colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+            elevation = CardDefaults.cardElevation(defaultElevation = Elevation.md)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.page),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                TaminText(
+                    text = preview.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = taminColors.textPrimary
+                )
+
+                LoadAsyncImage(
+                    model = preview.imageData,
+                    contentDescription = preview.title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(CornerRadius.cardCompact))
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(CornerRadius.cardCompact))
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = Spacing.sm),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TaminText(
+                        text = stringResource(UserRequestRes.string.user_request_document_preview_close),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

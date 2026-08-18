@@ -1,6 +1,4 @@
 package com.tamin.taminhamrah.feature.userRequest.ui
-
-import UserRequestsViewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,7 +52,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 import taminx.feature.userrequest.generated.resources.user_request_default_error_title
 import taminx.feature.userrequest.generated.resources.user_request_default_guide_title
-import taminx.feature.userrequest.generated.resources.user_request_demo_details_dialog
 import taminx.feature.userrequest.generated.resources.user_request_empty_list
 import taminx.feature.userrequest.generated.resources.user_request_header_subtitle
 import taminx.core.core_ui.Res
@@ -68,6 +67,7 @@ fun UserRequestsScreen(
     viewModel: UserRequestsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(UserRequestsIntent.LoadRequests)
@@ -77,7 +77,7 @@ fun UserRequestsScreen(
     LaunchedEffect(viewModel.events) {
         viewModel.events.collect { event ->
             when (event) {
-                is UserRequestsEvent.ShowToast -> { /* Handle Toast */ }
+                is UserRequestsEvent.ShowToast -> snackbarHostState.showSnackbar(event.message)
                 is UserRequestsEvent.NavigateToDetail -> {
                     onNavigateToDetail(
                         event.requestId,
@@ -95,7 +95,8 @@ fun UserRequestsScreen(
         state = state,
         onIntent = viewModel::sendIntent,
         onBackClick = onBackClick,
-        modifier = modifier
+        modifier = modifier,
+        snackbarHostState = snackbarHostState
     )
 
 }
@@ -106,6 +107,7 @@ fun UserRequestsContent(
     onIntent: (UserRequestsIntent) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState,
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -128,6 +130,7 @@ fun UserRequestsContent(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = taminColors.bgPage,
         topBar = {
             TaminTopAppBar(
@@ -234,15 +237,10 @@ fun UserRequestsContent(
                 }
             } else {
                 items(state.filteredRequests, key = { it.id }) { request ->
-                    val demoDetailsMsg = stringResource(UserRequestRes.string.user_request_demo_details_dialog, request.refCode)
                     UserRequestCard(
                         request = request,
                         onViewDetails = {
-                            if (request.requestTypeId == UserRequestTypeIds.PREGNANCY) {
-                                onIntent(UserRequestsIntent.ShowInfoDialog(demoDetailsMsg))
-                            } else {
-                                onIntent(UserRequestsIntent.ViewDetails(request))
-                            }
+                            onIntent(UserRequestsIntent.ViewDetails(request))
                         },
                         onOpenGuide = {
                             onIntent(
@@ -351,7 +349,8 @@ private fun UserRequestsScreenPreviewLight() {
                 isFilterOpen = false
             ),
             onIntent = {},
-            onBackClick = {}
+            onBackClick = {},
+            snackbarHostState = SnackbarHostState()
         )
     }
 }
@@ -379,7 +378,9 @@ private fun UserRequestsScreenPreviewDark() {
                 selectedTab = RequestStatusTab.COMPLETED
             ),
             onIntent = {},
-            onBackClick = {}
+            onBackClick = {},
+            snackbarHostState = SnackbarHostState()
+
         )
     }
 }

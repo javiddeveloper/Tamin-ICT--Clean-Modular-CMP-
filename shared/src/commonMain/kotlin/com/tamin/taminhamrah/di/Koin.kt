@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
 import com.tamin.taminhamrah.feature.security.di.securityModule
 import com.tamin.taminhamrah.feature.settings.di.settingsModule
 import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
-import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.feature.userRequest.di.userRequestModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -54,8 +53,7 @@ val sharedModules: List<Module>
         securityModule,
         addDependentModule,
         settingsModule,
-        userRequestModule,
-        securityModule
+        userRequestModule
     )
 
 

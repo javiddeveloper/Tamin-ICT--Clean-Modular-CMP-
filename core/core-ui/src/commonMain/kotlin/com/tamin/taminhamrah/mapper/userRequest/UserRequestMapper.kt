@@ -17,6 +17,8 @@ import com.tamin.taminhamrah.model.userRequest.SmartGuidePR
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsPR
+import com.tamin.taminhamrah.model.userRequest.UserRequestDocumentDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDocumentPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestListPolicy
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
@@ -60,8 +62,14 @@ fun UserRequestDetailsDN.toPresentation(): UserRequestDetailsPR {
         followUpObjection = followUpObjection?.toPresentation(),
         pregnancy = pregnancy?.toPresentation(),
         rejectReason = rejectReason,
+        documents = documents.map { it.toPresentation() },
     )
 }
+
+fun UserRequestDocumentDN.toPresentation(): UserRequestDocumentPR = UserRequestDocumentPR(
+    guid = guid,
+    documentType = documentType,
+)
 
 fun DeferredInstallmentDetailDN.toPresentation(): DeferredInstallmentDetailPR = DeferredInstallmentDetailPR(
     borrowerName = borrowerName,

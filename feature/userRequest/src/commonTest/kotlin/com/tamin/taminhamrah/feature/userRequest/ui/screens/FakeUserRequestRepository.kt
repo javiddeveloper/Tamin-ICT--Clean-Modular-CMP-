@@ -19,10 +19,15 @@ class FakeUserRequestRepository : UserRequestRepository {
     var showRequestInfoResult: UserRequestDetailsDN? = null
     var lastReferenceId: String? = null
     var lastRequestId: Long? = null
+    var downloadResult: String = ""
+    var lastDownloadedGuid: String? = null
+    var userRequestsResult: List<UserRequestDN> = emptyList()
+    var requestErrorsResult: List<RequestErrorDN> = emptyList()
+    var lastErrorsRequestId: Long? = null
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = flow {
         if (shouldThrowError) throw error
-        emit(emptyList())
+        emit(userRequestsResult)
     }
 
     override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> {
@@ -31,8 +36,9 @@ class FakeUserRequestRepository : UserRequestRepository {
     }
 
     override suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN> {
+        lastErrorsRequestId = requestId
         if (shouldThrowError) throw error
-        return emptyList()
+        return requestErrorsResult
     }
 
     override suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN> {
@@ -56,7 +62,8 @@ class FakeUserRequestRepository : UserRequestRepository {
     }
 
     override suspend fun downloadUserRequestDocument(guid: String): String {
+        lastDownloadedGuid = guid
         if (shouldThrowError) throw error
-        return ""
+        return downloadResult
     }
 }

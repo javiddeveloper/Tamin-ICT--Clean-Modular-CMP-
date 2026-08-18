@@ -7,6 +7,17 @@ data class UserRequestDetailsDN(
     val followUpObjection: FollowUpObjectionDetailDN? = null,
     val pregnancy: PregnancyDetailDN? = null,
     val rejectReason: String? = null,
+    val documents: List<UserRequestDocumentDN> = emptyList(),
+)
+
+/**
+ * A single uploaded document attached to a short-term or article-16 request.
+ * [guid] is the identifier passed to the upload-image endpoint to download the raw bytes.
+ * [documentType] is the server-provided type/label used to resolve a human-readable title.
+ */
+data class UserRequestDocumentDN(
+    val guid: String,
+    val documentType: String? = null,
 )
 
 data class DeferredInstallmentDetailDN(

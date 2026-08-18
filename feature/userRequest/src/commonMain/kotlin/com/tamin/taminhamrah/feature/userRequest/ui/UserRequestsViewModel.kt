@@ -1,3 +1,5 @@
+package com.tamin.taminhamrah.feature.userRequest.ui
+
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
@@ -20,6 +22,7 @@ import org.jetbrains.compose.resources.getString
 import taminx.feature.userrequest.generated.resources.Res
 import taminx.feature.userrequest.generated.resources.user_request_smart_guide_not_found
 import taminx.feature.userrequest.generated.resources.user_request_tracking_code_copied
+import taminx.feature.userrequest.generated.resources.user_request_no_errors_to_show
 
 class UserRequestsViewModel(
     private val getUserRequestsUseCase: GetUserRequestsUseCase,
@@ -49,7 +52,11 @@ class UserRequestsViewModel(
             is UserRequestsIntent.CloseSmartGuide -> flow { emit(PartialState.SmartGuideToggled(false)) }
             is UserRequestsIntent.CloseErrors -> flow { emit(PartialState.ErrorsToggled(false)) }
             is UserRequestsIntent.ViewDetails -> handleViewDetails(intent)
-            is UserRequestsIntent.CopyTrackingCode -> flow { sendEvent(UserRequestsEvent.ShowToast(getString(Res.string.user_request_tracking_code_copied))) }
+            is UserRequestsIntent.CopyTrackingCode -> flow {
+                val message = runCatching { getString(Res.string.user_request_tracking_code_copied) }
+                    .getOrElse { Res.string.user_request_tracking_code_copied.toString() }
+                sendEvent(UserRequestsEvent.ShowToast(message))
+            }
         }
     }
 
@@ -85,7 +92,14 @@ class UserRequestsViewModel(
         emit(PartialState.LoadingErrors(true))
         try {
             val errors = getUserRequestErrorsUseCase(requestId).toErrorPresentation()
-            emit(PartialState.ErrorsLoaded(errors, title))
+            if (errors.isEmpty()) {
+                emit(PartialState.LoadingErrors(false))
+                val message = runCatching { getString(Res.string.user_request_no_errors_to_show) }
+                    .getOrElse { Res.string.user_request_no_errors_to_show.toString() }
+                emit(PartialState.InfoDialogToggled(message))
+            } else {
+                emit(PartialState.ErrorsLoaded(errors, title))
+            }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
         }
@@ -98,7 +112,9 @@ class UserRequestsViewModel(
             val guides = getSmartGuideListUseCase(params).toSmartGuidePresentation()
             if (guides.isEmpty()) {
                 emit(PartialState.LoadingSmartGuide(false))
-                emit(PartialState.InfoDialogToggled(getString(Res.string.user_request_smart_guide_not_found)))
+                val message = runCatching { getString(Res.string.user_request_smart_guide_not_found) }
+                    .getOrElse { Res.string.user_request_smart_guide_not_found.toString() }
+                emit(PartialState.InfoDialogToggled(message))
             } else {
                 emit(PartialState.SmartGuideLoaded(guides, title))
             }

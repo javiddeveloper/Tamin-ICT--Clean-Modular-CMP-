@@ -53,6 +53,7 @@
     <!-- Bottom Sheets & Dialogs -->
     <string name="user_request_errors_sheet_title">خطاهای ثبت‌شده</string>
     <string name="user_request_error_registered_at">ثبت‌شده در %1$s</string>
+    <string name="user_request_reject_reason_label">دلیل رد: %s</string>
     <string name="user_request_action_close">بستن</string>
     <string name="user_request_info_dialog_title">اطلاعیه درخواست</string>
     <string name="user_request_action_got_it">متوجه شدم</string>
@@ -112,4 +113,13 @@
     <string name="user_request_detail_answer_date">تاریخ رسیدگی</string>
     <string name="user_request_detail_investigation_result">نتیجه کارشناسی</string>
     <string name="user_request_detail_expert_explanation">توضیح کارشناسی</string>
+    <string name="user_request_no_errors_to_show">خطایی برای این درخواست ثبت نشده است.</string>
+    <string name="user_request_detail_load_error">خطا در دریافت اطلاعات درخواست. لطفاً دوباره تلاش کنید.</string>
+
+    <!-- Submitted Documents -->
+    <string name="user_request_documents_section_title">مدارک ارسالی</string>
+    <string name="user_request_document_fallback_title">مدرک %s</string>
+    <string name="user_request_document_view_action">مشاهده</string>
+    <string name="user_request_document_download_error">دریافت مدرک با خطا مواجه شد.</string>
+    <string name="user_request_document_preview_close">بستن</string>
 </resources>

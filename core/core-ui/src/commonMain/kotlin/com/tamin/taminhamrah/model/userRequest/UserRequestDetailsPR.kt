@@ -12,6 +12,14 @@ data class UserRequestDetailsPR(
     val followUpObjection: FollowUpObjectionDetailPR? = null,
     val pregnancy: PregnancyDetailPR? = null,
     val rejectReason: String? = null,
+    val documents: List<UserRequestDocumentPR> = emptyList(),
+)
+
+@Immutable
+@Serializable
+data class UserRequestDocumentPR(
+    val guid: String,
+    val documentType: String? = null,
 )
 
 @Immutable

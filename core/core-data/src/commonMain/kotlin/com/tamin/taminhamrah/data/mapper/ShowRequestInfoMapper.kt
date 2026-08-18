@@ -9,9 +9,11 @@ import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionHistoryDTO
 import com.tamin.taminhamrah.model.userRequest.IllDayDetailDN
 import com.tamin.taminhamrah.model.userRequest.PregnancyDetailDN
 import com.tamin.taminhamrah.model.userRequest.PregnancyLookupDTO
+import com.tamin.taminhamrah.model.userRequest.ShortTermRequestDTO
 import com.tamin.taminhamrah.model.userRequest.ShortTermRequestInfoDTO
 import com.tamin.taminhamrah.model.userRequest.ShortTermRequestStatusDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDocumentDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
 
 fun ShortTermRequestInfoDTO.toDetails(
@@ -24,16 +26,26 @@ fun ShortTermRequestInfoDTO.toDetails(
         UserRequestTypeIds.ILL_DAY -> UserRequestDetailsDN(
             illDay = toIllDayDetail(),
             rejectReason = status?.rejectReason,
+            documents = shorttermIllness?.firstOrNull()?.shorttermRequest.toDocuments(),
         )
         UserRequestTypeIds.ORTHOTICS_PROSTHESIS -> UserRequestDetailsDN(
             illDay = toOrthoticsDetail(),
             rejectReason = status?.rejectReason,
+            documents = shorttermArutz?.firstOrNull()?.shorttermRequest.toDocuments(),
         )
         UserRequestTypeIds.PREGNANCY -> UserRequestDetailsDN(
             pregnancy = toPregnancyDetail(pregnancyStatus, pregnancyTypes),
             rejectReason = status?.rejectReason,
+            documents = shorttermPragnent?.firstOrNull()?.shorttermRequest.toDocuments(),
         )
         else -> UserRequestDetailsDN(rejectReason = status?.rejectReason)
+    }
+}
+
+private fun ShortTermRequestDTO?.toDocuments(): List<UserRequestDocumentDN> {
+    return this?.fileList.orEmpty().mapNotNull { file ->
+        val guid = file.documentFile?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        UserRequestDocumentDN(guid = guid, documentType = file.documentType)
     }
 }
 
@@ -72,7 +84,11 @@ fun Article16RequestInfoDTO.toDetails(): UserRequestDetailsDN {
         article16 = Article16DetailDN(
             defectDesc = defectDesc,
             result = defectDesc,
-        )
+        ),
+        documents = objectionPhotos.orEmpty().mapNotNull { photo ->
+            val guid = photo.guid?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            UserRequestDocumentDN(guid = guid, documentType = photo.type)
+        },
     )
 }
 
