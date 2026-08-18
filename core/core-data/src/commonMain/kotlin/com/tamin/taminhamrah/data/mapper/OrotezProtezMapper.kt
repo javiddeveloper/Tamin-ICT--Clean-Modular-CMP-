@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.model.orotezProtez.ShortTermOrthosisRequestFileDTO
 import com.tamin.taminhamrah.model.orotezProtez.ShortTermOrthosisRequestIdDTO
 
 private const val SHORT_TERM_ORTHOSIS_HELP_TYPE = "04"
+private const val SERVICE_DATE = 0L
 
 fun RequestInsuredMainInfoDTO.toDomain(): RequestInsuredMainInfoDN {
     return RequestInsuredMainInfoDN(
@@ -70,7 +71,7 @@ fun SaveShortTermOrthosisRequestDN.toDTO(): SaveShortTermOrthosisRequestDTO {
             requestFileList = requestFileList.map { it.toDTO() },
             requestHelpType = SHORT_TERM_ORTHOSIS_HELP_TYPE,
             risuid = risuid,
-            serviceDateTimeStamp = 0L,
+            serviceDateTimeStamp = SERVICE_DATE,
         ),
         userNationalCode = userNationalCode,
         userRelation = userRelation,

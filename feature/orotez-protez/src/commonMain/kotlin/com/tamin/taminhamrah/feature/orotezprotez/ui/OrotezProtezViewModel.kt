@@ -124,6 +124,10 @@ class OrotezProtezViewModel(
 
         is OrotezProtezIntent.OnSubmitDocumentsClicked -> handleSubmitDocumentsClicked()
 
+        is OrotezProtezIntent.OnSubmitSuccessAcknowledged -> flow {
+            sendEvent(OrotezProtezEvent.NavigateBack)
+        }
+
         is OrotezProtezIntent.BackToPreviousStep -> handleBackStep()
     }
     private fun handleDocumentImagePicked(documentId: String, file: PlatformFile): Flow<PartialState> = flow {

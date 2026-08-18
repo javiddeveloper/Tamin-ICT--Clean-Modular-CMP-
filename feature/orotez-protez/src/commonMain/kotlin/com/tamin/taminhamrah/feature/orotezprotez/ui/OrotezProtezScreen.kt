@@ -33,6 +33,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -81,7 +82,9 @@ import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -148,7 +151,9 @@ import taminx.core.core_ui.orotez_protez_step_user
 import taminx.core.core_ui.orotez_protez_step_user_description
 import taminx.core.core_ui.orotez_protez_step_user_title
 import taminx.core.core_ui.orotez_protez_submit_request
+import taminx.core.core_ui.orotez_protez_submit_success_confirm
 import taminx.core.core_ui.orotez_protez_submit_success_fallback
+import taminx.core.core_ui.orotez_protez_submit_success_title
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
@@ -747,16 +752,6 @@ private fun OrotezProtezDocumentsStep(
                     color = colors.dangerText,
                 )
             }
-
-            if (state.hasSubmitted) {
-                Spacer(Modifier.height(Spacing.sm))
-                Text(
-                    text = state.submittedResultMessage
-                        ?: stringResource(Res.string.orotez_protez_submit_success_fallback),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.greenText,
-                )
-            }
         }
 
         Row(
@@ -786,6 +781,37 @@ private fun OrotezProtezDocumentsStep(
             onDismiss = { previewDocumentId = null },
         )
     }
+
+    if (state.hasSubmitted) {
+        OrotezProtezSubmitSuccessDialog(
+            message = state.submittedResultMessage,
+            onAcknowledged = { onIntent(OrotezProtezIntent.OnSubmitSuccessAcknowledged) },
+        )
+    }
+}
+
+@Composable
+private fun OrotezProtezSubmitSuccessDialog(
+    message: String?,
+    onAcknowledged: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.orotez_protez_submit_success_title),
+        description = message ?: stringResource(Res.string.orotez_protez_submit_success_fallback),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.orotez_protez_submit_success_confirm),
+                onClick = onAcknowledged,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onAcknowledged,
+        icon = Icons.Default.Check,
+        iconTint = colors.greenText,
+        iconBackground = colors.greenBg,
+    )
 }
 
 @OptIn(ExperimentalEncodingApi::class)

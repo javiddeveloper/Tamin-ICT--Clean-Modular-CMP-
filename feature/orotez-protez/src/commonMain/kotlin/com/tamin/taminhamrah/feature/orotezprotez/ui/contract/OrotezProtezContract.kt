@@ -94,6 +94,7 @@ sealed interface OrotezProtezIntent {
     data object OnNextStepClicked : OrotezProtezIntent
     data object OnConfirmInsuredInfoClicked : OrotezProtezIntent
     data object OnSubmitDocumentsClicked : OrotezProtezIntent
+    data object OnSubmitSuccessAcknowledged : OrotezProtezIntent
     data object BackToPreviousStep : OrotezProtezIntent
 }
 
