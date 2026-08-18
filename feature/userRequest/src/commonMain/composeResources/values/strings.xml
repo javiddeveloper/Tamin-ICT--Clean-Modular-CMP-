@@ -1,0 +1,125 @@
+<resources>
+    <!-- Header & General -->
+    <string name="user_request_header_subtitle">کارتابل پیگیری درخواست‌ها، اطلاع از نتیجه اقدامات و ...</string>
+    <string name="user_request_empty_list">درخواستی یافت نشد</string>
+    <string name="user_request_demo_details_dialog">در نسخه نهایی، این دکمه شما را به صفحه جزئیات همین درخواست با کد پیگیری %s منتقل می‌کنند.</string>
+    <string name="user_request_default_guide_title">راهنمای عمومی</string>
+    <string name="user_request_default_error_title">خطاهای درخواست</string>
+    <string name="user_request_tracking_code_copied">کد پیگیری کپی شد</string>
+    <string name="user_request_smart_guide_not_found">راهنمای هوشمند برای وضعیت فعلی این درخواست موجود نیست.</string>
+
+    <!-- Status Matching Keywords (matched against server-returned statusDesc values) -->
+    <string name="user_request_keyword_in_progress">در جریان</string>
+    <string name="user_request_keyword_review">بررسی</string>
+    <string name="user_request_keyword_defect">نقص</string>
+    <string name="user_request_keyword_disapproval">عدم</string>
+    <string name="user_request_keyword_action">اقدام</string>
+    <string name="user_request_keyword_error">خطا</string>
+    <string name="user_request_keyword_approved">تایید</string>
+    <string name="user_request_keyword_closed">مختومه</string>
+    <string name="user_request_keyword_completed">تکمیل</string>
+    <string name="user_request_keyword_pregnancy">بارداری</string>
+
+    <!-- Request Status Tabs -->
+    <string name="user_request_tab_all">همه</string>
+    <string name="user_request_tab_in_progress">در جریان</string>
+    <string name="user_request_tab_action_required">نیازمند اقدام</string>
+    <string name="user_request_tab_completed">تکمیل‌شده</string>
+
+    <!-- Filter Panel -->
+    <string name="user_request_search_title">جستجوی درخواست</string>
+    <string name="user_request_search_ref_code_placeholder">کد پیگیری – حداکثر ۱۰ رقم</string>
+    <string name="user_request_type_placeholder">نوع درخواست</string>
+    <string name="user_request_all_types">همه انواع درخواست‌ها</string>
+    <string name="user_request_search_button">جستجوی درخواست</string>
+    <string name="user_request_filter_close_desc">بستن فیلتر</string>
+
+    <!-- Request Card -->
+    <string name="user_request_view_request">مشاهده درخواست</string>
+    <string name="user_request_follow_up_objection">پیگیری نتیجه اعتراض</string>
+    <string name="user_request_other_requests">سایر درخواست‌ها</string>
+    <string name="user_request_tracking_code_label">کد پیگیری: %s</string>
+    <string name="user_request_tracking_code_prefix">کد پیگیری: </string>
+    <string name="user_request_errors_btn">خطاها</string>
+    <string name="user_request_guide_btn">راهنما</string>
+
+    <!-- Request Step Progress -->
+    <string name="user_request_step_preprocessing">پیش پردازش</string>
+    <string name="user_request_step_branch_delivery">تحویل شعبه</string>
+    <string name="user_request_step_processing_complete">تکمیل رسیدگی</string>
+    <string name="user_request_step_result">نتیجه</string>
+    <string name="user_request_step_error_indicator">!</string>
+
+    <!-- Bottom Sheets & Dialogs -->
+    <string name="user_request_errors_sheet_title">خطاهای ثبت‌شده</string>
+    <string name="user_request_error_registered_at">ثبت‌شده در %1$s</string>
+    <string name="user_request_reject_reason_label">دلیل رد: %s</string>
+    <string name="user_request_action_close">بستن</string>
+    <string name="user_request_info_dialog_title">اطلاعیه درخواست</string>
+    <string name="user_request_action_got_it">متوجه شدم</string>
+    <string name="user_request_smart_guide_title">راهنمای هوشمند</string>
+
+    <!-- Request Detail Screen -->
+    <string name="user_request_detail_back_desc">بازگشت</string>
+    <string name="user_request_detail_title">نمایش درخواست کسر اقساط</string>
+    <string name="user_request_detail_bank_example">بانک صادرات ایران</string>
+    <string name="user_request_detail_guarantee_amount_label">مبلغ ضمانت</string>
+    <string name="user_request_detail_guarantee_amount_value">۷۲,۰۰۰,۰۰۰ ریال</string>
+    <string name="user_request_detail_repayment_label">بازپرداخت</string>
+    <string name="user_request_detail_installment_count_label">تعداد اقساط</string>
+    <string name="user_request_detail_installment_count_value">۱۲</string>
+    <string name="user_request_detail_installment_amount_label">مبلغ هر قسط</string>
+    <string name="user_request_detail_installment_amount_value">۵,۰۰۰,۰۰۰</string>
+    <string name="user_request_detail_installment_amount_with_unit">۵,۰۰۰,۰۰۰ ریال</string>
+    <string name="user_request_detail_repayment_zero_rial">۰ ریال</string>
+    <string name="user_request_detail_pensioner_guarantor">مستمری‌بگیر (ضامن)</string>
+    <string name="user_request_detail_full_name">نام و نام خانوادگی</string>
+    <string name="user_request_detail_national_id">کد ملی</string>
+    <string name="user_request_detail_pension_number">شماره مستمری</string>
+    <string name="user_request_detail_borrower">شخص وام‌گیرنده</string>
+    <string name="user_request_detail_birth_date">تاریخ تولد</string>
+    <string name="user_request_detail_loan_details">مشخصات وام</string>
+    <string name="user_request_detail_bank_institution">بانک / موسسه</string>
+    <string name="user_request_detail_branch_name">نام شعبه</string>
+    <string name="user_request_detail_branch_example">امانیه</string>
+    <string name="user_request_detail_repayment_amount">مبلغ بازپرداخت</string>
+    <string name="user_request_detail_sample_name">سیدرحمت اله میرفضلی</string>
+    <string name="user_request_detail_sample_national_id">۶۳۱۹۸۸۹۳۹۱</string>
+    <string name="user_request_detail_sample_pension_num">۱۰۰۳ND06938</string>
+    <string name="user_request_detail_placeholder_dash">-</string>
+    <string name="user_request_detail_start_date">تاریخ شروع</string>
+    <string name="user_request_detail_end_date">تاریخ پایان</string>
+    <string name="user_request_detail_employer_name">نام کارفرما</string>
+    <string name="user_request_detail_amount">مبلغ</string>
+    <string name="user_request_detail_objection_date">تاریخ ثبت اعتراض</string>
+    <string name="user_request_detail_objection_reason">علت اعتراض</string>
+    <string name="user_request_detail_article16_date">تاریخ طرح در هیات</string>
+    <string name="user_request_detail_article16_result">رای هیات</string>
+    <string name="user_request_detail_request_info">اطلاعات درخواست</string>
+    <string name="user_request_detail_user_info">اطلاعات بیمه شده</string>
+    <string name="user_request_detail_insurance_number">شماره بیمه</string>
+    <string name="user_request_detail_mobile">شماره همراه</string>
+    <string name="user_request_detail_account_number">شماره حساب</string>
+    <string name="user_request_detail_doctor_name">نام پزشک</string>
+    <string name="user_request_detail_doctor_id">کد نظام پزشکی</string>
+    <string name="user_request_detail_childbearing_date">تاریخ زایمان</string>
+    <string name="user_request_detail_rest_days">مدت استراحت</string>
+    <string name="user_request_detail_pregnancy_status">وضعیت بارداری</string>
+    <string name="user_request_detail_pregnancy_type">نوع بارداری</string>
+    <string name="user_request_detail_article16_info">اطلاعات اعتراض ماده ۱۶</string>
+    <string name="user_request_detail_article16_defect">توضیح نقص</string>
+    <string name="user_request_detail_objection_info">پیگیری نتیجه اعتراض</string>
+    <string name="user_request_detail_user_desc">توضیح کاربر</string>
+    <string name="user_request_detail_answer_date">تاریخ رسیدگی</string>
+    <string name="user_request_detail_investigation_result">نتیجه کارشناسی</string>
+    <string name="user_request_detail_expert_explanation">توضیح کارشناسی</string>
+    <string name="user_request_no_errors_to_show">خطایی برای این درخواست ثبت نشده است.</string>
+    <string name="user_request_detail_load_error">خطا در دریافت اطلاعات درخواست. لطفاً دوباره تلاش کنید.</string>
+
+    <!-- Submitted Documents -->
+    <string name="user_request_documents_section_title">مدارک ارسالی</string>
+    <string name="user_request_document_fallback_title">مدرک %s</string>
+    <string name="user_request_document_view_action">مشاهده</string>
+    <string name="user_request_document_download_error">دریافت مدرک با خطا مواجه شد.</string>
+    <string name="user_request_document_preview_close">بستن</string>
+</resources>
