@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,16 +33,17 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
 import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedShadow
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItemPR
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -107,7 +109,7 @@ internal fun PatientCarousel(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(TreatmentDimens.cardLoadingHeight)
-                .taminSurface(CornerRadius.card)
+                .raisedCard(CornerRadius.card)
                 .shimmer(),
         )
 
@@ -207,6 +209,11 @@ internal fun TreatmentQuickAccess(
     onOpenHealthProfile: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    // The contracted-centers directory is a web page the organization maintains, not a screen of
+    // ours, so it opens in the browser on both platforms. Remembered so the item's onClick stays
+    // the same instance across recompositions and the list item keeps skipping.
+    val launcher = remember { ExternalAppLauncher() }
+    val openCenters = remember(launcher) { { launcher.openUrl(CONTRACTED_CENTERS_URL) } }
     Column(
         modifier = Modifier.padding(horizontal = Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
@@ -216,7 +223,9 @@ internal fun TreatmentQuickAccess(
         // One ListGroupView per row rather than a single grouped list: the design keeps the
         // three as separate cards with gaps, and only the first carries the gradient.
         ListGroupView(
-            modifier = Modifier.background(quickAccessGradient(), RoundedCornerShape(CornerRadius.card)),
+            modifier = Modifier
+                .raisedShadow(CornerRadius.card)
+                .background(quickAccessGradient(), RoundedCornerShape(CornerRadius.card)),
             containerShape = RoundedCornerShape(CornerRadius.card),
             containerBackgroundColor = Color.Transparent,
             items = persistentListOf(
@@ -237,6 +246,7 @@ internal fun TreatmentQuickAccess(
         )
 
         ListGroupView(
+            modifier = Modifier.raisedShadow(CornerRadius.card),
             containerShape = RoundedCornerShape(CornerRadius.card),
             items = persistentListOf(
                 ListItemData(
@@ -267,6 +277,7 @@ internal fun TreatmentQuickAccess(
         )
 
         ListGroupView(
+            modifier = Modifier.raisedShadow(CornerRadius.card),
             containerShape = RoundedCornerShape(CornerRadius.card),
             items = persistentListOf(
                 ListItemData(
@@ -277,7 +288,7 @@ internal fun TreatmentQuickAccess(
                         leadingIconBackgroundColor = colors.greenBg,
                         leadingIconTintColor = colors.teal,
                     ),
-                    onClick = {},
+                    onClick = openCenters,
                 ),
             ),
         )
@@ -351,3 +362,11 @@ internal fun TreatmentCostSummary(
         modifier = Modifier.padding(horizontal = Spacing.page),
     )
 }
+
+/**
+ * The organization's directory of contracted treatment centres.
+ *
+ * A page on tamin.ir rather than an endpoint: there is no centers API, and the published list is
+ * what the branches actually keep current.
+ */
+private const val CONTRACTED_CENTERS_URL = "https://tamin.ir/html/item/4474"
