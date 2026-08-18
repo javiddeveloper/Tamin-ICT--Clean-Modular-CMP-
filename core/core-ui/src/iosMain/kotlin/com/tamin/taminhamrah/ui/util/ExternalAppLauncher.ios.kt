@@ -48,19 +48,16 @@ actual class ExternalAppLauncher actual constructor() {
     }
 
     actual fun shareText(text: String) {
-        val controller = UIActivityViewController(
+        val activityViewController = UIActivityViewController(
             activityItems = listOf(text),
-            applicationActivities = null,
+            applicationActivities = null
         )
-        // Presented from whatever is on top, so this works from a sheet or a dialog as well as the
-        // page. On iPad the sheet is a popover and needs an anchor or UIKit raises: the root view
-        // is the honest one here, since the button that triggered it is not reachable from common.
-        val root = UIApplication.sharedApplication.keyWindow?.rootViewController ?: return
-        var presenter = root
-        while (presenter.presentedViewController != null) {
-            presenter = presenter.presentedViewController ?: break
-        }
-        controller.popoverPresentationController?.sourceView = presenter.view
-        presenter.presentViewController(controller, animated = true, completion = null)
+
+        val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+        rootViewController?.presentViewController(
+            activityViewController,
+            animated = true,
+            completion = null
+        )
     }
 }

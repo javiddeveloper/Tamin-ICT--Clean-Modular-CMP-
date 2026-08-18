@@ -55,19 +55,6 @@ actual class ExternalAppLauncher actual constructor() {
         runCatching { context.startActivity(intent) }
     }
 
-    actual fun shareText(text: String, title: String?) {
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, text)
-        }
-        // The chooser gets the NEW_TASK flag, not the send intent: the flag belongs to whatever is
-        // actually started, and starting a bare ACTION_SEND from a non-activity context throws.
-        val chooser = Intent.createChooser(send, title).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(chooser)
-    }
-
     actual fun shareText(text: String) {
         val sendIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
