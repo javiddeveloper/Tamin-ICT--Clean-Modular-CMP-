@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.HistoryRepository
@@ -266,6 +267,10 @@ class SendHistoryToInstitutionsViewModelTest {
         override suspend fun getDisabilityPersonalInfo() = flow<com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN> { TODO() }
         override suspend fun getUserAge(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.personal.AgeDN> { TODO() }
         override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> { TODO() }
+        override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> {
+            TODO("Not yet implemented")
+        }
+
         override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN>> { TODO() }
         override suspend fun checkRetirementStatus() = flow<com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN> { TODO() }
         override suspend fun sendRetirementDocument(requestId: String, request: com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN) = flow<String?> { TODO() }
