@@ -48,7 +48,11 @@ class FakeHistoryRepository : HistoryRepository {
         return dastmozdResult
     }
 
-    var userInfoResult: UserInfoDN = emptyUserInfo()
+    /**
+     * Insured by default, because that is what every other test is about. A test that wants a
+     * مستمری‌بگیر or a کارفرما sets [notInsuredUser] — the person the service has no years for.
+     */
+    var userInfoResult: UserInfoDN = insuredUser()
     var userInfoError: Throwable? = null
 
     override suspend fun getUserInfos(): UserInfoDN {
@@ -62,7 +66,7 @@ class FakeHistoryRepository : HistoryRepository {
         flowOf(HistoryJobInfoDN(list = emptyList(), total = 0))
 }
 
-private fun emptyUserInfo() = UserInfoDN(
+private fun blankUser() = UserInfoDN(
     serial1 = null, militaryServiceCode = null, fatherName = null, lastName = null,
     serial2 = null, creationTime = null, lastModificationTime = null, cityCode = null,
     socialSecurityNumber = null, lastModifiedBy = null, issueplaceName = null, birthDate = null,
@@ -70,3 +74,9 @@ private fun emptyUserInfo() = UserInfoDN(
     marriageCode = null, createdBy = null, identityNumber = null, countryCode = null,
     id = null, birthDateTimestamp = null, issueplace = null, nationCode = null,
 )
+
+/** Someone the history endpoints will answer for: they have an insurance number. */
+fun insuredUser(): UserInfoDN = blankUser().copy(insuranceNumber = "0081631829")
+
+/** A مستمری‌بگیر or کارفرما: no insurance number, and so no insured years to ask for. */
+fun notInsuredUser(): UserInfoDN = blankUser().copy(insuranceNumber = null)

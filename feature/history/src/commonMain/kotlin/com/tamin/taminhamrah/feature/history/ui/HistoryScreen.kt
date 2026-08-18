@@ -81,6 +81,7 @@ import taminx.feature.history.history_combined_empty
 import taminx.feature.history.history_combined_empty_title
 import taminx.feature.history.history_combined_list_header
 import taminx.feature.history.history_combined_list_hint
+import taminx.feature.history.history_combined_not_insured
 import taminx.feature.history.history_combined_subtitle
 import taminx.feature.history.history_combined_title
 import androidx.compose.ui.unit.lerp as dpLerp
@@ -217,11 +218,21 @@ fun HistoryContent(
 
     // Outside the list: a failure is the only thing worth attending to while it is up, and a
     // dialog cannot live in a LazyColumn item.
-    ErrorStateView(
-        message = uiState.error,
-        onDismiss = onBackClicked,
-        onRetry = { onIntent(HistoryIntent.Load) },
-    )
+    //
+    // A refusal gets no «تلاش دوباره». Nothing failed and nothing will change on a second attempt —
+    // this person simply has no insured years — so the only button is the way out.
+    if (uiState.accessDenied) {
+        ErrorStateView(
+            message = stringResource(HistoryRes.string.history_combined_not_insured),
+            onDismiss = onBackClicked,
+        )
+    } else {
+        ErrorStateView(
+            message = uiState.error,
+            onDismiss = onBackClicked,
+            onRetry = { onIntent(HistoryIntent.Load) },
+        )
+    }
 
     uiState.selectedYear?.let { year ->
         YearDetailSheet(

@@ -26,6 +26,7 @@
     <string name="history_combined_year_complete">کامل</string>
     <string name="history_combined_year_partial">ناقص</string>
     <string name="history_combined_empty_title">سابقه‌ای یافت نشد</string>
+    <string name="history_combined_not_insured">کاربر گرامی؛ این سرویس تنها برای بیمه‌شدگان در دسترس است و سابقه‌ای برای نمایش وجود ندارد.</string>
     <string name="history_combined_empty">اطلاعات سابقه شما یافت نشد.</string>
     <string name="history_combined_detail_title">جزئیات سابقه</string>
     <string name="history_combined_season_spring">بهار</string>

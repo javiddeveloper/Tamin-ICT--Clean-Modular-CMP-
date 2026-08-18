@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.history.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.history.fake.FakeHistoryRepository
+import com.tamin.taminhamrah.feature.history.fake.notInsuredUser
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
@@ -10,6 +11,7 @@ import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -40,6 +42,7 @@ class HistoryViewModelTest {
         viewModel = HistoryViewModel(
             getTalfighInfosUseCase = GetTalfighInfosUseCase(repository),
             getDastmozdInfosUseCase = GetDastmozdInfosUseCase(repository),
+            getUserInfosUseCase = GetUserInfosUseCase(repository),
         )
     }
 
@@ -130,6 +133,42 @@ class HistoryViewModelTest {
         }
 
         assertNotNull(viewModel.uiState.value.error, "the page failure is still reported")
+    }
+
+    /**
+     * The whole point of the gate: a مستمری‌بگیر or کارفرما never reaches the two endpoints.
+     *
+     * They have no insured years, and the service answers 500 rather than an empty list, so the
+     * previous app decided this from the user's own record before asking. Asserted on the call
+     * counts, because "did not ask" is the behaviour — a message alone would still have asked.
+     */
+    @Test
+    fun load_whenThePersonCannotHaveHistory_refusesWithoutCallingTheEndpoints() =
+        runTest(testDispatcher) {
+            repository.userInfoResult = notInsuredUser()
+
+            viewModel.sendIntent(HistoryIntent.Load)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertTrue(state.accessDenied, "the screen must say why, not show a server error")
+            assertEquals(0, repository.talfighCalls, "the years must not be requested")
+            assertEquals(0, repository.dastmozdCalls, "the wages must not be requested either")
+            assertNull(state.error, "a refusal is not a failure")
+            assertEquals(false, state.isLoading)
+        }
+
+    @Test
+    fun load_whenThePersonIsInsured_goesOnToLoad() = runTest(testDispatcher) {
+        repository.talfighResult = talfigh(year("1404", days = "30"))
+
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(false, state.accessDenied)
+        assertEquals(1, repository.talfighCalls)
+        assertEquals(1, state.years.size)
     }
 
     @Test

@@ -31,6 +31,12 @@ data class HistoryUiState(
      * year with nothing recorded simply has no entry.
      */
     val wageByYear: ImmutableMap<String, ImmutableList<DastmozdInfoItemPR>> = persistentMapOf(),
+    /**
+     * Set when the signed-in person cannot have insurance history at all — a مستمری‌بگیر or a
+     * کارفرما. Not an [error]: nothing failed and retrying cannot help, so the screen says why and
+     * offers only a way out.
+     */
+    val accessDenied: Boolean = false,
     /** The year whose months are on screen, or null while the list is. */
     val selectedYear: YearHistoryPR? = null,
     val error: String? = null,
@@ -45,6 +51,8 @@ data class HistoryUiState(
         ) : PartialState
 
         data class YearSelected(val year: YearHistoryPR?) : PartialState
+
+        data object AccessDenied : PartialState
 
         data class Error(val message: String) : PartialState
     }

@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState.PartialState
+import com.tamin.taminhamrah.feature.history.ui.model.canHaveInsuranceHistory
 import com.tamin.taminhamrah.feature.history.ui.model.careerTotal
 import com.tamin.taminhamrah.feature.history.ui.model.mergeByYear
 import com.tamin.taminhamrah.mapper.history.toPresentation
@@ -12,6 +13,7 @@ import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
@@ -28,6 +30,7 @@ import taminx.feature.history.history_combined_wage_unavailable
 class HistoryViewModel(
     private val getTalfighInfosUseCase: GetTalfighInfosUseCase,
     private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase,
+    private val getUserInfosUseCase: GetUserInfosUseCase,
 ) : BaseViewModel<HistoryUiState, PartialState, HistoryEvent, HistoryIntent>(
     initialState = HistoryUiState()
 ) {
@@ -58,6 +61,14 @@ class HistoryViewModel(
         // The list already on screen stays there while this runs, so a retry never blanks the page.
         emit(PartialState.Loading(true))
         try {
+            // Who this is, before asking for anything. A مستمری‌بگیر or a کارفرما has no insured
+            // years and both history endpoints answer 500 for them, so the previous app decided
+            // this up front rather than showing the server's error — and so does this one.
+            if (!getUserInfosUseCase().canHaveInsuranceHistory()) {
+                emit(PartialState.AccessDenied)
+                return@flow
+            }
+
             coroutineScope {
                 val years = async { getTalfighInfosUseCase() }
                 // Not `runCatching`: it catches CancellationException too, so a wage call torn down
@@ -124,6 +135,9 @@ class HistoryViewModel(
         )
 
         is PartialState.YearSelected -> currentState.copy(selectedYear = partialState.year)
+
+        is PartialState.AccessDenied ->
+            currentState.copy(isLoading = false, accessDenied = true, error = null)
 
         is PartialState.Error ->
             currentState.copy(isLoading = false, error = partialState.message)
