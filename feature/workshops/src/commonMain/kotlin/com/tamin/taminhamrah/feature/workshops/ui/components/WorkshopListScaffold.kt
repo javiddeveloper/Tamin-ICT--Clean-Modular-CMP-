@@ -58,13 +58,22 @@ fun <T> WorkshopListScaffold(
     header: (@Composable () -> Unit)? = null,
     row: @Composable (T) -> Unit,
 ) {
+    // The three states share one set of insets: a header that keeps the page margins while the
+    // list is loading, then loses them once the rows arrive, reads as the page jumping sideways.
     if (state.isFirstLoad) {
-        WorkshopListSkeleton(modifier = modifier, header = header)
+        WorkshopListSkeleton(
+            modifier = modifier,
+            contentPadding = contentPadding,
+            header = header,
+        )
         return
     }
 
     if (state.isEmpty) {
-        Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(contentPadding),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
             header?.invoke()
             EmptyStateMessage(icon = Icons.Outlined.Info, title = emptyMessage)
         }
@@ -119,10 +128,11 @@ fun <T> WorkshopListScaffold(
 fun WorkshopListSkeleton(
     modifier: Modifier = Modifier,
     rowCount: Int = SKELETON_ROWS,
+    contentPadding: PaddingValues = PaddingValues(Spacing.page),
     header: (@Composable () -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(Spacing.page),
+        modifier = modifier.fillMaxSize().padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         header?.invoke()

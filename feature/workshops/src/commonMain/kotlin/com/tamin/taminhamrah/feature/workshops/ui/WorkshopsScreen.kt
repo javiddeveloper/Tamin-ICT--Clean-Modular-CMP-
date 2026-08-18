@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,6 +75,11 @@ fun WorkshopsScreen(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    // Built once, not per recomposition: a Brush created at the call site is a fresh instance
+    // every time and would defeat skipping on the bar below.
+    val headerGradient = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
+    }
     // Hoisted out of the item lambdas below: reading these from `state` inside a row would capture
     // the whole state, and every workshop would recompose whenever any unrelated field changed.
     val workshops = state.workshops
@@ -96,6 +104,7 @@ fun WorkshopsScreen(
                     onClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) },
                 )
             },
+            background = headerGradient,
             bottomPadding = HeaderBottomPadding,
         ) {
             Column(
@@ -103,7 +112,7 @@ fun WorkshopsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                AnimatedRingHeaderIcon(icon = Icons.Default.Search)
+                AnimatedRingHeaderIcon(icon = Icons.Outlined.Business)
                 Text(
                     text = stringResource(Res.string.workshops_header_subtitle),
                     style = MaterialTheme.typography.bodyMedium,

@@ -8,7 +8,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -31,9 +33,15 @@ fun WorkshopScreenShell(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    // The same navy the list header wears, so a workshop service does not change color when it
+    // is opened from one.
+    val headerGradient = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
+    }
     Column(modifier = modifier.fillMaxSize()) {
         TaminTopAppBar(
             title = title,
+            background = headerGradient,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = Icons.AutoMirrored.Filled.ArrowForward,
