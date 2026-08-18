@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -98,7 +100,7 @@ private fun StatColumn(
     label: String,
     value: Int?,
     modifier: Modifier = Modifier,
-    valueColor: androidx.compose.ui.graphics.Color = LocalTaminColors.current.textPrimary,
+    valueColor: Color = LocalTaminColors.current.textPrimary,
 ) {
     Column(
         modifier = modifier,
@@ -253,6 +255,40 @@ fun WorkshopCard(
 }
 
 /**
+ * A status word behind a dot, the way the design marks a workshop.
+ *
+ * Its own composable rather than a parameter on the shared `StatusPill`: the dot is six points
+ * across, smaller than anything in the icon scale, and that is a detail of this design rather than
+ * something every pill in the app should grow a knob for.
+ */
+@Composable
+private fun WorkshopStatusPill(
+    label: String,
+    containerColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .background(containerColor, CircleShape)
+            .padding(horizontal = Spacing.md, vertical = StatusPillVerticalPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(StatusDotSize)
+                .background(contentColor, CircleShape),
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            color = contentColor,
+        )
+    }
+}
+
+/**
  * The workshop code, on a tinted chip with a copy control.
  *
  * What lands on the clipboard is the raw ASCII code, not the Persian-digit label: it is pasted
@@ -305,6 +341,7 @@ private fun WorkshopCodeRow(
 
 /** The design marks a status with a dot, which is smaller than any icon in the scale. */
 private val StatusDotSize = 6.dp
+private val StatusPillVerticalPadding = 5.dp
 
 private val StatShimmerWidth = 28.dp
 private val StatShimmerHeight = 20.dp
