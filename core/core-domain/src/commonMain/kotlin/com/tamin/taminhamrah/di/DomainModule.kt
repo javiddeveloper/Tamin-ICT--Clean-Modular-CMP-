@@ -35,8 +35,13 @@ import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
@@ -215,6 +220,12 @@ val domainModule = module {
     factoryOf(::GetMainMenuUseCase)
     factoryOf(::GetUserRequestsUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
+    factoryOf(::GetUserRequestErrorsUseCase)
+    factoryOf(::GetSmartGuideListUseCase)
+    factoryOf(::GetUserRequestDetailUseCase)
+    factoryOf(::GetShowRequestInfoUseCase)
+    factoryOf(::DownloadUserRequestDocumentUseCase)
+
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)

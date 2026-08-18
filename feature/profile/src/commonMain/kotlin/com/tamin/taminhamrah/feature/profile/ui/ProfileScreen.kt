@@ -132,6 +132,7 @@ fun ProfileScreen(
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToUserRequests: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onBackClicked: () -> Unit
@@ -163,6 +164,7 @@ fun ProfileScreen(
         onNavigateToSecurity = onNavigateToSecurity,
         onNavigateToDependentsList = onNavigateToDependentsList,
         onNavigateToSettings = onNavigateToSettings,
+        onNavigateToUserRequests = onNavigateToUserRequests,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -191,6 +193,7 @@ fun HandleProfileEvents(
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -242,6 +245,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToMyInbox -> {
                 onNavigateToMyInbox()
+            }
+
+            ProfileEvent.NavigateToUserContracts ->{
+                onNavigateToUserRequests()
             }
 
             is ProfileEvent.OpenUrl -> {
