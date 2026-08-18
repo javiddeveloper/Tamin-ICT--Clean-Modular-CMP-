@@ -445,7 +445,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
-                workshopsScreen(navController)
+                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 

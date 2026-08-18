@@ -1,54 +1,45 @@
 package com.tamin.taminhamrah.feature.workshops.ui.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 
 /**
  * State of the کارگاه‌های کارفرما list.
  *
  * Search text and the status filter live here together and are sent together, so choosing a status
- * no longer throws away a code the user typed. [appliedSearch] is what the current page was
+ * no longer throws away a code the user typed. [appliedSearch] is what the visible page was
  * actually fetched with — kept apart from the editable fields so the screen can show which filter
  * is in force even after the panel is closed.
  */
 @Immutable
 data class WorkshopsUiState(
-    val isLoading: Boolean = false,
-    val isLoadingMore: Boolean = false,
-    val error: String? = null,
-    val workshops: ImmutableList<WorkshopPR> = persistentListOf(),
-    val hasMore: Boolean = false,
+    val list: PagedListState<WorkshopPR> = PagedListState(),
     val workshopIdInput: String = "",
     val branchCodeInput: String = "",
     val appliedSearch: WorkshopSearch = WorkshopSearch(),
     val statusFilter: WorkshopActivityStatus? = null,
-    /** The workshop whose action menu is open, or null while the sheet is closed. */
+    val isSearchOpen: Boolean = false,
+    val isFilterSheetOpen: Boolean = false,
+    /** The three figures the header card shows. Null until they have been counted. */
+    val stats: WorkshopStats? = null,
+    /** The workshop whose جزئیات و عملیات sheet is open, or null while it is closed. */
     val actionsFor: WorkshopPR? = null,
 ) {
-    /** The first page has not arrived yet — the skeleton stands in for the list. */
-    val isFirstLoad: Boolean get() = isLoading && workshops.isEmpty()
+    /** Whether anything narrows the list right now — what the filter chip reflects. */
+    val hasActiveFilter: Boolean get() = statusFilter != null || appliedSearch.isNotEmpty
 
-    /** Nothing matched, and it is not because the request is still in flight. */
-    val isEmpty: Boolean get() = !isLoading && error == null && workshops.isEmpty()
-
-    /** Whether anything narrows the list right now — what an "applied filter" chip reflects. */
-    val hasActiveFilter: Boolean
-        get() = statusFilter != null || appliedSearch.isNotEmpty
+    /** Convenience for the screen, which shows the loaded rows and nothing else. */
+    val workshops get() = list.items
 
     sealed interface PartialState {
-        data class Loading(val isLoading: Boolean) : PartialState
+        data object Loading : PartialState
         data object LoadingMore : PartialState
         data class Error(val message: String?) : PartialState
-        data class Loaded(
-            val workshops: ImmutableList<WorkshopPR>,
-            val hasMore: Boolean,
-        ) : PartialState
-
+        data class Loaded(val list: PagedListState<WorkshopPR>) : PartialState
         data class SearchInputChanged(
             val workshopId: String? = null,
             val branchCode: String? = null,
@@ -59,8 +50,32 @@ data class WorkshopsUiState(
             val status: WorkshopActivityStatus?,
         ) : PartialState
 
+        data class SearchOpenChanged(val isOpen: Boolean) : PartialState
+        data class FilterSheetOpenChanged(val isOpen: Boolean) : PartialState
+        data class StatsLoaded(val stats: WorkshopStats) : PartialState
         data class ActionsForChanged(val workshop: WorkshopPR?) : PartialState
     }
+}
+
+/**
+ * Counting rows needs no rows: the status counts are read off the envelope's `total`, so the
+ * request asks for the smallest page the service will give.
+ */
+const val WORKSHOP_STATS_PAGE_SIZE = 1
+
+/**
+ * The figures over the list: how many workshops the user has, and how many are active.
+ *
+ * Counted from the service's own totals rather than from the rows on screen — the list is paged,
+ * so counting what happens to be loaded would report a smaller number the further you scroll.
+ */
+@Immutable
+data class WorkshopStats(
+    val total: Int = 0,
+    val active: Int = 0,
+) {
+    /** The design shows نیمه فعال and غیر فعال as one figure, so it is derived, never counted twice. */
+    val inactive: Int get() = (total - active).coerceAtLeast(0)
 }
 
 /** The two code fields the search panel submits. Blank means "not part of the query". */
@@ -80,12 +95,15 @@ sealed interface WorkshopsIntent {
 
     data class WorkshopIdChanged(val value: String) : WorkshopsIntent
     data class BranchCodeChanged(val value: String) : WorkshopsIntent
+    data class SearchOpenChanged(val isOpen: Boolean) : WorkshopsIntent
 
     /** Submit whatever the two code fields hold, keeping the status filter. */
     data object ApplySearch : WorkshopsIntent
 
     /** همه موارد — clears the code fields *and* the query, so the two cannot disagree. */
     data object ClearSearch : WorkshopsIntent
+
+    data class FilterSheetOpenChanged(val isOpen: Boolean) : WorkshopsIntent
 
     /** Null clears the status filter while leaving any code search in place. */
     data class StatusFilterChanged(val status: WorkshopActivityStatus?) : WorkshopsIntent
@@ -96,7 +114,7 @@ sealed interface WorkshopsIntent {
 }
 
 sealed interface WorkshopsEvent {
-    /** The picked action can be opened directly; the screen navigates. */
+    /** The picked action can be opened; the route navigates. */
     data class Navigate(
         val action: WorkshopAction,
         val workshopId: String,

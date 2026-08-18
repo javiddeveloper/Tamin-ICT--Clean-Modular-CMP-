@@ -1,370 +1,177 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
-import org.koin.compose.viewmodel.koinViewModel
-
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCard
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchPanel
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStatsCard
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
+import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopActionsSheet
+import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.workshop_search
+import taminx.core.core_ui.workshops_header_subtitle
+import taminx.core.core_ui.workshops_title
+
+/**
+ * کارگاه‌های کارفرما — the launcher for every workshop service.
+ *
+ * The route collects state and turns events into navigation; [WorkshopsScreen] is stateless, so a
+ * preview can exercise every state without a ViewModel.
+ */
+@Composable
+fun WorkshopsRoute(
+    onBack: () -> Unit,
+    onOpenAction: (WorkshopAction, String, String, String) -> Unit,
+    viewModel: WorkshopsViewModel = koinViewModel(),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    HandleWorkshopsEvents(events = viewModel.events, onOpenAction = onOpenAction)
+
+    WorkshopsScreen(
+        state = state,
+        onIntent = viewModel::sendIntent,
+        onBack = onBack,
+    )
+}
 
 @Composable
 fun WorkshopsScreen(
-    viewModel: WorkshopsViewModel = koinViewModel(),
-    navigateToPaymentSheets: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopDebit: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopDebtInquiry: (String, String) -> Unit = { _, _ -> },
-    navigateToManagementDebit: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopMembers: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopStackholders: (String, String) -> Unit = { _, _ -> },
-    navigateToWorkshopRecentlyAddedMembers: (String, String) -> Unit = { _, _ -> },
-    navigateToObjectionableDebit: (String, String) -> Unit = { _, _ -> }
+    state: WorkshopsUiState,
+    onIntent: (WorkshopsIntent) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val colors = LocalTaminColors.current
+    // Hoisted out of the item lambdas below: reading these from `state` inside a row would capture
+    // the whole state, and every workshop would recompose whenever any unrelated field changed.
+    val workshops = state.workshops
+    val stats = state.stats
+    val isSearchOpen = state.isSearchOpen
+    val hasActiveFilter = state.hasActiveFilter
 
-    var workshopId by remember { mutableStateOf("") }
-    var branchCode by remember { mutableStateOf("") }
-    var workshopStatus by remember { mutableStateOf("") }
-    var selectedWorkshop by remember { mutableStateOf<Pair<String, String>?>(null) }
-
-    WorkshopsContent(
-        uiState = uiState,
-        workshopId = workshopId,
-        onWorkshopIdChange = { workshopId = it },
-        branchCode = branchCode,
-        onBranchCodeChange = { branchCode = it },
-        workshopStatus = workshopStatus,
-        onWorkshopStatusChange = { workshopStatus = it },
-        onLoadClick = {
-            viewModel.sendIntent(
-                WorkshopsIntent.LoadWorkshops(
-                    workshopId = workshopId.takeIf { it.isNotBlank() },
-                    branchCode = branchCode.takeIf { it.isNotBlank() },
-                    workshopStatus = workshopStatus.takeIf { it.isNotBlank() }
+    Column(modifier = modifier.fillMaxSize()) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.workshops_title),
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    onClick = onBack,
                 )
-            )
-        },
-        onTestDownloadPdfClick = {
-            viewModel.sendIntent(WorkshopsIntent.TestDownloadPdf)
-        },
-        onWorkshopClick = { wId, bCode ->
-            selectedWorkshop = wId to bCode
-        }
-    )
-
-    if (selectedWorkshop != null) {
-        val (wId, bCode) = selectedWorkshop!!
-        ModalBottomSheet(
-            onDismissRequest = { selectedWorkshop = null }
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = Icons.Default.Search,
+                    contentDescription = stringResource(Res.string.workshop_search),
+                    onClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) },
+                )
+            },
+            bottomPadding = HeaderBottomPadding,
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                AnimatedRingHeaderIcon(icon = Icons.Default.Search)
                 Text(
-                    text = "لیست برگ پرداخت",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToPaymentSheets(wId, bCode)
-                        }
-                        .padding(16.dp)
+                    text = stringResource(Res.string.workshops_header_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textHeaderSubtitle,
+                    textAlign = TextAlign.Center,
                 )
-                Text(
-                    text = "لیست بدهی کارگاه",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToWorkshopDebit(wId, bCode)
-                        }
-                        .padding(16.dp)
-                )
-                Text(
-                    text = "استعلام بدهی کارگاه",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToWorkshopDebtInquiry(wId, bCode)
-                        }
-                        .padding(16.dp)
-                )
-                Text(
-                    text = "اعتراض به بدهی",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToObjectionableDebit(wId, bCode)
-                        }
-                        .padding(16.dp)
-                )
-                Text(
-                    text = "نام نویسی غیرحضوری بیمه شده",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                        }
-                        .padding(16.dp)
-                )
-                Text(
-                    text = "رسیدگی به بدهی ماده ۱۶",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToManagementDebit(wId, bCode)
-                        }
-                        .padding(16.dp)
-                )
-                Text(
-                    text = "کارکنان",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToWorkshopMembers(wId, bCode)
-                        }
-                        .padding(16.dp)
-                )
-                Text(
-                    text = "ذینفعان",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedWorkshop = null
-                            navigateToWorkshopStackholders(wId, bCode)
-                        }
-                        .padding(16.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    }
-}
 
-@Composable
-fun WorkshopsContent(
-    uiState: WorkshopsUiState,
-    workshopId: String,
-    onWorkshopIdChange: (String) -> Unit,
-    branchCode: String,
-    onBranchCodeChange: (String) -> Unit,
-    workshopStatus: String,
-    onWorkshopStatusChange: (String) -> Unit,
-    onLoadClick: () -> Unit,
-    onTestDownloadPdfClick: () -> Unit,
-    onWorkshopClick: (String, String) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        OutlinedTextField(
-            value = workshopId,
-            onValueChange = onWorkshopIdChange,
-            label = { Text("کد کارگاه (workshopId)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = branchCode,
-            onValueChange = onBranchCodeChange,
-            label = { Text("کد شعبه (branchCode)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = workshopStatus,
-            onValueChange = onWorkshopStatusChange,
-            label = { Text("وضعیت کارگاه (workshopStatus)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onLoadClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("ارسال و دریافت اطلاعات")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = onTestDownloadPdfClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("تست دریافت PDF")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.error != null) {
-                Text(
-                    text = "خطا: ${uiState.error}",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                if (uiState.agreements.isEmpty()) {
-                    Text(
-                        text = "هیچ کارگاهی یافت نشد",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(uiState.agreements) { agreement ->
-                            WorkshopItem(
-                                agreement = agreement,
-                                onClick = onWorkshopClick
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WorkshopItem(
-    agreement: EmployerAgreementPR,
-    onClick: (String, String) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable {
-                val wId = agreement.workshop?.workshopId ?: ""
-                val bCode = agreement.workshop?.branchCode ?: ""
-                if (wId.isNotBlank() && bCode.isNotBlank()) {
-                    onClick(wId, bCode)
-                }
-            }
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "کارگاه: ${agreement.workshop?.workshopName ?: "نامشخص"}",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = "کد کارگاه: ${agreement.workshop?.workshopId ?: "ندارد"}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "نام کارفرما: ${agreement.workshop?.employerName ?: "ندارد"}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun WorkshopsContentPreview() {
-    PreviewRtlThemeContent {
-        WorkshopsContent(
-            uiState = WorkshopsUiState(
-                isLoading = false,
-                agreements = listOf(
-                    EmployerAgreementPR(
-                        pymseq = null,
-                        regno = null,
-                        firstname = null,
-                        emailaddr = null,
-                        nationalno = null,
-                        mobileno = null,
-                        startdate = null,
-                        mastcusttype = null,
-                        createdt = null,
-                        masttyp = null,
-                        logicalDeleted = null,
-                        regemailseq = null,
-                        lastname = null,
-                        special = null,
-                        risuid = null,
-                        nationalcode = null,
-                        enddate = null,
-                        letDate = null,
-                        regdate = null,
-                        roletype = null,
-                        dname = null,
-                        letNo = null,
-                        createuid = null,
-                        workshop = EmployerWorkshopPR(
-                            sswn = null,
-                            branchTitle = "شعبه نمونه",
-                            workshopApproveDate = null,
-                            inclusionDate = null,
-                            brhCode = null,
-                            activityName = null,
-                            workshopRegisterDate = null,
-                            branchCode = "123",
-                            workshopName = "کارگاه کامپیوتر توکلی",
-                            employerName = "علی توکلی",
-                            actitvityCode = null,
-                            userId = null,
-                            workshopId = "9900020917749",
-                            workshopUnemployedStat = null
-                        )
-                    )
-                ),
-                error = null
+        WorkshopListScaffold(
+            state = state.list,
+            onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
+            contentPadding = PaddingValues(
+                start = Spacing.page,
+                end = Spacing.page,
+                bottom = Spacing.page,
             ),
-            workshopId = "9900020917749",
-            onWorkshopIdChange = {},
-            branchCode = "123",
-            onBranchCodeChange = {},
-            workshopStatus = "",
-            onWorkshopStatusChange = {},
-            onLoadClick = {},
-            onTestDownloadPdfClick = {},
-            onWorkshopClick = { _, _ -> }
+            key = { it.workshopId + it.branchCode },
+            header = {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
+                    // Climbs into the gradient above it, the way the design overlaps the two.
+                    WorkshopStatsCard(
+                        stats = stats,
+                        modifier = Modifier.padding(top = StatsCardOverlap),
+                    )
+                    if (isSearchOpen) {
+                        WorkshopSearchPanel(
+                            workshopId = state.workshopIdInput,
+                            branchCode = state.branchCodeInput,
+                            onWorkshopIdChange = { onIntent(WorkshopsIntent.WorkshopIdChanged(it)) },
+                            onBranchCodeChange = { onIntent(WorkshopsIntent.BranchCodeChanged(it)) },
+                            onSearch = { onIntent(WorkshopsIntent.ApplySearch) },
+                            onClear = { onIntent(WorkshopsIntent.ClearSearch) },
+                        )
+                    }
+                    WorkshopSectionHeader(
+                        count = workshops.size,
+                        isFilterActive = hasActiveFilter,
+                        onFilterClick = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(true)) },
+                    )
+                }
+            },
+        ) { workshop ->
+            WorkshopCard(
+                workshop = workshop,
+                onOpenDetails = { onIntent(WorkshopsIntent.ActionsRequested(workshop)) },
+            )
+        }
+    }
+
+    state.actionsFor?.let { workshop ->
+        WorkshopActionsSheet(
+            workshop = workshop,
+            onDismiss = { onIntent(WorkshopsIntent.ActionsDismissed) },
+            onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
+        )
+    }
+
+    if (state.isFilterSheetOpen) {
+        WorkshopFilterSheet(
+            selected = state.statusFilter,
+            onDismiss = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(false)) },
+            onSelect = { status -> onIntent(WorkshopsIntent.StatusFilterChanged(status)) },
         )
     }
 }
+
+/** How far the stats card climbs into the gradient header. */
+private val StatsCardOverlap = (-40).dp
+
+/** Deep enough for the ring icon, the subtitle, and the card that overlaps them. */
+private val HeaderBottomPadding = 64.dp

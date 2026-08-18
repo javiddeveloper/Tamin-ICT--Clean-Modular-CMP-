@@ -98,7 +98,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     }
 
     /** Confirming reloads the list, because the row's own state changes with it. */
-    private fun confirm(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
+    private fun confirm(member: WorkshopNewMemberPR): Flow<PartialState> = flow<PartialState> {
         val requestId = member.requestId
         if (!member.canConfirm || requestId == null) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
@@ -114,7 +114,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
-    private fun delete(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
+    private fun delete(member: WorkshopNewMemberPR): Flow<PartialState> = flow<PartialState> {
         val personalId = member.personalId
         if (!member.isDraft || personalId == null) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))

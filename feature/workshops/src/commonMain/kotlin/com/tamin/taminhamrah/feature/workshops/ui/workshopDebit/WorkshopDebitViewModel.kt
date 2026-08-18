@@ -65,7 +65,7 @@ class WorkshopDebitViewModel(
      * Pre-check and payment are one step (the use case chains them), so a debt is never paid
      * without being checked and a refusal at either point reads the same to the user.
      */
-    private fun pay(debt: WorkShopDebtPR): Flow<PartialState> = flow {
+    private fun pay(debt: WorkShopDebtPR): Flow<PartialState> = flow<PartialState> {
         val state = uiState.value
         if (state.payingDebitNumber != null) return@flow
 

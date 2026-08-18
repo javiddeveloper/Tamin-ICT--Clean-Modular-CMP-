@@ -128,7 +128,7 @@ class ManagementDebitViewModel(
         sendEvent(ManagementDebitEvent.OpenRequestForm(debt, Article16RequestStatus.DOCUMENT_DEFECT))
     }
 
-    private fun showRequestPdf(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun showRequestPdf(debt: Article16DebtPR): Flow<PartialState> = flow<PartialState> {
         emit(PartialState.ActionsForChanged(null))
         val seqNo = debt.seqNo
         if (seqNo == null) {
@@ -142,7 +142,7 @@ class ManagementDebitViewModel(
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
-    private fun showExpertMessage(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun showExpertMessage(debt: Article16DebtPR): Flow<PartialState> = flow<PartialState> {
         emit(PartialState.ActionsForChanged(null))
         val seqNo = debt.seqNo
         if (seqNo == null) {

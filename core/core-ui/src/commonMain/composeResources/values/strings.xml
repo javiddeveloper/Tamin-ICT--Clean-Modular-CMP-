@@ -696,6 +696,15 @@
     <string name="send_history_access_denied_action">متوجه شدم</string>
 
     <!-- کارگاه‌های کارفرما — the workshop list and everything it launches -->
+    <string name="workshops_title">کارگاه‌ها</string>
+    <string name="workshops_header_subtitle">کارگاه‌های ثبت‌شده به نام شما</string>
+    <string name="workshop_stat_total">کارگاه</string>
+    <string name="workshop_stat_active">فعال</string>
+    <string name="workshop_stat_inactive">نیمه/غیرفعال</string>
+    <string name="workshop_details_and_actions">جزئیات و عملیات</string>
+    <string name="workshop_filter">فیلتر</string>
+    <string name="workshop_copy_code">کپی کد کارگاه</string>
+    <string name="workshop_code_copied">کد کارگاه کپی شد</string>
     <string name="workshop_list_title">لیست کارگاه ها</string>
     <string name="workshop_search_title">جستجوی کارگاه</string>
     <string name="workshop_code">کد کارگاه</string>

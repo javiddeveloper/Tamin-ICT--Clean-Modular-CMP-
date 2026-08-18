@@ -87,7 +87,7 @@ class ObjectionableDebitViewModel(
         else -> checkDeadline(debt)
     }
 
-    private fun downloadObjectionPdf(debt: WorkShopDebtPR): Flow<PartialState> = flow {
+    private fun downloadObjectionPdf(debt: WorkShopDebtPR): Flow<PartialState> = flow<PartialState> {
         val seqNo = debt.objectionSeqNo
         if (seqNo == null) {
             sendEvent(ObjectionableDebitEvent.ShowMessage(Res.string.workshop_error_receive_data))
@@ -100,7 +100,7 @@ class ObjectionableDebitViewModel(
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
-    private fun checkDeadline(debt: WorkShopDebtPR): Flow<PartialState> = flow {
+    private fun checkDeadline(debt: WorkShopDebtPR): Flow<PartialState> = flow<PartialState> {
         val domainDebt = debtsByNumber[debt.debitNumber]
         if (domainDebt == null) {
             sendEvent(ObjectionableDebitEvent.ShowMessage(Res.string.workshop_error_receive_data))

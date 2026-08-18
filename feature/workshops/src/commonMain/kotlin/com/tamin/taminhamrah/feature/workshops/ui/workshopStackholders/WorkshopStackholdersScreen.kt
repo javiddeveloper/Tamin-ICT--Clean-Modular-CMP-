@@ -1,54 +1,82 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import org.koin.compose.koinInject
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
+import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.member_father_name
+import taminx.core.core_ui.member_full_name
+import taminx.core.core_ui.member_national_id
+import taminx.core.core_ui.stackholder_birth_date
+import taminx.core.core_ui.stackholder_type
+import taminx.core.core_ui.workshop_action_stackholders
 
+/** ذینفعان of one workshop. */
 @Composable
 fun WorkshopStackholdersScreen(
     workshopId: String,
     branchCode: String,
-    viewModel: WorkshopStackholdersViewModel = koinInject()
+    onBack: () -> Unit,
+    viewModel: WorkshopStackholdersViewModel = koinViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(workshopId, branchCode) {
-        viewModel.sendIntent(WorkshopStackholdersIntent.Load(workshopId, branchCode))
+        viewModel.sendIntent(WorkshopStackholdersIntent.Open(workshopId, branchCode))
     }
 
-    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        if (state.isLoading) CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        else if (!state.error.isNullOrEmpty()) Text("خطا: ${state.error}", color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
-        else {
-            if (state.list.isEmpty()) Text("لیست خالی است", modifier = Modifier.align(Alignment.Center))
-            else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.list) { item ->
-                        Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("کد ملی: ${item.nationalId ?: "ندارد"}")
-                                Text("موبایل: ${item.mobile ?: "ندارد"}")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    WorkshopScreenShell(
+        title = stringResource(Res.string.workshop_action_stackholders),
+        onBack = onBack,
+    ) {
+        WorkshopListScaffold(
+            state = state.list,
+            onLoadMore = { viewModel.sendIntent(WorkshopStackholdersIntent.LoadMore) },
+            key = { it.nationalId },
+        ) { holder -> StackHolderCard(holder) }
+    }
+}
+
+@Composable
+private fun StackHolderCard(holder: WorkshopStackHolderPR, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface(CornerRadius.lg)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        DetailRow(
+            label = stringResource(Res.string.member_full_name),
+            value = holder.fullName,
+            numeric = false,
+        )
+        DetailRow(stringResource(Res.string.member_national_id), holder.nationalId)
+        DetailRow(
+            label = stringResource(Res.string.member_father_name),
+            value = holder.fatherName,
+            numeric = false,
+        )
+        DetailRow(stringResource(Res.string.stackholder_birth_date), holder.birthDate)
+        DetailRow(
+            label = stringResource(Res.string.stackholder_type),
+            value = holder.stackType,
+            numeric = false,
+        )
     }
 }

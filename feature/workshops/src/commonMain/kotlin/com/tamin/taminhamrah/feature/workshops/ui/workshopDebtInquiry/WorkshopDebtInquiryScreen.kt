@@ -1,109 +1,90 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.collectAsState
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
-import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryPR
-import org.koin.compose.koinInject
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListSkeleton
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
+import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.workshop_action_debt_inquiry
+import taminx.core.core_ui.workshop_empty_list
+import taminx.core.core_ui.workshop_inquiry_date
+import taminx.core.core_ui.workshop_inquiry_definitive
+import taminx.core.core_ui.workshop_inquiry_divisible
+import taminx.core.core_ui.workshop_inquiry_indivisible
+import taminx.core.core_ui.workshop_inquiry_result
 
+/** استعلام بدهی کارگاه — one record, five lines. */
 @Composable
 fun WorkshopDebtInquiryScreen(
     workshopId: String,
     branchCode: String,
-    viewModel: WorkshopDebtInquiryViewModel = koinInject()
+    onBack: () -> Unit,
+    viewModel: WorkshopDebtInquiryViewModel = koinViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(workshopId, branchCode) {
-        viewModel.sendIntent(WorkshopDebtInquiryIntent.LoadDebtInquiry(workshopId, branchCode))
+        viewModel.sendIntent(WorkshopDebtInquiryIntent.Open(workshopId, branchCode))
     }
 
-    WorkshopDebtInquiryContent(uiState)
-}
+    WorkshopScreenShell(
+        title = stringResource(Res.string.workshop_action_debt_inquiry),
+        onBack = onBack,
+    ) {
+        val inquiry = state.inquiry
+        when {
+            state.isLoading -> WorkshopListSkeleton(rowCount = 1)
 
-@Composable
-fun WorkshopDebtInquiryContent(uiState: WorkshopDebtInquiryUiState) {
-    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (uiState.error != null) {
-            Text(
-                text = "خطا: ${uiState.error}",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center)
+            inquiry == null -> EmptyStateMessage(
+                icon = Icons.Outlined.Info,
+                title = stringResource(Res.string.workshop_empty_list),
+                modifier = Modifier.fillMaxSize(),
             )
-        } else {
-            uiState.inquiryResult?.let { result ->
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "کارگاه: ${result.workshopName ?: "نامشخص"}",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "کد کارگاه: ${result.workshopId ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "کد شعبه: ${result.branchCode ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "نتیجه: ${result.result ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "مبلغ ۱: ${result.amount1 ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "مبلغ ۲: ${result.amount2 ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "مبلغ ۳: ${result.amount3 ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "تاریخ: ${result.sDate ?: "ندارد"}", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                }
-            } ?: run {
-                Text(
-                    text = "اطلاعاتی یافت نشد",
-                    modifier = Modifier.align(Alignment.Center)
+
+            else -> Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.page)
+                    .taminSurface(CornerRadius.lg)
+                    .padding(Spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                DetailRow(
+                    label = stringResource(Res.string.workshop_inquiry_result),
+                    value = inquiry.result,
+                    numeric = false,
+                )
+                DetailRow(stringResource(Res.string.workshop_inquiry_date), inquiry.date)
+                DetailRow(
+                    stringResource(Res.string.workshop_inquiry_definitive),
+                    inquiry.definitiveDebt,
+                )
+                DetailRow(
+                    stringResource(Res.string.workshop_inquiry_divisible),
+                    inquiry.divisibleDebt,
+                )
+                DetailRow(
+                    stringResource(Res.string.workshop_inquiry_indivisible),
+                    inquiry.indivisibleDebt,
                 )
             }
         }
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun WorkshopDebtInquiryContentPreview() {
-    PreviewRtlThemeContent {
-        WorkshopDebtInquiryContent(
-            uiState = WorkshopDebtInquiryUiState(
-                isLoading = false,
-                error = null,
-                inquiryResult = WorkshopDebtInquiryPR(
-                    status = null,
-                    workshopId = "1071410004",
-                    branchCode = "1070",
-                    workshopName = "سنگ بري سعيد",
-                    result = "کارگاه دارای بدهی قطعی",
-                    amount1 = "19895251",
-                    sDate = "1405/04/01",
-                    amount2 = "0",
-                    amount3 = "19895251"
-                )
-            )
-        )
     }
 }

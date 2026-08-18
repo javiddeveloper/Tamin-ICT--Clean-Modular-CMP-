@@ -92,7 +92,7 @@ class PaymentSheetsViewModel(
     }
 
     /** Fetched once: the picker's options do not change while the screen is open. */
-    private fun loadDebitReasons(): Flow<PartialState> = flow {
+    private fun loadDebitReasons(): Flow<PartialState> = flow<PartialState> {
         if (uiState.value.debitReasons.isNotEmpty()) return@flow
         val reasons = getDebitReasons()
         emit(
