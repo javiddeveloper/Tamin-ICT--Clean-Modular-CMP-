@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanc
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
+import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
@@ -45,6 +46,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> navigateToPensionSurvivor()
         FeatureFlag.DISABILITY_PENSION -> navigateToDisabilityPension()
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
+        FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
         else -> Unit
     }
 }

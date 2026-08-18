@@ -68,6 +68,7 @@ import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -194,6 +195,9 @@ fun HandleProfileEvents(
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
+
+    val launcher = remember { ExternalAppLauncher() }
+
     events.collectWithLifecycleAware {
         when (it) {
             ProfileEvent.NavigateBack -> {
@@ -247,8 +251,17 @@ fun HandleProfileEvents(
             is ProfileEvent.ShowToast -> {
                 // Handle toast
             }
+
             ProfileEvent.NavigateToSecurity -> {
                 onNavigateToSecurity()
+            }
+
+            is ProfileEvent.ShareAppLink -> {
+                launcher.shareText(it.appLink)
+            }
+
+            is ProfileEvent.Support -> {
+                onOpenUrl("tel:${it.phone}")
             }
         }
     }

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.ui.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.text.HtmlCompat
 import org.koin.core.context.GlobalContext
 
 actual class ExternalAppLauncher actual constructor() {
@@ -48,5 +49,16 @@ actual class ExternalAppLauncher actual constructor() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
+    }
+
+    actual fun shareText(text: String) {
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        val chooserTitle = HtmlCompat.fromHtml("به اشتراک گذاری", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val shareIntent = Intent.createChooser(sendIntent, chooserTitle)
+            .apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+        context.startActivity(shareIntent)
     }
 }

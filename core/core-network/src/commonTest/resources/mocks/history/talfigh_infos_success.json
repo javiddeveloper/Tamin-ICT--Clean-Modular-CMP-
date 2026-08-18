@@ -1,0 +1,49 @@
+{
+    "list": [
+        {
+            "id": 1,
+            "hisMonth1": "30",
+            "hisMonth2": null,
+            "hisMonth3": null,
+            "hisMonth4": null,
+            "hisMonth5": null,
+            "hisMonth6": null,
+            "hisMonth7": null,
+            "hisMonth8": null,
+            "hisMonth9": null,
+            "hisMonth10": null,
+            "hisMonth11": null,
+            "hisMonth12": null,
+            "hisYear": "1402",
+            "historyDays": null,
+            "historyMonths": null,
+            "historyYears": 10,
+            "risuid": null,
+            "sumHistoryYears": null,
+            "sumYear": null
+        },
+        {
+            "id": 2,
+            "hisMonth1": "31",
+            "hisMonth2": null,
+            "hisMonth3": null,
+            "hisMonth4": null,
+            "hisMonth5": null,
+            "hisMonth6": null,
+            "hisMonth7": null,
+            "hisMonth8": null,
+            "hisMonth9": null,
+            "hisMonth10": null,
+            "hisMonth11": null,
+            "hisMonth12": null,
+            "hisYear": "1401",
+            "historyDays": null,
+            "historyMonths": null,
+            "historyYears": 5,
+            "risuid": null,
+            "sumHistoryYears": null,
+            "sumYear": null
+        }
+    ],
+    "total": 2
+}

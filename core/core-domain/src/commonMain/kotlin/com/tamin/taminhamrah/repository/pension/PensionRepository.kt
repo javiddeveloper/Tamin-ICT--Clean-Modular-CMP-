@@ -48,6 +48,10 @@ interface PensionRepository {
         filters: List<ApiFilterDN>
     ): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN>
 
+    suspend fun getEdictReportPDF(
+        filters: List<ApiFilterDN>
+    ): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN>
+
     suspend fun getRetirementRequestInfo(
         filters: List<ApiFilterDN>
     ): Flow<List<RetirementRequestDN>>

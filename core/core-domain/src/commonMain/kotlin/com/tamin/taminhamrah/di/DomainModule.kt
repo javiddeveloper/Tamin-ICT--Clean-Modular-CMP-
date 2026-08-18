@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
+import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
@@ -182,6 +183,7 @@ val domainModule = module {
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
     factoryOf(::GetEdictPensionerUseCase)
+    factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
     factoryOf(::SendImageRequestUseCase)
     factoryOf(::SubdominantUseCase)

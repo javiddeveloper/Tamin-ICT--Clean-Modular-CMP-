@@ -115,7 +115,7 @@ fun HotlineCard(
                 }
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Column(
-                    horizontalAlignment = Alignment.End
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Text(
                         text = hotline.title,
@@ -131,7 +131,6 @@ fun HotlineCard(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp,
-                            textAlign = TextAlign.End
                         )
                     )
                 }

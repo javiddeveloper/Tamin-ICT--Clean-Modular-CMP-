@@ -38,8 +38,8 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contact_us_social_section
 import taminx.feature.profile.generated.resources.Res.drawable
+import taminx.feature.profile.generated.resources.ic_aparat
 import taminx.feature.profile.generated.resources.ic_bale
-import taminx.feature.profile.generated.resources.ic_bisphone
 import taminx.feature.profile.generated.resources.ic_eitaa
 import taminx.feature.profile.generated.resources.ic_email
 import taminx.feature.profile.generated.resources.ic_faq
@@ -170,8 +170,8 @@ private fun getSocialVector(type: SocialChannelTypePR): DrawableResource {
             return drawable.ic_bale
         }
 
-        SocialChannelTypePR.BISPHONE -> {
-            return drawable.ic_bisphone
+        SocialChannelTypePR.APARAT -> {
+            return drawable.ic_aparat
         }
 
         SocialChannelTypePR.GAP -> {
@@ -220,7 +220,7 @@ private val PreviewSampleSocialChannels = kotlinx.collections.immutable.persiste
     SocialChannelPR("3", "واتساپ", SocialChannelTypePR.WHATSAPP, "https://wa.me/989000000000"),
     SocialChannelPR("4", "آی‌گپ", SocialChannelTypePR.IGAP, "https://igap.net/tamin"),
     SocialChannelPR("5", "بله", SocialChannelTypePR.BALE, "https://ble.ir/tamin"),
-    SocialChannelPR("6", "بیسفون", SocialChannelTypePR.BISPHONE, "https://bisphone.com"),
+    SocialChannelPR("6", "آپارات", SocialChannelTypePR.APARAT, "https://aparat.com"),
     SocialChannelPR("7", "گپ", SocialChannelTypePR.GAP, "https://gap.im/tamin"),
     SocialChannelPR("8", "سروش", SocialChannelTypePR.SOROUSH, "https://splus.ir/tamin"),
     SocialChannelPR("9", "روبیکا", SocialChannelTypePR.RUBIKA, "https://rubika.ir/tamin"),

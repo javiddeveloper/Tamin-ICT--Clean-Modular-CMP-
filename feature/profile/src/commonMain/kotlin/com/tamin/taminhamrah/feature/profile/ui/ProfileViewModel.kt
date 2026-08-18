@@ -128,6 +128,8 @@ class ProfileViewModel(
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
             ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
             ProfileMenuItem.SECURITY -> sendEvent(ProfileEvent.NavigateToSecurity)
+            ProfileMenuItem.SHARE -> sendEvent(ProfileEvent.ShareAppLink("https://hamrah.tamin.ir/"))
+            ProfileMenuItem.SUPPORT -> sendEvent(ProfileEvent.Support("1420"))
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()
