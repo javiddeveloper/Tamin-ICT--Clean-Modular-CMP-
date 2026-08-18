@@ -2,6 +2,21 @@ package com.tamin.taminhamrah.feature.history.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.feature.history.ui.components.SourceChipPR
+import com.tamin.taminhamrah.ui.components.BarChartItem
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarSelectedBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarSelectedTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryZeroText
+import com.tamin.taminhamrah.ui.theme.TaminLightTextSecondary
+import com.tamin.taminhamrah.ui.theme.TaminNavy700
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -187,3 +202,104 @@ data class DurationLabels(
     val days: String,
     val sources: String,
 )
+
+/**
+ * Month names as the chart labels them — three letters, because twelve full names do not fit.
+ *
+ * Beside the chart that uses them rather than in the shared formatter: they are an abbreviation this
+ * design asks for, not a fact about the calendar.
+ */
+val MonthShortNames: List<String> = listOf(
+    "فرو", "ارد", "خرد", "تیر", "مرد", "شهر", "مهر", "آبا", "آذر", "دی", "بهم", "اسف",
+)
+
+/**
+ * The year series, newest first.
+ *
+ * Scaled against a full year rather than against the tallest bar: a short year has to look short
+ * beside a full one, not merely shorter than this person's best year.
+ */
+fun List<YearHistoryPR>.yearBars(toPersian: (String) -> String): ImmutableList<BarChartItem> =
+    asReversed().map { year ->
+        val full = year.isComplete
+        BarChartItem(
+            id = year.year,
+            label = toPersian(year.year),
+            fraction = year.totalDays / DAYS_IN_FULL_YEAR,
+            fillTop = if (full) TaminHistoryBarFullTop else TaminHistoryBarPartialYearTop,
+            fillBottom = if (full) TaminHistoryBarFullBottom else TaminHistoryBarPartialYearBottom,
+            labelColor = if (year.totalDays > 0) TaminLightTextSecondary else TaminHistoryZeroText,
+        )
+    }.toImmutableList()
+
+/**
+ * One year as twelve months, optionally narrowed to a single employer.
+ *
+ * A month is "full" against its own length — اسفند is 29 or 30 days, not 31 — so a complete month
+ * reads as complete whichever month it is. The teal cap marks the months worked at two employers at
+ * once, and only while looking at all of them together: inside one employer there is no overlap to
+ * show.
+ */
+fun YearDetailPR?.monthBars(
+    source: Int?,
+    selectedMonth: Int?,
+    daysInMonth: (month: Int) -> Int,
+    dayLabel: (days: Int) -> String,
+): ImmutableList<BarChartItem> {
+    val detail = this ?: return persistentListOf()
+    val rows = source?.let { detail.workshops.getOrNull(it)?.months }
+
+    return List(MONTHS) { month ->
+        val days = if (rows == null) {
+            detail.monthDays.getOrElse(month) { 0 }
+        } else {
+            rows.firstOrNull { it.monthIndex == month }?.days ?: 0
+        }
+        val length = daysInMonth(month)
+        val selected = month == selectedMonth
+        val full = days >= length
+        val concurrent = source == null && detail.concurrentMonths.getOrElse(month) { false }
+
+        BarChartItem(
+            id = month.toString(),
+            label = MonthShortNames[month],
+            fraction = if (length == 0) 0f else days.toFloat() / length,
+            fillTop = when {
+                selected -> TaminHistoryBarSelectedTop
+                full -> TaminHistoryBarFullTop
+                else -> TaminHistoryBarPartialMonthTop
+            },
+            fillBottom = when {
+                selected -> TaminHistoryBarSelectedBottom
+                full -> TaminHistoryBarFullBottom
+                else -> TaminHistoryBarPartialMonthBottom
+            },
+            labelColor = when {
+                selected -> TaminNavy700
+                days > 0 -> TaminLightTextSecondary
+                else -> TaminHistoryZeroText
+            },
+            capTop = if (concurrent && days > 0) TaminHistoryConcurrentTop else null,
+            capBottom = if (concurrent && days > 0) TaminHistoryConcurrentBottom else null,
+            pill = dayLabel(days).takeIf { selected && days > 0 },
+            labelBold = selected,
+            enabled = days > 0,
+        )
+    }.toImmutableList()
+}
+
+/** «همه» and one chip per employer — shown only when there is more than one to choose between. */
+fun YearDetailPR?.sourceChips(selected: Int?, allLabel: String): ImmutableList<SourceChipPR> {
+    val shops = this?.workshops ?: return persistentListOf()
+    if (shops.size <= 1) return persistentListOf()
+
+    return buildList {
+        add(SourceChipPR(label = allLabel, selected = selected == null))
+        shops.forEachIndexed { index, shop ->
+            add(SourceChipPR(label = shop.name, selected = selected == index))
+        }
+    }.toImmutableList()
+}
+
+/** A full Jalali year in days — what a year bar's height is measured against. */
+private const val DAYS_IN_FULL_YEAR = 366f

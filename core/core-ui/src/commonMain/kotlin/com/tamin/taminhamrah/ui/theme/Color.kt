@@ -372,8 +372,8 @@ val TaminHistoryZeroText = Color(0xFFC3CDDC)
 val TaminHistoryPartialYearText = Color(0xFFB4711A)
 val TaminHistoryPartialYearBg = Color(0xFFFDF3E3)
 
-/** The teal information banner and the send tile. */
-val TaminHistoryTealBg = Color(0xFFEAF7F7)
+/** Teal surface — the calm informational banner and the «ارسال» tile sit on it. */
+val TaminTealBg = Color(0xFFEAF7F7)
 
 /** Season markers in the year sheet: spring, summer, autumn, winter. */
 val TaminHistorySeasonSpring = Color(0xFF22A06B)
