@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.utils.ListData
 
 /**
  * The page size these two endpoints are asked for is not cosmetic.
@@ -71,6 +74,13 @@ class HistoryRepositoryImplTest {
             countryCode = null, id = null, birthDateTimestamp = null, issueplace = null,
             nationCode = null,
         )
+
+        override suspend fun getLoginInfo(): ListData<String> =
+            ListData(total = 0, list = emptyList())
+
+        override suspend fun downloadHistoryReport(
+            type: HistoryCertificateType
+        ): PdfDownloadDTO = PdfDownloadDTO()
 
         override suspend fun sendToInstitution(
             allHistorySelected: Boolean,

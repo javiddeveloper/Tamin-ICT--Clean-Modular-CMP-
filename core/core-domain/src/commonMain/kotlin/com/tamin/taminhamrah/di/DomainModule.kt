@@ -80,7 +80,9 @@ import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -226,6 +228,8 @@ val domainModule = module {
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetUserInfosUseCase)
+    factoryOf(::GetUserRoleUseCase)
+    factoryOf(::DownloadHistoryReportUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)

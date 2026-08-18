@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import com.tamin.taminhamrah.model.history.UserRoleDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 
 class FakeHistoryRepository : HistoryRepository {
     var shouldThrowError = false
@@ -41,6 +43,18 @@ class FakeHistoryRepository : HistoryRepository {
     override suspend fun getUserInfos(): UserInfoDN {
         if (shouldThrowError) throw error
         return getUserInfosResult
+    }
+
+    var userRoleResult: UserRoleDN = UserRoleDN.INSURED
+
+    override suspend fun getUserRole(): UserRoleDN {
+        if (shouldThrowError) throw error
+        return userRoleResult
+    }
+
+    override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> = flow {
+        if (shouldThrowError) throw error
+        emit(PdfDownloadDN())
     }
 
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {

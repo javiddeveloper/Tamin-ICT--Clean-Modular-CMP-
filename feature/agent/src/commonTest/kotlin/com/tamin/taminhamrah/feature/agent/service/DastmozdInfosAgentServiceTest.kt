@@ -19,6 +19,8 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import com.tamin.taminhamrah.model.history.UserRoleDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 
 class FakeHistoryRepository(
     private val expectedResult: DastmozdInfoDN
@@ -26,6 +28,8 @@ class FakeHistoryRepository(
     override suspend fun getDastmozdInfos(filters: List<ApiFilterDN>): DastmozdInfoDN = expectedResult
     override suspend fun getUserInfos(): UserInfoDN = TODO()
 
+    override suspend fun getUserRole(): UserRoleDN = TODO()
+    override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> = TODO()
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) = TODO()
 
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = TODO()
@@ -69,7 +73,7 @@ class DastmozdInfosAgentServiceTest {
         val keyValueBubble = assertIs<ChatBubbleContent.KeyValue>(success.bubbles[0])
         assertEquals("This is a test message", keyValueBubble.title)
 
-        // Amounts are presented to the user, so they carry Persian digits, a thousands
+        // Amounts are presented to the user, so they carry Persian digits, a thousand
         // separator and the currency unit rather than the raw figure.
         val amountPair = keyValueBubble.items.find { it.key == "مبلغ دستمزد فروردین" }
         assertEquals("۱٬۰۰۰ ریال", amountPair?.value)

@@ -46,10 +46,24 @@ import taminx.feature.history.history_combined_season_spring
 import taminx.feature.history.history_combined_season_summer
 import taminx.feature.history.history_combined_season_winter
 import taminx.feature.history.history_combined_workshops
+import taminx.feature.history.history_combined_workshops_unavailable
+import taminx.feature.history.history_combined_wage_from_1386
+import taminx.feature.history.history_combined_month_esfand_leap
 import taminx.feature.history.history_combined_year_days
 
 /** Months to a season, and the four the Jalali year is read in. */
 private const val MONTHS_PER_SEASON = 3
+
+/** Index of اسفند, the only month whose length depends on the year. */
+private const val ESFAND_INDEX = 11
+
+/**
+ * The first year `dastmozdinfos` holds anything for.
+ *
+ * The service is «سوابق و ریز دستمزد بعد از سال ۸۶» — earlier years have no wage rows at all, so
+ * their empty panel is a fact about the service rather than about this person's employers.
+ */
+private const val FIRST_WAGE_YEAR = 1386
 
 private val SeasonLabels: List<StringResource> = listOf(
     Res.string.history_combined_season_spring,
@@ -70,11 +84,18 @@ private val SeasonLabels: List<StringResource> = listOf(
 fun YearDetailSheet(
     year: YearHistoryPR,
     workshops: ImmutableList<DastmozdInfoItemPR>,
+    wagesUnavailable: Boolean,
     onDismiss: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+
+    // Read once per year rather than per redraw: it decides one label and never changes under it.
+    val jalaliYear = remember(year.year) { year.year.toIntOrNull() }
+    val isLeapYear = remember(jalaliYear) {
+        jalaliYear?.let { PersianDateFormatter.isLeapYear(it) } == true
+    }
 
     /*
      * Closing runs the hide animation to its end and only then reports the dismissal.
@@ -110,6 +131,7 @@ fun YearDetailSheet(
                     label = stringResource(SeasonLabels[season]),
                     firstMonth = season * MONTHS_PER_SEASON,
                     monthDays = year.monthDays,
+                    isLeapYear = isLeapYear,
                 )
             }
 
@@ -121,8 +143,20 @@ fun YearDetailSheet(
             )
 
             if (workshops.isEmpty()) {
+                // Three different blanks, and only one of them means "no workshops": the wage call
+                // failing is not knowing, and a year before the service began is not knowable.
                 Text(
-                    text = stringResource(Res.string.history_combined_no_workshop),
+                    text = stringResource(
+                        when {
+                            wagesUnavailable ->
+                                Res.string.history_combined_workshops_unavailable
+
+                            jalaliYear != null && jalaliYear < FIRST_WAGE_YEAR ->
+                                Res.string.history_combined_wage_from_1386
+
+                            else -> Res.string.history_combined_no_workshop
+                        },
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted,
                 )
@@ -176,8 +210,12 @@ private fun SeasonBlock(
     label: String,
     firstMonth: Int,
     monthDays: ImmutableList<Int>,
+    isLeapYear: Boolean,
 ) {
     val colors = LocalTaminColors.current
+    // The previous app marked اسفند in a leap year the same way, and it is the one month whose
+    // length a reader cannot infer from the calendar in their head.
+    val esfandLabel = stringResource(Res.string.history_combined_month_esfand_leap)
 
     Column(
         modifier = Modifier
@@ -200,7 +238,11 @@ private fun SeasonBlock(
             for (offset in 0 until MONTHS_PER_SEASON) {
                 val month = firstMonth + offset
                 MonthCell(
-                    name = PersianDateFormatter.monthNames.getOrElse(month) { "" },
+                    name = if (month == ESFAND_INDEX && isLeapYear) {
+                        esfandLabel
+                    } else {
+                        PersianDateFormatter.monthNames.getOrElse(month) { "" }
+                    },
                     days = monthDays.getOrElse(month) { 0 },
                     modifier = Modifier.weight(1f),
                 )

@@ -190,7 +190,7 @@ object PersianDateFormatter {
      * separate cycle rule: two independent leap rules drift apart, and the one that disagreed put
      * a 30th of اسفند on the 1st of فروردین.
      */
-    private fun isLeapYear(jy: Int): Boolean =
+    fun isLeapYear(jy: Int): Boolean =
         dayNumber(jy + 1, 1, 1) - dayNumber(jy, 1, 1) == DAYS_IN_LEAP_YEAR
 
     /** Days elapsed since the Jalali epoch, the quantity [jalaliToGregorian] is built on. */

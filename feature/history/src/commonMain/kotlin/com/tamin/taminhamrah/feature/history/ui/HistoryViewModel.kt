@@ -9,11 +9,14 @@ import com.tamin.taminhamrah.feature.history.ui.model.canHaveInsuranceHistory
 import com.tamin.taminhamrah.feature.history.ui.model.careerTotal
 import com.tamin.taminhamrah.feature.history.ui.model.mergeByYear
 import com.tamin.taminhamrah.mapper.history.toPresentation
+import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
-import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
@@ -30,10 +33,20 @@ import taminx.feature.history.history_combined_wage_unavailable
 class HistoryViewModel(
     private val getTalfighInfosUseCase: GetTalfighInfosUseCase,
     private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase,
-    private val getUserInfosUseCase: GetUserInfosUseCase,
+    private val getUserRoleUseCase: GetUserRoleUseCase,
+    private val downloadHistoryReportUseCase: DownloadHistoryReportUseCase,
 ) : BaseViewModel<HistoryUiState, PartialState, HistoryEvent, HistoryIntent>(
     initialState = HistoryUiState()
 ) {
+
+    /**
+     * Whether a load is already running.
+     *
+     * Held here rather than read off `uiState`: `BaseViewModel` reduces partial states through a
+     * channel, so `isLoading` only becomes true a hop after it is emitted, and two quick taps on
+     * «تلاش دوباره» would both find it still false. This is set before the first suspension.
+     */
+    private var loadInFlight = false
 
     override fun handleIntent(intent: HistoryIntent): Flow<PartialState> = when (intent) {
         is HistoryIntent.Load -> load()
@@ -41,6 +54,24 @@ class HistoryViewModel(
         is HistoryIntent.SelectYear -> flow { emit(PartialState.YearSelected(intent.year)) }
 
         is HistoryIntent.DismissYearDetail -> flow { emit(PartialState.YearSelected(null)) }
+
+        is HistoryIntent.ShowReportMenu -> flow { emit(PartialState.ReportMenuVisible(true)) }
+
+        is HistoryIntent.DismissReportMenu -> flow { emit(PartialState.ReportMenuVisible(false)) }
+
+        is HistoryIntent.SelectReport -> flow {
+            emit(PartialState.ReportMenuVisible(false))
+            // The bytes of whatever was open before must not be handed to the next viewer.
+            emit(PartialState.ReportPdfChanged(null))
+            emit(PartialState.ReportSelected(intent.type))
+        }
+
+        is HistoryIntent.DownloadReport -> downloadReport()
+
+        is HistoryIntent.DismissReport -> flow {
+            emit(PartialState.ReportSelected(null))
+            emit(PartialState.ReportPdfChanged(null))
+        }
     }
 
     /**
@@ -52,19 +83,26 @@ class HistoryViewModel(
      * to carry over.
      */
     private fun load(): Flow<PartialState> = flow {
-        // BaseViewModel merges intents rather than switching between them, so a second tap on
-        // «تلاش دوباره» while the first is still in flight would run two loads at once and let the
-        // slower one write last. One at a time, and the retry button simply does nothing until the
-        // current attempt finishes.
-        if (uiState.value.isLoading) return@flow
+        if (loadInFlight) return@flow
+        loadInFlight = true
 
         // The list already on screen stays there while this runs, so a retry never blanks the page.
         emit(PartialState.Loading(true))
         try {
-            // Who this is, before asking for anything. A مستمری‌بگیر or a کارفرما has no insured
-            // years and both history endpoints answer 500 for them, so the previous app decided
-            // this up front rather than showing the server's error — and so does this one.
-            if (!getUserInfosUseCase().canHaveInsuranceHistory()) {
+            // Who this is, before asking for anything. A مستمری‌بگیر has no insured years and both
+            // history endpoints answer 500 for them, so the previous app decided this up front from
+            // `login-services/logininfo` rather than showing the server's error — and so does this.
+            //
+            // A failed role check is not a refusal: the gate only exists to explain the service, so
+            // an outage on it must not lock out someone who can use the page.
+            val role = try {
+                getUserRoleUseCase()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                UserRoleDN.UNKNOWN
+            }
+            if (!role.canHaveInsuranceHistory()) {
                 emit(PartialState.AccessDenied)
                 return@flow
             }
@@ -103,11 +141,34 @@ class HistoryViewModel(
                         careerTotal = history.careerTotal(),
                         wageByYear = wageRows?.list?.toPresentation()?.groupByYear()
                             ?: persistentMapOf(),
+                        wagesUnavailable = wageRows == null,
                     )
                 )
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
+        } finally {
+            loadInFlight = false
+        }
+    }
+
+    /**
+     * The bytes for the report the viewer is showing.
+     *
+     * Driven by the viewer rather than by the menu tap: `TaminPdfViewer` renders a copy already on
+     * the device without asking, so a report downloaded once is never fetched again.
+     */
+    private fun downloadReport(): Flow<PartialState> = flow {
+        val type = uiState.value.selectedReport ?: return@flow
+        try {
+            downloadHistoryReportUseCase(type).collect { pdf ->
+                emit(PartialState.ReportPdfChanged(pdf.toPresentation()))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // The viewer says so itself; a dialog on top of an open viewer would only bury it.
+            emit(PartialState.ReportDownloadFailed)
         }
     }
 
@@ -131,10 +192,23 @@ class HistoryViewModel(
             years = partialState.years,
             careerTotal = partialState.careerTotal,
             wageByYear = partialState.wageByYear,
+            wagesUnavailable = partialState.wagesUnavailable,
             error = null,
         )
 
         is PartialState.YearSelected -> currentState.copy(selectedYear = partialState.year)
+
+        is PartialState.ReportMenuVisible ->
+            currentState.copy(showReportMenu = partialState.visible)
+
+        is PartialState.ReportSelected -> currentState.copy(
+            selectedReport = partialState.type,
+            reportDownloadFailed = false,
+        )
+
+        is PartialState.ReportPdfChanged -> currentState.copy(reportPdf = partialState.pdf)
+
+        is PartialState.ReportDownloadFailed -> currentState.copy(reportDownloadFailed = true)
 
         is PartialState.AccessDenied ->
             currentState.copy(isLoading = false, accessDenied = true, error = null)

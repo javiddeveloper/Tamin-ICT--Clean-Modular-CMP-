@@ -35,5 +35,12 @@
     <string name="history_combined_season_winter">زمستان</string>
     <string name="history_combined_workshops">کارگاه‌ها</string>
     <string name="history_combined_wage_unavailable">اطلاعات کارگاه‌ها در دسترس نیست؛ سایر اطلاعات نمایش داده می‌شود.</string>
+    <string name="history_combined_total_days">کل روزهای سابقه</string>
+    <string name="history_combined_chart_title">نمودار سوابق به تفکیک سال</string>
+    <string name="history_combined_workshops_unavailable">دریافت اطلاعات کارگاه‌ها ناموفق بود؛ برای دیدن آن‌ها صفحه را دوباره بارگذاری کنید.</string>
+    <string name="history_combined_wage_from_1386">ریز دستمزد فقط از سال ۱۳۸۶ به بعد در دسترس است.</string>
+    <string name="history_combined_month_esfand_leap">اسفند (کبیسه)</string>
+    <string name="history_report_menu_title">دانلود فایل</string>
+    <string name="history_report_action">دانلود سوابق</string>
     <string name="history_combined_no_workshop">برای این سال اطلاعات کارگاهی ثبت نشده است.</string>
 </resources>

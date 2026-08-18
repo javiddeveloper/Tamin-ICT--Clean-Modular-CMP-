@@ -15,7 +15,9 @@ import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
+import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.model.history.WageDetailDN
+import com.tamin.taminhamrah.model.utils.ListData
 
 fun TalfighInfoItemDTO.toDomain(): TalfighInfoItemDN {
     return TalfighInfoItemDN(
@@ -84,6 +86,21 @@ fun DastmozdInfoDTO.toDomain(): DastmozdInfoDN {
         total = total
     )
 }
+
+/**
+ * The relation code `login-services/logininfo` answers with, read as a role.
+ *
+ * `"05"` in the first position is a مستمری‌بگیر — the previous app's own test, kept letter for
+ * letter because the code is the server's vocabulary, not ours. An absent list means the service
+ * has nothing on this person yet, which is [UserRoleDN.UNKNOWN] rather than a guess either way.
+ */
+fun ListData<String>.toUserRole(): UserRoleDN = when {
+    list == null -> UserRoleDN.UNKNOWN
+    list.firstOrNull() == PENSIONER_RELATION_CODE -> UserRoleDN.PENSIONER
+    else -> UserRoleDN.INSURED
+}
+
+private const val PENSIONER_RELATION_CODE = "05"
 
 fun UserInfoDTO.toDomain(): UserInfoDN {
     return UserInfoDN(

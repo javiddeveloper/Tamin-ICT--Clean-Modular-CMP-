@@ -39,6 +39,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import com.tamin.taminhamrah.model.history.UserRoleDN
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SendHistoryToInstitutionsViewModelTest {
@@ -244,6 +245,11 @@ class SendHistoryToInstitutionsViewModelTest {
             if (shouldThrowError) throw RuntimeException("network error")
             return userInfoResult
         }
+
+        override suspend fun getUserRole(): UserRoleDN = UserRoleDN.INSURED
+
+        override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> =
+            flow { TODO() }
 
         override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
             if (shouldThrowError) throw RuntimeException("send failed")

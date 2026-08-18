@@ -2,10 +2,15 @@ package com.tamin.taminhamrah.dataSource.historySource
 
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
 import com.tamin.taminhamrah.model.history.UserInfoDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.utils.ListData
+import io.ktor.client.call.body
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
@@ -46,6 +51,25 @@ internal class HistoryRemoteDataSourceImpl(
             apiServices.getUserInfos().extractData()
         }
 
+    override suspend fun getLoginInfo(): ListData<String> =
+        errorParser.safeCall(TAG_LOGIN_INFO) {
+            apiServices.getLoginInfo().extractData()
+        }
+
+    /**
+     * The path is chosen here rather than in the repository so the three report URLs stay in one
+     * table beside the interface that declares them.
+     */
+    override suspend fun downloadHistoryReport(type: HistoryCertificateType): PdfDownloadDTO =
+        errorParser.safeCall(TAG_DOWNLOAD_REPORT) {
+            val statement = when (type) {
+                HistoryCertificateType.ALL -> apiServices.downloadAllHistoryReport()
+                HistoryCertificateType.WAGES -> apiServices.downloadWageHistoryReport()
+                HistoryCertificateType.COMBINED -> apiServices.downloadCombinedHistoryReport()
+            }
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.body()))
+        }
+
     override suspend fun sendToInstitution(
         allHistorySelected: Boolean,
         historyAndWageSelected: Boolean,
@@ -65,6 +89,8 @@ internal class HistoryRemoteDataSourceImpl(
         const val TAG_DASTMOZD = "getDastmozdInfos"
         const val TAG_JOB_INFO = "getHistoryJobInfos"
         const val TAG_USER_INFO = "getUserInfos"
+        const val TAG_LOGIN_INFO = "getLoginInfo"
         const val TAG_SEND_TO_INSTITUTION = "sendToInstitution"
+        const val TAG_DOWNLOAD_REPORT = "downloadHistoryReport"
     }
 }
