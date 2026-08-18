@@ -20,8 +20,8 @@ fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
         branchCode = branchCode ?: "",
         insuranceNumber = insuranceNumber ?: "",
-        pensionerRisUid = pensionerRisUid ?: "",
-        pensionerType = pensionerType ?: "",
+        pensionerRisUid = pensionNumber(),
+        pensionerType = pensionerTypeLabel(),
         paymentDate = paymentDate ?: "",
         pensionerBaseDate = pensionerBaseDate ?: "",
         fullName = fullName ?: "نامشخص",
@@ -32,6 +32,17 @@ fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
         nationalId = nationalId ?: "",
         paymentAmount = paymentAmount?.toString() ?: "0"
     )
+}
+
+private fun PensionInquiryDN.pensionNumber(): String =
+    pensionerId?.takeIf { it.isNotBlank() } ?: pensionerRisUid.orEmpty()
+
+private fun PensionInquiryDN.pensionerTypeLabel(): String {
+    pensionerTypeDesc?.takeIf { it.isNotBlank() }?.let { return it }
+    return when (pensionerType) {
+        "101" -> "بازنشستگی"
+        else -> pensionerType.orEmpty()
+    }
 }
 
 fun AuthenticationTicketDN.toPresentation(): AuthenticationTicketPR {

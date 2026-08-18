@@ -30,7 +30,58 @@ class PensionInquiryMapperTest {
         assertEquals("1500", pr.paymentAmount)
         assertEquals("BR01", pr.branchCode)
         assertEquals("INS123", pr.insuranceNumber)
+        assertEquals("RIS999", pr.pensionerRisUid)
+        assertEquals("TYPE_A", pr.pensionerType)
         assertEquals("Active", pr.statusDesc)
+    }
+
+    @Test
+    fun `toPresentation prefers pensionerId and type description`() {
+        val dn = PensionInquiryDN(
+            fullName = "Test",
+            paymentAmount = null,
+            branchCode = null,
+            insuranceNumber = "0043007196",
+            pensionerRisUid = "0043007196",
+            pensionerType = "101",
+            paymentDate = null,
+            pensionerBaseDate = null,
+            statusDesc = null,
+            sexDesc = null,
+            branchName = null,
+            pensionEndDate = null,
+            nationalId = "6319889391",
+            pensionerId = "1003406938",
+            pensionerTypeDesc = "بازنشستگی",
+        )
+
+        val pr = dn.toPresentation()
+
+        assertEquals("1003406938", pr.pensionerRisUid)
+        assertEquals("بازنشستگی", pr.pensionerType)
+    }
+
+    @Test
+    fun `toPresentation maps known pensioner type code when description is missing`() {
+        val dn = PensionInquiryDN(
+            fullName = null,
+            paymentAmount = null,
+            branchCode = null,
+            insuranceNumber = null,
+            pensionerRisUid = null,
+            pensionerType = "101",
+            paymentDate = null,
+            pensionerBaseDate = null,
+            statusDesc = null,
+            sexDesc = null,
+            branchName = null,
+            pensionEndDate = null,
+            nationalId = null,
+        )
+
+        val pr = dn.toPresentation()
+
+        assertEquals("بازنشستگی", pr.pensionerType)
     }
 
     @Test
