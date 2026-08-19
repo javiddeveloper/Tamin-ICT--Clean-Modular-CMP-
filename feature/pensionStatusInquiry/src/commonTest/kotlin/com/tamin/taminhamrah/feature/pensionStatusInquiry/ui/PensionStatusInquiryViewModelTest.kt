@@ -197,6 +197,7 @@ private fun PensionInquiryDN.toPresentationItem() = PensionInquiryPR(
     pensionerBaseDate = pensionerBaseDate.orEmpty(),
     fullName = fullName.orEmpty(),
     statusDesc = statusDesc.orEmpty(),
+    isActive = statusDesc == "01",
     sexDesc = sexDesc.orEmpty(),
     branchName = branchName.orEmpty(),
     pensionEndDate = pensionEndDate.orEmpty(),

@@ -714,6 +714,8 @@
     <string name="pension_status_order_type">نوع حکم</string>
     <string name="pension_status_org_unit">واحد سازمانی: %1$s</string>
     <string name="pension_status_active_header">مستمری بگیر فعال هستید</string>
+    <string name="pension_status_inactive_header">مستمری بگیر نیستید</string>
+    <string name="pension_status_inactive_badge">تأیید نشده</string>
     <string name="pension_status_empty_title">موردی یافت نشد</string>
     <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
     <string name="pension_status_send_success_title">ارسال گواهی</string>

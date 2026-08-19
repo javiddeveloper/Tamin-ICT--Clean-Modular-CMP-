@@ -33,6 +33,49 @@ class PensionInquiryMapperTest {
         assertEquals("RIS999", pr.pensionerRisUid)
         assertEquals("TYPE_A", pr.pensionerType)
         assertEquals("Active", pr.statusDesc)
+        assertEquals(false, pr.isActive)
+    }
+
+    @Test
+    fun `toPresentation marks statusDesc 01 as active pensioner`() {
+        val dn = PensionInquiryDN(
+            fullName = "John Doe",
+            paymentAmount = 1500,
+            branchCode = "BR01",
+            insuranceNumber = "INS123",
+            pensionerRisUid = "RIS999",
+            pensionerType = "TYPE_A",
+            paymentDate = "2023-05-10",
+            pensionerBaseDate = "2020-01-01",
+            statusDesc = "01",
+            sexDesc = "Male",
+            branchName = "Central Branch",
+            pensionEndDate = "2030-01-01",
+            nationalId = "0012345678",
+        )
+
+        assertEquals(true, dn.toPresentation().isActive)
+    }
+
+    @Test
+    fun `toPresentation marks non-01 statusDesc as inactive pensioner`() {
+        val dn = PensionInquiryDN(
+            fullName = "John Doe",
+            paymentAmount = 1500,
+            branchCode = "BR01",
+            insuranceNumber = "INS123",
+            pensionerRisUid = "RIS999",
+            pensionerType = "TYPE_A",
+            paymentDate = "2023-05-10",
+            pensionerBaseDate = "2020-01-01",
+            statusDesc = "02",
+            sexDesc = "Male",
+            branchName = "Central Branch",
+            pensionEndDate = "2030-01-01",
+            nationalId = "0012345678",
+        )
+
+        assertEquals(false, dn.toPresentation().isActive)
     }
 
     @Test

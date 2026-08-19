@@ -16,6 +16,8 @@ import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
 import com.tamin.taminhamrah.model.pension.retirement.*
 
+private const val ACTIVE_PENSIONER_STATUS_CODE = "01"
+
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
         branchCode = branchCode ?: "",
@@ -26,6 +28,7 @@ fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
         pensionerBaseDate = pensionerBaseDate ?: "",
         fullName = fullName ?: "نامشخص",
         statusDesc = statusDesc ?: "نامشخص",
+        isActive = statusDesc == ACTIVE_PENSIONER_STATUS_CODE,
         sexDesc = sexDesc ?: "نامشخص",
         branchName = branchName ?: "",
         pensionEndDate = pensionEndDate ?: "",

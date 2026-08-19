@@ -49,8 +49,11 @@ import taminx.core.core_ui.active_relation_send_certificate
 import taminx.core.core_ui.active_relation_verified_badge
 import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_user
 import taminx.core.core_ui.pension_status_active_header
+import taminx.core.core_ui.pension_status_inactive_badge
+import taminx.core.core_ui.pension_status_inactive_header
 import taminx.core.core_ui.pension_status_establishment_date
 import taminx.core.core_ui.pension_status_insurance_number
 import taminx.core.core_ui.pension_status_main_insured_number
@@ -76,7 +79,7 @@ internal fun PensionStatusCard(
         border = BorderStroke(Thickness.border, colors.border),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            StatusHeader()
+            StatusHeader(isActive = item.isActive)
             TaminDivider()
 
             Column(
@@ -143,12 +146,13 @@ internal fun PensionStatusCard(
 }
 
 @Composable
-private fun StatusHeader() {
+private fun StatusHeader(isActive: Boolean) {
     val colors = LocalTaminColors.current
+    val headerColor = if (isActive) colors.springGreenText else colors.dangerText
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.greenBg)
+            .background(if (isActive) colors.greenBg else colors.dangerBorder.copy(alpha = 0.12f))
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -160,42 +164,52 @@ private fun StatusHeader() {
             Box(
                 modifier = Modifier
                     .size(Spacing.sm)
-                    .background(colors.springGreenText, CircleShape),
+                    .background(headerColor, CircleShape),
             )
             Text(
-                text = stringResource(Res.string.pension_status_active_header),
+                text = stringResource(
+                    if (isActive) Res.string.pension_status_active_header
+                    else Res.string.pension_status_inactive_header,
+                ),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = colors.springGreenText,
+                color = headerColor,
             )
         }
-        OrganizationBadge()
+        OrganizationBadge(isActive = isActive)
     }
 }
 
 @Composable
-private fun OrganizationBadge() {
+private fun OrganizationBadge(isActive: Boolean) {
     val colors = LocalTaminColors.current
+    val accent = if (isActive) colors.springGreenText else colors.dangerText
+    val border = if (isActive) colors.greenBorder else colors.dangerBorder
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(CornerRadius.max))
             .background(colors.bgSurface)
-            .border(Thickness.border, colors.greenBorder, RoundedCornerShape(CornerRadius.max))
+            .border(Thickness.border, border, RoundedCornerShape(CornerRadius.max))
             .padding(horizontal = Spacing.md, vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_check),
+            imageVector = vectorResource(
+                if (isActive) Res.drawable.ic_tamin_check else Res.drawable.ic_tamin_cross,
+            ),
             contentDescription = null,
-            tint = colors.springGreenText,
+            tint = accent,
             modifier = Modifier.size(IconSize.small),
         )
         Text(
-            text = stringResource(Res.string.active_relation_verified_badge),
+            text = stringResource(
+                if (isActive) Res.string.active_relation_verified_badge
+                else Res.string.pension_status_inactive_badge,
+            ),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = colors.springGreenText,
+            color = accent,
         )
     }
 }
@@ -355,7 +369,36 @@ private fun PreviewPensionStatusCard() {
                 paymentDate = "14050530",
                 pensionerBaseDate = "13881201",
                 fullName = "سیدرحمت اله میرفضلی",
-                statusDesc = "مستمری‌بگیر فعال سازمان",
+                statusDesc = "01",
+                isActive = true,
+                sexDesc = "",
+                branchName = "یک کرج",
+                pensionEndDate = "",
+                nationalId = "6319889391",
+                paymentAmount = "0",
+            ),
+            isSendingCertificate = false,
+            onSendCertificateClicked = {},
+            modifier = Modifier.padding(Spacing.lg),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewPensionStatusCardInactive() {
+    PreviewRtlThemeContent {
+        PensionStatusCard(
+            item = PensionInquiryPR(
+                branchCode = "5750",
+                insuranceNumber = "0043007196",
+                pensionerRisUid = "1003406938",
+                pensionerType = "بازنشستگی",
+                paymentDate = "14050530",
+                pensionerBaseDate = "13881201",
+                fullName = "سیدرحمت اله میرفضلی",
+                statusDesc = "02",
+                isActive = false,
                 sexDesc = "",
                 branchName = "یک کرج",
                 pensionEndDate = "",
