@@ -43,18 +43,18 @@ class CalculateWagePensionUseCaseTest {
     }
 
     @Test
-    fun `skips first wage history row`() {
-        val skipped = yearItem(wage = "999999")
-        val counted = yearItem(wage = "1000")
+    fun `includes oldest wage history year in two-year average`() {
+        val oldest = yearItem(wage = "2000")
+        val newest = yearItem(wage = "1000")
         val result = useCase(
             talfigh = talfigh(sumHistoryYears = 3650, historyYears = 10),
             dastmozd = DastmozdInfoDN(
-                list = listOf(skipped, counted),
+                list = listOf(oldest, newest),
                 total = 2
             )
         )
 
-        assertEquals(500L, result.averageSalaryLastTwoYears)
+        assertEquals(1500L, result.averageSalaryLastTwoYears)
     }
 
     @Test
@@ -91,8 +91,8 @@ class CalculateWagePensionUseCaseTest {
     )
 
     private fun dastmozdWithTwoFullYears(wage: String) = DastmozdInfoDN(
-        list = listOf(yearItem(wage = "0"), yearItem(wage = wage), yearItem(wage = wage)),
-        total = 3
+        list = listOf(yearItem(wage = wage), yearItem(wage = wage)),
+        total = 2
     )
 
     private fun yearItem(wage: String) = DastmozdInfoItemDN(

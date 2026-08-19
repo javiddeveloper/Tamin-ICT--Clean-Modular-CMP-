@@ -52,7 +52,7 @@ class CalculateWagePensionUseCase {
         val listDays = ArrayList<String>()
         val listWages = ArrayList<String>()
 
-        for (i in list.lastIndex downTo 1) {
+        for (i in list.lastIndex downTo 0) {
             for (detail in list[i].wageDetails.asReversed()) {
                 val month = detail.month
                 val wage = detail.wage
