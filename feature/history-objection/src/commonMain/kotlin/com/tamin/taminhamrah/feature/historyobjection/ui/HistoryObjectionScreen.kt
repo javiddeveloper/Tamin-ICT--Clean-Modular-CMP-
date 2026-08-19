@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,6 +49,8 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
@@ -61,11 +64,14 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.history_objection_active_request_message
+import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
 import taminx.core.core_ui.history_objection_empty_subtitle
 import taminx.core.core_ui.history_objection_empty_title
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.send_history_access_denied_action
 import taminx.feature.history_objection.generated.resources.ic_history_objection
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
 
@@ -93,6 +99,33 @@ fun HistoryObjectionScreen(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::sendIntent,
         onNavigateBack = onNavigateBack,
+    )
+
+    if (uiState.showActiveRequestDialog) {
+        ActiveRequestDialog(
+            onDismiss = {
+                viewModel.sendIntent(HistoryObjectionIntent.OnActiveRequestDialogDismissed)
+                onNavigateBack()
+            },
+        )
+    }
+}
+
+@Composable
+private fun ActiveRequestDialog(onDismiss: () -> Unit) {
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.history_objection_active_request_title),
+        description = stringResource(Res.string.history_objection_active_request_message),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.send_history_access_denied_action),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onDismiss,
+        icon = Icons.Default.Info,
     )
 }
 

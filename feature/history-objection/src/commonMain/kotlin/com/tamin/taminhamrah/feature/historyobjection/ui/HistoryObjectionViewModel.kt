@@ -26,16 +26,22 @@ class HistoryObjectionViewModel(
         HistoryObjectionIntent.Load -> checkStatusNotExist()
 
         HistoryObjectionIntent.OnAddNewObjectionClicked -> {
-            sendEvent(HistoryObjectionEvent.NavigateToAddNewObjection)
+            if (!uiState.value.hasActiveRequest) {
+                sendEvent(HistoryObjectionEvent.NavigateToAddNewObjection)
+            }
             emptyFlow()
+        }
+
+        HistoryObjectionIntent.OnActiveRequestDialogDismissed -> flow {
+            emit(PartialState.ActiveRequestDialogDismissed)
         }
     }
 
     private fun checkStatusNotExist(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
-            val isStatusNotExist = checkHistoryObjectionStatusNotExistUseCase().first()
-            emit(PartialState.StatusChecked(isStatusNotExist))
+            val hasActiveRequest = checkHistoryObjectionStatusNotExistUseCase().first()
+            emit(PartialState.StatusChecked(hasActiveRequest))
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -48,9 +54,11 @@ class HistoryObjectionViewModel(
     ): HistoryObjectionUiState = when (partialState) {
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.StatusChecked -> currentState.copy(
-            isStatusNotExist = partialState.isStatusNotExist,
+            hasActiveRequest = partialState.hasActiveRequest,
+            showActiveRequestDialog = partialState.hasActiveRequest,
             error = null,
         )
+        PartialState.ActiveRequestDialogDismissed -> currentState.copy(showActiveRequestDialog = false)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
     }
 

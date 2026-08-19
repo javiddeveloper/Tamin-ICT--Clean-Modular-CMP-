@@ -766,5 +766,7 @@
     <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>
     <string name="history_objection_empty_subtitle">اگر بازه‌ای از کارکرد شما در «کلیهٔ سوابق» دیده نمی‌شود، همین‌جا آن را اعلام کنید.</string>
     <string name="history_objection_add_new">ثبت سابقهٔ ناموجود جدید</string>
+    <string name="history_objection_active_request_title">درخواست در حال بررسی</string>
+    <string name="history_objection_active_request_message">کاربر گرامی، در حال حاضر دارای یک درخواست در حال بررسی می‌باشید و امکان ثبت مجدد درخواست وجود ندارد.</string>
 
 </resources>
