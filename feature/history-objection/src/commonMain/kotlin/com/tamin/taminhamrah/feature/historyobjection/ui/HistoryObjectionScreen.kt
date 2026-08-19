@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,20 +44,32 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionEvent
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionIntent
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState
+import com.tamin.taminhamrah.model.historyObjection.NotExistRequestPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.LabeledBlock
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.dashedOutline
+import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -67,10 +80,21 @@ import taminx.core.core_ui.action_back
 import taminx.core.core_ui.history_objection_active_request_message
 import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
+import taminx.core.core_ui.history_objection_delete
+import taminx.core.core_ui.history_objection_edit
 import taminx.core.core_ui.history_objection_empty_subtitle
 import taminx.core.core_ui.history_objection_empty_title
+import taminx.core.core_ui.history_objection_end_date
+import taminx.core.core_ui.history_objection_insurance_number
+import taminx.core.core_ui.history_objection_list_title
+import taminx.core.core_ui.history_objection_start_date
+import taminx.core.core_ui.history_objection_status_not_sent
 import taminx.core.core_ui.history_objection_title
+import taminx.core.core_ui.history_objection_workshop_code
+import taminx.core.core_ui.history_objection_workshop_name
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_copy
+import taminx.core.core_ui.ic_trash
 import taminx.core.core_ui.send_history_access_denied_action
 import taminx.feature.history_objection.generated.resources.ic_history_objection
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
@@ -79,6 +103,7 @@ private val EmptyStateIconSize = 64.dp
 private val AddButtonHeight = 50.dp
 private val AddButtonIconSize = 17.dp
 private val AddButtonBorderColor = Color(0xFFB9CBEF)
+private val WorkshopCodeIconSize = 14.dp
 
 @Composable
 fun HistoryObjectionScreen(
@@ -138,6 +163,9 @@ private fun HandleHistoryObjectionEvents(
     events.collectWithLifecycleAware { event ->
         when (event) {
             HistoryObjectionEvent.NavigateToAddNewObjection -> {}
+            // Skeleton only — no edit/delete endpoint exists yet (docs/vault/History-Objection.md).
+            is HistoryObjectionEvent.NavigateToEditNotExistRequest -> {}
+            is HistoryObjectionEvent.ConfirmDeleteNotExistRequest -> {}
         }
     }
 }
@@ -199,29 +227,191 @@ private fun HistoryObjectionContent(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            IconBox(
-                painter = painterResource(FeatureRes.drawable.ic_history_objection),
-                backgroundColor = colors.chipBg,
-                cornerRadius = CornerRadius.card,
-                size = EmptyStateIconSize,
-            )
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            Text(
-                text = stringResource(Res.string.history_objection_empty_title),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.textPrimary,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                text = stringResource(Res.string.history_objection_empty_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textMuted,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(Spacing.xl))
+            if (state.notExistRequests.isEmpty()) {
+                IconBox(
+                    painter = painterResource(FeatureRes.drawable.ic_history_objection),
+                    backgroundColor = colors.chipBg,
+                    cornerRadius = CornerRadius.card,
+                    size = EmptyStateIconSize,
+                )
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                Text(
+                    text = stringResource(Res.string.history_objection_empty_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.textPrimary,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                Text(
+                    text = stringResource(Res.string.history_objection_empty_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textMuted,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(Spacing.xl))
+            } else {
+                SectionLabel(
+                    text = stringResource(Res.string.history_objection_list_title),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                state.notExistRequests.forEach { request ->
+                    NotExistRequestCard(
+                        request = request,
+                        onEditClick = {
+                            onIntent(HistoryObjectionIntent.OnEditNotExistRequestClicked(request.requestNumber))
+                        },
+                        onDeleteClick = {
+                            onIntent(HistoryObjectionIntent.OnDeleteNotExistRequestClicked(request.requestNumber))
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.md))
+                }
+                Spacer(modifier = Modifier.height(Spacing.sm))
+            }
             AddNewObjectionButton(
                 onClick = { onIntent(HistoryObjectionIntent.OnAddNewObjectionClicked) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun NotExistRequestCard(
+    request: NotExistRequestPR,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface()
+            .padding(Spacing.lg),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            Column {
+                Text(
+                    text = request.branchName,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.textPrimary,
+                )
+                Spacer(modifier = Modifier.height(Spacing.xxs))
+                Text(
+                    text = request.insuranceTypeDesc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textMuted,
+                )
+            }
+            // Fixed by design for now — not derived from `confirmed`, see docs/vault/History-Objection.md.
+            StatusPill(
+                text = stringResource(Res.string.history_objection_status_not_sent),
+                containerColor = colors.orangeBg,
+                contentColor = colors.orangeText,
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.md))
+        TaminDivider()
+        Spacer(modifier = Modifier.height(Spacing.md))
+        val workshopCode = request.workshopCode
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            if (workshopCode != null) {
+                WorkshopCodeBlock(
+                    label = stringResource(Res.string.history_objection_workshop_code),
+                    code = workshopCode,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.width(Spacing.md))
+            }
+            LabeledBlock(
+                label = stringResource(Res.string.history_objection_workshop_name),
+                value = request.workshopName,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.md))
+        LabeledBlock(
+            label = stringResource(Res.string.history_objection_insurance_number),
+            value = request.insuranceNumber,
+        )
+        Spacer(modifier = Modifier.height(Spacing.md))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            LabeledBlock(
+                label = stringResource(Res.string.history_objection_start_date),
+                value = request.startDateLabel,
+                modifier = Modifier.weight(1f),
+            )
+            LabeledBlock(
+                label = stringResource(Res.string.history_objection_end_date),
+                value = request.endDateLabel,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.lg))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.history_objection_delete),
+                onClick = onDeleteClick,
+                icon = vectorResource(Res.drawable.ic_trash),
+                modifier = Modifier.weight(1f),
+                containerColor = colors.dangerBg,
+                contentColor = colors.dangerText,
+                borderColor = colors.dangerBorder,
+            )
+            TaminOutlinedButton(
+                text = stringResource(Res.string.history_objection_edit),
+                onClick = onEditClick,
+                icon = Icons.Default.Edit,
+                modifier = Modifier.weight(1f),
+                containerColor = colors.blueBg,
+                contentColor = colors.blueText,
+                borderColor = Color.Transparent,
+            )
+        }
+    }
+}
+
+/** The workshop code: a label above a dashed-outline chip that copies its value on tap. */
+@Composable
+private fun WorkshopCodeBlock(
+    label: String,
+    code: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val copy = rememberCopyAction(code)
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
+        Text(text = label, style = MaterialTheme.typography.labelMedium, color = colors.textMuted)
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(CornerRadius.chip))
+                .background(colors.blueBg)
+                .dashedOutline(colors.blueText, CornerRadius.chip, Thickness.medium)
+                .clickable(onClick = copy)
+                .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_copy),
+                contentDescription = null,
+                tint = colors.blueText,
+                modifier = Modifier.size(WorkshopCodeIconSize),
+            )
+            NumericText(
+                text = code,
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.blueText,
             )
         }
     }
@@ -281,6 +471,32 @@ private fun HistoryObjectionScreenPreview() {
     PreviewRtlThemeContent {
         HistoryObjectionContent(
             state = HistoryObjectionUiState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            onIntent = {},
+            onNavigateBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun HistoryObjectionScreenWithListPreview() {
+    PreviewRtlThemeContent {
+        HistoryObjectionContent(
+            state = HistoryObjectionUiState(
+                notExistRequests = persistentListOf(
+                    NotExistRequestPR(
+                        requestNumber = "1837710",
+                        branchName = "هفت مشهد، توس",
+                        insuranceTypeDesc = "بیمهٔ اجباری (کارگری)",
+                        workshopName = "111",
+                        insuranceNumber = "0081631829",
+                        workshopCode = "1111111111",
+                        startDateLabel = "۱۳۹۴/۰۵/۲۸",
+                        endDateLabel = "۱۴۰۰/۰۵/۲۸",
+                    ),
+                ),
+            ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = {},
             onNavigateBack = {},

@@ -124,6 +124,7 @@ import com.tamin.taminhamrah.useCases.health.SyncIllnessSelfDeclarativesUseCase
 import com.tamin.taminhamrah.useCases.health.SyncDrugAllergiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetActFrequenciesUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
@@ -228,6 +229,7 @@ val domainModule = module {
     factoryOf(::GetShowRequestInfoUseCase)
     factoryOf(::DownloadUserRequestDocumentUseCase)
     factoryOf(::CheckHistoryObjectionStatusNotExistUseCase)
+    factoryOf(::GetHistoryObjectionNotExistRequestsUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)

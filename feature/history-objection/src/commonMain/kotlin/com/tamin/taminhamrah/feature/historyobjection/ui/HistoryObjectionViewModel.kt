@@ -5,15 +5,21 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjecti
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionIntent
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState.PartialState
+import com.tamin.taminhamrah.mapper.historyObjection.toPresentation
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 
 class HistoryObjectionViewModel(
     private val checkHistoryObjectionStatusNotExistUseCase: CheckHistoryObjectionStatusNotExistUseCase,
+    private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
 ) : BaseViewModel<HistoryObjectionUiState, PartialState, HistoryObjectionEvent, HistoryObjectionIntent>(
     initialState = HistoryObjectionUiState()
 ) {
@@ -23,7 +29,7 @@ class HistoryObjectionViewModel(
     }
 
     override fun handleIntent(intent: HistoryObjectionIntent): Flow<PartialState> = when (intent) {
-        HistoryObjectionIntent.Load -> checkStatusNotExist()
+        HistoryObjectionIntent.Load -> loadHistoryObjectionData()
 
         HistoryObjectionIntent.OnAddNewObjectionClicked -> {
             if (!uiState.value.hasActiveRequest) {
@@ -35,17 +41,40 @@ class HistoryObjectionViewModel(
         HistoryObjectionIntent.OnActiveRequestDialogDismissed -> flow {
             emit(PartialState.ActiveRequestDialogDismissed)
         }
+
+        is HistoryObjectionIntent.OnEditNotExistRequestClicked -> {
+            sendEvent(HistoryObjectionEvent.NavigateToEditNotExistRequest(intent.requestNumber))
+            emptyFlow()
+        }
+
+        is HistoryObjectionIntent.OnDeleteNotExistRequestClicked -> {
+            sendEvent(HistoryObjectionEvent.ConfirmDeleteNotExistRequest(intent.requestNumber))
+            emptyFlow()
+        }
+    }
+
+    private fun loadHistoryObjectionData(): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        emitAll(merge(checkStatusNotExist(), loadNotExistRequests()))
+        emit(PartialState.Loading(false))
     }
 
     private fun checkStatusNotExist(): Flow<PartialState> = flow {
-        emit(PartialState.Loading(true))
         try {
             val hasActiveRequest = checkHistoryObjectionStatusNotExistUseCase().first()
             emit(PartialState.StatusChecked(hasActiveRequest))
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
-        emit(PartialState.Loading(false))
+    }
+
+    private fun loadNotExistRequests(): Flow<PartialState> = flow {
+        try {
+            val requests = getHistoryObjectionNotExistRequestsUseCase().first().toPresentation()
+            emit(PartialState.RequestsLoaded(requests.toPersistentList()))
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        }
     }
 
     override fun reduceState(
@@ -58,12 +87,13 @@ class HistoryObjectionViewModel(
             showActiveRequestDialog = partialState.hasActiveRequest,
             error = null,
         )
+        is PartialState.RequestsLoaded -> currentState.copy(
+            notExistRequests = partialState.requests,
+            error = null,
+        )
         PartialState.ActiveRequestDialogDismissed -> currentState.copy(showActiveRequestDialog = false)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
-
-
-

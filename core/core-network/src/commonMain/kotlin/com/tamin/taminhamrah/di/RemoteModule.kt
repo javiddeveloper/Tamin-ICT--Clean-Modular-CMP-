@@ -132,6 +132,7 @@ val remoteModule = module {
     single<HistoryObjectionRemoteDataSource> {
         HistoryObjectionRemoteDataSourceImpl(
             historyObjectionApiService = get(),
+            apiQueryBuilder = get(),
             errorParser = get()
         )
     }
