@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.feature.security.di.securityModule
 import com.tamin.taminhamrah.feature.settings.di.settingsModule
 import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.feature.userRequest.di.userRequestModule
+import com.tamin.taminhamrah.feature.historyobjection.di.historyObjectionModule
 import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -55,6 +56,7 @@ val sharedModules: List<Module>
         settingsModule,
         userRequestModule,
         orotezProtezModule,
+        historyObjectionModule,
     )
 
 
