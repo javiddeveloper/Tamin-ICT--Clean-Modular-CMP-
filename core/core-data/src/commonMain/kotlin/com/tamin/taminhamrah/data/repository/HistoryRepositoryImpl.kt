@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.repository
 
+import com.tamin.taminhamrah.data.local.dao.HistoryCacheDao
 import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
@@ -41,27 +42,76 @@ private const val MAX_HISTORY_LIMIT = 500
 
 class HistoryRepositoryImpl(
     private val remoteDataSource: HistoryRemoteDataSource,
-    private val historyJobInfoDao: HistoryJobInfoDao
+    private val historyJobInfoDao: HistoryJobInfoDao,
+    private val historyCacheDao: HistoryCacheDao,
 ) : HistoryRepository {
+    /**
+     * The years, from the service when it answers and from the last successful load when it does
+     * not.
+     *
+     * Offline-first the way the rest of the app is: a fresh response is written through and becomes
+     * the cache, and a failed call falls back to what was cached rather than emptying the screen.
+     * The failure is only raised when there is nothing cached to show — at that point the person
+     * genuinely has nothing, and silence would be a lie.
+     */
     override suspend fun getTalfighInfos(
         filters: List<ApiFilterDN>
     ): TalfighInfoDN {
-        val first = remoteDataSource.getTalfighInfos(query(filters, UNPAGED_HISTORY_LIMIT))
-        val wider = widerLimitFor(first.total, first.list?.size)
-            ?: return first.toDomain()
-        val second = remoteDataSource.getTalfighInfos(query(filters, wider))
-        return preferLonger(first, second, { it.list?.size }) { it.toDomain() }
+        val remote = try {
+            val first = remoteDataSource.getTalfighInfos(query(filters, UNPAGED_HISTORY_LIMIT))
+            val wider = widerLimitFor(first.total, first.list?.size)
+            if (wider == null) {
+                first
+            } else {
+                val second = remoteDataSource.getTalfighInfos(query(filters, wider))
+                preferLonger(first, second) { it.list?.size }
+            }
+        } catch (e: Exception) {
+            return cachedTalfigh() ?: throw e
+        }
+
+        // Written through only when the service actually returned rows: an empty answer is not a
+        // reason to throw away a career the cache still holds.
+        val domain = remote.toDomain()
+        domain.list?.takeIf { it.isNotEmpty() }?.let { rows ->
+            historyCacheDao.replaceYears(rows.mapIndexed { index, row -> row.toEntity(index) })
+        }
+        return domain
     }
 
+    private suspend fun cachedTalfigh(): TalfighInfoDN? =
+        historyCacheDao.observeYears().firstOrNull()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { rows -> TalfighInfoDN(list = rows.map { it.toDomain() }, total = rows.size) }
+
+    /** The employers and their wages, cached and recovered exactly as the years are. */
     override suspend fun getDastmozdInfos(
         filters: List<ApiFilterDN>
     ): DastmozdInfoDN {
-        val first = remoteDataSource.getDastmozdInfos(query(filters, UNPAGED_HISTORY_LIMIT))
-        val wider = widerLimitFor(first.total, first.list?.size)
-            ?: return first.toDomain()
-        val second = remoteDataSource.getDastmozdInfos(query(filters, wider))
-        return preferLonger(first, second, { it.list?.size }) { it.toDomain() }
+        val remote = try {
+            val first = remoteDataSource.getDastmozdInfos(query(filters, UNPAGED_HISTORY_LIMIT))
+            val wider = widerLimitFor(first.total, first.list?.size)
+            if (wider == null) {
+                first
+            } else {
+                val second = remoteDataSource.getDastmozdInfos(query(filters, wider))
+                preferLonger(first, second) { it.list?.size }
+            }
+        } catch (e: Exception) {
+            return cachedDastmozd() ?: throw e
+        }
+
+        val domain = remote.toDomain()
+        domain.list?.takeIf { it.isNotEmpty() }?.let { rows ->
+            historyCacheDao.replaceWageRows(rows.mapIndexed { index, row -> row.toEntity(index) })
+        }
+        return domain
     }
+
+    private suspend fun cachedDastmozd(): DastmozdInfoDN? =
+        historyCacheDao.observeWageRows().firstOrNull()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { rows -> DastmozdInfoDN(list = rows.map { it.toDomain() }, total = rows.size) }
 
     private fun query(filters: List<ApiFilterDN>, limit: Int) =
         ApiQueryParamDN(filters = filters, limit = limit)
@@ -74,12 +124,8 @@ class HistoryRepositoryImpl(
      * response was the good one and is what the screen gets. Losing a person's history to a
      * speculative retry is far worse than missing the overflow it was meant to recover.
      */
-    private inline fun <DTO, DN> preferLonger(
-        first: DTO,
-        second: DTO,
-        size: (DTO) -> Int?,
-        toDomain: (DTO) -> DN,
-    ): DN = toDomain(if ((size(second) ?: 0) >= (size(first) ?: 0)) second else first)
+    private inline fun <T> preferLonger(first: T, second: T, size: (T) -> Int?): T =
+        if ((size(second) ?: 0) >= (size(first) ?: 0)) second else first
 
     /**
      * The limit to ask again with, or null when the first response already held everything.

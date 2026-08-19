@@ -30,7 +30,7 @@ class HistoryRepositoryImplReportTest {
     @BeforeTest
     fun setup() {
         remoteDataSource = FakeHistoryRemoteDataSource()
-        repository = HistoryRepositoryImpl(remoteDataSource, FakeHistoryJobInfoDao())
+        repository = HistoryRepositoryImpl(remoteDataSource, FakeHistoryJobInfoDao(), InMemoryHistoryCacheDao())
     }
 
     // ── getUserInfos ──────────────────────────────────────────────────────────
