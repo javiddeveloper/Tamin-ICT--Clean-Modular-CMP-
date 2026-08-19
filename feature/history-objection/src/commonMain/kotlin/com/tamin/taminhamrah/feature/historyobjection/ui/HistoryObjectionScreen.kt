@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -49,9 +50,9 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.IconBox
-import com.tamin.taminhamrah.ui.components.LabeledBlock
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -104,6 +105,7 @@ private val AddButtonHeight = 50.dp
 private val AddButtonIconSize = 17.dp
 private val AddButtonBorderColor = Color(0xFFB9CBEF)
 private val WorkshopCodeIconSize = 14.dp
+private const val WorkshopCodeOutlineAlpha = 0.2f
 
 @Composable
 fun HistoryObjectionScreen(
@@ -318,42 +320,43 @@ private fun NotExistRequestCard(
         }
         Spacer(modifier = Modifier.height(Spacing.md))
         TaminDivider()
-        Spacer(modifier = Modifier.height(Spacing.md))
         val workshopCode = request.workshopCode
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            if (workshopCode != null) {
-                WorkshopCodeBlock(
-                    label = stringResource(Res.string.history_objection_workshop_code),
-                    code = workshopCode,
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(modifier = Modifier.width(Spacing.md))
-            }
-            LabeledBlock(
-                label = stringResource(Res.string.history_objection_workshop_name),
-                value = request.workshopName,
-                modifier = Modifier.weight(1f),
+        if (workshopCode != null) {
+            WorkshopCodeRow(
+                label = stringResource(Res.string.history_objection_workshop_code),
+                code = workshopCode,
+                modifier = Modifier.padding(vertical = Spacing.xs),
             )
         }
-        Spacer(modifier = Modifier.height(Spacing.md))
-        LabeledBlock(
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.history_objection_workshop_name),
+            value = request.workshopName,
+            numeric = false,
+            modifier = Modifier.padding(vertical = Spacing.xs),
+        )
+        TaminDivider()
+        DetailRow(
             label = stringResource(Res.string.history_objection_insurance_number),
             value = request.insuranceNumber,
+            numeric = true,
+            modifier = Modifier.padding(vertical = Spacing.xs),
         )
-        Spacer(modifier = Modifier.height(Spacing.md))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            LabeledBlock(
-                label = stringResource(Res.string.history_objection_start_date),
-                value = request.startDateLabel,
-                modifier = Modifier.weight(1f),
-            )
-            LabeledBlock(
-                label = stringResource(Res.string.history_objection_end_date),
-                value = request.endDateLabel,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.history_objection_start_date),
+            value = request.startDateLabel,
+            numeric = true,
+            modifier = Modifier.padding(vertical = Spacing.xs),
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.history_objection_end_date),
+            value = request.endDateLabel,
+            numeric = true,
+            modifier = Modifier.padding(vertical = Spacing.xs),
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -363,7 +366,7 @@ private fun NotExistRequestCard(
                 onClick = onDeleteClick,
                 icon = vectorResource(Res.drawable.ic_trash),
                 modifier = Modifier.weight(1f),
-                containerColor = colors.dangerBg,
+                containerColor = colors.dangerBorder,
                 contentColor = colors.dangerText,
                 borderColor = colors.dangerBorder,
             )
@@ -381,8 +384,9 @@ private fun NotExistRequestCard(
 }
 
 /** The workshop code: a label above a dashed-outline chip that copies its value on tap. */
+/** Label on the right, a copyable dashed-outline code chip flush to the opposite end. */
 @Composable
-private fun WorkshopCodeBlock(
+private fun WorkshopCodeRow(
     label: String,
     code: String,
     modifier: Modifier = Modifier,
@@ -390,13 +394,19 @@ private fun WorkshopCodeBlock(
     val colors = LocalTaminColors.current
     val copy = rememberCopyAction(code)
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = colors.textMuted)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xs),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodySmall, color = colors.textMuted)
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(CornerRadius.chip))
+                .clip(RoundedCornerShape(CornerRadius.lg))
                 .background(colors.blueBg)
-                .dashedOutline(colors.blueText, CornerRadius.chip, Thickness.medium)
+                .dashedOutline(colors.blueText.copy(alpha = WorkshopCodeOutlineAlpha), CornerRadius.lg, Thickness.medium)
                 .clickable(onClick = copy)
                 .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
