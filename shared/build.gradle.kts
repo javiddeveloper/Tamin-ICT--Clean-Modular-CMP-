@@ -48,6 +48,7 @@ kotlin {
             api(project(":feature:userRequest"))
             api(project(":feature:security"))
             api(project(":feature:settings"))
+            api(project(":feature:orotez-protez"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)

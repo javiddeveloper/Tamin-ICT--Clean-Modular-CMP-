@@ -49,6 +49,9 @@ import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -81,6 +84,10 @@ import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateMultipleWorkshopsPensionUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -228,8 +235,15 @@ val domainModule = module {
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
+    factoryOf(::GetMultipleWorkshopPersonalInfoUseCase)
+    factoryOf(::CheckMultipleWorkshopsUseCase)
+    factoryOf(::CalculateMultipleWorkshopsPensionUseCase)
+    factoryOf(::CalculateWagePensionUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
+    factoryOf(::GetRequestInsuredMainInfoUseCase)
+    factoryOf(::GetInsuredPersonsUseCase)
+    factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)

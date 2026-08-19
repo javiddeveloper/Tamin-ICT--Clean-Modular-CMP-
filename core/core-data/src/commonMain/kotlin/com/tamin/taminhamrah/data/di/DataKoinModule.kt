@@ -10,10 +10,12 @@ import com.tamin.taminhamrah.repository.AgentChatCacheRepository
 import com.tamin.taminhamrah.data.repository.treatment.TreatmentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personalInbox.PersonalInboxRepositoryImpl
 import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
+import com.tamin.taminhamrah.data.repository.calculateWagePension.CalculateWagePensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.VersionHistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.contract.ContractsRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pension.PensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.userRequests.UserRequestRepositoryImpl
+import com.tamin.taminhamrah.data.repository.orotezProtez.OrotezProtezRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personal.PersonalRepositoryImpl
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.repository.UserRepository
@@ -23,9 +25,11 @@ import com.tamin.taminhamrah.repository.common.CommonRepository
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
 import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import com.tamin.taminhamrah.repository.HistoryRepository
+import com.tamin.taminhamrah.repository.calculateWagePension.CalculateWagePensionRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
+import com.tamin.taminhamrah.repository.orotezProtez.OrotezProtezRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
 import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
@@ -49,6 +53,7 @@ val dataKoinModule = module {
     singleOf(::TreatmentRepositoryImpl) { bind<TreatmentRepository>() }
     singleOf(::PensionRepositoryImpl) { bind<PensionRepository>() }
     singleOf(::HistoryRepositoryImpl) { bind<HistoryRepository>() }
+    singleOf(::CalculateWagePensionRepositoryImpl) { bind<CalculateWagePensionRepository>() }
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
     singleOf(::AgentChatCacheRepositoryImpl) { bind<AgentChatCacheRepository>() }
     singleOf(::WorkShopsRepositoryImpl) { bind<WorkShopsRepository>() }
@@ -60,4 +65,5 @@ val dataKoinModule = module {
     singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
+    singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }
 }
