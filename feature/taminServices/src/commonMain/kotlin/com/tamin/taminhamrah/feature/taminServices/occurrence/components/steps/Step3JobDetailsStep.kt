@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +31,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Occurre
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step3JobDetailsShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetailsStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
@@ -65,7 +65,6 @@ import taminx.core.core_ui.occurrence_sheet_marital_title
 import taminx.core.core_ui.occurrence_step3_readonly_hint
 import taminx.core.core_ui.occurrence_step3_title
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun Step3JobDetailsStep(
     uiState: OccurrenceUiState,
@@ -119,6 +118,7 @@ internal fun Step3JobDetailsStep(
             error = null,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
+            shimmerContent = { Step3JobDetailsShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
             Column(
                 modifier = Modifier

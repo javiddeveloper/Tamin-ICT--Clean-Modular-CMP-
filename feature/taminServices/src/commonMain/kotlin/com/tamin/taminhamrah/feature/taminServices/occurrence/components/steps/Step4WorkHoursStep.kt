@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InputRe
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step4WorkHoursShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -112,6 +113,7 @@ internal fun Step4WorkHoursStep(
             error = null,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
+            shimmerContent = { Step4WorkHoursShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
             Column(
                 modifier = Modifier

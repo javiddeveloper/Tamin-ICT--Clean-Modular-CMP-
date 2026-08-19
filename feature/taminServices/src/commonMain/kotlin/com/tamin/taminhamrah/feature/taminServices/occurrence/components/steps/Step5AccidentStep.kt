@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +24,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Occurre
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step5AccidentShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.AccidentStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
@@ -58,7 +58,6 @@ import taminx.core.core_ui.occurrence_select_outcome_hint
 import taminx.core.core_ui.occurrence_sheet_outcome_title
 import taminx.core.core_ui.occurrence_step5_title
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun Step5AccidentStep(
     uiState: OccurrenceUiState,
@@ -121,6 +120,7 @@ internal fun Step5AccidentStep(
             error = null,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
+            shimmerContent = { Step5AccidentShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
             Column(
                 modifier = Modifier

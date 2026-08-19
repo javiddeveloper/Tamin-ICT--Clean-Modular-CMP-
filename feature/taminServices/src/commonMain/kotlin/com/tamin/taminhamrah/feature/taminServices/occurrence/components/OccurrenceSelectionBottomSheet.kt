@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
@@ -52,7 +51,6 @@ data class OccurrenceSheetOption(
  * status, accident outcome, document type) — a titled list of bordered, radio-marked option cards
  * that selects and dismisses on tap, no submit button.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OccurrenceSelectionBottomSheet(
     title: String,

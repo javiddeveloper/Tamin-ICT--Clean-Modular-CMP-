@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step1PersonInfoShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -126,6 +127,7 @@ internal fun Step1PersonInfoStep(
             error = null,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
+            shimmerContent = { Step1PersonInfoShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
             Column(
                 modifier = Modifier

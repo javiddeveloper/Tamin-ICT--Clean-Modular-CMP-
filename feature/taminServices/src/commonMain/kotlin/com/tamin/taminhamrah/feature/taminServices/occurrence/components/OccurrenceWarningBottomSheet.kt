@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -58,7 +57,6 @@ import taminx.core.core_ui.occurrence_warning_title
  * component is shaped for selectable item/chip lists with a single description field, not a
  * scrollable stack of independent title+body cards like the three legal articles shown here.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun OccurrenceWarningBottomSheet(
     onConfirm: () -> Unit,
