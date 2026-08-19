@@ -58,6 +58,10 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbGlow
 import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbHighlight
 import kotlinx.collections.immutable.ImmutableList
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import com.tamin.taminhamrah.ui.theme.Duration
 
 /**
  * The page's dark head: who is looking, how long they were insured, and which years they can pick.
@@ -219,36 +223,60 @@ private fun HeroChip(
     val selectedBrush = remember {
         Brush.linearGradient(listOf(TaminHistoryChipSelectedStart, TaminHistoryChipSelectedEnd))
     }
-    val textColor = when {
-        selected -> TaminHistoryChipSelectedText
-        enabled -> TaminHistoryChipText
-        else -> TaminHistoryChipTextDisabled
-    }
+    val shape = remember { RoundedCornerShape(HistoryDimens.chipCorner) }
+
+    /*
+     * Every part of the transition is held as State and read inside `drawBehind` or a color
+     * lambda, never during composition.
+     *
+     * These chips are the most-tapped thing on the page: a selection that recomposed the strip
+     * would recompose every chip in it, and the strip is as long as the person's career.
+     */
+    val selection = animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(Duration.fast),
+        label = "chipSelection",
+    )
+    val border = animateColorAsState(
+        targetValue = if (selected) {
+            TaminHistoryChipSelectedBorder
+        } else {
+            TaminHistoryChipBorder
+        },
+        animationSpec = tween(Duration.fast),
+        label = "chipBorder",
+    )
+    val textColor = animateColorAsState(
+        targetValue = when {
+            selected -> TaminHistoryChipSelectedText
+            enabled -> TaminHistoryChipText
+            else -> TaminHistoryChipTextDisabled
+        },
+        animationSpec = tween(Duration.fast),
+        label = "chipText",
+    )
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(HistoryDimens.chipCorner))
-            .then(
-                if (selected) {
-                    Modifier.background(selectedBrush)
-                } else {
-                    Modifier.background(TaminHistoryChipBg)
-                },
-            )
-            .border(
-                width = HistoryDimens.hairline,
-                color = if (selected) TaminHistoryChipSelectedBorder else TaminHistoryChipBorder,
-                shape = RoundedCornerShape(HistoryDimens.chipCorner),
-            )
+            .clip(shape)
+            .drawBehind {
+                // The unselected glass is always there; the selected fill washes over it.
+                drawRect(TaminHistoryChipBg)
+                drawRect(brush = selectedBrush, alpha = selection.value)
+            }
+            .border(HistoryDimens.hairline, border.value, shape)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = HistoryDimens.chipPaddingH, vertical = HistoryDimens.chipPaddingV),
+            .padding(
+                horizontal = HistoryDimens.chipPaddingH,
+                vertical = HistoryDimens.chipPaddingV,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
         if (numeric) {
-            NumericText(text = label, style = style, color = textColor)
+            NumericText(text = label, style = style, color = textColor.value)
         } else {
-            Text(text = label, style = style, color = textColor, maxLines = 1)
+            Text(text = label, style = style, color = textColor.value, maxLines = 1)
         }
     }
 }

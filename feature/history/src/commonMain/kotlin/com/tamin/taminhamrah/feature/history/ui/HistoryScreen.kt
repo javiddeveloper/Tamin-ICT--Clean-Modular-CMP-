@@ -298,6 +298,9 @@ fun HistoryContent(
                         dense = dense,
                         // Twelve full month names never fit side by side; the year labels do.
                         rotateLabels = scope is HistoryScope.Year,
+                        // The chart re-forms when the scope or the employer filter changes, and
+                        // stays put when a month is merely selected.
+                        animationKey = scope to uiState.selectedSource,
                         axis = if (dense) {
                             ChartAxis(
                                 oldest = bars.last().label,

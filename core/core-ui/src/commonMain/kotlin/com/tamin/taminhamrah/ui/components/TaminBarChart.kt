@@ -32,6 +32,24 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryPillBg
 import kotlinx.collections.immutable.ImmutableList
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.draw.drawBehind
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * One column of a [TaminBarChart].
@@ -87,9 +105,18 @@ fun TaminBarChart(
      */
     rotateLabels: Boolean = false,
     labelLaneHeight: Dp = RotatedLabelLane,
+    /**
+     * What identifies the series, for the growth animation.
+     *
+     * The bars rise again whenever this changes, and only then — pass what makes it a *different*
+     * series (the year being shown, a filter), never the bars themselves. Keyed on the list, every
+     * selection would replay the whole chart, because selecting a bar changes its own item.
+     */
+    animationKey: Any? = null,
 ) {
     val gap = if (dense) DenseGap else Gap
     val corner = if (dense) DenseCorner else Corner
+    val growth = rememberBarGrowth(barCount = bars.size, key = animationKey)
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -97,10 +124,13 @@ fun TaminBarChart(
             horizontalArrangement = Arrangement.spacedBy(gap),
             verticalAlignment = Alignment.Bottom,
         ) {
-            bars.forEach { bar ->
+            bars.forEachIndexed { index, bar ->
                 Bar(
                     bar = bar,
                     corner = corner,
+                    // A lambda, not a value: the bar reads it while it lays itself out, so a frame
+                    // of growth costs no recomposition here.
+                    progress = growth.progressOf(index),
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     onClick = { onBarClick(bar.id) },
                 )
@@ -141,17 +171,61 @@ fun TaminBarChart(
     }
 }
 
+/**
+ * How far each bar has risen, and the coroutine that raises them.
+ *
+ * One holder for the whole series rather than an [Animatable] per bar composable: the bars are
+ * re-created on every selection, and per-bar state would be thrown away and restarted with them.
+ */
+@Stable
+class BarGrowthState internal constructor(barCount: Int, initial: Float) {
+    private val progress = List(barCount) { Animatable(initial) }
+
+    /** Read inside layout, never during composition. */
+    fun progressOf(index: Int): () -> Float = { progress.getOrNull(index)?.value ?: 1f }
+
+    internal suspend fun grow() = coroutineScope {
+        progress.forEachIndexed { index, animatable ->
+            launch {
+                delay((index * GrowStaggerMs).milliseconds)
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(GrowDurationMs, easing = Easing.decelerate),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The series' growth, restarted whenever [key] changes.
+ *
+ * With reduced motion the bars start at full height and nothing animates — the same contract
+ * `staggeredItemEntrance` honours.
+ */
+@Composable
+fun rememberBarGrowth(barCount: Int, key: Any?): BarGrowthState {
+    val reducedMotion = isReducedMotionEnabled()
+    val state = remember(barCount, key, reducedMotion) {
+        BarGrowthState(barCount, initial = if (reducedMotion) 1f else 0f)
+    }
+    LaunchedEffect(state) { if (!reducedMotion) state.grow() }
+    return state
+}
+
 @Composable
 private fun Bar(
     bar: BarChartItem,
     corner: Dp,
+    progress: () -> Float,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Built here from the two stable colors, and only when they change.
-    val fill = remember(bar.fillTop, bar.fillBottom) {
-        Brush.verticalGradient(listOf(bar.fillTop, bar.fillBottom))
-    }
+    // Selection recolors the fill rather than replacing it. Held as State and read in the draw
+    // lambda below, so the transition runs without recomposing the bar.
+    val fillTop = animateColorAsState(bar.fillTop, tween(Duration.fast), label = "barFillTop")
+    val fillBottom = animateColorAsState(bar.fillBottom, tween(Duration.fast), label = "barFillBottom")
+
     val cap = remember(bar.capTop, bar.capBottom) {
         val top = bar.capTop
         val bottom = bar.capBottom
@@ -162,15 +236,7 @@ private fun Bar(
         modifier = modifier.clickable(enabled = bar.enabled, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // A fixed lane above the plot, so a bubble appearing never shifts the bars under it. The
-        // bubble is wider than the bar it belongs to and is allowed to overflow it — clamped to the
-        // column it would be clipped to a single digit.
-        Box(
-            modifier = Modifier.height(PillLane).fillMaxWidth().wrapContentWidth(unbounded = true),
-            contentAlignment = Alignment.Center,
-        ) {
-            bar.pill?.let { PillLabel(text = it) }
-        }
+        PillLane(pill = bar.pill)
 
         Box(
             modifier = Modifier
@@ -180,14 +246,20 @@ private fun Bar(
                 .background(TaminHistoryBarTrack),
             contentAlignment = Alignment.BottomCenter,
         ) {
-            // fillMaxHeight(fraction) rather than a measured Dp: the plot's height is whatever the
-            // row gives it, and the bar takes its share at layout time.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(bar.fraction.coerceIn(MinFraction, 1f))
+                    .growTo(bar.fraction.coerceIn(MinFraction, 1f), progress)
                     .clip(RoundedCornerShape(corner))
-                    .background(fill),
+                    .drawBehind {
+                        drawRect(
+                            Brush.verticalGradient(
+                                listOf(fillTop.value, fillBottom.value),
+                                startY = 0f,
+                                endY = size.height,
+                            ),
+                        )
+                    },
                 contentAlignment = Alignment.TopCenter,
             ) {
                 cap?.let {
@@ -244,8 +316,15 @@ private const val QuarterTurn = -90f
 /** Room for a rotated month name. */
 private val RotatedLabelLane = 62.dp
 
+/** The design's own rise: long enough to read as growth, short enough not to be waited on. */
+private const val GrowDurationMs = 400
+private const val GrowStaggerMs = 25L
+
+private const val PillDurationMs = 120
+private const val PillInitialScale = 0.85f
+
 private val PlotHeight = 164.dp
-private val PillLane = 30.dp
+private val PillLaneHeight = 30.dp
 private val Gap = 5.dp
 private val DenseGap = 2.dp
 private val Corner = 9.dp

@@ -61,6 +61,8 @@ fun HistoryChartCard(
     sourceChips: ImmutableList<SourceChipPR> = persistentListOf(),
     onSourceClick: (Int?) -> Unit = {},
     rotateLabels: Boolean = false,
+    /** What makes this a different series — the bars rise again when it changes. */
+    animationKey: Any? = null,
     concurrency: String? = null,
     concurrencyLabel: String = "",
     footer: @Composable ColumnScope.() -> Unit = {},
@@ -104,6 +106,7 @@ fun HistoryChartCard(
             dense = dense,
             showLabels = !dense,
             rotateLabels = rotateLabels,
+            animationKey = animationKey,
         )
 
         axis?.let { ChartAxisRow(it) }
