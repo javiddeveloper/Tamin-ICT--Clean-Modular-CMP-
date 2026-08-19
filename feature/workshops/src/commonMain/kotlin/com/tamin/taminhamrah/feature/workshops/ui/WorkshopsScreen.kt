@@ -35,6 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
+import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
+import com.tamin.taminhamrah.model.studentContract.SelectBranchStepContent
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun WorkshopsScreen(
@@ -51,23 +57,26 @@ fun WorkshopsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var workshopId by remember { mutableStateOf("") }
-    var branchCode by remember { mutableStateOf("") }
     var workshopStatus by remember { mutableStateOf("") }
     var selectedWorkshop by remember { mutableStateOf<Pair<String, String>?>(null) }
+
+    // Read once here so the lambda below captures a String rather than the whole UiState.
+    val selectedBranchCode = uiState.branchSelection.branchCode
 
     WorkshopsContent(
         uiState = uiState,
         workshopId = workshopId,
         onWorkshopIdChange = { workshopId = it },
-        branchCode = branchCode,
-        onBranchCodeChange = { branchCode = it },
         workshopStatus = workshopStatus,
         onWorkshopStatusChange = { workshopStatus = it },
+        onProvinceSelected = { viewModel.sendIntent(WorkshopsIntent.SelectProvince(it)) },
+        onCitySelected = { viewModel.sendIntent(WorkshopsIntent.SelectCity(it)) },
+        onBranchSelected = { viewModel.sendIntent(WorkshopsIntent.SelectBranch(it)) },
         onLoadClick = {
             viewModel.sendIntent(
                 WorkshopsIntent.LoadWorkshops(
                     workshopId = workshopId.takeIf { it.isNotBlank() },
-                    branchCode = branchCode.takeIf { it.isNotBlank() },
+                    branchCode = selectedBranchCode.takeIf { it.isNotBlank() },
                     workshopStatus = workshopStatus.takeIf { it.isNotBlank() }
                 )
             )
@@ -184,10 +193,11 @@ fun WorkshopsContent(
     uiState: WorkshopsUiState,
     workshopId: String,
     onWorkshopIdChange: (String) -> Unit,
-    branchCode: String,
-    onBranchCodeChange: (String) -> Unit,
     workshopStatus: String,
     onWorkshopStatusChange: (String) -> Unit,
+    onProvinceSelected: (ProvincePR) -> Unit,
+    onCitySelected: (CityPR) -> Unit,
+    onBranchSelected: (BranchPR) -> Unit,
     onLoadClick: () -> Unit,
     onTestDownloadPdfClick: () -> Unit,
     onWorkshopClick: (String, String) -> Unit
@@ -202,11 +212,20 @@ fun WorkshopsContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = branchCode,
-            onValueChange = onBranchCodeChange,
-            label = { Text("کد شعبه (branchCode)") },
-            modifier = Modifier.fillMaxWidth()
+        // The branch is chosen through استان → شهر → شعبه rather than typed: only its
+        // resolved branchCode is a filter the workshops endpoint understands.
+        SelectBranchStepContent(
+            branchSelection = uiState.branchSelection,
+            provinces = uiState.provinces,
+            cities = uiState.cities,
+            branches = uiState.branches,
+            isProvincesLoading = uiState.isProvincesLoading,
+            isCitiesLoading = uiState.isCitiesLoading,
+            isBranchesLoading = uiState.isBranchesLoading,
+            onProvinceSelected = onProvinceSelected,
+            onCitySelected = onCitySelected,
+            onBranchSelected = onBranchSelected,
+            notices = persistentListOf(),
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -354,14 +373,26 @@ private fun WorkshopsContentPreview() {
                         )
                     )
                 ),
-                error = null
+                error = null,
+                branchSelection = BranchSelectionFormPR(
+                    provinceCode = "07",
+                    provinceName = "تهران",
+                    cityCode = "0701",
+                    cityName = "تهران",
+                    branchCode = "123",
+                    branchName = "شعبه ۱ تهران",
+                ),
+                provinces = listOf(ProvincePR("07", "تهران")),
+                cities = listOf(CityPR("0701", "تهران", "07")),
+                branches = listOf(BranchPR("123", "شعبه ۱ تهران")),
             ),
             workshopId = "9900020917749",
             onWorkshopIdChange = {},
-            branchCode = "123",
-            onBranchCodeChange = {},
             workshopStatus = "",
             onWorkshopStatusChange = {},
+            onProvinceSelected = {},
+            onCitySelected = {},
+            onBranchSelected = {},
             onLoadClick = {},
             onTestDownloadPdfClick = {},
             onWorkshopClick = { _, _ -> }
