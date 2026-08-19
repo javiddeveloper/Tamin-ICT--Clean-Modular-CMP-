@@ -48,18 +48,16 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedStart
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipTextDisabled
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroCaption
 import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBg
 import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroGrid
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroMid
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbBase
 import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbBody
 import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbGlow
 import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbHighlight
 import kotlinx.collections.immutable.ImmutableList
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 
 /**
  * The page's dark head: who is looking, how long they were insured, and which years they can pick.
@@ -82,13 +80,9 @@ fun HistoryHero(
     action: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val heroBrush = remember {
-        Brush.verticalGradient(
-            0f to TaminHistoryHeroTop,
-            HistoryConstants.HERO_MID_STOP to TaminHistoryHeroMid,
-            1f to TaminHistoryHeroBottom,
-        )
-    }
+    // Both themes' heads live in the theme: navy running down in light, the design's teal→blue on
+    // the diagonal in dark.
+    val heroBrush = LocalTaminColors.current.heroBrush
 
     Box(
         modifier = modifier

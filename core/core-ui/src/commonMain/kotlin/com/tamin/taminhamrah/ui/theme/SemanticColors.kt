@@ -4,6 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+/** Where the light hero's middle color sits, from the design's `180deg … 58% …`. */
+private const val HERO_MID_STOP = 0.58f
+
 @Immutable
 data class TaminColors(
     // Backgrounds / surfaces
@@ -93,6 +96,14 @@ data class TaminColors(
 
     // Top app bar. Held as stops rather than a Brush so the bar owns its sweep
     // direction; the strip behind the status bar shares this same wash.
+    /**
+     * A full-bleed page head.
+     *
+     * A brush rather than stops, because the two themes do not merely swap colors: light is the
+     * design's three-stop navy running straight down, dark is its two-stop teal→blue on the
+     * diagonal. Anything that only carried the colors would lose the direction with them.
+     */
+    val heroBrush: Brush,
     val topAppBarStops: List<Color>,
     val profileGradientStops: List<Color>,
     val aiAssistantGradient: Brush,
@@ -204,6 +215,11 @@ val LightTaminColors = TaminColors(
     heroGradient = Brush.linearGradient(listOf(Primary700,Primary900 )),
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
     // Same stops as the quick-access card; the bar just sweeps the other way.
+    heroBrush = Brush.verticalGradient(
+        0f to TaminHistoryHeroTop,
+        HERO_MID_STOP to TaminHistoryHeroMid,
+        1f to TaminHistoryHeroBottom,
+    ),
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
     profileGradientStops = listOf(TaminNavy900, TaminNavy700),
     aiAssistantGradient = Brush.linearGradient(
@@ -330,6 +346,9 @@ val DarkTaminColors = TaminColors(
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
     // Dark mode overrides every hero to the same teal-to-blue wash, status bar included,
     // so the bar and the strip above it join into one continuous band.
+    // The design's dark block overrides every `.tm-hero` with one diagonal teal→blue, which is the
+    // pair the app already carries for its other heads.
+    heroBrush = Brush.linearGradient(listOf(TaminDarkHeroStart, TaminDarkHeroEnd)),
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     aiAssistantGradient = Brush.linearGradient(

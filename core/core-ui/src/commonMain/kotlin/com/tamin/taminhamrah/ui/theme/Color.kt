@@ -387,10 +387,10 @@ val TaminLightTealBg = Color(0xFFEAF7F7)
  * Follows the convention the rest of the dark palette already uses (`0x29` over the accent), which
  * is what lets the tile sit on the card the way its blue sibling does.
  */
-val TaminDarkTealBg = Color(0x295FD8D2)
+val TaminDarkTealBg = Color(0x245BD8D4)
 
 /** Teal that stays legible on a dark surface — the design's own lighter teal. */
-val TaminDarkTeal = Color(0xFF5FD8D2)
+val TaminDarkTeal = Color(0xFF5BD8D4)
 
 /** Season markers in the year sheet: spring, summer, autumn, winter. */
 val TaminHistorySeasonSpring = Color(0xFF22A06B)

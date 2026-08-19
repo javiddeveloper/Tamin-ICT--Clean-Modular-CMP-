@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.history.ui.components.ChartAxis
@@ -73,8 +72,6 @@ import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroBottom
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroTop
 import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -173,9 +170,8 @@ fun HistoryContent(
 ) {
     val colors = LocalTaminColors.current
     val scope = uiState.scope
-    val viewerHeaderBrush = remember {
-        Brush.verticalGradient(listOf(TaminHistoryHeroTop, TaminHistoryHeroBottom))
-    }
+    // The viewer opens out of this page, so it wears this page's head — in whichever theme.
+    val viewerHeaderBrush = colors.heroBrush
     val dayLabel = stringResource(HistoryRes.string.history_combined_year_days, HistoryConstants.PLACEHOLDER_DAYS)
 
     // Everything drawn is folded here, each piece keyed on exactly what it is folded from, so a
