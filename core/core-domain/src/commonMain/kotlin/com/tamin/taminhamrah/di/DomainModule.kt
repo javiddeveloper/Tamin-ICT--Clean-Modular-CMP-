@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.pension.SendRequestDeferredInstallmentCertificateUseCase
+import com.tamin.taminhamrah.useCases.pension.SendRequestInquirePensionCertificateUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
@@ -185,6 +187,8 @@ val domainModule = module {
     factoryOf(::IdentityInfoUseCase)
     factoryOf(::GetPensionInquiryUseCase)
     factoryOf(::GetPensionerIdUseCase)
+    factoryOf(::SendRequestInquirePensionCertificateUseCase)
+    factoryOf(::SendRequestDeferredInstallmentCertificateUseCase)
     factoryOf(::GetPensionerPayRollUseCase)
     factoryOf(::GetPensionerPayRollPDFUseCase)
     factoryOf(::GetUserAgeUseCase)

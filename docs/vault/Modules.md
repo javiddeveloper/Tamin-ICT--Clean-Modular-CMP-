@@ -54,6 +54,8 @@ Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersi
 | `:feature:change-mobile` | `feature/change-mobile` | `…feature.changemobile` ⚠️ |
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
 | `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
+| `:feature:orotez-protez` | `feature/orotez-protez` | `…feature.orotezprotez` |
+| `:feature:deferredInstallment` | `feature/deferredInstallment` | `…feature.deferredInstallment` |
 
 ### Layout of a feature module
 

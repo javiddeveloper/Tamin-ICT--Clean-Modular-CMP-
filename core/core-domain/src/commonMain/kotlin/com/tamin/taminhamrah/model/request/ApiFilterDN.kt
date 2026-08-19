@@ -78,6 +78,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
     @SerialName("isPublic") IS_PUBLIC("isPublic"),
     @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
+    @SerialName("bankName") BANK_NAME("bankName"),
 }
 
 

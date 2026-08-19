@@ -12,7 +12,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.Deserve
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.girlSurvivor.GirlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
@@ -38,9 +37,6 @@ data object EdictRoute
 
 @Serializable
 data object IssuanceCertificateRoute
-
-@Serializable
-data object DeferredInstallmentRoute
 
 @Serializable
 data object GirlSurvivorRoute
@@ -81,10 +77,6 @@ fun NavController.navigateToEdict(navOptions: NavOptions? = null) {
 
 fun NavController.navigateToIssuanceCertificate(navOptions: NavOptions? = null) {
     navigate(IssuanceCertificateRoute, navOptions)
-}
-
-fun NavController.navigateToDeferredInstallment(navOptions: NavOptions? = null) {
-    navigate(DeferredInstallmentRoute, navOptions)
 }
 
 fun NavController.navigateToGirlSurvivor(navOptions: NavOptions? = null) {
@@ -138,12 +130,6 @@ fun NavGraphBuilder.edictScreen(onBack: () -> Unit) {
 fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<IssuanceCertificateRoute> {
         IssuanceCertificateScreen(onBack = onBack)
-    }
-}
-
-fun NavGraphBuilder.deferredInstallmentScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<DeferredInstallmentRoute> {
-        DeferredInstallmentScreen(onBack = onBack)
     }
 }
 

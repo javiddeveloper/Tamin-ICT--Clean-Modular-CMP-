@@ -26,6 +26,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
 
 **Adding a feature means adding its Koin module to this list.** Forgetting it produces a runtime failure, not a compile error.
 
+UseCases are not auto-discovered. A ViewModel constructor dependency needs `factoryOf(::ThatUseCase)` in `domainModule`. Add the new factory; do not replace an existing one. Missing that yields `InstanceCreationException: Could not create instance for '[Factory: …ViewModel]'`.
+
 ## Where each module lives
 
 | Module | File |
