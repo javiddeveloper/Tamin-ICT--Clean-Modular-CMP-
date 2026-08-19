@@ -65,6 +65,8 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -151,6 +153,12 @@ private fun MyInboxContent(
 
     LaunchedEffect(motionState, lazyListState) {
         motionState.observeLazyListState(lazyListState)
+    }
+
+    lazyListState.OnLoadMore(
+        enabled = !state.endReached && state.paginationError == null,
+    ) {
+        onIntent(MyInboxIntent.LoadNextPage)
     }
 
     val colors = LocalTaminColors.current
@@ -324,7 +332,15 @@ private fun MyInboxContent(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (state.items.isEmpty() && !state.isLoading) {
+
+            if (state.items.isEmpty() && state.paginationError != null && !state.isLoading) {
+                PagingFooter(
+                    isLoadingNextPage = false,
+                    error = state.paginationError,
+                    onRetry = { onIntent(MyInboxIntent.RetryNextPage) },
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else if (state.items.isEmpty() && !state.isLoading) {
                 TaminEmptyState(
                     message = stringResource(Res.string.inbox_empty_state),
                     modifier = Modifier.fillMaxSize()
@@ -348,6 +364,14 @@ private fun MyInboxContent(
                                 clipboardManager.setText(AnnotatedString(item.id.toString()))
                                 onIntent(MyInboxIntent.OnCopyClicked(item.id))
                             },
+                        )
+                    }
+
+                    item(key = PAGING_FOOTER_KEY) {
+                        PagingFooter(
+                            isLoadingNextPage = state.isLoadingNextPage,
+                            error = state.paginationError,
+                            onRetry = { onIntent(MyInboxIntent.RetryNextPage) },
                         )
                     }
                 }
@@ -486,3 +510,4 @@ private fun MyInboxScreenPreviewDark() {
         )
     }
 }
+private const val PAGING_FOOTER_KEY = "paging_footer"

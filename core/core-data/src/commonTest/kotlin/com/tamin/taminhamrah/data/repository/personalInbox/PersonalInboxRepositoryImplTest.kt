@@ -15,10 +15,12 @@ import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class PersonalInboxRepositoryImplTest {
 
@@ -70,7 +72,6 @@ class PersonalInboxRepositoryImplTest {
         repository.getInboxItems(null).test {
             val firstEmission = awaitItem()
             assertEquals(1, firstEmission.size)
-            // Should not emit anything else and should not throw because local data is present
             expectNoEvents()
         }
     }
@@ -104,6 +105,114 @@ class PersonalInboxRepositoryImplTest {
             assertEquals("20", second.usage)
 
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage should emit remote items with the backend total`() = runTest {
+        remoteDataSource.getInboxItemsResult =
+            PersonalInboxListDTO(list = listOf(createDTO(id = 2L)), total = "37")
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 0, limit = 10)).test {
+            val page = awaitItem()
+            assertEquals(listOf(2L), page.items.map { it.id })
+            assertEquals(37, page.total)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage should cache the first page`() = runTest {
+        remoteDataSource.getInboxItemsResult =
+            PersonalInboxListDTO(list = listOf(createDTO(id = 2L)), total = "37")
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 0, limit = 10)).test {
+            awaitItem()
+            awaitComplete()
+        }
+
+        assertEquals(1, dao.replaceAllCalledCount)
+        assertEquals(listOf(2L), dao.itemsFlow.value.map { it.id })
+    }
+
+    @Test
+    fun `getInboxItemsPage should not cache an appended page`() = runTest {
+        dao.itemsFlow.value = listOf(createEntity(id = 1L))
+        remoteDataSource.getInboxItemsResult =
+            PersonalInboxListDTO(list = listOf(createDTO(id = 2L)), total = "37")
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 2, start = 10, limit = 10)).test {
+            val page = awaitItem()
+            assertEquals(listOf(2L), page.items.map { it.id })
+            awaitComplete()
+        }
+        assertEquals(0, dao.replaceAllCalledCount)
+        assertEquals(listOf(1L), dao.itemsFlow.value.map { it.id })
+    }
+
+    @Test
+    fun `getInboxItemsPage should serve the cache when the first page fails`() = runTest {
+        dao.itemsFlow.value = listOf(createEntity(id = 1L))
+        remoteDataSource.shouldThrowError = true
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 0, limit = 10)).test {
+            val page = awaitItem()
+            assertEquals(listOf(1L), page.items.map { it.id })
+            assertEquals(1, page.total)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage should throw when the first page fails and nothing is cached`() = runTest {
+        dao.itemsFlow.value = emptyList()
+        remoteDataSource.shouldThrowError = true
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 0, limit = 10)).test {
+            awaitError()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage should throw when an appended page fails`() = runTest {
+        dao.itemsFlow.value = listOf(createEntity(id = 1L))
+        remoteDataSource.shouldThrowError = true
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 2, start = 10, limit = 10)).test {
+            awaitError()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage should forward the page query untouched`() = runTest {
+        val query = ApiQueryParamDN(page = 3, start = 20, limit = 10)
+
+        repository.getInboxItemsPage(query).test {
+            awaitItem()
+            awaitComplete()
+        }
+
+        assertEquals(query, remoteDataSource.lastQuery)
+    }
+
+    @Test
+    fun `getInboxItemsPage should survive a first() collector aborting after one emission`() = runTest {
+        remoteDataSource.getInboxItemsResult =
+            PersonalInboxListDTO(list = listOf(createDTO(id = 2L)), total = "73")
+
+        val page = repository.getInboxItemsPage(ApiQueryParamDN(page = 0, start = 0, limit = 10)).first()
+
+        assertEquals(listOf(2L), page.items.map { it.id })
+        assertEquals(73, page.total)
+    }
+
+    @Test
+    fun `getInboxItemsPage should still fail through first() when remote fails and cache is empty`() = runTest {
+        dao.itemsFlow.value = emptyList()
+        remoteDataSource.shouldThrowError = true
+
+        assertFailsWith<RuntimeException> {
+            repository.getInboxItemsPage(ApiQueryParamDN(page = 0, start = 0, limit = 10)).first()
         }
     }
 
@@ -162,8 +271,10 @@ class PersonalInboxRepositoryImplTest {
         var getInboxItemsResult = PersonalInboxListDTO(list = emptyList(), total = "0")
         var getInboxSizeResult = PersonalInboxSizeDTO(usage = "0", total = "0")
         var shouldThrowError = false
+        var lastQuery: ApiQueryParamDN? = null
 
         override suspend fun getInboxItems(query: ApiQueryParamDN): PersonalInboxListDTO {
+            lastQuery = query
             if (shouldThrowError) throw RuntimeException("Remote failure")
             return getInboxItemsResult
         }

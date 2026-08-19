@@ -22,6 +22,7 @@ tags: [moc]
 
 - [[Naming-Conventions]] — the file-naming contract (and why the build does not enforce it) ⚠️
 - [[Adding-a-Feature]] — checklist for a new screen or feature module
+- [[Pagination]] — the cross-platform `Paginator` (no AndroidX Paging in this project)
 - [[Typography]] — Vazirmatn, `ss01` Persian digits vs `toPersianDigits()`
 
 ## Build and release
