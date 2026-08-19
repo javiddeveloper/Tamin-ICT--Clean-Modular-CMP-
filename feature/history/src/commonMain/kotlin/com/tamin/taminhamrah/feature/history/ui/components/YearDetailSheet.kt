@@ -88,6 +88,7 @@ import taminx.feature.history.history_workshops_and_wages
 import taminx.feature.history.history_year_full
 import taminx.feature.history.history_year_incomplete
 import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
+import androidx.compose.foundation.layout.fillMaxHeight
 
 /**
  * One year in full: its twelve months by season, and every employer that reported it.
@@ -133,9 +134,16 @@ fun YearDetailSheet(
          * visibly bouncing up and down. A lazy list cooperates with the sheet instead, and only
          * composes the workshop cards actually on screen.
          */
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(HistoryDimens.sheetMaxHeightFraction)
+                .navigationBarsPadding(),
+        ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(HistoryDimens.sheetMaxHeightFraction)
                 .navigationBarsPadding(),
             contentPadding = PaddingValues(
                 start = HistoryDimens.sheetPaddingH,
@@ -197,7 +205,17 @@ fun YearDetailSheet(
                 else -> items(detail.workshops, key = { it.id }) { WorkshopCard(workshop = it) }
             }
 
-            item(key = HistoryConstants.CLOSE_KEY) { CloseButton(onClick = dismiss) }
+        }
+
+            // Outside the list on purpose: the way out of a sheet should not have to be scrolled to.
+            CloseButton(
+                onClick = dismiss,
+                modifier = Modifier.padding(
+                    start = HistoryDimens.sheetPaddingH,
+                    end = HistoryDimens.sheetPaddingH,
+                    bottom = HistoryDimens.sheetPaddingBottom,
+                ),
+            )
         }
     }
 }
@@ -515,12 +533,12 @@ fun DashedDivider(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun CloseButton(onClick: () -> Unit) {
+private fun CloseButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val brush = remember {
         Brush.linearGradient(listOf(TaminHistoryButtonStart, TaminHistoryButtonEnd))
     }
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = Spacing.sm)
             .clip(RoundedCornerShape(HistoryDimens.buttonCorner))

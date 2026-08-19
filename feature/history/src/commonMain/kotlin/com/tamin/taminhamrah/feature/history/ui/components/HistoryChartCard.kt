@@ -129,7 +129,7 @@ fun HistoryChartCard(
                     text = concurrencyLabel,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = TaminHistoryConcurrentBottom,
+                    color = colors.tealText,
                 )
                 Text(
                     text = note,

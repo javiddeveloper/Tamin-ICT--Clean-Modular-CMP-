@@ -283,7 +283,7 @@ val TaminCostsOperationsInk = Color(0xFFFFFFFF)
  * Ink and translucency layers on the insured-person card.
  *
  * Fixed rather than theme-varying: the card carries its own dark teal gradient in both themes, so
- * everything on it is a wash of white at a set strength rather than a surface colour.
+ * everything on it is a wash of white at a set strength rather than a surface color.
  */
 val TaminInsuranceCardInk = Color(0xFFFFFFFF)
 val TaminInsuranceCardInkMuted = TaminInsuranceCardInk.copy(alpha = 0.75f)
@@ -299,7 +299,7 @@ val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
  * header, the costs hero, timeline actions.
  *
  * Named rather than `Color.White.copy(alpha = …)` at each call site so the set is countable: every
- * value here is one the design actually specifies, and a new one has to be added deliberately.
+ * value here is one of the design actually specifies, and a new one has to be added deliberately.
  */
 val TaminOnAccentInk = Color(0xFFFFFFFF)
 val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
@@ -343,7 +343,13 @@ val TaminHistoryHeroCaption = Color(0xA8FFFFFF)
 val TaminHistoryHeroChipBg = Color(0x1AFFFFFF)
 val TaminHistoryHeroChipBorder = Color(0x2EFFFFFF)
 
-/** Chart bars. A full year and a full month share one fill; a short one is told apart by colour. */
+/**
+ * Chart bars.
+ *
+ * The track stays light in both themes — the dark design keeps it that way, so a bar reads as a
+ * proportion of a lit column rather than a shape on a dark card. Only the labels beneath it follow
+ * the theme.
+ */
 val TaminHistoryBarTrack = Color(0xFFF1F5FA)
 val TaminHistoryBarEmpty = Color(0xFFE7ECF3)
 val TaminHistoryBarFullTop = Color(0xFF5C92E8)
@@ -373,7 +379,18 @@ val TaminHistoryPartialYearText = Color(0xFFB4711A)
 val TaminHistoryPartialYearBg = Color(0xFFFDF3E3)
 
 /** Teal surface — the calm informational banner and the «ارسال» tile sit on it. */
-val TaminTealBg = Color(0xFFEAF7F7)
+val TaminLightTealBg = Color(0xFFEAF7F7)
+
+/**
+ * The same surface in dark, as a translucent accent rather than a darkened hex.
+ *
+ * Follows the convention the rest of the dark palette already uses (`0x29` over the accent), which
+ * is what lets the tile sit on the card the way its blue sibling does.
+ */
+val TaminDarkTealBg = Color(0x295FD8D2)
+
+/** Teal that stays legible on a dark surface — the design's own lighter teal. */
+val TaminDarkTeal = Color(0xFF5FD8D2)
 
 /** Season markers in the year sheet: spring, summer, autumn, winter. */
 val TaminHistorySeasonSpring = Color(0xFF22A06B)

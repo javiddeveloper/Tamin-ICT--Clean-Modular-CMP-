@@ -79,6 +79,9 @@ object HistoryDimens {
     val pillPaddingV = 4.dp
 
     // ── Year sheet ────────────────────────────────────────────────────────────
+    /** The design caps the sheet at 90% of the screen instead of letting it size to its content. */
+    const val sheetMaxHeightFraction = 0.9f
+
     val sheetCorner = 30.dp
     val sheetPaddingH = 18.dp
     val sheetPaddingBottom = 22.dp

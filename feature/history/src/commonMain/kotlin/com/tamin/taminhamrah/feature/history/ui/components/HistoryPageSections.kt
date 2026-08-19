@@ -38,8 +38,6 @@ import com.tamin.taminhamrah.ui.components.TaminActionTile
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminTeal900
-import com.tamin.taminhamrah.ui.theme.TaminTealBg
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -200,8 +198,8 @@ fun HistoryActionCards(
             icon = Icons.AutoMirrored.Filled.Send,
             title = stringResource(Res.string.history_action_send_title),
             subtitle = stringResource(Res.string.history_action_send_subtitle),
-            iconTint = TaminTeal900,
-            iconBackground = TaminTealBg,
+            iconTint = colors.tealText,
+            iconBackground = colors.tealBg,
             onClick = onSend,
             modifier = Modifier.weight(1f),
         )

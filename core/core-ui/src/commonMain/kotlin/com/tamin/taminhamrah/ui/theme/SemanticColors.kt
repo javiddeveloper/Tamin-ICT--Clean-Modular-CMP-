@@ -57,6 +57,15 @@ data class TaminColors(
     // Medical / Teal
     val teal: Color,
 
+    /**
+     * Teal surface and its ink — the calm note and the «ارسال» tile.
+     *
+     * A pair, like [blueBg]/[blueText], because a tile that hardcodes one theme's teal stops
+     * matching the blue tile beside it the moment the theme changes.
+     */
+    val tealBg: Color,
+    val tealText: Color,
+
     // Shadows
     val shadowPrimary: Color,
     val shadowSubtle: Color,
@@ -133,6 +142,8 @@ val LightTaminColors = TaminColors(
     dangerBorder = TaminLightDangerBorder,
     dangerText = TaminLightError,
     teal = Secondary700,
+    tealBg = TaminLightTealBg,
+    tealText = TaminTeal900,
     bgIconProfile = TaminLightSurface,
     iconGradientPrimary = Brush.verticalGradient(
         listOf(
@@ -251,6 +262,8 @@ val DarkTaminColors = TaminColors(
     dangerBorder = TaminDarkDangerBorder,
     dangerText = TaminDarkError,
     teal = Secondary500,
+    tealBg = TaminDarkTealBg,
+    tealText = TaminDarkTeal,
     bgIconProfile = TaminLightSurface,
     iconGradientPrimary = Brush.verticalGradient(
         listOf(
