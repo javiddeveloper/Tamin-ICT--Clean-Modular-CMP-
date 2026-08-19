@@ -171,6 +171,8 @@
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
     <string name="date_picker_confirm">تأیید تاریخ</string>
+    <string name="time_picker_now">اکنون</string>
+    <string name="time_picker_confirm">تأیید ساعت</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
     <string name="action_copy">کپی</string>

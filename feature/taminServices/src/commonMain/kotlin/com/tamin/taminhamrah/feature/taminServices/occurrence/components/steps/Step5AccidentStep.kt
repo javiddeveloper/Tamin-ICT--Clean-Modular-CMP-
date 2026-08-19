@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +35,8 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -70,15 +74,28 @@ internal fun Step5AccidentStep(
     val step = uiState.accident
     var showOutcomeSheet by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
-        TaminJalaliDatePicker(
+        TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_accident_date),
             onDismiss = { showDatePicker = false },
             onConfirm = { year, month, day ->
                 val dateStr = "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
                 onIntent(OccurrenceIntent.UpdateAccident(step.copy(accidentDate = dateStr)))
                 showDatePicker = false
+            },
+        )
+    }
+
+    if (showTimePicker) {
+        TaminJalaliTimePickerBottomSheet(
+            title = stringResource(Res.string.occurrence_field_accident_time),
+            onDismiss = { showTimePicker = false },
+            onConfirm = { hour, minute ->
+                val timeStr = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                onIntent(OccurrenceIntent.UpdateAccident(step.copy(accidentTime = timeStr)))
+                showTimePicker = false
             },
         )
     }
@@ -145,9 +162,12 @@ internal fun Step5AccidentStep(
 
                 StyledTextField(
                     value = step.accidentTime,
-                    onValueChange = { onIntent(OccurrenceIntent.UpdateAccident(step.copy(accidentTime = it))) },
+                    onValueChange = {},
                     label = stringResource(Res.string.occurrence_field_accident_time),
                     placeholder = "14:30",
+                    trailingIcon = Icons.Default.AccessTime,
+                    readOnly = true,
+                    onClick = { showTimePicker = true },
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))

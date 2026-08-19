@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +32,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.WorkHoursStepState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.ValidationUtils
 import org.jetbrains.compose.resources.stringResource
@@ -63,11 +66,11 @@ internal fun Step4WorkHoursStep(
     var transportationHasFocused by remember { mutableStateOf(false) }
     var transportationTouched by remember { mutableStateOf(false) }
 
-    var workStartTimeHasFocused by remember { mutableStateOf(false) }
     var workStartTimeTouched by remember { mutableStateOf(false) }
+    var showWorkStartTimePicker by remember { mutableStateOf(false) }
 
-    var workEndTimeHasFocused by remember { mutableStateOf(false) }
     var workEndTimeTouched by remember { mutableStateOf(false) }
+    var showWorkEndTimePicker by remember { mutableStateOf(false) }
 
     var homeAddressHasFocused by remember { mutableStateOf(false) }
     var homeAddressTouched by remember { mutableStateOf(false) }
@@ -85,6 +88,30 @@ internal fun Step4WorkHoursStep(
     val isHomePhoneValid = ValidationUtils.isPhoneNumberValid(step.homePhone)
     val isHomePostalCodeValid = step.homePostalCode.isNotBlank() &&
         ValidationUtils.isPostcodeValid(step.homePostalCode)
+
+    if (showWorkStartTimePicker) {
+        TaminJalaliTimePickerBottomSheet(
+            title = stringResource(Res.string.occurrence_field_work_start_time),
+            onDismiss = { showWorkStartTimePicker = false },
+            onConfirm = { hour, minute ->
+                val timeStr = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workStartTime = timeStr)))
+                showWorkStartTimePicker = false
+            },
+        )
+    }
+
+    if (showWorkEndTimePicker) {
+        TaminJalaliTimePickerBottomSheet(
+            title = stringResource(Res.string.occurrence_field_work_end_time),
+            onDismiss = { showWorkEndTimePicker = false },
+            onConfirm = { hour, minute ->
+                val timeStr = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workEndTime = timeStr)))
+                showWorkEndTimePicker = false
+            },
+        )
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -147,18 +174,17 @@ internal fun Step4WorkHoursStep(
                 val showWorkStartTimeError = workStartTimeTouched && !isWorkStartTimeValid
                 StyledTextField(
                     value = step.workStartTime,
-                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workStartTime = it))) },
+                    onValueChange = {},
                     label = stringResource(Res.string.occurrence_field_work_start_time),
                     placeholder = "08:00",
+                    trailingIcon = Icons.Default.AccessTime,
                     isValid = if (showWorkStartTimeError) false else null,
                     errorText = if (showWorkStartTimeError) stringResource(Res.string.occurrence_field_work_start_time_error) else null,
                     isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
-                            workStartTimeHasFocused = true
-                        } else if (workStartTimeHasFocused) {
-                            workStartTimeTouched = true
-                        }
+                    readOnly = true,
+                    onClick = {
+                        workStartTimeTouched = true
+                        showWorkStartTimePicker = true
                     },
                 )
 
@@ -167,18 +193,17 @@ internal fun Step4WorkHoursStep(
                 val showWorkEndTimeError = workEndTimeTouched && !isWorkEndTimeValid
                 StyledTextField(
                     value = step.workEndTime,
-                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workEndTime = it))) },
+                    onValueChange = {},
                     label = stringResource(Res.string.occurrence_field_work_end_time),
                     placeholder = "17:00",
+                    trailingIcon = Icons.Default.AccessTime,
                     isValid = if (showWorkEndTimeError) false else null,
                     errorText = if (showWorkEndTimeError) stringResource(Res.string.occurrence_field_work_end_time_error) else null,
                     isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
-                            workEndTimeHasFocused = true
-                        } else if (workEndTimeHasFocused) {
-                            workEndTimeTouched = true
-                        }
+                    readOnly = true,
+                    onClick = {
+                        workEndTimeTouched = true
+                        showWorkEndTimePicker = true
                     },
                 )
 

@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -89,7 +90,7 @@ internal fun Step1PersonInfoStep(
     var showDatePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
-        TaminJalaliDatePicker(
+        TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_birth_date),
             onDismiss = { showDatePicker = false },
             onConfirm = { year, month, day ->

@@ -41,6 +41,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
@@ -79,7 +80,7 @@ internal fun Step3JobDetailsStep(
     var showDatePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
-        TaminJalaliDatePicker(
+        TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_employment_date),
             onDismiss = { showDatePicker = false },
             onConfirm = { year, month, day ->
