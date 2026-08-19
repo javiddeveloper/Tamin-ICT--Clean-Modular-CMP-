@@ -56,6 +56,10 @@ gitLive = "2.1.0"
 okhttp = "4.12.0"
 turbine = "1.2.0"
 robolectric = "4.14.1"
+# Android framework jar for SDK 35 — the newest Robolectric 4.14.1 knows, and the one it always
+# loads as its "compile SDK". Tests pin @Config(sdk = [35]) to the same jar. Pinned here so Gradle
+# resolves it instead of Robolectric downloading it from repo1.maven.org at test runtime.
+robolectricAndroidAll = "15-robolectric-12650502-i7"
 appcompatVersion = "1.7.1"
 sqliteBundled = "2.5.2"
 chucker = "4.2.0"
@@ -295,6 +299,7 @@ androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-juni
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+robolectric-android-all = { module = "org.robolectric:android-all-instrumented", version.ref = "robolectricAndroidAll" }
 
 #haze
 chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
