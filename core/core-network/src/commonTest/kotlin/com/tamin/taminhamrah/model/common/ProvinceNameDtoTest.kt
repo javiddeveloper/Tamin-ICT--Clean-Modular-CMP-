@@ -33,12 +33,11 @@ class ProvinceNameDtoTest {
     }
 
     @Test
-    fun `parses a row that omits the optional status fields`() {
-        // The old app modelled every province field as nullable-with-default, so rows
-        // lacking status/statusStartDate were tolerated. Absent keys must not fail the
-        // whole list here either.
+    fun `keeps explicit nulls on the optional fields`() {
+        // ProvinceDto declares no defaults, so every key is required — the server must
+        // send status/statusStartDate even when their value is null.
         val payload = """
-            {"list":[{"provinceCode":"07","provinceName":"تهران"}],"total":1}
+            {"list":[{"provinceCode":"07","provinceName":"تهران","status":null,"statusStartDate":null}],"total":1}
         """.trimIndent()
 
         val dto = json.decodeFromString<ProvinceNameDto>(payload)
