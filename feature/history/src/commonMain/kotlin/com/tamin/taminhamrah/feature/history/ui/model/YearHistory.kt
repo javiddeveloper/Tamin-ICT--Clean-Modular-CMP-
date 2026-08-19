@@ -6,15 +6,7 @@ import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-
-/** Months in a Jalali year — the length every row's day-count list is normalized to. */
-private const val MONTHS_IN_YEAR = 12
-
-/** The service counts a month as 30 days when it reports a career length. */
-private const val DAYS_IN_MONTH = 30
-
-/** Below this many insured days a year is short, which the design marks. */
-private const val FULL_YEAR_DAYS = 365
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 
 /** One insurance year, after the employers reporting it have been added together. */
 @Immutable
@@ -26,7 +18,7 @@ data class YearHistoryPR(
     val totalDays: Int,
 ) {
     /** A full year of cover, as opposed to one the person was only insured for part of. */
-    val isComplete: Boolean get() = totalDays >= FULL_YEAR_DAYS
+    val isComplete: Boolean get() = totalDays >= HistoryConstants.FULL_YEAR_DAYS
 }
 
 /** How long the person has been insured altogether. */
@@ -58,8 +50,8 @@ fun List<TalfighInfoItemPR>.mergeByYear(): ImmutableList<YearHistoryPR> {
 
     val daysByYear = LinkedHashMap<String, IntArray>(size)
     forEach { row ->
-        val months = daysByYear.getOrPut(row.hisYear) { IntArray(MONTHS_IN_YEAR) }
-        for (month in 0 until MONTHS_IN_YEAR) {
+        val months = daysByYear.getOrPut(row.hisYear) { IntArray(HistoryConstants.MONTHS_IN_YEAR) }
+        for (month in 0 until HistoryConstants.MONTHS_IN_YEAR) {
             months[month] += row.months.getOrNull(month)?.toIntOrNull() ?: 0
         }
     }
@@ -85,11 +77,11 @@ fun List<TalfighInfoItemPR>.mergeByYear(): ImmutableList<YearHistoryPR> {
 fun List<TalfighInfoItemPR>.careerTotal(): CareerTotalPR {
     val row = firstOrNull() ?: return CareerTotalPR()
 
-    val days = row.historyDays % DAYS_IN_MONTH
-    val carriedMonths = row.historyMonths + row.historyDays / DAYS_IN_MONTH
+    val days = row.historyDays % HistoryConstants.DAYS_IN_MONTH
+    val carriedMonths = row.historyMonths + row.historyDays / HistoryConstants.DAYS_IN_MONTH
     return CareerTotalPR(
-        years = row.historyYears + carriedMonths / MONTHS_IN_YEAR,
-        months = carriedMonths % MONTHS_IN_YEAR,
+        years = row.historyYears + carriedMonths / HistoryConstants.MONTHS_IN_YEAR,
+        months = carriedMonths % HistoryConstants.MONTHS_IN_YEAR,
         days = days,
         totalDays = row.sumHistoryYears,
     )
@@ -112,8 +104,8 @@ fun List<DastmozdInfoItemPR>.yearsFromWages(): ImmutableList<YearHistoryPR> {
 
     val daysByYear = LinkedHashMap<String, IntArray>(size)
     forEach { row ->
-        val months = daysByYear.getOrPut(row.hisyear) { IntArray(MONTHS_IN_YEAR) }
-        for (month in 0 until MONTHS_IN_YEAR) {
+        val months = daysByYear.getOrPut(row.hisyear) { IntArray(HistoryConstants.MONTHS_IN_YEAR) }
+        for (month in 0 until HistoryConstants.MONTHS_IN_YEAR) {
             months[month] += row.wageDetails.getOrNull(month)?.month?.toIntOrNull() ?: 0
         }
     }
@@ -135,11 +127,11 @@ fun List<DastmozdInfoItemPR>.yearsFromWages(): ImmutableList<YearHistoryPR> {
  */
 fun List<YearHistoryPR>.careerTotalFromDays(): CareerTotalPR {
     val totalDays = sumOf { it.totalDays }
-    val months = totalDays / DAYS_IN_MONTH
+    val months = totalDays / HistoryConstants.DAYS_IN_MONTH
     return CareerTotalPR(
-        years = months / MONTHS_IN_YEAR,
-        months = months % MONTHS_IN_YEAR,
-        days = totalDays % DAYS_IN_MONTH,
+        years = months / HistoryConstants.MONTHS_IN_YEAR,
+        months = months % HistoryConstants.MONTHS_IN_YEAR,
+        days = totalDays % HistoryConstants.DAYS_IN_MONTH,
         totalDays = totalDays,
     )
 }

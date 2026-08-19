@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.history.ui.components.ChartAxis
 import com.tamin.taminhamrah.feature.history.ui.components.DashedDivider
@@ -177,7 +176,7 @@ fun HistoryContent(
     val viewerHeaderBrush = remember {
         Brush.verticalGradient(listOf(TaminHistoryHeroTop, TaminHistoryHeroBottom))
     }
-    val dayLabel = stringResource(HistoryRes.string.history_combined_year_days, PlaceholderDays)
+    val dayLabel = stringResource(HistoryRes.string.history_combined_year_days, HistoryConstants.PLACEHOLDER_DAYS)
 
     // Everything drawn is folded here, each piece keyed on exactly what it is folded from, so a
     // scroll costs nothing and a chip tap re-folds only what that chip changed.
@@ -221,11 +220,11 @@ fun HistoryContent(
                 source = uiState.selectedSource,
                 selectedMonth = uiState.selectedMonth,
                 daysInMonth = { month -> PersianDateFormatter.daysInMonth(year, month + 1) },
-                dayLabel = { days -> dayLabel.replace(PlaceholderDays, days.toString().toPersianDigits()) },
+                dayLabel = { days -> dayLabel.replace(HistoryConstants.PLACEHOLDER_DAYS, days.toString().toPersianDigits()) },
             )
         }
     }
-    val dense = scope is HistoryScope.All && bars.size > DenseBarThreshold
+    val dense = scope is HistoryScope.All && bars.size > HistoryConstants.DENSE_BAR_THRESHOLD
     val scopeDays = if (scope is HistoryScope.All) uiState.careerTotal.totalDays else detail?.totalDays ?: 0
 
     Scaffold(modifier = modifier, containerColor = colors.bgPage) { padding ->
@@ -234,7 +233,7 @@ fun HistoryContent(
             modifier = Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding()),
             contentPadding = PaddingValues(bottom = Spacing.xxl),
         ) {
-            item(key = HERO_KEY) {
+            item(key = HistoryConstants.HERO_KEY) {
                 HistoryHero(
                     title = stringResource(HistoryRes.string.history_all_title),
                     scope = scope,
@@ -271,7 +270,7 @@ fun HistoryContent(
             }
 
             if (uiState.years.isNotEmpty()) {
-                item(key = CHART_KEY) {
+                item(key = HistoryConstants.CHART_KEY) {
                     HistoryChartCard(
                         title = when (scope) {
                             is HistoryScope.All ->
@@ -298,8 +297,8 @@ fun HistoryContent(
                             }
                         },
                         modifier = Modifier
-                            .offset(y = ChartOverlap)
-                            .padding(horizontal = ChartSidePadding),
+                            .offset(y = HistoryDimens.chartOverlap)
+                            .padding(horizontal = HistoryDimens.chartSidePadding),
                         dense = dense,
                         // Twelve full month names never fit side by side; the year labels do.
                         rotateLabels = scope is HistoryScope.Year,
@@ -336,12 +335,12 @@ fun HistoryContent(
                     }
                 }
 
-                item(key = SECTIONS_KEY) {
+                item(key = HistoryConstants.SECTIONS_KEY) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .offset(y = ChartOverlap)
-                            .padding(horizontal = SidePadding),
+                            .offset(y = HistoryDimens.chartOverlap)
+                            .padding(horizontal = HistoryDimens.sidePadding),
                         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
                     ) {
                         if (scope is HistoryScope.All) {
@@ -374,7 +373,7 @@ fun HistoryContent(
             // Only once a load has returned: an empty list before that means "not known yet", and
             // saying "you have no history" then would be a lie the next frame corrects.
             if (uiState.years.isEmpty() && uiState.hasLoadedOnce && !uiState.isLoading) {
-                item(key = EMPTY_STATE_KEY) {
+                item(key = HistoryConstants.EMPTY_STATE_KEY) {
                     EmptyStateMessage(
                         icon = Icons.Outlined.History,
                         title = stringResource(HistoryRes.string.history_combined_empty_title),
@@ -382,17 +381,17 @@ fun HistoryContent(
                         showIconTile = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = SidePadding)
+                            .padding(horizontal = HistoryDimens.sidePadding)
                             .padding(top = Spacing.xl),
                     )
                 }
             }
 
             if (uiState.isLoading && uiState.years.isEmpty()) {
-                item(key = SKELETON_KEY) {
+                item(key = HistoryConstants.SKELETON_KEY) {
                     ShimmerRows(
-                        rowHeight = CardHeight,
-                        modifier = Modifier.padding(horizontal = SidePadding, vertical = Spacing.md),
+                        rowHeight = HistoryDimens.cardHeight,
+                        modifier = Modifier.padding(horizontal = HistoryDimens.sidePadding, vertical = Spacing.md),
                     )
                 }
             }
@@ -531,7 +530,7 @@ private fun ChartFooter(
             totalLabel = stringResource(HistoryRes.string.history_month_wage_total),
             rialLabel = stringResource(HistoryRes.string.history_rial),
             toPersianDigits = { it.toPersianDigits() },
-            formatWage = { it.toRialAmount(fallback = "").removeSuffix(RialSuffix).toPersianDigits() },
+            formatWage = { it.toRialAmount(fallback = "").removeSuffix(HistoryConstants.RIAL_SUFFIX).toPersianDigits() },
         )
     }
 }
@@ -553,8 +552,8 @@ private fun SingleSourceMonthLine(detail: YearDetailPR, month: Int) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = PersianDateFormatter.monthNames[month] + MonthSeparator + detail.year.toPersianDigits() +
-                MonthSeparator +
+            text = PersianDateFormatter.monthNames[month] + HistoryConstants.SEPARATOR + detail.year.toPersianDigits() +
+                HistoryConstants.SEPARATOR +
                 if (days > 0) {
                     stringResource(
                         HistoryRes.string.history_combined_year_days,
@@ -568,7 +567,7 @@ private fun SingleSourceMonthLine(detail: YearDetailPR, month: Int) {
         )
         worked?.wage?.takeIf { (it.toLongOrNull() ?: 0L) > 0L }?.let { wage ->
             WageText(
-                amount = wage.toRialAmount(fallback = "").removeSuffix(RialSuffix).toPersianDigits(),
+                amount = wage.toRialAmount(fallback = "").removeSuffix(HistoryConstants.RIAL_SUFFIX).toPersianDigits(),
                 rialLabel = stringResource(HistoryRes.string.history_rial),
                 color = colors.textPrimary,
             )
@@ -602,33 +601,6 @@ private fun HistoryCertificateType.fileName(nationalId: String?): String {
     // the download notification says something. ASCII digits: this is a file name, not a label.
     return listOfNotNull(kind, nationalId?.takeIf { it.isNotBlank() }).joinToString("_") + ".pdf"
 }
-
-private const val HERO_KEY = "hero"
-private const val CHART_KEY = "chart"
-private const val SECTIONS_KEY = "sections"
-private const val EMPTY_STATE_KEY = "empty"
-private const val SKELETON_KEY = "skeleton"
-
-/** Above this many years the design narrows the bars and drops their labels for an axis. */
-private const val DenseBarThreshold = 12
-
-/** Stands in for the number while «%s روز» is resolved once instead of per bar. */
-private const val PlaceholderDays = "#"
-
-/** `toRialAmount` appends the unit; the bubble and the rows print it themselves. */
-private const val RialSuffix = " ریال"
-
-/** « · » between a month, its year and its days. */
-private const val MonthSeparator = " · "
-
-/** What a card measures, so the skeleton stands in for one without the page jumping. */
-private val CardHeight = 76.dp
-
-/** The chart card rides up over the hero's rounded edge. */
-private val ChartOverlap = (-18).dp
-
-private val SidePadding = 18.dp
-private val ChartSidePadding = 14.dp
 
 @PreviewRtlTheme
 @Composable
@@ -706,3 +678,23 @@ private val PreviewYears = persistentListOf(
     ),
 )
 
+/** The page with a real career behind it — the chart, the note and the action cards. */
+@PreviewRtlTheme
+@Composable
+private fun HistoryFixturePreview() {
+    PreviewRtlThemeContent { HistoryFixtureScreen() }
+}
+
+/** One year: month bars, the source chips and the concurrency legend. */
+@PreviewRtlTheme
+@Composable
+private fun HistoryFixtureYearScopePreview() {
+    PreviewRtlThemeContent {
+        HistoryContent(
+            uiState = HistoryFixtures.state.copy(scope = HistoryScope.Year("1404")),
+            lazyListState = rememberLazyListState(),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}

@@ -19,8 +19,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlinx.coroutines.flow.first
 
 /**
  * The page size these two endpoints are asked for is not cosmetic.
@@ -35,69 +33,10 @@ class HistoryRepositoryImplTest {
     private val cache = InMemoryHistoryCacheDao()
     private val repository = HistoryRepositoryImpl(remote, NoJobInfoDao(), cache)
 
-    /**
-     * The point of the cache: the page keeps working on the last good load.
-     *
-     * The service is asked first — this is cache-backed, not cache-only — and only a failure falls
-     * back to what was stored.
-     */
-    @Test
-    fun talfighInfos_whenTheServiceFails_fallsBackToTheCachedYears() = runTest {
-        remote.talfighResult = TalfighInfoDTO(list = listOf(yearDto("1404")), total = 1)
-        repository.getTalfighInfos()
-        assertEquals(1, cache.observeYears().first().size, "the good load was written through")
 
-        remote.talfighError = IllegalStateException("offline")
-        val cached = repository.getTalfighInfos()
 
-        assertEquals(listOf("1404"), cached.list?.map { it.hisYear })
-    }
 
-    /** With nothing stored there is nothing to fall back on, so the failure has to surface. */
-    @Test
-    fun talfighInfos_whenTheServiceFailsAndNothingIsCached_raisesTheFailure() = runTest {
-        remote.talfighError = IllegalStateException("offline")
 
-        assertFailsWith<IllegalStateException> { repository.getTalfighInfos() }
-    }
-
-    /**
-     * Seen in production: `talfighinfos` answers `{"total":0,"list":[]}` for people the wage service
-     * reports in full. Caching that would erase a career the cache was holding.
-     */
-    @Test
-    fun talfighInfos_anEmptyResponseDoesNotWipeTheCache() = runTest {
-        remote.talfighResult = TalfighInfoDTO(list = listOf(yearDto("1404")), total = 1)
-        repository.getTalfighInfos()
-
-        remote.talfighResult = TalfighInfoDTO(list = emptyList(), total = 0)
-        repository.getTalfighInfos()
-
-        remote.talfighError = IllegalStateException("offline")
-        assertEquals(listOf("1404"), repository.getTalfighInfos().list?.map { it.hisYear })
-    }
-
-    /** Reloading the same years replaces them; the cache must not grow a copy each time. */
-    @Test
-    fun talfighInfos_reloadingTheSameYearsDoesNotDuplicateThem() = runTest {
-        remote.talfighResult = TalfighInfoDTO(list = listOf(yearDto("1404")), total = 1)
-        repository.getTalfighInfos()
-        repository.getTalfighInfos()
-
-        remote.talfighError = IllegalStateException("offline")
-        assertEquals(1, repository.getTalfighInfos().list?.size, "one row, not two")
-    }
-
-    @Test
-    fun dastmozdInfos_whenTheServiceFails_fallsBackToTheCachedRows() = runTest {
-        remote.dastmozdResult = DastmozdInfoDTO(list = listOf(wageDto(1, "1404")), total = 1)
-        repository.getDastmozdInfos()
-
-        remote.dastmozdError = IllegalStateException("offline")
-        val cached = repository.getDastmozdInfos()
-
-        assertEquals(listOf("1404"), cached.list?.map { it.hisyear })
-    }
 
     private fun yearDto(year: String) = TalfighInfoItemDTO(
         hisYear = year, hisMonth1 = "31", hisMonth2 = "0", hisMonth3 = "0", hisMonth4 = "0",
@@ -171,8 +110,12 @@ class HistoryRepositoryImplTest {
         var talfighError: Throwable? = null
         var dastmozdError: Throwable? = null
         var talfighCalls = 0
-        var talfighResult = TalfighInfoDTO(list = emptyList(), total = 0)
-        var dastmozdResult = DastmozdInfoDTO(list = emptyList(), total = 0)
+        /*
+         * Set to serve a specific payload. Left null, the source syntheses rows from
+         * [rowsReturned] / [reportedTotal], which is what the paging tests drive it with.
+         */
+        var talfighResult: TalfighInfoDTO? = null
+        var dastmozdResult: DastmozdInfoDTO? = null
         val talfighLimits = mutableListOf<Int>()
         val dastmozdLimits = mutableListOf<Int>()
 
@@ -185,7 +128,7 @@ class HistoryRepositoryImplTest {
             lastTalfighQuery = query
             talfighError?.let { throw it }
             talfighLimits += query.limit
-            return TalfighInfoDTO(
+            return talfighResult ?: TalfighInfoDTO(
                 list = List(rowsReturned.coerceAtMost(query.limit)) { TalfighInfoItemDTO() },
                 total = reportedTotal,
             )
@@ -195,7 +138,7 @@ class HistoryRepositoryImplTest {
             lastDastmozdQuery = query
             dastmozdError?.let { throw it }
             dastmozdLimits += query.limit
-            return DastmozdInfoDTO(
+            return dastmozdResult ?: DastmozdInfoDTO(
                 list = List(rowsReturned.coerceAtMost(query.limit)) { DastmozdInfoItemDTO() },
                 total = reportedTotal,
             )

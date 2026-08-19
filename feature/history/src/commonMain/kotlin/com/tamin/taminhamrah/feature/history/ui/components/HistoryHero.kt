@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -33,8 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
+import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.DurationChipPR
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearChipPR
@@ -85,7 +85,7 @@ fun HistoryHero(
     val heroBrush = remember {
         Brush.verticalGradient(
             0f to TaminHistoryHeroTop,
-            HeroMidStop to TaminHistoryHeroMid,
+            HistoryConstants.HERO_MID_STOP to TaminHistoryHeroMid,
             1f to TaminHistoryHeroBottom,
         )
     }
@@ -93,7 +93,7 @@ fun HistoryHero(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = HeroCorner, bottomEnd = HeroCorner))
+            .clip(RoundedCornerShape(bottomStart = HistoryDimens.heroCorner, bottomEnd = HistoryDimens.heroCorner))
             .background(heroBrush)
             .heroGrid()
             .windowInsetsPadding(WindowInsets.statusBars),
@@ -101,11 +101,11 @@ fun HistoryHero(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = HeroPaddingH)
-                .padding(top = HeroPaddingTop, bottom = HeroPaddingBottom),
+                .padding(horizontal = HistoryDimens.heroPaddingH)
+                .padding(top = HistoryDimens.heroPaddingTop, bottom = HistoryDimens.heroPaddingBottom),
             // The design's own row gap. A uniform theme spacing left the head visibly taller than
             // the mock, most obviously with one chip and a zero orb.
-            verticalArrangement = Arrangement.spacedBy(HeroRowGap),
+            verticalArrangement = Arrangement.spacedBy(HistoryDimens.heroRowGap),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -161,8 +161,8 @@ fun HistoryHero(
  * would be a hundred layout nodes that never change.
  */
 private fun Modifier.heroGrid(): Modifier = drawBehind {
-    val step = GridStep.toPx()
-    val stroke = GridStroke.toPx()
+    val step = HistoryDimens.gridStep.toPx()
+    val stroke = HistoryDimens.gridStroke.toPx()
     var x = 0f
     while (x < size.width) {
         drawRect(TaminHistoryHeroGrid, Offset(x, 0f), Size(stroke, size.height))
@@ -191,9 +191,9 @@ private fun YearChipStrip(
 ) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(ChipGap),
+        horizontalArrangement = Arrangement.spacedBy(HistoryDimens.chipGap),
     ) {
-        item(key = ALL_CHIP_KEY) {
+        item(key = HistoryConstants.ALL_CHIP_KEY) {
             HeroChip(
                 label = allLabel,
                 selected = scope is HistoryScope.All,
@@ -214,8 +214,6 @@ private fun YearChipStrip(
     }
 }
 
-private const val ALL_CHIP_KEY = "all"
-
 @Composable
 private fun HeroChip(
     label: String,
@@ -235,7 +233,7 @@ private fun HeroChip(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(ChipCorner))
+            .clip(RoundedCornerShape(HistoryDimens.chipCorner))
             .then(
                 if (selected) {
                     Modifier.background(selectedBrush)
@@ -244,12 +242,12 @@ private fun HeroChip(
                 },
             )
             .border(
-                width = ChipBorderWidth,
+                width = HistoryDimens.hairline,
                 color = if (selected) TaminHistoryChipSelectedBorder else TaminHistoryChipBorder,
-                shape = RoundedCornerShape(ChipCorner),
+                shape = RoundedCornerShape(HistoryDimens.chipCorner),
             )
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = ChipPaddingH, vertical = ChipPaddingV),
+            .padding(horizontal = HistoryDimens.chipPaddingH, vertical = HistoryDimens.chipPaddingV),
         contentAlignment = Alignment.Center,
     ) {
         val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
@@ -275,13 +273,13 @@ private fun DayOrb(days: String, label: String) {
     }
 
     Box(
-        modifier = Modifier.size(OrbSize),
+        modifier = Modifier.size(HistoryDimens.orbSize),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(HaloSize)
-                .blur(HaloBlur)
+                .size(HistoryDimens.haloSize)
+                .blur(HistoryDimens.haloBlur)
                 .background(haloBrush, CircleShape),
         )
         Box(
@@ -314,24 +312,24 @@ private fun DayOrb(days: String, label: String) {
 }
 
 private fun orbFontSize(digits: Int) = when {
-    digits > 5 -> 22.sp
-    digits > 4 -> 24.sp
-    else -> 27.sp
+    digits > 5 -> HistoryDimens.orbTextSmall
+    digits > 4 -> HistoryDimens.orbTextMedium
+    else -> HistoryDimens.orbTextLarge
 }
 
 @Composable
 private fun DurationChip(chip: DurationChipPR) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(PillCorner))
+            .clip(RoundedCornerShape(HistoryDimens.pillCorner))
             .background(TaminHistoryHeroChipBg)
             .border(
-                ChipBorderWidth,
+                HistoryDimens.hairline,
                 TaminHistoryHeroChipBorder,
-                RoundedCornerShape(PillCorner),
+                RoundedCornerShape(HistoryDimens.pillCorner),
             )
-            .padding(horizontal = Spacing.sm, vertical = DurationChipPaddingV),
-        horizontalArrangement = Arrangement.spacedBy(DurationChipGap),
+            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.durationChipPaddingV),
+        horizontalArrangement = Arrangement.spacedBy(HistoryDimens.durationChipGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NumericText(
@@ -347,22 +345,3 @@ private fun DurationChip(chip: DurationChipPR) {
     }
 }
 
-private val HeroCorner = 34.dp
-private val HeroPaddingH = 18.dp
-private val HeroRowGap = 14.dp
-private val HeroPaddingTop = 8.dp
-private val HeroPaddingBottom = 28.dp
-private const val HeroMidStop = 0.58f
-private val GridStep = 34.dp
-private val GridStroke = 1.dp
-private val ChipGap = 5.dp
-private val ChipCorner = 13.dp
-private val ChipPaddingH = 11.dp
-private val ChipPaddingV = 8.dp
-private val ChipBorderWidth = 1.dp
-private val OrbSize = 104.dp
-private val HaloSize = 150.dp
-private val HaloBlur = 5.dp
-private val PillCorner = 100.dp
-private val DurationChipPaddingV = 6.dp
-private val DurationChipGap = 5.dp

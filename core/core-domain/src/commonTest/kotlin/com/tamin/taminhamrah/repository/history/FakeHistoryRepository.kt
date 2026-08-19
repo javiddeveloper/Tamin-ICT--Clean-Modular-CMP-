@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.HistoryRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
@@ -58,7 +59,7 @@ class FakeHistoryRepository : HistoryRepository {
     }
 
     override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> =
-        kotlinx.coroutines.flow.flow {
+        flow {
             if (shouldThrowError) throw error
             emit(PdfDownloadDN())
         }
@@ -80,7 +81,7 @@ class FakeHistoryRepository : HistoryRepository {
     }
 
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
-        kotlinx.coroutines.flow.flow {
+        flow {
             if (shouldThrowError) throw error
             emit(historyJobInfoResult)
         }

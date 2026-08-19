@@ -27,7 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
+import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.WorkshopPR
 import com.tamin.taminhamrah.mapper.history.labelRes
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
@@ -77,7 +78,7 @@ fun HistorySpanNote(
     val gaps = if (gapYears > 0) {
         stringResource(Res.string.history_note_gaps, gapYears.toString().toPersianDigits())
     } else {
-        SentenceEnd
+        HistoryConstants.SENTENCE_END
     }
 
     BannerCard(message = span + gaps, type = BannerType.Tip, modifier = modifier)
@@ -97,9 +98,9 @@ fun WorkshopSummaryRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.lg))
             .background(colors.bgSurface)
-            .border(Hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
+            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
             .clickable(onClick = onClick)
-            .padding(horizontal = RowPaddingH, vertical = RowPaddingV),
+            .padding(horizontal = HistoryDimens.rowPaddingH, vertical = HistoryDimens.rowPaddingV),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -114,7 +115,7 @@ fun WorkshopSummaryRow(
                 maxLines = 1,
             )
             Text(
-                text = workshop.type + Separator + workshop.branch,
+                text = workshop.type + HistoryConstants.SEPARATOR + workshop.branch,
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textMuted,
                 maxLines = 1,
@@ -127,7 +128,7 @@ fun WorkshopSummaryRow(
             imageVector = Icons.Filled.ChevronLeft,
             contentDescription = null,
             tint = colors.textMuted,
-            modifier = Modifier.size(ChevronSize),
+            modifier = Modifier.size(HistoryDimens.chevronSize),
         )
     }
 }
@@ -137,8 +138,8 @@ private fun WorkshopIconTile() {
     val colors = LocalTaminColors.current
     Box(
         modifier = Modifier
-            .size(TileSize)
-            .clip(RoundedCornerShape(TileCorner))
+            .size(HistoryDimens.tileSize)
+            .clip(RoundedCornerShape(HistoryDimens.tileCorner))
             .background(colors.blueBg),
         contentAlignment = Alignment.Center,
     ) {
@@ -146,7 +147,7 @@ private fun WorkshopIconTile() {
             imageVector = Icons.Outlined.Description,
             contentDescription = null,
             tint = colors.blueText,
-            modifier = Modifier.size(TileIconSize),
+            modifier = Modifier.size(HistoryDimens.tileIconSize),
         )
     }
 }
@@ -157,9 +158,9 @@ fun DaysPill(days: Int, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(PillCorner))
+            .clip(RoundedCornerShape(HistoryDimens.pillCorner))
             .background(colors.blueBg)
-            .padding(horizontal = Spacing.sm, vertical = PillPaddingV),
+            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.pillPaddingV),
     ) {
         Text(
             text = stringResource(
@@ -248,9 +249,9 @@ fun ReportMenuSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(CornerRadius.lg))
                         .background(colors.bgSurface)
-                        .border(Hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
+                        .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
                         .clickable { onSelect(type) }
-                        .padding(horizontal = RowPaddingH, vertical = RowPaddingV),
+                        .padding(horizontal = HistoryDimens.rowPaddingH, vertical = HistoryDimens.rowPaddingV),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -266,7 +267,7 @@ fun ReportMenuSheet(
                         imageVector = vectorResource(CoreRes.drawable.ic_tamin_download),
                         contentDescription = null,
                         tint = colors.textMuted,
-                        modifier = Modifier.size(ChevronSize),
+                        modifier = Modifier.size(HistoryDimens.chevronSize),
                     )
                 }
             }
@@ -281,14 +282,3 @@ private val ReportTypes = listOf(
     HistoryCertificateType.COMBINED,
 )
 
-private const val Separator = " · "
-private const val SentenceEnd = "."
-private val Hairline = 1.dp
-private val RowPaddingH = 12.dp
-private val RowPaddingV = 11.dp
-private val TileSize = 34.dp
-private val TileCorner = 12.dp
-private val TileIconSize = 18.dp
-private val ChevronSize = 16.dp
-private val PillCorner = 100.dp
-private val PillPaddingV = 4.dp

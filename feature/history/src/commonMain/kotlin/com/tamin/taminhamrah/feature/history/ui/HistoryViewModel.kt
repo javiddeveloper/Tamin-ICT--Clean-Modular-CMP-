@@ -208,14 +208,12 @@ class HistoryViewModel(
 
                 // The years are awaited first on purpose. They are the page, so if they failed this
                 // throws here and the wage result is never inspected — which is what stops a page
-                // failure from also complaining that the workshops are missing. Only a load that
-                // got its years reaches the warning below.
+                // failure from also complaining that the workshops are missing.
                 val history = years.await().list?.toPresentation().orEmpty()
                 val wageRows = wages.await()
 
                 // Said out loud rather than swallowed: the years are all there, but every sheet
-                // opened from them will be missing its workshops, and a person looking for a
-                // workshop deserves to know it failed rather than read the blank as "none".
+                // opened from them will be missing its workshops.
                 if (wageRows == null) {
                     sendEvent(HistoryEvent.ShowToast(Res.string.history_combined_wage_unavailable))
                 }

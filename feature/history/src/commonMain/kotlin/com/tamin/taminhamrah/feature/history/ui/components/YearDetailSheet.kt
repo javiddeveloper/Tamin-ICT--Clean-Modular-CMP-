@@ -41,11 +41,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
+import com.tamin.taminhamrah.feature.history.ui.HistoryFixtures
 import com.tamin.taminhamrah.feature.history.ui.model.WorkshopPR
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
+import com.tamin.taminhamrah.feature.history.ui.model.detailWith
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.plainTextClipEntry
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -82,10 +87,7 @@ import taminx.feature.history.history_workshop_code
 import taminx.feature.history.history_workshops_and_wages
 import taminx.feature.history.history_year_full
 import taminx.feature.history.history_year_incomplete
-import com.tamin.taminhamrah.ui.components.plainTextClipEntry
-
-/** Months to a season, and the four the Jalali year is read in. */
-private const val MONTHS_PER_SEASON = 3
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 
 /**
  * One year in full: its twelve months by season, and every employer that reported it.
@@ -120,7 +122,7 @@ fun YearDetailSheet(
         onDismissRequest = dismiss,
         sheetState = sheetState,
         containerColor = colors.bgPage,
-        shape = RoundedCornerShape(topStart = SheetCorner, topEnd = SheetCorner),
+        shape = RoundedCornerShape(topStart = HistoryDimens.sheetCorner, topEnd = HistoryDimens.sheetCorner),
     ) {
         /*
          * A LazyColumn, not a Column with verticalScroll.
@@ -136,16 +138,24 @@ fun YearDetailSheet(
                 .fillMaxWidth()
                 .navigationBarsPadding(),
             contentPadding = PaddingValues(
-                start = SheetPaddingH,
-                end = SheetPaddingH,
-                bottom = SheetPaddingBottom,
+                start = HistoryDimens.sheetPaddingH,
+                end = HistoryDimens.sheetPaddingH,
+                bottom = HistoryDimens.sheetPaddingBottom,
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            /*
+             * No overscroll inside the sheet.
+             *
+             * The list's stretch effect and the sheet's own settle animation both answer the same
+             * upward drag, and together they read as the sheet springing up and down. The sheet
+             * already gives the gesture its meaning; the list must not add a second one.
+             */
+            overscrollEffect = null,
         ) {
-            item(key = HEADER_KEY) { SheetHeader(detail = detail) }
+            item(key = HistoryConstants.SHEET_HEADER_KEY) { SheetHeader(detail = detail) }
 
             // Two cards per row — the design's grid, without nesting a grid inside a list.
-            items(SEASONS / 2, key = { "season_row_$it" }) { row ->
+            items(HistoryConstants.SEASONS / 2, key = { "season_row_$it" }) { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -155,7 +165,7 @@ fun YearDetailSheet(
                 }
             }
 
-            item(key = WORKSHOPS_TITLE_KEY) {
+            item(key = HistoryConstants.WORKSHOPS_TITLE_KEY) {
                 Text(
                     text = stringResource(Res.string.history_workshops_and_wages),
                     style = MaterialTheme.typography.titleSmall,
@@ -168,7 +178,7 @@ fun YearDetailSheet(
             when {
                 // Said plainly: the wage call failed, so "none recorded" would be a claim about
                 // data that never arrived.
-                wagesUnavailable -> item(key = WAGES_UNAVAILABLE_KEY) {
+                wagesUnavailable -> item(key = HistoryConstants.WAGES_UNAVAILABLE_KEY) {
                     Text(
                         text = stringResource(Res.string.history_combined_wage_unavailable),
                         style = MaterialTheme.typography.bodySmall,
@@ -176,7 +186,7 @@ fun YearDetailSheet(
                     )
                 }
 
-                detail.workshops.isEmpty() -> item(key = NO_WORKSHOP_KEY) {
+                detail.workshops.isEmpty() -> item(key = HistoryConstants.NO_WORKSHOP_KEY) {
                     Text(
                         text = stringResource(Res.string.history_combined_no_workshop),
                         style = MaterialTheme.typography.bodySmall,
@@ -187,21 +197,15 @@ fun YearDetailSheet(
                 else -> items(detail.workshops, key = { it.id }) { WorkshopCard(workshop = it) }
             }
 
-            item(key = CLOSE_KEY) { CloseButton(onClick = dismiss) }
+            item(key = HistoryConstants.CLOSE_KEY) { CloseButton(onClick = dismiss) }
         }
     }
 }
 
-private const val HEADER_KEY = "header"
-private const val WORKSHOPS_TITLE_KEY = "workshops_title"
-private const val WAGES_UNAVAILABLE_KEY = "wages_unavailable"
-private const val NO_WORKSHOP_KEY = "no_workshop"
-private const val CLOSE_KEY = "close"
-
 @Composable
 private fun SheetHeader(detail: YearDetailPR) {
     val colors = LocalTaminColors.current
-    val complete = detail.totalDays >= FULL_YEAR_DAYS
+    val complete = detail.totalDays >= HistoryConstants.FULL_YEAR_DAYS
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
@@ -245,16 +249,16 @@ private fun HeaderChip(
     val colors = LocalTaminColors.current
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(PillCorner))
+            .clip(RoundedCornerShape(HistoryDimens.pillCorner))
             .background(background)
             .then(
                 if (bordered) {
-                    Modifier.border(Hairline, colors.border, RoundedCornerShape(PillCorner))
+                    Modifier.border(HistoryDimens.hairline, colors.border, RoundedCornerShape(HistoryDimens.pillCorner))
                 } else {
                     Modifier
                 },
             )
-            .padding(horizontal = Spacing.sm, vertical = ChipPaddingV),
+            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.pillPaddingV),
     ) {
         Text(
             text = text,
@@ -269,14 +273,14 @@ private fun HeaderChip(
 @Composable
 private fun SeasonCard(detail: YearDetailPR, season: Int, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    val firstMonth = season * MONTHS_PER_SEASON
+    val firstMonth = season * HistoryConstants.MONTHS_PER_SEASON
 
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
             .background(colors.bgSurface)
-            .border(Hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
-            .padding(horizontal = CardPaddingH, vertical = CardPaddingV),
+            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
+            .padding(horizontal = HistoryDimens.seasonCardPaddingH, vertical = HistoryDimens.seasonCardPaddingV),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Row(
@@ -285,7 +289,7 @@ private fun SeasonCard(detail: YearDetailPR, season: Int, modifier: Modifier = M
         ) {
             Box(
                 modifier = Modifier
-                    .size(SeasonDot)
+                    .size(HistoryDimens.seasonDot)
                     .clip(CircleShape)
                     .background(SeasonColors[season]),
             )
@@ -297,7 +301,7 @@ private fun SeasonCard(detail: YearDetailPR, season: Int, modifier: Modifier = M
             )
         }
 
-        for (offset in 0 until MONTHS_PER_SEASON) {
+        for (offset in 0 until HistoryConstants.MONTHS_PER_SEASON) {
             val month = firstMonth + offset
             val days = detail.monthDays.getOrElse(month) { 0 }
             Row(
@@ -315,7 +319,7 @@ private fun SeasonCard(detail: YearDetailPR, season: Int, modifier: Modifier = M
                     text = if (days > 0) {
                         days.toString().toPersianDigits()
                     } else {
-                        EmptyMonth.toPersianDigits()
+                        HistoryConstants.EMPTY_MONTH.toPersianDigits()
                     },
                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                     color = if (days > 0) colors.textPrimary else TaminHistoryZeroText,
@@ -338,8 +342,8 @@ private fun WorkshopCard(workshop: WorkshopPR) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.lg))
             .background(colors.bgSurface)
-            .border(Hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
-            .padding(CardPaddingH),
+            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
+            .padding(HistoryDimens.seasonCardPaddingH),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Row(
@@ -373,7 +377,7 @@ private fun WorkshopCard(workshop: WorkshopPR) {
             )
             FactTile(
                 label = stringResource(Res.string.history_workshop_code),
-                value = workshop.code ?: NoCode,
+                value = workshop.code ?: HistoryConstants.NO_CODE,
                 numeric = true,
                 trailing = if (workshop.code != null) {
                     {
@@ -381,7 +385,7 @@ private fun WorkshopCard(workshop: WorkshopPR) {
                             imageVector = Icons.Outlined.ContentCopy,
                             contentDescription = null,
                             tint = colors.blueText,
-                            modifier = Modifier.size(CopyIcon),
+                            modifier = Modifier.size(HistoryDimens.copyIcon),
                         )
                     }
                 } else {
@@ -412,7 +416,7 @@ private fun WorkshopCard(workshop: WorkshopPR) {
                     text = PersianDateFormatter.monthNames[worked.monthIndex],
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary,
-                    modifier = Modifier.width(MonthColumnWidth),
+                    modifier = Modifier.width(HistoryDimens.monthColumnWidth),
                 )
                 NumericText(
                     text = stringResource(
@@ -425,7 +429,7 @@ private fun WorkshopCard(workshop: WorkshopPR) {
                 Box(modifier = Modifier.weight(1f))
                 WageText(
                     amount = worked.wage.toRialAmount(fallback = "")
-                        .removeSuffix(RialSuffix)
+                        .removeSuffix(HistoryConstants.RIAL_SUFFIX)
                         .toPersianDigits(),
                     rialLabel = stringResource(Res.string.history_rial),
                     color = colors.textPrimary,
@@ -450,10 +454,10 @@ private fun FactTile(
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(TileCorner))
+            .clip(RoundedCornerShape(HistoryDimens.tileCorner))
             .background(colors.bgPage)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = TilePaddingH, vertical = TilePaddingV),
+            .padding(horizontal = HistoryDimens.factTilePaddingH, vertical = HistoryDimens.factTilePaddingV),
         verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
     ) {
         Row(
@@ -497,11 +501,11 @@ fun DashedDivider(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(Hairline)
+            .height(HistoryDimens.hairline)
             .drawBehind {
                 var x = 0f
-                val dash = DashWidth.toPx()
-                val gap = DashGap.toPx()
+                val dash = HistoryDimens.dashWidth.toPx()
+                val gap = HistoryDimens.dashGap.toPx()
                 while (x < size.width) {
                     drawRect(color, Offset(x, 0f), size.copy(width = dash))
                     x += dash + gap
@@ -519,10 +523,10 @@ private fun CloseButton(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = Spacing.sm)
-            .clip(RoundedCornerShape(ButtonCorner))
+            .clip(RoundedCornerShape(HistoryDimens.buttonCorner))
             .background(brush)
             .clickable(onClick = onClick)
-            .height(ButtonHeight),
+            .height(HistoryDimens.buttonHeight),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -533,8 +537,6 @@ private fun CloseButton(onClick: () -> Unit) {
         )
     }
 }
-
-private const val SEASONS = 4
 
 private val SeasonLabels = listOf(
     Res.string.history_combined_season_spring,
@@ -553,25 +555,31 @@ private val SeasonColors = listOf(
 /** Nothing recorded for this year, which is a legitimate answer rather than a failure. */
 internal val NoWorkshops: ImmutableList<DastmozdInfoItemPR> = persistentListOf()
 
-private const val FULL_YEAR_DAYS = 365
-private const val EmptyMonth = "00"
-private const val NoCode = "—"
-private const val RialSuffix = " ریال"
-private val SheetCorner = 30.dp
-private val SheetPaddingH = 18.dp
-private val SheetPaddingBottom = 22.dp
-private val Hairline = 1.dp
-private val PillCorner = 100.dp
-private val ChipPaddingV = 4.dp
-private val CardPaddingH = 12.dp
-private val CardPaddingV = 10.dp
-private val SeasonDot = 6.dp
-private val TileCorner = 12.dp
-private val TilePaddingH = 10.dp
-private val TilePaddingV = 8.dp
-private val CopyIcon = 12.dp
-private val MonthColumnWidth = 52.dp
-private val ButtonCorner = 15.dp
-private val ButtonHeight = 46.dp
-private val DashWidth = 4.dp
-private val DashGap = 3.dp
+/**
+ * The sheet's own content, previewed without the sheet.
+ *
+ * A `ModalBottomSheet` renders as a full-screen scrim in a preview, so the seasons and the workshop
+ * cards are only visible when drawn on their own.
+ */
+@PreviewRtlTheme
+@Composable
+private fun YearDetailContentPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.padding(HistoryDimens.sheetPaddingH)) {
+            val detail = HistoryFixtures.years[2].detailWith(
+                rows = HistoryFixtures.wageRows,
+                optionalSchemeName = "بیمهٔ اختیاری",
+                constructionSchemeName = "بیمهٔ کارگران ساختمانی",
+            )
+            SheetHeader(detail = detail)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                SeasonCard(detail = detail, season = 0, modifier = Modifier.weight(1f))
+                SeasonCard(detail = detail, season = 1, modifier = Modifier.weight(1f))
+            }
+            WorkshopCard(workshop = detail.workshops.first())
+        }
+    }
+}

@@ -24,7 +24,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.ui.components.BarChartItem
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -37,6 +36,8 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentTop
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 
 /** One filter above the month bars: «همه», or a single employer. */
 @Immutable
@@ -69,10 +70,10 @@ fun HistoryChartCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(CardCorner))
+            .clip(RoundedCornerShape(HistoryDimens.cardCorner))
             .background(colors.bgSurface)
-            .border(Hairline, colors.border, RoundedCornerShape(CardCorner))
-            .padding(horizontal = CardPaddingH, vertical = CardPaddingV),
+            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(HistoryDimens.cardCorner))
+            .padding(horizontal = HistoryDimens.cardPaddingH, vertical = HistoryDimens.cardPaddingV),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Row(
@@ -120,8 +121,8 @@ fun HistoryChartCard(
                 }
                 Box(
                     modifier = Modifier
-                        .size(width = LegendSwatchWidth, height = LegendSwatchHeight)
-                        .clip(RoundedCornerShape(LegendSwatchCorner))
+                        .size(width = HistoryDimens.legendSwatchWidth, height = HistoryDimens.legendSwatchHeight)
+                        .clip(RoundedCornerShape(HistoryDimens.legendSwatchCorner))
                         .background(capBrush),
                 )
                 Text(
@@ -191,7 +192,7 @@ private fun SourceChipRow(
             val source = (index - 1).takeIf { it >= 0 }
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(PillCorner))
+                    .clip(RoundedCornerShape(HistoryDimens.pillCorner))
                     .then(
                         if (chip.selected) {
                             Modifier.background(selectedBrush)
@@ -200,12 +201,12 @@ private fun SourceChipRow(
                         },
                     )
                     .border(
-                        Hairline,
+                        HistoryDimens.hairline,
                         if (chip.selected) TaminHistoryButtonEnd else colors.border,
-                        RoundedCornerShape(PillCorner),
+                        RoundedCornerShape(HistoryDimens.pillCorner),
                     )
                     .clickable { onSourceClick(source) }
-                    .padding(horizontal = Spacing.sm, vertical = ChipPaddingV),
+                    .padding(horizontal = Spacing.sm, vertical = HistoryDimens.sourceChipPaddingV),
             ) {
                 Text(
                     text = chip.label,
@@ -280,7 +281,7 @@ fun MonthWageBreakdown(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(TotalCorner))
+                .clip(RoundedCornerShape(HistoryDimens.totalCorner))
                 .background(colors.blueBg)
                 .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -305,7 +306,7 @@ fun MonthWageBreakdown(
 @Composable
 fun WageText(amount: String, rialLabel: String, color: Color) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(WageGap),
+        horizontalArrangement = Arrangement.spacedBy(HistoryDimens.wageGap),
         verticalAlignment = Alignment.Bottom,
     ) {
         NumericText(
@@ -316,20 +317,8 @@ fun WageText(amount: String, rialLabel: String, color: Color) {
         Text(
             text = rialLabel,
             style = MaterialTheme.typography.labelSmall,
-            color = color.copy(alpha = RialAlpha),
+            color = color.copy(alpha = HistoryConstants.RIAL_ALPHA),
         )
     }
 }
 
-private val CardCorner = 24.dp
-private val CardPaddingH = 15.dp
-private val CardPaddingV = 14.dp
-private val Hairline = 1.dp
-private val PillCorner = 100.dp
-private val ChipPaddingV = 6.dp
-private val LegendSwatchWidth = 10.dp
-private val LegendSwatchHeight = 7.dp
-private val LegendSwatchCorner = 3.dp
-private val TotalCorner = 12.dp
-private val WageGap = 3.dp
-private const val RialAlpha = 0.7f

@@ -21,12 +21,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import com.tamin.taminhamrah.util.PersianDateFormatter
-
-/** Months in a Jalali year. */
-private const val MONTHS = 12
-
-/** Days the service counts to a month when it reports a length. */
-private const val DAYS_IN_MONTH = 30
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 
 /**
  * What the page is showing: everything, or one year.
@@ -150,7 +145,7 @@ fun YearHistoryPR.detailWith(
             // or a construction-worker policy has none to carry. The design names the scheme from
             // the history type instead of leaving the line blank, and so does this.
             name = row.rwshname.ifBlank {
-                if (row.historytypedesc.startsWith(OPTIONAL_TYPE_PREFIX)) {
+                if (row.historytypedesc.startsWith(HistoryConstants.OPTIONAL_TYPE_PREFIX)) {
                     optionalSchemeName
                 } else {
                     constructionSchemeName
@@ -164,7 +159,7 @@ fun YearHistoryPR.detailWith(
         )
     }
 
-    val concurrent = BooleanArray(MONTHS) { month ->
+    val concurrent = BooleanArray(HistoryConstants.MONTHS_IN_YEAR) { month ->
         rows.count { row ->
             (row.wageDetails.getOrNull(month)?.month?.toIntOrNull() ?: 0) > 0
         } > 1
@@ -202,8 +197,8 @@ fun yearDurationChips(
 ): ImmutableList<DurationChipPR> {
     val days = detail?.totalDays ?: 0
     return persistentListOf(
-        DurationChipPR(toPersian(days / DAYS_IN_MONTH), labels.months),
-        DurationChipPR(toPersian(days % DAYS_IN_MONTH), labels.days),
+        DurationChipPR(toPersian(days / HistoryConstants.DAYS_IN_MONTH), labels.months),
+        DurationChipPR(toPersian(days % HistoryConstants.DAYS_IN_MONTH), labels.days),
         DurationChipPR(toPersian(detail?.workshops?.size ?: 0), labels.sources),
     )
 }
@@ -229,7 +224,7 @@ fun List<YearHistoryPR>.yearBars(toPersian: (String) -> String): ImmutableList<B
         BarChartItem(
             id = year.year,
             label = toPersian(year.year),
-            fraction = year.totalDays / DAYS_IN_FULL_YEAR,
+            fraction = year.totalDays / HistoryConstants.DAYS_IN_LEAP_YEAR,
             fillTop = if (full) TaminHistoryBarFullTop else TaminHistoryBarPartialYearTop,
             fillBottom = if (full) TaminHistoryBarFullBottom else TaminHistoryBarPartialYearBottom,
             labelColor = if (year.totalDays > 0) TaminLightTextSecondary else TaminHistoryZeroText,
@@ -253,7 +248,7 @@ fun YearDetailPR?.monthBars(
     val detail = this ?: return persistentListOf()
     val rows = source?.let { detail.workshops.getOrNull(it)?.months }
 
-    return List(MONTHS) { month ->
+    return List(HistoryConstants.MONTHS_IN_YEAR) { month ->
         val days = if (rows == null) {
             detail.monthDays.getOrElse(month) { 0 }
         } else {
@@ -305,13 +300,3 @@ fun YearDetailPR?.sourceChips(selected: Int?, allLabel: String): ImmutableList<S
     }.toImmutableList()
 }
 
-/** A full Jalali year in days — what a year bar's height is measured against. */
-private const val DAYS_IN_FULL_YEAR = 366f
-
-/**
- * How an optional-insurance row names its type.
- *
- * Spelled with the Arabic yeh the service actually sends, not the Persian one — this is matched
- * against the wire, and "correcting" it would stop it matching.
- */
-private const val OPTIONAL_TYPE_PREFIX = "اختياري"

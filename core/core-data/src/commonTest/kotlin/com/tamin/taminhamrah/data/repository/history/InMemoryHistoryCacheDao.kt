@@ -15,12 +15,21 @@ internal class InMemoryHistoryCacheDao : HistoryCacheDao {
 
     override fun observeWageRows(): Flow<List<HistoryWageRowEntity>> = wageRows
 
+    /*
+     * Both inserts replace by primary key and keep the stored order, because the real DAO is
+     * declared `OnConflictStrategy.REPLACE` and Room reads back ordered by `position`. Appending
+     * instead would let a test pass on duplicated rows that production would have collapsed.
+     */
     override suspend fun insertYears(years: List<HistoryYearEntity>) {
-        this.years.value += years
+        val incoming = years.associateBy { it.hisYear }
+        this.years.value = (this.years.value.filterNot { it.hisYear in incoming } + years)
+            .sortedBy { it.position }
     }
 
     override suspend fun insertWageRows(rows: List<HistoryWageRowEntity>) {
-        wageRows.value += rows
+        val incoming = rows.associateBy { it.id }
+        wageRows.value = (wageRows.value.filterNot { it.id in incoming } + rows)
+            .sortedBy { it.position }
     }
 
     override suspend fun clearYears() {

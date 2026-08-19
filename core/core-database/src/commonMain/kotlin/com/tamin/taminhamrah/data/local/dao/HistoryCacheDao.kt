@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.Flow
 /**
  * The cached «کلیه سوابق» — the years and the employers behind them.
  *
- * Both tables are replaced together in [replaceYears] / [replaceWageRows]: a load that returned
- * fewer rows than the cache holds must leave the cache matching the service, not a merge of the two.
+ * Each table is replaced whole: a load that returned fewer rows than the cache holds must leave the
+ * cache matching the service, not a merge of the two.
  */
 @Dao
 interface HistoryCacheDao {
