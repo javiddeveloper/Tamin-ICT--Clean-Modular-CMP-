@@ -21,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +47,7 @@ fun TaminConfirmationDialog(
     /** Defaults keep the informational blue every existing caller expects. */
     iconTint: Color = LocalTaminColors.current.blueText,
     iconBackground: Color = LocalTaminColors.current.blueBg,
+    iconBackgroundBrush: Brush? = null,
     /**
      * Optional block between the description and the buttons, for anything the description cannot
      * be: a value to copy, a field to read back. Omitted by every caller that only needs prose.
@@ -77,7 +80,7 @@ fun TaminConfirmationDialog(
                         modifier = Modifier
                             .size(68.dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(iconBackground),
+                            .background(iconBackgroundBrush ?: SolidColor(iconBackground)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

@@ -113,6 +113,7 @@ import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -482,6 +483,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 )
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
+
+                orotezProtezScreen(onBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }
