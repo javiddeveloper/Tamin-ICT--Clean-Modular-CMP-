@@ -38,6 +38,8 @@ import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRepositoryImpl
+import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -63,4 +65,5 @@ val dataKoinModule = module {
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
     singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }
+    singleOf(::HistoryObjectionRepositoryImpl) { bind<HistoryObjectionRepository>() }
 }

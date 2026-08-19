@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
+import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
@@ -123,6 +125,13 @@ val remoteModule = module {
         UserRequestRemoteDataSourceImpl(
             requestApiService = get(named("requestApiService")),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<HistoryObjectionRemoteDataSource> {
+        HistoryObjectionRemoteDataSourceImpl(
+            historyObjectionApiService = get(),
             errorParser = get()
         )
     }
