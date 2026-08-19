@@ -12,14 +12,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +44,7 @@ import androidx.compose.ui.window.Dialog
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -86,6 +91,63 @@ fun TaminJalaliDatePicker(
     initial: Triple<Int, Int, Int> = PersianDateFormatter.today(),
 ) {
     val colors = LocalTaminColors.current
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(CornerRadius.sheet),
+            color = colors.bgSurface,
+        ) {
+            JalaliDatePickerContent(
+                title = title,
+                onDismiss = onDismiss,
+                onConfirm = onConfirm,
+                initial = initial,
+            )
+        }
+    }
+}
+
+/**
+ * Same wheels as [TaminJalaliDatePicker], surfaced from the bottom of the screen instead of a
+ * centered dialog. Use where the picker is one step in a longer flow and should feel anchored to
+ * the field that opened it rather than floating above the page.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaminJalaliDatePickerBottomSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: (year: Int, month: Int, day: Int) -> Unit,
+    initial: Triple<Int, Int, Int> = PersianDateFormatter.today(),
+) {
+    val colors = LocalTaminColors.current
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = colors.bgPage,
+        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
+    ) {
+        JalaliDatePickerContent(
+            title = title,
+            onDismiss = onDismiss,
+            onConfirm = onConfirm,
+            initial = initial,
+            wheelsBackground = colors.bgSurface,
+            modifier = Modifier.navigationBarsPadding(),
+        )
+    }
+}
+
+/** The header, wheels and action row shared by the dialog and bottom-sheet presentations. */
+@Composable
+private fun JalaliDatePickerContent(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: (year: Int, month: Int, day: Int) -> Unit,
+    initial: Triple<Int, Int, Int>,
+    wheelsBackground: Color = LocalTaminColors.current.bgPage,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
     var year by remember { mutableIntStateOf(initial.first) }
     var month by remember { mutableIntStateOf(initial.second) }
     var day by remember { mutableIntStateOf(initial.third) }
@@ -107,58 +169,52 @@ fun TaminJalaliDatePicker(
     // stepping over a short month and back leaves the original day intact.
     val clampedDay = day.coerceAtMost(daysInMonth)
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(CornerRadius.sheet),
-            color = colors.bgSurface,
-        ) {
-            Column(
-                modifier = Modifier.padding(Spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg),
-            ) {
-                PickerHeader(
-                    title = title,
-                    year = year,
-                    month = month,
-                    day = clampedDay,
-                    onToday = {
-                        val today = PersianDateFormatter.today()
-                        year = today.first
-                        month = today.second
-                        day = today.third
-                    },
-                )
+    Column(
+        modifier = modifier.padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        PickerHeader(
+            title = title,
+            year = year,
+            month = month,
+            day = clampedDay,
+            onToday = {
+                val today = PersianDateFormatter.today()
+                year = today.first
+                month = today.second
+                day = today.third
+            },
+        )
 
-                DateWheels(
-                    days = days,
-                    months = months,
-                    years = years,
-                    dayIndex = clampedDay - 1,
-                    monthIndex = month - 1,
-                    yearIndex = year - FIRST_YEAR,
-                    onDayIndex = { day = it + 1 },
-                    onMonthIndex = { month = it + 1 },
-                    onYearIndex = { year = FIRST_YEAR + it },
-                )
+        DateWheels(
+            days = days,
+            months = months,
+            years = years,
+            dayIndex = clampedDay - 1,
+            monthIndex = month - 1,
+            yearIndex = year - FIRST_YEAR,
+            onDayIndex = { day = it + 1 },
+            onMonthIndex = { month = it + 1 },
+            onYearIndex = { year = FIRST_YEAR + it },
+            background = wheelsBackground,
+        )
 
-                // انصراف first so that right-to-left puts it on the right and the wide blue
-                // تأیید تاریخ on the left, as the design has them.
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    TaminPrimaryButton(
-                        text = stringResource(Res.string.date_picker_confirm),
-                        onClick = { onConfirm(year, month, clampedDay) },
-                        // The button's default is the app bar's gradient, which is teal. This
-                        // dialog is blue throughout, so it takes the same blue as the wheels.
-                        background = SolidColor(colors.blueText),
-                        modifier = Modifier.weight(2f),
-                    )
-                    CancelButton(
-                        text = stringResource(Res.string.action_cancel),
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
+        // انصراف first so that right-to-left puts it on the right and the wide blue
+        // تأیید تاریخ on the left, as the design has them.
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            TaminPrimaryButton(
+                text = stringResource(Res.string.date_picker_confirm),
+                onClick = { onConfirm(year, month, clampedDay) },
+                // The button's default is the app bar's gradient, which is teal. This
+                // dialog is blue throughout, so it takes the same blue as the wheels.
+                background = SolidColor(colors.blueText),
+                modifier = Modifier.weight(2f),
+            )
+            CancelButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
@@ -230,6 +286,7 @@ private fun DateWheels(
     onDayIndex: (Int) -> Unit,
     onMonthIndex: (Int) -> Unit,
     onYearIndex: (Int) -> Unit,
+    background: Color,
 ) {
     val colors = LocalTaminColors.current
     Box(
@@ -237,7 +294,8 @@ private fun DateWheels(
             .fillMaxWidth()
             .height(WHEEL_HEIGHT)
             .clip(RoundedCornerShape(CornerRadius.cardCompact))
-            .background(colors.bgPage),
+            .background(background)
+            .border(Thickness.border, colors.border, RoundedCornerShape(CornerRadius.cardCompact)),
         contentAlignment = Alignment.Center,
     ) {
         // The selection is a place, not a row: it stays put while the numbers move through it.
@@ -266,10 +324,10 @@ private fun DateWheels(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        0f to colors.bgPage,
+                        0f to background,
                         EDGE_FADE_STOP to Color.Transparent,
                         1f - EDGE_FADE_STOP to Color.Transparent,
-                        1f to colors.bgPage,
+                        1f to background,
                     ),
                 ),
         )
