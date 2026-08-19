@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceDocTypeDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrencePersonalInfoDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
+import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadImageResponseDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -45,7 +46,7 @@ interface OccurrenceApiService {
     @POST("upload-image/occurrenceImage")
     suspend fun uploadImage(
         @Body content: MultiPartFormDataContent,
-    ): BaseDTO<OccurrenceResponseDTO>
+    ): OccurrenceUploadImageResponseDTO
 
     @POST("occurence")
     suspend fun submitOccurrence(

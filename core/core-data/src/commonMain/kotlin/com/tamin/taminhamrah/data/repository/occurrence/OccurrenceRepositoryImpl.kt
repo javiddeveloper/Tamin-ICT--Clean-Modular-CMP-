@@ -15,8 +15,13 @@ class OccurrenceRepositoryImpl(
     private val remoteDataSource: OccurrenceRemoteDataSource,
 ) : OccurrenceRepository {
 
-    override suspend fun getPersonalInfo(nationalCode: String, birthDate: String): OccurrencePersonalInfoDN =
-        remoteDataSource.getPersonalInfo(nationalCode, birthDate).toDomain()
+    override suspend fun getPersonalInfo(
+        nationalCode: String,
+        birthDate: String,
+        workshopCode: String,
+        branchCode: String,
+    ): OccurrencePersonalInfoDN =
+        remoteDataSource.getPersonalInfo(nationalCode, birthDate, workshopCode, branchCode).toDomain()
 
     override suspend fun getAllWorkshops(nationalCode: String): List<WorkshopItemDN> =
         remoteDataSource.getAllWorkshops(nationalCode).list?.map { it.toDomain() } ?: emptyList()

@@ -1,6 +1,9 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,10 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +34,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.taminServices.occurrence.camera.rememberCameraPermission
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceDocumentSourceSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
@@ -48,15 +60,21 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.dashedOutline
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
@@ -66,6 +84,7 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_file_read_fallback
 import taminx.core.core_ui.occurrence_add_document
+import taminx.core.core_ui.occurrence_camera_permission_denied
 import taminx.core.core_ui.occurrence_doc_format_hint
 import taminx.core.core_ui.occurrence_doc_required_hint
 import taminx.core.core_ui.occurrence_documents_min_hint
@@ -97,12 +116,14 @@ internal fun Step6DocumentSubmitStep(
     val toaster = LocalToaster.current
     val scope = rememberCoroutineScope()
     val step = uiState.documentSubmit
+    val cameraPermission = rememberCameraPermission()
     var pendingDocType by remember { mutableStateOf<OccurrenceDocTypePR?>(null) }
     var showDocTypeSheet by remember { mutableStateOf(false) }
+    var showSourceSheet by remember { mutableStateOf(false) }
 
-    val filePickerLauncher = rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? ->
-        val docType = pendingDocType ?: return@rememberFilePickerLauncher
-        if (file == null) { pendingDocType = null; return@rememberFilePickerLauncher }
+    fun handlePicked(file: PlatformFile?) {
+        val docType = pendingDocType ?: return
+        if (file == null) { pendingDocType = null; return }
         scope.launch {
             try {
                 val bytes = file.readBytes()
@@ -115,6 +136,9 @@ internal fun Step6DocumentSubmitStep(
             }
         }
     }
+
+    val galleryLauncher = rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? -> handlePicked(file) }
+    val cameraLauncher = rememberCameraPickerLauncher { file: PlatformFile? -> handlePicked(file) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -131,6 +155,7 @@ internal fun Step6DocumentSubmitStep(
             OccurrenceNavigationBar(
                 primaryText = stringResource(Res.string.occurrence_submit),
                 primaryEnabled = uiState.isStep6Valid && !uiState.isLoading && !uiState.isSubmitting,
+                isPrimaryLoading = uiState.isSubmitting,
                 onPrimaryClick = { onIntent(OccurrenceIntent.SubmitOccurrence) },
                 secondaryText = stringResource(Res.string.occurrence_prev_step),
                 onSecondaryClick = onBack,
@@ -138,12 +163,9 @@ internal fun Step6DocumentSubmitStep(
         },
         contentWindowInsets = WindowInsets(0),
     ) { padding ->
-        OccurrenceErrorWrapper(
-            isLoading = uiState.isLoading,
-            error = null,
-            onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
-            modifier = Modifier.padding(padding),
-        ) {
+        if (uiState.isLoading) {
+            LoadingStateOverlay(modifier = Modifier.padding(padding))
+        } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -153,44 +175,71 @@ internal fun Step6DocumentSubmitStep(
             ) {
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                SectionLabel(text = stringResource(Res.string.occurrence_documents_section_title))
-                Spacer(modifier = Modifier.height(Spacing.xs))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .taminSurface(CornerRadius.card)
+                        .padding(Spacing.lg),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.occurrence_documents_section_title),
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.textPrimary,
+                        )
+                        StatusPill(
+                            text = stringResource(Res.string.occurrence_documents_min_hint, step.uploadedDocuments.size.toString()),
+                            containerColor = if (uiState.isStep6Valid) taminColors.greenBg else taminColors.orangeBg,
+                            contentColor = if (uiState.isStep6Valid) taminColors.greenText else taminColors.orangeText,
+                        )
+                    }
 
-                Text(
-                    text = stringResource(Res.string.occurrence_documents_min_hint, step.uploadedDocuments.size.toString()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textMuted,
-                )
-                Text(
-                    text = stringResource(Res.string.occurrence_doc_format_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textMuted,
-                )
+                    if (step.uploadedDocuments.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(Spacing.md))
+                        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                            step.uploadedDocuments.forEach { doc ->
+                                UploadedDocRow(doc = doc, onDelete = { onIntent(OccurrenceIntent.RemoveDocument(doc.guid)) })
+                            }
+                        }
+                    }
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
-                if (step.uploadedDocuments.isEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(if (step.isUploadingDoc) 0.5f else 1f)
+                            .clip(RoundedCornerShape(CornerRadius.lg))
+                            .background(taminColors.blueBg)
+                            .dashedOutline(taminColors.blueText, CornerRadius.lg, Thickness.border)
+                            .clickable(enabled = !step.isUploadingDoc, onClick = { showDocTypeSheet = true })
+                            .padding(vertical = Spacing.md),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.occurrence_add_document),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = taminColors.blueText,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+
                     Text(
                         text = stringResource(Res.string.occurrence_doc_required_hint),
                         style = MaterialTheme.typography.bodySmall,
-                        color = taminColors.dangerText,
+                        color = taminColors.textMuted,
                     )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        step.uploadedDocuments.forEach { doc ->
-                            UploadedDocRow(doc = doc, onDelete = { onIntent(OccurrenceIntent.RemoveDocument(doc.guid)) })
-                        }
-                    }
+                    Text(
+                        text = stringResource(Res.string.occurrence_doc_format_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.textMuted,
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(Spacing.sm))
-
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.occurrence_add_document),
-                    onClick = { showDocTypeSheet = true },
-                    enabled = !step.isUploadingDoc,
-                    modifier = Modifier.fillMaxWidth(),
-                )
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
                 TaminDivider()
@@ -277,9 +326,46 @@ internal fun Step6DocumentSubmitStep(
                 val docType = step.docTypes.first { it.id.toString() == option.id }
                 pendingDocType = docType
                 showDocTypeSheet = false
-                filePickerLauncher.launch()
+                showSourceSheet = true
             },
             onDismiss = { showDocTypeSheet = false },
+        )
+    }
+
+    val currentPendingDocType = pendingDocType
+    if (showSourceSheet && currentPendingDocType != null) {
+        OccurrenceDocumentSourceSheet(
+            title = currentPendingDocType.title,
+            onSelectCamera = {
+                showSourceSheet = false
+                if (cameraPermission.granted) {
+                    cameraLauncher.launch()
+                } else {
+                    cameraPermission.request { granted ->
+                        if (granted) {
+                            cameraLauncher.launch()
+                        } else {
+                            pendingDocType = null
+                            scope.launch {
+                                val msg = try {
+                                    getString(Res.string.occurrence_camera_permission_denied)
+                                } catch (_: Exception) {
+                                    ""
+                                }
+                                toaster.error(msg)
+                            }
+                        }
+                    }
+                }
+            },
+            onSelectGallery = {
+                showSourceSheet = false
+                galleryLauncher.launch()
+            },
+            onDismiss = {
+                showSourceSheet = false
+                pendingDocType = null
+            },
         )
     }
 }
@@ -291,13 +377,45 @@ private fun UploadedDocRow(
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.fillMaxWidth()) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface(CornerRadius.lg)
+            .padding(Spacing.md),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(IconSize.large)
+                .background(taminColors.blueBg, RoundedCornerShape(CornerRadius.md)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Image,
+                contentDescription = null,
+                tint = taminColors.blueText,
+                modifier = Modifier.size(IconSize.medium),
+            )
+        }
+        Spacer(modifier = Modifier.width(Spacing.md))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = doc.typeName, style = MaterialTheme.typography.bodyMedium, color = taminColors.textPrimary)
+            Text(text = doc.typeName, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = taminColors.textPrimary)
+            Spacer(modifier = Modifier.height(Spacing.xxs))
             Text(text = doc.fileName, style = MaterialTheme.typography.bodySmall, color = taminColors.textMuted)
         }
-        IconButton(onClick = onDelete) {
-            Icon(imageVector = Icons.Default.Close, contentDescription = null, tint = taminColors.dangerText)
+        Spacer(modifier = Modifier.width(Spacing.sm))
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier
+                .size(IconSize.large)
+                .background(taminColors.dangerBg, CircleShape),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = null,
+                tint = taminColors.dangerText,
+                modifier = Modifier.size(IconSize.small),
+            )
         }
     }
 }

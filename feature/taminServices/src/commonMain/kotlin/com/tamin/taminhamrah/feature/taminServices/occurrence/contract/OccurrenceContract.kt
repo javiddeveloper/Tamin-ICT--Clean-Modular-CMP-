@@ -41,8 +41,12 @@ data class WorkshopStepState(
 data class JobDetailsStepState(
     val fullName: String = "",
     val nationality: String = "",
+    val nationalityCode: String = "",
     val gender: String = "",
     val insuranceType: String = "",
+    val insuranceTypeCode: String = "",
+    val branchCode: String = "",
+    val branchName: String = "",
     val employmentDate: String = "",
     val maritalStatus: String = "",
     val jobTitle: String = "",

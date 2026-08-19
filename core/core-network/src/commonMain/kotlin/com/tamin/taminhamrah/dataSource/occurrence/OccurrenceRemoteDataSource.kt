@@ -9,7 +9,12 @@ import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface OccurrenceRemoteDataSource {
-    suspend fun getPersonalInfo(nationalCode: String, birthDate: String): OccurrencePersonalInfoDTO
+    suspend fun getPersonalInfo(
+        nationalCode: String,
+        birthDate: String,
+        workshopCode: String,
+        branchCode: String,
+    ): OccurrencePersonalInfoDTO
     suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopItemDTO>
     suspend fun getWorkshopSpec(workshopCode: String, branchCode: String): WorkshopItemDTO
     suspend fun getInsuredRelation(nationalCode: String): InsuredRelationDTO

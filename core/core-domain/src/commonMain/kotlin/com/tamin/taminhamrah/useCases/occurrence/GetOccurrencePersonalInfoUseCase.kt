@@ -6,6 +6,11 @@ import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
 class GetOccurrencePersonalInfoUseCase(
     private val repository: OccurrenceRepository
 ) {
-    suspend operator fun invoke(nationalCode: String, birthDate: String): OccurrencePersonalInfoDN =
-        repository.getPersonalInfo(nationalCode, birthDate)
+    suspend operator fun invoke(
+        nationalCode: String,
+        birthDate: String,
+        workshopCode: String,
+        branchCode: String,
+    ): OccurrencePersonalInfoDN =
+        repository.getPersonalInfo(nationalCode, birthDate, workshopCode, branchCode)
 }

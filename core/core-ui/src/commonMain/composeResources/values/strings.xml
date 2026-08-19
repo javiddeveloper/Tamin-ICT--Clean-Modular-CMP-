@@ -888,6 +888,11 @@
     <string name="occurrence_summary_exact_location">محل دقیق</string>
     <string name="occurrence_submit_disclaimer">با ارسال این فرم، صحت اطلاعات واردشده را تأیید می‌کنید. پس از ارسال، امکان ویرایش وجود ندارد.</string>
     <string name="occurrence_sheet_doc_type_title">نوع مدرک</string>
+    <string name="occurrence_document_source_camera_title">دوربین</string>
+    <string name="occurrence_document_source_camera_subtitle">گرفتن عکس جدید</string>
+    <string name="occurrence_document_source_gallery_title">گالری تصاویر</string>
+    <string name="occurrence_document_source_gallery_subtitle">انتخاب از فایل‌های دستگاه</string>
+    <string name="occurrence_camera_permission_denied">برای استفاده از دوربین، دسترسی لازم را در تنظیمات فعال کنید.</string>
 
     <!-- Success modal -->
     <string name="occurrence_success_title">گزارش حادثه ثبت شد</string>

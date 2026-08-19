@@ -11,6 +11,7 @@ data class WorkshopItemDN(
     val postalCode: String,
     val phone: String,
     val nationality: String,
+    val nationalityCode: String,
 ) {
     val displayCode: String get() = "$workshopCode - شعبه $branchCode"
 }

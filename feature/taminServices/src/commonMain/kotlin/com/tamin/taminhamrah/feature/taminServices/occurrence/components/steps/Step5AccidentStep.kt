@@ -101,13 +101,13 @@ internal fun Step5AccidentStep(
     }
 
     val outcomeOptions = listOf(
-        "1" to stringResource(Res.string.occurrence_outcome_death),
-        "2" to stringResource(Res.string.occurrence_outcome_total_disability),
-        "3" to stringResource(Res.string.occurrence_outcome_partial_disability),
-        "4" to stringResource(Res.string.occurrence_outcome_organ_defect),
-        "5" to stringResource(Res.string.occurrence_outcome_medical_rest),
-        "6" to stringResource(Res.string.occurrence_outcome_medical_compensation),
-        "7" to stringResource(Res.string.occurrence_outcome_none),
+        "0" to stringResource(Res.string.occurrence_outcome_death),
+        "1" to stringResource(Res.string.occurrence_outcome_total_disability),
+        "2" to stringResource(Res.string.occurrence_outcome_partial_disability),
+        "3" to stringResource(Res.string.occurrence_outcome_organ_defect),
+        "4" to stringResource(Res.string.occurrence_outcome_medical_rest),
+        "5" to stringResource(Res.string.occurrence_outcome_medical_compensation),
+        "6" to stringResource(Res.string.occurrence_outcome_none),
     )
 
     Scaffold(
@@ -241,7 +241,7 @@ private fun Step5AccidentStepPreview() {
                 accident = AccidentStepState(
                     accidentDate = "1402/06/15",
                     accidentTime = "14:30",
-                    accidentOutcomeId = "5",
+                    accidentOutcomeId = "4",
                     accidentOutcomeTitle = "استراحت پزشکی",
                     exactLocation = "سالن تولید، خط مونتاژ شماره ۳",
                     description = "در حین انجام کار با ماشین‌آلات، دست راست در معرض خطر قرار گرفت.",

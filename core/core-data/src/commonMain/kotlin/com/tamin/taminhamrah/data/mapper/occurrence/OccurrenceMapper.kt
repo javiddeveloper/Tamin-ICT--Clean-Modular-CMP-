@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.model.occurrence.InsuredRelationDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceDocTypeDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceDocTypeDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceDocumentDTO
+import com.tamin.taminhamrah.model.occurrence.OccurrenceDocumentFileDTO
+import com.tamin.taminhamrah.model.occurrence.OccurrenceDocumentTypeRefDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrencePersonalInfoDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrencePersonalInfoDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
@@ -26,6 +28,7 @@ fun WorkshopItemDTO.toDomain(): WorkshopItemDN = WorkshopItemDN(
     postalCode = postalCode.orEmpty(),
     phone = phone.orEmpty(),
     nationality = nation?.nationDesc.orEmpty(),
+    nationalityCode = nation?.nationCode.orEmpty(),
 )
 
 fun OccurrencePersonalInfoDTO.toDomain(): OccurrencePersonalInfoDN = OccurrencePersonalInfoDN(
@@ -58,32 +61,45 @@ fun OccurrenceResponseDTO.toDomain(): OccurrenceResultDN = OccurrenceResultDN(
 )
 
 fun OccurrenceSubmitRequestDN.toDTO(): OccurrenceRequestDTO = OccurrenceRequestDTO(
-    birthDate = birthDate,
-    workshopId = workshopId,
-    employerName = employerName,
-    employerPhone = employerPhone,
+    birthDate = birthDate.toString(),
+    bossFullName = employerName,
+    bossMobileNumber = employerPhone,
+    branchCode = branchCode,
+    branchName = branchName,
+    employeeDate = employmentDate.toString(),
+    gender = gender,
+    insuranceID = insuranceNumber,
+    isuTypeDesc = insuranceType,
+    isuTypecode = insuranceTypeCode,
+    jobDesc = jobTitle,
+    marriageStatusCode = maritalStatus,
+    nationCode = nationalityCode,
+    occurrenceAddress = exactLocation,
+    occurrenceDate = accidentDate.toString(),
+    occurrenceDesc = description,
+    occurrenceDocumentList = documents.map { it.toDTO() },
+    occurrenceResult = accidentOutcomeId,
+    occurrenceTime = accidentTime,
+    pFirstName = firstName,
+    pLastName = lastName,
+    pNationalCode = nationalCode,
+    reportAddress = homeAddress,
+    reportJobLocation = workLocation,
+    reportPostalCode = homePostalCode,
+    reportTelephone = homePhone,
+    reporterType = reporterType,
+    rwworkfinish = workEndTime,
+    rwworkstart = workStartTime,
+    vehicle = transportation,
     workshopAddress = workshopAddress,
+    workshopBranchCode = workshopBranchCode,
+    workshopCode = workshopId,
+    workshopName = workshopName,
     workshopPostalCode = workshopPostalCode,
-    workshopPhone = workshopPhone,
-    employmentDate = employmentDate,
-    maritalStatus = maritalStatus,
-    jobTitle = jobTitle,
-    workLocation = workLocation,
-    transportation = transportation,
-    workStartTime = workStartTime,
-    workEndTime = workEndTime,
-    homeAddress = homeAddress,
-    homePhone = homePhone,
-    homePostalCode = homePostalCode,
-    accidentDate = accidentDate,
-    accidentTime = accidentTime,
-    accidentOutcomeId = accidentOutcomeId,
-    exactLocation = exactLocation,
-    description = description,
-    documents = documents.map { it.toDTO() },
+    workshopTelephone = workshopPhone,
 )
 
 fun OccurrenceUploadedDocDN.toDTO(): OccurrenceDocumentDTO = OccurrenceDocumentDTO(
-    docTypeId = typeId,
-    guid = guid,
+    documentFile = OccurrenceDocumentFileDTO(id = guid),
+    occurrenceDocumentType = OccurrenceDocumentTypeRefDTO(docTypeId = typeId.toString()),
 )

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
@@ -313,6 +314,8 @@ fun OccurrenceNavigationBar(
     primaryText: String,
     onPrimaryClick: () -> Unit,
     primaryEnabled: Boolean = true,
+    /** Non-null switches the primary action to LoadingButton, spinning while true. */
+    isPrimaryLoading: Boolean? = null,
     showChevron: Boolean = true,
     secondaryText: String? = null,
     onSecondaryClick: (() -> Unit)? = null,
@@ -358,13 +361,24 @@ fun OccurrenceNavigationBar(
                 }
             }
 
-            TaminFilledButton(
-                text = primaryText,
-                onClick = onPrimaryClick,
-                enabled = primaryEnabled,
-                modifier = Modifier.weight(1f),
-                icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
-            )
+            if (isPrimaryLoading != null) {
+                LoadingButton(
+                    text = primaryText,
+                    onClick = onPrimaryClick,
+                    modifier = Modifier.weight(1f),
+                    enabled = primaryEnabled,
+                    isLoading = isPrimaryLoading,
+                    icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null,
+                )
+            } else {
+                TaminFilledButton(
+                    text = primaryText,
+                    onClick = onPrimaryClick,
+                    enabled = primaryEnabled,
+                    modifier = Modifier.weight(1f),
+                    icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null
+                )
+            }
         }
     }
 }

@@ -18,5 +18,10 @@ kotlin {
             implementation(libs.filekit.compose)
             implementation(libs.filekit.dialog.compose)
         }
+
+        androidMain.dependencies {
+            // Camera permission launcher (rememberLauncherForActivityResult).
+            implementation(libs.androidx.activity.compose)
+        }
     }
 }

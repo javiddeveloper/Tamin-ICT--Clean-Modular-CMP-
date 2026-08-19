@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
@@ -43,6 +44,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.PersonInfoStepState
+import com.tamin.taminhamrah.feature.taminServices.occurrence.model.Gender
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.OccurrencePersonalInfoPR
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.UserInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -139,25 +141,9 @@ internal fun Step1PersonInfoStep(
             ) {
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = Spacing.sm),
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_privacy),
-                        contentDescription = null,
-                        tint = taminColors.textMuted,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Text(
-                        text = stringResource(Res.string.occurrence_step1_readonly_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = taminColors.textMuted,
-                        modifier = Modifier.padding(start = Spacing.xs),
-                    )
-                }
+                InfoBanner(message = stringResource(Res.string.occurrence_step1_readonly_hint))
+
+                Spacer(Modifier.height(Spacing.smd))
 
                 Row(
                     modifier = Modifier.fillMaxWidth()
@@ -292,8 +278,9 @@ private fun PersonInfoCard(
                 )
                 PersonInfoGridItem(
                     label = stringResource(Res.string.occurrence_field_gender),
-                    value = info.genderCode
-                ) // TODO 0 or 1 for man or woman
+                    value = Gender.fromCode(info.genderCode)?.displayName?:""
+//                    value = info.genderCode
+                )
 
                 PersonInfoGridItem(
                     label = stringResource(Res.string.occurrence_field_handling_branch),

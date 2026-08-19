@@ -6,10 +6,13 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState.PartialState
+import com.tamin.taminhamrah.feature.taminServices.occurrence.model.Gender
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.toPR
 import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toJalaliParts
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetAllWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetInsuredRelationUseCase
@@ -25,6 +28,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+
+/** The legacy "occurence" submit endpoint's reporterType for a self-filed report — this flow has no reporter-type picker. */
+private const val REPORTER_TYPE_SELF = "1"
+
+/** Converts a Jalali "yyyy/mm/dd" date string to epoch milliseconds, as the legacy submit endpoint expects. */
+private fun String.toEpochMillisFromJalali(): Long {
+    val (year, month, day) = toJalaliParts() ?: return 0L
+    return PersianDateFormatter.toEpochMillis(year, month, day)
+}
 
 class OccurrenceViewModel(
     private val getPersonalInfoUseCase: GetOccurrencePersonalInfoUseCase,
@@ -91,7 +103,16 @@ class OccurrenceViewModel(
 
     private fun fetchInsuredRelation(nationalId: String): Flow<PartialState> = flow {
         val relation = getInsuredRelationUseCase(nationalId)
-        emit(PartialState.JobDetailsUpdated(uiState.value.jobDetails.copy(insuranceType = relation.insuranceType)))
+        emit(
+            PartialState.JobDetailsUpdated(
+                uiState.value.jobDetails.copy(
+                    insuranceType = relation.insuranceType,
+                    insuranceTypeCode = relation.insuranceTypeCode,
+                    branchCode = relation.branchCode,
+                    branchName = relation.branchName,
+                )
+            )
+        )
     }
 
     private fun goToPreviousStep(): Flow<PartialState> = flow {
@@ -130,6 +151,8 @@ class OccurrenceViewModel(
             val personalInfo = getPersonalInfoUseCase(
                 nationalCode = userInfo?.nationalID.orEmpty(),
                 birthDate = userInfo?.birthDateTimestamp?.toString().orEmpty(),
+                workshopCode = intent.workshop.workshopCode,
+                branchCode = intent.workshop.branchCode,
             )
             emit(PartialState.PersonInfoUpdated(uiState.value.personInfo.copy(personalInfo = personalInfo.toPR())))
             emit(
@@ -137,6 +160,7 @@ class OccurrenceViewModel(
                     uiState.value.jobDetails.copy(
                         fullName = personalInfo.fullName,
                         nationality = spec.nationality,
+                        nationalityCode = spec.nationalityCode,
                         gender = personalInfo.gender,
                     )
                 )
@@ -185,16 +209,32 @@ class OccurrenceViewModel(
         val state = uiState.value
         emit(PartialState.Submitting(true))
         try {
+            val personalInfo = state.personInfo.personalInfo
+            val userInfo = state.personInfo.userInfo
             val request = OccurrenceSubmitRequestDN(
-                birthDate = state.personInfo.birthDate,
+                nationalCode = userInfo?.nationalID?.takeIf { it.isNotBlank() }
+                    ?: personalInfo?.nationalCode.orEmpty(),
+                firstName = personalInfo?.firstName.orEmpty(),
+                lastName = personalInfo?.lastName.orEmpty(),
+                gender = Gender.fromCode(personalInfo?.gender)?.legacyCode ?: 0,
+                nationalityCode = state.jobDetails.nationalityCode.toIntOrNull() ?: 0,
+                insuranceType = state.jobDetails.insuranceType,
+                insuranceTypeCode = state.jobDetails.insuranceTypeCode,
+                insuranceNumber = userInfo?.insuranceNumber?.takeIf { it.isNotBlank() }
+                    ?: personalInfo?.insuranceNumber.orEmpty(),
+                branchCode = state.jobDetails.branchCode,
+                branchName = state.jobDetails.branchName,
+                birthDate = state.personInfo.birthDate.toEpochMillisFromJalali(),
                 workshopId = state.workshop.selectedWorkshop?.id.orEmpty(),
+                workshopBranchCode = state.workshop.selectedWorkshop?.branchCode.orEmpty(),
+                workshopName = state.workshop.selectedWorkshop?.name.orEmpty(),
                 employerName = state.workshop.employerName,
                 employerPhone = state.workshop.employerPhone,
                 workshopAddress = state.workshop.workshopAddress,
                 workshopPostalCode = state.workshop.workshopPostalCode,
                 workshopPhone = state.workshop.workshopPhone,
-                employmentDate = state.jobDetails.employmentDate,
-                maritalStatus = state.jobDetails.maritalStatus,
+                employmentDate = state.jobDetails.employmentDate.toEpochMillisFromJalali(),
+                maritalStatus = state.jobDetails.maritalStatus.toIntOrNull() ?: 0,
                 jobTitle = state.jobDetails.jobTitle,
                 workLocation = state.jobDetails.workLocation,
                 transportation = state.workHours.transportation,
@@ -203,11 +243,12 @@ class OccurrenceViewModel(
                 homeAddress = state.workHours.homeAddress,
                 homePhone = state.workHours.homePhone,
                 homePostalCode = state.workHours.homePostalCode,
-                accidentDate = state.accident.accidentDate,
+                accidentDate = state.accident.accidentDate.toEpochMillisFromJalali(),
                 accidentTime = state.accident.accidentTime,
-                accidentOutcomeId = state.accident.accidentOutcomeId,
+                accidentOutcomeId = state.accident.accidentOutcomeId.toIntOrNull() ?: 0,
                 exactLocation = state.accident.exactLocation,
                 description = state.accident.description,
+                reporterType = REPORTER_TYPE_SELF,
                 documents = state.documentSubmit.uploadedDocuments,
             )
             val result = submitOccurrenceUseCase(request)

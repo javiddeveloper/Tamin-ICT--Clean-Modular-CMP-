@@ -31,7 +31,12 @@ internal class OccurrenceRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : OccurrenceRemoteDataSource {
 
-    override suspend fun getPersonalInfo(nationalCode: String, birthDate: String): OccurrencePersonalInfoDTO {
+    override suspend fun getPersonalInfo(
+        nationalCode: String,
+        birthDate: String,
+        workshopCode: String,
+        branchCode: String,
+    ): OccurrencePersonalInfoDTO {
         return try {
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
@@ -44,6 +49,16 @@ internal class OccurrenceRemoteDataSourceImpl(
                         ApiFilterDN(
                             property = FilterProperty.BIRTH_DATE,
                             value = birthDate,
+                            operator = FilterOperator.EQUAL,
+                        ),
+                        ApiFilterDN(
+                            property = FilterProperty.WORKSHOP_CODE,
+                            value = workshopCode,
+                            operator = FilterOperator.EQUAL,
+                        ),
+                        ApiFilterDN(
+                            property = FilterProperty.PAYMENT_BRANCH_CODE,
+                            value = branchCode,
                             operator = FilterOperator.EQUAL,
                         ),
                     )
@@ -167,7 +182,7 @@ internal class OccurrenceRemoteDataSourceImpl(
                     )
                 },
             )
-            apiService.uploadImage(content).extractData().trackingCode
+            apiService.uploadImage(content).guid
                 ?: throw TaminErrorUriException(ErrorUri.UNKNOWN)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetail
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
+import com.tamin.taminhamrah.feature.taminServices.occurrence.model.MaritalStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -53,8 +54,6 @@ import taminx.core.core_ui.occurrence_field_employment_date
 import taminx.core.core_ui.occurrence_field_gender
 import taminx.core.core_ui.occurrence_field_insurance_type
 import taminx.core.core_ui.occurrence_field_job_title
-import taminx.core.core_ui.occurrence_field_marital_married
-import taminx.core.core_ui.occurrence_field_marital_single
 import taminx.core.core_ui.occurrence_field_marital_status
 import taminx.core.core_ui.occurrence_field_name
 import taminx.core.core_ui.occurrence_field_nationality
@@ -185,7 +184,7 @@ internal fun Step3JobDetailsStep(
                     StyledTextField(
                         leadingIcon = Icons.Default.KeyboardArrowDown,
                         modifier = Modifier.weight(1f),
-                        value = step.maritalStatus,
+                        value = MaritalStatus.fromCode(step.maritalStatus)?.displayName.orEmpty(),
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_marital_status),
                         placeholder = stringResource(Res.string.occurrence_select_marital),
@@ -238,12 +237,9 @@ internal fun Step3JobDetailsStep(
     }
 
     if (showMaritalSheet) {
-        val single = stringResource(Res.string.occurrence_field_marital_single)
-        val married = stringResource(Res.string.occurrence_field_marital_married)
-
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_marital_title),
-            options = listOf(single, married).map { OccurrenceSheetOption(id = it, title = it) },
+            options = MaritalStatus.entries.map { OccurrenceSheetOption(id = it.code, title = it.displayName) },
             selectedId = step.maritalStatus,
             onSelect = { option ->
                 onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(maritalStatus = option.id)))
@@ -267,7 +263,7 @@ private fun Step3JobDetailsStepPreview() {
                     gender = "01",
                     insuranceType = "اجباری",
                     employmentDate = "1395/06/01",
-                    maritalStatus = "متأهل",
+                    maritalStatus = MaritalStatus.MARRIED.code,
                     jobTitle = "مهندس نرم‌افزار",
                     workLocation = "تهران، خیابان ولیعصر",
                 ),

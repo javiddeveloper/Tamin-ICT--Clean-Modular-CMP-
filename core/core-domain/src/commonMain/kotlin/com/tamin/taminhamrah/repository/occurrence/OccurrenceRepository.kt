@@ -8,7 +8,12 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDN
 
 interface OccurrenceRepository {
-    suspend fun getPersonalInfo(nationalCode: String, birthDate: String): OccurrencePersonalInfoDN
+    suspend fun getPersonalInfo(
+        nationalCode: String,
+        birthDate: String,
+        workshopCode: String,
+        branchCode: String,
+    ): OccurrencePersonalInfoDN
     suspend fun getAllWorkshops(nationalCode: String): List<WorkshopItemDN>
     suspend fun getWorkshopSpec(workshopCode: String, branchCode: String): WorkshopItemDN
     suspend fun getInsuredRelation(nationalCode: String): InsuredRelationDN
