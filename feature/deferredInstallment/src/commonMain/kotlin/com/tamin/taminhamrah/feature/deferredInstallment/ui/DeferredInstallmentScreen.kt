@@ -19,14 +19,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -276,7 +271,7 @@ private fun DeferredInstallmentContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding()),
+                .padding(padding),
         ) {
             DeferredInstallmentStepIndicator(
                 currentStep = state.currentStep,
@@ -686,8 +681,8 @@ private fun DeferredInstallmentBottomBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.page, vertical = Spacing.md).navigationBarsPadding()
-            .imePadding(),
+            .padding(horizontal = Spacing.page, vertical = Spacing.md)
+            .navigationBarsPadding(),
     ) {
         when (state.currentStep) {
             DeferredInstallmentStep.CertificateRequest -> LoadingButton(
