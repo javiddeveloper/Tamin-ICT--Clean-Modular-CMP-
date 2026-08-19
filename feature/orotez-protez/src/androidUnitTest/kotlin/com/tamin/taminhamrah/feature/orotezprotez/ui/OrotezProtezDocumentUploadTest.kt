@@ -52,7 +52,7 @@ import kotlin.test.assertTrue
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [35])
 class OrotezProtezDocumentUploadTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
