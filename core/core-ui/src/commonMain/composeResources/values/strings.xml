@@ -712,6 +712,7 @@
     <string name="pension_status_establishment_date">تاریخ برقراری</string>
     <string name="pension_status_payment_date">تاریخ پرداخت</string>
     <string name="pension_status_order_type">نوع حکم</string>
+    <string name="pension_status_type_retirement">بازنشستگی</string>
     <string name="pension_status_org_unit">واحد سازمانی: %1$s</string>
     <string name="pension_status_active_header">مستمری بگیر فعال هستید</string>
     <string name="pension_status_inactive_header">مستمری بگیر نیستید</string>

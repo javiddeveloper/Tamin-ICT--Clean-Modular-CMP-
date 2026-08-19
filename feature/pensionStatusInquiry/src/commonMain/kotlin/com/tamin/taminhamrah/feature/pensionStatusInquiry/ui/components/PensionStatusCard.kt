@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.ui.toPensionerTypeLabel
 import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -129,7 +131,9 @@ internal fun PensionStatusCard(
 
                 InfoFieldRow(
                     label = stringResource(Res.string.pension_status_order_type),
-                    value = item.pensionerType,
+                    value = item.pensionerType.toPensionerTypeLabel()
+                        ?.let { stringResource(it) }
+                        ?: item.pensionerType.orDash(),
                     numeric = false,
                 )
             }
@@ -238,7 +242,7 @@ private fun ProfileRow(item: PensionInquiryPR) {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = item.fullName,
+                text = item.fullName.orDash(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,

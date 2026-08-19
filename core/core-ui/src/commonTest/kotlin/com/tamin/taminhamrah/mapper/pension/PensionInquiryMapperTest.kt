@@ -124,7 +124,7 @@ class PensionInquiryMapperTest {
 
         val pr = dn.toPresentation()
 
-        assertEquals("بازنشستگی", pr.pensionerType)
+        assertEquals("101", pr.pensionerType)
     }
 
     @Test
@@ -147,7 +147,10 @@ class PensionInquiryMapperTest {
 
         val pr = dn.toPresentation()
 
-        assertEquals("نامشخص", pr.fullName)
+        assertEquals("-", pr.fullName)
+        assertEquals("-", pr.statusDesc)
+        assertEquals("-", pr.sexDesc)
+        assertEquals("-", pr.pensionerType)
         assertEquals("0", pr.paymentAmount)
         assertEquals("", pr.branchCode)
     }

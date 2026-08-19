@@ -15,38 +15,35 @@ import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
 import com.tamin.taminhamrah.model.pension.retirement.*
+import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.ui.orZero
 
 private const val ACTIVE_PENSIONER_STATUS_CODE = "01"
 
 fun PensionInquiryDN.toPresentation(): PensionInquiryPR {
     return PensionInquiryPR(
-        branchCode = branchCode ?: "",
-        insuranceNumber = insuranceNumber ?: "",
+        branchCode = branchCode.orEmpty(),
+        insuranceNumber = insuranceNumber.orEmpty(),
         pensionerRisUid = pensionNumber(),
         pensionerType = pensionerTypeLabel(),
-        paymentDate = paymentDate ?: "",
-        pensionerBaseDate = pensionerBaseDate ?: "",
-        fullName = fullName ?: "نامشخص",
-        statusDesc = statusDesc ?: "نامشخص",
+        paymentDate = paymentDate.orEmpty(),
+        pensionerBaseDate = pensionerBaseDate.orEmpty(),
+        fullName = fullName.orDash(),
+        statusDesc = statusDesc.orDash(),
         isActive = statusDesc == ACTIVE_PENSIONER_STATUS_CODE,
-        sexDesc = sexDesc ?: "نامشخص",
-        branchName = branchName ?: "",
-        pensionEndDate = pensionEndDate ?: "",
-        nationalId = nationalId ?: "",
-        paymentAmount = paymentAmount?.toString() ?: "0"
+        sexDesc = sexDesc.orDash(),
+        branchName = branchName.orEmpty(),
+        pensionEndDate = pensionEndDate.orEmpty(),
+        nationalId = nationalId.orEmpty(),
+        paymentAmount = paymentAmount?.toString().orZero(),
     )
 }
 
 private fun PensionInquiryDN.pensionNumber(): String =
     pensionerId?.takeIf { it.isNotBlank() } ?: pensionerRisUid.orEmpty()
 
-private fun PensionInquiryDN.pensionerTypeLabel(): String {
-    pensionerTypeDesc?.takeIf { it.isNotBlank() }?.let { return it }
-    return when (pensionerType) {
-        "101" -> "بازنشستگی"
-        else -> pensionerType.orEmpty()
-    }
-}
+private fun PensionInquiryDN.pensionerTypeLabel(): String =
+    pensionerTypeDesc?.takeIf { it.isNotBlank() } ?: pensionerType.orDash()
 
 fun AuthenticationTicketDN.toPresentation(): AuthenticationTicketPR {
     return AuthenticationTicketPR(
