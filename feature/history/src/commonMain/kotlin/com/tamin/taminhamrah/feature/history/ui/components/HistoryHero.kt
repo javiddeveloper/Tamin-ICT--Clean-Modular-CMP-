@@ -103,7 +103,9 @@ fun HistoryHero(
                 .fillMaxWidth()
                 .padding(horizontal = HeroPaddingH)
                 .padding(top = HeroPaddingTop, bottom = HeroPaddingBottom),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            // The design's own row gap. A uniform theme spacing left the head visibly taller than
+            // the mock, most obviously with one chip and a zero orb.
+            verticalArrangement = Arrangement.spacedBy(HeroRowGap),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -347,6 +349,7 @@ private fun DurationChip(chip: DurationChipPR) {
 
 private val HeroCorner = 34.dp
 private val HeroPaddingH = 18.dp
+private val HeroRowGap = 14.dp
 private val HeroPaddingTop = 8.dp
 private val HeroPaddingBottom = 28.dp
 private const val HeroMidStop = 0.58f

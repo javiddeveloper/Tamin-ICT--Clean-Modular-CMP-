@@ -21,19 +21,35 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import kotlinx.coroutines.flow.flowOf
 
 class FakeHistoryRepository(
     private val expectedResult: DastmozdInfoDN
 ) : HistoryRepository {
     override suspend fun getDastmozdInfos(filters: List<ApiFilterDN>): DastmozdInfoDN = expectedResult
-    override suspend fun getUserInfos(): UserInfoDN = TODO()
+    override suspend fun getUserInfos(): UserInfoDN = UserInfoDN(
+            serial1 = null, militaryServiceCode = null, fatherName = null, lastName = "چیذاز",
+            serial2 = null, creationTime = null, lastModificationTime = null, cityCode = null,
+            socialSecurityNumber = null, lastModifiedBy = null, issueplaceName = null,
+            birthDate = "1366/09/26", firstName = "حمید", insuranceNumber = "0081631829",
+            genderCode = null, nationalID = "0946168113", marriageCode = null, createdBy = null,
+            identityNumber = null, countryCode = null, id = null, birthDateTimestamp = null,
+            issueplace = null, nationCode = null,
+        )
 
-    override suspend fun getUserRole(): UserRoleDN = TODO()
-    override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> = TODO()
-    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) = TODO()
+    override suspend fun getUserRole(): UserRoleDN = UserRoleDN.INSURED
+    override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> =
+            flowOf(PdfDownloadDN())
+    override suspend fun sendHistoryNotice(): String = "ارسال شد"
 
-    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = TODO()
-    override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): com.tamin.taminhamrah.model.history.TalfighInfoDN = TODO()
+    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) = Unit
+
+    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
+            flowOf(HistoryJobInfoDN(list = emptyList(), total = 0))
+    override suspend fun getTalfighInfos(
+            filters: List<ApiFilterDN>,
+        ): com.tamin.taminhamrah.model.history.TalfighInfoDN =
+            com.tamin.taminhamrah.model.history.TalfighInfoDN(list = emptyList(), total = 0)
 }
 
 class DastmozdInfosAgentServiceTest {

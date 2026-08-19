@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.ui.theme.TaminNavy700
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import com.tamin.taminhamrah.util.PersianDateFormatter
 
 /** Months in a Jalali year. */
 private const val MONTHS = 12
@@ -132,7 +133,11 @@ fun List<YearHistoryPR>.gapYearCount(): Int {
  * with no wage row behind them (before ۱۳۸۶ there are none at all), and the design shows that
  * honestly rather than making the two agree.
  */
-fun YearHistoryPR.detailWith(rows: List<DastmozdInfoItemPR>): YearDetailPR {
+fun YearHistoryPR.detailWith(
+    rows: List<DastmozdInfoItemPR>,
+    optionalSchemeName: String,
+    constructionSchemeName: String,
+): YearDetailPR {
     val workshops = rows.map { row ->
         val months = row.wageDetails.mapIndexedNotNull { index, detail ->
             val days = detail.month.toIntOrNull() ?: 0
@@ -141,7 +146,16 @@ fun YearHistoryPR.detailWith(rows: List<DastmozdInfoItemPR>): YearDetailPR {
         }
         WorkshopPR(
             id = row.rwshid.ifBlank { row.id.toString() },
-            name = row.rwshname,
+            // Rows that are a scheme rather than an employer carry no workshop name — an optional
+            // or a construction-worker policy has none to carry. The design names the scheme from
+            // the history type instead of leaving the line blank, and so does this.
+            name = row.rwshname.ifBlank {
+                if (row.historytypedesc.startsWith(OPTIONAL_TYPE_PREFIX)) {
+                    optionalSchemeName
+                } else {
+                    constructionSchemeName
+                }
+            },
             type = row.historytypedesc,
             branch = row.brhname,
             code = row.rwshid.takeIf { it.isNotBlank() },
@@ -194,23 +208,13 @@ fun yearDurationChips(
     )
 }
 
-/** The four words the chips are labelled with, resolved once by the screen. */
+/** The four words the chips are labeled with, resolved once by the screen. */
 @Immutable
 data class DurationLabels(
     val years: String,
     val months: String,
     val days: String,
     val sources: String,
-)
-
-/**
- * Month names as the chart labels them — three letters, because twelve full names do not fit.
- *
- * Beside the chart that uses them rather than in the shared formatter: they are an abbreviation this
- * design asks for, not a fact about the calendar.
- */
-val MonthShortNames: List<String> = listOf(
-    "فرو", "ارد", "خرد", "تیر", "مرد", "شهر", "مهر", "آبا", "آذر", "دی", "بهم", "اسف",
 )
 
 /**
@@ -262,7 +266,7 @@ fun YearDetailPR?.monthBars(
 
         BarChartItem(
             id = month.toString(),
-            label = MonthShortNames[month],
+            label = PersianDateFormatter.monthNames[month],
             fraction = if (length == 0) 0f else days.toFloat() / length,
             fillTop = when {
                 selected -> TaminHistoryBarSelectedTop
@@ -303,3 +307,11 @@ fun YearDetailPR?.sourceChips(selected: Int?, allLabel: String): ImmutableList<S
 
 /** A full Jalali year in days — what a year bar's height is measured against. */
 private const val DAYS_IN_FULL_YEAR = 366f
+
+/**
+ * How an optional-insurance row names its type.
+ *
+ * Spelled with the Arabic yeh the service actually sends, not the Persian one — this is matched
+ * against the wire, and "correcting" it would stop it matching.
+ */
+private const val OPTIONAL_TYPE_PREFIX = "اختياري"

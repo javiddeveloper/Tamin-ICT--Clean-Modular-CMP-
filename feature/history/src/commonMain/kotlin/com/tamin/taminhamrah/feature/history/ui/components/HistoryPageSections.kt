@@ -13,9 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +41,8 @@ import com.tamin.taminhamrah.ui.theme.TaminTeal900
 import com.tamin.taminhamrah.ui.theme.TaminTealBg
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_tamin_download
 import taminx.feature.history.Res
 import taminx.feature.history.history_action_download_subtitle
 import taminx.feature.history.history_action_download_title
@@ -51,6 +52,7 @@ import taminx.feature.history.history_combined_year_days
 import taminx.feature.history.history_download_sheet_title
 import taminx.feature.history.history_note_gaps
 import taminx.feature.history.history_note_span
+import taminx.core.core_ui.Res as CoreRes
 
 /**
  * The span of a career in one sentence, gaps included.
@@ -122,7 +124,7 @@ fun WorkshopSummaryRow(
         DaysPill(days = workshop.totalDays)
 
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            imageVector = Icons.Filled.ChevronLeft,
             contentDescription = null,
             tint = colors.textMuted,
             modifier = Modifier.size(ChevronSize),
@@ -185,7 +187,7 @@ fun HistoryActionCards(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         TaminActionTile(
-            icon = Icons.Filled.Download,
+            icon = vectorResource(CoreRes.drawable.ic_tamin_download),
             title = stringResource(Res.string.history_action_download_title),
             subtitle = stringResource(Res.string.history_action_download_subtitle),
             iconTint = colors.blueText,
@@ -261,7 +263,7 @@ fun ReportMenuSheet(
                         modifier = Modifier.weight(1f),
                     )
                     Icon(
-                        imageVector = Icons.Filled.Download,
+                        imageVector = vectorResource(CoreRes.drawable.ic_tamin_download),
                         contentDescription = null,
                         tint = colors.textMuted,
                         modifier = Modifier.size(ChevronSize),

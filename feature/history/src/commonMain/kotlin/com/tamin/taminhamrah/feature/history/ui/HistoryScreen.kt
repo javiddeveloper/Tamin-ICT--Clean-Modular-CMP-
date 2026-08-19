@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.history.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -11,8 +12,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,10 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.history.ui.components.ChartAxis
+import com.tamin.taminhamrah.feature.history.ui.components.DashedDivider
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryActionCards
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryChartCard
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryHero
@@ -32,6 +38,7 @@ import com.tamin.taminhamrah.feature.history.ui.components.HistorySpanNote
 import com.tamin.taminhamrah.feature.history.ui.components.MonthWageBreakdown
 import com.tamin.taminhamrah.feature.history.ui.components.NoWorkshops
 import com.tamin.taminhamrah.feature.history.ui.components.ReportMenuSheet
+import com.tamin.taminhamrah.feature.history.ui.components.WageText
 import com.tamin.taminhamrah.feature.history.ui.components.WorkshopSummaryRow
 import com.tamin.taminhamrah.feature.history.ui.components.YearDetailSheet
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
@@ -57,6 +64,9 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.ShimmerRows
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
@@ -64,6 +74,8 @@ import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroTop
 import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -71,10 +83,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
-import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.action_back
-import taminx.feature.history.Res as HistoryRes
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.btn_understood
+import taminx.core.core_ui.ic_tamin_download
+import taminx.feature.history.history_action_send_title
 import taminx.feature.history.history_all_title
 import taminx.feature.history.history_chart_hint_all
 import taminx.feature.history.history_chart_hint_year
@@ -92,14 +107,22 @@ import taminx.feature.history.history_concurrent_note
 import taminx.feature.history.history_detail_pick_month
 import taminx.feature.history.history_detail_pick_year
 import taminx.feature.history.history_detail_year_empty
+import taminx.feature.history.history_month_no_record
 import taminx.feature.history.history_month_wage_total
 import taminx.feature.history.history_orb_caption_all
 import taminx.feature.history.history_orb_caption_year
 import taminx.feature.history.history_orb_days
 import taminx.feature.history.history_report_action
 import taminx.feature.history.history_rial
+import taminx.feature.history.history_scheme_construction
+import taminx.feature.history.history_scheme_optional
 import taminx.feature.history.history_scope_all
+import taminx.feature.history.history_send_confirm_action
+import taminx.feature.history.history_send_confirm_body
+import taminx.feature.history.history_send_success_title
 import taminx.feature.history.history_stat_sources
+import taminx.core.core_ui.Res as CoreRes
+import taminx.feature.history.Res as HistoryRes
 
 /**
  * «کلیه سوابق».
@@ -151,6 +174,9 @@ fun HistoryContent(
 ) {
     val colors = LocalTaminColors.current
     val scope = uiState.scope
+    val viewerHeaderBrush = remember {
+        Brush.verticalGradient(listOf(TaminHistoryHeroTop, TaminHistoryHeroBottom))
+    }
     val dayLabel = stringResource(HistoryRes.string.history_combined_year_days, PlaceholderDays)
 
     // Everything drawn is folded here, each piece keyed on exactly what it is folded from, so a
@@ -161,8 +187,15 @@ fun HistoryContent(
             uiState.years.firstOrNull { it.year == picked.year }
         }
     }
-    val detail = remember(selectedYear, uiState.wageByYear) {
-        selectedYear?.detailWith(uiState.wageByYear[selectedYear.year] ?: NoWorkshops)
+    // The two schemes that arrive without a workshop name of their own.
+    val optionalScheme = stringResource(HistoryRes.string.history_scheme_optional)
+    val constructionScheme = stringResource(HistoryRes.string.history_scheme_construction)
+    val detail = remember(selectedYear, uiState.wageByYear, optionalScheme, constructionScheme) {
+        selectedYear?.detailWith(
+            rows = uiState.wageByYear[selectedYear.year] ?: NoWorkshops,
+            optionalSchemeName = optionalScheme,
+            constructionSchemeName = constructionScheme,
+        )
     }
 
     val labels = DurationLabels(
@@ -220,7 +253,7 @@ fun HistoryContent(
                     onScopeChange = { onIntent(HistoryIntent.SelectScope(it)) },
                     navigationIcon = {
                         TaminTopAppBarButton(
-                            icon = Icons.AutoMirrored.Filled.ArrowForward,
+                            icon = Icons.Filled.ChevronRight,
                             contentDescription = stringResource(CoreRes.string.action_back),
                             onClick = onBackClicked,
                             bordered = true,
@@ -228,7 +261,7 @@ fun HistoryContent(
                     },
                     action = {
                         TaminTopAppBarButton(
-                            icon = Icons.Filled.Download,
+                            icon = vectorResource(CoreRes.drawable.ic_tamin_download),
                             contentDescription = stringResource(HistoryRes.string.history_report_action),
                             onClick = { onIntent(HistoryIntent.ShowReportMenu) },
                             bordered = true,
@@ -268,6 +301,8 @@ fun HistoryContent(
                             .offset(y = ChartOverlap)
                             .padding(horizontal = ChartSidePadding),
                         dense = dense,
+                        // Twelve full month names never fit side by side; the year labels do.
+                        rotateLabels = scope is HistoryScope.Year,
                         axis = if (dense) {
                             ChartAxis(
                                 oldest = bars.last().label,
@@ -292,6 +327,7 @@ fun HistoryContent(
                             },
                         concurrencyLabel = stringResource(HistoryRes.string.history_concurrent_label),
                     ) {
+                        DashedDivider(modifier = Modifier.padding(top = Spacing.sm))
                         ChartFooter(
                             isAllScope = scope is HistoryScope.All,
                             detail = detail,
@@ -328,7 +364,7 @@ fun HistoryContent(
 
                         HistoryActionCards(
                             onDownload = { onIntent(HistoryIntent.ShowReportMenu) },
-                            onSend = { onIntent(HistoryIntent.ShowReportMenu) },
+                            onSend = { onIntent(HistoryIntent.AskSendNotice) },
                             modifier = Modifier.padding(top = Spacing.sm),
                         )
                     }
@@ -381,12 +417,64 @@ fun HistoryContent(
         )
     }
 
-    uiState.selectedYear?.let { year ->
+    // The sheet only ever opens on the year the page is already showing, so it renders the detail
+    // that is already folded rather than folding the same rows a second time.
+    if (uiState.selectedYear != null && detail != null) {
         YearDetailSheet(
-            year = year,
-            workshops = uiState.wageByYear[year.year] ?: NoWorkshops,
+            detail = detail,
             wagesUnavailable = uiState.wagesUnavailable,
             onDismiss = { onIntent(HistoryIntent.DismissYearDetail) },
+        )
+    }
+
+    // Confirmed before it is sent, because it posts on the person's behalf and the service has no
+    // undo — the design asks them to look at their history first for exactly that reason.
+    if (uiState.showSendConfirm) {
+        TaminConfirmationDialog(
+            title = stringResource(HistoryRes.string.history_action_send_title),
+            description = stringResource(HistoryRes.string.history_send_confirm_body),
+            icon = Icons.AutoMirrored.Filled.Send,
+            iconTint = colors.orangeText,
+            iconBackground = colors.orangeBg,
+            onDismissRequest = { onIntent(HistoryIntent.DismissSendConfirm) },
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(HistoryRes.string.history_send_confirm_action),
+                    onClick = { onIntent(HistoryIntent.ConfirmSendNotice) },
+                    enabled = !uiState.isSending,
+                    background = SolidColor(colors.blueText),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = stringResource(CoreRes.string.action_cancel),
+                    onClick = { onIntent(HistoryIntent.DismissSendConfirm) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+        )
+    }
+
+    // The service's own wording when it sends any, so the person reads what تأمین said, not our
+    // paraphrase of it.
+    uiState.sendSuccessMessage?.let { message ->
+        TaminConfirmationDialog(
+            title = stringResource(HistoryRes.string.history_send_success_title),
+            description = message,
+            icon = Icons.Filled.Check,
+            iconTint = colors.greenText,
+            iconBackground = colors.greenBg,
+            onDismissRequest = { onIntent(HistoryIntent.DismissSendSuccess) },
+            confirmButton = {},
+            dismissButton = {
+                TaminFilledButton(
+                    text = stringResource(CoreRes.string.btn_understood),
+                    onClick = { onIntent(HistoryIntent.DismissSendSuccess) },
+                    background = SolidColor(colors.blueText),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
         )
     }
 
@@ -401,12 +489,15 @@ fun HistoryContent(
     // the device without asking, saves the one it fetches, and refuses a body that is not a PDF.
     uiState.selectedReport?.let { report ->
         TaminPdfViewer(
-            fileName = report.fileName(),
+            fileName = report.fileName(uiState.nationalId),
             pdf = uiState.reportPdf,
             downloadFailed = uiState.reportDownloadFailed,
             onRequestDownload = { onIntent(HistoryIntent.DownloadReport) },
             onDismiss = { onIntent(HistoryIntent.DismissReport) },
             title = stringResource(report.labelRes()),
+            // The viewer opens out of this page, so it wears this page's head rather than the
+            // app-wide teal — the document and the screen that asked for it read as one thing.
+            background = viewerHeaderBrush,
         )
     }
 }
@@ -429,6 +520,11 @@ private fun ChartFooter(
         selectedMonth == null ->
             DetailLine(stringResource(HistoryRes.string.history_detail_pick_month))
 
+        // One employer needs no breakdown and no total: the design prints the month, its days and
+        // what it paid on a single line, and keeps the table for months that were shared.
+        detail.workshops.count { shop -> shop.months.any { it.monthIndex == selectedMonth } } <= 1 ->
+            SingleSourceMonthLine(detail = detail, month = selectedMonth)
+
         else -> MonthWageBreakdown(
             detail = detail,
             month = selectedMonth,
@@ -437,6 +533,46 @@ private fun ChartFooter(
             toPersianDigits = { it.toPersianDigits() },
             formatWage = { it.toRialAmount(fallback = "").removeSuffix(RialSuffix).toPersianDigits() },
         )
+    }
+}
+
+/** «آذر ۱۴۰۴ · ۳۰ روز» and the wage beside it — the design's one-employer month. */
+@Composable
+private fun SingleSourceMonthLine(detail: YearDetailPR, month: Int) {
+    val colors = LocalTaminColors.current
+    val worked = remember(detail, month) {
+        detail.workshops.firstNotNullOfOrNull { shop ->
+            shop.months.firstOrNull { it.monthIndex == month }
+        }
+    }
+    val days = worked?.days ?: 0
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = PersianDateFormatter.monthNames[month] + MonthSeparator + detail.year.toPersianDigits() +
+                MonthSeparator +
+                if (days > 0) {
+                    stringResource(
+                        HistoryRes.string.history_combined_year_days,
+                        days.toString().toPersianDigits(),
+                    )
+                } else {
+                    stringResource(HistoryRes.string.history_month_no_record)
+                },
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+        )
+        worked?.wage?.takeIf { (it.toLongOrNull() ?: 0L) > 0L }?.let { wage ->
+            WageText(
+                amount = wage.toRialAmount(fallback = "").removeSuffix(RialSuffix).toPersianDigits(),
+                rialLabel = stringResource(HistoryRes.string.history_rial),
+                color = colors.textPrimary,
+            )
+        }
     }
 }
 
@@ -453,13 +589,18 @@ private fun DetailLine(text: String) {
 /**
  * What the saved file is called on the device.
  *
- * Stable per report, because [TaminPdfViewer] uses the name to decide whether it already has the
- * file — a name with a timestamp in it would download the same report again every time.
+ * Stable per report and per person, because [TaminPdfViewer] uses the name to decide whether it
+ * already has the file — a name with a timestamp in it would download the same report every time.
  */
-private fun HistoryCertificateType.fileName(): String = when (this) {
-    HistoryCertificateType.ALL -> "history_all.pdf"
-    HistoryCertificateType.WAGES -> "history_wages.pdf"
-    HistoryCertificateType.COMBINED -> "history_combined.pdf"
+private fun HistoryCertificateType.fileName(nationalId: String?): String {
+    val kind = when (this) {
+        HistoryCertificateType.ALL -> "history_all"
+        HistoryCertificateType.WAGES -> "history_wages"
+        HistoryCertificateType.COMBINED -> "history_combined"
+    }
+    // Whose history it is, so several people's files on one device stay apart — and so the name in
+    // the download notification says something. ASCII digits: this is a file name, not a label.
+    return listOfNotNull(kind, nationalId?.takeIf { it.isNotBlank() }).joinToString("_") + ".pdf"
 }
 
 private const val HERO_KEY = "hero"
@@ -476,6 +617,9 @@ private const val PlaceholderDays = "#"
 
 /** `toRialAmount` appends the unit; the bubble and the rows print it themselves. */
 private const val RialSuffix = " ریال"
+
+/** « · » between a month, its year and its days. */
+private const val MonthSeparator = " · "
 
 /** What a card measures, so the skeleton stands in for one without the page jumping. */
 private val CardHeight = 76.dp
@@ -561,3 +705,4 @@ private val PreviewYears = persistentListOf(
         totalDays = 365,
     ),
 )
+

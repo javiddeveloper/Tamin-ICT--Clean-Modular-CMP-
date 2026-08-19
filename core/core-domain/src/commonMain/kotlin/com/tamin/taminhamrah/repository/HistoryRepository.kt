@@ -26,6 +26,9 @@ interface HistoryRepository {
 
     suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>)
 
+    /** Sends this history to the institutions; returns the server's confirmation text, if any. */
+    suspend fun sendHistoryNotice(): String?
+
     /** One of the three «سوابق» reports as a PDF. */
     fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN>
 

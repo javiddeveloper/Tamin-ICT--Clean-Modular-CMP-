@@ -10,7 +10,6 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
-import io.ktor.client.call.body
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
@@ -56,6 +55,11 @@ internal class HistoryRemoteDataSourceImpl(
             apiServices.getLoginInfo().extractData()
         }
 
+    override suspend fun sendHistoryNotice(): String? =
+        errorParser.safeCall(TAG_SEND_NOTICE) {
+            apiServices.sendHistoryNotice().extractData().text
+        }
+
     /**
      * The path is chosen here rather than in the repository so the three report URLs stay in one
      * table beside the interface that declares them.
@@ -92,5 +96,6 @@ internal class HistoryRemoteDataSourceImpl(
         const val TAG_LOGIN_INFO = "getLoginInfo"
         const val TAG_SEND_TO_INSTITUTION = "sendToInstitution"
         const val TAG_DOWNLOAD_REPORT = "downloadHistoryReport"
+        const val TAG_SEND_NOTICE = "sendHistoryNotice"
     }
 }

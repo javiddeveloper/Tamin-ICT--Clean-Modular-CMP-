@@ -18,6 +18,9 @@ interface HistoryRemoteDataSource {
     suspend fun getLoginInfo(): ListData<String>
     suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean)
 
+    /** Sends this history to the institutions; answers with the server's own confirmation text. */
+    suspend fun sendHistoryNotice(): String?
+
     /** One of the three «سوابق» reports as a PDF, chosen by [type]. */
     suspend fun downloadHistoryReport(type: HistoryCertificateType): PdfDownloadDTO
     suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO

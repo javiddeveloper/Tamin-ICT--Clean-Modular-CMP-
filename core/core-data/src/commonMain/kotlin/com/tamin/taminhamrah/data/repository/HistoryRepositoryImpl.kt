@@ -49,7 +49,8 @@ class HistoryRepositoryImpl(
         val first = remoteDataSource.getTalfighInfos(query(filters, UNPAGED_HISTORY_LIMIT))
         val wider = widerLimitFor(first.total, first.list?.size)
             ?: return first.toDomain()
-        return remoteDataSource.getTalfighInfos(query(filters, wider)).toDomain()
+        val second = remoteDataSource.getTalfighInfos(query(filters, wider))
+        return preferLonger(first, second, { it.list?.size }) { it.toDomain() }
     }
 
     override suspend fun getDastmozdInfos(
@@ -58,11 +59,27 @@ class HistoryRepositoryImpl(
         val first = remoteDataSource.getDastmozdInfos(query(filters, UNPAGED_HISTORY_LIMIT))
         val wider = widerLimitFor(first.total, first.list?.size)
             ?: return first.toDomain()
-        return remoteDataSource.getDastmozdInfos(query(filters, wider)).toDomain()
+        val second = remoteDataSource.getDastmozdInfos(query(filters, wider))
+        return preferLonger(first, second, { it.list?.size }) { it.toDomain() }
     }
 
     private fun query(filters: List<ApiFilterDN>, limit: Int) =
         ApiQueryParamDN(filters = filters, limit = limit)
+
+    /**
+     * The wider response, but only when it actually carried more.
+     *
+     * A second request is an optimization, never a replacement: if asking for more comes back with
+     * fewer rows — a limit the service will not honor, a transient empty answer — the first
+     * response was the good one and is what the screen gets. Losing a person's history to a
+     * speculative retry is far worse than missing the overflow it was meant to recover.
+     */
+    private inline fun <DTO, DN> preferLonger(
+        first: DTO,
+        second: DTO,
+        size: (DTO) -> Int?,
+        toDomain: (DTO) -> DN,
+    ): DN = toDomain(if ((size(second) ?: 0) >= (size(first) ?: 0)) second else first)
 
     /**
      * The limit to ask again with, or null when the first response already held everything.
@@ -86,6 +103,8 @@ class HistoryRepositoryImpl(
     override suspend fun getUserRole(): UserRoleDN {
         return remoteDataSource.getLoginInfo().toUserRole()
     }
+
+    override suspend fun sendHistoryNotice(): String? = remoteDataSource.sendHistoryNotice()
 
     override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> = flow {
         emit(remoteDataSource.downloadHistoryReport(type).toDomain())

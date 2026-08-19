@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +30,8 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarTrack
 import com.tamin.taminhamrah.ui.theme.TaminHistoryPillBg
 import kotlinx.collections.immutable.ImmutableList
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * One column of a [TaminBarChart].
@@ -36,7 +39,7 @@ import kotlinx.collections.immutable.ImmutableList
  * [id] is the bar's identity — it is what a tap reports back, so a caller never indexes into the
  * list it passed and can never open the wrong thing after the list changes underneath.
  *
- * Colours arrive as [Color]s rather than as a `Brush`: a brush is not a stable type, and one on this
+ * Colors arrive as [Color]s rather than as a `Brush`: a brush is not a stable type, and one on this
  * model would make every bar unskippable. The gradient is built from them inside the bar.
  */
 @Immutable
@@ -76,6 +79,14 @@ fun TaminBarChart(
     plotHeight: Dp = PlotHeight,
     dense: Boolean = false,
     showLabels: Boolean = true,
+    /**
+     * Turn the labels on their side.
+     *
+     * For a series whose names are longer than one bar is wide — twelve Jalali months in a phone's
+     * width — where the alternative is clipping every one of them to three letters.
+     */
+    rotateLabels: Boolean = false,
+    labelLaneHeight: Dp = RotatedLabelLane,
 ) {
     val gap = if (dense) DenseGap else Gap
     val corner = if (dense) DenseCorner else Corner
@@ -98,19 +109,32 @@ fun TaminBarChart(
 
         if (showLabels) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = LabelGap),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = LabelGap)
+                    .then(if (rotateLabels) Modifier.height(labelLaneHeight) else Modifier),
                 horizontalArrangement = Arrangement.spacedBy(gap),
+                verticalAlignment = if (rotateLabels) Alignment.Top else Alignment.CenterVertically,
             ) {
                 bars.forEach { bar ->
-                    Text(
-                        text = bar.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (bar.labelBold) FontWeight.ExtraBold else FontWeight.SemiBold,
-                        color = bar.labelColor,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Box(
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        Text(
+                            text = bar.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (bar.labelBold) {
+                                FontWeight.ExtraBold
+                            } else {
+                                FontWeight.SemiBold
+                            },
+                            color = bar.labelColor,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            modifier = if (rotateLabels) Modifier.rotateVertically() else Modifier,
+                        )
+                    }
                 }
             }
         }
@@ -124,7 +148,7 @@ private fun Bar(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Built here from the two stable colours, and only when they change.
+    // Built here from the two stable colors, and only when they change.
     val fill = remember(bar.fillTop, bar.fillBottom) {
         Brush.verticalGradient(listOf(bar.fillTop, bar.fillBottom))
     }
@@ -138,9 +162,11 @@ private fun Bar(
         modifier = modifier.clickable(enabled = bar.enabled, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // A fixed lane above the plot, so a bubble appearing never shifts the bars under it.
+        // A fixed lane above the plot, so a bubble appearing never shifts the bars under it. The
+        // bubble is wider than the bar it belongs to and is allowed to overflow it — clamped to the
+        // column it would be clipped to a single digit.
         Box(
-            modifier = Modifier.height(PillLane).fillMaxWidth(),
+            modifier = Modifier.height(PillLane).fillMaxWidth().wrapContentWidth(unbounded = true),
             contentAlignment = Alignment.Center,
         ) {
             bar.pill?.let { PillLabel(text = it) }
@@ -186,6 +212,37 @@ private fun PillLabel(text: String) {
             .padding(horizontal = Spacing.sm, vertical = PillPadding),
     )
 }
+
+/**
+ * Turns a label on its side, occupying the space it actually needs afterward.
+ *
+ * Rotating alone would leave the text laid out at its horizontal size and overlapping its
+ * neighbors, so the measurement is swapped first and the rotation applied after.
+ */
+private fun Modifier.rotateVertically(): Modifier = this
+    .layout { measurable, constraints ->
+        val placeable = measurable.measure(
+            constraints.copy(
+                minWidth = constraints.minHeight,
+                maxWidth = constraints.maxHeight,
+                minHeight = constraints.minWidth,
+                maxHeight = constraints.maxWidth,
+            ),
+        )
+        layout(placeable.height, placeable.width) {
+            placeable.place(
+                x = -(placeable.width / 2 - placeable.height / 2),
+                y = -(placeable.height / 2 - placeable.width / 2),
+            )
+        }
+    }
+    .graphicsLayer { rotationZ = QuarterTurn }
+
+/** Counter-clockwise, so a Persian label reads upward rather than upside down. */
+private const val QuarterTurn = -90f
+
+/** Room for a rotated month name. */
+private val RotatedLabelLane = 62.dp
 
 private val PlotHeight = 164.dp
 private val PillLane = 30.dp

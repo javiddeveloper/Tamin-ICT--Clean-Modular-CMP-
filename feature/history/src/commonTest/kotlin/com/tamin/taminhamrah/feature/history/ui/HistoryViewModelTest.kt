@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.history.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.history.fake.FakeHistoryRepository
+import com.tamin.taminhamrah.feature.history.fake.employerUser
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
@@ -13,7 +14,9 @@ import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
+import com.tamin.taminhamrah.useCases.history.SendHistoryNoticeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -29,6 +32,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import com.tamin.taminhamrah.model.history.WageDetailDN
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelTest {
@@ -45,6 +49,8 @@ class HistoryViewModelTest {
             getTalfighInfosUseCase = GetTalfighInfosUseCase(repository),
             getDastmozdInfosUseCase = GetDastmozdInfosUseCase(repository),
             getUserRoleUseCase = GetUserRoleUseCase(repository),
+            getUserInfosUseCase = GetUserInfosUseCase(repository),
+            sendHistoryNoticeUseCase = SendHistoryNoticeUseCase(repository),
             downloadHistoryReportUseCase = DownloadHistoryReportUseCase(repository),
         )
     }
@@ -121,7 +127,7 @@ class HistoryViewModelTest {
     /**
      * A failed page must not also complain about the workshops.
      *
-     * `safeCall` converts anything it does not recognize — a cancelled sibling call included — into
+     * `safeCall` converts anything it does not recognize — a canceled sibling call included — into
      * an ordinary failure, so the ordering inside the load is what keeps the two apart: the years
      * are awaited first, and a page that never got them never reaches the wage warning.
      */
@@ -145,7 +151,7 @@ class HistoryViewModelTest {
      *
      * They have no insured years, and the service answers 500 rather than an empty list, so the
      * previous app decided this from the user's own record before asking. Asserted on the call
-     * counts, because "did not ask" is the behaviour — a message alone would still have asked.
+     * counts, because "did not ask" is the behavior — a message alone would still have asked.
      */
     @Test
     fun load_whenThePersonCannotHaveHistory_refusesWithoutCallingTheEndpoints() =
@@ -163,6 +169,39 @@ class HistoryViewModelTest {
             assertEquals(false, state.isLoading)
         }
 
+    /**
+     * The role service has no code for an employer, so the role alone cannot recognize one. Without
+     * the insurance number this person reached `talfighinfos`, was rejected, and read the rejection
+     * as «خطای اتصال» — an internet problem they did not have.
+     */
+    @Test
+    fun load_whenThePersonIsAnEmployer_refusesWithoutCallingTheEndpoints() =
+        runTest(testDispatcher) {
+            repository.userInfoResult = employerUser()
+
+            viewModel.sendIntent(HistoryIntent.Load)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertTrue(state.accessDenied, "an employer has no insured years to show")
+            assertEquals(0, repository.talfighCalls, "the years must not be requested")
+            assertEquals(0, repository.dastmozdCalls)
+            assertNull(state.error, "a refusal is not a failure")
+        }
+
+    /** An outage on either lookup must not read as «you are not insured». */
+    @Test
+    fun load_whenTheIdentityLookupFails_carriesOnRatherThanRefusing() = runTest(testDispatcher) {
+        repository.userInfoError = IllegalStateException("userinfos down")
+        repository.talfighResult = talfigh(year("1403", days = "30"))
+
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        assertEquals(false, viewModel.uiState.value.accessDenied)
+        assertEquals(1, repository.talfighCalls)
+    }
+
     @Test
     fun load_whenThePersonIsInsured_goesOnToLoad() = runTest(testDispatcher) {
         repository.talfighResult = talfigh(year("1404", days = "30"))
@@ -174,6 +213,49 @@ class HistoryViewModelTest {
         assertEquals(false, state.accessDenied)
         assertEquals(1, repository.talfighCalls)
         assertEquals(1, state.years.size)
+    }
+
+    /**
+     * Production case: `talfighinfos` answered `{"total":0,"list":[]}` while `dastmozdinfos`
+     * returned five years for the same person. The page held the whole history and showed «سابقه‌ای
+     * یافت نشد», so the years now fold from the wage rows when the merged service gives nothing.
+     */
+    @Test
+    fun load_whenTheMergedServiceIsEmpty_foldsTheYearsFromTheWageRows() = runTest(testDispatcher) {
+        repository.talfighResult = TalfighInfoDN(list = emptyList(), total = 0)
+        repository.dastmozdResult = wagesWithDays("1404" to 30, "1403" to 10)
+
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf("1404", "1403"), state.years.map { it.year })
+        assertEquals(360, state.years.first().totalDays, "twelve months of thirty days")
+        assertEquals(480, state.careerTotal.totalDays, "counted from the days themselves")
+        assertNull(state.error, "an empty merged service is not a failure")
+    }
+
+    /** The fallback is a fallback: when the merged service answers, it decides the years. */
+    @Test
+    fun load_whenTheMergedServiceAnswers_ignoresTheWageRowsForTheYears() = runTest(testDispatcher) {
+        repository.talfighResult = talfigh(year("1402", days = "30"))
+        repository.dastmozdResult = wagesWithDays("1399" to 30)
+
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf("1402"), state.years.map { it.year }, "the merged year, not the wage one")
+    }
+
+    /** Neither service has anything: still an empty page, not a fabricated one. */
+    @Test
+    fun load_whenNeitherServiceHasRows_staysEmpty() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.years.isEmpty())
+        assertTrue(viewModel.uiState.value.hasLoadedOnce)
     }
 
     @Test
@@ -207,6 +289,73 @@ class HistoryViewModelTest {
         assertEquals(1, viewModel.uiState.value.years.size)
         assertEquals(false, viewModel.uiState.value.isLoading)
     }
+
+    /** «ارسال سابقه» posts on the person's behalf, so it must go through the confirmation. */
+    @Test
+    fun sendingTheNotice_onlyHappensAfterConfirming() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryIntent.AskSendNotice)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.showSendConfirm)
+        assertEquals(0, repository.noticeCalls, "asking is not sending")
+
+        viewModel.sendIntent(HistoryIntent.ConfirmSendNotice)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(1, repository.noticeCalls)
+        assertEquals(false, state.showSendConfirm, "the confirmation closes behind the send")
+        assertEquals("ارسال شد", state.sendSuccessMessage, "the server's own wording is shown")
+    }
+
+    @Test
+    fun sendingTheNotice_whenItFails_reportsTheErrorRatherThanSuccess() = runTest(testDispatcher) {
+        repository.noticeError = IllegalStateException("rejected")
+
+        viewModel.sendIntent(HistoryIntent.ConfirmSendNotice)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertNotNull(state.error)
+        assertNull(state.sendSuccessMessage, "a failure must not read as a confirmation")
+        assertEquals(false, state.isSending)
+    }
+
+    /** A report for someone with no years is a blank PDF; the menu must refuse rather than open. */
+    @Test
+    fun openingTheReportMenu_withNoHistory_refusesAndSaysWhy() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(HistoryIntent.ShowReportMenu)
+            advanceUntilIdle()
+
+            assertTrue(awaitItem() is HistoryEvent.ShowToast)
+        }
+        assertEquals(false, viewModel.uiState.value.showReportMenu)
+    }
+
+    /**
+     * The blank PDF a user actually received: years folded from the wage rows, so the page has
+     * history, but `talfighinfos` had none — and «سوابق تلفیقی» is generated from exactly that.
+     */
+    @Test
+    fun selectingAReport_whoseServiceHasNoRows_refusesInsteadOfDownloadingABlankFile() =
+        runTest(testDispatcher) {
+            repository.talfighResult = TalfighInfoDN(list = emptyList(), total = 0)
+            repository.dastmozdResult = wagesWithDays("1404" to 30)
+            viewModel.sendIntent(HistoryIntent.Load)
+            advanceUntilIdle()
+
+            viewModel.events.test {
+                viewModel.sendIntent(HistoryIntent.SelectReport(HistoryCertificateType.COMBINED))
+                advanceUntilIdle()
+
+                assertTrue(awaitItem() is HistoryEvent.ShowToast, "it says why")
+            }
+            assertNull(viewModel.uiState.value.selectedReport, "no viewer, no download")
+        }
 
     @Test
     fun selectingAYearCarriesThatYearAndDismissingClearsIt() = runTest(testDispatcher) {
@@ -246,6 +395,13 @@ class HistoryViewModelTest {
     @Test
     fun selectingAReportOpensTheViewerForThatReportAndDismissingClosesIt() =
         runTest(testDispatcher) {
+        // A report is only offered when its own service has rows; this test is about what happens
+        // after that, so both services answer.
+        repository.talfighResult = talfigh(year("1402", days = "30"))
+        repository.dastmozdResult = wagesWithDays("1402" to 30)
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
             viewModel.sendIntent(HistoryIntent.ShowReportMenu)
             advanceUntilIdle()
             assertTrue(viewModel.uiState.value.showReportMenu)
@@ -266,6 +422,11 @@ class HistoryViewModelTest {
     /** The viewer asks for the bytes, so the report it asks for must be the one it is showing. */
     @Test
     fun downloadingAReportFetchesTheOneOnScreen() = runTest(testDispatcher) {
+        // The report is only offered once its service has answered with rows.
+        repository.talfighResult = talfigh(year("1402", days = "30"))
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
         viewModel.sendIntent(HistoryIntent.SelectReport(HistoryCertificateType.COMBINED))
         advanceUntilIdle()
 
@@ -284,6 +445,11 @@ class HistoryViewModelTest {
     @Test
     fun aFailedReportDownloadTellsTheViewerRatherThanThePage() = runTest(testDispatcher) {
         repository.reportError = IllegalStateException("report down")
+        // «کلیه سوابق» is offered whenever the page has years at all.
+        repository.talfighResult = talfigh(year("1402", days = "30"))
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
         viewModel.sendIntent(HistoryIntent.SelectReport(HistoryCertificateType.ALL))
         advanceUntilIdle()
 
@@ -316,6 +482,22 @@ class HistoryViewModelTest {
         sumHistoryYears = 0,
         id = 0,
         hisYear = year,
+    )
+
+    /** Wage rows carrying real day counts, which is what the fallback folds years out of. */
+    private fun wagesWithDays(vararg yearToDays: Pair<String, Int>) = DastmozdInfoDN(
+        list = yearToDays.mapIndexed { index, (year, daysPerMonth) ->
+            DastmozdInfoItemDN(
+                wageDetails = List(12) {
+                    WageDetailDN(month = daysPerMonth.toString(), wage = "1000")
+                },
+                hisyear = year, id = index, risufname = "", risubirthdate = "",
+                risuidserial2 = "", risuidserial1 = "", rwshname = "کارگاه", expcitycode = "",
+                brhcode = "", risuidno = "", risudname = "", risuid = "", risulname = "",
+                risunatcode = "", brhname = "", historytypedesc = "", rwshid = "$index",
+            )
+        },
+        total = yearToDays.size,
     )
 
     private fun dastmozd(vararg years: String) = DastmozdInfoDN(

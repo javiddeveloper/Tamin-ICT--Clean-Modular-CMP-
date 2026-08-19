@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.history.ui.model
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -91,5 +92,54 @@ fun List<TalfighInfoItemPR>.careerTotal(): CareerTotalPR {
         months = carriedMonths % MONTHS_IN_YEAR,
         days = days,
         totalDays = row.sumHistoryYears,
+    )
+}
+
+/**
+ * The years, rebuilt from the wage rows.
+ *
+ * `talfighinfos` is the service that merges a career into one row per year, and it is what this
+ * page reads — but it answers with an empty list for some insured people whose history the wage
+ * service reports in full. Seen in production: `talfighinfos` → `{"total":0,"list":[]}` while
+ * `dastmozdinfos` returned five years of days and wages for the same person.
+ *
+ * `dastmozdinfos` carries the same per-month day counts, one row per employer per year, so the
+ * years can be folded from it exactly the way [mergeByYear] folds the merged rows. Used only when
+ * the merged service gives nothing: when it answers, it stays the source of truth.
+ */
+fun List<DastmozdInfoItemPR>.yearsFromWages(): ImmutableList<YearHistoryPR> {
+    if (isEmpty()) return persistentListOf()
+
+    val daysByYear = LinkedHashMap<String, IntArray>(size)
+    forEach { row ->
+        val months = daysByYear.getOrPut(row.hisyear) { IntArray(MONTHS_IN_YEAR) }
+        for (month in 0 until MONTHS_IN_YEAR) {
+            months[month] += row.wageDetails.getOrNull(month)?.month?.toIntOrNull() ?: 0
+        }
+    }
+
+    return daysByYear.map { (year, months) ->
+        YearHistoryPR(
+            year = year,
+            monthDays = months.asList().toImmutableList(),
+            totalDays = months.sum(),
+        )
+    }.toImmutableList()
+}
+
+/**
+ * The career total when only the wage rows are available.
+ *
+ * [careerTotal] reads figures the merged service puts on its first row; with no merged rows there
+ * are none, so the same 30-day-month convention is applied to the days actually counted.
+ */
+fun List<YearHistoryPR>.careerTotalFromDays(): CareerTotalPR {
+    val totalDays = sumOf { it.totalDays }
+    val months = totalDays / DAYS_IN_MONTH
+    return CareerTotalPR(
+        years = months / MONTHS_IN_YEAR,
+        months = months % MONTHS_IN_YEAR,
+        days = totalDays % DAYS_IN_MONTH,
+        totalDays = totalDays,
     )
 }

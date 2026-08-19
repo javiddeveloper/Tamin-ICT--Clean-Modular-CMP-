@@ -63,7 +63,26 @@ class FakeHistoryRepository : HistoryRepository {
         return userRoleResult
     }
 
-    override suspend fun getUserInfos(): UserInfoDN = error("not used by this screen")
+    /** Insured by default: an employer is the test that sets [employerUser]. */
+    var userInfoResult: UserInfoDN = insuredUser()
+    var userInfoError: Throwable? = null
+
+    override suspend fun getUserInfos(): UserInfoDN {
+        userInfoError?.let { throw it }
+        return userInfoResult
+    }
+
+    /** What the server answered, and whether it was asked at all. */
+    var noticeResult: String? = "ارسال شد"
+    var noticeError: Throwable? = null
+    var noticeCalls: Int = 0
+        private set
+
+    override suspend fun sendHistoryNotice(): String? {
+        noticeCalls++
+        noticeError?.let { throw it }
+        return noticeResult
+    }
 
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) = Unit
 
@@ -87,3 +106,18 @@ class FakeHistoryRepository : HistoryRepository {
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
         flowOf(HistoryJobInfoDN(list = emptyList(), total = 0))
 }
+
+private fun blankUser() = UserInfoDN(
+    serial1 = null, militaryServiceCode = null, fatherName = null, lastName = null,
+    serial2 = null, creationTime = null, lastModificationTime = null, cityCode = null,
+    socialSecurityNumber = null, lastModifiedBy = null, issueplaceName = null, birthDate = null,
+    firstName = null, insuranceNumber = null, genderCode = null, nationalID = null,
+    marriageCode = null, createdBy = null, identityNumber = null, countryCode = null,
+    id = null, birthDateTimestamp = null, issueplace = null, nationCode = null,
+)
+
+/** Someone the history endpoints will answer for: they have an insurance number. */
+fun insuredUser(): UserInfoDN = blankUser().copy(insuranceNumber = "0081631829")
+
+/** A کارفرما: never insured, so no insurance number and no insured years to ask for. */
+fun employerUser(): UserInfoDN = blankUser()

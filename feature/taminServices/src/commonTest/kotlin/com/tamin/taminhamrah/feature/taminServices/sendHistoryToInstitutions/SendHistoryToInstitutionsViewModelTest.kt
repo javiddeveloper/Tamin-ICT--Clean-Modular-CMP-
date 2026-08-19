@@ -251,6 +251,8 @@ class SendHistoryToInstitutionsViewModelTest {
         override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> =
             flow { TODO() }
 
+    override suspend fun sendHistoryNotice(): String? = null
+
         override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
             if (shouldThrowError) throw RuntimeException("send failed")
             lastSentTypes = selectedTypes

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryNoticeDTO
 import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
@@ -49,6 +50,16 @@ interface HistoryApiServices {
         @Query("type2") historyAndWageSelected: Boolean,
         @Query("type3") combineHistorySelected: Boolean
     ): BaseDTO<JsonElement?>
+
+    /**
+     * Sends the person's history to the institutions as a notice.
+     *
+     * A different endpoint from `sendinstitution`, which is the standalone «اعلام سابقه» service and
+     * takes three type flags. This one is what «کلیه سوابق» itself sends, always `type=1`, exactly
+     * as the previous app's toolbar did.
+     */
+    @GET("historyreport-services/sendeblagh")
+    suspend fun sendHistoryNotice(@Query("type") type: Int = 1): BaseDTO<HistoryNoticeDTO>
 
     /** «کلیه سوابق» as a PDF. */
     @Streaming

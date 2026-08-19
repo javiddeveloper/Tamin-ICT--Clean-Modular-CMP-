@@ -5,6 +5,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.model.history.WageDetailPR
+import kotlinx.collections.immutable.toImmutableList
 
 class YearHistoryTest {
 
@@ -102,6 +105,66 @@ class YearHistoryTest {
         assertEquals(0, total.years)
         assertEquals(0, total.totalDays)
     }
+
+    /**
+     * Seen in production: `talfighinfos` answered `{"total":0,"list":[]}` for a person whose wage
+     * rows carried five years. The years have to come from somewhere, and this is where.
+     */
+    @Test
+    fun yearsFromWages_foldsTheWageRowsIntoYearsTheSameWayTheMergedRowsFold() {
+        val years = listOf(
+            wageRow(year = "1404", days = listOf(0, 0, 0, 4, 31, 31, 30, 30, 30, 30, 30, 29)),
+            wageRow(year = "1403", days = listOf(0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 0)),
+        ).yearsFromWages()
+
+        assertEquals(listOf("1404", "1403"), years.map { it.year })
+        assertEquals(245, years[0].totalDays)
+        assertEquals(19, years[1].totalDays)
+        assertEquals(12, years[0].monthDays.size, "always twelve months")
+    }
+
+    /** Two employers in one year are added together, exactly as the merged rows would be. */
+    @Test
+    fun yearsFromWages_addsUpEveryEmployerInAYear() {
+        val years = listOf(
+            wageRow(year = "1402", days = List(12) { 10 }),
+            wageRow(year = "1402", days = List(12) { 5 }),
+        ).yearsFromWages()
+
+        assertEquals(1, years.size)
+        assertEquals(180, years.first().totalDays)
+        assertEquals(List(12) { 15 }, years.first().monthDays)
+    }
+
+    @Test
+    fun yearsFromWages_returnsNothingWhenThereAreNoWageRows() {
+        assertTrue(emptyList<DastmozdInfoItemPR>().yearsFromWages().isEmpty())
+    }
+
+    /**
+     * With no merged rows there are no server-supplied totals, so the same 30-day-month convention
+     * is applied to the days actually counted — 631 days is 1 year, 9 months, 1 day.
+     */
+    @Test
+    fun careerTotalFromDays_normalizesTheDaysItCounted() {
+        val total = listOf(
+            YearHistoryPR("1404", List(12) { 0 }.toImmutableList(), totalDays = 245),
+            YearHistoryPR("1403", List(12) { 0 }.toImmutableList(), totalDays = 386),
+        ).careerTotalFromDays()
+
+        assertEquals(631, total.totalDays)
+        assertEquals(1, total.years)
+        assertEquals(9, total.months)
+        assertEquals(1, total.days)
+    }
+
+    private fun wageRow(year: String, days: List<Int>) = DastmozdInfoItemPR(
+        wageDetails = days.map { WageDetailPR(month = it.toString(), wage = "0") },
+        hisyear = year, id = 0, risufname = "", risubirthdate = "", risuidserial2 = "",
+        risuidserial1 = "", rwshname = "", expcitycode = "", brhcode = "", risuidno = "",
+        risudname = "", risuid = "", risulname = "", risunatcode = "", brhname = "",
+        historytypedesc = "", rwshid = "",
+    )
 
     private fun row(
         year: String,

@@ -8,19 +8,23 @@ import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState.PartialS
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.canHaveInsuranceHistory
 import com.tamin.taminhamrah.feature.history.ui.model.careerTotal
+import com.tamin.taminhamrah.feature.history.ui.model.careerTotalFromDays
 import com.tamin.taminhamrah.feature.history.ui.model.mergeByYear
+import com.tamin.taminhamrah.feature.history.ui.model.yearsFromWages
 import com.tamin.taminhamrah.mapper.history.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
+import com.tamin.taminhamrah.useCases.history.SendHistoryNoticeUseCase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CancellationException
@@ -30,11 +34,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import taminx.feature.history.Res
 import taminx.feature.history.history_combined_wage_unavailable
+import taminx.feature.history.history_report_empty
+import taminx.feature.history.history_report_no_history
 
 class HistoryViewModel(
     private val getTalfighInfosUseCase: GetTalfighInfosUseCase,
     private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase,
     private val getUserRoleUseCase: GetUserRoleUseCase,
+    private val getUserInfosUseCase: GetUserInfosUseCase,
+    private val sendHistoryNoticeUseCase: SendHistoryNoticeUseCase,
     private val downloadHistoryReportUseCase: DownloadHistoryReportUseCase,
 ) : BaseViewModel<HistoryUiState, PartialState, HistoryEvent, HistoryIntent>(
     initialState = HistoryUiState()
@@ -72,11 +80,69 @@ class HistoryViewModel(
 
         is HistoryIntent.SelectSource -> flow { emit(PartialState.SourceSelected(intent.source)) }
 
-        is HistoryIntent.ShowReportMenu -> flow { emit(PartialState.ReportMenuVisible(true)) }
+        is HistoryIntent.AskSendNotice -> flow { emit(PartialState.SendConfirmVisible(true)) }
+
+        is HistoryIntent.DismissSendConfirm -> flow { emit(PartialState.SendConfirmVisible(false)) }
+
+        is HistoryIntent.DismissSendSuccess -> flow { emit(PartialState.SendSucceeded(null)) }
+
+        /*
+         * The «اعلام» the previous app sent from this very screen — `sendeblagh`, not the three-flag
+         * `sendinstitution` of the standalone service.
+         *
+         * Guarded against a second tap while the first is in flight: this posts something, and a
+         * double send is not a cosmetic problem.
+         */
+        is HistoryIntent.ConfirmSendNotice -> flow {
+            if (uiState.value.isSending) return@flow
+            emit(PartialState.Sending(true))
+            try {
+                val message = sendHistoryNoticeUseCase()
+                emit(PartialState.SendConfirmVisible(false))
+                emit(PartialState.SendSucceeded(message ?: DEFAULT_SEND_SUCCESS))
+            } catch (e: Exception) {
+                emit(PartialState.SendConfirmVisible(false))
+                emit(PartialState.Error(e.toSingleLineMessage()))
+            } finally {
+                emit(PartialState.Sending(false))
+            }
+        }
+
+        /*
+         * A report for someone with no insured years is a valid PDF with nothing on it. The service
+         * will happily produce one, so the refusal has to be here: no years, no file, and say why
+         * rather than open a viewer onto a blank page.
+         */
+        is HistoryIntent.ShowReportMenu -> flow {
+            if (uiState.value.years.isEmpty()) {
+                sendEvent(HistoryEvent.ShowToast(Res.string.history_report_no_history))
+            } else {
+                emit(PartialState.ReportMenuVisible(true))
+            }
+        }
 
         is HistoryIntent.DismissReportMenu -> flow { emit(PartialState.ReportMenuVisible(false)) }
 
+        /*
+         * Each report comes from one service, and a service with no rows still returns a valid PDF
+         * with nothing on it — which is what reached the user as a blank page. Refuse the report
+         * whose source is empty rather than download a document with nothing in it.
+         */
         is HistoryIntent.SelectReport -> flow {
+            val state = uiState.value
+            val available = when (intent.type) {
+                HistoryCertificateType.COMBINED -> state.hasCombinedRecords
+                HistoryCertificateType.WAGES -> state.hasWageRecords
+                // «کلیه سوابق» is generated from the year report, which is populated whenever any
+                // of the person's history exists at all.
+                HistoryCertificateType.ALL -> state.years.isNotEmpty()
+            }
+            if (!available) {
+                emit(PartialState.ReportMenuVisible(false))
+                sendEvent(HistoryEvent.ShowToast(Res.string.history_report_empty))
+                return@flow
+            }
+
             emit(PartialState.ReportMenuVisible(false))
             // The bytes of whatever was open before must not be handed to the next viewer.
             emit(PartialState.ReportPdfChanged(null))
@@ -106,23 +172,25 @@ class HistoryViewModel(
         // The list already on screen stays there while this runs, so a retry never blanks the page.
         emit(PartialState.Loading(true))
         try {
-            // Who this is, before asking for anything. A مستمری‌بگیر has no insured years and both
-            // history endpoints answer 500 for them, so the previous app decided this up front from
-            // `login-services/logininfo` rather than showing the server's error — and so does this.
+            // Who this is, before asking for anything. Neither a مستمری‌بگیر nor a کارفرما has
+            // insured years, and the history endpoints reject them rather than answering empty —
+            // which reaches the user as a connection error, because an unparseable rejection is
+            // indistinguishable from a dead network by the time it gets to the screen.
             //
-            // A failed role check is not a refusal: the gate only exists to explain the service, so
-            // an outage on it must not lock out someone who can use the page.
-            val role = try {
-                getUserRoleUseCase()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                UserRoleDN.UNKNOWN
+            // Both lookups at once: they are independent, and together they cost one round trip.
+            // Neither failing is a refusal — the gate exists to explain the service, so an outage
+            // on it must not lock out someone who can use the page.
+            val (role, userInfo) = coroutineScope {
+                val roleCall = async { orNull { getUserRoleUseCase() } }
+                val infoCall = async { orNull { getUserInfosUseCase() } }
+                (roleCall.await() ?: UserRoleDN.UNKNOWN) to infoCall.await()
             }
-            if (!role.canHaveInsuranceHistory()) {
+            if (!canHaveInsuranceHistory(role, userInfo)) {
                 emit(PartialState.AccessDenied)
                 return@flow
             }
+            // Kept from the record already in hand — it names the files this page downloads.
+            emit(PartialState.IdentityLoaded(userInfo?.nationalID))
 
             coroutineScope {
                 val years = async { getTalfighInfosUseCase() }
@@ -152,13 +220,25 @@ class HistoryViewModel(
                     sendEvent(HistoryEvent.ShowToast(Res.string.history_combined_wage_unavailable))
                 }
 
+                // The merged service is the source of truth when it answers at all; when it comes
+                // back empty for someone the wage service does report, the years are folded from
+                // those rows instead of showing a person with history an empty page.
+                val wageRowList = wageRows?.list?.toPresentation().orEmpty()
+                val mergedYears = history.mergeByYear()
+                val resolvedYears = mergedYears.ifEmpty { wageRowList.yearsFromWages() }
+
                 emit(
                     PartialState.HistoryLoaded(
-                        years = history.mergeByYear(),
-                        careerTotal = history.careerTotal(),
-                        wageByYear = wageRows?.list?.toPresentation()?.groupByYear()
-                            ?: persistentMapOf(),
+                        years = resolvedYears,
+                        careerTotal = if (mergedYears.isEmpty()) {
+                            resolvedYears.careerTotalFromDays()
+                        } else {
+                            history.careerTotal()
+                        },
+                        wageByYear = wageRowList.groupByYear(),
                         wagesUnavailable = wageRows == null,
+                        hasCombinedRecords = mergedYears.isNotEmpty(),
+                        hasWageRecords = wageRowList.isNotEmpty(),
                     )
                 )
             }
@@ -187,6 +267,20 @@ class HistoryViewModel(
             // The viewer says so itself; a dialog on top of an open viewer would only bury it.
             emit(PartialState.ReportDownloadFailed)
         }
+    }
+
+    /**
+     * The call's result, or null when it failed.
+     *
+     * Not `runCatching`: it swallows CancellationException too, and a lookup torn down with its
+     * scope would then read as an answer of "no".
+     */
+    private inline fun <T> orNull(call: () -> T): T? = try {
+        call()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: Exception) {
+        null
     }
 
     /** The scope to keep after a load: the one already chosen, unless its year did not come back. */
@@ -218,6 +312,8 @@ class HistoryViewModel(
             careerTotal = partialState.careerTotal,
             wageByYear = partialState.wageByYear,
             wagesUnavailable = partialState.wagesUnavailable,
+            hasCombinedRecords = partialState.hasCombinedRecords,
+            hasWageRecords = partialState.hasWageRecords,
             // A reload can return a different set of years; a scope pointing at one that is gone
             // would leave the page counting a year it can no longer draw.
             scope = partialState.scope(currentState.scope),
@@ -233,6 +329,17 @@ class HistoryViewModel(
         is PartialState.MonthSelected -> currentState.copy(selectedMonth = partialState.month)
 
         is PartialState.SourceSelected -> currentState.copy(selectedSource = partialState.source)
+
+        is PartialState.SendConfirmVisible ->
+            currentState.copy(showSendConfirm = partialState.visible)
+
+        is PartialState.Sending -> currentState.copy(isSending = partialState.isSending)
+
+        is PartialState.SendSucceeded ->
+            currentState.copy(sendSuccessMessage = partialState.message)
+
+        is PartialState.IdentityLoaded ->
+            currentState.copy(nationalId = partialState.nationalId)
 
         is PartialState.ReportMenuVisible ->
             currentState.copy(showReportMenu = partialState.visible)
@@ -251,6 +358,11 @@ class HistoryViewModel(
 
         is PartialState.Error ->
             currentState.copy(isLoading = false, error = partialState.message)
+    }
+
+    private companion object {
+        /** Used only when the service confirms without wording of its own. */
+        const val DEFAULT_SEND_SUCCESS = "درخواست شما با موفقیت ثبت شد."
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

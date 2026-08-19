@@ -6,16 +6,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
@@ -30,7 +29,6 @@ import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.ui.components.BarChartItem
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminBarChart
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonEnd
@@ -61,6 +59,7 @@ fun HistoryChartCard(
     axis: ChartAxis? = null,
     sourceChips: ImmutableList<SourceChipPR> = persistentListOf(),
     onSourceClick: (Int?) -> Unit = {},
+    rotateLabels: Boolean = false,
     concurrency: String? = null,
     concurrencyLabel: String = "",
     footer: @Composable ColumnScope.() -> Unit = {},
@@ -103,6 +102,7 @@ fun HistoryChartCard(
             onBarClick = onBarClick,
             dense = dense,
             showLabels = !dense,
+            rotateLabels = rotateLabels,
         )
 
         axis?.let { ChartAxisRow(it) }

@@ -138,6 +138,8 @@ class HistoryRepositoryImplReportTest {
             type: HistoryCertificateType
         ): PdfDownloadDTO = PdfDownloadDTO()
 
+        override suspend fun sendHistoryNotice(): String? = null
+
         override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
             if (shouldThrowOnSendToInstitution) throw RuntimeException("Remote failure")
             lastSentAllHistory = allHistorySelected

@@ -134,6 +134,8 @@ class HistoryRepositoryImplTest {
             type: HistoryCertificateType
         ): PdfDownloadDTO = PdfDownloadDTO()
 
+        override suspend fun sendHistoryNotice(): String? = null
+
         override suspend fun sendToInstitution(
             allHistorySelected: Boolean,
             historyAndWageSelected: Boolean,
@@ -143,7 +145,7 @@ class HistoryRepositoryImplTest {
 
     private class NoJobInfoDao : HistoryJobInfoDao {
         override fun getAllJobInfos(): Flow<List<HistoryJobInfoEntity>> = flowOf(emptyList())
-        override suspend fun insertJobInfos(items: List<HistoryJobInfoEntity>) = Unit
+        override suspend fun insertJobInfos(jobInfos: List<HistoryJobInfoEntity>) = Unit
         override suspend fun clearAll() = Unit
     }
 }

@@ -57,6 +57,8 @@ class FakeHistoryRepository : HistoryRepository {
         emit(PdfDownloadDN())
     }
 
+    override suspend fun sendHistoryNotice(): String? = null
+
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
         if (shouldThrowError) throw error
         lastSentTypes = selectedTypes

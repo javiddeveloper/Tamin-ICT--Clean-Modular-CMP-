@@ -71,4 +71,11 @@
     <string name="history_year_incomplete">سال ناقص</string>
     <string name="history_workshops_and_wages">کارگاه و دستمزد</string>
     <string name="history_close">بستن</string>
+    <string name="history_scheme_optional">بیمهٔ اختیاری</string>
+    <string name="history_scheme_construction">بیمهٔ کارگران ساختمانی</string>
+    <string name="history_send_confirm_body">قبل از ارسال سابقه لطفا تمامی سوابق خود را مشاهده و بررسی نمایید.</string>
+    <string name="history_send_confirm_action">ارسال سابقه</string>
+    <string name="history_send_success_title">درخواست شما ثبت شد</string>
+    <string name="history_report_no_history">سابقه‌ای برای تهیهٔ گزارش وجود ندارد.</string>
+    <string name="history_report_empty">برای این نوع گزارش سابقه‌ای ثبت نشده است.</string>
 </resources>
