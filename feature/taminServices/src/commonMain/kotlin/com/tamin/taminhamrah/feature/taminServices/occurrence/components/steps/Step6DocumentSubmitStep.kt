@@ -28,13 +28,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.AccidentStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.DocumentSubmitStepState
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetailsStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
@@ -45,7 +49,6 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -76,7 +79,9 @@ import taminx.core.core_ui.occurrence_submit_disclaimer
 import taminx.core.core_ui.occurrence_summary_accident_date
 import taminx.core.core_ui.occurrence_summary_accident_time
 import taminx.core.core_ui.occurrence_summary_employer
+import taminx.core.core_ui.occurrence_summary_exact_location
 import taminx.core.core_ui.occurrence_summary_outcome
+import taminx.core.core_ui.occurrence_summary_person
 import taminx.core.core_ui.occurrence_summary_section
 import taminx.core.core_ui.occurrence_summary_transport
 import taminx.core.core_ui.occurrence_summary_workshop
@@ -87,6 +92,7 @@ internal fun Step6DocumentSubmitStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
+    onClose:() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -118,6 +124,7 @@ internal fun Step6DocumentSubmitStep(
             OccurrenceTopAppBar(
                 title = stringResource(Res.string.occurrence_step6_title),
                 onBackClicked = onBack,
+                onCloseClicked = onClose,
                 currentStep = uiState.stepNumber,
                 totalSteps = OccurrenceStep.entries.size,
             )
@@ -126,7 +133,6 @@ internal fun Step6DocumentSubmitStep(
             OccurrenceNavigationBar(
                 primaryText = stringResource(Res.string.occurrence_submit),
                 primaryEnabled = uiState.isStep6Valid && !uiState.isLoading && !uiState.isSubmitting,
-                showChevron = false,
                 onPrimaryClick = { onIntent(OccurrenceIntent.SubmitOccurrence) },
                 secondaryText = stringResource(Res.string.occurrence_prev_step),
                 onSecondaryClick = onBack,
@@ -192,29 +198,72 @@ internal fun Step6DocumentSubmitStep(
                 TaminDivider()
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                SectionLabel(text = stringResource(Res.string.occurrence_summary_section))
-                Spacer(modifier = Modifier.height(Spacing.xs))
-
-                DetailRow(label = stringResource(Res.string.occurrence_summary_workshop), value = uiState.workshop.selectedWorkshop?.displayCode.orEmpty(), numeric = true)
-                TaminDivider()
-                DetailRow(label = stringResource(Res.string.occurrence_summary_employer), value = uiState.workshop.employerName, numeric = false)
-                TaminDivider()
-                DetailRow(label = stringResource(Res.string.occurrence_summary_accident_date), value = uiState.accident.accidentDate, numeric = true)
-                TaminDivider()
-                DetailRow(label = stringResource(Res.string.occurrence_summary_accident_time), value = uiState.accident.accidentTime, numeric = true)
-                TaminDivider()
-                DetailRow(label = stringResource(Res.string.occurrence_summary_outcome), value = uiState.accident.accidentOutcomeTitle, numeric = false)
-                TaminDivider()
-                DetailRow(label = stringResource(Res.string.occurrence_summary_transport), value = uiState.workHours.transportation, numeric = false)
-
+                PersonInfoCard(title = stringResource(Res.string.occurrence_summary_section)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_person),
+                            value = uiState.jobDetails.fullName,
+                        )
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_workshop),
+                            value = uiState.workshop.selectedWorkshop?.name.orEmpty(),
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_employer),
+                            value = uiState.workshop.employerName,
+                        )
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_accident_date),
+                            value = uiState.accident.accidentDate,
+                            numeric = true,
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_outcome),
+                            value = uiState.accident.accidentOutcomeTitle,
+                        )
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_accident_time),
+                            value = uiState.accident.accidentTime,
+                            numeric = true,
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_transport),
+                            value = uiState.workHours.transportation,
+                        )
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_summary_exact_location),
+                            value = uiState.accident.exactLocation,
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(Spacing.md))
-
-                Text(
-                    text = stringResource(Res.string.occurrence_submit_disclaimer),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textMuted,
-                )
-
+                InfoBanner(message =  stringResource(Res.string.occurrence_submit_disclaimer))
                 Spacer(modifier = Modifier.height(Spacing.lg))
                 Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
@@ -262,6 +311,9 @@ private fun Step6DocumentSubmitStepPreview() {
     PreviewRtlThemeContent {
         Step6DocumentSubmitStep(
             uiState = OccurrenceUiState(
+                jobDetails = JobDetailsStepState(
+                    fullName = "علی محمدی",
+                ),
                 workshop = WorkshopStepState(
                     selectedWorkshop = WorkshopItemPR(id = "1", workshopCode = "1412345", branchCode = "014", name = "کارگاه تولیدی الف", employerName = "شرکت الف", employerPhone = "02112345678", address = "تهران، خیابان ولیعصر", postalCode = "1234567890", phone = "02112345678"),
                     employerName = "شرکت الف",
@@ -270,6 +322,7 @@ private fun Step6DocumentSubmitStepPreview() {
                     accidentDate = "1402/06/15",
                     accidentTime = "۱۴:۳۰",
                     accidentOutcomeTitle = "استراحت پزشکی",
+                    exactLocation = "طبقه دوم، سالن تولید",
                 ),
                 workHours = WorkHoursStepState(
                     transportation = "وسیله نقلیه شخصی",
@@ -284,6 +337,7 @@ private fun Step6DocumentSubmitStepPreview() {
             ),
             onIntent = {},
             onBack = {},
+            onClose = {}
         )
     }
 }

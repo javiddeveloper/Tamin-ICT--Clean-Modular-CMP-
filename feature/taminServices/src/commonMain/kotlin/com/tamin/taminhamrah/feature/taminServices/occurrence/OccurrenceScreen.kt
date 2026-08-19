@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSuccessModal
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceWarningBottomSheet
@@ -26,9 +32,28 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.OccurrencePe
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.occurrence_exit_confirmation_confirm
+import taminx.core.core_ui.occurrence_exit_confirmation_desc
+import taminx.core.core_ui.occurrence_exit_confirmation_dismiss
+import taminx.core.core_ui.occurrence_exit_confirmation_title
+
+private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
+    OccurrenceStep.WORKSHOP_INFO,
+    OccurrenceStep.JOB_DETAILS,
+    OccurrenceStep.WORK_HOURS,
+    OccurrenceStep.ACCIDENT_DETAILS,
+    OccurrenceStep.DOCUMENT_SUBMIT,
+)
 
 @Composable
 fun OccurrenceScreen(
@@ -53,9 +78,58 @@ fun OccurrenceScreen(
         }
     }
 
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
+    val onExitRequested = remember(uiState.currentStep, onBack) {
+        {
+            if (uiState.currentStep in STEPS_REQUIRING_EXIT_CONFIRMATION) {
+                showExitConfirmation = true
+            } else {
+                onBack()
+            }
+        }
+    }
+
+    BackHandler(onBack = { viewModel.sendIntent(OccurrenceIntent.GoToPreviousStep) })
+
+    if (showExitConfirmation) {
+        val taminColors = LocalTaminColors.current
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.occurrence_exit_confirmation_title),
+            description = stringResource(Res.string.occurrence_exit_confirmation_desc),
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.occurrence_exit_confirmation_confirm),
+                    onClick = { showExitConfirmation = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp),
+                    icon = Icons.Default.Check
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.occurrence_exit_confirmation_dismiss),
+                    onClick = {
+                        showExitConfirmation = false
+                        onBack()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 50.dp,
+                    shape = RoundedCornerShape(14.dp),
+                    borderWidth = 0.dp,
+                    contentColor = taminColors.textSecondary
+                )
+            },
+            onDismissRequest = { showExitConfirmation = false },
+            icon = Icons.AutoMirrored.Outlined.HelpOutline
+        )
+    }
+
     OccurrenceContent(
         uiState = uiState,
         onBack = { viewModel.sendIntent(OccurrenceIntent.GoToPreviousStep) },
+        onClose = onExitRequested,
         onIntent = viewModel::sendIntent,
     )
 
@@ -81,16 +155,57 @@ fun OccurrenceScreen(
 internal fun OccurrenceContent(
     uiState: OccurrenceUiState,
     onBack: () -> Unit,
+    onClose: () -> Unit,
     onIntent: (OccurrenceIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (uiState.currentStep) {
-        OccurrenceStep.PERSON_INFO -> Step1PersonInfoStep(uiState = uiState, onIntent = onIntent, onBack = onBack, modifier = modifier)
-        OccurrenceStep.WORKSHOP_INFO -> Step2WorkshopStep(uiState = uiState, onIntent = onIntent, onBack = onBack, modifier = modifier)
-        OccurrenceStep.JOB_DETAILS -> Step3JobDetailsStep(uiState = uiState, onIntent = onIntent, onBack = onBack, modifier = modifier)
-        OccurrenceStep.WORK_HOURS -> Step4WorkHoursStep(uiState = uiState, onIntent = onIntent, onBack = onBack, modifier = modifier)
-        OccurrenceStep.ACCIDENT_DETAILS -> Step5AccidentStep(uiState = uiState, onIntent = onIntent, onBack = onBack, modifier = modifier)
-        OccurrenceStep.DOCUMENT_SUBMIT -> Step6DocumentSubmitStep(uiState = uiState, onIntent = onIntent, onBack = onBack, modifier = modifier)
+        OccurrenceStep.PERSON_INFO -> Step1PersonInfoStep(
+            uiState = uiState,
+            onIntent = onIntent,
+            onBack = onBack,
+            modifier = modifier
+        )
+
+        OccurrenceStep.WORKSHOP_INFO -> Step2WorkshopStep(
+            uiState = uiState,
+            onIntent = onIntent,
+            onBack = onBack,
+            modifier = modifier,
+            onClose = onClose
+        )
+
+        OccurrenceStep.JOB_DETAILS -> Step3JobDetailsStep(
+            uiState = uiState,
+            onIntent = onIntent,
+            onBack = onBack,
+            onClose = onClose,
+            modifier = modifier
+        )
+
+        OccurrenceStep.WORK_HOURS -> Step4WorkHoursStep(
+            uiState = uiState,
+            onIntent = onIntent,
+            onBack = onBack,
+            onClose = onClose,
+            modifier = modifier
+        )
+
+        OccurrenceStep.ACCIDENT_DETAILS -> Step5AccidentStep(
+            uiState = uiState,
+            onIntent = onIntent,
+            onBack = onBack,
+            onClose = onClose,
+            modifier = modifier
+        )
+
+        OccurrenceStep.DOCUMENT_SUBMIT -> Step6DocumentSubmitStep(
+            uiState = uiState,
+            onIntent = onIntent,
+            onBack = onBack,
+            onClose = onClose,
+            modifier = modifier
+        )
     }
 }
 
@@ -120,6 +235,7 @@ private fun OccurrenceContentStep1Preview() {
             ),
             onBack = {},
             onIntent = {},
+            onClose = {},
         )
     }
 }

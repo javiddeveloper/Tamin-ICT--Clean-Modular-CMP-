@@ -876,12 +876,14 @@
     <string name="occurrence_doc_required_hint">بارگذاری حداقل دو تصویر الزامی است.</string>
     <string name="occurrence_doc_format_hint">تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد</string>
     <string name="occurrence_summary_section">خلاصه اطلاعات</string>
+    <string name="occurrence_summary_person">فرد حادثه‌دیده</string>
     <string name="occurrence_summary_workshop">کارگاه</string>
     <string name="occurrence_summary_employer">کارفرما</string>
     <string name="occurrence_summary_accident_date">تاریخ حادثه</string>
     <string name="occurrence_summary_accident_time">ساعت حادثه</string>
     <string name="occurrence_summary_outcome">نتیجه حادثه</string>
     <string name="occurrence_summary_transport">ایاب و ذهاب</string>
+    <string name="occurrence_summary_exact_location">محل دقیق</string>
     <string name="occurrence_submit_disclaimer">با ارسال این فرم، صحت اطلاعات واردشده را تأیید می‌کنید. پس از ارسال، امکان ویرایش وجود ندارد.</string>
     <string name="occurrence_sheet_doc_type_title">نوع مدرک</string>
 
@@ -890,4 +892,10 @@
     <string name="occurrence_success_desc">درخواست شما به شعبه ذیربط ارسال شد. نتیجه از طریق صندوق شخصی اطلاع‌رسانی می‌شود.</string>
     <string name="occurrence_success_tracking_label">کد رهگیری</string>
     <string name="occurrence_success_action">بازگشت به خدمات</string>
+
+    <!-- Exit confirmation -->
+    <string name="occurrence_exit_confirmation_title">فرم را رها می‌کنید؟</string>
+    <string name="occurrence_exit_confirmation_desc">اطلاعات واردشده ذخیره نشده و در صورت خروج از بین می‌رود.</string>
+    <string name="occurrence_exit_confirmation_confirm">ادامه تکمیل فرم</string>
+    <string name="occurrence_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
 </resources>

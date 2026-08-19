@@ -15,9 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +30,8 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Occurre
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetailsStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
@@ -39,10 +39,8 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
@@ -73,6 +71,7 @@ internal fun Step3JobDetailsStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
+    onClose:() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -99,6 +98,7 @@ internal fun Step3JobDetailsStep(
             OccurrenceTopAppBar(
                 title = stringResource(Res.string.occurrence_step3_title),
                 onBackClicked = onBack,
+                onCloseClicked = onClose,
                 currentStep = uiState.stepNumber,
                 totalSteps = OccurrenceStep.entries.size,
             )
@@ -133,7 +133,45 @@ internal fun Step3JobDetailsStep(
 
                 Spacer(Modifier.height(Spacing.md))
 
-                PersonInfoCard(step = step)
+                PersonInfoCard {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_field_name),
+                            value = step.fullName,
+                        )
+
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_field_nationality),
+                            value = step.nationality,
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_field_insurance_type),
+                            value = step.insuranceType,
+                        )
+
+                        PersonInfoGridItem(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.occurrence_field_gender),
+                            value = if (step.gender.isBlank()) {
+                                "-"
+                            } else {
+                                stringResource(step.gender.toGenderLabel())
+                            },
+                        )
+                    }
+                }
 
                 TaminDivider()
 
@@ -215,93 +253,6 @@ internal fun Step3JobDetailsStep(
     }
 }
 
-@Composable
-private fun PersonInfoCard(
-    step: JobDetailsStepState,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface()
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-        ) {
-            PersonInfoGridItem(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.occurrence_field_name),
-                value = step.fullName,
-            )
-
-            PersonInfoGridItem(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.occurrence_field_nationality),
-                value = step.nationality,
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-        ) {
-            PersonInfoGridItem(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.occurrence_field_insurance_type),
-                value = step.insuranceType,
-            )
-
-            PersonInfoGridItem(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.occurrence_field_gender),
-                value = if (step.gender.isBlank()) {
-                    "-"
-                } else {
-                    stringResource(step.gender.toGenderLabel())
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun PersonInfoGridItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    numeric: Boolean = false,
-) {
-    val taminColors = LocalTaminColors.current
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = taminColors.textMuted,
-        )
-
-        if (numeric) {
-            NumericText(
-                text = value,
-                style = MaterialTheme.typography.titleSmall,
-                color = taminColors.textPrimary,
-            )
-        } else {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleSmall,
-                color = taminColors.textPrimary,
-            )
-        }
-    }
-}
-
 @PreviewRtlTheme
 @Preview
 @Composable
@@ -322,6 +273,7 @@ private fun Step3JobDetailsStepPreview() {
             ),
             onIntent = {},
             onBack = {},
+            onClose = {}
         )
     }
 }

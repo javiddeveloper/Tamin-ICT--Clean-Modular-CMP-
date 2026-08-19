@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -338,20 +339,21 @@ fun OccurrenceNavigationBar(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Optional Secondary outlined button
             if (secondaryText != null && onSecondaryClick != null) {
                 Box(
                     modifier = Modifier
-                        .height(54.dp)
+                        .size(54.dp)
                         .border(1.5.dp, taminColors.border, RoundedCornerShape(15.dp))
                         .clip(RoundedCornerShape(15.dp))
-                        .clickable { onSecondaryClick() }
-                        .padding(horizontal = 24.dp),
+                        .clickable { onSecondaryClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    TaminText(
-                        text = secondaryText,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                        color = taminColors.textSecondary
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

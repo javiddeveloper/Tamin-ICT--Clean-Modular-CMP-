@@ -85,6 +85,7 @@ internal fun Step2WorkshopStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
+    onClose:() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -121,6 +122,7 @@ internal fun Step2WorkshopStep(
                 onBackClicked = onBack,
                 currentStep = uiState.stepNumber,
                 totalSteps = OccurrenceStep.entries.size,
+                onCloseClicked = onClose
             )
         },
         bottomBar = {
@@ -465,6 +467,7 @@ private fun Step2WorkshopStepPreview() {
             ),
             onIntent = {},
             onBack = {},
+            onClose = {}
         )
     }
 }

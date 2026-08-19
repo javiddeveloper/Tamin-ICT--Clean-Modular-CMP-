@@ -64,6 +64,7 @@ internal fun Step5AccidentStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
+    onClose:() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -99,6 +100,7 @@ internal fun Step5AccidentStep(
             OccurrenceTopAppBar(
                 title = stringResource(Res.string.occurrence_step5_title),
                 onBackClicked = onBack,
+                onCloseClicked = onClose,
                 currentStep = uiState.stepNumber,
                 totalSteps = OccurrenceStep.entries.size,
             )
@@ -227,6 +229,7 @@ private fun Step5AccidentStepPreview() {
             ),
             onIntent = {},
             onBack = {},
+            onClose = {}
         )
     }
 }

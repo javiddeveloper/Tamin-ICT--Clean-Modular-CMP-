@@ -54,6 +54,7 @@ internal fun Step4WorkHoursStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
+    onClose:() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val step = uiState.workHours
@@ -90,6 +91,7 @@ internal fun Step4WorkHoursStep(
             OccurrenceTopAppBar(
                 title = stringResource(Res.string.occurrence_step4_title),
                 onBackClicked = onBack,
+                onCloseClicked = onClose,
                 currentStep = uiState.stepNumber,
                 totalSteps = OccurrenceStep.entries.size,
             )
@@ -273,6 +275,7 @@ private fun Step4WorkHoursStepPreview() {
             ),
             onIntent = {},
             onBack = {},
+            onClose = {}
         )
     }
 }
