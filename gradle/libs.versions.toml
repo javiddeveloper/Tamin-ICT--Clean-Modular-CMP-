@@ -55,6 +55,7 @@ connectivity = "2.1.0"
 gitLive = "2.1.0"
 okhttp = "4.12.0"
 turbine = "1.2.0"
+robolectric = "4.14.1"
 appcompatVersion = "1.7.1"
 sqliteBundled = "2.5.2"
 chucker = "4.2.0"
@@ -293,6 +294,7 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 #haze
 chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }

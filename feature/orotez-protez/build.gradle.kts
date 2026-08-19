@@ -5,6 +5,10 @@ plugins {
 
 android {
     namespace = "com.tamin.taminhamrah.feature.orotezprotez"
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 kotlin {
@@ -21,6 +25,10 @@ kotlin {
         androidMain.dependencies {
             // Camera permission launcher (rememberLauncherForActivityResult).
             implementation(libs.androidx.activity.compose)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.robolectric)
         }
     }
 }
