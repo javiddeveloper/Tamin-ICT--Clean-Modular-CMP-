@@ -32,6 +32,7 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 private const val CHEVRON_DOWN_DEGREES = 90f
 
 private val IconSize = 19.dp
+private val ChevronSize = 16.dp
 private val PickerRowMinHeight = 56.dp
 private val PickerRowPaddingVertical = 15.dp
 
@@ -56,6 +57,7 @@ fun PickerRow(
     isPlaceholder: Boolean = false,
     icon: ImageVector? = null,
     iconTint: Color? = null,
+    showChevron: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     Row(
@@ -91,5 +93,13 @@ fun PickerRow(
             color = if (isPlaceholder) colors.textMuted else colors.textPrimary,
             modifier = Modifier.weight(1f),
         )
+        if (showChevron && icon != null) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                tint = colors.textMuted,
+                modifier = Modifier.size(ChevronSize).rotate(CHEVRON_DOWN_DEGREES),
+            )
+        }
     }
 }

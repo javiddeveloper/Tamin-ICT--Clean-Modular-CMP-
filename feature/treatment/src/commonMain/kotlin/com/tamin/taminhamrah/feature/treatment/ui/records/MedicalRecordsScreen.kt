@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,7 +64,6 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -422,7 +424,7 @@ fun MedicalRecordsContent(
                     onSearchClick = { showSearchSheet = true },
                     personExpanded = openFilter == RecordFilter.PATIENT,
                     dateExpanded = openFilter == RecordFilter.PERIOD,
-                    personMenu = {
+                    personMenu = { anchorWidth ->
                         RecordFilterMenu(
                             expanded = openFilter == RecordFilter.PATIENT,
                             options = remember(patients, selectedPatient, selfLabel) {
@@ -432,6 +434,7 @@ fun MedicalRecordsContent(
                                     .toImmutableList()
                             },
                             isSelected = { it == selectedPatient },
+                            anchorWidth = anchorWidth,
                             onDismiss = { openFilter = null },
                             onSelect = {
                                 onPatientSelected(it)
@@ -439,11 +442,12 @@ fun MedicalRecordsContent(
                             },
                         )
                     },
-                    dateMenu = {
+                    dateMenu = { anchorWidth ->
                         RecordFilterMenu(
                             expanded = openFilter == RecordFilter.PERIOD,
                             options = rememberPeriodOptions(),
                             isSelected = { it == selectedPeriod },
+                            anchorWidth = anchorWidth,
                             onDismiss = { openFilter = null },
                             onSelect = { period ->
                                 openFilter = null
@@ -615,8 +619,8 @@ private fun RecordsShimmerSkeleton() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .raisedCard(CornerRadius.cardCompact)
                     .height(TreatmentDimens.recordsFooterSpacer)
-                    .taminSurface(CornerRadius.cardCompact)
                     .shimmer(),
             )
         }

@@ -173,6 +173,8 @@
     <string name="date_picker_confirm">تأیید تاریخ</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
+    <string name="action_copy">کپی</string>
+    <string name="action_copied">در حافظه کپی شد</string>
     <string name="action_show_details">نمایش جزئیات</string>
     <string name="action_hide_details">مخفی کردن جزئیات</string>
     <string name="unit_rial">ریال</string>
@@ -221,17 +223,24 @@
     <!-- Prescription / record detail -->
     <string name="prescription_title">نسخهٔ الکترونیک</string>
     <string name="prescription_download_cd">دریافت نسخهٔ الکترونیک</string>
+    <string name="prescription_share_cd">هم‌رسانی نسخه</string>
+    <!-- What the share sheet sends: the record's identity and its total, one line each. -->
+    <string name="prescription_share_body">%1$s
+پزشک: %2$s
+کد رهگیری: %3$s
+تاریخ صدور: %4$s
+جمع کل: %5$s ریال</string>
     <string name="prescription_lab_result_cd">دریافت جواب آزمایش</string>
     <string name="prescription_empty">برای این نسخه قلمی ثبت نشده است.</string>
     <string name="prescription_items">اقلام دارویی</string>
     <string name="detail_doctor">پزشک</string>
     <string name="detail_tracking_code">کد رهگیری</string>
-    <string name="detail_date">تاریخ</string>
+    <string name="detail_date">تاریخ صدور</string>
     <string name="detail_dose">دستور مصرف</string>
     <string name="detail_prescribed">تجویزی</string>
     <string name="detail_received">دریافتی</string>
     <string name="detail_center">داروخانه/پاراکلینیک</string>
-    <string name="detail_action_date">تاریخ اقدام</string>
+   <string name="detail_action_date">تاریخ ارائهٔ خدمت</string>
     <string name="detail_patient_share">سهم بیمار</string>
     <string name="detail_visit_reason">دلیل مراجعه</string>
     <string name="detail_diagnosis">تشخیص</string>
@@ -694,6 +703,65 @@
     <string name="send_history_success_action">متوجه شدم</string>
     <string name="send_history_access_denied_title">عدم دسترسی به سرویس</string>
     <string name="send_history_access_denied_action">متوجه شدم</string>
+    <string name="orotez_protez_title">کمک هزینه اروتز و پروتز</string>
+    <string name="orotez_protez_subtitle">کمک‌هزینهٔ خرید وسایل اروتز و پروتز</string>
+    <string name="orotez_protez_help_dialog_title">راهنمای کمک هزینه</string>
+    <string name="orotez_protez_help_dialog_description">پس از خرید وسیله، نسخهٔ تجویز پزشک و فاکتور خرید را بارگذاری کنید. برای سمعک، نوار گوش و گارانتی نیز در بررسی پرونده مؤثر است.</string>
+    <string name="orotez_protez_help_dialog_confirm">متوجه شدم</string>
+    <string name="orotez_protez_step_user">استفاده‌کننده</string>
+    <string name="orotez_protez_step_info">اطلاعات</string>
+    <string name="orotez_protez_step_documents">مدارک</string>
+    <string name="orotez_protez_step_user_title">تعیین استفاده‌کننده</string>
+    <string name="orotez_protez_step_user_description">شعبهٔ رسیدگی‌کننده، فرد استفاده‌کننده و تاریخ تجویز پزشک را مشخص کنید.</string>
+    <string name="orotez_protez_field_branch_placeholder">انتخاب شعبه</string>
+    <string name="orotez_protez_field_insured_person">شماره بیمه / فرد استفاده‌کننده</string>
+    <string name="orotez_protez_field_prescription_date">تاریخ تجویز پزشک</string>
+    <string name="orotez_protez_pick_branch_title">انتخاب شعبه</string>
+    <string name="orotez_protez_pick_branch_subtitle">شعبهٔ رسیدگی‌کننده به درخواست</string>
+    <string name="orotez_protez_pick_insured_person_title">فرد استفاده‌کننده</string>
+    <string name="orotez_protez_pick_insured_person_subtitle">بیمه‌شدهٔ اصلی یا افراد تحت تکفل</string>
+    <string name="orotez_protez_insured_person_subtitle">شماره بیمه %1$s</string>
+    <string name="orotez_protez_next_step">مرحله بعد</string>
+    <string name="orotez_protez_step_info_title">اطلاعات بیمه‌شده</string>
+    <string name="orotez_protez_step_info_description">اطلاعات فرد انتخاب‌شده را بررسی و تأیید کنید.</string>
+    <string name="orotez_protez_detail_full_name">نام و نام خانوادگی</string>
+    <string name="orotez_protez_detail_relation">نسبت</string>
+    <string name="orotez_protez_detail_national_code">کد ملی</string>
+    <string name="orotez_protez_detail_birth_certificate_number">شماره شناسنامه</string>
+    <string name="orotez_protez_detail_issue_place">محل صدور شناسنامه</string>
+    <string name="orotez_protez_detail_birth_date">تاریخ تولد</string>
+    <string name="orotez_protez_detail_booklet_valid_until">خاتمه اعتبار دفترچه</string>
+    <string name="orotez_protez_confirm_and_continue">تأیید و ادامه</string>
+    <string name="orotez_protez_documents_title">بارگذاری مدارک</string>
+    <string name="orotez_protez_documents_description">تصویر jpeg و حداکثر ۲ مگابایت. نسخه پزشک و فاکتور خرید الزامی است.</string>
+    <string name="orotez_protez_document_required">الزامی</string>
+    <string name="orotez_protez_document_optional">اختیاری</string>
+    <string name="orotez_protez_document_pick_placeholder">انتخاب از دوربین یا گالری</string>
+    <string name="orotez_protez_document_prescription">نسخه تجویز پزشک</string>
+    <string name="orotez_protez_document_invoice">فاکتور خرید</string>
+    <string name="orotez_protez_document_ear_mold">نوار گوش (سمعک)</string>
+    <string name="orotez_protez_document_hearing_aid_warranty">گارانتی سمعک</string>
+    <string name="orotez_protez_submit_request">ارسال درخواست</string>
+    <string name="orotez_protez_submit_missing_data_error">اطلاعات لازم برای ارسال درخواست کامل نیست. لطفاً مراحل قبلی را دوباره بررسی کنید.</string>
+    <string name="orotez_protez_submit_success_fallback">درخواست شما با موفقیت ثبت شد.</string>
+    <string name="orotez_protez_submit_success_title">درخواست شما با موفقیت ثبت شد</string>
+    <string name="orotez_protez_submit_success_confirm">متوجه شدم</string>
+    <string name="orotez_protez_document_source_subtitle">منبع تصویر را انتخاب کنید</string>
+    <string name="orotez_protez_document_source_camera_title">دوربین</string>
+    <string name="orotez_protez_document_source_camera_subtitle">گرفتن عکس جدید</string>
+    <string name="orotez_protez_document_source_gallery_title">گالری تصاویر</string>
+    <string name="orotez_protez_document_source_gallery_subtitle">انتخاب از فایل‌های دستگاه</string>
+    <string name="orotez_protez_document_source_remove">حذف تصویر</string>
+    <string name="orotez_protez_document_status_uploading">در حال بارگذاری...</string>
+    <string name="orotez_protez_document_status_uploaded">بارگذاری شد • برای تغییر یا حذف ضربه بزنید</string>
+    <string name="orotez_protez_document_status_error_tap_to_retry">برای تلاش دوباره ضربه بزنید</string>
+    <string name="orotez_protez_document_format_error">فقط تصاویر با فرمت jpeg و حداکثر ۲ مگابایت مجاز است.</string>
+    <string name="orotez_protez_document_duplicate_error">این تصویر قبلاً برای یکی از مدارک انتخاب شده است.</string>
+    <string name="orotez_protez_document_camera_permission_error">برای گرفتن عکس، دسترسی دوربین لازم است.</string>
+    <string name="orotez_protez_document_upload_error">بارگذاری تصویر با خطا مواجه شد.</string>
+    <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
+    <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
+    <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
 
     <!-- Occurrence / Accident Report -->
     <string name="occurrence_title">گزارش حادثه ناشی از کار</string>

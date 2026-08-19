@@ -1,9 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.medicalConfirmations
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,8 +39,12 @@ import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.pushBack
+import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -114,6 +116,12 @@ fun MedicalConfirmationsScreen(
     var selectedDetail by remember { mutableStateOf<MedicalConfirmationPR?>(null) }
     val collapseState = rememberCollapsingHeaderState(TreatmentConfirmationsDimens.headerCollapseDistance)
 
+    // Both live above the swap, because both have to outlive it: the list is torn down while the
+    // detail is on screen, so held inside it the chosen filter would silently reset to «همه» and
+    // every row would fade in again underneath the slide back.
+    var selectedFilterIndex by remember { mutableIntStateOf(0) }
+    val staggerState = rememberStaggeredEntranceState()
+
     Scaffold(
         modifier = modifier,
         containerColor = colors.bgPage,
@@ -147,7 +155,7 @@ fun MedicalConfirmationsScreen(
                             Text(
                                 text = stringResource(Res.string.confirmations_hero_subtitle),
                                 style = typography.bodyMedium,
-                                color = colors.bgSurface.copy(alpha = 0.9f),
+                                color = TaminOnAccentInkSoft,
                             )
                         }
                     }
@@ -156,9 +164,11 @@ fun MedicalConfirmationsScreen(
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Opening a row is a step deeper into the page and closing it is a step back out, so
+            // it animates the way the app pushes a screen rather than dissolving in place.
             AnimatedContent(
                 targetState = selectedDetail,
-                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                transitionSpec = { if (targetState != null) pushForward() else pushBack() },
                 label = "confirmations-screen-transition",
             ) { detailItem ->
                 if (detailItem != null) {
@@ -172,6 +182,9 @@ fun MedicalConfirmationsScreen(
                         confirmations = state.confirmationList,
                         isLoading = state.isLoading,
                         error = state.error,
+                        selectedFilterIndex = selectedFilterIndex,
+                        onFilterSelected = { selectedFilterIndex = it },
+                        staggerState = staggerState,
                         onSelectDetail = { item -> selectedDetail = item },
                         modifier = Modifier.nestedScroll(collapseState.nestedScrollConnection),
                     )
