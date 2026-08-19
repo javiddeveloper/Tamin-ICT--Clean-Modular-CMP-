@@ -270,6 +270,56 @@ private fun Bar(
     }
 }
 
+/**
+ * The fixed lane above the plot.
+ *
+ * Its own composable so the plain `AnimatedVisibility` resolves: inside the bar's `Column` the
+ * `ColumnScope` overload wins, and it is not the one wanted here.
+ *
+ * The lane keeps its height whether a bubble is in it, so one appearing never shifts the
+ * bars beneath. The bubble is wider than its bar and is allowed to overflow — clamped to the
+ * column it would be clipped to a single digit.
+ */
+@Composable
+private fun PillLane(pill: String?) {
+    Box(
+        modifier = Modifier.height(PillLaneHeight).fillMaxWidth().wrapContentWidth(unbounded = true),
+        contentAlignment = Alignment.Center,
+    ) {
+        // A tooltip should arrive rather than blink: it scales up from just under full size as it
+        // fades in, and leaves the same way.
+        AnimatedVisibility(
+            visible = pill != null,
+            enter = fadeIn(tween(PillDurationMs)) +
+                scaleIn(tween(PillDurationMs), initialScale = PillInitialScale),
+            exit = fadeOut(tween(PillDurationMs)) +
+                scaleOut(tween(PillDurationMs), targetScale = PillInitialScale),
+        ) {
+            // Held across the exit so the bubble fades out with its text intact rather than
+            // emptying first.
+            val text = remember(pill) { pill }
+            text?.let { PillLabel(text = it) }
+        }
+    }
+}
+
+/**
+ * Takes [fraction] of the height available, scaled by [progress].
+ *
+ * A layout modifier and not `fillMaxHeight(animatedFraction)`, which would recompose every frame,
+ * and not `graphicsLayer { scaleY }`, which would squash the corner radius on the way up. Reading
+ * [progress] inside the measure lambda keeps a frame of animation to the layout phase.
+ */
+private fun Modifier.growTo(fraction: Float, progress: () -> Float): Modifier = layout {
+    measurable, constraints ->
+    val full = (constraints.maxHeight * fraction).roundToInt()
+    val height = (full * progress().coerceIn(0f, 1f)).roundToInt().coerceAtMost(constraints.maxHeight)
+    val placeable = measurable.measure(
+        constraints.copy(minHeight = height, maxHeight = height),
+    )
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+}
+
 @Composable
 private fun PillLabel(text: String) {
     Text(
