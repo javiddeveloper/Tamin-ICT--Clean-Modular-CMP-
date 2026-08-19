@@ -32,6 +32,8 @@ import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
 import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
+import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
+import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -135,5 +137,10 @@ val ApiClientsModule = module {
     single<AgentApiService>(named("agentApiService")) {
         val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
+    }
+
+    single<OccurrenceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createOccurrenceApiService()
     }
 }

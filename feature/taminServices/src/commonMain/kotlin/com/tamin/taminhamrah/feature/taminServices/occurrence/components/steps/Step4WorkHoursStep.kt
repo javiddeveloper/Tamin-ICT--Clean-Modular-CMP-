@@ -1,0 +1,278 @@
+package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InputRestriction
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.WorkHoursStepState
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.ValidationUtils
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.occurrence_field_home_address
+import taminx.core.core_ui.occurrence_field_home_address_error
+import taminx.core.core_ui.occurrence_field_home_phone
+import taminx.core.core_ui.occurrence_field_home_phone_error
+import taminx.core.core_ui.occurrence_field_home_postal_code
+import taminx.core.core_ui.occurrence_field_home_postal_code_error
+import taminx.core.core_ui.occurrence_field_transportation
+import taminx.core.core_ui.occurrence_field_transportation_error
+import taminx.core.core_ui.occurrence_field_work_end_time
+import taminx.core.core_ui.occurrence_field_work_end_time_error
+import taminx.core.core_ui.occurrence_field_work_start_time
+import taminx.core.core_ui.occurrence_field_work_start_time_error
+import taminx.core.core_ui.occurrence_next_step
+import taminx.core.core_ui.occurrence_prev_step
+import taminx.core.core_ui.occurrence_step4_title
+
+@Composable
+internal fun Step4WorkHoursStep(
+    uiState: OccurrenceUiState,
+    onIntent: (OccurrenceIntent) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val step = uiState.workHours
+
+    var transportationHasFocused by remember { mutableStateOf(false) }
+    var transportationTouched by remember { mutableStateOf(false) }
+
+    var workStartTimeHasFocused by remember { mutableStateOf(false) }
+    var workStartTimeTouched by remember { mutableStateOf(false) }
+
+    var workEndTimeHasFocused by remember { mutableStateOf(false) }
+    var workEndTimeTouched by remember { mutableStateOf(false) }
+
+    var homeAddressHasFocused by remember { mutableStateOf(false) }
+    var homeAddressTouched by remember { mutableStateOf(false) }
+
+    var homePhoneHasFocused by remember { mutableStateOf(false) }
+    var homePhoneTouched by remember { mutableStateOf(false) }
+
+    var homePostalCodeHasFocused by remember { mutableStateOf(false) }
+    var homePostalCodeTouched by remember { mutableStateOf(false) }
+
+    val isTransportationValid = step.transportation.isNotBlank()
+    val isWorkStartTimeValid = step.workStartTime.isNotBlank()
+    val isWorkEndTimeValid = step.workEndTime.isNotBlank()
+    val isHomeAddressValid = step.homeAddress.isNotBlank()
+    val isHomePhoneValid = ValidationUtils.isPhoneNumberValid(step.homePhone)
+    val isHomePostalCodeValid = step.homePostalCode.isNotBlank() &&
+        ValidationUtils.isPostcodeValid(step.homePostalCode)
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            OccurrenceTopAppBar(
+                title = stringResource(Res.string.occurrence_step4_title),
+                onBackClicked = onBack,
+                currentStep = uiState.stepNumber,
+                totalSteps = OccurrenceStep.entries.size,
+            )
+        },
+        bottomBar = {
+            OccurrenceNavigationBar(
+                primaryText = stringResource(Res.string.occurrence_next_step),
+                primaryEnabled = uiState.isStep4Valid && !uiState.isLoading && !uiState.isSubmitting,
+                onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
+                secondaryText = stringResource(Res.string.occurrence_prev_step),
+                onSecondaryClick = onBack,
+            )
+        },
+        contentWindowInsets = WindowInsets(0),
+    ) { padding ->
+        OccurrenceErrorWrapper(
+            isLoading = uiState.isLoading,
+            error = null,
+            onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
+            modifier = Modifier.padding(padding),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = padding.calculateTopPadding())
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Spacing.lg),
+            ) {
+                Spacer(modifier = Modifier.height(Spacing.md))
+
+                val showTransportationError = transportationTouched && !isTransportationValid
+                StyledTextField(
+                    value = step.transportation,
+                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(transportation = it))) },
+                    label = stringResource(Res.string.occurrence_field_transportation),
+                    placeholder = "پیاده، خودروی شخصی، سرویس کارگاه، ...",
+                    isValid = if (showTransportationError) false else null,
+                    errorText = if (showTransportationError) stringResource(Res.string.occurrence_field_transportation_error) else null,
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            transportationHasFocused = true
+                        } else if (transportationHasFocused) {
+                            transportationTouched = true
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
+                val showWorkStartTimeError = workStartTimeTouched && !isWorkStartTimeValid
+                StyledTextField(
+                    value = step.workStartTime,
+                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workStartTime = it))) },
+                    label = stringResource(Res.string.occurrence_field_work_start_time),
+                    placeholder = "08:00",
+                    isValid = if (showWorkStartTimeError) false else null,
+                    errorText = if (showWorkStartTimeError) stringResource(Res.string.occurrence_field_work_start_time_error) else null,
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            workStartTimeHasFocused = true
+                        } else if (workStartTimeHasFocused) {
+                            workStartTimeTouched = true
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
+                val showWorkEndTimeError = workEndTimeTouched && !isWorkEndTimeValid
+                StyledTextField(
+                    value = step.workEndTime,
+                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workEndTime = it))) },
+                    label = stringResource(Res.string.occurrence_field_work_end_time),
+                    placeholder = "17:00",
+                    isValid = if (showWorkEndTimeError) false else null,
+                    errorText = if (showWorkEndTimeError) stringResource(Res.string.occurrence_field_work_end_time_error) else null,
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            workEndTimeHasFocused = true
+                        } else if (workEndTimeHasFocused) {
+                            workEndTimeTouched = true
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
+                val showHomeAddressError = homeAddressTouched && !isHomeAddressValid
+                StyledTextField(
+                    value = step.homeAddress,
+                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homeAddress = it))) },
+                    label = stringResource(Res.string.occurrence_field_home_address),
+                    placeholder = "استان، شهر، خیابان، پلاک",
+                    isValid = if (showHomeAddressError) false else null,
+                    errorText = if (showHomeAddressError) stringResource(Res.string.occurrence_field_home_address_error) else null,
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            homeAddressHasFocused = true
+                        } else if (homeAddressHasFocused) {
+                            homeAddressTouched = true
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
+                val showHomePhoneError = homePhoneTouched && !isHomePhoneValid
+                StyledTextField(
+                    value = step.homePhone,
+                    onValueChange = {
+                        val filtered = ValidationUtils.validatePhoneNumber(it)
+                        onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePhone = filtered)))
+                    },
+                    label = stringResource(Res.string.occurrence_field_home_phone),
+                    placeholder = "شماره تلفن",
+                    inputRestriction = InputRestriction.DigitsOnly,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    isValid = if (showHomePhoneError) false else null,
+                    errorText = if (showHomePhoneError) stringResource(Res.string.occurrence_field_home_phone_error) else null,
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            homePhoneHasFocused = true
+                        } else if (homePhoneHasFocused) {
+                            homePhoneTouched = true
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
+                val showHomePostalCodeError = homePostalCodeTouched && !isHomePostalCodeValid
+                StyledTextField(
+                    value = step.homePostalCode,
+                    onValueChange = {
+                        val filtered = ValidationUtils.validatePostcode(it)
+                        onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePostalCode = filtered)))
+                    },
+                    label = stringResource(Res.string.occurrence_field_home_postal_code),
+                    placeholder = "کد پستی 10 رقمی",
+                    inputRestriction = InputRestriction.DigitsOnly,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isValid = if (showHomePostalCodeError) false else null,
+                    errorText = if (showHomePostalCodeError) stringResource(Res.string.occurrence_field_home_postal_code_error) else null,
+                    isRequired = true,
+                    onFocusChanged = { isFocused ->
+                        if (isFocused) {
+                            homePostalCodeHasFocused = true
+                        } else if (homePostalCodeHasFocused) {
+                            homePostalCodeTouched = true
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
+            }
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Preview
+@Composable
+private fun Step4WorkHoursStepPreview() {
+    PreviewRtlThemeContent {
+        Step4WorkHoursStep(
+            uiState = OccurrenceUiState(
+                workHours = WorkHoursStepState(
+                    transportation = "وسیله نقلیه شخصی",
+                    workStartTime = "۰۸:۰۰",
+                    workEndTime = "۱۷:۰۰",
+                    homeAddress = "تهران، خیابان انقلاب، پلاک ۱۲",
+                    homePhone = "02112345678",
+                    homePostalCode = "1234567890",
+                ),
+            ),
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}

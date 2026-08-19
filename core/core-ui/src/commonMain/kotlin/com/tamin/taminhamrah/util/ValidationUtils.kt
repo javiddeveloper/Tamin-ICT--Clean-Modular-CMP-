@@ -12,6 +12,17 @@ object ValidationUtils {
         return input.filter { it.isDigit() }.take(11)
     }
 
+    fun validateMobileNumber(input: String): String {
+        val digits = input.filter { it.isDigit() }.take(11)
+
+        return when {
+            digits.isEmpty() -> ""
+            digits.firstOrNull() != '0' -> "0"
+            digits.length >= 2 && digits.take(2) != "09" -> "09"
+            else -> digits
+        }
+    }
+
     /**
      * Filters input to only digit characters and caps length to 11 digits.
      */
