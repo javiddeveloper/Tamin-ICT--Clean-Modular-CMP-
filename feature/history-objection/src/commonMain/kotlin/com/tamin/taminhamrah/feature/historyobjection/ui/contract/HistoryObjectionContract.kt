@@ -18,9 +18,9 @@ data class HistoryObjectionUiState(
 }
 
 sealed interface HistoryObjectionIntent {
-
+    data object OnAddNewObjectionClicked : HistoryObjectionIntent
 }
 
 sealed interface HistoryObjectionEvent {
-
+    data object NavigateToAddNewObjection : HistoryObjectionEvent
 }

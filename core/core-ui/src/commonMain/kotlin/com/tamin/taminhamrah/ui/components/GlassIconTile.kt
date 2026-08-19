@@ -35,7 +35,8 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 @Composable
 fun GlassIconTile(
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tint: Color = LocalTaminColors.current.glassIconTileIconTint,
 ) {
     val taminColors = LocalTaminColors.current
     Box(
@@ -56,7 +57,7 @@ fun GlassIconTile(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = taminColors.glassIconTileIconTint,
+            tint = tint,
             modifier = Modifier.size(IconSize.tileInner)
         )
     }

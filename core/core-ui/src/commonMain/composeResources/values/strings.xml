@@ -762,6 +762,9 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
-    <string name="history_objection_title">اعتراض به سوابق ناموجود</string>
+    <string name="history_objection_title">اعتراض سابقه ناموجود</string>
+    <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>
+    <string name="history_objection_empty_subtitle">اگر بازه‌ای از کارکرد شما در «کلیهٔ سوابق» دیده نمی‌شود، همین‌جا آن را اعلام کنید.</string>
+    <string name="history_objection_add_new">ثبت سابقهٔ ناموجود جدید</string>
 
 </resources>

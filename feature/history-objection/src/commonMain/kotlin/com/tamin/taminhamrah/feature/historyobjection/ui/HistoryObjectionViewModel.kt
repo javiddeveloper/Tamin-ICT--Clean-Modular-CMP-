@@ -18,8 +18,8 @@ class HistoryObjectionViewModel(
     }
 
     override fun handleIntent(intent: HistoryObjectionIntent): Flow<PartialState> = when (intent) {
-
-        else -> {
+        HistoryObjectionIntent.OnAddNewObjectionClicked -> {
+            sendEvent(HistoryObjectionEvent.NavigateToAddNewObjection)
             emptyFlow()
         }
     }
