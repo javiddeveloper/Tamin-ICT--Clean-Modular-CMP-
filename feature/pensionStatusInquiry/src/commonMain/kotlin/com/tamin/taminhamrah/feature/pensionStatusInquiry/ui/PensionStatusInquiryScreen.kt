@@ -214,9 +214,7 @@ fun PensionStatusInquiryContent(
     state.successMessage?.let { message ->
         TaminConfirmationDialog(
             title = stringResource(Res.string.pension_status_send_success_title),
-            description = message.ifBlank {
-                stringResource(Res.string.pension_status_send_success_desc)
-            },
+            description = stringResource(Res.string.pension_status_send_success_desc),
             icon = vectorResource(Res.drawable.ic_tamin_check_circle),
             iconTint = taminColors.greenText,
             iconBackground = taminColors.greenBg,
