@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
@@ -114,5 +116,21 @@ fun PayRollSkeletonBodyCards(modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollSkeletonMainCardPreview() {
+    PreviewRtlThemeContent {
+        PayRollSkeletonMainCard(modifier = Modifier.padding(Spacing.lg))
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollSkeletonBodyCardsPreview() {
+    PreviewRtlThemeContent {
+        PayRollSkeletonBodyCards(modifier = Modifier.padding(Spacing.lg))
     }
 }

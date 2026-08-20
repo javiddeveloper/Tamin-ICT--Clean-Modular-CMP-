@@ -77,3 +77,11 @@ private fun PayRollSuccessDialogPreview() {
         PayRollSuccessDialog(onDismiss = {})
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollNoPensionerDialogPreview() {
+    PreviewRtlThemeContent {
+        PayRollNoPensionerDialog(onDismiss = {})
+    }
+}

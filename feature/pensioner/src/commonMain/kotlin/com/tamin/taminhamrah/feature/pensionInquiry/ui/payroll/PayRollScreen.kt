@@ -67,7 +67,6 @@ import taminx.core.core_ui.btn_send_to_inbox
 import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_tamin_download
 
-// ─── Entry point ──────────────────────────────────────────────────────────────
 
 @Composable
 fun PayRollScreen(
@@ -332,6 +331,56 @@ private fun PayRollContentDarkPreview() {
             onIntent = {},
             onBack = {},
             onDownloadPdf = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollContentLoadingPreview() {
+    PreviewRtlThemeContent {
+        PayRollContent(
+            state = PayRollUiState(isLoading = true, hasLoadedOnce = false),
+            onIntent = {},
+            onBack = {},
+            onDownloadPdf = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollContentEmptyPreview() {
+    PreviewRtlThemeContent {
+        PayRollContent(
+            state = PreviewPayRollUiState.copy(payRollList = emptyList()),
+            onIntent = {},
+            onBack = {},
+            onDownloadPdf = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollBottomBarPreview() {
+    PreviewRtlThemeContent {
+        PayRollBottomBar(
+            onSendToInbox = {},
+            onDownloadPdf = {},
+            isSending = false,
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollBottomBarSendingPreview() {
+    PreviewRtlThemeContent {
+        PayRollBottomBar(
+            onSendToInbox = {},
+            onDownloadPdf = {},
+            isSending = true,
         )
     }
 }

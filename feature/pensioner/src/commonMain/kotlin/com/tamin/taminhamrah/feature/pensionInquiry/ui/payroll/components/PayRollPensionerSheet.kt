@@ -124,3 +124,16 @@ private fun PayRollPensionerSheetPreview() {
         )
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollPensionerSheetNoSelectionPreview() {
+    PreviewRtlThemeContent {
+        PayRollPensionerSheet(
+            pensionerIds = listOf("1003406938", "2003406939", "3003406940"),
+            selectedId = null,
+            onSelect = {},
+            onDismiss = {},
+        )
+    }
+}

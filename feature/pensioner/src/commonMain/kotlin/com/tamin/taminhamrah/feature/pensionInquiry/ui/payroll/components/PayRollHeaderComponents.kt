@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollUiState
 import com.tamin.taminhamrah.model.pension.PaymentTypeDN
+import com.tamin.taminhamrah.model.pension.PayRollPR
+import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -331,17 +333,142 @@ internal fun payRollPaymentTypeLabel(code: String): String = when (PaymentTypeDN
     PaymentTypeDN.ARREARS_INCREASE -> stringResource(Res.string.payroll_payment_type_arrears)
 }
 
+// ─── Preview data ─────────────────────────────────────────────────────────────
+
+private val PreviewHeaderItems = listOf(
+    PayRollPR(id = 1, clpType = "1", tprDesc = "مبلغ مستمری", sumAmount = 41008708, sumPay = 40852660, hisYear = "1405", hisMon = "05"),
+    PayRollPR(id = 2, clpType = "1", tprDesc = "کمک هزینه عائله‌مندی", sumAmount = 439980),
+    PayRollPR(id = 3, clpType = "1", tprDesc = "کمک به تأمین معیشت", sumAmount = 385000),
+    PayRollPR(id = 4, clpType = "2", tprDesc = "بیمه عمر", sumAmount = -71600),
+    PayRollPR(id = 5, clpType = "2", tprDesc = "بیمه درمان تکمیلی", sumAmount = -584000),
+)
+
+private val PreviewHeaderState = PayRollUiState(
+    isLoading = false,
+    hasLoadedOnce = true,
+    selectedPensionerId = "1003406938",
+    startDate = "140505",
+    paymentType = PaymentTypeDN.MONTHLY.code,
+    pensionerIds = listOf(PensionIdPR("1003406938"), PensionIdPR("2003406939")),
+    payRollList = PreviewHeaderItems,
+)
+
+// ─── Previews ─────────────────────────────────────────────────────────────────
+
 @PreviewRtlTheme
 @Composable
 private fun PayRollHeaderPreview() {
     PreviewRtlThemeContent {
         PayRollHeader(
-            state = PayRollUiState(
-                selectedPensionerId = "1003406938",
-                startDate = "140505",
+            state = PreviewHeaderState,
+            onBack = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollHeaderCollapsedPreview() {
+    PreviewRtlThemeContent {
+        PayRollHeader(
+            state = PreviewHeaderState,
+            onBack = {},
+            onIntent = {},
+            collapseProgress = { 1f },
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollHeaderLoadingPreview() {
+    PreviewRtlThemeContent {
+        PayRollHeader(
+            state = PayRollUiState(isLoading = true, hasLoadedOnce = false),
+            onBack = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollHeaderEmptyPreview() {
+    PreviewRtlThemeContent {
+        PayRollHeader(
+            state = PreviewHeaderState.copy(payRollList = emptyList()),
+            onBack = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollHeaderFilteredPreview() {
+    PreviewRtlThemeContent {
+        PayRollHeader(
+            state = PreviewHeaderState.copy(
+                isDateFilteredBySearch = true,
+                startDate = "140503",
+                paymentType = PaymentTypeDN.BONUS.code,
             ),
             onBack = {},
             onIntent = {},
         )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollPensionerChipPreview() {
+    PreviewRtlThemeContent {
+        Box(
+            modifier = Modifier
+                .background(LocalTaminColors.current.blueText)
+                .padding(Spacing.lg),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                PayRollPensionerChip(state = PreviewHeaderState, onIntent = {}, modifier = Modifier)
+                PayRollPensionerChip(
+                    state = PayRollUiState(selectedPensionerId = null),
+                    onIntent = {},
+                    modifier = Modifier,
+                )
+            }
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollFilterChipPreview() {
+    PreviewRtlThemeContent {
+        Box(
+            modifier = Modifier
+                .background(LocalTaminColors.current.blueText)
+                .padding(Spacing.lg),
+        ) {
+            PayRollFilterChip(
+                startDate = "140503",
+                paymentType = PaymentTypeDN.BONUS.code,
+                onClear = {},
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollDateChipsRowPreview() {
+    PreviewRtlThemeContent {
+        Box(
+            modifier = Modifier
+                .background(LocalTaminColors.current.blueText)
+                .padding(Spacing.lg),
+        ) {
+            PayRollDateChipsRow(state = PreviewHeaderState, onIntent = {})
+        }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollU
 import com.tamin.taminhamrah.model.pension.PayRollPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
 import com.tamin.taminhamrah.ui.components.vanishOnCollapse
@@ -70,6 +72,7 @@ import taminx.core.core_ui.payroll_net_label_template
 import taminx.core.core_ui.payroll_paid_legend
 import taminx.core.core_ui.payroll_payments_section_title
 import taminx.core.core_ui.unit_rial
+import kotlin.math.abs
 
 private const val CLP_TYPE_PAYMENT = "1"
 private const val CLP_TYPE_DEDUCTION = "2"
@@ -110,7 +113,8 @@ fun PayRollMainCard(
     val deductionTotal = items.filter { it.clpType == CLP_TYPE_DEDUCTION }.sumOf { it.sumAmount }
     val netTotal = paidTotal + deductionTotal
     val rial = stringResource(Res.string.unit_rial)
-    val dateLabelText = if (state.startDate.isNotEmpty()) formatPayRollDateLabel(state.startDate) else ""
+    val dateLabelText =
+        if (state.startDate.isNotEmpty()) formatPayRollDateLabel(state.startDate) else ""
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Card(
@@ -133,11 +137,12 @@ fun PayRollMainCard(
                     modifier = Modifier.layoutId(PayRollCardSlot.LabelHint),
                 )
                 // DateLabel: stays pinned at the end edge, rides vertically into the compact bar
-                TaminText(
+                CustomChip(
                     text = dateLabelText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textSecondary,
                     modifier = Modifier.layoutId(PayRollCardSlot.DateLabel),
+                    containerColor = taminColors.chipBg,
+                    textColor = taminColors.blueText,
+                    border = BorderStroke(color = taminColors.blueBg, width = 1.dp),
                 )
                 // Amount: big net number + unit – travels beside LabelHint in the compact bar,
                 // shrinking (visually scaled, not re-measured, so the collapse costs no
@@ -187,7 +192,7 @@ fun PayRollMainCard(
                     PayRollLegendItem(
                         label = stringResource(Res.string.payroll_deduction_legend),
                         amount = deductionTotal,
-                        color = taminColors.orangeText,
+                        color = taminColors.dangerText,
                         rial = rial,
                     )
                 }
@@ -258,9 +263,13 @@ fun PayRollMainCard(
 }
 
 @Composable
-private fun PayRollProgressBar(paidTotal: Long, deductionTotal: Long, modifier: Modifier = Modifier) {
+private fun PayRollProgressBar(
+    paidTotal: Long,
+    deductionTotal: Long,
+    modifier: Modifier = Modifier
+) {
     val taminColors = LocalTaminColors.current
-    val total = paidTotal + kotlin.math.abs(deductionTotal)
+    val total = paidTotal + abs(deductionTotal)
 
     Row(
         modifier = modifier.height(8.dp),
@@ -279,10 +288,10 @@ private fun PayRollProgressBar(paidTotal: Long, deductionTotal: Long, modifier: 
             if (deductionTotal != 0L) {
                 Box(
                     modifier = Modifier
-                        .weight(kotlin.math.abs(deductionTotal).toFloat() / total)
+                        .weight(abs(deductionTotal).toFloat() / total)
                         .fillMaxHeight()
                         .clip(CircleShape)
-                        .background(taminColors.orangeText),
+                        .background(taminColors.dangerText),
                 )
             }
         }
@@ -305,7 +314,7 @@ private fun PayRollLegendItem(label: String, amount: Long, color: Color, rial: S
             modifier = Modifier.weight(1f),
         )
         TaminText(
-            text = "${amount.toPriceFormat()} $rial",
+            text = "${amount.toPriceFormat().replace("-", "")} $rial",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = taminColors.textPrimary,
@@ -335,7 +344,7 @@ fun PayRollBreakdownSections(items: List<PayRollPR>, modifier: Modifier = Modifi
         if (deductions.isNotEmpty()) {
             PayRollSectionCard(
                 title = stringResource(Res.string.payroll_deductions_section_title),
-                totalLabelColor = taminColors.orangeText,
+                totalLabelColor = taminColors.dangerText,
                 total = deductions.sumOf { it.sumAmount },
                 items = deductions,
                 rial = rial,
@@ -369,12 +378,18 @@ private fun PayRollSectionCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded },
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) {
+                        expanded = !expanded
+                    },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(totalLabelColor))
+                    Box(
+                        modifier = Modifier.size(8.dp).clip(CircleShape).background(totalLabelColor)
+                    )
                     Spacer(Modifier.width(Spacing.sm))
                     TaminText(
                         text = title,
@@ -385,7 +400,7 @@ private fun PayRollSectionCard(
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TaminText(
-                        text = "${total.toPriceFormat()} $rial",
+                        text = "${total.toPriceFormat().replace("-", "")} $rial",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = totalLabelColor,
@@ -417,7 +432,7 @@ private fun PayRollSectionCard(
                                 modifier = Modifier.weight(1f),
                             )
                             TaminText(
-                                text = "${item.sumAmount.toPriceFormat()} $rial",
+                                text = "${item.sumAmount.toPriceFormat().replace("-", "")} $rial",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = taminColors.textPrimary,
@@ -517,6 +532,138 @@ fun PayRollEmptyCard(onShowAll: () -> Unit, modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Center,
             )
         }
+    }
+}
+
+// ─── Preview data ─────────────────────────────────────────────────────────────
+
+private val PreviewCardItems = listOf(
+    PayRollPR(
+        id = 1,
+        clpType = CLP_TYPE_PAYMENT,
+        tprDesc = "مبلغ مستمری",
+        sumAmount = 41008708,
+        sumPay = 40852660,
+        hisYear = "1405",
+        hisMon = "05"
+    ),
+    PayRollPR(
+        id = 2,
+        clpType = CLP_TYPE_PAYMENT,
+        tprDesc = "کمک هزینه عائله‌مندی",
+        sumAmount = 439980
+    ),
+    PayRollPR(
+        id = 3,
+        clpType = CLP_TYPE_PAYMENT,
+        tprDesc = "کمک به تأمین معیشت",
+        sumAmount = 385000
+    ),
+    PayRollPR(id = 4, clpType = CLP_TYPE_DEDUCTION, tprDesc = "بیمه عمر", sumAmount = -71600),
+    PayRollPR(
+        id = 5,
+        clpType = CLP_TYPE_DEDUCTION,
+        tprDesc = "بیمه درمان تکمیلی",
+        sumAmount = -584000
+    ),
+)
+
+private val PreviewCardState = PayRollUiState(
+    isLoading = false,
+    hasLoadedOnce = true,
+    selectedPensionerId = "1003406938",
+    startDate = "140505",
+    payRollList = PreviewCardItems,
+)
+
+// ─── Previews ─────────────────────────────────────────────────────────────────
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollMainCardPreview() {
+    PreviewRtlThemeContent {
+        PayRollMainCard(state = PreviewCardState, modifier = Modifier.padding(Spacing.lg))
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollMainCardCollapsedPreview() {
+    PreviewRtlThemeContent {
+        PayRollMainCard(
+            state = PreviewCardState,
+            collapseProgress = { 1f },
+            modifier = Modifier.padding(Spacing.lg),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollProgressBarPreview() {
+    PreviewRtlThemeContent {
+        PayRollProgressBar(
+            paidTotal = 41848688,
+            deductionTotal = -655600,
+            modifier = Modifier.fillMaxWidth().padding(Spacing.lg),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollLegendItemPreview() {
+    PreviewRtlThemeContent {
+        val taminColors = LocalTaminColors.current
+        Column(
+            modifier = Modifier.padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            PayRollLegendItem(
+                label = "جمع پرداخت‌ها",
+                amount = 41848688,
+                color = taminColors.blueText,
+                rial = "ریال"
+            )
+            PayRollLegendItem(
+                label = "جمع کسورات",
+                amount = -655600,
+                color = taminColors.dangerText,
+                rial = "ریال"
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollBreakdownSectionsPreview() {
+    PreviewRtlThemeContent {
+        PayRollBreakdownSections(items = PreviewCardItems, modifier = Modifier.padding(Spacing.lg))
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollSectionCardPreview() {
+    PreviewRtlThemeContent {
+        val taminColors = LocalTaminColors.current
+        PayRollSectionCard(
+            title = stringResource(Res.string.payroll_payments_section_title),
+            totalLabelColor = taminColors.blueText,
+            total = PreviewCardItems.filter { it.clpType == CLP_TYPE_PAYMENT }
+                .sumOf { it.sumAmount },
+            items = PreviewCardItems.filter { it.clpType == CLP_TYPE_PAYMENT },
+            rial = stringResource(Res.string.unit_rial),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PayRollNetSummaryBarPreview() {
+    PreviewRtlThemeContent {
+        PayRollNetSummaryBar(items = PreviewCardItems, modifier = Modifier.padding(Spacing.lg))
     }
 }
 
