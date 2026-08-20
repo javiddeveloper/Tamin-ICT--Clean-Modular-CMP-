@@ -7,6 +7,7 @@
 package com.tamin.taminhamrah.apiService
 
 import com.tamin.core.network.model.common.CityNameDto
+import com.tamin.taminhamrah.model.common.InsuranceTypeDto
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
@@ -33,6 +34,16 @@ internal interface CommonApiService {
     suspend fun getProvinceName(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ProvinceNameDto>
+
+    @GET("special-insured-services/cities")
+    suspend fun getCitiesByProvince(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<CityNameDto>
+
+    @GET("proxy/models/insurance-type/")
+    suspend fun getInsuranceTypes(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<InsuranceTypeDto>>
 
     @GET
     suspend fun getMainMenu(@Url url: String): BaseDTO<List<MainServiceDto>>

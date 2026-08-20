@@ -120,4 +120,5 @@ private object EmptyCityProvinceRepository : CityProvinceRepository {
     override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> =
         flowOf(emptyList())
+    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = flowOf(emptyList())
 }

@@ -15,6 +15,9 @@ import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -217,6 +220,9 @@ val domainModule = module {
     factoryOf(::GetConfirmSurvivorsListUseCase)
     factoryOf(::GetAgeUseCase)
     factoryOf(::GetCitiesUseCase)
+    factoryOf(::GetProvincesUseCase)
+    factoryOf(::GetCitiesByProvinceUseCase)
+    factoryOf(::GetInsuranceTypesUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)

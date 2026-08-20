@@ -127,6 +127,8 @@ private val DescriptionFieldMinHeight = 96.dp
 fun HistoryObjectionScreen(
     viewModel: HistoryObjectionViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
+    onNavigateToAddNew: () -> Unit = {},
+    onNavigateToEdit: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -135,6 +137,8 @@ fun HistoryObjectionScreen(
         events = viewModel.events,
         snackbarHostState = snackbarHostState,
         onNavigateBack = onNavigateBack,
+        onNavigateToAddNew = onNavigateToAddNew,
+        onNavigateToEdit = onNavigateToEdit,
     )
 
     HistoryObjectionContent(
@@ -190,12 +194,14 @@ private fun HandleHistoryObjectionEvents(
     events: Flow<HistoryObjectionEvent>,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    onNavigateToAddNew: () -> Unit,
+    onNavigateToEdit: (String) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
-            HistoryObjectionEvent.NavigateToAddNewObjection -> {}
-            // Skeleton only — no edit/submit endpoint or destination exists yet (docs/vault/History-Objection.md).
-            is HistoryObjectionEvent.NavigateToEditNotExistRequest -> {}
+            HistoryObjectionEvent.NavigateToAddNewObjection -> onNavigateToAddNew()
+            is HistoryObjectionEvent.NavigateToEditNotExistRequest -> onNavigateToEdit(event.requestNumber)
+            // Skeleton only — no submit endpoint exists yet (docs/vault/History-Objection.md).
             HistoryObjectionEvent.SubmitRequested -> {}
         }
     }

@@ -14,6 +14,8 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     var error: Throwable = RuntimeException("Error")
     var lastCitiesSearch: String? = null
     var lastProvinceCode: String? = null
+    var citiesByProvinceResult: List<CityDN> = emptyList()
+    var lastCitiesByProvinceCode: String? = null
 
     override fun getCity(cityId: String): Flow<CityDN> = flow {
         cityResult?.let { emit(it) }
@@ -41,5 +43,11 @@ class FakeCityProvinceRepository : CityProvinceRepository {
             }
         }
         emit(cities)
+    }
+
+    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = flow {
+        lastCitiesByProvinceCode = provinceCode
+        if (shouldThrowError) throw error
+        emit(citiesByProvinceResult)
     }
 }

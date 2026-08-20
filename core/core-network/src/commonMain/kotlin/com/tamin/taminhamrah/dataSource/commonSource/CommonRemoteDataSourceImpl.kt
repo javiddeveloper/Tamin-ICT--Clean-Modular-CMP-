@@ -7,6 +7,7 @@
 package com.tamin.taminhamrah.dataSource.commonSource
 
 import com.tamin.core.network.model.common.CityNameDto
+import com.tamin.taminhamrah.model.common.InsuranceTypeDto
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
@@ -48,6 +49,32 @@ internal class CommonRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        }
+    }
+
+    override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto {
+        return try {
+            val response = commonApiService.getCitiesByProvince(
+                queryBuilder.buildQuery(query)
+            )
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDto>? {
+        return try {
+            val response = commonApiService.getInsuranceTypes(
+                queryBuilder.buildQuery(query)
+            )
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 

@@ -13,9 +13,14 @@ import com.tamin.taminhamrah.data.repository.city.CityListQuery
 import com.tamin.taminhamrah.data.repository.city.ProvinceListQuery
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
+import com.tamin.taminhamrah.data.repository.city.CityByProvinceQuery
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 internal class CityProvinceRepositoryImpl(
     private val commonRemoteDataSource: CommonRemoteDataSource,
@@ -59,6 +64,24 @@ internal class CityProvinceRepositoryImpl(
             },
         )
     }
+
+    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = flow {
+        val localCities = cityProvinceDao.getCitiesByProvinceCode(provinceCode).first()
+        emit(localCities.map { it.toDomain() })
+
+        try {
+            val response = commonRemoteDataSource.getCitiesByProvince(CityByProvinceQuery.build(provinceCode))
+            cityProvinceDao.replaceCitiesForProvince(provinceCode, response.list.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localCities.isEmpty()) throw e
+        }
+
+        emitAll(
+            cityProvinceDao.getCitiesByProvinceCode(provinceCode).map { entities ->
+                entities.map { it.toDomain() }
+            },
+        )
+    }.distinctUntilChanged()
 
     private fun CityDN.matchesProvinceCode(selectedProvinceCode: String): Boolean {
         val cityProvinceCode = provinceCode ?: return false

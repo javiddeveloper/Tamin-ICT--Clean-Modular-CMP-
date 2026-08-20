@@ -38,6 +38,10 @@ class FakeRepositoryForFeatureManager : CommonRepository {
     }
 
     override fun getBeneficiary(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>): Flow<List<com.tamin.taminhamrah.model.common.BeneficiaryDN>> = flow {}
+
+    override fun getInsuranceTypes(searchText: String?): Flow<List<com.tamin.taminhamrah.model.common.InsuranceTypeDN>> = flow {
+        emit(emptyList())
+    }
 }
 
 class FeatureManagerImplTest {

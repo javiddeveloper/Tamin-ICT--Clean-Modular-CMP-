@@ -665,6 +665,8 @@
     <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
     <string name="bs_province">استان</string>
     <string name="bs_city">شهر</string>
+    <string name="bs_branch">شعبه</string>
+    <string name="bs_insurance_type">نوع حق بیمه</string>
     <string name="bs_blood_group">گروه خونی</string>
     <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
     <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>
@@ -782,5 +784,30 @@
     <string name="history_objection_description_label">توضیحات تکمیلی (اختیاری)</string>
     <string name="history_objection_description_placeholder">توضیح دربارهٔ سوابق اعلام‌شده...</string>
     <string name="history_objection_submit">تأیید و ارسال به تأمین اجتماعی</string>
+    <string name="history_objection_step_branch_title">اطلاعات شعبه</string>
+    <string name="history_objection_step_workshop_title">اطلاعات کارگاه</string>
+    <string name="history_objection_step_record_title">اطلاعات کارکرد</string>
+    <string name="history_objection_province_label">استان</string>
+    <string name="history_objection_province_placeholder">انتخاب استان</string>
+    <string name="history_objection_city_label">شهر</string>
+    <string name="history_objection_city_placeholder">انتخاب شهر</string>
+    <string name="history_objection_branch_label">شعبهٔ تأمین اجتماعی</string>
+    <string name="history_objection_branch_placeholder">انتخاب شعبه</string>
+    <string name="history_objection_insurance_type_label">نوع حق بیمه</string>
+    <string name="history_objection_insurance_type_placeholder">انتخاب نوع حق بیمه</string>
+    <string name="history_objection_workshop_id_label">شمارهٔ کارگاه (۱۰ رقم)</string>
+    <string name="history_objection_workshop_id_placeholder">مثال: ۶۳۹۳۶۱۰۰۱۹</string>
+    <string name="history_objection_workshop_name_placeholder">نام کارگاه محل کار</string>
+    <string name="history_objection_employer_name_label">نام کارفرما</string>
+    <string name="history_objection_employer_name_placeholder">نام و نام خانوادگی کارفرما</string>
+    <string name="history_objection_workshop_address_label">آدرس کارگاه</string>
+    <string name="history_objection_workshop_address_placeholder">آدرس کامل محل کارگاه</string>
+    <string name="history_objection_work_start_date_label">تاریخ شروع کارکرد</string>
+    <string name="history_objection_work_end_date_label">تاریخ پایان کارکرد</string>
+    <string name="history_objection_date_placeholder">انتخاب تاریخ</string>
+    <string name="history_objection_work_days_label">تعداد روز کارکرد</string>
+    <string name="history_objection_work_days_placeholder">مثلاً ۹۰</string>
+    <string name="history_objection_next_step">مرحلهٔ بعد</string>
+    <string name="history_objection_confirm">ثبت</string>
 
 </resources>

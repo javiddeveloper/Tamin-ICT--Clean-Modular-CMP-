@@ -114,6 +114,7 @@ import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -487,7 +488,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
 
-                historyObjectionScreen(onBack = { navController.popBackStack() })
+                historyObjectionScreen(navController = navController, onBack = { navController.popBackStack() })
+
+                historyObjectionStepperScreen(onBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }

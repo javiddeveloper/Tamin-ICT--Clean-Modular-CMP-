@@ -6,10 +6,13 @@ import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
+import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
@@ -86,5 +89,26 @@ class CommonRepositoryImpl(
                 RoleDN(3, "کارفرما")
             )
         )
+    }
+
+    override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> = flow {
+        val query = ApiQueryParamDN(
+            page = 0,
+            start = 0,
+            limit = 100,
+            filters = listOf(
+                ApiFilterDN(
+                    property = FilterProperty.INSURANCE_TYPE_DESC,
+                    operator = FilterOperator.LIKE,
+                    value = searchText?.takeIf { it.isNotBlank() } ?: INSURANCE_TYPE_WILDCARD_SEARCH,
+                ),
+            ),
+        )
+        val response = commonRemoteDataSource.getInsuranceTypes(query)
+        emit(response?.list.orEmpty().map { it.toDomain() })
+    }
+
+    private companion object {
+        const val INSURANCE_TYPE_WILDCARD_SEARCH = "**"
     }
 }
