@@ -259,6 +259,7 @@ private fun Step3JobDetailsStepPreview() {
     PreviewRtlThemeContent {
         Step3JobDetailsStep(
             uiState = OccurrenceUiState(
+                currentStep = OccurrenceStep.JOB_DETAILS,
                 jobDetails = JobDetailsStepState(
                     fullName = "علی محمدی",
                     nationality = "ایرانی",

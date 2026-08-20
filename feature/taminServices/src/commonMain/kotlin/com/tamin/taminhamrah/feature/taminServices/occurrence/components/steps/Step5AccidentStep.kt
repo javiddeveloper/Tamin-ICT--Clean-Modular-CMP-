@@ -276,6 +276,7 @@ private fun Step5AccidentStepPreview() {
     PreviewRtlThemeContent {
         Step5AccidentStep(
             uiState = OccurrenceUiState(
+                currentStep = OccurrenceStep.ACCIDENT_DETAILS,
                 accident = AccidentStepState(
                     accidentDate = "1402/06/15",
                     accidentTime = "14:30",

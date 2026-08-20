@@ -329,6 +329,7 @@ private fun Step4WorkHoursStepPreview() {
     PreviewRtlThemeContent {
         Step4WorkHoursStep(
             uiState = OccurrenceUiState(
+                currentStep = OccurrenceStep.WORK_HOURS,
                 workHours = WorkHoursStepState(
                     transportation = "وسیله نقلیه شخصی",
                     workStartTime = "۰۸:۰۰",

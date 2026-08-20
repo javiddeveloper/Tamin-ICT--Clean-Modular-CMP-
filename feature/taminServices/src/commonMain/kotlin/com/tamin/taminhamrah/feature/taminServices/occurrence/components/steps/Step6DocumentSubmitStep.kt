@@ -522,6 +522,7 @@ private fun Step6DocumentSubmitStepPreview() {
     PreviewRtlThemeContent {
         Step6DocumentSubmitStep(
             uiState = OccurrenceUiState(
+                currentStep = OccurrenceStep.DOCUMENT_SUBMIT,
                 jobDetails = JobDetailsStepState(
                     fullName = "علی محمدی",
                 ),

@@ -329,6 +329,7 @@ private fun Step1PersonInfoStepPreview() {
     PreviewRtlThemeContent {
         Step1PersonInfoStep(
             uiState = OccurrenceUiState(
+                currentStep = OccurrenceStep.PERSON_INFO,
                 personInfo = PersonInfoStepState(
                     personalInfo = OccurrencePersonalInfoPR(
                         nationalCode = "0012345678",
@@ -356,6 +357,6 @@ private fun Step1PersonInfoStepPreview() {
 @Composable
 private fun Step1PersonInfoStepEmptyPreview() {
     PreviewRtlThemeContent {
-        Step1PersonInfoStep(uiState = OccurrenceUiState(), onIntent = {}, onBack = {})
+        Step1PersonInfoStep(uiState = OccurrenceUiState( currentStep = OccurrenceStep.PERSON_INFO,), onIntent = {}, onBack = {})
     }
 }

@@ -2,9 +2,7 @@ package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,9 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,11 +48,9 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.ValidationUtils
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -149,13 +143,6 @@ internal fun Step2WorkshopStep(
                     .padding(horizontal = Spacing.lg),
             ) {
                 Spacer(modifier = Modifier.height(Spacing.md))
-
-                /*  WorkshopSelector(
-                      selected = step.selectedWorkshop,
-                      hint = stringResource(Res.string.occurrence_field_workshop_code_hint),
-                      label = stringResource(Res.string.occurrence_field_workshop_code),
-                      onClick = { showWorkshopSheet = true },
-                  )*/
 
                 StyledTextField(
                     value = step.selectedWorkshop?.displayCode ?: "",
@@ -398,43 +385,6 @@ internal fun Step2WorkshopStep(
     }
 }
 
-@Composable
-private fun WorkshopSelector(
-    selected: WorkshopItemPR?,
-    hint: String,
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val taminColors = LocalTaminColors.current
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.sm))
-            .border(
-                width = Thickness.border,
-                color = taminColors.border,
-                shape = RoundedCornerShape(CornerRadius.sm)
-            )
-            .clickable { onClick() }
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-    ) {
-        Column {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = taminColors.textMuted
-            )
-            Text(
-                text = selected?.displayCode ?: hint,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (selected != null) taminColors.textPrimary else taminColors.textMuted,
-                modifier = Modifier.padding(top = Spacing.xxs),
-            )
-        }
-    }
-}
-
 @PreviewRtlTheme
 @Preview
 @Composable
@@ -442,6 +392,7 @@ private fun Step2WorkshopStepPreview() {
     PreviewRtlThemeContent {
         Step2WorkshopStep(
             uiState = OccurrenceUiState(
+                currentStep = OccurrenceStep.WORKSHOP_INFO,
                 workshop = WorkshopStepState(
                     workshops = listOf(
                         WorkshopItemPR(
