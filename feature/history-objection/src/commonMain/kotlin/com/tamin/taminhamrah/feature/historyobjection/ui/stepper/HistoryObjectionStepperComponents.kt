@@ -128,7 +128,7 @@ internal fun HistoryObjectionTextFieldRow(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, fontWeight = FontWeight(800)),
                 cursorBrush = SolidColor(colors.blueText),
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = keyboardType),
                 modifier = Modifier.fillMaxWidth(),
