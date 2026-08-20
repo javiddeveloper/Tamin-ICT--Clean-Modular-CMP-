@@ -300,6 +300,29 @@ object WorkshopTestData {
         get() = readResourceFile("mocks/workshop_stackholders_success.json")
 }
 
+object OccurrenceTestData {
+    val personalInfoSuccess: String
+        get() = readResourceFile("mocks/occurrence/personal_info_success.json")
+
+    val allWorkshopsSuccess: String
+        get() = readResourceFile("mocks/occurrence/all_workshops_success.json")
+
+    val workshopSpecSuccess: String
+        get() = readResourceFile("mocks/occurrence/workshop_spec_success.json")
+
+    val insuredRelationSuccess: String
+        get() = readResourceFile("mocks/occurrence/insured_relation_success.json")
+
+    val documentTypesSuccess: String
+        get() = readResourceFile("mocks/occurrence/document_types_success.json")
+
+    val uploadImageSuccess: String
+        get() = readResourceFile("mocks/occurrence/upload_image_success.json")
+
+    val submitOccurrenceSuccess: String
+        get() = readResourceFile("mocks/occurrence/submit_occurrence_success.json")
+}
+
 object HistoryTestData {
     val dastmozdInfosSuccess: String
         get() = readResourceFile("mocks/history/dastmozd_infos_success.json")

@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -60,15 +61,7 @@ fun OccurrenceScreen(
     onDone: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val toaster = LocalToaster.current
     val onIntent = viewModel::sendIntent
-
-    viewModel.events.collectWithLifecycleAware { event ->
-        when (event) {
-            is OccurrenceEvent.ShowToast -> toaster.error(event.message)
-            is OccurrenceEvent.NavigateBack -> onBack()
-        }
-    }
 
     val onExitRequested = remember(uiState.currentStep, uiState.dialogs, onBack) {
         {
@@ -90,7 +83,15 @@ fun OccurrenceScreen(
             confirmButton = {
                 TaminFilledButton(
                     text = stringResource(Res.string.occurrence_exit_confirmation_confirm),
-                    onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = false))) },
+                    onClick = {
+                        onIntent(
+                            OccurrenceIntent.UpdateDialogs(
+                                uiState.dialogs.copy(
+                                    showExitConfirmation = false
+                                )
+                            )
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     height = 50.dp,
                     shape = RoundedCornerShape(14.dp),
@@ -101,7 +102,13 @@ fun OccurrenceScreen(
                 TaminOutlinedButton(
                     text = stringResource(Res.string.occurrence_exit_confirmation_dismiss),
                     onClick = {
-                        onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = false)))
+                        onIntent(
+                            OccurrenceIntent.UpdateDialogs(
+                                uiState.dialogs.copy(
+                                    showExitConfirmation = false
+                                )
+                            )
+                        )
                         onBack()
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -111,10 +118,23 @@ fun OccurrenceScreen(
                     contentColor = taminColors.textSecondary
                 )
             },
-            onDismissRequest = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = false))) },
+            onDismissRequest = {
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            showExitConfirmation = false
+                        )
+                    )
+                )
+            },
             icon = Icons.AutoMirrored.Outlined.HelpOutline
         )
     }
+
+    HandleOccurrenceEvents(
+        events = viewModel.events,
+        onBackClicked = onBack,
+    )
 
     OccurrenceContent(
         uiState = uiState,
@@ -125,7 +145,15 @@ fun OccurrenceScreen(
 
     if (uiState.dialogs.showWarningSheet) {
         OccurrenceWarningBottomSheet(
-            onConfirm = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWarningSheet = false))) },
+            onConfirm = {
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            showWarningSheet = false
+                        )
+                    )
+                )
+            },
             onDismiss = onBack,
         )
     }
@@ -138,6 +166,20 @@ fun OccurrenceScreen(
                 onDone()
             },
         )
+    }
+}
+
+@Composable
+fun HandleOccurrenceEvents(
+    events: Flow<OccurrenceEvent>,
+    onBackClicked: () -> Unit,
+) {
+    val toaster = LocalToaster.current
+    events.collectWithLifecycleAware(key = onBackClicked) { event ->
+        when(event){
+            is OccurrenceEvent.ShowToast -> toaster.error(event.message)
+            is OccurrenceEvent.NavigateBack -> onBackClicked()
+        }
     }
 }
 
