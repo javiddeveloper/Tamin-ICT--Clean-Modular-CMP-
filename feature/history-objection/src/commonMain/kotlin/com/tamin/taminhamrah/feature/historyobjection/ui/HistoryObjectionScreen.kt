@@ -95,6 +95,7 @@ import taminx.core.core_ui.history_objection_workshop_code
 import taminx.core.core_ui.history_objection_workshop_name
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_copy
+import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_trash
 import taminx.core.core_ui.send_history_access_denied_action
 import taminx.feature.history_objection.generated.resources.ic_history_objection
@@ -252,11 +253,6 @@ private fun HistoryObjectionContent(
                 )
                 Spacer(modifier = Modifier.height(Spacing.xl))
             } else {
-                SectionLabel(
-                    text = stringResource(Res.string.history_objection_list_title),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(Spacing.sm))
                 state.notExistRequests.forEach { request ->
                     NotExistRequestCard(
                         request = request,
@@ -373,7 +369,7 @@ private fun NotExistRequestCard(
             TaminOutlinedButton(
                 text = stringResource(Res.string.history_objection_edit),
                 onClick = onEditClick,
-                icon = Icons.Default.Edit,
+                icon = vectorResource(Res.drawable.ic_tamin_edit),
                 modifier = Modifier.weight(1f),
                 containerColor = colors.blueBg,
                 contentColor = colors.blueText,
@@ -384,7 +380,6 @@ private fun NotExistRequestCard(
 }
 
 /** The workshop code: a label above a dashed-outline chip that copies its value on tap. */
-/** Label on the right, a copyable dashed-outline code chip flush to the opposite end. */
 @Composable
 private fun WorkshopCodeRow(
     label: String,
