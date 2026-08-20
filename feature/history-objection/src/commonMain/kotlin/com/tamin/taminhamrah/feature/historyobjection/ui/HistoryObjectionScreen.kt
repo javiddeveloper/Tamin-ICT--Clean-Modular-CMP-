@@ -160,7 +160,11 @@ fun HistoryObjectionScreen(
     val deleteRequestNumber = uiState.deleteConfirmationRequestNumber
     if (deleteRequestNumber != null) {
         DeleteConfirmationDialog(
-            onConfirm = { viewModel.sendIntent(HistoryObjectionIntent.OnDeleteConfirmed(deleteRequestNumber)) },
+            onConfirm = {
+                viewModel.sendIntent(
+                    HistoryObjectionIntent.OnDeleteConfirmed(deleteRequestNumber, uiState.deleteConfirmationRowIndex)
+                )
+            },
             onDismiss = { viewModel.sendIntent(HistoryObjectionIntent.OnDeleteConfirmationDismissed) },
         )
     }
@@ -235,7 +239,7 @@ private fun DeleteConfirmationDialog(
         onDismissRequest = onDismiss,
         icon = vectorResource(Res.drawable.ic_trash),
         iconTint = colors.dangerText,
-        iconBackground = colors.dangerBg,
+        iconBackground = colors.dangerBorder,
     )
 }
 
@@ -336,7 +340,9 @@ private fun HistoryObjectionContent(
                             onIntent(HistoryObjectionIntent.OnEditNotExistRequestClicked(request.requestNumber))
                         },
                         onDeleteClick = {
-                            onIntent(HistoryObjectionIntent.OnDeleteNotExistRequestClicked(request.requestNumber))
+                            onIntent(
+                                HistoryObjectionIntent.OnDeleteNotExistRequestClicked(request.requestNumber, request.rowIndex)
+                            )
                         },
                     )
                     Spacer(modifier = Modifier.height(Spacing.md))
@@ -642,6 +648,7 @@ private fun HistoryObjectionScreenWithListPreview() {
                 notExistRequests = persistentListOf(
                     NotExistRequestPR(
                         requestNumber = "1837710",
+                        rowIndex = "1",
                         branchName = "هفت مشهد، توس",
                         insuranceTypeDesc = "بیمهٔ اجباری (کارگری)",
                         workshopName = "111",

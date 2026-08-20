@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class NotExistRequestPR(
     val requestNumber: String,
+    val rowIndex: String?,
     val branchName: String,
     val insuranceTypeDesc: String,
     val workshopName: String,

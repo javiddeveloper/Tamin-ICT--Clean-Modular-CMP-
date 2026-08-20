@@ -27,4 +27,8 @@ internal class HistoryObjectionRepositoryImpl(
     override fun saveNotExist(request: SaveNotExistRequestDN): Flow<Boolean> = flow {
         emit(historyObjectionRemoteDataSource.saveNotExist(request.toDTO()))
     }
+
+    override fun deleteNotExist(requestNumber: String, rowIndex: String): Flow<Boolean> = flow {
+        emit(historyObjectionRemoteDataSource.deleteNotExist(requestNumber, rowIndex))
+    }
 }

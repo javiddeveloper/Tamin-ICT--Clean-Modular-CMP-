@@ -8,4 +8,5 @@ interface HistoryObjectionRepository {
     fun checkStatusNotExist(): Flow<Boolean>
     fun getNotExistRequests(): Flow<List<NotExistRequestDN>>
     fun saveNotExist(request: SaveNotExistRequestDN): Flow<Boolean>
+    fun deleteNotExist(requestNumber: String, rowIndex: String): Flow<Boolean>
 }

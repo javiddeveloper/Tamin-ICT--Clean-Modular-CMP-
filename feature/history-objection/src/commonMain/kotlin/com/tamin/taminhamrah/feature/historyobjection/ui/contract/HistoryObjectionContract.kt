@@ -13,8 +13,9 @@ data class HistoryObjectionUiState(
     val notExistRequests: ImmutableList<NotExistRequestPR> = persistentListOf(),
     val description: String = "",
     val error: String? = null,
-    /** Non-null while the delete-confirmation dialog is shown for this request. */
+    val isDeleting: Boolean = false,
     val deleteConfirmationRequestNumber: String? = null,
+    val deleteConfirmationRowIndex: String? = null,
     ) {
 
     sealed interface PartialState {
@@ -25,8 +26,9 @@ data class HistoryObjectionUiState(
         data class DescriptionChanged(val description: String) : PartialState
         data class Error(val message: String) : PartialState
         data object ErrorDismissed : PartialState
-        data class DeleteConfirmationShown(val requestNumber: String) : PartialState
+        data class DeleteConfirmationShown(val requestNumber: String, val rowIndex: String?) : PartialState
         data object DeleteConfirmationHidden : PartialState
+        data class Deleting(val isDeleting: Boolean) : PartialState
     }
 }
 
@@ -35,9 +37,9 @@ sealed interface HistoryObjectionIntent {
     data object OnAddNewObjectionClicked : HistoryObjectionIntent
     data object OnActiveRequestDialogDismissed : HistoryObjectionIntent
     data class OnEditNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
-    data class OnDeleteNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
+    data class OnDeleteNotExistRequestClicked(val requestNumber: String, val rowIndex: String?) : HistoryObjectionIntent
     data object OnDeleteConfirmationDismissed : HistoryObjectionIntent
-    data class OnDeleteConfirmed(val requestNumber: String) : HistoryObjectionIntent
+    data class OnDeleteConfirmed(val requestNumber: String, val rowIndex: String?) : HistoryObjectionIntent
     data class OnDescriptionChanged(val description: String) : HistoryObjectionIntent
     data object OnSubmitClicked : HistoryObjectionIntent
     data object OnErrorDismissed : HistoryObjectionIntent

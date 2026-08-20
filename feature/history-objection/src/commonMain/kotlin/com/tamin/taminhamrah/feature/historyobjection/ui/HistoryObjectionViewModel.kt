@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjecti
 import com.tamin.taminhamrah.mapper.historyObjection.toPresentation
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
@@ -16,10 +17,14 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.history_objection_delete_missing_data_error
 
 class HistoryObjectionViewModel(
     private val checkHistoryObjectionStatusNotExistUseCase: CheckHistoryObjectionStatusNotExistUseCase,
     private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
+    private val deleteHistoryObjectionNotExistRequestUseCase: DeleteHistoryObjectionNotExistRequestUseCase,
 ) : BaseViewModel<HistoryObjectionUiState, PartialState, HistoryObjectionEvent, HistoryObjectionIntent>(
     initialState = HistoryObjectionUiState()
 ) {
@@ -48,19 +53,14 @@ class HistoryObjectionViewModel(
         }
 
         is HistoryObjectionIntent.OnDeleteNotExistRequestClicked -> flow {
-            emit(PartialState.DeleteConfirmationShown(intent.requestNumber))
+            emit(PartialState.DeleteConfirmationShown(intent.requestNumber, intent.rowIndex))
         }
 
         HistoryObjectionIntent.OnDeleteConfirmationDismissed -> flow {
             emit(PartialState.DeleteConfirmationHidden)
         }
 
-        // TODO(history-objection): call the delete endpoint here and refresh the list on success
-        // once it exists (docs/vault/History-Objection.md — "Going live"). Until then this only
-        // closes the dialog; nothing is deleted.
-        is HistoryObjectionIntent.OnDeleteConfirmed -> flow {
-            emit(PartialState.DeleteConfirmationHidden)
-        }
+        is HistoryObjectionIntent.OnDeleteConfirmed -> handleDeleteConfirmed(intent.requestNumber, intent.rowIndex)
 
         is HistoryObjectionIntent.OnDescriptionChanged -> flow {
             emit(PartialState.DescriptionChanged(intent.description))
@@ -103,6 +103,28 @@ class HistoryObjectionViewModel(
         }
     }
 
+    private fun handleDeleteConfirmed(requestNumber: String, rowIndex: String?): Flow<PartialState> = flow {
+        // flatMapMerge runs intents concurrently — drop a repeated confirm while the first
+        // delete is still in flight rather than firing a second deletenotexist request.
+        if (uiState.value.isDeleting) return@flow
+        emit(PartialState.DeleteConfirmationHidden)
+
+        if (rowIndex == null) {
+            emit(PartialState.Error(getString(Res.string.history_objection_delete_missing_data_error)))
+            return@flow
+        }
+
+        emit(PartialState.Deleting(true))
+        try {
+            deleteHistoryObjectionNotExistRequestUseCase(requestNumber, rowIndex).first()
+            emitAll(loadHistoryObjectionData())
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        } finally {
+            emit(PartialState.Deleting(false))
+        }
+    }
+
     override fun reduceState(
         currentState: HistoryObjectionUiState,
         partialState: PartialState,
@@ -127,8 +149,13 @@ class HistoryObjectionViewModel(
         PartialState.ErrorDismissed -> currentState.copy(error = null)
         is PartialState.DeleteConfirmationShown -> currentState.copy(
             deleteConfirmationRequestNumber = partialState.requestNumber,
+            deleteConfirmationRowIndex = partialState.rowIndex,
         )
-        PartialState.DeleteConfirmationHidden -> currentState.copy(deleteConfirmationRequestNumber = null)
+        PartialState.DeleteConfirmationHidden -> currentState.copy(
+            deleteConfirmationRequestNumber = null,
+            deleteConfirmationRowIndex = null,
+        )
+        is PartialState.Deleting -> currentState.copy(isDeleting = partialState.isDeleting)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

@@ -30,6 +30,10 @@ class HistoryObjectionRemoteDataSourceImpl(
         return fetchData { historyObjectionApiService.saveNotExist(request) }
     }
 
+    override suspend fun deleteNotExist(requestNumber: String, rowIndex: String): Boolean {
+        return fetchData { historyObjectionApiService.deleteNotExist(requestNumber, rowIndex) }
+    }
+
     private suspend fun <T> fetchData(call: suspend () -> BaseDTO<T>): T {
         return try {
             call().extractData()

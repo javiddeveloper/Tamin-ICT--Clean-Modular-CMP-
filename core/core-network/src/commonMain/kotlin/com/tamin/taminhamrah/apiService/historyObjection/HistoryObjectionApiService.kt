@@ -5,8 +5,10 @@ import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
 
 interface HistoryObjectionApiService {
@@ -22,5 +24,11 @@ interface HistoryObjectionApiService {
     @POST("historyprotest-services/savenotexist")
     suspend fun saveNotExist(
         @Body request: SaveNotExistRequestDTO
+    ): BaseDTO<Boolean>
+
+    @DELETE("historyprotest-services/deletenotexist/{requestNumber}/{rowIndex}")
+    suspend fun deleteNotExist(
+        @Path("requestNumber") requestNumber: String,
+        @Path("rowIndex") rowIndex: String,
     ): BaseDTO<Boolean>
 }

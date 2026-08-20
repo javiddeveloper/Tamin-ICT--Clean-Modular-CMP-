@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 
 fun NotExistRequestDN.toPresentation(): NotExistRequestPR = NotExistRequestPR(
     requestNumber = requestNumber ?: "-",
+    rowIndex = rowIndex,
     branchName = branchName ?: "-",
     insuranceTypeDesc = insuranceTypeDesc ?: "-",
     workshopName = workshopName ?: "-",

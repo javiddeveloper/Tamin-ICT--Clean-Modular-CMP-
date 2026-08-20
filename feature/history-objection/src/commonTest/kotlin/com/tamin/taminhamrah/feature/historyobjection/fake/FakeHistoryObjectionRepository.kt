@@ -14,6 +14,11 @@ class FakeHistoryObjectionRepository : HistoryObjectionRepository {
     var shouldThrowOnSave = false
     var saveError: Throwable = RuntimeException("Save error")
     var lastSaveNotExistRequest: SaveNotExistRequestDN? = null
+    var deleteNotExistResult = true
+    var shouldThrowOnDelete = false
+    var deleteError: Throwable = RuntimeException("Delete error")
+    var lastDeleteRequestNumber: String? = null
+    var lastDeleteRowIndex: String? = null
 
     override fun checkStatusNotExist(): Flow<Boolean> = flow { emit(false) }
 
@@ -26,5 +31,12 @@ class FakeHistoryObjectionRepository : HistoryObjectionRepository {
         lastSaveNotExistRequest = request
         if (shouldThrowOnSave) throw saveError
         emit(saveNotExistResult)
+    }
+
+    override fun deleteNotExist(requestNumber: String, rowIndex: String): Flow<Boolean> = flow {
+        lastDeleteRequestNumber = requestNumber
+        lastDeleteRowIndex = rowIndex
+        if (shouldThrowOnDelete) throw deleteError
+        emit(deleteNotExistResult)
     }
 }
