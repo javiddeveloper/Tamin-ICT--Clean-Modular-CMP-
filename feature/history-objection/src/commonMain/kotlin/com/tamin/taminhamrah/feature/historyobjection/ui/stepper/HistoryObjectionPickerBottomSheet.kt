@@ -81,7 +81,7 @@ fun HistoryObjectionPickerBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         modifier = modifier,
-        containerColor = colors.bgSurface,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
     ) {
         Column(
@@ -110,6 +110,7 @@ fun HistoryObjectionPickerBottomSheet(
                 query = inputText,
                 onQueryChange = { inputText = it },
                 placeHolder = config.searchInputHint.orEmpty(),
+                containerColor = colors.bgSurface,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -168,7 +169,7 @@ private fun HistoryObjectionPickerRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.lg))
-            .then(if (item.isSelected) Modifier.background(colors.blueBg) else Modifier)
+            .then(if (item.isSelected) Modifier.background(colors.blueText.copy(0.1f)) else Modifier)
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
@@ -189,7 +190,7 @@ private fun HistoryObjectionPickerRow(
         if (item.isSelected) {
             Box(
                 modifier = Modifier
-                    .size(SELECTED_CHECK_BADGE_SIZE)
+                    .size(18.dp)
                     .clip(CircleShape)
                     .background(colors.blueText),
                 contentAlignment = Alignment.Center,
@@ -198,7 +199,7 @@ private fun HistoryObjectionPickerRow(
                     imageVector = Icons.Filled.Check,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(12.dp),
                 )
             }
         } else {
