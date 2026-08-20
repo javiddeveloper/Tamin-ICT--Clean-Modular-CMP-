@@ -42,10 +42,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.camera.rememberCameraPermission
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceDocumentSourceSheet
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.AccidentStepState
@@ -64,11 +62,13 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LiquidWaveProgressBar
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -164,7 +164,7 @@ internal fun Step6DocumentSubmitStep(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            OccurrenceTopAppBar(
+            TaminStepTopAppBar(
                 title = stringResource(Res.string.occurrence_step6_title),
                 onBackClicked = onBack,
                 onCloseClicked = onClose,
@@ -173,7 +173,7 @@ internal fun Step6DocumentSubmitStep(
             )
         },
         bottomBar = {
-            OccurrenceNavigationBar(
+            TaminBottomActionBar(
                 primaryText = stringResource(Res.string.occurrence_submit),
                 primaryEnabled = uiState.isStep6Valid && !uiState.isLoading && !uiState.isSubmitting,
                 isPrimaryLoading = uiState.isSubmitting,

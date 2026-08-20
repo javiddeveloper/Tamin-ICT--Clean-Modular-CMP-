@@ -34,14 +34,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InputRestriction
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step2WorkshopShimmerSkeleton
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -50,8 +46,12 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.WorkshopS
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.InputRestriction
+import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTextArea
+import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -113,7 +113,7 @@ internal fun Step2WorkshopStep(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            OccurrenceTopAppBar(
+            TaminStepTopAppBar(
                 title = stringResource(Res.string.occurrence_step2_title),
                 onBackClicked = onBack,
                 currentStep = uiState.stepNumber,
@@ -122,7 +122,7 @@ internal fun Step2WorkshopStep(
             )
         },
         bottomBar = {
-            OccurrenceNavigationBar(
+            TaminBottomActionBar(
                 primaryText = stringResource(Res.string.occurrence_next_step),
                 primaryEnabled = uiState.isStep2Valid && !uiState.isLoading && !uiState.isSubmitting,
                 onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
@@ -148,7 +148,7 @@ internal fun Step2WorkshopStep(
             ) {
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                StyledTextField(
+                TaminStyledTextField(
                     value = step.selectedWorkshop?.displayCode ?: "",
                     label = stringResource(Res.string.occurrence_field_workshop_code),
                     placeholder = stringResource(Res.string.occurrence_field_workshop_code_hint),
@@ -205,7 +205,7 @@ internal fun Step2WorkshopStep(
                 }
 
                 val showEmployerNameError = employerNameTouched && !isEmployerNameValid
-                StyledTextField(
+                TaminStyledTextField(
                     value = step.employerName,
                     onValueChange = {
                         onIntent(
@@ -233,7 +233,7 @@ internal fun Step2WorkshopStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showEmployerPhoneError = employerPhoneTouched && !isEmployerPhoneValid
-                StyledTextField(
+                TaminStyledTextField(
                     value = step.employerPhone,
                     onValueChange = {
                         val filtered = ValidationUtils.validatePhoneNumber(it)
@@ -298,7 +298,7 @@ internal fun Step2WorkshopStep(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.workshopPhone,
                         onValueChange = {
@@ -327,7 +327,7 @@ internal fun Step2WorkshopStep(
                         },
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.workshopPostalCode,
                         onValueChange = {

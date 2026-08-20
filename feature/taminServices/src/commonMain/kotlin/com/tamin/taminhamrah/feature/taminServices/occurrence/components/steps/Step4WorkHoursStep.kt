@@ -26,20 +26,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InputRestriction
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step4WorkHoursShimmerSkeleton
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.WorkHoursStepState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.InputRestriction
+import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
+import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.ValidationUtils
 import org.jetbrains.compose.resources.stringResource
@@ -122,7 +122,7 @@ internal fun Step4WorkHoursStep(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            OccurrenceTopAppBar(
+            TaminStepTopAppBar(
                 title = stringResource(Res.string.occurrence_step4_title),
                 onBackClicked = onBack,
                 onCloseClicked = onClose,
@@ -131,7 +131,7 @@ internal fun Step4WorkHoursStep(
             )
         },
         bottomBar = {
-            OccurrenceNavigationBar(
+            TaminBottomActionBar(
                 primaryText = stringResource(Res.string.occurrence_next_step),
                 primaryEnabled = uiState.isStep4Valid && !uiState.isLoading && !uiState.isSubmitting,
                 onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
@@ -158,7 +158,7 @@ internal fun Step4WorkHoursStep(
                 Spacer(modifier = Modifier.height(Spacing.md))
 
                 val showTransportationError = transportationTouched && !isTransportationValid
-                StyledTextField(
+                TaminStyledTextField(
                     value = step.transportation,
                     onValueChange = {
                         onIntent(
@@ -191,7 +191,7 @@ internal fun Step4WorkHoursStep(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = androidx.compose.ui.Alignment.Top
                 ) {
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.workStartTime,
                         onValueChange = {},
@@ -211,7 +211,7 @@ internal fun Step4WorkHoursStep(
                     Spacer(modifier = Modifier.width(Spacing.sm))
 
                     val showWorkEndTimeError = workEndTimeTouched && !isWorkEndTimeValid
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.workEndTime,
                         onValueChange = {},
@@ -266,7 +266,7 @@ internal fun Step4WorkHoursStep(
                     verticalAlignment = Alignment.Top
                 ) {
 
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.homePhone,
                         onValueChange = {
@@ -292,7 +292,7 @@ internal fun Step4WorkHoursStep(
                     Spacer(modifier = Modifier.width(Spacing.sm))
 
                     val showHomePostalCodeError = homePostalCodeTouched && !isHomePostalCodeValid
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.homePostalCode,
                         onValueChange = {

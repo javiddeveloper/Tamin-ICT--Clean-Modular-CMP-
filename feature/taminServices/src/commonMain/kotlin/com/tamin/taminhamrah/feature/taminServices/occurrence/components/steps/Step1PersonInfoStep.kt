@@ -32,10 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step1PersonInfoShimmerSkeleton
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -47,11 +44,14 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.UserInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -110,7 +110,7 @@ internal fun Step1PersonInfoStep(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            OccurrenceTopAppBar(
+            TaminStepTopAppBar(
                 title = stringResource(Res.string.occurrence_step1_title),
                 onBackClicked = onBack,
                 currentStep = uiState.stepNumber,
@@ -118,7 +118,7 @@ internal fun Step1PersonInfoStep(
             )
         },
         bottomBar = {
-            OccurrenceNavigationBar(
+            TaminBottomActionBar(
                 primaryText = stringResource(Res.string.occurrence_next_step),
                 primaryEnabled = uiState.isStep1Valid && !uiState.isLoading && !uiState.isSubmitting,
                 onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
@@ -172,7 +172,7 @@ internal fun Step1PersonInfoStep(
 
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                StyledTextField(
+                TaminStyledTextField(
                     value = step.birthDate,
                     onValueChange = {},
                     label = "تاریخ تولد فرد حادثه دیده",

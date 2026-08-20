@@ -21,14 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step3JobDetailsShimmerSkeleton
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetailsStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
@@ -37,9 +34,12 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.MaritalStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
+import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
@@ -96,7 +96,7 @@ internal fun Step3JobDetailsStep(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            OccurrenceTopAppBar(
+            TaminStepTopAppBar(
                 title = stringResource(Res.string.occurrence_step3_title),
                 onBackClicked = onBack,
                 onCloseClicked = onClose,
@@ -105,7 +105,7 @@ internal fun Step3JobDetailsStep(
             )
         },
         bottomBar = {
-            OccurrenceNavigationBar(
+            TaminBottomActionBar(
                 primaryText = stringResource(Res.string.occurrence_next_step),
                 primaryEnabled = uiState.isStep3Valid && !uiState.isLoading && !uiState.isSubmitting,
                 onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
@@ -183,7 +183,7 @@ internal fun Step3JobDetailsStep(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
-                    StyledTextField(
+                    TaminStyledTextField(
                         leadingIcon = Icons.Default.KeyboardArrowDown,
                         modifier = Modifier.weight(1f),
                         value = MaritalStatus.fromCode(step.maritalStatus)?.displayName.orEmpty(),
@@ -194,7 +194,7 @@ internal fun Step3JobDetailsStep(
                         onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showMaritalSheet = true))) },
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.employmentDate,
                         onValueChange = {},

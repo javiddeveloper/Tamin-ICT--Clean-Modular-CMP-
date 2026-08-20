@@ -21,21 +21,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceNavigationBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step5AccidentShimmerSkeleton
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.AccidentStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
+import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -117,7 +117,7 @@ internal fun Step5AccidentStep(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            OccurrenceTopAppBar(
+            TaminStepTopAppBar(
                 title = stringResource(Res.string.occurrence_step5_title),
                 onBackClicked = onBack,
                 onCloseClicked = onClose,
@@ -126,7 +126,7 @@ internal fun Step5AccidentStep(
             )
         },
         bottomBar = {
-            OccurrenceNavigationBar(
+            TaminBottomActionBar(
                 primaryText = stringResource(Res.string.occurrence_next_step),
                 primaryEnabled = uiState.isStep5Valid && !uiState.isLoading && !uiState.isSubmitting,
                 onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
@@ -152,7 +152,7 @@ internal fun Step5AccidentStep(
             ) {
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                StyledTextField(
+                TaminStyledTextField(
                     value = step.accidentDate,
                     onValueChange = {},
                     label = stringResource(Res.string.occurrence_field_accident_date),
@@ -169,7 +169,7 @@ internal fun Step5AccidentStep(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.accidentTime,
                         onValueChange = {},
@@ -180,7 +180,7 @@ internal fun Step5AccidentStep(
                         onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentTimePicker = true))) },
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
-                    StyledTextField(
+                    TaminStyledTextField(
                         modifier = Modifier.weight(1f),
                         value = step.accidentOutcomeTitle,
                         onValueChange = {},
