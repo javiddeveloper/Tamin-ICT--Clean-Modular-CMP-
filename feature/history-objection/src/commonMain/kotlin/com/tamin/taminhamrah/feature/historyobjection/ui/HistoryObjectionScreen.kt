@@ -58,6 +58,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -85,10 +86,13 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.history_objection_active_request_message
 import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
 import taminx.core.core_ui.history_objection_delete
+import taminx.core.core_ui.history_objection_delete_confirm_message
+import taminx.core.core_ui.history_objection_delete_confirm_title
 import taminx.core.core_ui.history_objection_description_label
 import taminx.core.core_ui.history_objection_description_placeholder
 import taminx.core.core_ui.history_objection_edit
@@ -148,6 +152,19 @@ fun HistoryObjectionScreen(
             },
         )
     }
+
+    val deleteRequestNumber = uiState.deleteConfirmationRequestNumber
+    if (deleteRequestNumber != null) {
+        DeleteConfirmationDialog(
+            onConfirm = { viewModel.sendIntent(HistoryObjectionIntent.OnDeleteConfirmed(deleteRequestNumber)) },
+            onDismiss = { viewModel.sendIntent(HistoryObjectionIntent.OnDeleteConfirmationDismissed) },
+        )
+    }
+
+    ErrorStateView(
+        message = uiState.error,
+        onDismiss = { viewModel.sendIntent(HistoryObjectionIntent.OnErrorDismissed) },
+    )
 }
 
 @Composable
@@ -177,12 +194,43 @@ private fun HandleHistoryObjectionEvents(
     events.collectWithLifecycleAware { event ->
         when (event) {
             HistoryObjectionEvent.NavigateToAddNewObjection -> {}
-            // Skeleton only — no edit/delete/submit endpoint exists yet (docs/vault/History-Objection.md).
+            // Skeleton only — no edit/submit endpoint or destination exists yet (docs/vault/History-Objection.md).
             is HistoryObjectionEvent.NavigateToEditNotExistRequest -> {}
-            is HistoryObjectionEvent.ConfirmDeleteNotExistRequest -> {}
             HistoryObjectionEvent.SubmitRequested -> {}
         }
     }
+}
+
+@Composable
+private fun DeleteConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.history_objection_delete_confirm_title),
+        description = stringResource(Res.string.history_objection_delete_confirm_message),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.history_objection_delete),
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth(),
+                background = SolidColor(colors.dangerText),
+            )
+        },
+        dismissButton = {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        onDismissRequest = onDismiss,
+        icon = vectorResource(Res.drawable.ic_trash),
+        iconTint = colors.dangerText,
+        iconBackground = colors.dangerBg,
+    )
 }
 
 @Composable
@@ -229,7 +277,7 @@ private fun HistoryObjectionContent(
             }
         },
         bottomBar = {
-            if (state.notExistRequests.isNotEmpty()) {
+            if (!state.isLoading && state.notExistRequests.isNotEmpty()) {
                 SubmitButton(onClick = { onIntent(HistoryObjectionIntent.OnSubmitClicked) })
             }
         },
@@ -247,7 +295,7 @@ private fun HistoryObjectionContent(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (state.isLoading && state.notExistRequests.isEmpty()) {
+            if (state.isLoading) {
                 HistoryObjectionListSkeleton()
             } else if (state.notExistRequests.isEmpty()) {
                 IconBox(

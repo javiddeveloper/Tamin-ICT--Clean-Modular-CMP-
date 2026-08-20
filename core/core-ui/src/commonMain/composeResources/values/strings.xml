@@ -776,6 +776,8 @@
     <string name="history_objection_start_date">تاریخ شروع</string>
     <string name="history_objection_end_date">تاریخ پایان</string>
     <string name="history_objection_delete">حذف</string>
+    <string name="history_objection_delete_confirm_title">حذف سابقه</string>
+    <string name="history_objection_delete_confirm_message">آیا از حذف این سابقهٔ ناموجود اطمینان دارید؟</string>
     <string name="history_objection_edit">ویرایش</string>
     <string name="history_objection_description_label">توضیحات تکمیلی (اختیاری)</string>
     <string name="history_objection_description_placeholder">توضیح دربارهٔ سوابق اعلام‌شده...</string>

@@ -47,18 +47,35 @@ class HistoryObjectionViewModel(
             emptyFlow()
         }
 
-        is HistoryObjectionIntent.OnDeleteNotExistRequestClicked -> {
-            sendEvent(HistoryObjectionEvent.ConfirmDeleteNotExistRequest(intent.requestNumber))
-            emptyFlow()
+        is HistoryObjectionIntent.OnDeleteNotExistRequestClicked -> flow {
+            emit(PartialState.DeleteConfirmationShown(intent.requestNumber))
+        }
+
+        HistoryObjectionIntent.OnDeleteConfirmationDismissed -> flow {
+            emit(PartialState.DeleteConfirmationHidden)
+        }
+
+        // TODO(history-objection): call the delete endpoint here and refresh the list on success
+        // once it exists (docs/vault/History-Objection.md — "Going live"). Until then this only
+        // closes the dialog; nothing is deleted.
+        is HistoryObjectionIntent.OnDeleteConfirmed -> flow {
+            emit(PartialState.DeleteConfirmationHidden)
         }
 
         is HistoryObjectionIntent.OnDescriptionChanged -> flow {
             emit(PartialState.DescriptionChanged(intent.description))
         }
 
+        // TODO(history-objection): no double-tap guard yet — safe today only because
+        // SubmitRequested is a no-op; add an isSubmitting guard once submit calls a real
+        // endpoint (docs/vault/History-Objection.md notes this was the original intent).
         HistoryObjectionIntent.OnSubmitClicked -> {
             sendEvent(HistoryObjectionEvent.SubmitRequested)
             emptyFlow()
+        }
+
+        HistoryObjectionIntent.OnErrorDismissed -> flow {
+            emit(PartialState.ErrorDismissed)
         }
     }
 
@@ -102,7 +119,16 @@ class HistoryObjectionViewModel(
         )
         PartialState.ActiveRequestDialogDismissed -> currentState.copy(showActiveRequestDialog = false)
         is PartialState.DescriptionChanged -> currentState.copy(description = partialState.description)
-        is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
+        // isLoading is left as-is here: checkStatusNotExist()/loadNotExistRequests() run
+        // concurrently via merge() and loadHistoryObjectionData() always emits the authoritative
+        // Loading(false) once both finish — clearing it on the first error would dismiss the
+        // skeleton while the other flow is still in flight.
+        is PartialState.Error -> currentState.copy(error = partialState.message)
+        PartialState.ErrorDismissed -> currentState.copy(error = null)
+        is PartialState.DeleteConfirmationShown -> currentState.copy(
+            deleteConfirmationRequestNumber = partialState.requestNumber,
+        )
+        PartialState.DeleteConfirmationHidden -> currentState.copy(deleteConfirmationRequestNumber = null)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

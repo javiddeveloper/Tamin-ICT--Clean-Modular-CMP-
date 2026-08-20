@@ -13,6 +13,8 @@ data class HistoryObjectionUiState(
     val notExistRequests: ImmutableList<NotExistRequestPR> = persistentListOf(),
     val description: String = "",
     val error: String? = null,
+    /** Non-null while the delete-confirmation dialog is shown for this request. */
+    val deleteConfirmationRequestNumber: String? = null,
     ) {
 
     sealed interface PartialState {
@@ -22,6 +24,9 @@ data class HistoryObjectionUiState(
         data object ActiveRequestDialogDismissed : PartialState
         data class DescriptionChanged(val description: String) : PartialState
         data class Error(val message: String) : PartialState
+        data object ErrorDismissed : PartialState
+        data class DeleteConfirmationShown(val requestNumber: String) : PartialState
+        data object DeleteConfirmationHidden : PartialState
     }
 }
 
@@ -31,13 +36,15 @@ sealed interface HistoryObjectionIntent {
     data object OnActiveRequestDialogDismissed : HistoryObjectionIntent
     data class OnEditNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
     data class OnDeleteNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
+    data object OnDeleteConfirmationDismissed : HistoryObjectionIntent
+    data class OnDeleteConfirmed(val requestNumber: String) : HistoryObjectionIntent
     data class OnDescriptionChanged(val description: String) : HistoryObjectionIntent
     data object OnSubmitClicked : HistoryObjectionIntent
+    data object OnErrorDismissed : HistoryObjectionIntent
 }
 
 sealed interface HistoryObjectionEvent {
     data object NavigateToAddNewObjection : HistoryObjectionEvent
     data class NavigateToEditNotExistRequest(val requestNumber: String) : HistoryObjectionEvent
-    data class ConfirmDeleteNotExistRequest(val requestNumber: String) : HistoryObjectionEvent
     data object SubmitRequested : HistoryObjectionEvent
 }
