@@ -336,6 +336,7 @@ fun PayRollBreakdownSections(items: List<PayRollPR>, modifier: Modifier = Modifi
             PayRollSectionCard(
                 title = stringResource(Res.string.payroll_payments_section_title),
                 totalLabelColor = taminColors.blueText,
+                containerColor = taminColors.blueBg,
                 total = payments.sumOf { it.sumAmount },
                 items = payments,
                 rial = rial,
@@ -345,6 +346,7 @@ fun PayRollBreakdownSections(items: List<PayRollPR>, modifier: Modifier = Modifi
             PayRollSectionCard(
                 title = stringResource(Res.string.payroll_deductions_section_title),
                 totalLabelColor = taminColors.dangerText,
+                containerColor = taminColors.dangerBorder,
                 total = deductions.sumOf { it.sumAmount },
                 items = deductions,
                 rial = rial,
@@ -357,6 +359,7 @@ fun PayRollBreakdownSections(items: List<PayRollPR>, modifier: Modifier = Modifi
 private fun PayRollSectionCard(
     title: String,
     totalLabelColor: Color,
+    containerColor: Color,
     total: Long,
     items: List<PayRollPR>,
     rial: String,
@@ -374,15 +377,18 @@ private fun PayRollSectionCard(
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
         border = BorderStroke(1.dp, taminColors.border),
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
+        Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = CornerRadius.card, topEnd = CornerRadius.card))
+                    .background(containerColor)
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }) {
                         expanded = !expanded
-                    },
+                    }
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -418,8 +424,7 @@ private fun PayRollSectionCard(
             }
 
             AnimatedVisibility(visible = expanded) {
-                Column {
-                    Spacer(Modifier.height(Spacing.md))
+                Column(modifier = Modifier.padding(Spacing.lg)) {
                     items.forEachIndexed { index, item ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -651,6 +656,7 @@ private fun PayRollSectionCardPreview() {
         PayRollSectionCard(
             title = stringResource(Res.string.payroll_payments_section_title),
             totalLabelColor = taminColors.blueText,
+            containerColor = taminColors.blueBg,
             total = PreviewCardItems.filter { it.clpType == CLP_TYPE_PAYMENT }
                 .sumOf { it.sumAmount },
             items = PreviewCardItems.filter { it.clpType == CLP_TYPE_PAYMENT },
