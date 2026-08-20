@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDN
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDTO
+import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDN
+import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDTO
 
 fun NotExistRequestDTO.toDomain(): NotExistRequestDN = NotExistRequestDN(
     requestNumber = requestNumber,
@@ -25,4 +27,21 @@ fun NotExistRequestDTO.toDomain(): NotExistRequestDN = NotExistRequestDN(
     cityName = cityName,
     confirmed = confirmed ?: false,
     userDesc = userDesc,
+)
+
+fun SaveNotExistRequestDN.toDTO(): SaveNotExistRequestDTO = SaveNotExistRequestDTO(
+    branchCode = branchCode,
+    branchName = branchName,
+    cityCode = cityCode,
+    cityName = cityName,
+    endDate = endDate.toString(),
+    insuranceType = insuranceType,
+    provinceCode = provinceCode,
+    provinceName = provinceName,
+    rwshAddress = workshopAddress,
+    rwshManager = workshopManager,
+    rwshid = workshopId,
+    rwshname = workshopName,
+    startDate = startDate.toString(),
+    workDays = workDays,
 )

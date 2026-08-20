@@ -811,5 +811,9 @@
     <string name="history_objection_confirm">ثبت</string>
     <string name="history_objection_select_province_first">لطفاً ابتدا استان را انتخاب کنید</string>
     <string name="history_objection_select_city_first">لطفاً ابتدا شهر را انتخاب کنید</string>
+    <string name="history_objection_submit_success_title">درخواست شما با موفقیت ثبت شد</string>
+    <string name="history_objection_submit_success_message">سابقهٔ ناموجود اعلام‌شدهٔ شما با موفقیت ثبت شد و برای بررسی ارسال گردید.</string>
+    <string name="history_objection_submit_success_confirm">متوجه شدم</string>
+    <string name="history_objection_submit_missing_data_error">اطلاعات وارد شده ناقص است. لطفاً مراحل را دوباره بررسی کنید.</string>
 
 </resources>

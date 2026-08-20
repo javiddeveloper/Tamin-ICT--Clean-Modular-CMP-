@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -42,9 +44,11 @@ import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.GlassIconTile
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -65,6 +69,9 @@ import taminx.core.core_ui.history_objection_next_step
 import taminx.core.core_ui.history_objection_step_branch_title
 import taminx.core.core_ui.history_objection_step_record_title
 import taminx.core.core_ui.history_objection_step_workshop_title
+import taminx.core.core_ui.history_objection_submit_success_confirm
+import taminx.core.core_ui.history_objection_submit_success_message
+import taminx.core.core_ui.history_objection_submit_success_title
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.ic_close
 import taminx.core.core_ui.ic_moon
@@ -217,24 +224,21 @@ private fun HistoryObjectionStepperContent(
                     .navigationBarsPadding()
                     .imePadding(),
             ) {
-                TaminFilledButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                    text = if (state.currentStep == STEP_RECORD) {
-                        stringResource(Res.string.history_objection_confirm)
-                    } else {
-                        stringResource(Res.string.history_objection_next_step)
-                    },
-                    enabled = state.canGoNextFromCurrentStep,
-                    onClick = {
-                        onIntent(
-                            if (state.currentStep == STEP_RECORD) {
-                                HistoryObjectionStepperIntent.OnConfirmClicked
-                            } else {
-                                HistoryObjectionStepperIntent.OnNextClicked
-                            }
-                        )
-                    },
-                )
+                if (state.currentStep == STEP_RECORD) {
+                    LoadingButton(
+                        text = stringResource(Res.string.history_objection_confirm),
+                        onClick = { onIntent(HistoryObjectionStepperIntent.OnConfirmClicked) },
+                        enabled = state.canGoNextFromCurrentStep && !state.isSubmitting,
+                        isLoading = state.isSubmitting,
+                    )
+                } else {
+                    TaminFilledButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                        text = stringResource(Res.string.history_objection_next_step),
+                        enabled = state.canGoNextFromCurrentStep,
+                        onClick = { onIntent(HistoryObjectionStepperIntent.OnNextClicked) },
+                    )
+                }
             }
         },
     ) { innerPadding ->
@@ -278,6 +282,33 @@ private fun HistoryObjectionStepperContent(
     ErrorStateView(
         message = state.error,
         onDismiss = { onIntent(HistoryObjectionStepperIntent.OnErrorDismissed) },
+    )
+
+    if (state.hasSubmitted) {
+        HistoryObjectionSubmitSuccessDialog(
+            onAcknowledged = { onIntent(HistoryObjectionStepperIntent.OnSubmitSuccessAcknowledged) },
+        )
+    }
+}
+
+@Composable
+private fun HistoryObjectionSubmitSuccessDialog(onAcknowledged: () -> Unit) {
+    val colors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.history_objection_submit_success_title),
+        description = stringResource(Res.string.history_objection_submit_success_message),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.history_objection_submit_success_confirm),
+                onClick = onAcknowledged,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onAcknowledged,
+        icon = Icons.Default.Check,
+        iconTint = colors.greenText,
+        iconBackground = colors.greenBg,
     )
 }
 

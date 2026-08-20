@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.InsuranceTypePR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
@@ -24,12 +25,12 @@ import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -41,6 +42,7 @@ import taminx.core.core_ui.bs_insurance_type
 import taminx.core.core_ui.bs_province
 import taminx.core.core_ui.history_objection_select_city_first
 import taminx.core.core_ui.history_objection_select_province_first
+import taminx.core.core_ui.history_objection_submit_missing_data_error
 import taminx.core.core_ui.search_hint
 
 class HistoryObjectionStepperViewModel(
@@ -49,6 +51,7 @@ class HistoryObjectionStepperViewModel(
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getInsuranceTypesUseCase: GetInsuranceTypesUseCase,
     private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
+    private val saveHistoryObjectionNotExistRequestUseCase: SaveHistoryObjectionNotExistRequestUseCase,
 ) : BaseViewModel<HistoryObjectionStepperState, PartialState, HistoryObjectionStepperEvent, HistoryObjectionStepperIntent>(
     initialState = HistoryObjectionStepperState()
 ) {
@@ -71,9 +74,11 @@ class HistoryObjectionStepperViewModel(
             }
         }
 
-        // TODO(history-objection): no create endpoint exists yet — see docs/vault/History-Objection.md
-        // "Going live". Intentionally a no-op rather than faking a success.
-        HistoryObjectionStepperIntent.OnConfirmClicked -> emptyFlow()
+        HistoryObjectionStepperIntent.OnConfirmClicked -> handleConfirmClicked()
+
+        HistoryObjectionStepperIntent.OnSubmitSuccessAcknowledged -> flow {
+            sendEvent(HistoryObjectionStepperEvent.NavigateBack)
+        }
 
         HistoryObjectionStepperIntent.OnErrorDismissed -> flow {
             emit(PartialState.ErrorDismissed)
@@ -267,6 +272,61 @@ class HistoryObjectionStepperViewModel(
         }
     }
 
+    private fun handleConfirmClicked(): Flow<PartialState> = flow {
+        // flatMapMerge runs intents concurrently, so a repeated tap while the first call is
+        // still in flight must be dropped here rather than firing a second saveNotExist request.
+        if (uiState.value.isSubmitting) return@flow
+
+        val request = uiState.value.toSaveNotExistRequestDN()
+        if (request == null) {
+            sendEvent(HistoryObjectionStepperEvent.ShowMessage(getString(Res.string.history_objection_submit_missing_data_error)))
+            return@flow
+        }
+
+        emit(PartialState.ErrorDismissed)
+        emit(PartialState.Submitting(true))
+        try {
+            saveHistoryObjectionNotExistRequestUseCase(request).first()
+            emit(PartialState.SubmitSucceeded)
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        } finally {
+            emit(PartialState.Submitting(false))
+        }
+    }
+
+    private fun HistoryObjectionStepperState.toSaveNotExistRequestDN(): SaveNotExistRequestDN? {
+        val branch = selectedBranch ?: return null
+        val branchCode = branch.code ?: return null
+        val city = selectedCity ?: return null
+        val province = selectedProvince ?: return null
+        val insuranceType = selectedInsuranceType ?: return null
+        val start = startDateTimestamp ?: return null
+        val end = endDateTimestamp ?: return null
+        if (workshopId.isBlank() || workshopName.isBlank() || employerName.isBlank() ||
+            workshopAddress.isBlank() || workDays.isBlank()
+        ) {
+            return null
+        }
+
+        return SaveNotExistRequestDN(
+            branchCode = branchCode,
+            branchName = branch.name.orEmpty(),
+            cityCode = city.cityCode,
+            cityName = city.cityName,
+            endDate = end,
+            insuranceType = insuranceType.insuranceTypeCode,
+            provinceCode = province.provinceCode,
+            provinceName = province.provinceName,
+            workshopId = workshopId,
+            workshopName = workshopName,
+            workshopManager = employerName,
+            workshopAddress = workshopAddress,
+            startDate = start,
+            workDays = workDays,
+        )
+    }
+
     private fun loadInitialData(editRequestNumber: String?): Flow<PartialState> = flow {
         emit(PartialState.ModeInitialized(isEditMode = editRequestNumber != null, editRequestNumber = editRequestNumber))
         emit(PartialState.Loading(true))
@@ -335,6 +395,8 @@ class HistoryObjectionStepperViewModel(
             editRequestNumber = partialState.editRequestNumber,
         )
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
+        PartialState.SubmitSucceeded -> currentState.copy(hasSubmitted = true)
         is PartialState.Error -> currentState.copy(error = partialState.message)
         PartialState.ErrorDismissed -> currentState.copy(error = null)
         is PartialState.StepChanged -> currentState.copy(currentStep = partialState.step)

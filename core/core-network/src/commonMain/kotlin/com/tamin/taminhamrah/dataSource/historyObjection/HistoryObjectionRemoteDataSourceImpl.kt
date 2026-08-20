@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.dataSource.historyObjection
 
 import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDTO
+import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -23,6 +24,10 @@ class HistoryObjectionRemoteDataSourceImpl(
 
     override suspend fun getNotExistRequests(query: ApiQueryParamDN): ListData<NotExistRequestDTO> {
         return fetchData { historyObjectionApiService.getNotExistRequests(apiQueryBuilder.buildQuery(query)) }
+    }
+
+    override suspend fun saveNotExist(request: SaveNotExistRequestDTO): Boolean {
+        return fetchData { historyObjectionApiService.saveNotExist(request) }
     }
 
     private suspend fun <T> fetchData(call: suspend () -> BaseDTO<T>): T {

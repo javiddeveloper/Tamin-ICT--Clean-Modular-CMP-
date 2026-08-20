@@ -26,6 +26,8 @@ data class HistoryObjectionStepperState(
     val isEditMode: Boolean = false,
     val editRequestNumber: String? = null,
     val isLoading: Boolean = false,
+    val isSubmitting: Boolean = false,
+    val hasSubmitted: Boolean = false,
     val error: String? = null,
 
     // Step 1 — اطلاعات شعبه
@@ -68,6 +70,8 @@ data class HistoryObjectionStepperState(
     sealed interface PartialState {
         data class ModeInitialized(val isEditMode: Boolean, val editRequestNumber: String?) : PartialState
         data class Loading(val isLoading: Boolean) : PartialState
+        data class Submitting(val isSubmitting: Boolean) : PartialState
+        data object SubmitSucceeded : PartialState
         data class Error(val message: String) : PartialState
         data object ErrorDismissed : PartialState
         data class StepChanged(val step: Int) : PartialState
@@ -120,6 +124,7 @@ sealed interface HistoryObjectionStepperIntent {
     data object OnNextClicked : HistoryObjectionStepperIntent
     data object OnBackClicked : HistoryObjectionStepperIntent
     data object OnConfirmClicked : HistoryObjectionStepperIntent
+    data object OnSubmitSuccessAcknowledged : HistoryObjectionStepperIntent
     data object OnErrorDismissed : HistoryObjectionStepperIntent
 
     data object OnShowProvincePicker : HistoryObjectionStepperIntent

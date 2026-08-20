@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -53,6 +54,7 @@ class HistoryObjectionStepperViewModelTest {
             getBranchesUseCase = GetBranchesUseCase(contractsRepository),
             getInsuranceTypesUseCase = GetInsuranceTypesUseCase(commonRepository),
             getHistoryObjectionNotExistRequestsUseCase = GetHistoryObjectionNotExistRequestsUseCase(historyObjectionRepository),
+            saveHistoryObjectionNotExistRequestUseCase = SaveHistoryObjectionNotExistRequestUseCase(historyObjectionRepository),
         )
     }
 
@@ -212,6 +214,98 @@ class HistoryObjectionStepperViewModelTest {
             assertEquals(1000L, loaded.startDateTimestamp)
             assertEquals(2000L, loaded.endDateTimestamp)
             assertEquals("90", loaded.workDays)
+        }
+    }
+
+    @Test
+    fun confirmClicked_withCompleteData_savesRequestAndMarksSubmitted() = runTest(testDispatcher) {
+        val existing = NotExistRequestDN(
+            requestNumber = "1837710",
+            provinceCode = "14",
+            provinceName = "شهرستانهاي استان تهران",
+            cityCode = "1306",
+            cityName = "پاکدشت",
+            branchCode = "0950",
+            branchName = "پاکدشت",
+            insuranceType = "02",
+            insuranceTypeDesc = "اختياري",
+            workshopId = "1111111111",
+            workshopName = "22333333333333",
+            workshopManager = "333333333333",
+            workshopAddress = "3333333333333",
+            startDate = 1660937400000L,
+            endDate = 1724013000000L,
+            workDays = "11",
+        )
+        historyObjectionRepository.notExistRequestsResult = listOf(existing)
+        historyObjectionRepository.saveNotExistResult = true
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(HistoryObjectionStepperIntent.Load("1837710"))
+            awaitUntil { it.workshopId == "1111111111" }
+
+            viewModel.sendIntent(HistoryObjectionStepperIntent.OnConfirmClicked)
+            val submitted = awaitUntil { it.hasSubmitted }
+
+            assertEquals(false, submitted.isSubmitting)
+            val request = historyObjectionRepository.lastSaveNotExistRequest
+            assertEquals("0950", request?.branchCode)
+            assertEquals("1306", request?.cityCode)
+            assertEquals("14", request?.provinceCode)
+            assertEquals("02", request?.insuranceType)
+            assertEquals("1111111111", request?.workshopId)
+            assertEquals("22333333333333", request?.workshopName)
+            assertEquals("333333333333", request?.workshopManager)
+            assertEquals("3333333333333", request?.workshopAddress)
+            assertEquals(1660937400000L, request?.startDate)
+            assertEquals(1724013000000L, request?.endDate)
+            assertEquals("11", request?.workDays)
+        }
+    }
+
+    @Test
+    fun confirmClicked_withIncompleteData_doesNotCallSaveUseCase() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryObjectionStepperIntent.OnConfirmClicked)
+
+        assertNull(historyObjectionRepository.lastSaveNotExistRequest)
+        assertEquals(false, viewModel.uiState.value.hasSubmitted)
+    }
+
+    @Test
+    fun confirmClicked_whenSaveFails_setsErrorAndDoesNotMarkSubmitted() = runTest(testDispatcher) {
+        val existing = NotExistRequestDN(
+            requestNumber = "1837710",
+            provinceCode = "14",
+            provinceName = "شهرستانهاي استان تهران",
+            cityCode = "1306",
+            cityName = "پاکدشت",
+            branchCode = "0950",
+            branchName = "پاکدشت",
+            insuranceType = "02",
+            insuranceTypeDesc = "اختياري",
+            workshopId = "1111111111",
+            workshopName = "22333333333333",
+            workshopManager = "333333333333",
+            workshopAddress = "3333333333333",
+            startDate = 1660937400000L,
+            endDate = 1724013000000L,
+            workDays = "11",
+        )
+        historyObjectionRepository.notExistRequestsResult = listOf(existing)
+        historyObjectionRepository.shouldThrowOnSave = true
+        historyObjectionRepository.saveError = RuntimeException("network down")
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(HistoryObjectionStepperIntent.Load("1837710"))
+            awaitUntil { it.workshopId == "1111111111" }
+
+            viewModel.sendIntent(HistoryObjectionStepperIntent.OnConfirmClicked)
+            val errored = awaitUntil { it.error != null }
+
+            assertEquals(false, errored.hasSubmitted)
+            assertEquals(false, errored.isSubmitting)
         }
     }
 
