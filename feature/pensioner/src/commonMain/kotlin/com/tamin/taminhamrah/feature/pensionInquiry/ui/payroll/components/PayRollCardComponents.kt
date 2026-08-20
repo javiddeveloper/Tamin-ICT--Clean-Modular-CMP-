@@ -38,9 +38,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollUiState
@@ -48,6 +50,7 @@ import com.tamin.taminhamrah.model.pension.PayRollPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
 import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Easing
@@ -70,6 +73,9 @@ import taminx.core.core_ui.unit_rial
 
 private const val CLP_TYPE_PAYMENT = "1"
 private const val CLP_TYPE_DEDUCTION = "2"
+
+/** How much the net-amount headline shrinks once the card is fully collapsed. */
+private const val AMOUNT_COLLAPSED_SCALE = 0.72f
 
 // ─── Main amount card ──────────────────────────────────────────────────────────
 
@@ -105,6 +111,7 @@ fun PayRollMainCard(
     val netTotal = paidTotal + deductionTotal
     val rial = stringResource(Res.string.unit_rial)
     val dateLabelText = if (state.startDate.isNotEmpty()) formatPayRollDateLabel(state.startDate) else ""
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -132,9 +139,17 @@ fun PayRollMainCard(
                     color = taminColors.textSecondary,
                     modifier = Modifier.layoutId(PayRollCardSlot.DateLabel),
                 )
-                // Amount: big net number + unit – travels beside LabelHint in the compact bar
+                // Amount: big net number + unit – travels beside LabelHint in the compact bar,
+                // shrinking (visually scaled, not re-measured, so the collapse costs no
+                // recomposition) once collapsing so the big headline figure doesn't crowd the bar.
                 Row(
-                    modifier = Modifier.layoutId(PayRollCardSlot.Amount),
+                    modifier = Modifier
+                        .layoutId(PayRollCardSlot.Amount)
+                        .shrinkOnCollapse(
+                            progress = collapseProgress,
+                            minScale = AMOUNT_COLLAPSED_SCALE,
+                            rtl = rtl,
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TaminText(
