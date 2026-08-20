@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,20 +86,20 @@ internal fun Step2WorkshopStep(
     val taminColors = LocalTaminColors.current
     val step = uiState.workshop
 
-    var employerNameHasFocused by remember { mutableStateOf(false) }
-    var employerNameTouched by remember { mutableStateOf(false) }
+    var employerNameHasFocused by rememberSaveable { mutableStateOf(false) }
+    var employerNameTouched by rememberSaveable { mutableStateOf(false) }
 
-    var employerPhoneHasFocused by remember { mutableStateOf(false) }
-    var employerPhoneTouched by remember { mutableStateOf(false) }
+    var employerPhoneHasFocused by rememberSaveable { mutableStateOf(false) }
+    var employerPhoneTouched by rememberSaveable { mutableStateOf(false) }
 
-    var workshopAddressHasFocused by remember { mutableStateOf(false) }
-    var workshopAddressTouched by remember { mutableStateOf(false) }
+    var workshopAddressHasFocused by rememberSaveable { mutableStateOf(false) }
+    var workshopAddressTouched by rememberSaveable { mutableStateOf(false) }
 
-    var workshopPhoneHasFocused by remember { mutableStateOf(false) }
-    var workshopPhoneTouched by remember { mutableStateOf(false) }
+    var workshopPhoneHasFocused by rememberSaveable { mutableStateOf(false) }
+    var workshopPhoneTouched by rememberSaveable { mutableStateOf(false) }
 
-    var workshopPostalCodeHasFocused by remember { mutableStateOf(false) }
-    var workshopPostalCodeTouched by remember { mutableStateOf(false) }
+    var workshopPostalCodeHasFocused by rememberSaveable { mutableStateOf(false) }
+    var workshopPostalCodeTouched by rememberSaveable { mutableStateOf(false) }
 
     val isEmployerNameValid = step.employerName.isNotBlank()
     val isEmployerPhoneValid = ValidationUtils.isPhoneNumberValid(step.employerPhone)

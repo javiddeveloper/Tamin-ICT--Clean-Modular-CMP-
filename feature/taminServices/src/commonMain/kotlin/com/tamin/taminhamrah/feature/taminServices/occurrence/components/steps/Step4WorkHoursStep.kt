@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,20 +68,20 @@ internal fun Step4WorkHoursStep(
 ) {
     val step = uiState.workHours
 
-    var transportationHasFocused by remember { mutableStateOf(false) }
-    var transportationTouched by remember { mutableStateOf(false) }
+    var transportationHasFocused by rememberSaveable { mutableStateOf(false) }
+    var transportationTouched by rememberSaveable { mutableStateOf(false) }
 
-    var workStartTimeTouched by remember { mutableStateOf(false) }
-    var workEndTimeTouched by remember { mutableStateOf(false) }
+    var workStartTimeTouched by rememberSaveable { mutableStateOf(false) }
+    var workEndTimeTouched by rememberSaveable { mutableStateOf(false) }
 
-    var homeAddressHasFocused by remember { mutableStateOf(false) }
-    var homeAddressTouched by remember { mutableStateOf(false) }
+    var homeAddressHasFocused by rememberSaveable { mutableStateOf(false) }
+    var homeAddressTouched by rememberSaveable { mutableStateOf(false) }
 
-    var homePhoneHasFocused by remember { mutableStateOf(false) }
-    var homePhoneTouched by remember { mutableStateOf(false) }
+    var homePhoneHasFocused by rememberSaveable { mutableStateOf(false) }
+    var homePhoneTouched by rememberSaveable { mutableStateOf(false) }
 
-    var homePostalCodeHasFocused by remember { mutableStateOf(false) }
-    var homePostalCodeTouched by remember { mutableStateOf(false) }
+    var homePostalCodeHasFocused by rememberSaveable { mutableStateOf(false) }
+    var homePostalCodeTouched by rememberSaveable { mutableStateOf(false) }
 
     val isTransportationValid = step.transportation.isNotBlank()
     val isWorkStartTimeValid = step.workStartTime.isNotBlank()
