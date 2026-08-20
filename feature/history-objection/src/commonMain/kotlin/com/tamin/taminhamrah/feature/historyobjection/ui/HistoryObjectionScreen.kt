@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.historyobjection.ui.components.HistoryObjectionListSkeleton
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionEvent
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionIntent
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState
@@ -230,7 +231,9 @@ private fun HistoryObjectionContent(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (state.notExistRequests.isEmpty()) {
+            if (state.isLoading && state.notExistRequests.isEmpty()) {
+                HistoryObjectionListSkeleton()
+            } else if (state.notExistRequests.isEmpty()) {
                 IconBox(
                     painter = painterResource(FeatureRes.drawable.ic_history_objection),
                     backgroundColor = colors.chipBg,
@@ -252,6 +255,9 @@ private fun HistoryObjectionContent(
                     textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(Spacing.xl))
+                AddNewObjectionButton(
+                    onClick = { onIntent(HistoryObjectionIntent.OnAddNewObjectionClicked) },
+                )
             } else {
                 state.notExistRequests.forEach { request ->
                     NotExistRequestCard(
@@ -266,10 +272,10 @@ private fun HistoryObjectionContent(
                     Spacer(modifier = Modifier.height(Spacing.md))
                 }
                 Spacer(modifier = Modifier.height(Spacing.sm))
+                AddNewObjectionButton(
+                    onClick = { onIntent(HistoryObjectionIntent.OnAddNewObjectionClicked) },
+                )
             }
-            AddNewObjectionButton(
-                onClick = { onIntent(HistoryObjectionIntent.OnAddNewObjectionClicked) },
-            )
         }
     }
 }
