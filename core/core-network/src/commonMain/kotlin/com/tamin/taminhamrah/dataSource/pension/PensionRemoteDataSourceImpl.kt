@@ -250,6 +250,20 @@ class PensionRemoteDataSourceImpl(
             )
         }
     }
+    override suspend fun sendPayRollToInbox(filter: List<ApiFilterDN>): String? {
+        return try {
+            val filterJson = apiQueryBuilder.buildFilterJson(filter)
+            val response = pensionApiService.sendPayRollToInbox(filterJson)
+            response?.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) :String? {
         return try {
             val filterJson = apiQueryBuilder.buildFilterJson(filter)

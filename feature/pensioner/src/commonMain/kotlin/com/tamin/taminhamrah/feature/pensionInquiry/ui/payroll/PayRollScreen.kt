@@ -1,35 +1,23 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,108 +26,255 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollBreakdownSections
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollHeader
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollNetSummaryBar
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollNoPensionerDialog
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollPensionerSheet
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollSearchSheet
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollSkeletonBodyCards
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.components.PayRollSuccessDialog
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.contract.PayRollUiState
+import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.PayRollPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.IconBox
+import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
+import com.tamin.taminhamrah.ui.components.reservedHeight
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.btn_close
-import taminx.core.core_ui.btn_load_payroll
-import taminx.core.core_ui.btn_show_payroll_pdf
-import taminx.core.core_ui.error_empty_pensioner_id
-import taminx.core.core_ui.error_generic
-import taminx.core.core_ui.payroll_desc
-import taminx.core.core_ui.payroll_header
-import taminx.core.core_ui.payroll_month
-import taminx.core.core_ui.payroll_payment_type_label
-import taminx.core.core_ui.payroll_payment_type_placeholder
-import taminx.core.core_ui.payroll_pensioner_id_label
-import taminx.core.core_ui.payroll_start_date_label
-import taminx.core.core_ui.payroll_start_date_placeholder
-import taminx.core.core_ui.payroll_sum_amount
-import taminx.core.core_ui.payroll_sum_pay
-import taminx.core.core_ui.payroll_title
-import taminx.core.core_ui.payroll_type
-import taminx.core.core_ui.payroll_year
+import taminx.core.core_ui.btn_send_to_inbox
+import taminx.core.core_ui.ic_email
+import taminx.core.core_ui.ic_tamin_download
+
+// ─── Entry point ──────────────────────────────────────────────────────────────
 
 @Composable
 fun PayRollScreen(
     onBack: () -> Unit,
-    viewModel: PayRollViewModel = koinViewModel()
+    viewModel: PayRollViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val toaster = LocalToaster.current
+    var showPdfViewer by remember { mutableStateOf(false) }
 
-    // Opening the viewer no longer means a download has happened: it decides for itself whether
-    // the payroll still needs fetching, so the tap only says "show it".
-    var showPdf by remember { mutableStateOf(false) }
+    HandlePayRollEvents(
+        events = viewModel.events,
+        onShowToast = { toaster.error(it) },
+        onNavigateBack = onBack,
+    )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(Res.string.payroll_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.btn_close)
-                        )
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (state.isLoading && state.pensionerIds.isEmpty()) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        PayRollForm(
-                            state = state,
-                            onIntent = viewModel::sendIntent,
-                            onShowPdf = { showPdf = true },
-                        )
-                    }
+    PayRollContent(
+        state = state,
+        onIntent = viewModel::sendIntent,
+        onBack = onBack,
+        onDownloadPdf = { showPdfViewer = true },
+    )
 
-                    items(state.payRollList) { payRoll ->
-                        PayRollDetailCard(payRoll)
-                    }
-                }
-            }
-
-            if (state.error != null) {
-                Snackbar(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    Text(text = stringResource(Res.string.error_generic, state.error ?: ""))
-                }
-            }
-        }
+    if (state.showSearchSheet) {
+        PayRollSearchSheet(
+            searchYear = state.searchYear,
+            searchMonth = state.searchMonth,
+            searchPaymentType = state.searchPaymentType,
+            onYearChanged = { viewModel.sendIntent(PayRollIntent.ChangeSearchYear(it)) },
+            onMonthChanged = { viewModel.sendIntent(PayRollIntent.ChangeSearchMonth(it)) },
+            onPaymentTypeChanged = { viewModel.sendIntent(PayRollIntent.ChangeSearchPaymentType(it)) },
+            onApply = { viewModel.sendIntent(PayRollIntent.ApplySearch) },
+            onDismiss = { viewModel.sendIntent(PayRollIntent.DismissSearchSheet) },
+            onClear = { viewModel.sendIntent(PayRollIntent.ClearDateFilter) },
+        )
     }
 
-    if (showPdf) {
+    if (state.showPensionerSheet) {
+        PayRollPensionerSheet(
+            pensionerIds = state.pensionerIds.map { it.pensionerId },
+            selectedId = state.selectedPensionerId,
+            onSelect = { id ->
+                viewModel.sendIntent(PayRollIntent.ChangeSelectedPensionerId(id))
+                viewModel.sendIntent(PayRollIntent.LoadPayRoll)
+            },
+            onDismiss = { viewModel.sendIntent(PayRollIntent.DismissPensionerSheet) },
+        )
+    }
+
+    if (state.showNoPensionerDialog) {
+        PayRollNoPensionerDialog(
+            onDismiss = { viewModel.sendIntent(PayRollIntent.DismissNoPensionerDialog) },
+        )
+    }
+
+    if (state.showSendSuccess) {
+        PayRollSuccessDialog(
+            onDismiss = { viewModel.sendIntent(PayRollIntent.DismissSendSuccess) },
+        )
+    }
+
+    if (showPdfViewer) {
         TaminPdfViewer(
             fileName = payRollFileName(state),
             pdf = state.payRollPDF,
             downloadFailed = state.viewerDownloadFailed,
             onRequestDownload = { viewModel.sendIntent(PayRollIntent.LoadPayRollPDF) },
             onDismiss = {
-                showPdf = false
+                showPdfViewer = false
                 viewModel.sendIntent(PayRollIntent.DismissPdfViewer)
             },
+        )
+    }
+}
+
+// ─── Event handler ────────────────────────────────────────────────────────────
+
+@Composable
+fun HandlePayRollEvents(
+    events: Flow<PayRollEvent>,
+    onShowToast: (String) -> Unit,
+    onNavigateBack: () -> Unit,
+) {
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            is PayRollEvent.ShowToast -> onShowToast(event.message)
+            is PayRollEvent.NavigateBack -> onNavigateBack()
+        }
+    }
+}
+
+// ─── Stateless content ────────────────────────────────────────────────────────
+
+@Composable
+fun PayRollContent(
+    state: PayRollUiState,
+    onIntent: (PayRollIntent) -> Unit,
+    onBack: () -> Unit,
+    onDownloadPdf: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    val hasData = state.payRollList.isNotEmpty()
+    val scrollState = rememberScrollState()
+    val collapse = rememberCollapsingHeaderState(120.dp)
+    var headerHeightPx by remember { mutableStateOf(0) }
+
+    Box(modifier = modifier.fillMaxSize().background(taminColors.bgPage)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(collapse.nestedScrollConnection)
+                .verticalScroll(scrollState),
+        ) {
+            Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+            if (!state.hasLoadedOnce && state.isLoading) {
+                PayRollSkeletonBodyCards(
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.lg)
+                        .padding(top = Spacing.lg),
+                )
+            } else if (hasData) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.lg)
+                        .padding(top = Spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+                ) {
+                    PayRollBreakdownSections(items = state.payRollList)
+                    PayRollNetSummaryBar(items = state.payRollList)
+                    Spacer(
+                        modifier = Modifier.height(
+                            80.dp + WindowInsets.navigationBars
+                                .asPaddingValues()
+                                .calculateBottomPadding(),
+                        ),
+                    )
+                }
+            }
+        }
+
+        PayRollHeader(
+            state = state,
+            onBack = onBack,
+            onIntent = onIntent,
+            collapseProgress = collapse.progressProvider,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { headerHeightPx = it.height },
+        )
+
+        if (hasData) {
+            PayRollBottomBar(
+                onSendToInbox = { onIntent(PayRollIntent.RequestSendToInbox) },
+                onDownloadPdf = onDownloadPdf,
+                isSending = state.isSendingToInbox,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+
+        if (state.isLoading && state.hasLoadedOnce) {
+            LoadingStateOverlay()
+        }
+    }
+}
+
+// ─── Bottom action bar ────────────────────────────────────────────────────────
+
+@Composable
+private fun PayRollBottomBar(
+    onSendToInbox: () -> Unit,
+    onDownloadPdf: () -> Unit,
+    isSending: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(taminColors.glassSolid)
+            .padding(Spacing.lg)
+            .padding(
+                bottom = WindowInsets.navigationBars
+                    .asPaddingValues()
+                    .calculateBottomPadding(),
+            ),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconBox(
+            modifier = Modifier.border(
+                width = 1.dp,
+                shape = RoundedCornerShape(CornerRadius.lg),
+                color = taminColors.border,
+            ).clickable { onDownloadPdf() },
+            painter = painterResource(Res.drawable.ic_tamin_download),
+            size = 52.dp,
+            backgroundColor = taminColors.bgSurface,
+            cornerRadius = CornerRadius.lg,
+            colorFilter = ColorFilter.tint(color = taminColors.blueText),
+        )
+        LoadingButton(
+            text = stringResource(Res.string.btn_send_to_inbox),
+            onClick = onSendToInbox,
+            isLoading = isSending,
+            modifier = Modifier.weight(1f),
+            icon = vectorResource(Res.drawable.ic_email),
         )
     }
 }
@@ -156,122 +291,47 @@ private fun payRollFileName(state: PayRollUiState): String {
     return "payroll_$query.pdf"
 }
 
+// ─── Preview ──────────────────────────────────────────────────────────────────
+
+private val PreviewPayRollItems = listOf(
+    PayRollPR(id = 1, clpType = "1", tprDesc = "مبلغ مستمری", sumAmount = 41008708, sumPay = 40852660, hisYear = "1405", hisMon = "05"),
+    PayRollPR(id = 2, clpType = "1", tprDesc = "کمک هزینه عائله‌مندی", sumAmount = 439980),
+    PayRollPR(id = 3, clpType = "1", tprDesc = "کمک به تامین معیشت", sumAmount = 385000),
+    PayRollPR(id = 4, clpType = "2", tprDesc = "بیمه عمر", sumAmount = -71600),
+    PayRollPR(id = 5, clpType = "2", tprDesc = "بیمه درمان تکمیلی", sumAmount = -584000),
+)
+
+private val PreviewPayRollUiState = PayRollUiState(
+    isLoading = false,
+    hasLoadedOnce = true,
+    selectedPensionerId = "1003406938",
+    startDate = "140505",
+    pensionerIds = listOf(PensionIdPR("1003406938"), PensionIdPR("1003406939")),
+    payRollList = PreviewPayRollItems,
+)
+
+@PreviewRtlTheme
 @Composable
-fun PayRollForm(
-    state: PayRollUiState,
-    onIntent: (PayRollIntent) -> Unit,
-    onShowPdf: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Pensioner ID Selector
-            Text(
-                text = stringResource(Res.string.payroll_pensioner_id_label),
-                style = MaterialTheme.typography.labelMedium
-            )
-
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text(
-                        text = state.selectedPensionerId ?: stringResource(Res.string.error_empty_pensioner_id),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
-                ) {
-                    state.pensionerIds.forEach { idItem ->
-                        DropdownMenuItem(
-                            text = { Text(idItem.pensionerId) },
-                            onClick = {
-                                onIntent(PayRollIntent.ChangeSelectedPensionerId(idItem.pensionerId))
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Start Date Input
-            OutlinedTextField(
-                value = state.startDate,
-                onValueChange = { onIntent(PayRollIntent.ChangeStartDate(it)) },
-                label = { Text(stringResource(Res.string.payroll_start_date_label)) },
-                placeholder = { Text(stringResource(Res.string.payroll_start_date_placeholder)) },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Payment Type Input
-            OutlinedTextField(
-                value = state.paymentType,
-                onValueChange = { onIntent(PayRollIntent.ChangePaymentType(it)) },
-                label = { Text(stringResource(Res.string.payroll_payment_type_label)) },
-                placeholder = { Text(stringResource(Res.string.payroll_payment_type_placeholder)) },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Action Buttons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { onIntent(PayRollIntent.LoadPayRoll) },
-                    enabled = !state.selectedPensionerId.isNullOrEmpty(),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(Res.string.btn_load_payroll))
-                }
-
-                Button(
-                    onClick = onShowPdf,
-                    enabled = !state.selectedPensionerId.isNullOrEmpty(),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(Res.string.btn_show_payroll_pdf))
-                }
-            }
-        }
+private fun PayRollContentPreview() {
+    PreviewRtlThemeContent {
+        PayRollContent(
+            state = PreviewPayRollUiState,
+            onIntent = {},
+            onBack = {},
+            onDownloadPdf = {},
+        )
     }
 }
 
+@PreviewRtlTheme
 @Composable
-fun PayRollDetailCard(item: PayRollPR) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(Res.string.payroll_header),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Text(text = stringResource(Res.string.payroll_desc, item.tprDesc))
-            Text(text = stringResource(Res.string.payroll_sum_amount, item.sumAmount))
-            Text(text = stringResource(Res.string.payroll_sum_pay, item.sumPay))
-            Text(text = stringResource(Res.string.payroll_year, item.hisYear))
-            Text(text = stringResource(Res.string.payroll_month, item.hisMon))
-            Text(text = stringResource(Res.string.payroll_type, item.clpType))
-        }
+private fun PayRollContentDarkPreview() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        PayRollContent(
+            state = PreviewPayRollUiState,
+            onIntent = {},
+            onBack = {},
+            onDownloadPdf = {},
+        )
     }
 }
