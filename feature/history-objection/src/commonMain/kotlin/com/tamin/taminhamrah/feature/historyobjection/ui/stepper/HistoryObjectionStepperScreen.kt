@@ -23,7 +23,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperEvent
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperIntent
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperState
@@ -32,14 +35,15 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.STEP_R
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.STEP_WORKSHOP
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionBottomSheetTarget
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -59,6 +63,9 @@ import taminx.core.core_ui.history_objection_step_record_title
 import taminx.core.core_ui.history_objection_step_workshop_title
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.feature.history_objection.generated.resources.Res as FeatureRes
+import taminx.feature.history_objection.generated.resources.ic_history_objection
 
 @Composable
 fun HistoryObjectionStepperScreen(
@@ -86,7 +93,7 @@ fun HistoryObjectionStepperScreen(
     )
 
     state.bottomSheetConfig?.let { config ->
-        TaminBottomSheet(
+        HistoryObjectionPickerBottomSheet(
             config = config,
             onDismissRequest = { viewModel.sendIntent(HistoryObjectionStepperIntent.OnDismissBottomSheet) },
             onSubmit = { result ->
@@ -153,11 +160,26 @@ private fun HistoryObjectionStepperContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
-                        onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
+                        onClick = onNavigateBack,
                         bordered = true,
                     )
                 },
-            ) {}
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    DecorativeBackgroundCircle(
+                        size = 190.dp,
+                        xOffset = 450.dp,
+                        yOffset = (-150).dp
+                    )
+                    GlassIconTile(
+                        icon = vectorResource(FeatureRes.drawable.ic_history_objection),
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = Spacing.lg),
+                    )
+                }
+            }
         },
         bottomBar = {
             Box(
@@ -169,6 +191,7 @@ private fun HistoryObjectionStepperContent(
                     .imePadding(),
             ) {
                 TaminFilledButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                     text = if (state.currentStep == STEP_RECORD) {
                         stringResource(Res.string.history_objection_confirm)
                     } else {

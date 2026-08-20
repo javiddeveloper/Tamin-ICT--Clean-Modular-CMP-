@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +33,8 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 
 private val FieldHeight = 56.dp
+private const val CHEVRON_DOWN_DEGREES = 90f
+private val ChevronSize = 16.dp
 
 @Composable
 internal fun HistoryObjectionStepTitle(title: String, modifier: Modifier = Modifier) {
@@ -47,8 +51,8 @@ internal fun HistoryObjectionStepTitle(title: String, modifier: Modifier = Modif
 internal fun HistoryObjectionFieldLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = LocalTaminColors.current.textMuted,
+        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight(800)),
+        color = LocalTaminColors.current.textPrimary.copy(alpha = 0.6f),
         modifier = modifier,
     )
 }
@@ -82,13 +86,14 @@ internal fun HistoryObjectionSelectableFieldRow(
         ) {
             Text(
                 text = value.ifBlank { placeholder },
-                style = MaterialTheme.typography.bodyMedium,
+                style = if (value.isBlank()) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight(800)),
                 color = if (value.isBlank()) colors.textMuted else colors.textPrimary,
             )
             Icon(
                 imageVector = trailingIcon,
                 contentDescription = null,
                 tint = colors.textMuted,
+                modifier = Modifier.size(ChevronSize).rotate(CHEVRON_DOWN_DEGREES)
             )
         }
     }

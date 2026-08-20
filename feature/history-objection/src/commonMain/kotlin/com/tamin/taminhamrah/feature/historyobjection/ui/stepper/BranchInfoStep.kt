@@ -25,13 +25,14 @@ import taminx.core.core_ui.history_objection_province_label
 import taminx.core.core_ui.history_objection_province_placeholder
 import taminx.core.core_ui.history_objection_step_branch_title
 import taminx.core.core_ui.ic_arrow_down
+import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
 fun BranchInfoStep(
     state: HistoryObjectionStepperState,
     onIntent: (HistoryObjectionStepperIntent) -> Unit,
 ) {
-    val chevron = vectorResource(Res.drawable.ic_arrow_down)
+    val chevron = vectorResource(Res.drawable.ic_tamin_chevron_back)
 
     Column(
         modifier = Modifier
