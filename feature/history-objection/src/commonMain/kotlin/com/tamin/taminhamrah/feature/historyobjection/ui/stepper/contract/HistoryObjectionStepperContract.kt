@@ -144,4 +144,5 @@ sealed interface HistoryObjectionStepperIntent {
 
 sealed interface HistoryObjectionStepperEvent {
     data object NavigateBack : HistoryObjectionStepperEvent
+    data class ShowMessage(val message: String) : HistoryObjectionStepperEvent
 }

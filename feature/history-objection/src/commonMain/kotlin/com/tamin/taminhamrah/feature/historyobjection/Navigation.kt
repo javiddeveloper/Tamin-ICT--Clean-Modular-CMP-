@@ -30,12 +30,14 @@ fun NavGraphBuilder.historyObjectionScreen(
 
 fun NavGraphBuilder.historyObjectionStepperScreen(
     onBack: () -> Unit,
+    onNavigateHome: () -> Unit,
 ) {
     composableWithFadeTransitions<HistoryObjectionStepperRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<HistoryObjectionStepperRoute>()
         HistoryObjectionStepperScreen(
             requestNumber = route.requestNumber,
             onNavigateBack = onBack,
+            onNavigateHome = onNavigateHome,
         )
     }
 }

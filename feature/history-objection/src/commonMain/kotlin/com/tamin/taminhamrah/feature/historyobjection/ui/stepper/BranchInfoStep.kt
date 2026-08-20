@@ -57,9 +57,7 @@ fun BranchInfoStep(
             value = state.selectedCity?.cityName.orEmpty(),
             placeholder = stringResource(Res.string.history_objection_city_placeholder),
             trailingIcon = chevron,
-            onClick = {
-                if (state.selectedProvince != null) onIntent(HistoryObjectionStepperIntent.OnShowCityPicker)
-            },
+            onClick = { onIntent(HistoryObjectionStepperIntent.OnShowCityPicker) },
         )
         Spacer(modifier = Modifier.height(Spacing.smd))
 
@@ -68,9 +66,7 @@ fun BranchInfoStep(
             value = state.selectedBranch?.displayName.orEmpty(),
             placeholder = stringResource(Res.string.history_objection_branch_placeholder),
             trailingIcon = chevron,
-            onClick = {
-                if (state.selectedCity != null) onIntent(HistoryObjectionStepperIntent.OnShowBranchPicker)
-            },
+            onClick = { onIntent(HistoryObjectionStepperIntent.OnShowBranchPicker) },
         )
         Spacer(modifier = Modifier.height(Spacing.smd))
 

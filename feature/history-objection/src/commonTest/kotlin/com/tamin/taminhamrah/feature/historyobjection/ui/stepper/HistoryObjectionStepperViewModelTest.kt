@@ -153,6 +153,27 @@ class HistoryObjectionStepperViewModelTest {
     }
 
     @Test
+    fun showCityPicker_withoutProvinceSelected_doesNotOpenSheet() = runTest(testDispatcher) {
+        // Guard only depends on selectedProvince, which is already null in the fresh state —
+        // no need to wait for Load() to settle first. The guard also sends
+        // HistoryObjectionStepperEvent.ShowMessage — verified by code review, not asserted here
+        // since the events Channel's timing is not reliably observable via Turbine in this setup.
+        viewModel.sendIntent(HistoryObjectionStepperIntent.OnShowCityPicker)
+        assertNull(viewModel.uiState.value.bottomSheetConfig)
+    }
+
+    @Test
+    fun showBranchPicker_withProvinceButNoCitySelected_doesNotOpenSheet() = runTest(testDispatcher) {
+        viewModel.sendIntent(
+            HistoryObjectionStepperIntent.OnProvinceSelected(
+                com.tamin.taminhamrah.model.common.ProvincePR("04", "اصفهان")
+            )
+        )
+        viewModel.sendIntent(HistoryObjectionStepperIntent.OnShowBranchPicker)
+        assertNull(viewModel.uiState.value.bottomSheetConfig)
+    }
+
+    @Test
     fun editMode_reconstructsFieldsAcrossAllThreeSteps() = runTest(testDispatcher) {
         val existing = NotExistRequestDN(
             requestNumber = "1837710",

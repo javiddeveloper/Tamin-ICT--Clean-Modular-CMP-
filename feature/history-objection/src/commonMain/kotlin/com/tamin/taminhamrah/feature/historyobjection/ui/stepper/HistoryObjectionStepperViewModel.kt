@@ -39,6 +39,8 @@ import taminx.core.core_ui.bs_branch
 import taminx.core.core_ui.bs_city
 import taminx.core.core_ui.bs_insurance_type
 import taminx.core.core_ui.bs_province
+import taminx.core.core_ui.history_objection_select_city_first
+import taminx.core.core_ui.history_objection_select_province_first
 import taminx.core.core_ui.search_hint
 
 class HistoryObjectionStepperViewModel(
@@ -102,6 +104,10 @@ class HistoryObjectionStepperViewModel(
 
         HistoryObjectionStepperIntent.OnShowCityPicker -> flow {
             val state = uiState.value
+            if (state.selectedProvince == null) {
+                sendEvent(HistoryObjectionStepperEvent.ShowMessage(getString(Res.string.history_objection_select_province_first)))
+                return@flow
+            }
             emit(
                 PartialState.BottomSheetStateChanged(
                     config = TaminBottomSheetConfig(
@@ -125,6 +131,14 @@ class HistoryObjectionStepperViewModel(
 
         HistoryObjectionStepperIntent.OnShowBranchPicker -> flow {
             val state = uiState.value
+            if (state.selectedProvince == null) {
+                sendEvent(HistoryObjectionStepperEvent.ShowMessage(getString(Res.string.history_objection_select_province_first)))
+                return@flow
+            }
+            if (state.selectedCity == null) {
+                sendEvent(HistoryObjectionStepperEvent.ShowMessage(getString(Res.string.history_objection_select_city_first)))
+                return@flow
+            }
             emit(
                 PartialState.BottomSheetStateChanged(
                     config = TaminBottomSheetConfig(

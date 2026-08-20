@@ -25,7 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperEvent
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperIntent
@@ -35,6 +38,7 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.STEP_R
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.STEP_WORKSHOP
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionBottomSheetTarget
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.GlassIconTile
@@ -62,6 +66,9 @@ import taminx.core.core_ui.history_objection_step_branch_title
 import taminx.core.core_ui.history_objection_step_record_title
 import taminx.core.core_ui.history_objection_step_workshop_title
 import taminx.core.core_ui.history_objection_title
+import taminx.core.core_ui.ic_close
+import taminx.core.core_ui.ic_moon
+import taminx.core.core_ui.ic_sun
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
@@ -71,6 +78,7 @@ import taminx.feature.history_objection.generated.resources.ic_history_objection
 fun HistoryObjectionStepperScreen(
     requestNumber: String?,
     onNavigateBack: () -> Unit,
+    onNavigateHome: () -> Unit,
     viewModel: HistoryObjectionStepperViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -83,6 +91,7 @@ fun HistoryObjectionStepperScreen(
     HandleHistoryObjectionStepperEvents(
         events = viewModel.events,
         onNavigateBack = onNavigateBack,
+        snackbarHostState = snackbarHostState,
     )
 
     HistoryObjectionStepperContent(
@@ -90,6 +99,7 @@ fun HistoryObjectionStepperScreen(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::sendIntent,
         onNavigateBack = onNavigateBack,
+        onNavigateHome = onNavigateHome,
     )
 
     state.bottomSheetConfig?.let { config ->
@@ -130,10 +140,12 @@ private fun resolvePickerSelection(
 private fun HandleHistoryObjectionStepperEvents(
     events: Flow<HistoryObjectionStepperEvent>,
     onNavigateBack: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             HistoryObjectionStepperEvent.NavigateBack -> onNavigateBack()
+            is HistoryObjectionStepperEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
         }
     }
 }
@@ -144,9 +156,14 @@ private fun HistoryObjectionStepperContent(
     snackbarHostState: SnackbarHostState,
     onIntent: (HistoryObjectionStepperIntent) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+
+    // Step 2/3's phone-back and screen-back must go to the previous step, not exit the feature —
+    // this routes both through the same OnBackClicked logic the top bar's chevron uses.
+    BackHandler(onBack = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -160,10 +177,20 @@ private fun HistoryObjectionStepperContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
-                        onClick = onNavigateBack,
+                        onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
                         bordered = true,
                     )
                 },
+                action = {
+                    Box() {
+                        TaminTopAppBarButton(
+                            icon = vectorResource(Res.drawable.ic_close),
+                            contentDescription = null,
+                            onClick = onNavigateHome,
+                            bordered = true
+                        )
+                    }
+                }
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     DecorativeBackgroundCircle(

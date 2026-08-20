@@ -490,7 +490,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 historyObjectionScreen(navController = navController, onBack = { navController.popBackStack() })
 
-                historyObjectionStepperScreen(onBack = { navController.popBackStack() })
+                historyObjectionStepperScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
+                )
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }
