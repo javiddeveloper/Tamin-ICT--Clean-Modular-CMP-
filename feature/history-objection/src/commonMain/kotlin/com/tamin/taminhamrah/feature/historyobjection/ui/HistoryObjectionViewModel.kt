@@ -51,6 +51,10 @@ class HistoryObjectionViewModel(
             sendEvent(HistoryObjectionEvent.ConfirmDeleteNotExistRequest(intent.requestNumber))
             emptyFlow()
         }
+
+        is HistoryObjectionIntent.OnDescriptionChanged -> flow {
+            emit(PartialState.DescriptionChanged(intent.description))
+        }
     }
 
     private fun loadHistoryObjectionData(): Flow<PartialState> = flow {
@@ -92,6 +96,7 @@ class HistoryObjectionViewModel(
             error = null,
         )
         PartialState.ActiveRequestDialogDismissed -> currentState.copy(showActiveRequestDialog = false)
+        is PartialState.DescriptionChanged -> currentState.copy(description = partialState.description)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
     }
 

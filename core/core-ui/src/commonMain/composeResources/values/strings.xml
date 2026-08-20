@@ -777,5 +777,7 @@
     <string name="history_objection_end_date">تاریخ پایان</string>
     <string name="history_objection_delete">حذف</string>
     <string name="history_objection_edit">ویرایش</string>
+    <string name="history_objection_description_label">توضیحات تکمیلی (اختیاری)</string>
+    <string name="history_objection_description_placeholder">توضیح دربارهٔ سوابق اعلام‌شده...</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.historyobjection.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +12,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -39,6 +42,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius as CanvasCornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,6 +87,8 @@ import taminx.core.core_ui.history_objection_active_request_message
 import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
 import taminx.core.core_ui.history_objection_delete
+import taminx.core.core_ui.history_objection_description_label
+import taminx.core.core_ui.history_objection_description_placeholder
 import taminx.core.core_ui.history_objection_edit
 import taminx.core.core_ui.history_objection_empty_subtitle
 import taminx.core.core_ui.history_objection_empty_title
@@ -108,6 +114,7 @@ private val AddButtonIconSize = 17.dp
 private val AddButtonBorderColor = Color(0xFFB9CBEF)
 private val WorkshopCodeIconSize = 14.dp
 private const val WorkshopCodeOutlineAlpha = 0.2f
+private val DescriptionFieldMinHeight = 96.dp
 
 @Composable
 fun HistoryObjectionScreen(
@@ -274,6 +281,11 @@ private fun HistoryObjectionContent(
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 AddNewObjectionButton(
                     onClick = { onIntent(HistoryObjectionIntent.OnAddNewObjectionClicked) },
+                )
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                AdditionalDescriptionField(
+                    value = state.description,
+                    onValueChange = { onIntent(HistoryObjectionIntent.OnDescriptionChanged(it)) },
                 )
             }
         }
@@ -473,6 +485,52 @@ private fun AddNewObjectionButton(
             style = MaterialTheme.typography.labelLarge,
             color = colors.blueText,
         )
+    }
+}
+
+/** A free-text note about the whole declared list — held in state for whenever submit ships. */
+@Composable
+private fun AdditionalDescriptionField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.history_objection_description_label),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textMuted,
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = DescriptionFieldMinHeight)
+                .clip(RoundedCornerShape(CornerRadius.lg))
+                .background(colors.bgSurface)
+                .border(Thickness.border, colors.border, RoundedCornerShape(CornerRadius.lg))
+                .padding(Spacing.md),
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
+                cursorBrush = SolidColor(colors.blueText),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    if (value.isEmpty()) {
+                        Text(
+                            text = stringResource(Res.string.history_objection_description_placeholder),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.textMuted,
+                        )
+                    }
+                    innerTextField()
+                },
+            )
+        }
     }
 }
 

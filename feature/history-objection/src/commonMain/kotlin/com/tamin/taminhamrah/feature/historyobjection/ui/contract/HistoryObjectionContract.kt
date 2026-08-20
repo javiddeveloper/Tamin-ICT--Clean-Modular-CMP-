@@ -11,6 +11,7 @@ data class HistoryObjectionUiState(
     val hasActiveRequest: Boolean = false,
     val showActiveRequestDialog: Boolean = false,
     val notExistRequests: ImmutableList<NotExistRequestPR> = persistentListOf(),
+    val description: String = "",
     val error: String? = null,
     ) {
 
@@ -19,6 +20,7 @@ data class HistoryObjectionUiState(
         data class StatusChecked(val hasActiveRequest: Boolean) : PartialState
         data class RequestsLoaded(val requests: ImmutableList<NotExistRequestPR>) : PartialState
         data object ActiveRequestDialogDismissed : PartialState
+        data class DescriptionChanged(val description: String) : PartialState
         data class Error(val message: String) : PartialState
     }
 }
@@ -29,6 +31,7 @@ sealed interface HistoryObjectionIntent {
     data object OnActiveRequestDialogDismissed : HistoryObjectionIntent
     data class OnEditNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
     data class OnDeleteNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
+    data class OnDescriptionChanged(val description: String) : HistoryObjectionIntent
 }
 
 sealed interface HistoryObjectionEvent {
